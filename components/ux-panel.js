@@ -1189,16 +1189,33 @@
   });
 
   // Sync horizontal scroll between table header and body
+  // Uses requestAnimationFrame throttling for performance
   const syncTableScroll = (wrapper) => {
     const header = wrapper.querySelector('.ux-panel-table-wrapper__header');
     const body = wrapper.querySelector('.ux-panel-table-wrapper__body');
 
     if (header && body) {
+      let bodyTicking = false;
+      let headerTicking = false;
+
       body.addEventListener('scroll', () => {
-        header.scrollLeft = body.scrollLeft;
+        if (!bodyTicking) {
+          requestAnimationFrame(() => {
+            header.scrollLeft = body.scrollLeft;
+            bodyTicking = false;
+          });
+          bodyTicking = true;
+        }
       });
+
       header.addEventListener('scroll', () => {
-        body.scrollLeft = header.scrollLeft;
+        if (!headerTicking) {
+          requestAnimationFrame(() => {
+            body.scrollLeft = header.scrollLeft;
+            headerTicking = false;
+          });
+          headerTicking = true;
+        }
       });
     }
   };

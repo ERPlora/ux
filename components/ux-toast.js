@@ -93,6 +93,7 @@
       pointer-events: auto;
       opacity: 0;
       transform: translateY(-20px) scale(0.95);
+      will-change: transform, opacity;
       transition:
         opacity var(--ux-transition-base) var(--ux-ease),
         transform var(--ux-transition-base) var(--ux-ease-spring);
@@ -123,6 +124,7 @@
     .ux-toast--visible {
       opacity: 1;
       transform: translateY(0) translateX(0) scale(1);
+      will-change: auto;
     }
 
     /* ========================================
