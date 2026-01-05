@@ -45,6 +45,15 @@
       flex-shrink: 0;
     }
 
+    /* Expanded touch target for accessibility (44px minimum) */
+    .ux-radio__circle::before {
+      content: '';
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      z-index: 1;
+    }
+
     .ux-radio__dot {
       width: 12px;
       height: 12px;
@@ -325,6 +334,25 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: var(--ux-space-md);
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .ux-radio__circle {
+        transition: none;
+      }
+
+      .ux-radio__dot {
+        transition: none;
+      }
+
+      .ux-radio-card {
+        transition: none;
+      }
+
+      .ux-radio-card__check {
+        transition: none;
+      }
     }
   `;
 

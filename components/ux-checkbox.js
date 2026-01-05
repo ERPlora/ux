@@ -46,6 +46,14 @@
       flex-shrink: 0;
     }
 
+    /* Expanded touch target for accessibility (44px minimum) */
+    .ux-checkbox__box::before {
+      content: '';
+      position: absolute;
+      inset: -10px;
+      z-index: 1;
+    }
+
     .ux-checkbox__checkmark {
       display: none;
       width: 14px;
@@ -265,6 +273,17 @@
 
     .ux-checkbox--round .ux-checkbox__box {
       border-radius: 50%;
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .ux-checkbox__box {
+        transition: none;
+      }
+
+      .ux-checkbox__input:checked + .ux-checkbox__box .ux-checkbox__checkmark {
+        animation: none;
+      }
     }
   `;
 

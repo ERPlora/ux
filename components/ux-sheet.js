@@ -402,6 +402,31 @@
       overscroll-behavior-y: contain;
     }
 
+    /* Sheet dragging state */
+    .ux-sheet--dragging {
+      transition: none !important;
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .ux-sheet-backdrop {
+        transition: opacity 0.1s ease, visibility 0.1s ease;
+      }
+
+      .ux-sheet,
+      .ux-side-sheet,
+      .ux-action-sheet {
+        transition: transform 0.1s ease;
+      }
+
+      .ux-sheet-backdrop--open .ux-sheet,
+      .ux-sheet-backdrop--open .ux-side-sheet--left,
+      .ux-sheet-backdrop--open .ux-side-sheet--right,
+      .ux-sheet-backdrop--open .ux-action-sheet {
+        transition: transform 0.1s ease;
+      }
+    }
+
   `;
 
   // Inject styles
@@ -416,15 +441,28 @@
 
   // Alpine component for bottom sheet
   // ARIA: role="dialog", aria-modal="true", aria-labelledby
+  // Features: snap points (detents), velocity-based gestures, focus trap
   const sheetComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
     detent: config.detent || 'medium', // small, medium, large
+    detents: config.detents || ['medium', 'large'], // Available snap points
     closeOnBackdrop: config.closeOnBackdrop !== false,
+    closeOnEscape: config.closeOnEscape !== false,
     draggable: config.draggable !== false,
     startY: 0,
     currentY: 0,
     isDragging: false,
     sheetId: config.id || 'ux-sheet-' + Math.random().toString(36).substr(2, 9),
+    _touchStartTime: 0,
+    _previousActiveElement: null,
+    _focusTrapCleanup: null,
+
+    // Detent heights as percentages of viewport
+    _detentHeights: {
+      small: 25,
+      medium: 50,
+      large: 90
+    },
 
     // ARIA attributes for the sheet
     get ariaAttrs() {
@@ -441,21 +479,57 @@
 
     open(detent) {
       if (detent) this.detent = detent;
+      this._previousActiveElement = document.activeElement;
       this.isOpen = true;
-      document.body.style.overflow = 'hidden';
-      // Focus first focusable element
+
+      // Use global scroll lock if available
+      if (window.UX && window.UX.lockScroll) {
+        window.UX.lockScroll();
+      } else {
+        document.body.style.overflow = 'hidden';
+      }
+
+      // Setup focus trap
       this.$nextTick(() => {
         const sheet = this.$refs.sheet || this.$el.querySelector('.ux-sheet, .ux-side-sheet');
-        if (sheet) {
+        if (sheet && window.UX && window.UX.trapFocus) {
+          this._focusTrapCleanup = window.UX.trapFocus(sheet);
+        } else if (sheet) {
+          // Fallback: focus first focusable element
           const focusable = sheet.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
           if (focusable) focusable.focus();
+        }
+
+        // Announce to screen readers
+        if (window.UX && window.UX.announce) {
+          const title = this.$el.querySelector('[id$="-title"]');
+          if (title) {
+            window.UX.announce(title.textContent + ' sheet opened', 'assertive');
+          }
         }
       });
     },
 
     close() {
       this.isOpen = false;
-      document.body.style.overflow = '';
+
+      // Cleanup focus trap
+      if (this._focusTrapCleanup) {
+        this._focusTrapCleanup();
+        this._focusTrapCleanup = null;
+      }
+
+      // Use global scroll unlock if available
+      if (window.UX && window.UX.unlockScroll) {
+        window.UX.unlockScroll();
+      } else {
+        document.body.style.overflow = '';
+      }
+
+      // Restore focus
+      if (this._previousActiveElement && this._previousActiveElement.focus) {
+        this._previousActiveElement.focus();
+      }
     },
 
     toggle() {
@@ -476,10 +550,21 @@
       }
     },
 
+    handleKeydown(event) {
+      if (this.closeOnEscape && event.key === 'Escape') {
+        this.close();
+      }
+    },
+
     handleTouchStart(event) {
       if (!this.draggable) return;
       this.isDragging = true;
       this.startY = event.touches[0].clientY;
+      this._touchStartTime = Date.now();
+
+      // Add dragging class for no-transition state
+      const sheet = this.$refs.sheet || this.$el.querySelector('.ux-sheet');
+      if (sheet) sheet.classList.add('ux-sheet--dragging');
     },
 
     handleTouchMove(event) {
@@ -496,9 +581,34 @@
       if (!this.isDragging) return;
       this.isDragging = false;
 
-      // Close if dragged more than 100px
-      if (this.currentY > 100) {
+      // Remove dragging class
+      const sheet = this.$refs.sheet || this.$el.querySelector('.ux-sheet');
+      if (sheet) sheet.classList.remove('ux-sheet--dragging');
+
+      // Calculate velocity (pixels per millisecond)
+      const touchDuration = Date.now() - this._touchStartTime;
+      const velocity = this.currentY / touchDuration;
+
+      // Fast swipe (velocity > 0.5 px/ms) - close immediately
+      if (velocity > 0.5) {
+        this.currentY = 0;
         this.close();
+        return;
+      }
+
+      // Snap to detent based on drag distance
+      const threshold = velocity > 0.2 ? 50 : 100; // Lower threshold for faster swipes
+
+      if (this.currentY > threshold) {
+        // Check if we should snap to a smaller detent or close
+        const currentDetentIndex = this.detents.indexOf(this.detent);
+        if (currentDetentIndex > 0) {
+          // Snap to smaller detent
+          this.detent = this.detents[currentDetentIndex - 1];
+        } else {
+          // Close the sheet
+          this.close();
+        }
       }
 
       this.currentY = 0;
@@ -530,7 +640,10 @@
     message: config.message || '',
     buttons: config.buttons || [],
     cancelText: config.cancelText || 'Cancel',
+    closeOnEscape: config.closeOnEscape !== false,
     actionSheetId: config.id || 'ux-action-sheet-' + Math.random().toString(36).substr(2, 9),
+    _previousActiveElement: null,
+    _focusTrapCleanup: null,
 
     // ARIA attributes
     get ariaAttrs() {
@@ -551,13 +664,51 @@
       if (options.buttons) this.buttons = options.buttons;
       if (options.cancelText) this.cancelText = options.cancelText;
 
+      this._previousActiveElement = document.activeElement;
       this.isOpen = true;
-      document.body.style.overflow = 'hidden';
+
+      // Use global scroll lock if available
+      if (window.UX && window.UX.lockScroll) {
+        window.UX.lockScroll();
+      } else {
+        document.body.style.overflow = 'hidden';
+      }
+
+      // Setup focus trap
+      this.$nextTick(() => {
+        const actionSheet = this.$el.querySelector('.ux-action-sheet');
+        if (actionSheet && window.UX && window.UX.trapFocus) {
+          this._focusTrapCleanup = window.UX.trapFocus(actionSheet);
+        }
+      });
     },
 
     close() {
       this.isOpen = false;
-      document.body.style.overflow = '';
+
+      // Cleanup focus trap
+      if (this._focusTrapCleanup) {
+        this._focusTrapCleanup();
+        this._focusTrapCleanup = null;
+      }
+
+      // Use global scroll unlock if available
+      if (window.UX && window.UX.unlockScroll) {
+        window.UX.unlockScroll();
+      } else {
+        document.body.style.overflow = '';
+      }
+
+      // Restore focus
+      if (this._previousActiveElement && this._previousActiveElement.focus) {
+        this._previousActiveElement.focus();
+      }
+    },
+
+    handleKeydown(event) {
+      if (this.closeOnEscape && event.key === 'Escape') {
+        this.close();
+      }
     },
 
     handleButtonClick(button) {
