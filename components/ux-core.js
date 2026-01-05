@@ -129,6 +129,9 @@
       --ux-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
       --ux-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
+      /* Reduced motion - used as multiplier */
+      --ux-motion-reduce: 1;
+
       /* Shadows */
       --ux-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
       --ux-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -344,6 +347,41 @@
       --ux-primary-contrast: #ffffff;
       --ux-primary-shade: #0891b2;
       --ux-primary-tint: #22d3ee;
+    }
+
+    /* ========================================
+       Reduced Motion Support
+       Respects user preference for reduced motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      :root {
+        --ux-transition-fast: 0ms;
+        --ux-transition-base: 0ms;
+        --ux-transition-slow: 0ms;
+        --ux-transition-slower: 0ms;
+        --ux-ease-spring: ease;
+        --ux-motion-reduce: 0;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Utility class to force reduced motion */
+    .ux-reduce-motion,
+    .ux-reduce-motion *,
+    .ux-reduce-motion *::before,
+    .ux-reduce-motion *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
     }
 
     /* ========================================
