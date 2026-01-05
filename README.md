@@ -21,6 +21,9 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 ### Via CDN (Recommended)
 
 ```html
+<!-- Bootstrap Grid (external, for grid system) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
+
 <!-- Full library (all components) -->
 <script src="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/ux.min.js"></script>
 
@@ -28,21 +31,26 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 <script src="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/ux-core.min.js"></script>
 ```
 
+> **Note:** UX Library uses Bootstrap Grid externally. Load `bootstrap-grid.min.css` before `ux-core.js`. UX automatically overrides Bootstrap's gutter variables to match Ionic spacing (12px vs 24px).
+
 ### Bundle Sizes
 
 | Bundle | Size | Gzipped |
 |--------|------|---------|
-| ux.min.js | 551 KB | ~78 KB |
-| ux-core.min.js | 39 KB | ~8 KB |
+| ux.min.js | ~586 KB | ~80 KB |
+| ux-core.min.js | ~53 KB | ~10 KB |
 
 ### Local Installation
 
 ```html
+<!-- Bootstrap Grid (required for grid system) -->
+<link href="bootstrap-grid.min.css" rel="stylesheet">
+
 <!-- Dependencies (optional) -->
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://unpkg.com/htmx.org@1.x.x"></script>
 
-<!-- Core (required) -->
+<!-- Core (required) - overrides Bootstrap gutter variables -->
 <script src="components/ux-core.js"></script>
 
 <!-- Load only what you need -->
@@ -53,13 +61,13 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 <script src="ux-all.js"></script>
 ```
 
-## Components (48)
+## Components (47)
 
 | Category | Components |
 |----------|------------|
 | **Basic** | button, badge, chip, spinner, progress, avatar, img |
 | **Forms** | input, checkbox, radio, toggle, range, select, searchbar, textarea |
-| **Layout** | card, list, grid, content |
+| **Layout** | card, list, content, page-header |
 | **Navigation** | navbar, toolbar, tabs, segment, breadcrumbs, menu, back-button |
 | **Overlay** | modal, sheet, alert, toast, popover, loading, picker |
 | **Feedback** | skeleton, fab |
@@ -141,13 +149,44 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 <body class="ux-theme-emerald"><!-- or purple, sunset, rose, etc. --></body>
 ```
 
+## Grid System
+
+UX Library uses **Bootstrap Grid** externally with Ionic-style spacing overrides:
+
+```html
+<!-- Bootstrap Grid classes work as expected -->
+<div class="container">
+  <div class="row">
+    <div class="col-12 col-md-6 col-lg-4">Column</div>
+    <div class="col-12 col-md-6 col-lg-4">Column</div>
+    <div class="col-12 col-md-6 col-lg-4">Column</div>
+  </div>
+</div>
+
+<!-- UX CSS Grid utilities (native CSS Grid) -->
+<div class="ux-css-grid ux-css-grid--3 ux-gap-lg">
+  <div>Item 1</div>
+  <div>Item 2</div>
+  <div>Item 3</div>
+</div>
+```
+
+| Class | Description |
+|-------|-------------|
+| `.ux-css-grid--{2,3,4,6,12}` | Fixed column grid |
+| `.ux-css-grid--auto-fit` | Auto-fit responsive grid |
+| `.ux-gap-{xs,sm,md,lg,xl}` | Gap utilities |
+
 ## CSS Utilities
 
 ```css
 /* Flex */
 .ux-flex .ux-flex-col .ux-items-center .ux-justify-between .ux-gap-md
 
-/* Spacing: xs, sm, md, lg, xl */
+/* Responsive Spacing (scales with viewport) */
+.ux-padding .ux-margin .ux-padding-horizontal .ux-margin-vertical
+
+/* Fixed Spacing: xs, sm, md, lg, xl */
 .ux-p-md .ux-m-lg .ux-px-sm .ux-py-xl .ux-mt-md .ux-mb-lg
 
 /* Typography */
