@@ -379,6 +379,7 @@
     closeOnBackdrop: config.closeOnBackdrop !== false,
     closeOnEscape: config.closeOnEscape !== false,
     modalId: config.id || 'ux-modal-' + Math.random().toString(36).substr(2, 9),
+    _previousActiveElement: null,
 
     // ARIA attributes for the modal
     get ariaAttrs() {
@@ -398,15 +399,25 @@
       return this.modalId + '-content';
     },
 
+    // Get all focusable elements within modal
+    _getFocusableElements() {
+      const modal = this.$refs.modal || this.$el.querySelector('.ux-modal');
+      if (!modal) return [];
+      const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])';
+      return Array.from(modal.querySelectorAll(selector)).filter(el => el.offsetParent !== null);
+    },
+
     open() {
+      // Store current focused element to restore on close
+      this._previousActiveElement = document.activeElement;
       this.isOpen = true;
       document.body.style.overflow = 'hidden';
-      // Focus trap: focus first focusable element
+
+      // Focus first focusable element
       this.$nextTick(() => {
-        const modal = this.$refs.modal || this.$el.querySelector('.ux-modal');
-        if (modal) {
-          const focusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-          if (focusable) focusable.focus();
+        const focusable = this._getFocusableElements();
+        if (focusable.length > 0) {
+          focusable[0].focus();
         }
       });
     },
@@ -414,6 +425,11 @@
     close() {
       this.isOpen = false;
       document.body.style.overflow = '';
+
+      // Restore focus to previous element
+      if (this._previousActiveElement && this._previousActiveElement.focus) {
+        this._previousActiveElement.focus();
+      }
     },
 
     toggle() {
@@ -433,6 +449,30 @@
     handleKeydown(event) {
       if (this.closeOnEscape && event.key === 'Escape') {
         this.close();
+        return;
+      }
+
+      // Focus trap: Tab key cycles within modal
+      if (event.key === 'Tab') {
+        const focusable = this._getFocusableElements();
+        if (focusable.length === 0) return;
+
+        const firstElement = focusable[0];
+        const lastElement = focusable[focusable.length - 1];
+
+        if (event.shiftKey) {
+          // Shift+Tab: if on first element, go to last
+          if (document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          // Tab: if on last element, go to first
+          if (document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+          }
+        }
       }
     }
   });
