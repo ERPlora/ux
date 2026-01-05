@@ -445,6 +445,51 @@
     }
 
     /* ========================================
+       View Toggle Buttons
+    ======================================== */
+
+    .ux-datatable__view-toggle {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius);
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .ux-datatable__view-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: calc(var(--ux-border-radius) - 2px);
+      color: var(--ux-text-tertiary);
+      cursor: pointer;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__view-btn:hover {
+      color: var(--ux-text);
+    }
+
+    .ux-datatable__view-btn--active {
+      background-color: var(--ux-surface);
+      color: var(--ux-primary);
+      box-shadow: var(--ux-shadow-sm);
+    }
+
+    .ux-datatable__view-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
        Responsive "No More Tables" View
     ======================================== */
 
@@ -623,7 +668,11 @@
     empty: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>',
     edit: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
     delete: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
-    view: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+    view: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    // View toggle icons
+    viewTable: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
+    viewCards: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+    viewList: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>'
   };
 
   // Inject styles
@@ -668,6 +717,10 @@
     responsive: config.responsive !== false,
     forceResponsive: config.forceResponsive || false,
 
+    // View mode (table, cards)
+    viewMode: config.viewMode || 'table',
+    showViewToggle: config.showViewToggle || false,
+
     // Loading
     loading: config.loading || false,
 
@@ -683,6 +736,8 @@
       entries: config.labels?.entries || 'entries',
       perPage: config.labels?.perPage || 'per page',
       noResults: config.labels?.noResults || 'No results found',
+      viewTable: config.labels?.viewTable || 'Table view',
+      viewCards: config.labels?.viewCards || 'Cards view',
       ...config.labels
     },
 
@@ -882,6 +937,19 @@
     onSearch() {
       this.currentPage = 1;
       this.$dispatch('search', { query: this.searchQuery });
+    },
+
+    // View mode
+    setViewMode(mode) {
+      this.viewMode = mode;
+      this.$dispatch('view-mode-change', { mode });
+    },
+
+    get viewModeClass() {
+      if (this.viewMode === 'cards') {
+        return 'ux-datatable--force-responsive';
+      }
+      return this.responsive ? 'ux-datatable--responsive' : '';
     },
 
     // Selection
