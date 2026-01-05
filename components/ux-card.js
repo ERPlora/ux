@@ -122,6 +122,29 @@
     }
 
     /* ========================================
+       Card Body (optional wrapper for padding)
+    ======================================== */
+
+    .ux-card__body {
+      padding: var(--ux-space-lg);
+    }
+
+    .ux-card__body .ux-card__header,
+    .ux-card__body .ux-card__content,
+    .ux-card__body .ux-card__footer {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .ux-card__body .ux-card__header:first-child {
+      padding-top: 0;
+    }
+
+    .ux-card__body .ux-card__footer:last-child {
+      padding-bottom: 0;
+    }
+
+    /* ========================================
        Card Content
     ======================================== */
 
@@ -415,6 +438,42 @@
     }
 
     /* ========================================
+       Card Content - Centered variant (Ionic style)
+       Use for icon cards with avatar/icon + name + badge
+    ======================================== */
+
+    .ux-card__content--centered {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Avatar inside centered content */
+    .ux-card__content--centered .ux-avatar {
+      margin-bottom: var(--ux-space-md);
+    }
+
+    /* Name text */
+    .ux-card__content--centered .ux-card__name {
+      font-weight: 500;
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      line-height: 1.3;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+
+    /* Badge/chip container */
+    .ux-card__content--centered .ux-badge,
+    .ux-card__content--centered .ux-chip {
+      margin-top: var(--ux-space-sm);
+    }
+
+    /* ========================================
        Icon Card (component/feature card style)
        Supports icons, avatars, or any element
     ======================================== */
@@ -474,6 +533,11 @@
       font-weight: 500;
       font-size: var(--ux-font-size-sm);
       color: var(--ux-text);
+      line-height: 1.3;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* Description - now supports any content (text, badges, etc.) */
@@ -484,7 +548,7 @@
       gap: var(--ux-space-xs);
       font-size: var(--ux-font-size-xs);
       color: var(--ux-text-secondary);
-      margin-top: var(--ux-space-xs);
+      margin-top: var(--ux-space-sm);
     }
 
     /* When description contains only text */
@@ -512,6 +576,10 @@
       font-size: var(--ux-font-size-xs);
     }
 
+    .ux-card--icon.ux-card--sm .ux-card__description {
+      margin-top: var(--ux-space-xs);
+    }
+
     .ux-card--icon.ux-card--lg {
       padding: var(--ux-space-xl);
     }
@@ -529,6 +597,10 @@
 
     .ux-card--icon.ux-card--lg .ux-card__name {
       font-size: var(--ux-font-size-md);
+    }
+
+    .ux-card--icon.ux-card--lg .ux-card__description {
+      margin-top: var(--ux-space-md);
     }
 
     /* Icon card color variants (icon-only, not background) */
