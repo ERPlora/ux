@@ -55,7 +55,7 @@
 
     /* Checked State */
     .ux-toggle input[type="checkbox"]:checked + .ux-toggle__track {
-      background-color: var(--ux-success);
+      background-color: var(--ux-toggle-color, var(--ux-success));
     }
 
     .ux-toggle input[type="checkbox"]:checked + .ux-toggle__track .ux-toggle__thumb {
@@ -90,32 +90,20 @@
     }
 
     /* ========================================
-       Color Variants
+       Color Variants - Using CSS Custom Property
+       Consolidated pattern for easier theming
     ======================================== */
 
-    .ux-toggle--primary input[type="checkbox"]:checked + .ux-toggle__track {
-      background-color: var(--ux-primary);
+    .ux-toggle {
+      --ux-toggle-color: var(--ux-success);
     }
 
-    .ux-toggle--secondary input[type="checkbox"]:checked + .ux-toggle__track {
-      background-color: var(--ux-secondary);
-    }
-
-    .ux-toggle--tertiary input[type="checkbox"]:checked + .ux-toggle__track {
-      background-color: var(--ux-tertiary);
-    }
-
-    .ux-toggle--success input[type="checkbox"]:checked + .ux-toggle__track {
-      background-color: var(--ux-success);
-    }
-
-    .ux-toggle--warning input[type="checkbox"]:checked + .ux-toggle__track {
-      background-color: var(--ux-warning);
-    }
-
-    .ux-toggle--danger input[type="checkbox"]:checked + .ux-toggle__track {
-      background-color: var(--ux-danger);
-    }
+    .ux-toggle--primary { --ux-toggle-color: var(--ux-primary); }
+    .ux-toggle--secondary { --ux-toggle-color: var(--ux-secondary); }
+    .ux-toggle--tertiary { --ux-toggle-color: var(--ux-tertiary); }
+    .ux-toggle--success { --ux-toggle-color: var(--ux-success); }
+    .ux-toggle--warning { --ux-toggle-color: var(--ux-warning); }
+    .ux-toggle--danger { --ux-toggle-color: var(--ux-danger); }
 
     /* ========================================
        Sizes
