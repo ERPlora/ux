@@ -2298,7 +2298,8 @@
       flex-shrink: 0;
     }
 
-    .ux-card__header-content {
+    .ux-card__header-content,
+    .ux-card__header-text {
       flex: 1;
       min-width: 0;
     }
@@ -2323,6 +2324,7 @@
       align-items: center;
       gap: var(--ux-space-xs);
       flex-shrink: 0;
+      margin-left: auto;
     }
 
     /* ========================================
