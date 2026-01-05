@@ -1363,95 +1363,56 @@
     /* ========================================
        Ionic-style Padding/Margin Classes
        Similar to ion-padding, ion-margin
+       Uses CSS custom property for responsive scaling
     ======================================== */
 
-    /* Padding - all sides */
-    .ux-padding {
-      padding: 1rem;
+    :root {
+      /* Responsive spacing - scales with viewport */
+      --ux-responsive-space: var(--ux-space-lg); /* 1rem base */
     }
 
-    .ux-padding-top {
-      padding-top: 1rem;
+    @media (min-width: 768px) {
+      :root { --ux-responsive-space: var(--ux-space-xl); } /* 1.5rem */
     }
 
-    .ux-padding-bottom {
-      padding-bottom: 1rem;
+    @media (min-width: 992px) {
+      :root { --ux-responsive-space: var(--ux-space-2xl); } /* 2rem */
     }
 
-    .ux-padding-start,
-    .ux-padding-left {
-      padding-left: 1rem;
-    }
+    /* Padding - uses responsive variable */
+    .ux-padding { padding: var(--ux-responsive-space); }
+    .ux-padding-top { padding-top: var(--ux-responsive-space); }
+    .ux-padding-bottom { padding-bottom: var(--ux-responsive-space); }
+    .ux-padding-start, .ux-padding-left { padding-left: var(--ux-responsive-space); }
+    .ux-padding-end, .ux-padding-right { padding-right: var(--ux-responsive-space); }
+    .ux-padding-horizontal { padding-left: var(--ux-responsive-space); padding-right: var(--ux-responsive-space); }
+    .ux-padding-vertical { padding-top: var(--ux-responsive-space); padding-bottom: var(--ux-responsive-space); }
+    .ux-no-padding { padding: 0 !important; }
 
-    .ux-padding-end,
-    .ux-padding-right {
-      padding-right: 1rem;
-    }
-
-    .ux-padding-horizontal {
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-
-    .ux-padding-vertical {
-      padding-top: 1rem;
-      padding-bottom: 1rem;
-    }
-
-    .ux-no-padding {
-      padding: 0 !important;
-    }
-
-    /* Margin - all sides */
-    .ux-margin {
-      margin: 1rem;
-    }
-
-    .ux-margin-top {
-      margin-top: 1rem;
-    }
-
-    .ux-margin-bottom {
-      margin-bottom: 1rem;
-    }
-
-    .ux-margin-start,
-    .ux-margin-left {
-      margin-left: 1rem;
-    }
-
-    .ux-margin-end,
-    .ux-margin-right {
-      margin-right: 1rem;
-    }
-
-    .ux-margin-horizontal {
-      margin-left: 1rem;
-      margin-right: 1rem;
-    }
-
-    .ux-margin-vertical {
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .ux-no-margin {
-      margin: 0 !important;
-    }
+    /* Margin - uses responsive variable */
+    .ux-margin { margin: var(--ux-responsive-space); }
+    .ux-margin-top { margin-top: var(--ux-responsive-space); }
+    .ux-margin-bottom { margin-bottom: var(--ux-responsive-space); }
+    .ux-margin-start, .ux-margin-left { margin-left: var(--ux-responsive-space); }
+    .ux-margin-end, .ux-margin-right { margin-right: var(--ux-responsive-space); }
+    .ux-margin-horizontal { margin-left: var(--ux-responsive-space); margin-right: var(--ux-responsive-space); }
+    .ux-margin-vertical { margin-top: var(--ux-responsive-space); margin-bottom: var(--ux-responsive-space); }
+    .ux-no-margin { margin: 0 !important; }
 
     /* ========================================
        Responsive Breakpoints
        sm: 576px, md: 768px, lg: 992px, xl: 1200px
+       Note: Base .ux-padding/.ux-margin classes are responsive via --ux-responsive-space
     ======================================== */
 
     /* Small screens and up (576px+) */
     @media (min-width: 576px) {
-      .ux-padding-sm { padding: 1rem; }
-      .ux-padding-horizontal-sm { padding-left: 1rem; padding-right: 1rem; }
-      .ux-padding-vertical-sm { padding-top: 1rem; padding-bottom: 1rem; }
-      .ux-margin-sm { margin: 1rem; }
-      .ux-margin-horizontal-sm { margin-left: 1rem; margin-right: 1rem; }
-      .ux-margin-vertical-sm { margin-top: 1rem; margin-bottom: 1rem; }
+      .ux-padding-sm { padding: var(--ux-space-lg); }
+      .ux-padding-horizontal-sm { padding-left: var(--ux-space-lg); padding-right: var(--ux-space-lg); }
+      .ux-padding-vertical-sm { padding-top: var(--ux-space-lg); padding-bottom: var(--ux-space-lg); }
+      .ux-margin-sm { margin: var(--ux-space-lg); }
+      .ux-margin-horizontal-sm { margin-left: var(--ux-space-lg); margin-right: var(--ux-space-lg); }
+      .ux-margin-vertical-sm { margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-lg); }
       .ux-hidden-sm { display: none; }
       .ux-block-sm { display: block; }
       .ux-flex-sm { display: flex; }
@@ -1459,28 +1420,12 @@
 
     /* Medium screens and up (768px+) */
     @media (min-width: 768px) {
-      .ux-padding { padding: 1.5rem; }
-      .ux-padding-horizontal { padding-left: 1.5rem; padding-right: 1.5rem; }
-      .ux-padding-vertical { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-      .ux-padding-top { padding-top: 1.5rem; }
-      .ux-padding-bottom { padding-bottom: 1.5rem; }
-      .ux-padding-start, .ux-padding-left { padding-left: 1.5rem; }
-      .ux-padding-end, .ux-padding-right { padding-right: 1.5rem; }
-
-      .ux-margin { margin: 1.5rem; }
-      .ux-margin-horizontal { margin-left: 1.5rem; margin-right: 1.5rem; }
-      .ux-margin-vertical { margin-top: 1.5rem; margin-bottom: 1.5rem; }
-      .ux-margin-top { margin-top: 1.5rem; }
-      .ux-margin-bottom { margin-bottom: 1.5rem; }
-      .ux-margin-start, .ux-margin-left { margin-left: 1.5rem; }
-      .ux-margin-end, .ux-margin-right { margin-right: 1.5rem; }
-
-      .ux-padding-md { padding: 1.5rem; }
-      .ux-padding-horizontal-md { padding-left: 1.5rem; padding-right: 1.5rem; }
-      .ux-padding-vertical-md { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-      .ux-margin-md { margin: 1.5rem; }
-      .ux-margin-horizontal-md { margin-left: 1.5rem; margin-right: 1.5rem; }
-      .ux-margin-vertical-md { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+      .ux-padding-md { padding: var(--ux-space-xl); }
+      .ux-padding-horizontal-md { padding-left: var(--ux-space-xl); padding-right: var(--ux-space-xl); }
+      .ux-padding-vertical-md { padding-top: var(--ux-space-xl); padding-bottom: var(--ux-space-xl); }
+      .ux-margin-md { margin: var(--ux-space-xl); }
+      .ux-margin-horizontal-md { margin-left: var(--ux-space-xl); margin-right: var(--ux-space-xl); }
+      .ux-margin-vertical-md { margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-xl); }
       .ux-hidden-md { display: none; }
       .ux-block-md { display: block; }
       .ux-flex-md { display: flex; }
@@ -1488,28 +1433,12 @@
 
     /* Large screens and up (992px+) */
     @media (min-width: 992px) {
-      .ux-padding { padding: 2rem; }
-      .ux-padding-horizontal { padding-left: 2rem; padding-right: 2rem; }
-      .ux-padding-vertical { padding-top: 2rem; padding-bottom: 2rem; }
-      .ux-padding-top { padding-top: 2rem; }
-      .ux-padding-bottom { padding-bottom: 2rem; }
-      .ux-padding-start, .ux-padding-left { padding-left: 2rem; }
-      .ux-padding-end, .ux-padding-right { padding-right: 2rem; }
-
-      .ux-margin { margin: 2rem; }
-      .ux-margin-horizontal { margin-left: 2rem; margin-right: 2rem; }
-      .ux-margin-vertical { margin-top: 2rem; margin-bottom: 2rem; }
-      .ux-margin-top { margin-top: 2rem; }
-      .ux-margin-bottom { margin-bottom: 2rem; }
-      .ux-margin-start, .ux-margin-left { margin-left: 2rem; }
-      .ux-margin-end, .ux-margin-right { margin-right: 2rem; }
-
-      .ux-padding-lg { padding: 2rem; }
-      .ux-padding-horizontal-lg { padding-left: 2rem; padding-right: 2rem; }
-      .ux-padding-vertical-lg { padding-top: 2rem; padding-bottom: 2rem; }
-      .ux-margin-lg { margin: 2rem; }
-      .ux-margin-horizontal-lg { margin-left: 2rem; margin-right: 2rem; }
-      .ux-margin-vertical-lg { margin-top: 2rem; margin-bottom: 2rem; }
+      .ux-padding-lg { padding: var(--ux-space-2xl); }
+      .ux-padding-horizontal-lg { padding-left: var(--ux-space-2xl); padding-right: var(--ux-space-2xl); }
+      .ux-padding-vertical-lg { padding-top: var(--ux-space-2xl); padding-bottom: var(--ux-space-2xl); }
+      .ux-margin-lg { margin: var(--ux-space-2xl); }
+      .ux-margin-horizontal-lg { margin-left: var(--ux-space-2xl); margin-right: var(--ux-space-2xl); }
+      .ux-margin-vertical-lg { margin-top: var(--ux-space-2xl); margin-bottom: var(--ux-space-2xl); }
       .ux-hidden-lg { display: none; }
       .ux-block-lg { display: block; }
       .ux-flex-lg { display: flex; }
@@ -1517,12 +1446,12 @@
 
     /* Extra large screens (1200px+) */
     @media (min-width: 1200px) {
-      .ux-padding-xl { padding: 3rem; }
-      .ux-padding-horizontal-xl { padding-left: 3rem; padding-right: 3rem; }
-      .ux-padding-vertical-xl { padding-top: 3rem; padding-bottom: 3rem; }
-      .ux-margin-xl { margin: 3rem; }
-      .ux-margin-horizontal-xl { margin-left: 3rem; margin-right: 3rem; }
-      .ux-margin-vertical-xl { margin-top: 3rem; margin-bottom: 3rem; }
+      .ux-padding-xl { padding: var(--ux-space-3xl); }
+      .ux-padding-horizontal-xl { padding-left: var(--ux-space-3xl); padding-right: var(--ux-space-3xl); }
+      .ux-padding-vertical-xl { padding-top: var(--ux-space-3xl); padding-bottom: var(--ux-space-3xl); }
+      .ux-margin-xl { margin: var(--ux-space-3xl); }
+      .ux-margin-horizontal-xl { margin-left: var(--ux-space-3xl); margin-right: var(--ux-space-3xl); }
+      .ux-margin-vertical-xl { margin-top: var(--ux-space-3xl); margin-bottom: var(--ux-space-3xl); }
       .ux-hidden-xl { display: none; }
       .ux-block-xl { display: block; }
       .ux-flex-xl { display: flex; }
@@ -1547,22 +1476,8 @@
       max-width: 75rem;
       margin-left: auto;
       margin-right: auto;
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-
-    @media (min-width: 768px) {
-      .ux-container {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-      }
-    }
-
-    @media (min-width: 992px) {
-      .ux-container {
-        padding-left: 2rem;
-        padding-right: 2rem;
-      }
+      padding-left: var(--ux-responsive-space);
+      padding-right: var(--ux-responsive-space);
     }
 
     /* ========================================
