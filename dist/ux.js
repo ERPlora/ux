@@ -9556,6 +9556,253 @@
     .ux-card-grid--icon .ux-card {
       margin: 0;
     }
+
+    /* ========================================
+       App Icon Card (iOS-style launcher icons)
+    ======================================== */
+
+    .ux-card--app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      padding: var(--ux-space-md) var(--ux-space-sm);
+      border-radius: var(--ux-border-radius);
+      background: transparent;
+      box-shadow: none;
+      margin: 0;
+      cursor: pointer;
+      transition:
+        transform var(--ux-transition-fast) var(--ux-ease),
+        background-color var(--ux-transition-fast) var(--ux-ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-card--app:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+      transform: scale(1.02);
+    }
+
+    .ux-card--app:active {
+      transform: scale(0.95);
+    }
+
+    /* App icon - iOS rounded square */
+    .ux-card--app .ux-card__icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 13.5px; /* iOS corner radius: 22.5% */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--ux-space-sm);
+      background: linear-gradient(
+        135deg,
+        var(--ux-card-app-color, var(--ux-primary)) 0%,
+        var(--ux-card-app-shade, var(--ux-primary-shade)) 100%
+      );
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      color: #fff;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .ux-card--app .ux-card__icon svg {
+      width: 28px;
+      height: 28px;
+      fill: currentColor;
+    }
+
+    /* App icon name */
+    .ux-card--app .ux-card__name {
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.2;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--ux-text);
+    }
+
+    /* App icon sizes */
+    .ux-card--app.ux-card--sm .ux-card__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10.8px;
+    }
+
+    .ux-card--app.ux-card--sm .ux-card__icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .ux-card--app.ux-card--sm .ux-card__name {
+      font-size: 11px;
+      max-width: 64px;
+    }
+
+    .ux-card--app.ux-card--lg .ux-card__icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 16px;
+    }
+
+    .ux-card--app.ux-card--lg .ux-card__icon svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .ux-card--app.ux-card--lg .ux-card__name {
+      font-size: 13px;
+      max-width: 90px;
+    }
+
+    .ux-card--app.ux-card--xl .ux-card__icon {
+      width: 84px;
+      height: 84px;
+      border-radius: 18.9px;
+    }
+
+    .ux-card--app.ux-card--xl .ux-card__icon svg {
+      width: 38px;
+      height: 38px;
+    }
+
+    .ux-card--app.ux-card--xl .ux-card__name {
+      font-size: 14px;
+      max-width: 100px;
+    }
+
+    /* App icon color variants */
+    .ux-card--app.ux-card--app-primary .ux-card__icon {
+      --ux-card-app-color: var(--ux-primary);
+      --ux-card-app-shade: var(--ux-primary-shade);
+    }
+
+    .ux-card--app.ux-card--app-secondary .ux-card__icon {
+      --ux-card-app-color: var(--ux-secondary);
+      --ux-card-app-shade: var(--ux-secondary-shade);
+    }
+
+    .ux-card--app.ux-card--app-tertiary .ux-card__icon {
+      --ux-card-app-color: var(--ux-tertiary);
+      --ux-card-app-shade: var(--ux-tertiary-shade);
+    }
+
+    .ux-card--app.ux-card--app-success .ux-card__icon {
+      --ux-card-app-color: var(--ux-success);
+      --ux-card-app-shade: var(--ux-success-shade);
+    }
+
+    .ux-card--app.ux-card--app-warning .ux-card__icon {
+      --ux-card-app-color: var(--ux-warning);
+      --ux-card-app-shade: var(--ux-warning-shade);
+    }
+
+    .ux-card--app.ux-card--app-danger .ux-card__icon {
+      --ux-card-app-color: var(--ux-danger);
+      --ux-card-app-shade: var(--ux-danger-shade);
+    }
+
+    .ux-card--app.ux-card--app-dark .ux-card__icon {
+      --ux-card-app-color: var(--ux-dark, #334155);
+      --ux-card-app-shade: var(--ux-dark-shade, #1e293b);
+    }
+
+    .ux-card--app.ux-card--app-medium .ux-card__icon {
+      --ux-card-app-color: var(--ux-medium, #94a3b8);
+      --ux-card-app-shade: var(--ux-medium-shade, #64748b);
+    }
+
+    /* Dashed/outline variant for "Add" buttons */
+    .ux-card--app .ux-card__icon--dashed,
+    .ux-card--app .ux-card__icon--outline {
+      background: transparent;
+      border: 2px dashed var(--ux-border-color);
+      box-shadow: none;
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-card--app .ux-card__icon--outline {
+      border-style: solid;
+    }
+
+    .ux-card--app:hover .ux-card__icon--dashed,
+    .ux-card--app:hover .ux-card__icon--outline {
+      border-color: var(--ux-primary);
+      color: var(--ux-primary);
+    }
+
+    /* Favorite badge */
+    .ux-card--app .ux-card__favorite {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      color: var(--ux-warning);
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    }
+
+    .ux-card--app .ux-card__favorite svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Notification badge */
+    .ux-card--app .ux-card__badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 9px;
+      background-color: var(--ux-danger);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    /* App card grid */
+    .ux-card-grid--app {
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: var(--ux-space-sm);
+    }
+
+    /* Dark mode */
+    @media (prefers-color-scheme: dark) {
+      :root:not(.ux-theme-light):not(.ux-light) .ux-card--app:hover {
+        background-color: rgba(255, 255, 255, 0.06);
+      }
+
+      :root:not(.ux-theme-light):not(.ux-light) .ux-card--app .ux-card__icon {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      :root:not(.ux-theme-light):not(.ux-light) .ux-card--app .ux-card__icon--dashed,
+      :root:not(.ux-theme-light):not(.ux-light) .ux-card--app .ux-card__icon--outline {
+        box-shadow: none;
+      }
+    }
+
+    .ux-dark .ux-card--app:hover,
+    .ux-theme-dark .ux-card--app:hover {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .ux-dark .ux-card--app .ux-card__icon,
+    .ux-theme-dark .ux-card--app .ux-card__icon {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
   `;
 
   // Inject styles
