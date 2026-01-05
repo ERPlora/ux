@@ -57,6 +57,7 @@
       flex-direction: column;
       transform: scale(0.95) translateY(20px);
       opacity: 0;
+      will-change: transform, opacity;
       transition:
         transform var(--ux-transition-base) var(--ux-ease-spring),
         opacity var(--ux-transition-base) var(--ux-ease);
@@ -65,6 +66,7 @@
     .ux-modal-backdrop--open .ux-modal {
       transform: scale(1) translateY(0);
       opacity: 1;
+      will-change: auto;
     }
 
     /* Mobile: sheet style */
@@ -380,6 +382,7 @@
     closeOnEscape: config.closeOnEscape !== false,
     modalId: config.id || 'ux-modal-' + Math.random().toString(36).substr(2, 9),
     _previousActiveElement: null,
+    _focusTrapCleanup: null,
 
     // ARIA attributes for the modal
     get ariaAttrs() {
@@ -411,20 +414,52 @@
       // Store current focused element to restore on close
       this._previousActiveElement = document.activeElement;
       this.isOpen = true;
-      document.body.style.overflow = 'hidden';
 
-      // Focus first focusable element
+      // Use global scroll lock (supports nested modals)
+      if (window.UX && window.UX.lockScroll) {
+        window.UX.lockScroll();
+      } else {
+        document.body.style.overflow = 'hidden';
+      }
+
+      // Setup focus trap and focus first element
       this.$nextTick(() => {
-        const focusable = this._getFocusableElements();
-        if (focusable.length > 0) {
-          focusable[0].focus();
+        const modal = this.$refs.modal || this.$el.querySelector('.ux-modal');
+        if (modal && window.UX && window.UX.trapFocus) {
+          this._focusTrapCleanup = window.UX.trapFocus(modal);
+        } else {
+          // Fallback: focus first focusable element
+          const focusable = this._getFocusableElements();
+          if (focusable.length > 0) {
+            focusable[0].focus();
+          }
+        }
+
+        // Announce modal opened for screen readers
+        if (window.UX && window.UX.announce) {
+          const title = this.$el.querySelector('[id$="-title"]');
+          if (title) {
+            window.UX.announce(title.textContent + ' dialog opened', 'assertive');
+          }
         }
       });
     },
 
     close() {
       this.isOpen = false;
-      document.body.style.overflow = '';
+
+      // Cleanup focus trap
+      if (this._focusTrapCleanup) {
+        this._focusTrapCleanup();
+        this._focusTrapCleanup = null;
+      }
+
+      // Use global scroll unlock
+      if (window.UX && window.UX.unlockScroll) {
+        window.UX.unlockScroll();
+      } else {
+        document.body.style.overflow = '';
+      }
 
       // Restore focus to previous element
       if (this._previousActiveElement && this._previousActiveElement.focus) {
@@ -452,8 +487,8 @@
         return;
       }
 
-      // Focus trap: Tab key cycles within modal
-      if (event.key === 'Tab') {
+      // Focus trap: Tab key cycles within modal (fallback if UX.trapFocus not used)
+      if (event.key === 'Tab' && !this._focusTrapCleanup) {
         const focusable = this._getFocusableElements();
         if (focusable.length === 0) return;
 
