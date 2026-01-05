@@ -73,6 +73,7 @@
     'ux-refresher',
     'ux-reorder',
     'ux-rating',
+    'ux-datatable',
 
     // Gesture directives
     'ux-swipe',
