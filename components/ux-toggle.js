@@ -250,9 +250,19 @@
   }
 
   // Alpine component for toggle
+  // ARIA: role="switch", aria-checked for toggle state
   const toggleComponent = (config = {}) => ({
     checked: config.checked || false,
     disabled: config.disabled || false,
+
+    // ARIA attributes for toggle (when used without native checkbox)
+    get ariaAttrs() {
+      return {
+        'role': 'switch',
+        'aria-checked': this.checked ? 'true' : 'false',
+        'aria-disabled': this.disabled ? 'true' : 'false'
+      };
+    },
 
     toggle() {
       if (!this.disabled) {

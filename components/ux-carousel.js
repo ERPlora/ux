@@ -332,6 +332,7 @@
   }
 
   // Alpine component
+  // ARIA: group role, aria-roledescription, aria-label for navigation
   const carouselComponent = (config = {}) => ({
     currentIndex: 0,
     slidesCount: 0,
@@ -347,6 +348,55 @@
     _currentX: 0,
     _isDragging: false,
     _trackEl: null,
+    carouselId: config.id || 'ux-carousel-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the carousel container
+    get ariaAttrs() {
+      return {
+        'role': 'group',
+        'aria-roledescription': 'carousel',
+        'aria-label': config.ariaLabel || 'Carousel'
+      };
+    },
+
+    // ARIA attributes for navigation prev button
+    get prevButtonAriaAttrs() {
+      return {
+        'aria-label': 'Previous slide',
+        'aria-controls': this.carouselId + '-track'
+      };
+    },
+
+    // ARIA attributes for navigation next button
+    get nextButtonAriaAttrs() {
+      return {
+        'aria-label': 'Next slide',
+        'aria-controls': this.carouselId + '-track'
+      };
+    },
+
+    // ARIA attributes for slide
+    getSlideAriaAttrs(index) {
+      return {
+        'role': 'group',
+        'aria-roledescription': 'slide',
+        'aria-label': `Slide ${index + 1} of ${this.slidesCount}`
+      };
+    },
+
+    // ARIA attributes for pagination dot
+    getDotAriaAttrs(pageIndex) {
+      const isCurrentPage = this.getCurrentPage() === pageIndex;
+      return {
+        'role': 'button',
+        'aria-label': `Go to slide ${pageIndex + 1}`,
+        'aria-current': isCurrentPage ? 'true' : 'false'
+      };
+    },
+
+    get trackId() {
+      return this.carouselId + '-track';
+    },
 
     init() {
       this.$nextTick(() => {

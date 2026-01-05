@@ -4611,9 +4611,19 @@
   }
 
   // Alpine component for toggle
+  // ARIA: role="switch", aria-checked for toggle state
   const toggleComponent = (config = {}) => ({
     checked: config.checked || false,
     disabled: config.disabled || false,
+
+    // ARIA attributes for toggle (when used without native checkbox)
+    get ariaAttrs() {
+      return {
+        'role': 'switch',
+        'aria-checked': this.checked ? 'true' : 'false',
+        'aria-disabled': this.disabled ? 'true' : 'false'
+      };
+    },
 
     toggle() {
       if (!this.disabled) {
@@ -10810,11 +10820,42 @@
   }
 
   // Alpine component for tabs
+  // ARIA: role="tablist" on bar, role="tab" on buttons, role="tabpanel" on panels
   const tabsComponent = (config = {}) => ({
     activeTab: config.activeTab || 0,
     tabs: config.tabs || [],
     animated: config.animated || false,
     indicatorStyle: {},
+    tabsId: config.id || 'ux-tabs-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the tab bar (tablist)
+    get tablistAriaAttrs() {
+      return {
+        'role': 'tablist',
+        'aria-label': config.ariaLabel || 'Tabs'
+      };
+    },
+
+    // ARIA attributes for each tab button
+    getTabAriaAttrs(index) {
+      return {
+        'role': 'tab',
+        'aria-selected': this.activeTab === index ? 'true' : 'false',
+        'aria-controls': this.tabsId + '-panel-' + index,
+        'id': this.tabsId + '-tab-' + index,
+        'tabindex': this.activeTab === index ? '0' : '-1'
+      };
+    },
+
+    // ARIA attributes for each tab panel
+    getPanelAriaAttrs(index) {
+      return {
+        'role': 'tabpanel',
+        'aria-labelledby': this.tabsId + '-tab-' + index,
+        'id': this.tabsId + '-panel-' + index,
+        'tabindex': '0'
+      };
+    },
 
     init() {
       this.$nextTick(() => {
@@ -11907,15 +11948,49 @@
   }
 
   // Alpine component for menu
+  // ARIA: role="menu", aria-expanded on trigger, role="menuitem" on items
   const menuComponent = (config = {}) => ({
     isOpen: false,
     position: config.position || 'bottom-left',
     items: config.items || [],
     selectedValue: config.selectedValue || null,
+    menuId: config.id || 'ux-menu-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the trigger button
+    get triggerAriaAttrs() {
+      return {
+        'aria-haspopup': 'menu',
+        'aria-expanded': this.isOpen ? 'true' : 'false',
+        'aria-controls': this.menuId + '-content'
+      };
+    },
+
+    // ARIA attributes for the menu content
+    get menuAriaAttrs() {
+      return {
+        'role': 'menu',
+        'id': this.menuId + '-content',
+        'aria-orientation': 'vertical'
+      };
+    },
+
+    // ARIA attributes for each menu item
+    getItemAriaAttrs(item, index) {
+      return {
+        'role': 'menuitem',
+        'tabindex': index === 0 ? '0' : '-1',
+        'aria-disabled': item.disabled ? 'true' : 'false'
+      };
+    },
 
     open() {
       this.isOpen = true;
       document.body.style.overflow = 'hidden';
+      // Focus first menu item
+      this.$nextTick(() => {
+        const firstItem = this.$refs.content?.querySelector('.ux-menu__item:not(.ux-menu__item--disabled)');
+        if (firstItem) firstItem.focus();
+      });
     },
 
     close() {
@@ -12434,14 +12509,42 @@
   }
 
   // Alpine component for modal
+  // ARIA: role="dialog", aria-modal="true", aria-labelledby, aria-describedby
   const modalComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
     closeOnBackdrop: config.closeOnBackdrop !== false,
     closeOnEscape: config.closeOnEscape !== false,
+    modalId: config.id || 'ux-modal-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the modal
+    get ariaAttrs() {
+      return {
+        'role': 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': this.modalId + '-title',
+        'aria-describedby': this.modalId + '-content'
+      };
+    },
+
+    get titleId() {
+      return this.modalId + '-title';
+    },
+
+    get contentId() {
+      return this.modalId + '-content';
+    },
 
     open() {
       this.isOpen = true;
       document.body.style.overflow = 'hidden';
+      // Focus trap: focus first focusable element
+      this.$nextTick(() => {
+        const modal = this.$refs.modal || this.$el.querySelector('.ux-modal');
+        if (modal) {
+          const focusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (focusable) focusable.focus();
+        }
+      });
     },
 
     close() {
@@ -12895,6 +12998,7 @@
   }
 
   // Alpine component for bottom sheet
+  // ARIA: role="dialog", aria-modal="true", aria-labelledby
   const sheetComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
     detent: config.detent || 'medium', // small, medium, large
@@ -12903,11 +13007,33 @@
     startY: 0,
     currentY: 0,
     isDragging: false,
+    sheetId: config.id || 'ux-sheet-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the sheet
+    get ariaAttrs() {
+      return {
+        'role': 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': this.sheetId + '-title'
+      };
+    },
+
+    get titleId() {
+      return this.sheetId + '-title';
+    },
 
     open(detent) {
       if (detent) this.detent = detent;
       this.isOpen = true;
       document.body.style.overflow = 'hidden';
+      // Focus first focusable element
+      this.$nextTick(() => {
+        const sheet = this.$refs.sheet || this.$el.querySelector('.ux-sheet, .ux-side-sheet');
+        if (sheet) {
+          const focusable = sheet.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (focusable) focusable.focus();
+        }
+      });
     },
 
     close() {
@@ -12980,12 +13106,27 @@
   }
 
   // Alpine component for action sheet
+  // ARIA: role="dialog", aria-modal="true", aria-labelledby
   const actionSheetComponent = (config = {}) => ({
     isOpen: false,
     title: config.title || '',
     message: config.message || '',
     buttons: config.buttons || [],
     cancelText: config.cancelText || 'Cancel',
+    actionSheetId: config.id || 'ux-action-sheet-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'role': 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': this.actionSheetId + '-title'
+      };
+    },
+
+    get titleId() {
+      return this.actionSheetId + '-title';
+    },
 
     open(options = {}) {
       if (options.title) this.title = options.title;
@@ -13374,6 +13515,7 @@
   }
 
   // Alpine component for alert dialog
+  // ARIA: role="alertdialog", aria-modal="true", aria-labelledby, aria-describedby
   const alertComponent = (config = {}) => ({
     isOpen: false,
     title: config.title || '',
@@ -13381,6 +13523,25 @@
     buttons: config.buttons || [],
     inputs: config.inputs || [],
     inputValues: {},
+    alertId: config.id || 'ux-alert-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for alert dialog
+    get ariaAttrs() {
+      return {
+        'role': 'alertdialog',
+        'aria-modal': 'true',
+        'aria-labelledby': this.alertId + '-title',
+        'aria-describedby': this.alertId + '-message'
+      };
+    },
+
+    get titleId() {
+      return this.alertId + '-title';
+    },
+
+    get messageId() {
+      return this.alertId + '-message';
+    },
 
     open(options = {}) {
       if (options.title) this.title = options.title;
@@ -13447,9 +13608,18 @@
   }
 
   // Alpine component for inline alert banner
+  // ARIA: role="alert" for important messages
   const alertBannerComponent = (config = {}) => ({
     visible: config.visible !== false,
     dismissible: config.dismissible !== false,
+
+    // ARIA role for inline alerts
+    get ariaAttrs() {
+      return {
+        'role': 'alert',
+        'aria-live': 'polite'
+      };
+    },
 
     dismiss() {
       this.visible = false;
@@ -13857,6 +14027,7 @@
   }
 
   // Alpine component for toast
+  // ARIA: role="status" or "alert", aria-live for announcements
   const toastComponent = (config = {}) => ({
     visible: false,
     message: config.message || '',
@@ -13867,6 +14038,16 @@
     progress: 100,
     _timer: null,
     _progressTimer: null,
+
+    // ARIA attributes - use "alert" for danger/errors, "status" for info
+    get ariaAttrs() {
+      const isUrgent = this.color === 'danger' || this.color === 'warning';
+      return {
+        'role': isUrgent ? 'alert' : 'status',
+        'aria-live': isUrgent ? 'assertive' : 'polite',
+        'aria-atomic': 'true'
+      };
+    },
 
     show(options = {}) {
       if (options.message) this.message = options.message;
@@ -13962,11 +14143,20 @@
   }
 
   // Toast manager for multiple toasts
+  // ARIA: Container with aria-live region for toast announcements
   // Posiciones disponibles: top, bottom, center, top-start, top-end, bottom-start, bottom-end, center-start, center-end
   const toastManagerComponent = (config = {}) => ({
     toasts: [],
     position: config.position || 'bottom',
     maxToasts: config.maxToasts || 5,
+
+    // ARIA attributes for toast container (live region)
+    get containerAriaAttrs() {
+      return {
+        'aria-live': 'polite',
+        'aria-atomic': 'false'
+      };
+    },
 
     // Computed class for container position
     get containerClass() {
@@ -15784,13 +15974,33 @@
   }
 
   // Alpine component for accordion
+  // ARIA: aria-expanded, aria-controls on headers; region role on panels
   const accordionComponent = (config = {}) => ({
     openItems: config.openItems || [],
     multiple: config.multiple || false,
     disabled: config.disabled || false,
+    accordionId: config.id || 'ux-accordion-' + Math.random().toString(36).substr(2, 9),
 
     isOpen(index) {
       return this.openItems.includes(index);
+    },
+
+    // ARIA attributes for accordion header button
+    getHeaderAriaAttrs(index) {
+      return {
+        'aria-expanded': this.isOpen(index) ? 'true' : 'false',
+        'aria-controls': this.accordionId + '-panel-' + index,
+        'id': this.accordionId + '-header-' + index
+      };
+    },
+
+    // ARIA attributes for accordion panel
+    getPanelAriaAttrs(index) {
+      return {
+        'role': 'region',
+        'aria-labelledby': this.accordionId + '-header-' + index,
+        'id': this.accordionId + '-panel-' + index
+      };
     },
 
     toggle(index) {
@@ -15836,9 +16046,29 @@
   }
 
   // Alpine component for single accordion item
+  // ARIA: aria-expanded on header
   const accordionItemComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
     disabled: config.disabled || false,
+    itemId: config.id || 'ux-accordion-item-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for header
+    get headerAriaAttrs() {
+      return {
+        'aria-expanded': this.isOpen ? 'true' : 'false',
+        'aria-controls': this.itemId + '-panel',
+        'id': this.itemId + '-header'
+      };
+    },
+
+    // ARIA attributes for panel
+    get panelAriaAttrs() {
+      return {
+        'role': 'region',
+        'aria-labelledby': this.itemId + '-header',
+        'id': this.itemId + '-panel'
+      };
+    },
 
     toggle() {
       if (!this.disabled) {
@@ -18785,6 +19015,7 @@
   }
 
   // Alpine component
+  // ARIA: group role, aria-roledescription, aria-label for navigation
   const carouselComponent = (config = {}) => ({
     currentIndex: 0,
     slidesCount: 0,
@@ -18800,6 +19031,55 @@
     _currentX: 0,
     _isDragging: false,
     _trackEl: null,
+    carouselId: config.id || 'ux-carousel-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the carousel container
+    get ariaAttrs() {
+      return {
+        'role': 'group',
+        'aria-roledescription': 'carousel',
+        'aria-label': config.ariaLabel || 'Carousel'
+      };
+    },
+
+    // ARIA attributes for navigation prev button
+    get prevButtonAriaAttrs() {
+      return {
+        'aria-label': 'Previous slide',
+        'aria-controls': this.carouselId + '-track'
+      };
+    },
+
+    // ARIA attributes for navigation next button
+    get nextButtonAriaAttrs() {
+      return {
+        'aria-label': 'Next slide',
+        'aria-controls': this.carouselId + '-track'
+      };
+    },
+
+    // ARIA attributes for slide
+    getSlideAriaAttrs(index) {
+      return {
+        'role': 'group',
+        'aria-roledescription': 'slide',
+        'aria-label': `Slide ${index + 1} of ${this.slidesCount}`
+      };
+    },
+
+    // ARIA attributes for pagination dot
+    getDotAriaAttrs(pageIndex) {
+      const isCurrentPage = this.getCurrentPage() === pageIndex;
+      return {
+        'role': 'button',
+        'aria-label': `Go to slide ${pageIndex + 1}`,
+        'aria-current': isCurrentPage ? 'true' : 'false'
+      };
+    },
+
+    get trackId() {
+      return this.carouselId + '-track';
+    },
 
     init() {
       this.$nextTick(() => {
@@ -20794,4 +21074,489 @@
       Alpine.data('uxPanelDetail', panelDetailComponent);
     });
   }
+})();
+/**
+ * UX PWA - Progressive Web App Support
+ * Service Worker registration, offline detection, and install prompts
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX PWA Styles
+    ======================================== */
+
+    /* Online/Offline Indicator */
+    .ux-pwa-status {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: var(--ux-z-toast);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      text-align: center;
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .ux-pwa-status--visible {
+      transform: translateY(0);
+    }
+
+    .ux-pwa-status--offline {
+      background-color: var(--ux-danger);
+      color: white;
+    }
+
+    .ux-pwa-status--online {
+      background-color: var(--ux-success);
+      color: white;
+    }
+
+    /* Install Banner */
+    .ux-pwa-install {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: var(--ux-z-modal);
+      background: var(--ux-surface);
+      border-top: 1px solid var(--ux-border-color);
+      padding: var(--ux-space-lg);
+      padding-bottom: calc(var(--ux-space-lg) + env(safe-area-inset-bottom));
+      box-shadow: var(--ux-shadow-lg);
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .ux-pwa-install--visible {
+      transform: translateY(0);
+    }
+
+    .ux-pwa-install__content {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-md);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .ux-pwa-install__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--ux-border-radius);
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+
+    .ux-pwa-install__text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ux-pwa-install__title {
+      font-weight: 600;
+      font-size: var(--ux-font-size-base);
+      color: var(--ux-text);
+      margin-bottom: 2px;
+    }
+
+    .ux-pwa-install__subtitle {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-pwa-install__actions {
+      display: flex;
+      gap: var(--ux-space-sm);
+      flex-shrink: 0;
+    }
+
+    /* Update Available Banner */
+    .ux-pwa-update {
+      position: fixed;
+      bottom: var(--ux-space-lg);
+      left: var(--ux-space-lg);
+      right: var(--ux-space-lg);
+      z-index: var(--ux-z-modal);
+      background: var(--ux-primary);
+      color: white;
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      box-shadow: var(--ux-shadow-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ux-space-md);
+      transform: translateY(calc(100% + var(--ux-space-xl)));
+      transition: transform 0.3s ease;
+    }
+
+    .ux-pwa-update--visible {
+      transform: translateY(0);
+    }
+
+    .ux-pwa-update__text {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+    }
+
+    .ux-pwa-update__btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: var(--ux-space-xs) var(--ux-space-md);
+      border-radius: var(--ux-border-radius);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .ux-pwa-update__btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Offline Overlay */
+    .ux-pwa-offline-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: var(--ux-z-modal);
+      background: var(--ux-surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-xl);
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .ux-pwa-offline-overlay--visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .ux-pwa-offline-overlay__icon {
+      width: 80px;
+      height: 80px;
+      margin-bottom: var(--ux-space-lg);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-pwa-offline-overlay__title {
+      font-size: var(--ux-font-size-xl);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin-bottom: var(--ux-space-sm);
+    }
+
+    .ux-pwa-offline-overlay__subtitle {
+      font-size: var(--ux-font-size-base);
+      color: var(--ux-text-secondary);
+      max-width: 300px;
+    }
+
+    /* Cached indicator badge */
+    .ux-pwa-cached {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      background: var(--ux-success-soft);
+      color: var(--ux-success);
+      font-size: var(--ux-font-size-xs);
+      font-weight: 500;
+      border-radius: var(--ux-border-radius);
+    }
+
+    .ux-pwa-cached__icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* iOS Safari specific styles */
+    @supports (-webkit-touch-callout: none) {
+      .ux-pwa-install__subtitle--ios::after {
+        content: ' Tap Share then "Add to Home Screen"';
+      }
+    }
+
+    /* Safe area support */
+    @supports (padding: env(safe-area-inset-bottom)) {
+      .ux-pwa-status {
+        padding-top: calc(var(--ux-space-sm) + env(safe-area-inset-top));
+      }
+    }
+
+    /* Dark mode adjustments */
+    .ux-dark .ux-pwa-install {
+      background: var(--ux-surface);
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles(styles, 'ux-pwa');
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // PWA Manager Alpine component
+  const pwaComponent = (config = {}) => ({
+    // State
+    isOnline: navigator.onLine,
+    isInstallable: false,
+    isStandalone: false,
+    hasUpdate: false,
+    showInstallBanner: false,
+    showOfflineStatus: false,
+    showOnlineStatus: false,
+    showUpdateBanner: false,
+    showOfflineOverlay: false,
+
+    // Config
+    serviceWorkerPath: config.serviceWorkerPath || '/sw.js',
+    appName: config.appName || document.title,
+    appIcon: config.appIcon || '/icon-192.png',
+    offlineStatusDuration: config.offlineStatusDuration ?? 3000,
+    onlineStatusDuration: config.onlineStatusDuration ?? 2000,
+    autoShowInstall: config.autoShowInstall ?? true,
+    installDelay: config.installDelay ?? 30000, // 30 seconds
+
+    // Internal
+    deferredPrompt: null,
+    registration: null,
+    statusTimeout: null,
+
+    init() {
+      // Check if running as installed PWA
+      this.isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                          window.navigator.standalone === true;
+
+      // Online/Offline events
+      window.addEventListener('online', () => this.handleOnline());
+      window.addEventListener('offline', () => this.handleOffline());
+
+      // Install prompt event
+      window.addEventListener('beforeinstallprompt', (e) => this.handleInstallPrompt(e));
+
+      // App installed event
+      window.addEventListener('appinstalled', () => this.handleAppInstalled());
+
+      // Register service worker
+      if (config.registerServiceWorker !== false) {
+        this.registerServiceWorker();
+      }
+
+      // Auto-show install banner after delay
+      if (this.autoShowInstall && !this.isStandalone) {
+        setTimeout(() => {
+          if (this.isInstallable && !this.isStandalone) {
+            this.showInstallBanner = true;
+          }
+        }, this.installDelay);
+      }
+    },
+
+    async registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        try {
+          this.registration = await navigator.serviceWorker.register(this.serviceWorkerPath);
+
+          // Check for updates
+          this.registration.addEventListener('updatefound', () => {
+            const newWorker = this.registration.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                this.hasUpdate = true;
+                this.showUpdateBanner = true;
+              }
+            });
+          });
+
+          // Listen for controller change (after update)
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (config.reloadOnUpdate !== false) {
+              window.location.reload();
+            }
+          });
+
+          console.log('Service Worker registered:', this.registration.scope);
+        } catch (error) {
+          console.error('Service Worker registration failed:', error);
+        }
+      }
+    },
+
+    handleOnline() {
+      this.isOnline = true;
+      this.showOfflineOverlay = false;
+      this.showOnlineStatus = true;
+
+      clearTimeout(this.statusTimeout);
+      this.statusTimeout = setTimeout(() => {
+        this.showOnlineStatus = false;
+      }, this.onlineStatusDuration);
+
+      this.$dispatch('ux-pwa-online');
+    },
+
+    handleOffline() {
+      this.isOnline = false;
+      this.showOfflineStatus = true;
+
+      clearTimeout(this.statusTimeout);
+      this.statusTimeout = setTimeout(() => {
+        this.showOfflineStatus = false;
+      }, this.offlineStatusDuration);
+
+      this.$dispatch('ux-pwa-offline');
+    },
+
+    handleInstallPrompt(e) {
+      e.preventDefault();
+      this.deferredPrompt = e;
+      this.isInstallable = true;
+      this.$dispatch('ux-pwa-installable');
+    },
+
+    handleAppInstalled() {
+      this.isInstallable = false;
+      this.isStandalone = true;
+      this.showInstallBanner = false;
+      this.deferredPrompt = null;
+      this.$dispatch('ux-pwa-installed');
+    },
+
+    async promptInstall() {
+      if (!this.deferredPrompt) return false;
+
+      this.deferredPrompt.prompt();
+      const { outcome } = await this.deferredPrompt.userChoice;
+
+      if (outcome === 'accepted') {
+        this.isInstallable = false;
+        this.showInstallBanner = false;
+      }
+
+      this.deferredPrompt = null;
+      return outcome === 'accepted';
+    },
+
+    dismissInstall() {
+      this.showInstallBanner = false;
+      this.$dispatch('ux-pwa-install-dismissed');
+    },
+
+    async applyUpdate() {
+      if (this.registration && this.registration.waiting) {
+        this.registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+      this.showUpdateBanner = false;
+    },
+
+    dismissUpdate() {
+      this.showUpdateBanner = false;
+    },
+
+    // Check if a specific resource is cached
+    async isCached(url) {
+      if ('caches' in window) {
+        const cache = await caches.open('v1');
+        const response = await cache.match(url);
+        return !!response;
+      }
+      return false;
+    },
+
+    // Clear all caches
+    async clearCache() {
+      if ('caches' in window) {
+        const names = await caches.keys();
+        await Promise.all(names.map(name => caches.delete(name)));
+        return true;
+      }
+      return false;
+    },
+
+    // Get cache storage estimate
+    async getCacheSize() {
+      if ('storage' in navigator && 'estimate' in navigator.storage) {
+        const estimate = await navigator.storage.estimate();
+        return {
+          usage: estimate.usage,
+          quota: estimate.quota,
+          usageFormatted: this.formatBytes(estimate.usage),
+          quotaFormatted: this.formatBytes(estimate.quota),
+          percentUsed: Math.round((estimate.usage / estimate.quota) * 100)
+        };
+      }
+      return null;
+    },
+
+    formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    },
+
+    // Check if iOS
+    get isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent);
+    },
+
+    // Check if can install (not iOS Safari in standalone)
+    get canInstall() {
+      return this.isInstallable && !this.isStandalone;
+    }
+  });
+
+  // Register Alpine component
+  if (window.UX) {
+    window.UX.registerComponent('uxPWA', pwaComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxPWA', pwaComponent);
+    });
+  }
+
+  // Simple offline detection helper (no Alpine required)
+  window.UXOffline = {
+    isOnline: navigator.onLine,
+    callbacks: { online: [], offline: [] },
+
+    init() {
+      window.addEventListener('online', () => {
+        this.isOnline = true;
+        this.callbacks.online.forEach(cb => cb());
+      });
+      window.addEventListener('offline', () => {
+        this.isOnline = false;
+        this.callbacks.offline.forEach(cb => cb());
+      });
+    },
+
+    onOnline(callback) {
+      this.callbacks.online.push(callback);
+    },
+
+    onOffline(callback) {
+      this.callbacks.offline.push(callback);
+    }
+  };
+
+  // Auto-init
+  window.UXOffline.init();
+
 })();

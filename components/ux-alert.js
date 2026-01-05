@@ -354,6 +354,7 @@
   }
 
   // Alpine component for alert dialog
+  // ARIA: role="alertdialog", aria-modal="true", aria-labelledby, aria-describedby
   const alertComponent = (config = {}) => ({
     isOpen: false,
     title: config.title || '',
@@ -361,6 +362,25 @@
     buttons: config.buttons || [],
     inputs: config.inputs || [],
     inputValues: {},
+    alertId: config.id || 'ux-alert-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for alert dialog
+    get ariaAttrs() {
+      return {
+        'role': 'alertdialog',
+        'aria-modal': 'true',
+        'aria-labelledby': this.alertId + '-title',
+        'aria-describedby': this.alertId + '-message'
+      };
+    },
+
+    get titleId() {
+      return this.alertId + '-title';
+    },
+
+    get messageId() {
+      return this.alertId + '-message';
+    },
 
     open(options = {}) {
       if (options.title) this.title = options.title;
@@ -427,9 +447,18 @@
   }
 
   // Alpine component for inline alert banner
+  // ARIA: role="alert" for important messages
   const alertBannerComponent = (config = {}) => ({
     visible: config.visible !== false,
     dismissible: config.dismissible !== false,
+
+    // ARIA role for inline alerts
+    get ariaAttrs() {
+      return {
+        'role': 'alert',
+        'aria-live': 'polite'
+      };
+    },
 
     dismiss() {
       this.visible = false;

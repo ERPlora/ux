@@ -261,13 +261,33 @@
   }
 
   // Alpine component for accordion
+  // ARIA: aria-expanded, aria-controls on headers; region role on panels
   const accordionComponent = (config = {}) => ({
     openItems: config.openItems || [],
     multiple: config.multiple || false,
     disabled: config.disabled || false,
+    accordionId: config.id || 'ux-accordion-' + Math.random().toString(36).substr(2, 9),
 
     isOpen(index) {
       return this.openItems.includes(index);
+    },
+
+    // ARIA attributes for accordion header button
+    getHeaderAriaAttrs(index) {
+      return {
+        'aria-expanded': this.isOpen(index) ? 'true' : 'false',
+        'aria-controls': this.accordionId + '-panel-' + index,
+        'id': this.accordionId + '-header-' + index
+      };
+    },
+
+    // ARIA attributes for accordion panel
+    getPanelAriaAttrs(index) {
+      return {
+        'role': 'region',
+        'aria-labelledby': this.accordionId + '-header-' + index,
+        'id': this.accordionId + '-panel-' + index
+      };
     },
 
     toggle(index) {
@@ -313,9 +333,29 @@
   }
 
   // Alpine component for single accordion item
+  // ARIA: aria-expanded on header
   const accordionItemComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
     disabled: config.disabled || false,
+    itemId: config.id || 'ux-accordion-item-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for header
+    get headerAriaAttrs() {
+      return {
+        'aria-expanded': this.isOpen ? 'true' : 'false',
+        'aria-controls': this.itemId + '-panel',
+        'id': this.itemId + '-header'
+      };
+    },
+
+    // ARIA attributes for panel
+    get panelAriaAttrs() {
+      return {
+        'role': 'region',
+        'aria-labelledby': this.itemId + '-header',
+        'id': this.itemId + '-panel'
+      };
+    },
 
     toggle() {
       if (!this.disabled) {

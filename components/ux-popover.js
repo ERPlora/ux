@@ -318,6 +318,7 @@
   }
 
   // Alpine component for popover
+  // ARIA: aria-expanded, aria-haspopup on trigger; described-by on popover
   const popoverComponent = (config = {}) => ({
     isOpen: false,
     position: config.position || 'bottom',
@@ -325,6 +326,25 @@
     dismissOnClickOutside: config.dismissOnClickOutside !== false,
     offset: config.offset || 8,
     popoverStyle: {},
+    popoverId: config.id || 'ux-popover-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the trigger element
+    get triggerAriaAttrs() {
+      return {
+        'aria-haspopup': 'dialog',
+        'aria-expanded': this.isOpen ? 'true' : 'false',
+        'aria-controls': this.popoverId
+      };
+    },
+
+    // ARIA attributes for the popover
+    get popoverAriaAttrs() {
+      return {
+        'role': 'dialog',
+        'id': this.popoverId,
+        'aria-modal': 'false'
+      };
+    },
 
     open() {
       this.isOpen = true;
@@ -414,6 +434,7 @@
   }
 
   // Alpine component for tooltip
+  // ARIA: role="tooltip", aria-describedby on trigger
   const tooltipComponent = (config = {}) => ({
     isVisible: false,
     text: config.text || '',
@@ -421,6 +442,22 @@
     delay: config.delay || 200,
     tooltipStyle: {},
     _showTimer: null,
+    tooltipId: config.id || 'ux-tooltip-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the trigger element
+    get triggerAriaAttrs() {
+      return {
+        'aria-describedby': this.isVisible ? this.tooltipId : null
+      };
+    },
+
+    // ARIA attributes for the tooltip
+    get tooltipAriaAttrs() {
+      return {
+        'role': 'tooltip',
+        'id': this.tooltipId
+      };
+    },
 
     show() {
       this._showTimer = setTimeout(() => {

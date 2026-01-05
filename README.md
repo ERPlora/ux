@@ -30,7 +30,7 @@ iOS-style UI components for web, optimized for HTMX and Alpine.js.
 
 | Bundle | Size | Gzipped |
 |--------|------|---------|
-| ux.min.js | 460 KB | ~60 KB |
+| ux.min.js | 474 KB | ~62 KB |
 | ux-core.min.js | 33 KB | ~8 KB |
 
 ### Local Installation
@@ -63,6 +63,7 @@ iOS-style UI components for web, optimized for HTMX and Alpine.js.
 | **Feedback** | skeleton, fab |
 | **Interactive** | accordion, datetime, infinite-scroll, refresher, reorder, swipe, carousel |
 | **Admin** | shell, panel |
+| **PWA** | pwa (offline detection, install prompt, service worker) |
 
 ## Usage
 

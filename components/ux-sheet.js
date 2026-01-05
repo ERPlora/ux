@@ -415,6 +415,7 @@
   }
 
   // Alpine component for bottom sheet
+  // ARIA: role="dialog", aria-modal="true", aria-labelledby
   const sheetComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
     detent: config.detent || 'medium', // small, medium, large
@@ -423,11 +424,33 @@
     startY: 0,
     currentY: 0,
     isDragging: false,
+    sheetId: config.id || 'ux-sheet-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the sheet
+    get ariaAttrs() {
+      return {
+        'role': 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': this.sheetId + '-title'
+      };
+    },
+
+    get titleId() {
+      return this.sheetId + '-title';
+    },
 
     open(detent) {
       if (detent) this.detent = detent;
       this.isOpen = true;
       document.body.style.overflow = 'hidden';
+      // Focus first focusable element
+      this.$nextTick(() => {
+        const sheet = this.$refs.sheet || this.$el.querySelector('.ux-sheet, .ux-side-sheet');
+        if (sheet) {
+          const focusable = sheet.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (focusable) focusable.focus();
+        }
+      });
     },
 
     close() {
@@ -500,12 +523,27 @@
   }
 
   // Alpine component for action sheet
+  // ARIA: role="dialog", aria-modal="true", aria-labelledby
   const actionSheetComponent = (config = {}) => ({
     isOpen: false,
     title: config.title || '',
     message: config.message || '',
     buttons: config.buttons || [],
     cancelText: config.cancelText || 'Cancel',
+    actionSheetId: config.id || 'ux-action-sheet-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'role': 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': this.actionSheetId + '-title'
+      };
+    },
+
+    get titleId() {
+      return this.actionSheetId + '-title';
+    },
 
     open(options = {}) {
       if (options.title) this.title = options.title;

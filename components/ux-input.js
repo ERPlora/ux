@@ -415,6 +415,71 @@
       border-left: none;
       border-radius: 0 var(--ux-border-radius) var(--ux-border-radius) 0;
     }
+
+    /* ========================================
+       Date/Time Input Icons (Native Browser)
+    ======================================== */
+
+    /* Webkit browsers (Chrome, Safari, Edge) */
+    input.ux-input[type="date"]::-webkit-calendar-picker-indicator,
+    input.ux-input[type="time"]::-webkit-calendar-picker-indicator,
+    input.ux-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+    input.ux-input[type="month"]::-webkit-calendar-picker-indicator,
+    input.ux-input[type="week"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      opacity: 0.6;
+      filter: var(--ux-icon-filter, none);
+      transition: opacity var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    input.ux-input[type="date"]::-webkit-calendar-picker-indicator:hover,
+    input.ux-input[type="time"]::-webkit-calendar-picker-indicator:hover,
+    input.ux-input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover,
+    input.ux-input[type="month"]::-webkit-calendar-picker-indicator:hover,
+    input.ux-input[type="week"]::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+    }
+
+    /* Dark mode support for date/time icons */
+    .ux-dark input.ux-input[type="date"]::-webkit-calendar-picker-indicator,
+    .ux-dark input.ux-input[type="time"]::-webkit-calendar-picker-indicator,
+    .ux-dark input.ux-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+    .ux-dark input.ux-input[type="month"]::-webkit-calendar-picker-indicator,
+    .ux-dark input.ux-input[type="week"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+
+    /* Also support data-theme dark */
+    [data-theme="dark"] input.ux-input[type="date"]::-webkit-calendar-picker-indicator,
+    [data-theme="dark"] input.ux-input[type="time"]::-webkit-calendar-picker-indicator,
+    [data-theme="dark"] input.ux-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+    [data-theme="dark"] input.ux-input[type="month"]::-webkit-calendar-picker-indicator,
+    [data-theme="dark"] input.ux-input[type="week"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+
+    /* Match color with text-tertiary using CSS filters */
+    input.ux-input[type="date"]::-webkit-calendar-picker-indicator,
+    input.ux-input[type="time"]::-webkit-calendar-picker-indicator,
+    input.ux-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+    input.ux-input[type="month"]::-webkit-calendar-picker-indicator,
+    input.ux-input[type="week"]::-webkit-calendar-picker-indicator {
+      /* Subtle gray filter to match text-tertiary color */
+      filter: opacity(0.5);
+    }
+
+    .ux-dark input.ux-input[type="date"]::-webkit-calendar-picker-indicator,
+    .ux-dark input.ux-input[type="time"]::-webkit-calendar-picker-indicator,
+    .ux-dark input.ux-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+    .ux-dark input.ux-input[type="month"]::-webkit-calendar-picker-indicator,
+    .ux-dark input.ux-input[type="week"]::-webkit-calendar-picker-indicator,
+    [data-theme="dark"] input.ux-input[type="date"]::-webkit-calendar-picker-indicator,
+    [data-theme="dark"] input.ux-input[type="time"]::-webkit-calendar-picker-indicator,
+    [data-theme="dark"] input.ux-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+    [data-theme="dark"] input.ux-input[type="month"]::-webkit-calendar-picker-indicator,
+    [data-theme="dark"] input.ux-input[type="week"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) opacity(0.6);
+    }
   `;
 
   // Inject styles

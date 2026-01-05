@@ -360,11 +360,42 @@
   }
 
   // Alpine component for tabs
+  // ARIA: role="tablist" on bar, role="tab" on buttons, role="tabpanel" on panels
   const tabsComponent = (config = {}) => ({
     activeTab: config.activeTab || 0,
     tabs: config.tabs || [],
     animated: config.animated || false,
     indicatorStyle: {},
+    tabsId: config.id || 'ux-tabs-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the tab bar (tablist)
+    get tablistAriaAttrs() {
+      return {
+        'role': 'tablist',
+        'aria-label': config.ariaLabel || 'Tabs'
+      };
+    },
+
+    // ARIA attributes for each tab button
+    getTabAriaAttrs(index) {
+      return {
+        'role': 'tab',
+        'aria-selected': this.activeTab === index ? 'true' : 'false',
+        'aria-controls': this.tabsId + '-panel-' + index,
+        'id': this.tabsId + '-tab-' + index,
+        'tabindex': this.activeTab === index ? '0' : '-1'
+      };
+    },
+
+    // ARIA attributes for each tab panel
+    getPanelAriaAttrs(index) {
+      return {
+        'role': 'tabpanel',
+        'aria-labelledby': this.tabsId + '-tab-' + index,
+        'id': this.tabsId + '-panel-' + index,
+        'tabindex': '0'
+      };
+    },
 
     init() {
       this.$nextTick(() => {
