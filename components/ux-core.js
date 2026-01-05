@@ -186,7 +186,41 @@
       }
     }
 
-    /* Manual Dark Mode Class */
+    /* Force Light Mode - overrides system dark preference */
+    html.ux-light,
+    body.ux-light,
+    .ux-light {
+      --ux-background: #ffffff;
+      --ux-background-rgb: 255, 255, 255;
+      --ux-text: #000000;
+      --ux-text-rgb: 0, 0, 0;
+      --ux-text-secondary: #666666;
+      --ux-text-tertiary: #999999;
+      --ux-text-muted: #b3b3b3;
+      --ux-surface: #ffffff;
+      --ux-surface-rgb: 255, 255, 255;
+      --ux-surface-secondary: #f4f5f8;
+      --ux-surface-tertiary: #e8e9ed;
+      --ux-border-color: rgba(0, 0, 0, 0.13);
+      --ux-divider-color: rgba(0, 0, 0, 0.08);
+      --ux-shadow-color: rgba(0, 0, 0, 0.1);
+
+      --ux-light: #f4f5f8;
+      --ux-light-rgb: 244, 245, 248;
+      --ux-light-contrast: #000000;
+      --ux-light-shade: #d7d8da;
+      --ux-light-tint: #f5f6f9;
+
+      --ux-dark: #222428;
+      --ux-dark-rgb: 34, 36, 40;
+      --ux-dark-contrast: #ffffff;
+      --ux-dark-shade: #1e2023;
+      --ux-dark-tint: #383a3e;
+    }
+
+    /* Manual Dark Mode Class - applied to html or body */
+    html.ux-dark,
+    body.ux-dark,
     .ux-dark {
       --ux-background: #000000;
       --ux-background-rgb: 0, 0, 0;
@@ -1087,20 +1121,23 @@
       },
 
       applyTheme() {
-        // Apply dark mode
+        const root = document.documentElement;
+
+        // Apply dark/light mode
+        root.classList.remove('ux-dark', 'ux-light');
         if (this.darkMode) {
-          document.body.classList.add('ux-dark');
+          root.classList.add('ux-dark');
         } else {
-          document.body.classList.remove('ux-dark');
+          root.classList.add('ux-light');
         }
 
         // Remove all theme classes and apply current one
-        document.body.classList.remove(
+        root.classList.remove(
           'ux-theme-ocean', 'ux-theme-emerald', 'ux-theme-purple',
           'ux-theme-sunset', 'ux-theme-rose', 'ux-theme-teal',
           'ux-theme-amber', 'ux-theme-slate', 'ux-theme-indigo', 'ux-theme-cyan'
         );
-        document.body.classList.add(this.colorTheme);
+        root.classList.add(this.colorTheme);
       },
 
       toggleDarkMode() {
@@ -1130,28 +1167,27 @@
 
   // Auto-apply saved theme on load (before Alpine initializes)
   function applyTheme() {
-    if (!document.body) return;
-
+    const root = document.documentElement;
     const savedDarkMode = localStorage.getItem('ux-dark-mode');
     const savedColorTheme = localStorage.getItem('ux-color-theme');
 
+    // Remove both classes first
+    root.classList.remove('ux-dark', 'ux-light');
+
     if (savedDarkMode === 'true') {
-      document.body.classList.add('ux-dark');
-    } else if (savedDarkMode === null && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.body.classList.add('ux-dark');
+      root.classList.add('ux-dark');
+    } else if (savedDarkMode === 'false') {
+      root.classList.add('ux-light');
     }
+    // If savedDarkMode is null, let system preference handle it via @media query
 
     if (savedColorTheme) {
-      document.body.classList.add(savedColorTheme);
+      root.classList.add(savedColorTheme);
     }
   }
 
-  // Apply immediately if body exists, otherwise wait for DOMContentLoaded
-  if (document.body) {
-    applyTheme();
-  } else {
-    document.addEventListener('DOMContentLoaded', applyTheme);
-  }
+  // Apply immediately - documentElement is always available
+  applyTheme();
 
   console.log('UX Core loaded v1.0.0');
 })();
