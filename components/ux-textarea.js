@@ -365,6 +365,45 @@
     maxLength: config.maxLength || null,
     minLength: config.minLength || null,
     autoResize: config.autoResize || false,
+    _resizeObserver: null,
+
+    init() {
+      // Set up ResizeObserver for efficient auto-resize
+      if (this.autoResize && this.$refs.textarea) {
+        this.setupAutoResize(this.$refs.textarea);
+      }
+    },
+
+    destroy() {
+      // Clean up ResizeObserver to prevent memory leaks
+      if (this._resizeObserver) {
+        this._resizeObserver.disconnect();
+        this._resizeObserver = null;
+      }
+    },
+
+    setupAutoResize(el) {
+      if (!el) return;
+
+      // Initial resize
+      this.resize(el);
+
+      // Use ResizeObserver for efficient resize detection
+      if (typeof ResizeObserver !== 'undefined') {
+        this._resizeObserver = new ResizeObserver(() => {
+          // Avoid infinite loop by checking if height actually needs updating
+          const currentHeight = el.style.height;
+          el.style.height = 'auto';
+          const newHeight = el.scrollHeight + 'px';
+          if (currentHeight !== newHeight) {
+            el.style.height = newHeight;
+          } else {
+            el.style.height = currentHeight;
+          }
+        });
+        this._resizeObserver.observe(el);
+      }
+    },
 
     get hasValue() {
       return this.value && this.value.length > 0;

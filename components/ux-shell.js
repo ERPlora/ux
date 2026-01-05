@@ -474,22 +474,42 @@
     sidebarOpen: false,
     sidebarCollapsed: config.collapsed || false,
     isMobile: window.innerWidth < 768,
+    _resizeHandler: null,
+    _keydownHandler: null,
 
     init() {
       // Set initial state based on screen size
       this.checkMobile();
 
-      // Listen for resize
-      window.addEventListener('resize', () => {
-        this.checkMobile();
-      });
-
-      // Close sidebar on escape key
-      document.addEventListener('keydown', (e) => {
+      // Store handler references for cleanup
+      this._resizeHandler = this.checkMobile.bind(this);
+      this._keydownHandler = (e) => {
         if (e.key === 'Escape' && this.sidebarOpen && this.isMobile) {
           this.closeSidebar();
         }
-      });
+      };
+
+      // Listen for resize
+      window.addEventListener('resize', this._resizeHandler);
+
+      // Close sidebar on escape key
+      document.addEventListener('keydown', this._keydownHandler);
+    },
+
+    destroy() {
+      // Clean up event listeners to prevent memory leaks
+      if (this._resizeHandler) {
+        window.removeEventListener('resize', this._resizeHandler);
+        this._resizeHandler = null;
+      }
+      if (this._keydownHandler) {
+        document.removeEventListener('keydown', this._keydownHandler);
+        this._keydownHandler = null;
+      }
+      // Restore body overflow if sidebar was open
+      if (this.sidebarOpen) {
+        document.body.style.overflow = '';
+      }
     },
 
     checkMobile() {
