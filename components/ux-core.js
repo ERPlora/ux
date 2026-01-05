@@ -915,11 +915,41 @@
     .ux-absolute { position: absolute; }
     .ux-fixed { position: fixed; }
     .ux-sticky { position: sticky; }
+    .ux-position-relative { position: relative; }
+    .ux-position-absolute { position: absolute; }
+    .ux-position-fixed { position: fixed; }
+    .ux-position-sticky { position: sticky; }
 
     /* Overflow */
     .ux-overflow-hidden { overflow: hidden; }
     .ux-overflow-auto { overflow: auto; }
     .ux-overflow-scroll { overflow: scroll; }
+    .ux-overflow-x-auto { overflow-x: auto; }
+    .ux-overflow-y-auto { overflow-y: auto; }
+    .ux-overflow-x-hidden { overflow-x: hidden; }
+    .ux-overflow-y-hidden { overflow-y: hidden; }
+
+    /* Cursor */
+    .ux-cursor-pointer { cursor: pointer; }
+    .ux-cursor-default { cursor: default; }
+    .ux-cursor-not-allowed { cursor: not-allowed; }
+    .ux-cursor-grab { cursor: grab; }
+    .ux-cursor-grabbing { cursor: grabbing; }
+
+    /* Transform / Rotate */
+    .ux-rotate-0 { transform: rotate(0deg); }
+    .ux-rotate-45 { transform: rotate(45deg); }
+    .ux-rotate-90 { transform: rotate(90deg); }
+    .ux-rotate-180 { transform: rotate(180deg); }
+    .ux-rotate-270 { transform: rotate(270deg); }
+    .-ux-rotate-90 { transform: rotate(-90deg); }
+    .-ux-rotate-180 { transform: rotate(-180deg); }
+
+    /* Min/Max Width */
+    .ux-min-w-0 { min-width: 0; }
+    .ux-min-w-full { min-width: 100%; }
+    .ux-max-w-full { max-width: 100%; }
+    .ux-max-w-none { max-width: none; }
 
     /* Border Radius */
     .ux-rounded { border-radius: var(--ux-border-radius); }
