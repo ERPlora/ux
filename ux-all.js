@@ -47,6 +47,7 @@
     'ux-list',
     'ux-grid',
     'ux-content',
+    'ux-page-header',
 
     // Navigation components
     'ux-navbar',
