@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Modal - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-modal.js"></script>
+  <script src="../components/ux-input.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text);
+    }
+    .demo-section p {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--ux-space-md);
+    }
+    .code-block {
+      background: var(--ux-dark);
+      color: #e5e5e5;
+      padding: var(--ux-space-md);
+      border-radius: var(--ux-border-radius);
+      overflow-x: auto;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: var(--ux-font-size-xs);
+      line-height: 1.6;
+    }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+  </style>
+</head>
+<body class="ux-app">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Modal</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+    <!-- Basic Modal -->
+    <section class="demo-section">
+      <h3>Modal Basico</h3>
+      <p>Modal centrado con backdrop. En movil se muestra como sheet desde abajo.</p>
+      <div class="demo-box">
+        <div x-data="uxModal()">
+          <button class="ux-button ux-button--primary" @click="open()">Abrir Modal</button>
+          <template x-teleport="body">
+            <div class="ux-modal-backdrop" :class="isOpen && 'ux-modal-backdrop--open'" @click.self="close()" @keydown.escape.window="close()">
+              <div class="ux-modal" @click.stop>
+                <div class="ux-modal__header">
+                  <h2 class="ux-modal__title">Titulo del Modal</h2>
+                  <button class="ux-modal__close" @click="close()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="ux-modal__content">
+                  <p>Este es el contenido del modal. Puede contener cualquier elemento HTML.</p>
+                </div>
+                <div class="ux-modal__footer">
+                  <button class="ux-button" @click="close()">Cancelar</button>
+                  <button class="ux-button ux-button--primary" @click="close()">Aceptar</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxModal()"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button"</span> <span class="attr">@click</span>=<span class="string">"open()"</span><span class="tag">&gt;</span>Abrir<span class="tag">&lt;/button&gt;</span>
+
+  <span class="tag">&lt;template</span> <span class="attr">x-teleport</span>=<span class="string">"body"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal-backdrop"</span>
+         <span class="attr">:class</span>=<span class="string">"isOpen && 'ux-modal-backdrop--open'"</span>
+         <span class="attr">@click.self</span>=<span class="string">"close()"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__header"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+        <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__content"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+        <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__footer"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/template&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Size Variants -->
+    <section class="demo-section">
+      <h3>Tamanos</h3>
+      <p>Small, medium (default), large, y fullscreen.</p>
+      <div class="demo-box">
+        <div x-data="uxModal()">
+          <button class="ux-button" @click="open()">Small</button>
+          <template x-teleport="body">
+            <div class="ux-modal-backdrop" :class="isOpen && 'ux-modal-backdrop--open'" @click.self="close()">
+              <div class="ux-modal ux-modal--sm" @click.stop>
+                <div class="ux-modal__header">
+                  <h2 class="ux-modal__title">Modal Small</h2>
+                  <button class="ux-modal__close" @click="close()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="ux-modal__content">
+                  <p>Contenido compacto.</p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div x-data="uxModal()">
+          <button class="ux-button" @click="open()">Large</button>
+          <template x-teleport="body">
+            <div class="ux-modal-backdrop" :class="isOpen && 'ux-modal-backdrop--open'" @click.self="close()">
+              <div class="ux-modal ux-modal--lg" @click.stop>
+                <div class="ux-modal__header">
+                  <h2 class="ux-modal__title">Modal Large</h2>
+                  <button class="ux-modal__close" @click="close()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="ux-modal__content">
+                  <p>Modal mas grande para contenido extenso.</p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div x-data="uxModal()">
+          <button class="ux-button" @click="open()">Fullscreen</button>
+          <template x-teleport="body">
+            <div class="ux-modal-backdrop" :class="isOpen && 'ux-modal-backdrop--open'" @click.self="close()">
+              <div class="ux-modal ux-modal--fullscreen" @click.stop>
+                <div class="ux-modal__header">
+                  <h2 class="ux-modal__title">Fullscreen Modal</h2>
+                  <button class="ux-modal__close" @click="close()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="ux-modal__content">
+                  <p>Modal a pantalla completa.</p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal ux-modal--sm"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal ux-modal--lg"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal ux-modal--fullscreen"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Form Modal -->
+    <section class="demo-section">
+      <h3>Modal con Formulario</h3>
+      <p>Ejemplo de modal con formulario.</p>
+      <div class="demo-box">
+        <div x-data="uxModal()">
+          <button class="ux-button ux-button--primary" @click="open()">Abrir Formulario</button>
+          <template x-teleport="body">
+            <div class="ux-modal-backdrop" :class="isOpen && 'ux-modal-backdrop--open'" @click.self="close()">
+              <div class="ux-modal" @click.stop>
+                <div class="ux-modal__header">
+                  <h2 class="ux-modal__title">Nuevo Contacto</h2>
+                  <button class="ux-modal__close" @click="close()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="ux-modal__content">
+                  <form>
+                    <div class="ux-input-group" style="margin-bottom: var(--ux-space-md);">
+                      <label class="ux-input__label">Nombre</label>
+                      <input type="text" class="ux-input" placeholder="Tu nombre">
+                    </div>
+                    <div class="ux-input-group" style="margin-bottom: var(--ux-space-md);">
+                      <label class="ux-input__label">Email</label>
+                      <input type="email" class="ux-input" placeholder="tu@email.com">
+                    </div>
+                    <div class="ux-input-group">
+                      <label class="ux-input__label">Telefono</label>
+                      <input type="tel" class="ux-input" placeholder="+1 234 567 890">
+                    </div>
+                  </form>
+                </div>
+                <div class="ux-modal__footer">
+                  <button class="ux-button" @click="close()">Cancelar</button>
+                  <button class="ux-button ux-button--primary" @click="close()">Guardar</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <!-- CSS Only -->
+    <section class="demo-section">
+      <h3>Sin Alpine (CSS + Checkbox)</h3>
+      <p>Modal sin JavaScript usando checkbox hack.</p>
+      <div class="demo-box">
+        <input type="checkbox" id="modal-toggle" class="ux-modal-toggle" hidden>
+        <label for="modal-toggle" class="ux-button ux-button--secondary">Abrir (sin JS)</label>
+        <div class="ux-modal-backdrop">
+          <div class="ux-modal">
+            <div class="ux-modal__header">
+              <h2 class="ux-modal__title">Modal CSS Only</h2>
+              <label for="modal-toggle" class="ux-modal__close" style="cursor: pointer;">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </label>
+            </div>
+            <div class="ux-modal__content">
+              <p>Este modal funciona solo con CSS usando el checkbox hack.</p>
+            </div>
+            <div class="ux-modal__footer">
+              <label for="modal-toggle" class="ux-button" style="cursor: pointer;">Cerrar</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="comment">&lt;!-- Checkbox oculto controla el estado --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"checkbox"</span> <span class="attr">id</span>=<span class="string">"modal-1"</span> <span class="attr">class</span>=<span class="string">"ux-modal-toggle"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;label</span> <span class="attr">for</span>=<span class="string">"modal-1"</span> <span class="attr">class</span>=<span class="string">"ux-button"</span><span class="tag">&gt;</span>Abrir<span class="tag">&lt;/label&gt;</span>
+
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal-backdrop"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal"</span><span class="tag">&gt;</span>
+    <span class="comment">&lt;!-- Usa label for="modal-1" para cerrar --&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- HTMX -->
+    <section class="demo-section">
+      <h3>Con HTMX</h3>
+      <p>Cargar contenido del modal via HTMX.</p>
+      <pre class="code-block"><span class="comment">&lt;!-- Boton que carga el modal --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button"</span>
+        <span class="attr">hx-get</span>=<span class="string">"/modal/content"</span>
+        <span class="attr">hx-target</span>=<span class="string">"#modal-container"</span>
+        <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+  Cargar Modal
+<span class="tag">&lt;/button&gt;</span>
+
+<span class="comment">&lt;!-- Contenedor para el modal --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"modal-container"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Respuesta del servidor --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__backdrop"</span> <span class="attr">style</span>=<span class="string">"display: flex"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal"</span><span class="tag">&gt;</span>
+    ...contenido cargado...
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- API -->
+    <section class="demo-section">
+      <h3>API Alpine</h3>
+      <table style="width: 100%; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Metodo/Propiedad</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>isOpen</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean - Estado del modal</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>open()</code></td>
+            <td style="padding: var(--ux-space-sm);">Abre el modal</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>close()</code></td>
+            <td style="padding: var(--ux-space-sm);">Cierra el modal</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>toggle()</code></td>
+            <td style="padding: var(--ux-space-sm);">Alterna el estado</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

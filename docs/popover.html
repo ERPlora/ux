@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Popover - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-popover.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-xl); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-lg); justify-content: center; align-items: center; min-height: 120px; }
+    .code-block { background: var(--ux-dark); color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: var(--ux-font-size-xs); overflow-x: auto; white-space: pre; }
+    .class-table { width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-sm); }
+    .class-table th, .class-table td { padding: var(--ux-space-sm) var(--ux-space-md); text-align: left; border-bottom: 1px solid var(--ux-border-color); }
+    .class-table th { font-weight: 600; background: var(--ux-surface-secondary); }
+    .class-table code { background: var(--ux-surface-secondary); padding: 2px 6px; border-radius: 4px; font-size: var(--ux-font-size-xs); }
+  </style>
+</head>
+<body class="ux-app">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Popover & Tooltip</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <!-- Intro -->
+  <div class="demo-section">
+    <h3>Popover & Tooltip</h3>
+    <p>Componentes flotantes para mostrar informacion contextual, menus y contenido adicional.</p>
+    <pre class="code-block">&lt;script src="components/ux-popover.js"&gt;&lt;/script&gt;</pre>
+  </div>
+
+  <!-- Popover Basico -->
+  <div class="demo-section">
+    <h3>Popover Basico</h3>
+    <p>Popover que aparece al hacer click. Cierra al hacer click fuera.</p>
+    <div class="demo-box" x-data="uxPopover({ position: 'bottom' })" @click.away="close()">
+      <button class="ux-button ux-button--primary" x-ref="trigger" @click="toggle()">
+        Abrir Popover
+      </button>
+      <div class="ux-popover ux-popover--bottom"
+           :class="{ 'ux-popover--open': isOpen }"
+           x-ref="popover"
+           :style="popoverStyle">
+        <div class="ux-popover__arrow"></div>
+        <div class="ux-popover__content">
+          Este es el contenido del popover. Puede incluir texto, imagenes, o cualquier elemento HTML.
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxPopover({ position: 'bottom' })" @click.away="close()"&gt;
+  &lt;button x-ref="trigger" @click="toggle()"&gt;Abrir&lt;/button&gt;
+  &lt;div class="ux-popover ux-popover--bottom"
+       :class="{ 'ux-popover--open': isOpen }"
+       x-ref="popover"
+       :style="popoverStyle"&gt;
+    &lt;div class="ux-popover__arrow"&gt;&lt;/div&gt;
+    &lt;div class="ux-popover__content"&gt;Contenido...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Posiciones -->
+  <div class="demo-section">
+    <h3>Posiciones</h3>
+    <p>El popover puede aparecer arriba, abajo, izquierda o derecha del trigger.</p>
+    <div class="demo-box">
+      <div x-data="uxPopover({ position: 'top' })" @click.away="close()">
+        <button class="ux-button" x-ref="trigger" @click="toggle()">Top</button>
+        <div class="ux-popover ux-popover--top" :class="{ 'ux-popover--open': isOpen }" x-ref="popover" :style="popoverStyle">
+          <div class="ux-popover__arrow"></div>
+          <div class="ux-popover__content">Popover arriba</div>
+        </div>
+      </div>
+      <div x-data="uxPopover({ position: 'right' })" @click.away="close()">
+        <button class="ux-button" x-ref="trigger" @click="toggle()">Right</button>
+        <div class="ux-popover ux-popover--right" :class="{ 'ux-popover--open': isOpen }" x-ref="popover" :style="popoverStyle">
+          <div class="ux-popover__arrow"></div>
+          <div class="ux-popover__content">Popover derecha</div>
+        </div>
+      </div>
+      <div x-data="uxPopover({ position: 'bottom' })" @click.away="close()">
+        <button class="ux-button" x-ref="trigger" @click="toggle()">Bottom</button>
+        <div class="ux-popover ux-popover--bottom" :class="{ 'ux-popover--open': isOpen }" x-ref="popover" :style="popoverStyle">
+          <div class="ux-popover__arrow"></div>
+          <div class="ux-popover__content">Popover abajo</div>
+        </div>
+      </div>
+      <div x-data="uxPopover({ position: 'left' })" @click.away="close()">
+        <button class="ux-button" x-ref="trigger" @click="toggle()">Left</button>
+        <div class="ux-popover ux-popover--left" :class="{ 'ux-popover--open': isOpen }" x-ref="popover" :style="popoverStyle">
+          <div class="ux-popover__arrow"></div>
+          <div class="ux-popover__content">Popover izquierda</div>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxPopover({ position: 'top' })"&gt;...&lt;/div&gt;
+&lt;div x-data="uxPopover({ position: 'right' })"&gt;...&lt;/div&gt;
+&lt;div x-data="uxPopover({ position: 'bottom' })"&gt;...&lt;/div&gt;
+&lt;div x-data="uxPopover({ position: 'left' })"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Popover con Header -->
+  <div class="demo-section">
+    <h3>Popover con Header</h3>
+    <p>Popover con titulo y boton de cerrar.</p>
+    <div class="demo-box" x-data="uxPopover({ position: 'bottom' })" @click.away="close()">
+      <button class="ux-button ux-button--primary" x-ref="trigger" @click="toggle()">Con Header</button>
+      <div class="ux-popover ux-popover--bottom" :class="{ 'ux-popover--open': isOpen }" x-ref="popover" :style="popoverStyle">
+        <div class="ux-popover__arrow"></div>
+        <div class="ux-popover__header">
+          <h4 class="ux-popover__title">Titulo del Popover</h4>
+          <button class="ux-popover__close" @click="close()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="ux-popover__content">Contenido del popover con header.</div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-popover__header"&gt;
+  &lt;h4 class="ux-popover__title"&gt;Titulo&lt;/h4&gt;
+  &lt;button class="ux-popover__close" @click="close()"&gt;...&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="ux-popover__content"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Tamanos -->
+  <div class="demo-section">
+    <h3>Tamanos</h3>
+    <p>Small, default, large y auto.</p>
+    <div class="demo-box">
+      <div x-data="uxPopover({ position: 'bottom' })" @click.away="close()">
+        <button class="ux-button" x-ref="trigger" @click="toggle()">Small</button>
+        <div class="ux-popover ux-popover--bottom ux-popover--sm" :class="{ 'ux-popover--open': isOpen }" x-ref="popover" :style="popoverStyle">
+          <div class="ux-popover__arrow"></div>
+          <div class="ux-popover__content">Pequeno</div>
+        </div>
+      </div>
+      <div x-data="uxPopover({ position: 'bottom' })" @click.away="close()">
+        <button class="ux-button" x-ref="trigger" @click="toggle()">Default</button>
+        <div class="ux-popover ux-popover--bottom" :class="{ 'ux-popover--open': isOpen }" x-ref="popover" :style="popoverStyle">
+          <div class="ux-popover__arrow"></div>
+          <div class="ux-popover__content">Default con mas texto.</div>
+        </div>
+      </div>
+      <div x-data="uxPopover({ position: 'bottom' })" @click.away="close()">
+        <button class="ux-button" x-ref="trigger" @click="toggle()">Large</button>
+        <div class="ux-popover ux-popover--bottom ux-popover--lg" :class="{ 'ux-popover--open': isOpen }" x-ref="popover" :style="popoverStyle">
+          <div class="ux-popover__arrow"></div>
+          <div class="ux-popover__content">Popover grande para contenido extenso.</div>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-popover ux-popover--sm"&gt;...&lt;/div&gt;
+&lt;div class="ux-popover"&gt;...&lt;/div&gt;
+&lt;div class="ux-popover ux-popover--lg"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Tooltip Basico -->
+  <div class="demo-section">
+    <h3>Tooltip Basico</h3>
+    <p>Tooltip simple que aparece al hover. Ideal para hints cortos.</p>
+    <div class="demo-box">
+      <div x-data="uxTooltip({ text: 'Este es un tooltip', position: 'top' })">
+        <button class="ux-button ux-button--primary" x-ref="trigger" @mouseenter="show()" @mouseleave="hide()">Hover aqui</button>
+        <div class="ux-tooltip ux-tooltip--top" :class="{ 'ux-tooltip--visible': isVisible }" x-ref="tooltip" :style="tooltipStyle" x-text="text"></div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxTooltip({ text: 'Tooltip', position: 'top' })"&gt;
+  &lt;button x-ref="trigger" @mouseenter="show()" @mouseleave="hide()"&gt;Hover&lt;/button&gt;
+  &lt;div class="ux-tooltip ux-tooltip--top"
+       :class="{ 'ux-tooltip--visible': isVisible }"
+       x-ref="tooltip" :style="tooltipStyle" x-text="text"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Tooltip Posiciones -->
+  <div class="demo-section">
+    <h3>Tooltip - Posiciones</h3>
+    <div class="demo-box">
+      <div x-data="uxTooltip({ text: 'Arriba', position: 'top' })">
+        <button class="ux-button" x-ref="trigger" @mouseenter="show()" @mouseleave="hide()">Top</button>
+        <div class="ux-tooltip ux-tooltip--top" :class="{ 'ux-tooltip--visible': isVisible }" x-ref="tooltip" :style="tooltipStyle" x-text="text"></div>
+      </div>
+      <div x-data="uxTooltip({ text: 'Derecha', position: 'right' })">
+        <button class="ux-button" x-ref="trigger" @mouseenter="show()" @mouseleave="hide()">Right</button>
+        <div class="ux-tooltip ux-tooltip--right" :class="{ 'ux-tooltip--visible': isVisible }" x-ref="tooltip" :style="tooltipStyle" x-text="text"></div>
+      </div>
+      <div x-data="uxTooltip({ text: 'Abajo', position: 'bottom' })">
+        <button class="ux-button" x-ref="trigger" @mouseenter="show()" @mouseleave="hide()">Bottom</button>
+        <div class="ux-tooltip ux-tooltip--bottom" :class="{ 'ux-tooltip--visible': isVisible }" x-ref="tooltip" :style="tooltipStyle" x-text="text"></div>
+      </div>
+      <div x-data="uxTooltip({ text: 'Izquierda', position: 'left' })">
+        <button class="ux-button" x-ref="trigger" @mouseenter="show()" @mouseleave="hide()">Left</button>
+        <div class="ux-tooltip ux-tooltip--left" :class="{ 'ux-tooltip--visible': isVisible }" x-ref="tooltip" :style="tooltipStyle" x-text="text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooltip Colores -->
+  <div class="demo-section">
+    <h3>Tooltip - Variantes de Color</h3>
+    <div class="demo-box">
+      <div x-data="uxTooltip({ text: 'Tooltip oscuro', position: 'bottom' })">
+        <button class="ux-button" x-ref="trigger" @mouseenter="show()" @mouseleave="hide()">Dark</button>
+        <div class="ux-tooltip" :class="{ 'ux-tooltip--visible': isVisible }" x-ref="tooltip" :style="tooltipStyle" x-text="text"></div>
+      </div>
+      <div x-data="uxTooltip({ text: 'Tooltip claro', position: 'bottom' })">
+        <button class="ux-button" x-ref="trigger" @mouseenter="show()" @mouseleave="hide()">Light</button>
+        <div class="ux-tooltip ux-tooltip--light" :class="{ 'ux-tooltip--visible': isVisible }" x-ref="tooltip" :style="tooltipStyle" x-text="text"></div>
+      </div>
+      <div x-data="uxTooltip({ text: 'Tooltip primario', position: 'bottom' })">
+        <button class="ux-button" x-ref="trigger" @mouseenter="show()" @mouseleave="hide()">Primary</button>
+        <div class="ux-tooltip ux-tooltip--primary" :class="{ 'ux-tooltip--visible': isVisible }" x-ref="tooltip" :style="tooltipStyle" x-text="text"></div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-tooltip"&gt;...&lt;/div&gt;               &lt;!-- Dark --&gt;
+&lt;div class="ux-tooltip ux-tooltip--light"&gt;...&lt;/div&gt;
+&lt;div class="ux-tooltip ux-tooltip--primary"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Rich Tooltip -->
+  <div class="demo-section">
+    <h3>Rich Tooltip</h3>
+    <p>Tooltip con titulo y contenido extendido.</p>
+    <div class="demo-box" x-data="uxTooltip({ position: 'bottom', delay: 300 })">
+      <button class="ux-button ux-button--primary" x-ref="trigger" @mouseenter="show()" @mouseleave="hide()">Hover para info</button>
+      <div class="ux-tooltip ux-rich-tooltip ux-tooltip--light" :class="{ 'ux-tooltip--visible': isVisible }" x-ref="tooltip" :style="tooltipStyle">
+        <div class="ux-rich-tooltip__title">Titulo del Tooltip</div>
+        <div class="ux-rich-tooltip__content">Este es un tooltip enriquecido con mas contenido.</div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-tooltip ux-rich-tooltip ux-tooltip--light"&gt;
+  &lt;div class="ux-rich-tooltip__title"&gt;Titulo&lt;/div&gt;
+  &lt;div class="ux-rich-tooltip__content"&gt;Contenido...&lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Popover como Dropdown -->
+  <div class="demo-section">
+    <h3>Popover como Dropdown</h3>
+    <p>Usando popover para crear menus dropdown.</p>
+    <div class="demo-box" x-data="uxPopover({ position: 'bottom' })" @click.away="close()">
+      <button class="ux-button" x-ref="trigger" @click="toggle()">
+        Opciones
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-left: 4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="ux-popover ux-popover--bottom ux-popover--dropdown ux-popover--no-arrow" :class="{ 'ux-popover--open': isOpen }" x-ref="popover" :style="popoverStyle">
+        <div class="ux-popover__content ux-popover__content--no-padding">
+          <button style="display: block; width: 100%; text-align: left; padding: 12px 16px; border: none; background: none; cursor: pointer;" @click="close()">Editar</button>
+          <button style="display: block; width: 100%; text-align: left; padding: 12px 16px; border: none; background: none; cursor: pointer;" @click="close()">Duplicar</button>
+          <button style="display: block; width: 100%; text-align: left; padding: 12px 16px; border: none; background: none; cursor: pointer; color: var(--ux-danger);" @click="close()">Eliminar</button>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-popover ux-popover--dropdown ux-popover--no-arrow"&gt;
+  &lt;div class="ux-popover__content ux-popover__content--no-padding"&gt;
+    &lt;button&gt;Opcion 1&lt;/button&gt;
+    &lt;button&gt;Opcion 2&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Componentes Alpine.js -->
+  <div class="demo-section">
+    <h3>Componentes Alpine.js</h3>
+    <div class="demo-box" style="display: block;">
+      <pre class="code-block">// uxPopover - Popover interactivo
+uxPopover({
+  position: 'bottom',             // top, bottom, left, right
+  trigger: 'click',               // click, hover, focus
+  dismissOnClickOutside: true,    // Cerrar al click fuera
+  offset: 8                       // Distancia del trigger (px)
+})
+
+// Propiedades:
+isOpen           // true si esta abierto
+popoverStyle     // Estilos de posicion
+
+// Metodos:
+open()           // Abre el popover
+close()          // Cierra el popover
+toggle()         // Alterna abrir/cerrar
+updatePosition() // Actualiza la posicion
+
+
+// uxTooltip - Tooltip simple
+uxTooltip({
+  text: '',         // Texto del tooltip
+  position: 'top',  // top, bottom, left, right
+  delay: 200        // Delay antes de mostrar (ms)
+})
+
+// Propiedades:
+isVisible        // true si es visible
+tooltipStyle     // Estilos de posicion
+
+// Metodos:
+show()           // Muestra el tooltip
+hide()           // Oculta el tooltip</pre>
+    </div>
+  </div>
+
+  <!-- Integracion HTMX -->
+  <div class="demo-section">
+    <h3>Integracion con HTMX</h3>
+    <div class="demo-box" style="display: block;">
+      <pre class="code-block">&lt;!-- Cargar contenido del popover desde servidor --&gt;
+&lt;div x-data="uxPopover({ position: 'bottom' })" @click.away="close()"&gt;
+  &lt;button x-ref="trigger"
+          @click="toggle()"
+          hx-get="/api/user/123/info"
+          hx-target="#popover-content"
+          hx-trigger="click once"&gt;
+    Ver Usuario
+  &lt;/button&gt;
+  &lt;div class="ux-popover ux-popover--bottom" x-ref="popover"&gt;
+    &lt;div id="popover-content" class="ux-popover__content"&gt;
+      Cargando...
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+  </div>
+
+  <!-- Referencia de Clases -->
+  <div class="demo-section">
+    <h3>Referencia de Clases CSS</h3>
+    <div style="overflow-x: auto;">
+      <table class="class-table">
+        <thead><tr><th>Clase</th><th>Descripcion</th></tr></thead>
+        <tbody>
+          <tr><td colspan="2" style="font-weight: 600; background: var(--ux-surface-secondary);">Popover</td></tr>
+          <tr><td><code>.ux-popover</code></td><td>Contenedor del popover</td></tr>
+          <tr><td><code>.ux-popover--open</code></td><td>Estado visible</td></tr>
+          <tr><td><code>.ux-popover--top/bottom/left/right</code></td><td>Posiciones</td></tr>
+          <tr><td><code>.ux-popover--sm/lg/auto</code></td><td>Tamanos</td></tr>
+          <tr><td><code>.ux-popover--no-arrow</code></td><td>Sin flecha</td></tr>
+          <tr><td><code>.ux-popover--dropdown</code></td><td>Estilo dropdown</td></tr>
+          <tr><td><code>.ux-popover__arrow</code></td><td>Flecha</td></tr>
+          <tr><td><code>.ux-popover__header</code></td><td>Header con titulo</td></tr>
+          <tr><td><code>.ux-popover__title</code></td><td>Titulo</td></tr>
+          <tr><td><code>.ux-popover__close</code></td><td>Boton cerrar</td></tr>
+          <tr><td><code>.ux-popover__content</code></td><td>Contenido</td></tr>
+          <tr><td colspan="2" style="font-weight: 600; background: var(--ux-surface-secondary);">Tooltip</td></tr>
+          <tr><td><code>.ux-tooltip</code></td><td>Contenedor del tooltip</td></tr>
+          <tr><td><code>.ux-tooltip--visible</code></td><td>Estado visible</td></tr>
+          <tr><td><code>.ux-tooltip--top/bottom/left/right</code></td><td>Posiciones</td></tr>
+          <tr><td><code>.ux-tooltip--light</code></td><td>Fondo claro</td></tr>
+          <tr><td><code>.ux-tooltip--primary</code></td><td>Fondo primario</td></tr>
+          <tr><td><code>.ux-rich-tooltip</code></td><td>Tooltip con contenido extendido</td></tr>
+          <tr><td><code>.ux-rich-tooltip__title</code></td><td>Titulo del rich tooltip</td></tr>
+          <tr><td><code>.ux-rich-tooltip__content</code></td><td>Contenido del rich tooltip</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="ux-padding" style="text-align: center; background: var(--ux-surface-secondary); color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">
+    <p>UX Library - Popover & Tooltip Component</p>
+  </footer>
+</body>
+</html>

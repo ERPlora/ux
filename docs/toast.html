@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Toast - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-toast.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+    .demo-section p { font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-md); }
+    .code-block { background: var(--ux-dark); color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-xs); line-height: 1.6; }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+  </style>
+</head>
+<body class="ux-app" x-data="{ toasts: [], toastPosition: 'bottom' }">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Toast</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <!-- Toast Container Global (posicion dinamica) -->
+  <div class="ux-toast-container" :class="'ux-toast-container--' + toastPosition">
+    <template x-for="(toast, index) in toasts" :key="index">
+      <div class="ux-toast"
+           :class="[toast.type ? 'ux-toast--' + toast.type : '', toast.visible ? 'ux-toast--visible' : '']">
+        <span class="ux-toast__message" x-text="toast.message"></span>
+        <button class="ux-toast__close" @click="toast.visible = false; setTimeout(() => toasts.splice(index, 1), 300)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </template>
+  </div>
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+    <!-- Basic Toast -->
+    <section class="demo-section">
+      <h3>Toast Basico</h3>
+      <p>Notificaciones temporales en la parte inferior.</p>
+      <div class="demo-box">
+        <button class="ux-button ux-button--primary" @click="
+          toasts.push({ message: 'Este es un toast basico', visible: true });
+          setTimeout(() => toasts.shift(), 3000);
+        ">Mostrar Toast</button>
+      </div>
+      <pre class="code-block"><span class="comment">// Con Alpine.js</span>
+<span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxToastManager()"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"show('Mensaje del toast')"</span><span class="tag">&gt;</span>Mostrar<span class="tag">&lt;/button&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;template</span> <span class="attr">x-for</span>=<span class="string">"toast in toasts"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast"</span> <span class="attr">x-show</span>=<span class="string">"toast.visible"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"toast.message"</span><span class="tag">&gt;&lt;/span&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/template&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Toast Types -->
+    <section class="demo-section">
+      <h3>Tipos de Toast</h3>
+      <p>Success, warning, danger, e info.</p>
+      <div class="demo-box">
+        <button class="ux-button ux-button--success" @click="
+          toasts.push({ message: 'Guardado correctamente', type: 'success', visible: true });
+          setTimeout(() => toasts.shift(), 3000);
+        ">Success</button>
+        <button class="ux-button ux-button--warning" @click="
+          toasts.push({ message: 'Conexion inestable', type: 'warning', visible: true });
+          setTimeout(() => toasts.shift(), 3000);
+        ">Warning</button>
+        <button class="ux-button ux-button--danger" @click="
+          toasts.push({ message: 'Error al guardar', type: 'danger', visible: true });
+          setTimeout(() => toasts.shift(), 3000);
+        ">Danger</button>
+        <button class="ux-button ux-button--secondary" @click="
+          toasts.push({ message: 'Nueva actualizacion disponible', type: 'info', visible: true });
+          setTimeout(() => toasts.shift(), 3000);
+        ">Info</button>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--success"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--warning"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--danger"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--info"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Static Examples -->
+    <section class="demo-section">
+      <h3>Ejemplos Estaticos</h3>
+      <p>Vista previa de los estilos de toast.</p>
+      <div class="demo-box" style="flex-direction: column;">
+        <div class="ux-toast ux-toast--success" style="position: relative; opacity: 1; transform: none;">
+          <svg class="ux-toast__icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span class="ux-toast__message">Archivo guardado correctamente</span>
+          <button class="ux-toast__close">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="ux-toast ux-toast--danger" style="position: relative; opacity: 1; transform: none;">
+          <svg class="ux-toast__icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <span class="ux-toast__message">Error de conexion</span>
+          <button class="ux-toast__action">Reintentar</button>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--success"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;svg</span> <span class="attr">class</span>=<span class="string">"ux-toast__icon"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/svg&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-toast__message"</span><span class="tag">&gt;</span>Mensaje<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-toast__close"</span><span class="tag">&gt;</span>X<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--danger"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-toast__message"</span><span class="tag">&gt;</span>Error<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-toast__action"</span><span class="tag">&gt;</span>Reintentar<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Positions -->
+    <section class="demo-section">
+      <h3>Posiciones</h3>
+      <p>El contenedor puede posicionarse en 9 ubicaciones diferentes.</p>
+
+      <div class="demo-box" style="flex-direction: column; gap: var(--ux-space-lg);">
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin: 0;">Haz clic en una posicion para ver el toast:</p>
+
+        <!-- Position grid -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ux-space-sm); max-width: 400px;">
+          <button class="ux-button ux-button--sm" :class="toastPosition === 'top-start' ? 'ux-button--primary' : 'ux-button--secondary'" @click="toastPosition = 'top-start'; toasts.push({ message: 'Toast top-start', visible: true }); setTimeout(() => toasts.shift(), 2000)">top-start</button>
+          <button class="ux-button ux-button--sm" :class="toastPosition === 'top' ? 'ux-button--primary' : 'ux-button--secondary'" @click="toastPosition = 'top'; toasts.push({ message: 'Toast top', visible: true }); setTimeout(() => toasts.shift(), 2000)">top</button>
+          <button class="ux-button ux-button--sm" :class="toastPosition === 'top-end' ? 'ux-button--primary' : 'ux-button--secondary'" @click="toastPosition = 'top-end'; toasts.push({ message: 'Toast top-end', visible: true }); setTimeout(() => toasts.shift(), 2000)">top-end</button>
+
+          <button class="ux-button ux-button--sm" :class="toastPosition === 'center-start' ? 'ux-button--primary' : 'ux-button--secondary'" @click="toastPosition = 'center-start'; toasts.push({ message: 'Toast center-start', visible: true }); setTimeout(() => toasts.shift(), 2000)">center-start</button>
+          <button class="ux-button ux-button--sm" :class="toastPosition === 'center' ? 'ux-button--primary' : 'ux-button--secondary'" @click="toastPosition = 'center'; toasts.push({ message: 'Toast center', visible: true }); setTimeout(() => toasts.shift(), 2000)">center</button>
+          <button class="ux-button ux-button--sm" :class="toastPosition === 'center-end' ? 'ux-button--primary' : 'ux-button--secondary'" @click="toastPosition = 'center-end'; toasts.push({ message: 'Toast center-end', visible: true }); setTimeout(() => toasts.shift(), 2000)">center-end</button>
+
+          <button class="ux-button ux-button--sm" :class="toastPosition === 'bottom-start' ? 'ux-button--primary' : 'ux-button--secondary'" @click="toastPosition = 'bottom-start'; toasts.push({ message: 'Toast bottom-start', visible: true }); setTimeout(() => toasts.shift(), 2000)">bottom-start</button>
+          <button class="ux-button ux-button--sm" :class="toastPosition === 'bottom' ? 'ux-button--primary' : 'ux-button--secondary'" @click="toastPosition = 'bottom'; toasts.push({ message: 'Toast bottom', visible: true }); setTimeout(() => toasts.shift(), 2000)">bottom</button>
+          <button class="ux-button ux-button--sm" :class="toastPosition === 'bottom-end' ? 'ux-button--primary' : 'ux-button--secondary'" @click="toastPosition = 'bottom-end'; toasts.push({ message: 'Toast bottom-end', visible: true }); setTimeout(() => toasts.shift(), 2000)">bottom-end</button>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Posiciones principales --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--top"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--bottom"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--center"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Esquinas --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--top-start"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--top-end"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--bottom-start"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--bottom-end"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Centro laterales --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--center-start"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--center-end"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Con Alpine (posicion dinamica) --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxToastManager({ position: 'top-end' })"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">:class</span>=<span class="string">"containerClass"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+
+  <span class="comment">&lt;!-- Cambiar posicion dinamicamente --&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"setPosition('bottom')"</span><span class="tag">&gt;</span>Mover abajo<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Alpine API -->
+    <section class="demo-section">
+      <h3>API Alpine - Toast Manager</h3>
+      <p>Componente completo para gestionar multiples toasts.</p>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxToastManager()"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- Botones para mostrar toasts --&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"show('Mensaje')"</span><span class="tag">&gt;</span>Default<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"success('Guardado!')"</span><span class="tag">&gt;</span>Success<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"error('Error!')"</span><span class="tag">&gt;</span>Error<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"warning('Cuidado!')"</span><span class="tag">&gt;</span>Warning<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"info('Info!')"</span><span class="tag">&gt;</span>Info<span class="tag">&lt;/button&gt;</span>
+
+  <span class="comment">&lt;!-- Contenedor de toasts --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast-container"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;template</span> <span class="attr">x-for</span>=<span class="string">"toast in toasts"</span> <span class="attr">:key</span>=<span class="string">"toast.id"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast"</span>
+           <span class="attr">:class</span>=<span class="string">"'ux-toast--' + toast.type"</span>
+           <span class="attr">x-show</span>=<span class="string">"toast.visible"</span>
+           <span class="attr">x-transition</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"toast.message"</span><span class="tag">&gt;&lt;/span&gt;</span>
+        <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"dismiss(toast.id)"</span><span class="tag">&gt;</span>X<span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/template&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- HTMX -->
+    <section class="demo-section">
+      <h3>Con HTMX</h3>
+      <p>Mostrar toast desde respuesta del servidor.</p>
+      <pre class="code-block"><span class="comment">&lt;!-- Boton que dispara request --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">hx-post</span>=<span class="string">"/api/save"</span>
+        <span class="attr">hx-target</span>=<span class="string">"#toast-container"</span>
+        <span class="attr">hx-swap</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
+  Guardar
+<span class="tag">&lt;/button&gt;</span>
+
+<span class="comment">&lt;!-- Contenedor para toasts --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"toast-container"</span> <span class="attr">class</span>=<span class="string">"ux-toast-container"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Respuesta del servidor (HTML) --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--success"</span>
+     <span class="attr">x-data</span>=<span class="string">"{ show: true }"</span>
+     <span class="attr">x-show</span>=<span class="string">"show"</span>
+     <span class="attr">x-init</span>=<span class="string">"setTimeout(() => { show = false; $el.remove() }, 3000)"</span><span class="tag">&gt;</span>
+  Guardado!
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- API Table -->
+    <section class="demo-section">
+      <h3>API Alpine</h3>
+      <table style="width: 100%; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Metodo</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>show(message, options)</code></td>
+            <td style="padding: var(--ux-space-sm);">Muestra un toast con mensaje y opciones</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>success(message)</code></td>
+            <td style="padding: var(--ux-space-sm);">Toast de exito</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>error(message)</code></td>
+            <td style="padding: var(--ux-space-sm);">Toast de error</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>warning(message)</code></td>
+            <td style="padding: var(--ux-space-sm);">Toast de advertencia</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>info(message)</code></td>
+            <td style="padding: var(--ux-space-sm);">Toast informativo</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>dismiss(id)</code></td>
+            <td style="padding: var(--ux-space-sm);">Cierra un toast especifico</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>dismissAll()</code></td>
+            <td style="padding: var(--ux-space-sm);">Cierra todos los toasts</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>setPosition(pos)</code></td>
+            <td style="padding: var(--ux-space-sm);">Cambia la posicion del contenedor</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>containerClass</code></td>
+            <td style="padding: var(--ux-space-sm);">Clase CSS dinamica para el contenedor</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Posiciones disponibles</h4>
+      <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">
+        <code>top</code>, <code>bottom</code>, <code>center</code>,
+        <code>top-start</code>, <code>top-end</code>,
+        <code>bottom-start</code>, <code>bottom-end</code>,
+        <code>center-start</code>, <code>center-end</code>
+      </p>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Alert - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-alert.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text);
+    }
+    .demo-section p {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--ux-space-md);
+    }
+    .demo-box--column {
+      flex-direction: column;
+    }
+    .code-block {
+      background: var(--ux-dark);
+      color: #e5e5e5;
+      padding: var(--ux-space-md);
+      border-radius: var(--ux-border-radius);
+      overflow-x: auto;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: var(--ux-font-size-xs);
+      line-height: 1.6;
+    }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+  </style>
+</head>
+<body class="ux-app">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Alert</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+    <!-- Basic Alert Dialog -->
+    <section class="demo-section">
+      <h3>Alert Dialog Basico</h3>
+      <p>Dialogo de alerta estilo iOS con titulo, mensaje y botones.</p>
+      <div class="demo-box">
+        <div x-data="uxAlert()">
+          <button class="ux-button ux-button--primary" @click="open({ title: 'Titulo', message: 'Este es el mensaje del alert.' })">Abrir Alert</button>
+          <template x-teleport="body">
+            <div class="ux-alert-backdrop" :class="isOpen && 'ux-alert-backdrop--open'" @click.self="close()">
+              <div class="ux-alert">
+                <div class="ux-alert__content">
+                  <h2 class="ux-alert__title" x-text="title"></h2>
+                  <p class="ux-alert__message" x-text="message"></p>
+                </div>
+                <div class="ux-alert__buttons">
+                  <button class="ux-alert__button ux-alert__button--primary" @click="close()">OK</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxAlert()"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"open({ title: 'Titulo', message: 'Mensaje' })"</span><span class="tag">&gt;</span>Abrir<span class="tag">&lt;/button&gt;</span>
+
+  <span class="tag">&lt;template</span> <span class="attr">x-teleport</span>=<span class="string">"body"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert-backdrop"</span> <span class="attr">:class</span>=<span class="string">"isOpen && 'ux-alert-backdrop--open'"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert__content"</span><span class="tag">&gt;</span>
+          <span class="tag">&lt;h2</span> <span class="attr">class</span>=<span class="string">"ux-alert__title"</span> <span class="attr">x-text</span>=<span class="string">"title"</span><span class="tag">&gt;&lt;/h2&gt;</span>
+          <span class="tag">&lt;p</span> <span class="attr">class</span>=<span class="string">"ux-alert__message"</span> <span class="attr">x-text</span>=<span class="string">"message"</span><span class="tag">&gt;&lt;/p&gt;</span>
+        <span class="tag">&lt;/div&gt;</span>
+        <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert__buttons"</span><span class="tag">&gt;</span>
+          <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-alert__button"</span> <span class="attr">@click</span>=<span class="string">"close()"</span><span class="tag">&gt;</span>OK<span class="tag">&lt;/button&gt;</span>
+        <span class="tag">&lt;/div&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/template&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Alert with Icon -->
+    <section class="demo-section">
+      <h3>Alert con Icono</h3>
+      <p>Alertas con iconos para diferentes estados: success, warning, danger, info.</p>
+      <div class="demo-box">
+        <div x-data="{ open: false, type: 'success' }">
+          <button class="ux-button ux-button--success" @click="type = 'success'; open = true">Success</button>
+          <button class="ux-button ux-button--warning" @click="type = 'warning'; open = true">Warning</button>
+          <button class="ux-button ux-button--danger" @click="type = 'danger'; open = true">Danger</button>
+          <button class="ux-button ux-button--primary" @click="type = 'info'; open = true">Info</button>
+          <template x-teleport="body">
+            <div class="ux-alert-backdrop" :class="open && 'ux-alert-backdrop--open'" @click.self="open = false">
+              <div class="ux-alert">
+                <div class="ux-alert__content">
+                  <div class="ux-alert__icon" :class="'ux-alert__icon--' + type">
+                    <template x-if="type === 'success'">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </template>
+                    <template x-if="type === 'warning'">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                      </svg>
+                    </template>
+                    <template x-if="type === 'danger'">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </template>
+                    <template x-if="type === 'info'">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </template>
+                  </div>
+                  <h2 class="ux-alert__title" x-text="type.charAt(0).toUpperCase() + type.slice(1)"></h2>
+                  <p class="ux-alert__message">Este es un mensaje de tipo <span x-text="type"></span>.</p>
+                </div>
+                <div class="ux-alert__buttons">
+                  <button class="ux-alert__button ux-alert__button--primary" @click="open = false">OK</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert__icon ux-alert__icon--success"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;svg&gt;</span>...<span class="tag">&lt;/svg&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+<span class="comment">&lt;!-- Variantes: --success, --warning, --danger, --info --&gt;</span></pre>
+    </section>
+
+    <!-- Confirm Dialog -->
+    <section class="demo-section">
+      <h3>Confirm Dialog</h3>
+      <p>Alert con botones de confirmacion y cancelacion.</p>
+      <div class="demo-box">
+        <div x-data="{ open: false, result: null }">
+          <button class="ux-button ux-button--primary" @click="open = true">Confirmar Accion</button>
+          <span x-show="result !== null" class="ux-ml-md" x-text="result ? 'Confirmado!' : 'Cancelado'"></span>
+          <template x-teleport="body">
+            <div class="ux-alert-backdrop" :class="open && 'ux-alert-backdrop--open'" @click.self="open = false; result = false">
+              <div class="ux-alert">
+                <div class="ux-alert__content">
+                  <h2 class="ux-alert__title">Confirmar</h2>
+                  <p class="ux-alert__message">¿Estas seguro de que quieres continuar?</p>
+                </div>
+                <div class="ux-alert__buttons">
+                  <button class="ux-alert__button" @click="open = false; result = false">Cancelar</button>
+                  <button class="ux-alert__button ux-alert__button--primary" @click="open = false; result = true">Aceptar</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert__buttons"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-alert__button"</span><span class="tag">&gt;</span>Cancelar<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-alert__button ux-alert__button--primary"</span><span class="tag">&gt;</span>Aceptar<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Destructive Action -->
+    <section class="demo-section">
+      <h3>Accion Destructiva</h3>
+      <p>Alert para confirmar acciones peligrosas como eliminar.</p>
+      <div class="demo-box">
+        <div x-data="{ open: false }">
+          <button class="ux-button ux-button--danger" @click="open = true">Eliminar</button>
+          <template x-teleport="body">
+            <div class="ux-alert-backdrop" :class="open && 'ux-alert-backdrop--open'" @click.self="open = false">
+              <div class="ux-alert">
+                <div class="ux-alert__content">
+                  <h2 class="ux-alert__title">Eliminar Item</h2>
+                  <p class="ux-alert__message">Esta accion no se puede deshacer. ¿Quieres continuar?</p>
+                </div>
+                <div class="ux-alert__buttons">
+                  <button class="ux-alert__button ux-alert__button--cancel" @click="open = false">Cancelar</button>
+                  <button class="ux-alert__button ux-alert__button--destructive" @click="open = false">Eliminar</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-alert__button ux-alert__button--cancel"</span><span class="tag">&gt;</span>Cancelar<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-alert__button ux-alert__button--destructive"</span><span class="tag">&gt;</span>Eliminar<span class="tag">&lt;/button&gt;</span></pre>
+    </section>
+
+    <!-- Stacked Buttons -->
+    <section class="demo-section">
+      <h3>Botones Apilados</h3>
+      <p>Para multiples opciones, los botones se pueden apilar verticalmente.</p>
+      <div class="demo-box">
+        <div x-data="{ open: false, selected: '' }">
+          <button class="ux-button ux-button--primary" @click="open = true">Elegir Opcion</button>
+          <span x-show="selected" class="ux-ml-md" x-text="selected"></span>
+          <template x-teleport="body">
+            <div class="ux-alert-backdrop" :class="open && 'ux-alert-backdrop--open'" @click.self="open = false">
+              <div class="ux-alert">
+                <div class="ux-alert__content">
+                  <h2 class="ux-alert__title">Elige una opcion</h2>
+                  <p class="ux-alert__message">Selecciona como quieres continuar.</p>
+                </div>
+                <div class="ux-alert__buttons ux-alert__buttons--stacked">
+                  <button class="ux-alert__button ux-alert__button--primary" @click="selected = 'Opcion A'; open = false">Opcion A</button>
+                  <button class="ux-alert__button" @click="selected = 'Opcion B'; open = false">Opcion B</button>
+                  <button class="ux-alert__button" @click="selected = 'Opcion C'; open = false">Opcion C</button>
+                  <button class="ux-alert__button ux-alert__button--destructive" @click="open = false">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert__buttons ux-alert__buttons--stacked"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-alert__button ux-alert__button--primary"</span><span class="tag">&gt;</span>Opcion A<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-alert__button"</span><span class="tag">&gt;</span>Opcion B<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-alert__button ux-alert__button--destructive"</span><span class="tag">&gt;</span>Cancelar<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Prompt with Input -->
+    <section class="demo-section">
+      <h3>Prompt con Input</h3>
+      <p>Alert con campo de entrada para solicitar informacion al usuario.</p>
+      <div class="demo-box">
+        <div x-data="{ open: false, value: '', result: '' }">
+          <button class="ux-button ux-button--primary" @click="open = true; value = ''">Ingresar Nombre</button>
+          <span x-show="result" class="ux-ml-md">Hola, <span x-text="result"></span>!</span>
+          <template x-teleport="body">
+            <div class="ux-alert-backdrop" :class="open && 'ux-alert-backdrop--open'" @click.self="open = false">
+              <div class="ux-alert">
+                <div class="ux-alert__content">
+                  <h2 class="ux-alert__title">Tu Nombre</h2>
+                  <p class="ux-alert__message">Por favor ingresa tu nombre.</p>
+                </div>
+                <div class="ux-alert__inputs">
+                  <input type="text" class="ux-alert__input" placeholder="Nombre" x-model="value" @keydown.enter="result = value; open = false">
+                </div>
+                <div class="ux-alert__buttons">
+                  <button class="ux-alert__button" @click="open = false">Cancelar</button>
+                  <button class="ux-alert__button ux-alert__button--primary" @click="result = value; open = false">OK</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert__inputs"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">class</span>=<span class="string">"ux-alert__input"</span> <span class="attr">placeholder</span>=<span class="string">"Nombre"</span> <span class="attr">x-model</span>=<span class="string">"value"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Login Prompt -->
+    <section class="demo-section">
+      <h3>Login Prompt</h3>
+      <p>Alert con multiples campos de entrada.</p>
+      <div class="demo-box">
+        <div x-data="{ open: false, user: '', pass: '' }">
+          <button class="ux-button ux-button--primary" @click="open = true; user = ''; pass = ''">Login</button>
+          <template x-teleport="body">
+            <div class="ux-alert-backdrop" :class="open && 'ux-alert-backdrop--open'" @click.self="open = false">
+              <div class="ux-alert">
+                <div class="ux-alert__content">
+                  <h2 class="ux-alert__title">Iniciar Sesion</h2>
+                  <p class="ux-alert__message">Ingresa tus credenciales.</p>
+                </div>
+                <div class="ux-alert__inputs">
+                  <input type="text" class="ux-alert__input" placeholder="Usuario" x-model="user">
+                  <input type="password" class="ux-alert__input" placeholder="Contrasena" x-model="pass">
+                </div>
+                <div class="ux-alert__buttons">
+                  <button class="ux-alert__button" @click="open = false">Cancelar</button>
+                  <button class="ux-alert__button ux-alert__button--primary" @click="open = false">Entrar</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert__inputs"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">class</span>=<span class="string">"ux-alert__input"</span> <span class="attr">placeholder</span>=<span class="string">"Usuario"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"password"</span> <span class="attr">class</span>=<span class="string">"ux-alert__input"</span> <span class="attr">placeholder</span>=<span class="string">"Contrasena"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Wide Alert (Android Style) -->
+    <section class="demo-section">
+      <h3>Alert Ancho (Estilo Android)</h3>
+      <p>Variante mas ancha con botones alineados a la derecha.</p>
+      <div class="demo-box">
+        <div x-data="{ open: false }">
+          <button class="ux-button" @click="open = true">Alert Ancho</button>
+          <template x-teleport="body">
+            <div class="ux-alert-backdrop" :class="open && 'ux-alert-backdrop--open'" @click.self="open = false">
+              <div class="ux-alert ux-alert--wide">
+                <div class="ux-alert__content">
+                  <h2 class="ux-alert__title">Titulo del Alert</h2>
+                  <p class="ux-alert__message">Este es un alert estilo Material Design con botones alineados a la derecha y texto alineado a la izquierda.</p>
+                </div>
+                <div class="ux-alert__buttons">
+                  <button class="ux-alert__button" @click="open = false">Cancelar</button>
+                  <button class="ux-alert__button ux-alert__button--primary" @click="open = false">Aceptar</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert ux-alert--wide"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Alert Banners -->
+    <section class="demo-section">
+      <h3>Alert Banner (Inline)</h3>
+      <p>Alertas inline para mostrar mensajes dentro del contenido.</p>
+      <div class="demo-box demo-box--column">
+        <div class="ux-alert-banner ux-alert-banner--success" x-data="uxAlertBanner()" x-show="visible">
+          <div class="ux-alert-banner__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <div class="ux-alert-banner__content">
+            <h4 class="ux-alert-banner__title">Exito</h4>
+            <p class="ux-alert-banner__message">Tu archivo ha sido guardado correctamente.</p>
+          </div>
+          <button class="ux-alert-banner__close" @click="dismiss()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="ux-alert-banner ux-alert-banner--warning" x-data="uxAlertBanner()" x-show="visible">
+          <div class="ux-alert-banner__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div class="ux-alert-banner__content">
+            <h4 class="ux-alert-banner__title">Advertencia</h4>
+            <p class="ux-alert-banner__message">Tu sesion expirara en 5 minutos.</p>
+          </div>
+          <button class="ux-alert-banner__close" @click="dismiss()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="ux-alert-banner ux-alert-banner--danger" x-data="uxAlertBanner()" x-show="visible">
+          <div class="ux-alert-banner__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="ux-alert-banner__content">
+            <h4 class="ux-alert-banner__title">Error</h4>
+            <p class="ux-alert-banner__message">No se pudo completar la operacion.</p>
+          </div>
+          <button class="ux-alert-banner__close" @click="dismiss()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="ux-alert-banner ux-alert-banner--info" x-data="uxAlertBanner()" x-show="visible">
+          <div class="ux-alert-banner__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="ux-alert-banner__content">
+            <h4 class="ux-alert-banner__title">Informacion</h4>
+            <p class="ux-alert-banner__message">Hay una nueva version disponible.</p>
+          </div>
+          <button class="ux-alert-banner__close" @click="dismiss()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert-banner ux-alert-banner--success"</span> <span class="attr">x-data</span>=<span class="string">"uxAlertBanner()"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert-banner__icon"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert-banner__content"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h4</span> <span class="attr">class</span>=<span class="string">"ux-alert-banner__title"</span><span class="tag">&gt;</span>Exito<span class="tag">&lt;/h4&gt;</span>
+    <span class="tag">&lt;p</span> <span class="attr">class</span>=<span class="string">"ux-alert-banner__message"</span><span class="tag">&gt;</span>Mensaje<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-alert-banner__close"</span> <span class="attr">@click</span>=<span class="string">"dismiss()"</span><span class="tag">&gt;</span>X<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+<span class="comment">&lt;!-- Variantes: --success, --warning, --danger, --info --&gt;</span></pre>
+    </section>
+
+    <!-- Banner with Actions -->
+    <section class="demo-section">
+      <h3>Banner con Acciones</h3>
+      <p>Banner con botones de accion.</p>
+      <div class="demo-box demo-box--column">
+        <div class="ux-alert-banner ux-alert-banner--info" x-data="uxAlertBanner()">
+          <div class="ux-alert-banner__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+          </div>
+          <div class="ux-alert-banner__content">
+            <h4 class="ux-alert-banner__title">Actualizacion Disponible</h4>
+            <p class="ux-alert-banner__message">Version 2.0 esta lista para instalar.</p>
+            <div class="ux-alert-banner__actions">
+              <button class="ux-button ux-button--sm ux-button--primary">Actualizar Ahora</button>
+              <button class="ux-button ux-button--sm ux-button--outline">Mas Tarde</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-alert-banner__actions"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button ux-button--sm ux-button--primary"</span><span class="tag">&gt;</span>Actualizar<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button ux-button--sm ux-button--outline"</span><span class="tag">&gt;</span>Mas Tarde<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- API Reference -->
+    <section class="demo-section">
+      <h3>API Alpine - uxAlert()</h3>
+      <table style="width: 100%; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Metodo/Propiedad</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>isOpen</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean - Estado del alert</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>title</code></td>
+            <td style="padding: var(--ux-space-sm);">String - Titulo del alert</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>message</code></td>
+            <td style="padding: var(--ux-space-sm);">String - Mensaje del alert</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>open(options)</code></td>
+            <td style="padding: var(--ux-space-sm);">Abre el alert con opciones { title, message, buttons, inputs }</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>close()</code></td>
+            <td style="padding: var(--ux-space-sm);">Cierra el alert</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>confirm(title, msg)</code></td>
+            <td style="padding: var(--ux-space-sm);">Retorna Promise&lt;boolean&gt;</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>prompt(title, msg, placeholder)</code></td>
+            <td style="padding: var(--ux-space-sm);">Retorna Promise&lt;string|null&gt;</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- uxAlertBanner API -->
+    <section class="demo-section">
+      <h3>API Alpine - uxAlertBanner()</h3>
+      <table style="width: 100%; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Metodo/Propiedad</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>visible</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean - Visibilidad del banner</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>dismissible</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean - Si se puede cerrar (default: true)</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>dismiss()</code></td>
+            <td style="padding: var(--ux-space-sm);">Oculta el banner</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>show()</code></td>
+            <td style="padding: var(--ux-space-sm);">Muestra el banner</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CSS Reference -->
+    <section class="demo-section">
+      <h3>Referencia CSS</h3>
+      <table style="width: 100%; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Clase</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert-backdrop</code></td><td style="padding: var(--ux-space-sm);">Fondo oscuro del dialog</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert-backdrop--open</code></td><td style="padding: var(--ux-space-sm);">Estado visible</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert</code></td><td style="padding: var(--ux-space-sm);">Contenedor del dialog</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert--wide</code></td><td style="padding: var(--ux-space-sm);">Variante ancha (estilo Android)</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__content</code></td><td style="padding: var(--ux-space-sm);">Area de contenido</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__icon</code></td><td style="padding: var(--ux-space-sm);">Icono del alert</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__icon--{color}</code></td><td style="padding: var(--ux-space-sm);">success, warning, danger, info</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__title</code></td><td style="padding: var(--ux-space-sm);">Titulo</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__message</code></td><td style="padding: var(--ux-space-sm);">Mensaje</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__inputs</code></td><td style="padding: var(--ux-space-sm);">Contenedor de inputs</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__input</code></td><td style="padding: var(--ux-space-sm);">Input del alert</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__buttons</code></td><td style="padding: var(--ux-space-sm);">Contenedor de botones</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__buttons--stacked</code></td><td style="padding: var(--ux-space-sm);">Botones apilados</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__button</code></td><td style="padding: var(--ux-space-sm);">Boton del alert</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__button--primary</code></td><td style="padding: var(--ux-space-sm);">Boton principal (bold)</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__button--destructive</code></td><td style="padding: var(--ux-space-sm);">Boton destructivo (rojo)</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert__button--cancel</code></td><td style="padding: var(--ux-space-sm);">Boton cancelar (bold)</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert-banner</code></td><td style="padding: var(--ux-space-sm);">Banner inline</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-alert-banner--{color}</code></td><td style="padding: var(--ux-space-sm);">success, warning, danger, info</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

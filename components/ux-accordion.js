@@ -1,0 +1,344 @@
+/**
+ * UX Accordion Component
+ * Acordeones expandibles estilo iOS
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Accordion
+    ======================================== */
+
+    .ux-accordion {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+    }
+
+    /* ========================================
+       Accordion Item
+    ======================================== */
+
+    .ux-accordion-item {
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-accordion-item:last-child {
+      border-bottom: none;
+    }
+
+    /* ========================================
+       Accordion Header
+    ======================================== */
+
+    .ux-accordion-item__header {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: var(--ux-touch-target);
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      background: none;
+      border: none;
+      color: var(--ux-text);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-md);
+      text-align: left;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-accordion-item__header:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-accordion-item__header:active {
+      background-color: var(--ux-light);
+    }
+
+    .ux-accordion-item--disabled .ux-accordion-item__header {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ux-accordion-item--disabled .ux-accordion-item__header:hover {
+      background-color: transparent;
+    }
+
+    /* ========================================
+       Accordion Header Content
+    ======================================== */
+
+    .ux-accordion-item__icon {
+      width: 24px;
+      height: 24px;
+      margin-right: var(--ux-space-md);
+      color: var(--ux-text-secondary);
+      flex-shrink: 0;
+    }
+
+    .ux-accordion-item__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-accordion-item__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ux-accordion-item__title {
+      font-weight: 500;
+      color: var(--ux-text);
+    }
+
+    .ux-accordion-item__subtitle {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin-top: 2px;
+    }
+
+    .ux-accordion-item__chevron {
+      width: 20px;
+      height: 20px;
+      margin-left: var(--ux-space-md);
+      color: var(--ux-text-tertiary);
+      flex-shrink: 0;
+      transition: transform var(--ux-transition-base) var(--ux-ease);
+    }
+
+    .ux-accordion-item__chevron svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-accordion-item--open .ux-accordion-item__chevron {
+      transform: rotate(180deg);
+    }
+
+    /* ========================================
+       Accordion Body
+    ======================================== */
+
+    .ux-accordion-item__body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows var(--ux-transition-base) var(--ux-ease);
+    }
+
+    .ux-accordion-item--open .ux-accordion-item__body {
+      grid-template-rows: 1fr;
+    }
+
+    .ux-accordion-item__body-inner {
+      overflow: hidden;
+    }
+
+    .ux-accordion-item__body-content {
+      padding: 0 var(--ux-space-lg) var(--ux-space-lg);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* With left icon offset */
+    .ux-accordion-item--with-icon .ux-accordion-item__body-content {
+      padding-left: calc(var(--ux-space-lg) + 24px + var(--ux-space-md));
+    }
+
+    /* ========================================
+       Accordion Variants
+    ======================================== */
+
+    /* Inset (iOS grouped style) */
+    .ux-accordion--inset {
+      margin: var(--ux-space-lg);
+    }
+
+    /* Outline */
+    .ux-accordion--outline {
+      background-color: transparent;
+      border: 1px solid var(--ux-border-color);
+    }
+
+    .ux-accordion--outline .ux-accordion-item {
+      border-bottom-color: var(--ux-border-color);
+    }
+
+    /* Flat */
+    .ux-accordion--flat {
+      border-radius: 0;
+      background-color: transparent;
+    }
+
+    .ux-accordion--flat .ux-accordion-item {
+      background-color: var(--ux-surface);
+      margin-bottom: var(--ux-space-sm);
+      border-radius: var(--ux-border-radius);
+      border-bottom: none;
+    }
+
+    /* ========================================
+       Sizes
+    ======================================== */
+
+    .ux-accordion--sm .ux-accordion-item__header {
+      min-height: 40px;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-accordion--sm .ux-accordion-item__icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ux-accordion--sm .ux-accordion-item__body-content {
+      padding: 0 var(--ux-space-md) var(--ux-space-md);
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-accordion--lg .ux-accordion-item__header {
+      min-height: 60px;
+      padding: var(--ux-space-lg) var(--ux-space-xl);
+      font-size: var(--ux-font-size-lg);
+    }
+
+    .ux-accordion--lg .ux-accordion-item__body-content {
+      padding: 0 var(--ux-space-xl) var(--ux-space-xl);
+      font-size: var(--ux-font-size-md);
+    }
+
+    /* ========================================
+       Accordion List (simpler version)
+    ======================================== */
+
+    .ux-accordion-list {
+      background-color: var(--ux-surface);
+    }
+
+    .ux-accordion-list__item {
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-accordion-list__item:last-child {
+      border-bottom: none;
+    }
+
+    /* ========================================
+       FAQ Style
+    ======================================== */
+
+    .ux-accordion--faq .ux-accordion-item__title {
+      font-weight: 600;
+    }
+
+    .ux-accordion--faq .ux-accordion-item__title::before {
+      content: 'Q: ';
+      color: var(--ux-primary);
+    }
+
+    .ux-accordion--faq .ux-accordion-item__body-content::before {
+      content: 'A: ';
+      font-weight: 600;
+      color: var(--ux-success);
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-accordion-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-accordion-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for accordion
+  const accordionComponent = (config = {}) => ({
+    openItems: config.openItems || [],
+    multiple: config.multiple || false,
+    disabled: config.disabled || false,
+
+    isOpen(index) {
+      return this.openItems.includes(index);
+    },
+
+    toggle(index) {
+      if (this.disabled) return;
+
+      if (this.isOpen(index)) {
+        this.close(index);
+      } else {
+        this.open(index);
+      }
+    },
+
+    open(index) {
+      if (!this.multiple) {
+        this.openItems = [index];
+      } else if (!this.openItems.includes(index)) {
+        this.openItems.push(index);
+      }
+    },
+
+    close(index) {
+      const i = this.openItems.indexOf(index);
+      if (i !== -1) {
+        this.openItems.splice(i, 1);
+      }
+    },
+
+    openAll(total) {
+      this.openItems = Array.from({ length: total }, (_, i) => i);
+    },
+
+    closeAll() {
+      this.openItems = [];
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxAccordion', accordionComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxAccordion', accordionComponent);
+    });
+  }
+
+  // Alpine component for single accordion item
+  const accordionItemComponent = (config = {}) => ({
+    isOpen: config.isOpen || false,
+    disabled: config.disabled || false,
+
+    toggle() {
+      if (!this.disabled) {
+        this.isOpen = !this.isOpen;
+      }
+    },
+
+    open() {
+      if (!this.disabled) {
+        this.isOpen = true;
+      }
+    },
+
+    close() {
+      this.isOpen = false;
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxAccordionItem', accordionItemComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxAccordionItem', accordionItemComponent);
+    });
+  }
+})();
