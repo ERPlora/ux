@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Img - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-img.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: var(--ux-font-size-xs); overflow-x: auto; white-space: pre; }
+    .css-reference { width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-sm); }
+    .css-reference th, .css-reference td { border: 1px solid var(--ux-border-color); padding: var(--ux-space-sm); text-align: left; }
+    .css-reference th { background: var(--ux-surface); font-weight: 600; }
+    .css-reference code { background: var(--ux-surface-alt); padding: 2px 6px; border-radius: 4px; font-size: var(--ux-font-size-xs); }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--ux-space-md); }
+    .demo-flex { display: flex; gap: var(--ux-space-md); align-items: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body class="ux-app">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Img</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <!-- Uso Basico -->
+  <div class="demo-section">
+    <h3>Uso Basico</h3>
+    <p>Componente de imagen con lazy loading, skeleton mientras carga, y manejo de errores.</p>
+    <div class="demo-box">
+      <p>Carga el componente:</p>
+      <pre class="code-block">&lt;script src="components/ux-img.js"&gt;&lt;/script&gt;</pre>
+    </div>
+  </div>
+
+  <!-- Imagen Simple -->
+  <div class="demo-section">
+    <h3>Imagen Simple</h3>
+    <p>La imagen se carga con lazy loading por defecto y muestra un skeleton mientras carga.</p>
+
+    <div class="demo-box">
+      <div class="ux-img ux-img--square" style="width: 200px;"
+           x-data="uxImg({ src: 'https://picsum.photos/400/400' })"
+           :class="containerClass">
+        <div class="ux-img__skeleton"></div>
+        <img class="ux-img__image" :src="isLoaded ? src : ''" :alt="alt">
+        <div class="ux-img__error">
+          <svg class="ux-img__error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div class="ux-img ux-img--square" style="width: 200px;"
+     x-data="uxImg({ src: 'https://example.com/image.jpg' })"
+     :class="containerClass"&gt;
+  &lt;div class="ux-img__skeleton"&gt;&lt;/div&gt;
+  &lt;img class="ux-img__image" :src="isLoaded ? src : ''" :alt="alt"&gt;
+  &lt;div class="ux-img__error"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Formas -->
+  <div class="demo-section">
+    <h3>Formas</h3>
+    <p>Diferentes formas para las imagenes.</p>
+
+    <div class="demo-box">
+      <div class="demo-flex">
+        <div>
+          <div class="ux-img ux-img--sm"
+               x-data="uxImg({ src: 'https://picsum.photos/100/100?1' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="Default">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px; text-align: center;">Default</p>
+        </div>
+
+        <div>
+          <div class="ux-img ux-img--sm ux-img--rounded"
+               x-data="uxImg({ src: 'https://picsum.photos/100/100?2' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="Rounded">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px; text-align: center;">Rounded</p>
+        </div>
+
+        <div>
+          <div class="ux-img ux-img--sm ux-img--circle"
+               x-data="uxImg({ src: 'https://picsum.photos/100/100?3' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="Circle">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px; text-align: center;">Circle</p>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div class="ux-img"&gt;...&lt;/div&gt;                  &lt;!-- Default --&gt;
+&lt;div class="ux-img ux-img--rounded"&gt;...&lt;/div&gt;  &lt;!-- Rounded --&gt;
+&lt;div class="ux-img ux-img--circle"&gt;...&lt;/div&gt;   &lt;!-- Circle --&gt;</pre>
+  </div>
+
+  <!-- Tamanos -->
+  <div class="demo-section">
+    <h3>Tamanos Predefinidos</h3>
+    <p>Tamanos predefinidos para imagenes cuadradas.</p>
+
+    <div class="demo-box">
+      <div class="demo-flex" style="align-items: flex-end;">
+        <div>
+          <div class="ux-img ux-img--xs ux-img--circle"
+               x-data="uxImg({ src: 'https://picsum.photos/64/64?xs' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px; text-align: center;">xs 32px</p>
+        </div>
+
+        <div>
+          <div class="ux-img ux-img--sm ux-img--circle"
+               x-data="uxImg({ src: 'https://picsum.photos/96/96?sm' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px; text-align: center;">sm 48px</p>
+        </div>
+
+        <div>
+          <div class="ux-img ux-img--md ux-img--circle"
+               x-data="uxImg({ src: 'https://picsum.photos/160/160?md' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px; text-align: center;">md 80px</p>
+        </div>
+
+        <div>
+          <div class="ux-img ux-img--lg ux-img--circle"
+               x-data="uxImg({ src: 'https://picsum.photos/240/240?lg' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px; text-align: center;">lg 120px</p>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div class="ux-img ux-img--xs"&gt;...&lt;/div&gt;  &lt;!-- 32px --&gt;
+&lt;div class="ux-img ux-img--sm"&gt;...&lt;/div&gt;  &lt;!-- 48px --&gt;
+&lt;div class="ux-img ux-img--md"&gt;...&lt;/div&gt;  &lt;!-- 80px --&gt;
+&lt;div class="ux-img ux-img--lg"&gt;...&lt;/div&gt;  &lt;!-- 120px --&gt;
+&lt;div class="ux-img ux-img--xl"&gt;...&lt;/div&gt;  &lt;!-- 200px --&gt;</pre>
+  </div>
+
+  <!-- Aspect Ratios -->
+  <div class="demo-section">
+    <h3>Aspect Ratios</h3>
+    <p>Relaciones de aspecto predefinidas.</p>
+
+    <div class="demo-box">
+      <div class="demo-grid">
+        <div>
+          <div class="ux-img ux-img--square ux-img--rounded"
+               x-data="uxImg({ src: 'https://picsum.photos/200/200?sq' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px;">square (1:1)</p>
+        </div>
+
+        <div>
+          <div class="ux-img ux-img--portrait ux-img--rounded"
+               x-data="uxImg({ src: 'https://picsum.photos/150/200?pt' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px;">portrait (3:4)</p>
+        </div>
+
+        <div>
+          <div class="ux-img ux-img--landscape ux-img--rounded"
+               x-data="uxImg({ src: 'https://picsum.photos/200/150?ls' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px;">landscape (4:3)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-box">
+      <div class="ux-img ux-img--video ux-img--rounded" style="max-width: 400px;"
+           x-data="uxImg({ src: 'https://picsum.photos/800/450?vid' })"
+           :class="containerClass">
+        <div class="ux-img__skeleton"></div>
+        <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+      </div>
+      <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px;">video (16:9)</p>
+    </div>
+
+    <pre class="code-block">&lt;div class="ux-img ux-img--square"&gt;...&lt;/div&gt;     &lt;!-- 1:1 --&gt;
+&lt;div class="ux-img ux-img--portrait"&gt;...&lt;/div&gt;   &lt;!-- 3:4 --&gt;
+&lt;div class="ux-img ux-img--landscape"&gt;...&lt;/div&gt;  &lt;!-- 4:3 --&gt;
+&lt;div class="ux-img ux-img--video"&gt;...&lt;/div&gt;      &lt;!-- 16:9 --&gt;
+&lt;div class="ux-img ux-img--wide"&gt;...&lt;/div&gt;       &lt;!-- 21:9 --&gt;</pre>
+  </div>
+
+  <!-- Object Fit -->
+  <div class="demo-section">
+    <h3>Object Fit</h3>
+    <p>Control de como la imagen se ajusta al contenedor.</p>
+
+    <div class="demo-box">
+      <div class="demo-grid">
+        <div>
+          <div class="ux-img ux-img--square ux-img--cover ux-img--rounded" style="width: 100px;"
+               x-data="uxImg({ src: 'https://picsum.photos/300/200?of1' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px;">cover (default)</p>
+        </div>
+
+        <div>
+          <div class="ux-img ux-img--square ux-img--contain ux-img--rounded" style="width: 100px;"
+               x-data="uxImg({ src: 'https://picsum.photos/300/200?of2' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px;">contain</p>
+        </div>
+
+        <div>
+          <div class="ux-img ux-img--square ux-img--fill ux-img--rounded" style="width: 100px;"
+               x-data="uxImg({ src: 'https://picsum.photos/300/200?of3' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px;">fill</p>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div class="ux-img ux-img--cover"&gt;...&lt;/div&gt;       &lt;!-- default --&gt;
+&lt;div class="ux-img ux-img--contain"&gt;...&lt;/div&gt;
+&lt;div class="ux-img ux-img--fill"&gt;...&lt;/div&gt;
+&lt;div class="ux-img ux-img--none"&gt;...&lt;/div&gt;
+&lt;div class="ux-img ux-img--scale-down"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Estado de Error -->
+  <div class="demo-section">
+    <h3>Estado de Error</h3>
+    <p>Cuando la imagen no se puede cargar, se muestra un estado de error.</p>
+
+    <div class="demo-box">
+      <div class="demo-flex">
+        <div class="ux-img ux-img--md ux-img--rounded"
+             x-data="uxImg({ src: 'https://invalid-url.com/no-image.jpg' })"
+             :class="containerClass">
+          <div class="ux-img__skeleton"></div>
+          <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          <div class="ux-img__error">
+            <svg class="ux-img__error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="ux-img ux-img--lg ux-img--rounded"
+             x-data="uxImg({ src: 'https://invalid-url.com/no-image.jpg' })"
+             :class="containerClass">
+          <div class="ux-img__skeleton"></div>
+          <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          <div class="ux-img__error">
+            <svg class="ux-img__error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span class="ux-img__error-text">Error al cargar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div class="ux-img__error"&gt;
+  &lt;svg class="ux-img__error-icon"&gt;...&lt;/svg&gt;
+  &lt;span class="ux-img__error-text"&gt;Error al cargar&lt;/span&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Animaciones -->
+  <div class="demo-section">
+    <h3>Animaciones de Carga</h3>
+    <p>Efectos visuales cuando la imagen termina de cargar.</p>
+
+    <div class="demo-box">
+      <div class="demo-flex">
+        <div>
+          <div class="ux-img ux-img--md ux-img--rounded ux-img--fade"
+               x-data="uxImg({ src: 'https://picsum.photos/200/200?fade' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px; text-align: center;">fade</p>
+        </div>
+
+        <div>
+          <div class="ux-img ux-img--md ux-img--rounded ux-img--zoom"
+               x-data="uxImg({ src: 'https://picsum.photos/200/200?zoom' })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-top: 4px; text-align: center;">zoom</p>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div class="ux-img ux-img--fade"&gt;...&lt;/div&gt;
+&lt;div class="ux-img ux-img--zoom"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Lazy Loading Demo -->
+  <div class="demo-section">
+    <h3>Lazy Loading</h3>
+    <p>Las imagenes se cargan automaticamente cuando entran en el viewport. Haz scroll para ver las imagenes cargando.</p>
+
+    <div class="demo-box">
+      <div class="demo-grid">
+        <template x-data x-for="i in 12" :key="i">
+          <div class="ux-img ux-img--square ux-img--rounded"
+               x-data="uxImg({ src: 'https://picsum.photos/200/200?lazy=' + i })"
+               :class="containerClass">
+            <div class="ux-img__skeleton"></div>
+            <img class="ux-img__image" :src="isLoaded ? src : ''" alt="">
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;!-- Lazy loading esta activado por defecto --&gt;
+&lt;div x-data="uxImg({ src: '...', lazy: true })"&gt;...&lt;/div&gt;
+
+&lt;!-- Desactivar lazy loading --&gt;
+&lt;div x-data="uxImg({ src: '...', lazy: false })"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Solo CSS -->
+  <div class="demo-section">
+    <h3>Uso Solo con CSS</h3>
+    <p>Estructura HTML basica sin Alpine.js.</p>
+
+    <div class="demo-box">
+      <div class="ux-img ux-img--md ux-img--rounded ux-img--loaded">
+        <img class="ux-img__image" src="https://picsum.photos/200/200?css" alt="Solo CSS" style="opacity: 1;">
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;!-- Imagen ya cargada (agregar clase ux-img--loaded) --&gt;
+&lt;div class="ux-img ux-img--md ux-img--rounded ux-img--loaded"&gt;
+  &lt;img class="ux-img__image" src="image.jpg" alt=""&gt;
+&lt;/div&gt;
+
+&lt;!-- Con skeleton manual --&gt;
+&lt;div class="ux-img ux-img--md ux-img--rounded"&gt;
+  &lt;div class="ux-img__skeleton"&gt;&lt;/div&gt;
+  &lt;img class="ux-img__image"
+       src="image.jpg"
+       alt=""
+       onload="this.parentElement.classList.add('ux-img--loaded')"
+       onerror="this.parentElement.classList.add('ux-img--error')"&gt;
+  &lt;div class="ux-img__error"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Integracion HTMX -->
+  <div class="demo-section">
+    <h3>Integracion con HTMX</h3>
+    <p>El componente funciona con contenido cargado via HTMX.</p>
+
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- El servidor devuelve la imagen con la estructura completa --&gt;
+&lt;div hx-get="/api/user/avatar"
+     hx-trigger="load"
+     hx-swap="innerHTML"&gt;
+  &lt;!-- Skeleton mientras carga --&gt;
+  &lt;div class="ux-img ux-img--md ux-img--circle"&gt;
+    &lt;div class="ux-img__skeleton"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Respuesta del servidor --&gt;
+&lt;div class="ux-img ux-img--md ux-img--circle ux-img--loaded"&gt;
+  &lt;img class="ux-img__image" src="/avatars/user.jpg" alt="Usuario"&gt;
+&lt;/div&gt;</pre>
+    </div>
+  </div>
+
+  <!-- Componente Alpine -->
+  <div class="demo-section">
+    <h3>Componente Alpine: uxImg()</h3>
+    <p>Propiedades y metodos disponibles.</p>
+
+    <div class="demo-box">
+      <pre class="code-block">// Configuracion
+uxImg({
+  src: 'image.jpg',        // URL de la imagen (requerido)
+  alt: 'Descripcion',      // Texto alternativo
+  lazy: true,              // Lazy loading (default: true)
+  lqip: 'tiny.jpg'         // Low quality image placeholder (blur-up)
+})
+
+// Propiedades reactivas
+isLoading     // true mientras carga
+isLoaded      // true cuando cargo exitosamente
+isError       // true si hubo error
+state         // 'loading' | 'loaded' | 'error'
+containerClass // Clases CSS segun estado
+
+// Metodos
+reload()           // Recargar la imagen
+setSrc(newSrc)     // Cambiar la imagen
+
+// Eventos
+@ux-img:load       // Cuando la imagen cargo
+@ux-img:error      // Cuando hubo un error</pre>
+    </div>
+
+    <div class="demo-box">
+      <p><strong>Ejemplo con eventos:</strong></p>
+      <pre class="code-block">&lt;div x-data="uxImg({ src: 'image.jpg' })"
+     @ux-img:load="console.log('Imagen cargada!')"
+     @ux-img:error="console.log('Error al cargar')"
+     :class="containerClass"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- Cambiar imagen dinamicamente --&gt;
+&lt;div x-data="uxImg({ src: '' })" x-ref="img"&gt;
+  &lt;button @click="$refs.img.__x.$data.setSrc('new-image.jpg')"&gt;
+    Cargar imagen
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+    </div>
+  </div>
+
+  <!-- Referencia CSS -->
+  <div class="demo-section">
+    <h3>Referencia de Clases CSS</h3>
+    <table class="css-reference">
+      <thead>
+        <tr>
+          <th>Clase</th>
+          <th>Descripcion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>.ux-img</code></td>
+          <td>Contenedor principal</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img--rounded</code></td>
+          <td>Bordes redondeados</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img--circle</code></td>
+          <td>Forma circular</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img--loaded</code></td>
+          <td>Estado: imagen cargada</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img--error</code></td>
+          <td>Estado: error de carga</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img--xs/sm/md/lg/xl</code></td>
+          <td>Tamanos predefinidos</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img--square/portrait/landscape/video/wide</code></td>
+          <td>Aspect ratios</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img--cover/contain/fill/none/scale-down</code></td>
+          <td>Object-fit</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img--fade</code></td>
+          <td>Animacion fade-in</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img--zoom</code></td>
+          <td>Animacion zoom-in</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img__skeleton</code></td>
+          <td>Placeholder skeleton</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img__image</code></td>
+          <td>Elemento img</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img__error</code></td>
+          <td>Contenedor de error</td>
+        </tr>
+        <tr>
+          <td><code>.ux-img__lqip</code></td>
+          <td>Low quality image placeholder</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Variables CSS -->
+  <div class="demo-section">
+    <h3>Variables CSS</h3>
+    <div class="demo-box">
+      <pre class="code-block">:root {
+  --ux-img-bg: var(--ux-light);
+  --ux-img-skeleton-bg: var(--ux-light);
+  --ux-img-object-fit: cover;
+  --ux-img-object-position: center;
+}</pre>
+    </div>
+  </div>
+
+</body>
+</html>

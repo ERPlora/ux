@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Carousel - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-card.js"></script>
+  <script src="../components/ux-carousel.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { margin-bottom: var(--ux-space-md); font-weight: 600; }
+    .demo-section p { color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); font-size: var(--ux-font-size-sm); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-xs); line-height: 1.6; }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+
+    /* Demo slides */
+    .demo-slide {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-primary-shade) 100%);
+      color: white;
+      font-size: var(--ux-font-size-2xl);
+      font-weight: 700;
+      border-radius: var(--ux-border-radius-lg);
+    }
+
+    .demo-slide--alt {
+      background: linear-gradient(135deg, var(--ux-success) 0%, var(--ux-success-shade) 100%);
+    }
+
+    .demo-slide--warning {
+      background: linear-gradient(135deg, var(--ux-warning) 0%, var(--ux-warning-shade) 100%);
+    }
+
+    .demo-slide--danger {
+      background: linear-gradient(135deg, var(--ux-danger) 0%, var(--ux-danger-shade) 100%);
+    }
+
+    /* Product card for demo */
+    .product-card {
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+      box-shadow: var(--ux-shadow-sm);
+    }
+
+    .product-card__image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .product-card__content {
+      padding: var(--ux-space-md);
+    }
+
+    .product-card__title {
+      font-weight: 600;
+      margin-bottom: var(--ux-space-xs);
+    }
+
+    .product-card__price {
+      color: var(--ux-primary);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body class="ux-app" x-data>
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Carousel</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <div class="ux-content ux-padding">
+    <h1 class="ux-text-2xl ux-font-bold ux-mb-sm">Carousel</h1>
+    <p class="ux-text-secondary ux-mb-xl">Carrusel con navegacion por flechas y soporte para cualquier contenido HTML.</p>
+
+    <!-- Basic Carousel -->
+    <section class="demo-section">
+      <h3>Carousel Basico</h3>
+      <p>Carrusel simple con 1 slide visible y navegacion por flechas.</p>
+
+      <div class="demo-box">
+        <div x-data="uxCarousel({ slidesPerView: 1 })" class="ux-carousel ux-carousel--show-1 ux-carousel--gap-md">
+          <!-- Navigation -->
+          <button class="ux-carousel__nav ux-carousel__nav--prev" @click="prev()" :disabled="!canGoPrev">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button class="ux-carousel__nav ux-carousel__nav--next" @click="next()" :disabled="!canGoNext">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <!-- Viewport -->
+          <div class="ux-carousel__viewport" x-ref="viewport">
+            <div class="ux-carousel__track" x-ref="track" :style="{ transform: `translateX(${translateX}%)` }">
+              <div class="ux-carousel__slide">
+                <div class="demo-slide">1</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--alt">2</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--warning">3</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--danger">4</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="ux-carousel__pagination">
+            <template x-for="(dot, i) in paginationDots" :key="i">
+              <button class="ux-carousel__dot" :class="{ 'ux-carousel__dot--active': getCurrentPage() === i }" @click="goToPage(i)"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxCarousel({ slidesPerView: 1 })"</span> <span class="attr">class</span>=<span class="string">"ux-carousel ux-carousel--show-1"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- Navigation arrows --&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-carousel__nav ux-carousel__nav--prev"</span> <span class="attr">@click</span>=<span class="string">"prev()"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-carousel__nav ux-carousel__nav--next"</span> <span class="attr">@click</span>=<span class="string">"next()"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/button&gt;</span>
+
+  <span class="comment">&lt;!-- Viewport --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel__viewport"</span> <span class="attr">x-ref</span>=<span class="string">"viewport"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel__track"</span> <span class="attr">x-ref</span>=<span class="string">"track"</span> <span class="attr">:style</span>=<span class="string">"{ transform: `translateX(${translateX}%)` }"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel__slide"</span><span class="tag">&gt;</span>Slide 1<span class="tag">&lt;/div&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel__slide"</span><span class="tag">&gt;</span>Slide 2<span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Multiple Slides -->
+    <section class="demo-section">
+      <h3>Multiples Slides Visibles</h3>
+      <p>Muestra 2, 3, 4 o mas slides a la vez.</p>
+
+      <div class="demo-box">
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md);">3 slides visibles:</p>
+
+        <div x-data="uxCarousel({ slidesPerView: 3 })" class="ux-carousel ux-carousel--show-3 ux-carousel--gap-md">
+          <button class="ux-carousel__nav ux-carousel__nav--prev" @click="prev()" :disabled="!canGoPrev">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button class="ux-carousel__nav ux-carousel__nav--next" @click="next()" :disabled="!canGoNext">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <div class="ux-carousel__viewport" x-ref="viewport">
+            <div class="ux-carousel__track" x-ref="track" :style="{ transform: `translateX(${translateX}%)` }">
+              <div class="ux-carousel__slide">
+                <div class="demo-slide" style="height: 120px; font-size: var(--ux-font-size-lg);">1</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--alt" style="height: 120px; font-size: var(--ux-font-size-lg);">2</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--warning" style="height: 120px; font-size: var(--ux-font-size-lg);">3</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--danger" style="height: 120px; font-size: var(--ux-font-size-lg);">4</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide" style="height: 120px; font-size: var(--ux-font-size-lg);">5</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--alt" style="height: 120px; font-size: var(--ux-font-size-lg);">6</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- 2 slides --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel ux-carousel--show-2"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- 3 slides --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel ux-carousel--show-3"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- 4 slides --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel ux-carousel--show-4"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Gap entre slides --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel ux-carousel--show-3 ux-carousel--gap-md"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Responsive -->
+    <section class="demo-section">
+      <h3>Responsive</h3>
+      <p>Diferentes cantidades de slides segun el tamano de pantalla.</p>
+
+      <div class="demo-box">
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md);">4 en desktop, 2 en tablet, 1 en mobile:</p>
+
+        <div x-data="uxCarousel({ slidesPerView: 4 })" class="ux-carousel ux-carousel--show-4 ux-carousel--show-md-2 ux-carousel--show-sm-1 ux-carousel--gap-sm">
+          <button class="ux-carousel__nav ux-carousel__nav--prev ux-carousel--nav-hide-mobile" @click="prev()" :disabled="!canGoPrev">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button class="ux-carousel__nav ux-carousel__nav--next ux-carousel--nav-hide-mobile" @click="next()" :disabled="!canGoNext">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <div class="ux-carousel__viewport" x-ref="viewport">
+            <div class="ux-carousel__track" x-ref="track" :style="{ transform: `translateX(${translateX}%)` }">
+              <div class="ux-carousel__slide">
+                <div class="product-card">
+                  <img class="product-card__image" src="https://picsum.photos/300/200?random=1" alt="Product">
+                  <div class="product-card__content">
+                    <div class="product-card__title">Producto 1</div>
+                    <div class="product-card__price">$29.99</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="product-card">
+                  <img class="product-card__image" src="https://picsum.photos/300/200?random=2" alt="Product">
+                  <div class="product-card__content">
+                    <div class="product-card__title">Producto 2</div>
+                    <div class="product-card__price">$49.99</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="product-card">
+                  <img class="product-card__image" src="https://picsum.photos/300/200?random=3" alt="Product">
+                  <div class="product-card__content">
+                    <div class="product-card__title">Producto 3</div>
+                    <div class="product-card__price">$19.99</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="product-card">
+                  <img class="product-card__image" src="https://picsum.photos/300/200?random=4" alt="Product">
+                  <div class="product-card__content">
+                    <div class="product-card__title">Producto 4</div>
+                    <div class="product-card__price">$39.99</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="product-card">
+                  <img class="product-card__image" src="https://picsum.photos/300/200?random=5" alt="Product">
+                  <div class="product-card__content">
+                    <div class="product-card__title">Producto 5</div>
+                    <div class="product-card__price">$59.99</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="product-card">
+                  <img class="product-card__image" src="https://picsum.photos/300/200?random=6" alt="Product">
+                  <div class="product-card__content">
+                    <div class="product-card__title">Producto 6</div>
+                    <div class="product-card__price">$24.99</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ux-carousel__pagination">
+            <template x-for="(dot, i) in paginationDots" :key="i">
+              <button class="ux-carousel__dot" :class="{ 'ux-carousel__dot--active': getCurrentPage() === i }" @click="goToPage(i)"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Responsive: 4 desktop, 2 tablet, 1 mobile --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel ux-carousel--show-4 ux-carousel--show-md-2 ux-carousel--show-sm-1"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Breakpoints disponibles --&gt;</span>
+<span class="comment">&lt;!-- sm: < 480px --&gt;</span>
+<span class="comment">&lt;!-- md: < 768px --&gt;</span>
+<span class="comment">&lt;!-- lg: < 1024px --&gt;</span></pre>
+    </section>
+
+    <!-- Loop & Autoplay -->
+    <section class="demo-section">
+      <h3>Loop y Autoplay</h3>
+      <p>Carrusel infinito con reproduccion automatica.</p>
+
+      <div class="demo-box">
+        <div x-data="uxCarousel({ slidesPerView: 1, loop: true, autoplay: true, autoplayInterval: 3000 })" class="ux-carousel ux-carousel--show-1 ux-carousel--gap-md">
+          <button class="ux-carousel__nav ux-carousel__nav--prev" @click="prev()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button class="ux-carousel__nav ux-carousel__nav--next" @click="next()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <div class="ux-carousel__viewport" x-ref="viewport">
+            <div class="ux-carousel__track" x-ref="track" :style="{ transform: `translateX(${translateX}%)` }">
+              <div class="ux-carousel__slide">
+                <div class="demo-slide">Auto 1</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--alt">Auto 2</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--warning">Auto 3</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ux-carousel__pagination ux-carousel--pagination-lines">
+            <template x-for="(dot, i) in paginationDots" :key="i">
+              <button class="ux-carousel__dot" :class="{ 'ux-carousel__dot--active': getCurrentPage() === i }" @click="goToPage(i)"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxCarousel({
+  slidesPerView: 1,
+  loop: true,
+  autoplay: true,
+  autoplayInterval: 3000
+})"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Paginacion con lineas --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel__pagination ux-carousel--pagination-lines"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Navigation Variants -->
+    <section class="demo-section">
+      <h3>Variantes de Navegacion</h3>
+      <p>Diferentes estilos para las flechas de navegacion.</p>
+
+      <div class="demo-box">
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md);">Navegacion pequena:</p>
+
+        <div x-data="uxCarousel({ slidesPerView: 2 })" class="ux-carousel ux-carousel--show-2 ux-carousel--gap-sm ux-carousel--nav-sm" style="margin-bottom: var(--ux-space-lg);">
+          <button class="ux-carousel__nav ux-carousel__nav--prev" @click="prev()" :disabled="!canGoPrev">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button class="ux-carousel__nav ux-carousel__nav--next" @click="next()" :disabled="!canGoNext">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <div class="ux-carousel__viewport" x-ref="viewport">
+            <div class="ux-carousel__track" x-ref="track" :style="{ transform: `translateX(${translateX}%)` }">
+              <div class="ux-carousel__slide">
+                <div class="demo-slide" style="height: 100px; font-size: var(--ux-font-size-md);">1</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--alt" style="height: 100px; font-size: var(--ux-font-size-md);">2</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--warning" style="height: 100px; font-size: var(--ux-font-size-md);">3</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--danger" style="height: 100px; font-size: var(--ux-font-size-md);">4</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md);">Sin flechas (solo paginacion):</p>
+
+        <div x-data="uxCarousel({ slidesPerView: 1 })" class="ux-carousel ux-carousel--show-1">
+          <div class="ux-carousel__viewport" x-ref="viewport">
+            <div class="ux-carousel__track" x-ref="track" :style="{ transform: `translateX(${translateX}%)` }">
+              <div class="ux-carousel__slide">
+                <div class="demo-slide" style="height: 100px; font-size: var(--ux-font-size-md);">Slide 1</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--alt" style="height: 100px; font-size: var(--ux-font-size-md);">Slide 2</div>
+              </div>
+              <div class="ux-carousel__slide">
+                <div class="demo-slide demo-slide--warning" style="height: 100px; font-size: var(--ux-font-size-md);">Slide 3</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ux-carousel__pagination">
+            <template x-for="(dot, i) in paginationDots" :key="i">
+              <button class="ux-carousel__dot" :class="{ 'ux-carousel__dot--active': getCurrentPage() === i }" @click="goToPage(i)"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Navegacion pequena --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel ux-carousel--nav-sm"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Ocultar en mobile --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-carousel__nav ux-carousel--nav-hide-mobile"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/button&gt;</span>
+
+<span class="comment">&lt;!-- Sin flechas (solo agregar paginacion) --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel__viewport"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-carousel__pagination"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Cards Content -->
+    <section class="demo-section">
+      <h3>Contenido HTML Variado</h3>
+      <p>El carousel acepta cualquier tipo de contenido HTML.</p>
+
+      <div class="demo-box">
+        <div x-data="uxCarousel({ slidesPerView: 1 })" class="ux-carousel ux-carousel--show-1 ux-carousel--show-md-2 ux-carousel--gap-md">
+          <button class="ux-carousel__nav ux-carousel__nav--prev" @click="prev()" :disabled="!canGoPrev">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button class="ux-carousel__nav ux-carousel__nav--next" @click="next()" :disabled="!canGoNext">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <div class="ux-carousel__viewport" x-ref="viewport">
+            <div class="ux-carousel__track" x-ref="track" :style="{ transform: `translateX(${translateX}%)` }">
+              <!-- Card 1 -->
+              <div class="ux-carousel__slide">
+                <div class="ux-card">
+                  <div class="ux-card__header">
+                    <h4 class="ux-card__title">Caracteristica 1</h4>
+                  </div>
+                  <div class="ux-card__content">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.</p>
+                    <button class="ux-button ux-button--primary ux-button--block ux-mt-md">Ver mas</button>
+                  </div>
+                </div>
+              </div>
+              <!-- Card 2 -->
+              <div class="ux-carousel__slide">
+                <div class="ux-card">
+                  <div class="ux-card__header">
+                    <h4 class="ux-card__title">Caracteristica 2</h4>
+                  </div>
+                  <div class="ux-card__content">
+                    <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
+                    <button class="ux-button ux-button--secondary ux-button--block ux-mt-md">Explorar</button>
+                  </div>
+                </div>
+              </div>
+              <!-- Card 3 -->
+              <div class="ux-carousel__slide">
+                <div class="ux-card">
+                  <div class="ux-card__header">
+                    <h4 class="ux-card__title">Caracteristica 3</h4>
+                  </div>
+                  <div class="ux-card__content">
+                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat.</p>
+                    <button class="ux-button ux-button--outline ux-button--block ux-mt-md">Contactar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ux-carousel__pagination">
+            <template x-for="(dot, i) in paginationDots" :key="i">
+              <button class="ux-carousel__dot" :class="{ 'ux-carousel__dot--active': getCurrentPage() === i }" @click="goToPage(i)"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- API Reference -->
+    <section class="demo-section">
+      <h3>API Alpine</h3>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Opciones de configuracion</h4>
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: var(--ux-space-sm);">Opcion</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Default</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>slidesPerView</code></td>
+            <td style="padding: var(--ux-space-sm);">1</td>
+            <td style="padding: var(--ux-space-sm);">Numero de slides visibles</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>loop</code></td>
+            <td style="padding: var(--ux-space-sm);">false</td>
+            <td style="padding: var(--ux-space-sm);">Navegacion infinita</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>autoplay</code></td>
+            <td style="padding: var(--ux-space-sm);">false</td>
+            <td style="padding: var(--ux-space-sm);">Reproduccion automatica</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>autoplayInterval</code></td>
+            <td style="padding: var(--ux-space-sm);">5000</td>
+            <td style="padding: var(--ux-space-sm);">Intervalo en ms</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>draggable</code></td>
+            <td style="padding: var(--ux-space-sm);">true</td>
+            <td style="padding: var(--ux-space-sm);">Permite arrastrar con touch/mouse</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Metodos</h4>
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: var(--ux-space-sm);">Metodo</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>prev()</code></td>
+            <td style="padding: var(--ux-space-sm);">Ir al slide anterior</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>next()</code></td>
+            <td style="padding: var(--ux-space-sm);">Ir al siguiente slide</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>goTo(index)</code></td>
+            <td style="padding: var(--ux-space-sm);">Ir a un slide especifico</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>goToPage(page)</code></td>
+            <td style="padding: var(--ux-space-sm);">Ir a una pagina especifica</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>startAutoplay()</code></td>
+            <td style="padding: var(--ux-space-sm);">Iniciar autoplay</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>stopAutoplay()</code></td>
+            <td style="padding: var(--ux-space-sm);">Detener autoplay</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Propiedades reactivas</h4>
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: var(--ux-space-sm);">Propiedad</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>currentIndex</code></td>
+            <td style="padding: var(--ux-space-sm);">Indice del slide actual</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>slidesCount</code></td>
+            <td style="padding: var(--ux-space-sm);">Total de slides</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>canGoPrev</code></td>
+            <td style="padding: var(--ux-space-sm);">Si puede ir atras</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>canGoNext</code></td>
+            <td style="padding: var(--ux-space-sm);">Si puede ir adelante</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>translateX</code></td>
+            <td style="padding: var(--ux-space-sm);">Valor de traduccion CSS</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>paginationDots</code></td>
+            <td style="padding: var(--ux-space-sm);">Array para generar dots</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Eventos</h4>
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: var(--ux-space-sm);">Evento</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>ux-carousel:init</code></td>
+            <td style="padding: var(--ux-space-sm);">{ slidesCount, currentIndex }</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>ux-carousel:change</code></td>
+            <td style="padding: var(--ux-space-sm);">{ index, direction }</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CSS Classes -->
+    <section class="demo-section">
+      <h3>Clases CSS</h3>
+
+      <pre class="code-block"><span class="comment">/* Slides visibles */</span>
+.ux-carousel--show-1   <span class="comment">/* 1 slide */</span>
+.ux-carousel--show-2   <span class="comment">/* 2 slides */</span>
+.ux-carousel--show-3   <span class="comment">/* 3 slides */</span>
+.ux-carousel--show-4   <span class="comment">/* 4 slides */</span>
+.ux-carousel--show-5   <span class="comment">/* 5 slides */</span>
+.ux-carousel--show-6   <span class="comment">/* 6 slides */</span>
+
+<span class="comment">/* Responsive (< breakpoint) */</span>
+.ux-carousel--show-sm-1  <span class="comment">/* 1 en < 480px */</span>
+.ux-carousel--show-md-2  <span class="comment">/* 2 en < 768px */</span>
+.ux-carousel--show-lg-3  <span class="comment">/* 3 en < 1024px */</span>
+
+<span class="comment">/* Gap entre slides */</span>
+.ux-carousel--gap-xs
+.ux-carousel--gap-sm
+.ux-carousel--gap-md
+.ux-carousel--gap-lg
+
+<span class="comment">/* Navegacion */</span>
+.ux-carousel--nav-sm           <span class="comment">/* Flechas pequenas */</span>
+.ux-carousel--nav-outside      <span class="comment">/* Flechas fuera */</span>
+.ux-carousel--nav-hide-mobile  <span class="comment">/* Ocultar en mobile */</span>
+
+<span class="comment">/* Paginacion */</span>
+.ux-carousel--pagination-lines <span class="comment">/* Dots como lineas */</span></pre>
+    </section>
+  </div>
+</body>
+</html>
