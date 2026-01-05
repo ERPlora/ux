@@ -19,6 +19,28 @@
       height: 100%;
       min-height: 0;
       overflow: hidden;
+      /* Ensure it fills flex container */
+      flex: 1 1 auto;
+    }
+
+    /* Page layout with horizontal padding */
+    .ux-page-layout--padded {
+      padding-left: var(--ux-space-lg);
+      padding-right: var(--ux-space-lg);
+    }
+
+    @media (min-width: 768px) {
+      .ux-page-layout--padded {
+        padding-left: var(--ux-space-xl);
+        padding-right: var(--ux-space-xl);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .ux-page-layout--padded {
+        padding-left: var(--ux-space-2xl);
+        padding-right: var(--ux-space-2xl);
+      }
     }
 
     /* ========================================
@@ -47,7 +69,7 @@
     /* Title row */
     .ux-page-header__title {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: var(--ux-space-md);
     }
@@ -159,7 +181,15 @@
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
-      padding: var(--ux-space-lg);
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-page-content--sm {
+      padding: var(--ux-space-md);
+    }
+
+    .ux-page-content--lg {
+      padding: var(--ux-space-2xl);
     }
 
     .ux-page-content--no-padding {

@@ -21918,7 +21918,8 @@
     }
 
     .ux-shell--collapsed .ux-shell__sidebar-item-text,
-    .ux-shell--collapsed .ux-shell__sidebar-section-title {
+    .ux-shell--collapsed .ux-shell__sidebar-section-title,
+    .ux-shell--collapsed .ux-shell__sidebar-header {
       opacity: 0;
       visibility: hidden;
     }
@@ -21941,7 +21942,8 @@
       }
 
       .ux-shell--collapsed .ux-shell__sidebar-item-text,
-      .ux-shell--collapsed .ux-shell__sidebar-section-title {
+      .ux-shell--collapsed .ux-shell__sidebar-section-title,
+      .ux-shell--collapsed .ux-shell__sidebar-header {
         opacity: 1;
         visibility: visible;
       }
@@ -21976,7 +21978,8 @@
       margin-bottom: var(--ux-space-md);
     }
 
-    .ux-shell__sidebar-section-title {
+    .ux-shell__sidebar-section-title,
+    .ux-shell__sidebar-header {
       padding: var(--ux-space-sm) var(--ux-space-lg);
       font-size: var(--ux-font-size-xs);
       font-weight: 600;
