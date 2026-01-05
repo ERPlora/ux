@@ -2,7 +2,7 @@
 
 iOS-style UI components for web, optimized for HTMX and Alpine.js.
 
-[Documentación en Español](docs/index.html) | [English Documentation](docs/index.html?lang=en)
+**[Live Demo](https://erplora.github.io/ux/)** | [Documentación en Español](docs/index.html) | [English Documentation](docs/index.html?lang=en)
 
 ## Features
 
@@ -14,7 +14,26 @@ iOS-style UI components for web, optimized for HTMX and Alpine.js.
 - **Dark Mode** - Built-in light and dark themes
 - **12 Color Themes** - Ocean, Emerald, Purple, Sunset, Rose, Teal, Amber, Slate, Indigo, Cyan, Crimson, Forest
 
-## Quick Start
+## Installation
+
+### Via CDN (Recommended)
+
+```html
+<!-- Full library (all components) -->
+<script src="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/ux.min.js"></script>
+
+<!-- Or core only -->
+<script src="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/ux-core.min.js"></script>
+```
+
+### Bundle Sizes
+
+| Bundle | Size | Gzipped |
+|--------|------|---------|
+| ux.min.js | 460 KB | ~60 KB |
+| ux-core.min.js | 33 KB | ~8 KB |
+
+### Local Installation
 
 ```html
 <!-- Dependencies (optional) -->
