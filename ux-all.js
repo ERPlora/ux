@@ -30,6 +30,7 @@
     'ux-spinner',
     'ux-progress',
     'ux-avatar',
+    'ux-img',
 
     // Form components
     'ux-input',
@@ -54,6 +55,7 @@
     'ux-segment',
     'ux-breadcrumbs',
     'ux-menu',
+    'ux-back-button',
 
     // Overlay components
     'ux-modal',
@@ -61,6 +63,8 @@
     'ux-alert',
     'ux-toast',
     'ux-popover',
+    'ux-loading',
+    'ux-picker',
 
     // Feedback components
     'ux-skeleton',
@@ -77,6 +81,11 @@
 
     // Gesture directives
     'ux-swipe',
+    'ux-carousel',
+
+    // Admin components
+    'ux-shell',
+    'ux-panel',
 
     // PWA / Offline support
     'ux-pwa'
