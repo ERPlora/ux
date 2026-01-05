@@ -15,7 +15,7 @@
       position: fixed;
       inset: 0;
       background-color: rgba(0, 0, 0, 0.3);
-      z-index: 1200;
+      z-index: var(--ux-z-toast);
       display: flex;
       align-items: center;
       justify-content: center;

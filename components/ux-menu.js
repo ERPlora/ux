@@ -31,7 +31,7 @@
       box-shadow: var(--ux-shadow-xl);
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      z-index: 1000;
+      z-index: var(--ux-z-dropdown);
       opacity: 0;
       visibility: hidden;
       transform: scale(0.95) translateY(-8px);
@@ -293,7 +293,7 @@
 
     .ux-context-menu {
       position: fixed;
-      z-index: 1001;
+      z-index: var(--ux-z-popover);
     }
 
     .ux-context-menu .ux-menu__content {
@@ -352,7 +352,7 @@
       position: fixed;
       inset: 0;
       background-color: rgba(0, 0, 0, 0.4);
-      z-index: 999;
+      z-index: var(--ux-z-modal-backdrop);
       opacity: 0;
       visibility: hidden;
       transition:

@@ -13,7 +13,7 @@
 
     .ux-popover {
       position: absolute;
-      z-index: 1000;
+      z-index: var(--ux-z-popover);
       min-width: 150px;
       max-width: 300px;
       background-color: var(--ux-surface);
@@ -166,7 +166,7 @@
 
     .ux-tooltip {
       position: absolute;
-      z-index: 1100;
+      z-index: var(--ux-z-tooltip);
       padding: var(--ux-space-xs) var(--ux-space-sm);
       background-color: var(--ux-dark);
       color: var(--ux-dark-contrast);
@@ -260,7 +260,7 @@
     .ux-popover-backdrop {
       position: fixed;
       inset: 0;
-      z-index: 999;
+      z-index: var(--ux-z-modal-backdrop);
       background: transparent;
     }
 

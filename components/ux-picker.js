@@ -15,7 +15,7 @@
       position: fixed;
       inset: 0;
       background-color: rgba(0, 0, 0, 0.4);
-      z-index: 1000;
+      z-index: var(--ux-z-modal-backdrop);
       opacity: 0;
       visibility: hidden;
       transition:
@@ -39,7 +39,7 @@
       bottom: 0;
       background-color: var(--ux-surface);
       border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
-      z-index: 1001;
+      z-index: var(--ux-z-modal);
       transform: translateY(100%);
       transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
       padding-bottom: env(safe-area-inset-bottom);
