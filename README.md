@@ -1,6 +1,6 @@
-# UX Library
+# UX - Universal eXtensions
 
-iOS-style UI components for web, optimized for HTMX and Alpine.js.
+Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Optimized for HTMX and Alpine.js.
 
 **[Live Demo](https://erplora.github.io/ux/)** | [Documentación en Español](docs/index.html) | [English Documentation](docs/index.html?lang=en)
 
@@ -8,9 +8,11 @@ iOS-style UI components for web, optimized for HTMX and Alpine.js.
 
 - **Zero Build** - No compilation needed, works directly in browsers
 - **Self-contained** - Each component includes CSS + JS in one file
+- **Universal** - Works on Web, Mobile browsers & PWA
 - **HTMX Compatible** - Works seamlessly with HTMX
 - **Touch-First** - Optimized for mobile (44px touch targets, gestures)
 - **iOS Style** - Pixel-perfect iOS/Ionic design patterns
+- **Accessible** - ARIA attributes for screen readers
 - **Dark Mode** - Built-in light and dark themes
 - **12 Color Themes** - Ocean, Emerald, Purple, Sunset, Rose, Teal, Amber, Slate, Indigo, Cyan, Crimson, Forest
 
