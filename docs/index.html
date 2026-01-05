@@ -4,6 +4,98 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>UX Library - Documentation</title>
+  <script>
+    // Simple i18n system
+    window.UXi18n = {
+      lang: new URLSearchParams(location.search).get('lang') || localStorage.getItem('ux-lang') || 'es',
+      translations: {
+        es: {
+          heroSubtitle: 'Componentes iOS-style para web, optimizados para HTMX y Alpine.js',
+          quickStart: 'Quick Start',
+          components: 'Componentes',
+          quickStartTitle: 'Quick Start',
+          loadComponents: 'Carga solo los componentes que necesitas:',
+          features: 'Caracteristicas',
+          zeroBuild: 'Zero Build',
+          zeroBuildDesc: 'Sin compilacion',
+          selfContained: 'Autocontenido',
+          selfContainedDesc: 'CSS + JS en uno',
+          htmxCompatible: 'HTMX',
+          htmxCompatibleDesc: 'Compatible',
+          touchFirst: 'Touch-First',
+          touchFirstDesc: 'Optimizado mobile',
+          iosStyle: 'iOS Style',
+          iosStyleDesc: 'Pixel-perfect',
+          darkModeFeature: 'Dark Mode',
+          darkModeDesc: 'Claro y oscuro',
+          basic: 'Basicos',
+          forms: 'Formularios',
+          layout: 'Layout',
+          navigation: 'Navegacion',
+          overlay: 'Overlay',
+          feedback: 'Feedback',
+          interactive: 'Interactivos',
+          adminLayouts: 'Admin Layouts',
+          utilities: 'Clases Utility (ux-core.js)',
+          utilitiesDesc: 'Clases CSS incluidas en el core para uso rapido sin componentes adicionales.',
+          colorTheme: 'Tema de color',
+          lightMode: 'Modo claro',
+          darkMode: 'Modo oscuro'
+        },
+        en: {
+          heroSubtitle: 'iOS-style components for web, optimized for HTMX and Alpine.js',
+          quickStart: 'Quick Start',
+          components: 'Components',
+          quickStartTitle: 'Quick Start',
+          loadComponents: 'Load only the components you need:',
+          features: 'Features',
+          zeroBuild: 'Zero Build',
+          zeroBuildDesc: 'No compilation',
+          selfContained: 'Self-contained',
+          selfContainedDesc: 'CSS + JS in one',
+          htmxCompatible: 'HTMX',
+          htmxCompatibleDesc: 'Compatible',
+          touchFirst: 'Touch-First',
+          touchFirstDesc: 'Mobile optimized',
+          iosStyle: 'iOS Style',
+          iosStyleDesc: 'Pixel-perfect',
+          darkModeFeature: 'Dark Mode',
+          darkModeDesc: 'Light and dark',
+          basic: 'Basic',
+          forms: 'Forms',
+          layout: 'Layout',
+          navigation: 'Navigation',
+          overlay: 'Overlay',
+          feedback: 'Feedback',
+          interactive: 'Interactive',
+          adminLayouts: 'Admin Layouts',
+          utilities: 'Utility Classes (ux-core.js)',
+          utilitiesDesc: 'CSS classes included in core for quick use without additional components.',
+          colorTheme: 'Color theme',
+          lightMode: 'Light mode',
+          darkMode: 'Dark mode'
+        }
+      },
+      t(key) {
+        return this.translations[this.lang]?.[key] || this.translations.es[key] || key;
+      },
+      setLang(lang) {
+        this.lang = lang;
+        localStorage.setItem('ux-lang', lang);
+        location.search = `?lang=${lang}`;
+      },
+      apply() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          el.textContent = this.t(el.dataset.i18n);
+        });
+        document.querySelectorAll('[data-i18n-title]').forEach(el => {
+          el.title = this.t(el.dataset.i18nTitle);
+        });
+        document.documentElement.lang = this.lang;
+      }
+    };
+    document.addEventListener('DOMContentLoaded', () => UXi18n.apply());
+  </script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-button.js"></script>
@@ -25,6 +117,11 @@
         <span class="ux-badge ux-badge--primary">v1.0</span>
       </div>
       <div class="ux-navbar__end">
+        <!-- Language Switcher -->
+        <div style="display: flex; gap: 4px; margin-right: 12px;">
+          <button onclick="UXi18n.setLang('es')" class="ux-button ux-button--clear ux-button--sm" style="padding: 4px 8px; min-width: auto; opacity: 0.7;" :style="UXi18n.lang === 'es' ? 'opacity: 1; font-weight: 600;' : ''">ES</button>
+          <button onclick="UXi18n.setLang('en')" class="ux-button ux-button--clear ux-button--sm" style="padding: 4px 8px; min-width: auto; opacity: 0.7;" :style="UXi18n.lang === 'en' ? 'opacity: 1; font-weight: 600;' : ''">EN</button>
+        </div>
         <div class="theme-switcher">
           <!-- Dark/Light Toggle -->
           <button class="theme-toggle-btn" @click="toggleDarkMode()" :title="darkMode ? 'Modo claro' : 'Modo oscuro'">
@@ -118,10 +215,10 @@
   <div class="ux-card" style="margin: 0; border-radius: 0; background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-primary-shade) 100%); color: white; text-align: center;">
     <div class="ux-card__content ux-py-xl">
       <h1 class="ux-text-3xl ux-font-bold ux-mb-md">UX Library</h1>
-      <p class="ux-text-lg ux-mb-lg" style="opacity: 0.9; max-width: 600px; margin-left: auto; margin-right: auto;">Componentes iOS-style para web, optimizados para HTMX y Alpine.js</p>
+      <p class="ux-text-lg ux-mb-lg" style="opacity: 0.9; max-width: 600px; margin-left: auto; margin-right: auto;" data-i18n="heroSubtitle">Componentes iOS-style para web, optimizados para HTMX y Alpine.js</p>
       <div class="ux-flex ux-justify-center ux-gap-md" style="flex-wrap: wrap;">
-        <a href="#quick-start" class="ux-button ux-button--light">Quick Start</a>
-        <a href="#components" class="ux-button ux-button--outline" style="border-color: white; color: white;">Componentes</a>
+        <a href="#quick-start" class="ux-button ux-button--light" data-i18n="quickStart">Quick Start</a>
+        <a href="#components" class="ux-button ux-button--outline" style="border-color: white; color: white;" data-i18n="components">Componentes</a>
       </div>
     </div>
   </div>
@@ -129,11 +226,11 @@
   <div class="ux-content">
     <!-- Quick Start -->
     <section id="quick-start" class="ux-padding">
-      <h2 class="ux-text-xl ux-font-semibold ux-mb-lg">Quick Start</h2>
+      <h2 class="ux-text-xl ux-font-semibold ux-mb-lg" data-i18n="quickStartTitle">Quick Start</h2>
 
       <div class="ux-card">
         <div class="ux-card__content">
-          <p class="ux-text-secondary ux-mb-md">Carga solo los componentes que necesitas:</p>
+          <p class="ux-text-secondary ux-mb-md" data-i18n="loadComponents">Carga solo los componentes que necesitas:</p>
           <pre style="background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-size: var(--ux-font-size-sm); font-family: 'SF Mono', Monaco, monospace;"><code>&lt;!-- Dependencias opcionales --&gt;
 &lt;script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"&gt;&lt;/script&gt;
 &lt;script src="https://unpkg.com/htmx.org@1.x.x"&gt;&lt;/script&gt;
@@ -150,7 +247,7 @@
         </div>
       </div>
 
-      <h3 class="ux-text-lg ux-font-semibold ux-mb-md ux-mt-xl">Caracteristicas</h3>
+      <h3 class="ux-text-lg ux-font-semibold ux-mb-md ux-mt-xl" data-i18n="features">Caracteristicas</h3>
 
       <div class="ux-row ux-gap-md">
         <div class="ux-col-6 ux-col-sm-4 ux-col-md-3 ux-col-lg-2">
@@ -159,8 +256,8 @@
               <svg class="ux-mb-sm" style="width: 48px; height: 48px; margin: 0 auto; color: var(--ux-success);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
               </svg>
-              <div class="ux-text-sm ux-font-medium">Zero Build</div>
-              <div class="ux-text-xs ux-text-secondary">Sin compilacion</div>
+              <div class="ux-text-sm ux-font-medium" data-i18n="zeroBuild">Zero Build</div>
+              <div class="ux-text-xs ux-text-secondary" data-i18n="zeroBuildDesc">Sin compilacion</div>
             </div>
           </div>
         </div>
@@ -170,8 +267,8 @@
               <svg class="ux-text-primary ux-mb-sm" style="width: 48px; height: 48px; margin: 0 auto;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
               </svg>
-              <div class="ux-text-sm ux-font-medium">Autocontenido</div>
-              <div class="ux-text-xs ux-text-secondary">CSS + JS en uno</div>
+              <div class="ux-text-sm ux-font-medium" data-i18n="selfContained">Autocontenido</div>
+              <div class="ux-text-xs ux-text-secondary" data-i18n="selfContainedDesc">CSS + JS en uno</div>
             </div>
           </div>
         </div>
@@ -181,8 +278,8 @@
               <svg class="ux-mb-sm" style="width: 48px; height: 48px; margin: 0 auto; color: var(--ux-warning);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
-              <div class="ux-text-sm ux-font-medium">HTMX</div>
-              <div class="ux-text-xs ux-text-secondary">Compatible</div>
+              <div class="ux-text-sm ux-font-medium" data-i18n="htmxCompatible">HTMX</div>
+              <div class="ux-text-xs ux-text-secondary" data-i18n="htmxCompatibleDesc">Compatible</div>
             </div>
           </div>
         </div>
@@ -192,8 +289,8 @@
               <svg class="ux-text-primary ux-mb-sm" style="width: 48px; height: 48px; margin: 0 auto;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
               </svg>
-              <div class="ux-text-sm ux-font-medium">Touch-First</div>
-              <div class="ux-text-xs ux-text-secondary">Optimizado mobile</div>
+              <div class="ux-text-sm ux-font-medium" data-i18n="touchFirst">Touch-First</div>
+              <div class="ux-text-xs ux-text-secondary" data-i18n="touchFirstDesc">Optimizado mobile</div>
             </div>
           </div>
         </div>
@@ -203,8 +300,8 @@
               <svg class="ux-text-primary ux-mb-sm" style="width: 48px; height: 48px; margin: 0 auto;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
               </svg>
-              <div class="ux-text-sm ux-font-medium">iOS Style</div>
-              <div class="ux-text-xs ux-text-secondary">Pixel-perfect</div>
+              <div class="ux-text-sm ux-font-medium" data-i18n="iosStyle">iOS Style</div>
+              <div class="ux-text-xs ux-text-secondary" data-i18n="iosStyleDesc">Pixel-perfect</div>
             </div>
           </div>
         </div>
@@ -214,8 +311,8 @@
               <svg class="ux-mb-sm" style="width: 48px; height: 48px; margin: 0 auto; color: var(--ux-info);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
               </svg>
-              <div class="ux-text-sm ux-font-medium">Dark Mode</div>
-              <div class="ux-text-xs ux-text-secondary">Claro y oscuro</div>
+              <div class="ux-text-sm ux-font-medium" data-i18n="darkModeFeature">Dark Mode</div>
+              <div class="ux-text-xs ux-text-secondary" data-i18n="darkModeDesc">Claro y oscuro</div>
             </div>
           </div>
         </div>
@@ -224,10 +321,10 @@
 
     <!-- Components -->
     <section id="components" class="ux-padding">
-      <h2 class="ux-text-xl ux-font-semibold ux-mb-lg">Componentes</h2>
+      <h2 class="ux-text-xl ux-font-semibold ux-mb-lg" data-i18n="components">Componentes</h2>
 
       <!-- Basic -->
-      <span class="ux-badge ux-badge--soft ux-badge--primary ux-mb-md" style="display: inline-block;">Basicos</span>
+      <span class="ux-badge ux-badge--soft ux-badge--primary ux-mb-md" style="display: inline-block;" data-i18n="basic">Basicos</span>
       <div class="ux-row ux-gap-md ux-mb-xl">
         <div class="ux-col-6 ux-col-sm-4 ux-col-md-3 ux-col-lg-2">
           <a href="button.html" class="ux-card ux-card--clickable ux-text-center">

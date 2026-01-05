@@ -1,90 +1,160 @@
 # UX Library
 
-Zero-build, touch-first UI component library with iOS/Ionic-style design, optimized for HTMX and Alpine.js integration.
+iOS-style UI components for web, optimized for HTMX and Alpine.js.
+
+[Documentación en Español](docs/index.html) | [English Documentation](docs/index.html?lang=en)
 
 ## Features
 
-- **Zero Build** - No npm, no webpack, no bundlers. Just include the scripts.
-- **Touch First** - 44px touch targets, gestures, mobile-optimized
-- **iOS/Ionic Style** - Clean, modern design following Apple HIG
-- **Dark Mode** - Automatic dark mode support
-- **Alpine.js Integration** - Interactive components with Alpine.js
-- **HTMX Ready** - Works seamlessly with HTMX
+- **Zero Build** - No compilation needed, works directly in browsers
+- **Self-contained** - Each component includes CSS + JS in one file
+- **HTMX Compatible** - Works seamlessly with HTMX
+- **Touch-First** - Optimized for mobile (44px touch targets, gestures)
+- **iOS Style** - Pixel-perfect iOS/Ionic design patterns
+- **Dark Mode** - Built-in light and dark themes
+- **12 Color Themes** - Ocean, Emerald, Purple, Sunset, Rose, Teal, Amber, Slate, Indigo, Cyan, Crimson, Forest
 
 ## Quick Start
 
 ```html
-<!-- Alpine.js (required for interactive components) -->
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<!-- Dependencies (optional) -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.x.x"></script>
 
-<!-- UX Library -->
+<!-- Core (required) -->
+<script src="components/ux-core.js"></script>
+
+<!-- Load only what you need -->
+<script src="components/ux-button.js"></script>
+<script src="components/ux-modal.js"></script>
+
+<!-- Or load everything -->
 <script src="ux-all.js"></script>
 ```
 
-Or load individual components:
+## Components (40+)
 
+| Category | Components |
+|----------|------------|
+| **Basic** | button, badge, chip, spinner, progress, avatar, img |
+| **Forms** | input, checkbox, radio, toggle, range, select, searchbar, textarea |
+| **Layout** | card, list, grid, content |
+| **Navigation** | navbar, toolbar, tabs, segment, breadcrumbs, menu |
+| **Overlay** | modal, sheet, alert, toast, popover |
+| **Feedback** | skeleton, fab |
+| **Interactive** | accordion, datetime, infinite-scroll, refresher, reorder, swipe, carousel |
+| **Admin** | shell, panel |
+
+## Usage
+
+### Buttons
 ```html
-<script src="components/ux-core.js"></script>
-<script src="components/ux-button.js"></script>
-<script src="components/ux-modal.js"></script>
+<button class="ux-button ux-button--primary">Primary</button>
+<button class="ux-button ux-button--secondary ux-button--lg">Large</button>
+<button class="ux-button ux-button--outline ux-button--sm">Small Outline</button>
 ```
 
-## Components
+### Modal (Alpine.js)
+```html
+<div x-data="uxModal()">
+  <button @click="open()" class="ux-button">Open</button>
+  <template x-teleport="body">
+    <div x-show="isOpen" class="ux-modal__backdrop" @click.self="close()">
+      <div class="ux-modal__content">
+        Modal content
+      </div>
+    </div>
+  </template>
+</div>
+```
 
-### Basic (CSS-only)
-- Button, Badge, Chip, Spinner, Progress, Avatar
+### Toast Notifications
+```html
+<div x-data="uxToastManager({ position: 'top-end' })">
+  <button @click="success('Saved!')">Toast</button>
+  <button @click="danger('Error!')">Error</button>
+</div>
+```
 
-### Form
-- Input, Toggle, Checkbox, Radio, Range, Select, Searchbar, Textarea
+### Carousel
+```html
+<div x-data="uxCarousel({ slidesPerView: 3 })"
+     class="ux-carousel ux-carousel--show-3 ux-carousel--gap-md">
+  <button class="ux-carousel__nav ux-carousel__nav--prev" @click="prev()">←</button>
+  <button class="ux-carousel__nav ux-carousel__nav--next" @click="next()">→</button>
+  <div class="ux-carousel__viewport" x-ref="viewport">
+    <div class="ux-carousel__track" x-ref="track"
+         :style="{ transform: `translateX(${translateX}%)` }">
+      <div class="ux-carousel__slide">1</div>
+      <div class="ux-carousel__slide">2</div>
+      <div class="ux-carousel__slide">3</div>
+    </div>
+  </div>
+</div>
+```
 
-### Layout
-- Card, List, Grid, Content
+### With HTMX
+```html
+<button class="ux-button" hx-post="/api/save" hx-target="#result">
+  Save
+</button>
 
-### Navigation
-- Navbar, Toolbar, Tabs, Segment, Breadcrumbs, Menu
+<form hx-post="/api/submit" hx-swap="outerHTML">
+  <input type="text" class="ux-input" name="email">
+  <button type="submit" class="ux-button ux-button--primary">Submit</button>
+</form>
+```
 
-### Overlay
-- Modal, Sheet, Alert, Toast, Popover
+## Theming
 
-### Feedback
-- Skeleton, FAB
+### Dark Mode
+```html
+<body x-data="uxTheme()" :class="{ 'ux-dark': darkMode }">
+  <button @click="toggleDarkMode()">Toggle</button>
+</body>
+```
 
-### Interactive (Alpine.js)
-- Accordion, Datetime, Infinite Scroll, Refresher, Reorder
+### Color Themes
+```html
+<body class="ux-theme-emerald"><!-- or purple, sunset, rose, etc. --></body>
+```
 
-### Gestures
-- Swipe, Drag, Pull-to-Refresh, Long Press, Pinch, Tap
-
-## CSS Naming Convention
+## CSS Utilities
 
 ```css
-/* Component */
-.ux-button { }
+/* Flex */
+.ux-flex .ux-flex-col .ux-items-center .ux-justify-between .ux-gap-md
 
-/* Modifier */
-.ux-button--primary { }
-.ux-button--lg { }
+/* Spacing: xs, sm, md, lg, xl */
+.ux-p-md .ux-m-lg .ux-px-sm .ux-py-xl .ux-mt-md .ux-mb-lg
 
-/* Child element */
-.ux-button__icon { }
+/* Typography */
+.ux-text-sm .ux-text-lg .ux-text-center .ux-font-bold .ux-text-primary
+
+/* Display */
+.ux-hidden .ux-block .ux-rounded-lg .ux-shadow-md
 ```
 
 ## CSS Variables
 
-All components use CSS custom properties with `--ux-*` prefix:
-
 ```css
 :root {
   --ux-primary: #007aff;
+  --ux-success: #34c759;
+  --ux-danger: #ff3b30;
   --ux-space-md: 16px;
   --ux-border-radius: 8px;
   --ux-touch-target: 44px;
 }
 ```
 
+## Browser Support
+
+Chrome 88+ | Firefox 78+ | Safari 14+ | Edge 88+
+
 ## Documentation
 
-Open `docs/index.html` in your browser to see all components with interactive examples.
+Open `docs/index.html` for full documentation with live examples.
 
 ## License
 
