@@ -365,6 +365,8 @@
       }
     },
 
+    actualPosition: 'bottom', // Tracks the actual position after collision detection
+
     updatePosition() {
       const trigger = this.$refs.trigger;
       const popover = this.$refs.popover;
@@ -374,10 +376,42 @@
       const popoverRect = popover.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
+      const margin = 8;
+
+      // Collision detection - check if preferred position fits
+      let position = this.position;
+
+      // Vertical collision detection
+      if (position === 'bottom' && triggerRect.bottom + popoverRect.height + this.offset > viewportHeight - margin) {
+        // Doesn't fit below, try top
+        if (triggerRect.top - popoverRect.height - this.offset >= margin) {
+          position = 'top';
+        }
+      } else if (position === 'top' && triggerRect.top - popoverRect.height - this.offset < margin) {
+        // Doesn't fit above, try bottom
+        if (triggerRect.bottom + popoverRect.height + this.offset <= viewportHeight - margin) {
+          position = 'bottom';
+        }
+      }
+
+      // Horizontal collision detection
+      if (position === 'right' && triggerRect.right + popoverRect.width + this.offset > viewportWidth - margin) {
+        // Doesn't fit right, try left
+        if (triggerRect.left - popoverRect.width - this.offset >= margin) {
+          position = 'left';
+        }
+      } else if (position === 'left' && triggerRect.left - popoverRect.width - this.offset < margin) {
+        // Doesn't fit left, try right
+        if (triggerRect.right + popoverRect.width + this.offset <= viewportWidth - margin) {
+          position = 'right';
+        }
+      }
+
+      this.actualPosition = position;
 
       let top, left;
 
-      switch (this.position) {
+      switch (position) {
         case 'top':
           top = triggerRect.top - popoverRect.height - this.offset;
           left = triggerRect.left + (triggerRect.width - popoverRect.width) / 2;
@@ -396,14 +430,14 @@
           break;
       }
 
-      // Keep within viewport
-      if (left < 8) left = 8;
-      if (left + popoverRect.width > viewportWidth - 8) {
-        left = viewportWidth - popoverRect.width - 8;
+      // Final boundary clamping
+      if (left < margin) left = margin;
+      if (left + popoverRect.width > viewportWidth - margin) {
+        left = viewportWidth - popoverRect.width - margin;
       }
-      if (top < 8) top = 8;
-      if (top + popoverRect.height > viewportHeight - 8) {
-        top = viewportHeight - popoverRect.height - 8;
+      if (top < margin) top = margin;
+      if (top + popoverRect.height > viewportHeight - margin) {
+        top = viewportHeight - popoverRect.height - margin;
       }
 
       this.popoverStyle = {

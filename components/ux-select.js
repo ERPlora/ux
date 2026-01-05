@@ -662,6 +662,12 @@
       cursor: not-allowed;
     }
 
+    .ux-select__option--focused {
+      background-color: var(--ux-surface-secondary);
+      outline: 2px solid var(--ux-primary);
+      outline-offset: -2px;
+    }
+
     .ux-select__option-check {
       width: 20px;
       height: 20px;
@@ -841,6 +847,9 @@
       if (this.disabled) return;
       this.isOpen = true;
       this.tempValue = this.value;
+      // Reset focused index to selected item or first item
+      const selectedIdx = this.options.findIndex(opt => opt.value === this.value);
+      this.focusedIndex = selectedIdx >= 0 ? selectedIdx : 0;
       document.body.style.overflow = 'hidden';
     },
 
@@ -903,31 +912,71 @@
       this.close();
     },
 
+    focusedIndex: -1,
+
     handleKeydown(event) {
+      const enabledOptions = this.options.filter(opt => !opt.disabled);
+
       switch (event.key) {
         case 'Escape':
           this.close();
           break;
         case 'Enter':
         case ' ':
+          event.preventDefault();
           if (!this.isOpen) {
-            event.preventDefault();
             this.open();
+          } else if (this.focusedIndex >= 0 && this.focusedIndex < enabledOptions.length) {
+            this.selectOption(enabledOptions[this.focusedIndex]);
           }
           break;
         case 'ArrowDown':
           event.preventDefault();
           if (!this.isOpen) {
             this.open();
+          } else {
+            this.focusedIndex = Math.min(this.focusedIndex + 1, enabledOptions.length - 1);
+            this.scrollToFocused();
           }
           break;
         case 'ArrowUp':
           event.preventDefault();
           if (!this.isOpen) {
             this.open();
+          } else {
+            this.focusedIndex = Math.max(this.focusedIndex - 1, 0);
+            this.scrollToFocused();
+          }
+          break;
+        case 'Home':
+          if (this.isOpen) {
+            event.preventDefault();
+            this.focusedIndex = 0;
+            this.scrollToFocused();
+          }
+          break;
+        case 'End':
+          if (this.isOpen) {
+            event.preventDefault();
+            this.focusedIndex = enabledOptions.length - 1;
+            this.scrollToFocused();
           }
           break;
       }
+    },
+
+    scrollToFocused() {
+      this.$nextTick(() => {
+        const dropdown = this.$refs.dropdown;
+        const focused = dropdown?.querySelector('.ux-select__option--focused');
+        if (focused && dropdown) {
+          focused.scrollIntoView({ block: 'nearest' });
+        }
+      });
+    },
+
+    isFocused(index) {
+      return this.focusedIndex === index;
     }
   });
 

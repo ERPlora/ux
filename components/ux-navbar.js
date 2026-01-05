@@ -96,16 +96,22 @@
 
     .ux-navbar__center {
       position: absolute;
-      left: 0;
-      right: 0;
+      left: var(--ux-touch-target);
+      right: var(--ux-touch-target);
       display: flex;
       align-items: center;
       justify-content: center;
       pointer-events: none;
+      max-width: calc(100% - var(--ux-touch-target) * 2 - var(--ux-space-md) * 2);
+      margin: 0 auto;
     }
 
     .ux-navbar__center > * {
       pointer-events: auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
     }
 
     .ux-navbar__end {
