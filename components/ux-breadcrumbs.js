@@ -9,6 +9,8 @@
   const styles = `
     /* ========================================
        UX Breadcrumbs
+       Semantic structure: nav > ol > li
+       ARIA: aria-label="Breadcrumb", aria-current="page"
     ======================================== */
 
     .ux-breadcrumbs {
@@ -18,6 +20,17 @@
       gap: var(--ux-space-xs);
       padding: var(--ux-space-sm) 0;
       font-size: var(--ux-font-size-sm);
+    }
+
+    /* Semantic list structure */
+    .ux-breadcrumbs__list {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--ux-space-xs);
+      list-style: none;
+      margin: 0;
+      padding: 0;
     }
 
     /* ========================================
@@ -238,11 +251,26 @@
   }
 
   // Alpine component for collapsible breadcrumbs
+  // ARIA: aria-label="Breadcrumb" on nav, aria-current="page" on last item
   const breadcrumbsComponent = (config = {}) => ({
     items: config.items || [],
     maxItems: config.maxItems || 4,
     collapsed: true,
     dropdownOpen: false,
+    ariaLabel: config.ariaLabel || 'Breadcrumb',
+
+    // ARIA attributes for the nav element
+    get navAriaAttrs() {
+      return {
+        'aria-label': this.ariaLabel
+      };
+    },
+
+    // ARIA attributes for list items
+    getItemAriaAttrs(index) {
+      const isLast = this.isLast(index);
+      return isLast ? { 'aria-current': 'page' } : {};
+    },
 
     get visibleItems() {
       if (!this.collapsed || this.items.length <= this.maxItems) {

@@ -72,6 +72,17 @@
       display: none;
     }
 
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .ux-skeleton::after {
+        animation: none;
+      }
+
+      .ux-skeleton--pulse {
+        animation: none;
+      }
+    }
+
     /* Pulse animation alternative */
     .ux-skeleton--pulse {
       animation: ux-skeleton-pulse 1.5s ease-in-out infinite;
@@ -475,15 +486,30 @@
   }
 
   // Alpine component for skeleton loading state
+  // ARIA: aria-busy indicates loading state, role="status" for live region
   const skeletonComponent = (config = {}) => ({
     loading: config.loading !== false,
+    ariaLabel: config.ariaLabel || 'Loading content',
+
+    // ARIA attributes for the skeleton container
+    get ariaAttrs() {
+      return {
+        'aria-busy': this.loading ? 'true' : 'false',
+        'aria-live': 'polite',
+        'aria-label': this.ariaLabel
+      };
+    },
 
     setLoading(state) {
       this.loading = state;
+      // Announce state change to screen readers
+      if (!state && window.UX && window.UX.announce) {
+        window.UX.announce('Content loaded', 'polite');
+      }
     },
 
     loaded() {
-      this.loading = false;
+      this.setLoading(false);
     }
   });
 

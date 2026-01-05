@@ -333,6 +333,22 @@
       transition: none;
     }
 
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .ux-toast {
+        transition: opacity 0.1s ease;
+        transform: none !important;
+      }
+
+      .ux-toast--visible {
+        transform: none;
+      }
+
+      .ux-toast__progress-bar {
+        transition: none;
+      }
+    }
+
     /* ========================================
        Stacked Toasts
     ======================================== */
@@ -398,6 +414,7 @@
     progress: 100,
     _timer: null,
     _progressTimer: null,
+    _startTime: null,
 
     // ARIA attributes - use "alert" for danger/errors, "status" for info
     get ariaAttrs() {
@@ -418,28 +435,29 @@
 
       this.visible = true;
       this.progress = 100;
+      this._startTime = Date.now();
 
       // Clear existing timer
       if (this._timer) {
         clearTimeout(this._timer);
       }
       if (this._progressTimer) {
-        clearInterval(this._progressTimer);
+        cancelAnimationFrame(this._progressTimer);
       }
 
       // Auto dismiss
       if (this.duration > 0) {
-        // Progress bar animation
+        // Progress bar animation using requestAnimationFrame for accuracy
         if (this.showProgress) {
-          const interval = 50;
-          const decrement = (100 / this.duration) * interval;
-          this._progressTimer = setInterval(() => {
-            this.progress -= decrement;
-            if (this.progress <= 0) {
-              this.progress = 0;
-              clearInterval(this._progressTimer);
+          const updateProgress = () => {
+            const elapsed = Date.now() - this._startTime;
+            this.progress = Math.max(0, 100 - (elapsed / this.duration) * 100);
+
+            if (this.progress > 0 && this.visible) {
+              this._progressTimer = requestAnimationFrame(updateProgress);
             }
-          }, interval);
+          };
+          this._progressTimer = requestAnimationFrame(updateProgress);
         }
 
         this._timer = setTimeout(() => {
@@ -455,18 +473,19 @@
         this._timer = null;
       }
       if (this._progressTimer) {
-        clearInterval(this._progressTimer);
+        cancelAnimationFrame(this._progressTimer);
         this._progressTimer = null;
       }
     },
 
     pause() {
+      this._pausedAt = Date.now();
       if (this._timer) {
         clearTimeout(this._timer);
         this._timer = null;
       }
       if (this._progressTimer) {
-        clearInterval(this._progressTimer);
+        cancelAnimationFrame(this._progressTimer);
         this._progressTimer = null;
       }
     },
@@ -474,17 +493,19 @@
     resume() {
       if (this.visible && this.duration > 0) {
         const remainingTime = (this.progress / 100) * this.duration;
+        // Adjust start time to account for pause duration
+        this._startTime = Date.now() - (this.duration - remainingTime);
 
         if (this.showProgress) {
-          const interval = 50;
-          const decrement = (100 / this.duration) * interval;
-          this._progressTimer = setInterval(() => {
-            this.progress -= decrement;
-            if (this.progress <= 0) {
-              this.progress = 0;
-              clearInterval(this._progressTimer);
+          const updateProgress = () => {
+            const elapsed = Date.now() - this._startTime;
+            this.progress = Math.max(0, 100 - (elapsed / this.duration) * 100);
+
+            if (this.progress > 0 && this.visible) {
+              this._progressTimer = requestAnimationFrame(updateProgress);
             }
-          }, interval);
+          };
+          this._progressTimer = requestAnimationFrame(updateProgress);
         }
 
         this._timer = setTimeout(() => {

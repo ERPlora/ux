@@ -268,6 +268,29 @@
     .ux-spinner--paused span {
       animation-play-state: paused;
     }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .ux-spinner {
+        animation: none;
+        border-top-color: var(--ux-primary);
+        opacity: 0.8;
+      }
+
+      .ux-spinner--dots span {
+        animation: none;
+        opacity: 0.7;
+      }
+
+      .ux-spinner--bars span {
+        animation: none;
+        transform: scaleY(0.7);
+      }
+
+      .ux-spinner--ios svg {
+        animation: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -281,13 +304,28 @@
   }
 
   // Alpine component for spinner with loading state
+  // ARIA: role="status", aria-label for screen readers
   const spinnerComponent = (config = {}) => ({
     visible: config.visible !== undefined ? config.visible : true,
     text: config.text || '',
+    ariaLabel: config.ariaLabel || 'Loading',
+
+    // ARIA attributes for the spinner
+    get ariaAttrs() {
+      return {
+        'role': 'status',
+        'aria-live': 'polite',
+        'aria-label': this.text || this.ariaLabel
+      };
+    },
 
     show(text = '') {
       this.text = text;
       this.visible = true;
+      // Announce to screen readers
+      if (window.UX && window.UX.announce) {
+        window.UX.announce(text || this.ariaLabel, 'polite');
+      }
     },
 
     hide() {

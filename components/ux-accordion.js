@@ -262,11 +262,14 @@
 
   // Alpine component for accordion
   // ARIA: aria-expanded, aria-controls on headers; region role on panels
+  // Keyboard: Arrow Up/Down, Home/End, Enter/Space
   const accordionComponent = (config = {}) => ({
     openItems: config.openItems || [],
     multiple: config.multiple || false,
     disabled: config.disabled || false,
     accordionId: config.id || 'ux-accordion-' + Math.random().toString(36).substr(2, 9),
+    totalItems: config.totalItems || 0,
+    focusedIndex: -1,
 
     isOpen(index) {
       return this.openItems.includes(index);
@@ -321,6 +324,43 @@
 
     closeAll() {
       this.openItems = [];
+    },
+
+    // Keyboard navigation handler
+    handleKeydown(event, index) {
+      const headers = this.$el.querySelectorAll('.ux-accordion-item__header');
+      const total = headers.length;
+
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          this.focusItem((index + 1) % total, headers);
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          this.focusItem((index - 1 + total) % total, headers);
+          break;
+        case 'Home':
+          event.preventDefault();
+          this.focusItem(0, headers);
+          break;
+        case 'End':
+          event.preventDefault();
+          this.focusItem(total - 1, headers);
+          break;
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          this.toggle(index);
+          break;
+      }
+    },
+
+    focusItem(index, headers) {
+      this.focusedIndex = index;
+      if (headers && headers[index]) {
+        headers[index].focus();
+      }
     }
   });
 
@@ -334,6 +374,7 @@
 
   // Alpine component for single accordion item
   // ARIA: aria-expanded on header
+  // Keyboard: Enter/Space to toggle
   const accordionItemComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
     disabled: config.disabled || false,
@@ -371,6 +412,14 @@
 
     close() {
       this.isOpen = false;
+    },
+
+    // Keyboard handler for Enter/Space
+    handleKeydown(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        this.toggle();
+      }
     }
   });
 

@@ -319,6 +319,31 @@
     @keyframes ux-carousel-spin {
       to { transform: translate(-50%, -50%) rotate(360deg); }
     }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .ux-carousel__track {
+        transition: none;
+      }
+
+      .ux-carousel--smooth .ux-carousel__track,
+      .ux-carousel--fast .ux-carousel__track,
+      .ux-carousel--spring .ux-carousel__track {
+        transition: none;
+      }
+
+      .ux-carousel--fade .ux-carousel__slide {
+        transition: opacity 0.1s ease;
+      }
+
+      .ux-carousel--center .ux-carousel__slide {
+        transition: none;
+      }
+
+      .ux-carousel--loading::after {
+        animation: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -597,6 +622,41 @@
       // Resume autoplay
       if (this.autoplay) {
         this.startAutoplay();
+      }
+    },
+
+    // Keyboard navigation handler
+    handleKeydown(event) {
+      switch (event.key) {
+        case 'ArrowLeft':
+          event.preventDefault();
+          this.prev();
+          // Announce to screen readers
+          if (window.UX && window.UX.announce) {
+            window.UX.announce(`Slide ${this.currentIndex + 1} of ${this.slidesCount}`, 'polite');
+          }
+          break;
+        case 'ArrowRight':
+          event.preventDefault();
+          this.next();
+          if (window.UX && window.UX.announce) {
+            window.UX.announce(`Slide ${this.currentIndex + 1} of ${this.slidesCount}`, 'polite');
+          }
+          break;
+        case 'Home':
+          event.preventDefault();
+          this.goTo(0);
+          if (window.UX && window.UX.announce) {
+            window.UX.announce(`First slide`, 'polite');
+          }
+          break;
+        case 'End':
+          event.preventDefault();
+          this.goTo(this.maxIndex);
+          if (window.UX && window.UX.announce) {
+            window.UX.announce(`Last slide`, 'polite');
+          }
+          break;
       }
     }
   });

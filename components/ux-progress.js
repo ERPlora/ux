@@ -277,6 +277,28 @@
       }
     }
 
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .ux-progress--indeterminate .ux-progress__bar {
+        animation: none;
+        width: 100% !important;
+        opacity: 0.5;
+      }
+
+      .ux-progress--animated .ux-progress__bar {
+        animation: none;
+      }
+
+      .ux-progress-circular--indeterminate svg {
+        animation: none;
+      }
+
+      .ux-progress-circular--indeterminate .ux-progress-circular__bar {
+        animation: none;
+        stroke-dasharray: 90, 150;
+      }
+    }
+
     /* Circular Colors */
     .ux-progress-circular--success .ux-progress-circular__bar {
       stroke: var(--ux-success);
@@ -302,10 +324,32 @@
   }
 
   // Alpine component for progress
+  // ARIA: role="progressbar", aria-valuenow, aria-valuemin, aria-valuemax
   const progressComponent = (config = {}) => ({
     value: config.value || 0,
     max: config.max || 100,
+    min: config.min || 0,
     buffer: config.buffer || 0,
+    indeterminate: config.indeterminate || false,
+    ariaLabel: config.ariaLabel || 'Progress',
+
+    // ARIA attributes for the progress bar
+    get ariaAttrs() {
+      const attrs = {
+        'role': 'progressbar',
+        'aria-label': this.ariaLabel,
+        'aria-valuemin': this.min,
+        'aria-valuemax': this.max
+      };
+
+      // Only set aria-valuenow for determinate progress
+      if (!this.indeterminate) {
+        attrs['aria-valuenow'] = this.value;
+        attrs['aria-valuetext'] = `${Math.round(this.percent)}%`;
+      }
+
+      return attrs;
+    },
 
     get percent() {
       return Math.min(100, Math.max(0, (this.value / this.max) * 100));
@@ -316,7 +360,7 @@
     },
 
     set(value) {
-      this.value = Math.min(this.max, Math.max(0, value));
+      this.value = Math.min(this.max, Math.max(this.min, value));
     },
 
     increment(amount = 1) {
@@ -328,11 +372,15 @@
     },
 
     reset() {
-      this.value = 0;
+      this.value = this.min;
     },
 
     complete() {
       this.value = this.max;
+      // Announce completion to screen readers
+      if (window.UX && window.UX.announce) {
+        window.UX.announce('Progress complete', 'polite');
+      }
     }
   });
 
