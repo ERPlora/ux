@@ -91,35 +91,35 @@
 
       /* Borders */
       --ux-border-color: rgba(0, 0, 0, 0.13);
-      --ux-border-radius: 8px;
-      --ux-border-radius-sm: 4px;
-      --ux-border-radius-lg: 12px;
-      --ux-border-radius-xl: 16px;
+      --ux-border-radius: 0.5rem;
+      --ux-border-radius-sm: 0.25rem;
+      --ux-border-radius-lg: 0.75rem;
+      --ux-border-radius-xl: 1rem;
 
       /* Typography */
       --ux-font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Roboto", sans-serif;
-      --ux-font-size-xs: 10px;
-      --ux-font-size-sm: 12px;
-      --ux-font-size-base: 14px;
-      --ux-font-size-md: 16px;
-      --ux-font-size-lg: 18px;
-      --ux-font-size-xl: 20px;
-      --ux-font-size-2xl: 24px;
-      --ux-font-size-3xl: 30px;
-      --ux-font-size-4xl: 36px;
+      --ux-font-size-xs: 0.625rem;
+      --ux-font-size-sm: 0.75rem;
+      --ux-font-size-base: 0.875rem;
+      --ux-font-size-md: 1rem;
+      --ux-font-size-lg: 1.125rem;
+      --ux-font-size-xl: 1.25rem;
+      --ux-font-size-2xl: 1.5rem;
+      --ux-font-size-3xl: 1.875rem;
+      --ux-font-size-4xl: 2.25rem;
 
       /* Spacing */
-      --ux-space-xs: 4px;
-      --ux-space-sm: 8px;
-      --ux-space-md: 12px;
-      --ux-space-lg: 16px;
-      --ux-space-xl: 24px;
-      --ux-space-2xl: 32px;
-      --ux-space-3xl: 48px;
+      --ux-space-xs: 0.25rem;
+      --ux-space-sm: 0.5rem;
+      --ux-space-md: 0.75rem;
+      --ux-space-lg: 1rem;
+      --ux-space-xl: 1.5rem;
+      --ux-space-2xl: 2rem;
+      --ux-space-3xl: 3rem;
 
       /* Touch */
-      --ux-touch-target: 44px;
-      --ux-touch-target-sm: 36px;
+      --ux-touch-target: 2.75rem;
+      --ux-touch-target-sm: 2.25rem;
 
       /* Transitions */
       --ux-transition-fast: 150ms;
@@ -425,43 +425,43 @@
     ======================================== */
 
     h1, h2, h3, h4, h5, h6 {
-      margin-top: 16px;
-      margin-bottom: 10px;
+      margin-top: 1rem;
+      margin-bottom: 0.625rem;
       font-weight: 500;
       line-height: 1.2;
       color: var(--ux-text);
     }
 
     h1 {
-      margin-top: 20px;
-      font-size: 26px;
+      margin-top: 1.25rem;
+      font-size: 1.625rem;
     }
 
     h2 {
-      margin-top: 18px;
-      font-size: 24px;
+      margin-top: 1.125rem;
+      font-size: 1.5rem;
     }
 
     h3 {
-      font-size: 22px;
+      font-size: 1.375rem;
     }
 
     h4 {
-      font-size: 20px;
+      font-size: 1.25rem;
     }
 
     h5 {
-      font-size: 18px;
+      font-size: 1.125rem;
     }
 
     h6 {
-      font-size: 16px;
+      font-size: 1rem;
     }
 
     /* Paragraphs */
     p {
       margin-top: 0;
-      margin-bottom: 16px;
+      margin-bottom: 1rem;
       line-height: 1.5;
     }
 
@@ -510,7 +510,7 @@
     }
 
     code {
-      padding: 2px 6px;
+      padding: 0.125rem 0.375rem;
       background-color: var(--ux-surface-secondary);
       border-radius: var(--ux-border-radius-sm);
       color: var(--ux-danger);
@@ -520,7 +520,7 @@
       display: block;
       padding: var(--ux-space-md);
       margin-top: 0;
-      margin-bottom: 16px;
+      margin-bottom: 1rem;
       overflow: auto;
       background-color: var(--ux-surface-secondary);
       border-radius: var(--ux-border-radius);
@@ -534,7 +534,7 @@
 
     /* Blockquote */
     blockquote {
-      margin: 0 0 16px;
+      margin: 0 0 1rem;
       padding: var(--ux-space-md) var(--ux-space-lg);
       border-left: 4px solid var(--ux-primary);
       background-color: var(--ux-surface-secondary);
@@ -554,9 +554,9 @@
 
     /* Mark / Highlight */
     mark {
-      padding: 2px 4px;
+      padding: 0.125rem 0.25rem;
       background-color: rgba(var(--ux-warning-rgb), 0.3);
-      border-radius: 2px;
+      border-radius: 0.125rem;
     }
 
     /* Abbreviation */
@@ -569,8 +569,8 @@
     /* Lists */
     ul, ol {
       margin-top: 0;
-      margin-bottom: 16px;
-      padding-left: 24px;
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
     }
 
     ul ul, ul ol, ol ul, ol ol {
@@ -578,13 +578,13 @@
     }
 
     li {
-      margin-bottom: 4px;
+      margin-bottom: 0.25rem;
     }
 
     /* Definition List */
     dl {
       margin-top: 0;
-      margin-bottom: 16px;
+      margin-bottom: 1rem;
     }
 
     dt {
@@ -593,7 +593,7 @@
 
     dd {
       margin-left: 0;
-      margin-bottom: 8px;
+      margin-bottom: 0.5rem;
     }
 
     /* Smooth scrolling */
@@ -1035,35 +1035,35 @@
 
     /* Padding - all sides */
     .ux-padding {
-      padding: 16px;
+      padding: 1rem;
     }
 
     .ux-padding-top {
-      padding-top: 16px;
+      padding-top: 1rem;
     }
 
     .ux-padding-bottom {
-      padding-bottom: 16px;
+      padding-bottom: 1rem;
     }
 
     .ux-padding-start,
     .ux-padding-left {
-      padding-left: 16px;
+      padding-left: 1rem;
     }
 
     .ux-padding-end,
     .ux-padding-right {
-      padding-right: 16px;
+      padding-right: 1rem;
     }
 
     .ux-padding-horizontal {
-      padding-left: 16px;
-      padding-right: 16px;
+      padding-left: 1rem;
+      padding-right: 1rem;
     }
 
     .ux-padding-vertical {
-      padding-top: 16px;
-      padding-bottom: 16px;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
     }
 
     .ux-no-padding {
@@ -1072,35 +1072,35 @@
 
     /* Margin - all sides */
     .ux-margin {
-      margin: 16px;
+      margin: 1rem;
     }
 
     .ux-margin-top {
-      margin-top: 16px;
+      margin-top: 1rem;
     }
 
     .ux-margin-bottom {
-      margin-bottom: 16px;
+      margin-bottom: 1rem;
     }
 
     .ux-margin-start,
     .ux-margin-left {
-      margin-left: 16px;
+      margin-left: 1rem;
     }
 
     .ux-margin-end,
     .ux-margin-right {
-      margin-right: 16px;
+      margin-right: 1rem;
     }
 
     .ux-margin-horizontal {
-      margin-left: 16px;
-      margin-right: 16px;
+      margin-left: 1rem;
+      margin-right: 1rem;
     }
 
     .ux-margin-vertical {
-      margin-top: 16px;
-      margin-bottom: 16px;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
     }
 
     .ux-no-margin {
@@ -1114,12 +1114,12 @@
 
     /* Small screens and up (576px+) */
     @media (min-width: 576px) {
-      .ux-padding-sm { padding: 16px; }
-      .ux-padding-horizontal-sm { padding-left: 16px; padding-right: 16px; }
-      .ux-padding-vertical-sm { padding-top: 16px; padding-bottom: 16px; }
-      .ux-margin-sm { margin: 16px; }
-      .ux-margin-horizontal-sm { margin-left: 16px; margin-right: 16px; }
-      .ux-margin-vertical-sm { margin-top: 16px; margin-bottom: 16px; }
+      .ux-padding-sm { padding: 1rem; }
+      .ux-padding-horizontal-sm { padding-left: 1rem; padding-right: 1rem; }
+      .ux-padding-vertical-sm { padding-top: 1rem; padding-bottom: 1rem; }
+      .ux-margin-sm { margin: 1rem; }
+      .ux-margin-horizontal-sm { margin-left: 1rem; margin-right: 1rem; }
+      .ux-margin-vertical-sm { margin-top: 1rem; margin-bottom: 1rem; }
       .ux-hidden-sm { display: none; }
       .ux-block-sm { display: block; }
       .ux-flex-sm { display: flex; }
@@ -1127,28 +1127,28 @@
 
     /* Medium screens and up (768px+) */
     @media (min-width: 768px) {
-      .ux-padding { padding: 24px; }
-      .ux-padding-horizontal { padding-left: 24px; padding-right: 24px; }
-      .ux-padding-vertical { padding-top: 24px; padding-bottom: 24px; }
-      .ux-padding-top { padding-top: 24px; }
-      .ux-padding-bottom { padding-bottom: 24px; }
-      .ux-padding-start, .ux-padding-left { padding-left: 24px; }
-      .ux-padding-end, .ux-padding-right { padding-right: 24px; }
+      .ux-padding { padding: 1.5rem; }
+      .ux-padding-horizontal { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .ux-padding-vertical { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+      .ux-padding-top { padding-top: 1.5rem; }
+      .ux-padding-bottom { padding-bottom: 1.5rem; }
+      .ux-padding-start, .ux-padding-left { padding-left: 1.5rem; }
+      .ux-padding-end, .ux-padding-right { padding-right: 1.5rem; }
 
-      .ux-margin { margin: 24px; }
-      .ux-margin-horizontal { margin-left: 24px; margin-right: 24px; }
-      .ux-margin-vertical { margin-top: 24px; margin-bottom: 24px; }
-      .ux-margin-top { margin-top: 24px; }
-      .ux-margin-bottom { margin-bottom: 24px; }
-      .ux-margin-start, .ux-margin-left { margin-left: 24px; }
-      .ux-margin-end, .ux-margin-right { margin-right: 24px; }
+      .ux-margin { margin: 1.5rem; }
+      .ux-margin-horizontal { margin-left: 1.5rem; margin-right: 1.5rem; }
+      .ux-margin-vertical { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+      .ux-margin-top { margin-top: 1.5rem; }
+      .ux-margin-bottom { margin-bottom: 1.5rem; }
+      .ux-margin-start, .ux-margin-left { margin-left: 1.5rem; }
+      .ux-margin-end, .ux-margin-right { margin-right: 1.5rem; }
 
-      .ux-padding-md { padding: 24px; }
-      .ux-padding-horizontal-md { padding-left: 24px; padding-right: 24px; }
-      .ux-padding-vertical-md { padding-top: 24px; padding-bottom: 24px; }
-      .ux-margin-md { margin: 24px; }
-      .ux-margin-horizontal-md { margin-left: 24px; margin-right: 24px; }
-      .ux-margin-vertical-md { margin-top: 24px; margin-bottom: 24px; }
+      .ux-padding-md { padding: 1.5rem; }
+      .ux-padding-horizontal-md { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .ux-padding-vertical-md { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+      .ux-margin-md { margin: 1.5rem; }
+      .ux-margin-horizontal-md { margin-left: 1.5rem; margin-right: 1.5rem; }
+      .ux-margin-vertical-md { margin-top: 1.5rem; margin-bottom: 1.5rem; }
       .ux-hidden-md { display: none; }
       .ux-block-md { display: block; }
       .ux-flex-md { display: flex; }
@@ -1156,28 +1156,28 @@
 
     /* Large screens and up (992px+) */
     @media (min-width: 992px) {
-      .ux-padding { padding: 32px; }
-      .ux-padding-horizontal { padding-left: 32px; padding-right: 32px; }
-      .ux-padding-vertical { padding-top: 32px; padding-bottom: 32px; }
-      .ux-padding-top { padding-top: 32px; }
-      .ux-padding-bottom { padding-bottom: 32px; }
-      .ux-padding-start, .ux-padding-left { padding-left: 32px; }
-      .ux-padding-end, .ux-padding-right { padding-right: 32px; }
+      .ux-padding { padding: 2rem; }
+      .ux-padding-horizontal { padding-left: 2rem; padding-right: 2rem; }
+      .ux-padding-vertical { padding-top: 2rem; padding-bottom: 2rem; }
+      .ux-padding-top { padding-top: 2rem; }
+      .ux-padding-bottom { padding-bottom: 2rem; }
+      .ux-padding-start, .ux-padding-left { padding-left: 2rem; }
+      .ux-padding-end, .ux-padding-right { padding-right: 2rem; }
 
-      .ux-margin { margin: 32px; }
-      .ux-margin-horizontal { margin-left: 32px; margin-right: 32px; }
-      .ux-margin-vertical { margin-top: 32px; margin-bottom: 32px; }
-      .ux-margin-top { margin-top: 32px; }
-      .ux-margin-bottom { margin-bottom: 32px; }
-      .ux-margin-start, .ux-margin-left { margin-left: 32px; }
-      .ux-margin-end, .ux-margin-right { margin-right: 32px; }
+      .ux-margin { margin: 2rem; }
+      .ux-margin-horizontal { margin-left: 2rem; margin-right: 2rem; }
+      .ux-margin-vertical { margin-top: 2rem; margin-bottom: 2rem; }
+      .ux-margin-top { margin-top: 2rem; }
+      .ux-margin-bottom { margin-bottom: 2rem; }
+      .ux-margin-start, .ux-margin-left { margin-left: 2rem; }
+      .ux-margin-end, .ux-margin-right { margin-right: 2rem; }
 
-      .ux-padding-lg { padding: 32px; }
-      .ux-padding-horizontal-lg { padding-left: 32px; padding-right: 32px; }
-      .ux-padding-vertical-lg { padding-top: 32px; padding-bottom: 32px; }
-      .ux-margin-lg { margin: 32px; }
-      .ux-margin-horizontal-lg { margin-left: 32px; margin-right: 32px; }
-      .ux-margin-vertical-lg { margin-top: 32px; margin-bottom: 32px; }
+      .ux-padding-lg { padding: 2rem; }
+      .ux-padding-horizontal-lg { padding-left: 2rem; padding-right: 2rem; }
+      .ux-padding-vertical-lg { padding-top: 2rem; padding-bottom: 2rem; }
+      .ux-margin-lg { margin: 2rem; }
+      .ux-margin-horizontal-lg { margin-left: 2rem; margin-right: 2rem; }
+      .ux-margin-vertical-lg { margin-top: 2rem; margin-bottom: 2rem; }
       .ux-hidden-lg { display: none; }
       .ux-block-lg { display: block; }
       .ux-flex-lg { display: flex; }
@@ -1185,12 +1185,12 @@
 
     /* Extra large screens (1200px+) */
     @media (min-width: 1200px) {
-      .ux-padding-xl { padding: 48px; }
-      .ux-padding-horizontal-xl { padding-left: 48px; padding-right: 48px; }
-      .ux-padding-vertical-xl { padding-top: 48px; padding-bottom: 48px; }
-      .ux-margin-xl { margin: 48px; }
-      .ux-margin-horizontal-xl { margin-left: 48px; margin-right: 48px; }
-      .ux-margin-vertical-xl { margin-top: 48px; margin-bottom: 48px; }
+      .ux-padding-xl { padding: 3rem; }
+      .ux-padding-horizontal-xl { padding-left: 3rem; padding-right: 3rem; }
+      .ux-padding-vertical-xl { padding-top: 3rem; padding-bottom: 3rem; }
+      .ux-margin-xl { margin: 3rem; }
+      .ux-margin-horizontal-xl { margin-left: 3rem; margin-right: 3rem; }
+      .ux-margin-vertical-xl { margin-top: 3rem; margin-bottom: 3rem; }
       .ux-hidden-xl { display: none; }
       .ux-block-xl { display: block; }
       .ux-flex-xl { display: flex; }
@@ -1212,24 +1212,24 @@
 
     .ux-container {
       width: 100%;
-      max-width: 1200px;
+      max-width: 75rem;
       margin-left: auto;
       margin-right: auto;
-      padding-left: 16px;
-      padding-right: 16px;
+      padding-left: 1rem;
+      padding-right: 1rem;
     }
 
     @media (min-width: 768px) {
       .ux-container {
-        padding-left: 24px;
-        padding-right: 24px;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
       }
     }
 
     @media (min-width: 992px) {
       .ux-container {
-        padding-left: 32px;
-        padding-right: 32px;
+        padding-left: 2rem;
+        padding-right: 2rem;
       }
     }
 
