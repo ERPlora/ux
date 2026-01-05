@@ -32,8 +32,8 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 
 | Bundle | Size | Gzipped |
 |--------|------|---------|
-| ux.min.js | 474 KB | ~62 KB |
-| ux-core.min.js | 33 KB | ~8 KB |
+| ux.min.js | 514 KB | ~70 KB |
+| ux-core.min.js | 34 KB | ~7 KB |
 
 ### Local Installation
 
@@ -63,7 +63,7 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 | **Navigation** | navbar, toolbar, tabs, segment, breadcrumbs, menu |
 | **Overlay** | modal, sheet, alert, toast, popover |
 | **Feedback** | skeleton, fab |
-| **Interactive** | accordion, datetime, infinite-scroll, refresher, reorder, swipe, carousel |
+| **Interactive** | accordion, datetime, infinite-scroll, refresher, reorder, rating, datatable, swipe, carousel |
 | **Admin** | shell, panel |
 | **PWA** | pwa (offline detection, install prompt, service worker) |
 
