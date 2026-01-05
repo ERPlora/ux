@@ -565,11 +565,22 @@
     });
   }
 
-  // Helper to highlight matching text
+  // Helper to highlight matching text (XSS-safe)
   window.UX = window.UX || {};
   window.UX.highlightMatch = function(text, query) {
-    if (!query) return text;
-    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.replace(regex, '<span class="ux-searchbar__highlight">$1</span>');
+    if (!query || !text) return text || '';
+
+    // First, escape HTML in the text to prevent XSS
+    const escapeHtml = (str) => {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    };
+
+    const escapedText = escapeHtml(String(text));
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+
+    return escapedText.replace(regex, '<span class="ux-searchbar__highlight">$1</span>');
   };
 })();

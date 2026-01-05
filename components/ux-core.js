@@ -362,12 +362,17 @@
       --ux-touch-target-sm: 2.25rem;
 
       /* Transitions */
+      --ux-transition-instant: 50ms;
       --ux-transition-fast: 150ms;
       --ux-transition-base: 200ms;
       --ux-transition-slow: 300ms;
       --ux-transition-slower: 400ms;
       --ux-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
       --ux-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      /* Disabled State */
+      --ux-disabled-opacity: 0.5;
+      --ux-disabled-cursor: not-allowed;
 
       /* Reduced motion - used as multiplier */
       --ux-motion-reduce: 1;
@@ -1092,10 +1097,23 @@
       text-decoration: underline;
     }
 
-    /* Disabled state */
-    [disabled] {
-      opacity: 0.5;
-      cursor: not-allowed;
+    /* Disabled state - Standardized across all components */
+    [disabled],
+    .ux-disabled {
+      opacity: var(--ux-disabled-opacity) !important;
+      cursor: var(--ux-disabled-cursor) !important;
+      pointer-events: none !important;
+    }
+
+    /* Disabled interactive elements */
+    button[disabled],
+    input[disabled],
+    select[disabled],
+    textarea[disabled],
+    .ux-button[disabled],
+    .ux-input[disabled] {
+      opacity: var(--ux-disabled-opacity);
+      cursor: var(--ux-disabled-cursor);
       pointer-events: none;
     }
 
@@ -1648,6 +1666,8 @@
     version: '1.0.0',
     components: {},
     _alpineReady: false,
+    _scrollLockCount: 0,
+    _scrollPosition: 0,
 
     // Helper to inject component styles
     injectStyles: function(id, css) {
@@ -1694,6 +1714,99 @@
           Alpine.directive(name, directive);
         });
       }
+    },
+
+    // Scroll Lock - prevents body scroll when modals are open
+    // Supports nested modals with reference counting
+    lockScroll: function() {
+      this._scrollLockCount++;
+      if (this._scrollLockCount === 1) {
+        this._scrollPosition = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${this._scrollPosition}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.overflow = 'hidden';
+      }
+    },
+
+    unlockScroll: function() {
+      this._scrollLockCount = Math.max(0, this._scrollLockCount - 1);
+      if (this._scrollLockCount === 0) {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, this._scrollPosition);
+      }
+    },
+
+    // Focus Trap - keeps focus within a container (for modals, dialogs)
+    // Returns a cleanup function to remove the trap
+    trapFocus: function(container) {
+      const focusableSelector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])';
+
+      const getFocusableElements = () => {
+        return Array.from(container.querySelectorAll(focusableSelector))
+          .filter(el => el.offsetParent !== null); // Only visible elements
+      };
+
+      const handleKeydown = (event) => {
+        if (event.key !== 'Tab') return;
+
+        const focusable = getFocusableElements();
+        if (focusable.length === 0) return;
+
+        const firstElement = focusable[0];
+        const lastElement = focusable[focusable.length - 1];
+
+        if (event.shiftKey) {
+          // Shift+Tab: if on first element, go to last
+          if (document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          // Tab: if on last element, go to first
+          if (document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+          }
+        }
+      };
+
+      container.addEventListener('keydown', handleKeydown);
+
+      // Focus first element
+      const focusable = getFocusableElements();
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+
+      // Return cleanup function
+      return () => {
+        container.removeEventListener('keydown', handleKeydown);
+      };
+    },
+
+    // Announce to screen readers via live region
+    announce: function(message, priority = 'polite') {
+      let announcer = document.getElementById('ux-announcer');
+      if (!announcer) {
+        announcer = document.createElement('div');
+        announcer.id = 'ux-announcer';
+        announcer.setAttribute('aria-live', priority);
+        announcer.setAttribute('aria-atomic', 'true');
+        announcer.className = 'ux-sr-only';
+        document.body.appendChild(announcer);
+      }
+      announcer.setAttribute('aria-live', priority);
+      announcer.textContent = '';
+      // Small delay ensures screen reader picks up the change
+      setTimeout(() => {
+        announcer.textContent = message;
+      }, 100);
     }
   };
 
