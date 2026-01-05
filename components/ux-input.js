@@ -11,6 +11,7 @@
        UX Input - Base Styles (direct on input)
     ======================================== */
 
+    .ux-input,
     input.ux-input,
     textarea.ux-input,
     select.ux-input {
@@ -33,17 +34,20 @@
       appearance: none;
     }
 
+    .ux-input::placeholder,
     input.ux-input::placeholder,
     textarea.ux-input::placeholder {
       color: var(--ux-text-tertiary);
     }
 
+    .ux-input:hover,
     input.ux-input:hover,
     textarea.ux-input:hover,
     select.ux-input:hover {
       border-color: var(--ux-medium);
     }
 
+    .ux-input:focus,
     input.ux-input:focus,
     textarea.ux-input:focus,
     select.ux-input:focus {
@@ -51,6 +55,7 @@
       box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
     }
 
+    .ux-input:disabled,
     input.ux-input:disabled,
     textarea.ux-input:disabled,
     select.ux-input:disabled {
@@ -60,6 +65,7 @@
       opacity: 0.6;
     }
 
+    .ux-input[readonly],
     input.ux-input[readonly],
     textarea.ux-input[readonly] {
       background-color: var(--ux-light);
@@ -67,6 +73,7 @@
     }
 
     /* Size variants for direct input */
+    .ux-input--sm,
     input.ux-input--sm,
     textarea.ux-input--sm {
       min-height: var(--ux-touch-target-sm);
@@ -74,6 +81,7 @@
       font-size: var(--ux-font-size-sm);
     }
 
+    .ux-input--lg,
     input.ux-input--lg,
     textarea.ux-input--lg {
       min-height: 52px;
@@ -82,6 +90,7 @@
     }
 
     /* Variant styles for direct input */
+    .ux-input--filled,
     input.ux-input--filled,
     textarea.ux-input--filled {
       background-color: var(--ux-surface-secondary);
@@ -90,17 +99,20 @@
       border-bottom: 2px solid var(--ux-border-color);
     }
 
+    .ux-input--filled:focus,
     input.ux-input--filled:focus,
     textarea.ux-input--filled:focus {
       border-bottom-color: var(--ux-primary);
       box-shadow: none;
     }
 
+    .ux-input--outline,
     input.ux-input--outline,
     textarea.ux-input--outline {
       background-color: transparent;
     }
 
+    .ux-input--underline,
     input.ux-input--underline,
     textarea.ux-input--underline {
       background-color: transparent;
@@ -111,6 +123,7 @@
       padding-right: 0;
     }
 
+    .ux-input--underline:focus,
     input.ux-input--underline:focus,
     textarea.ux-input--underline:focus {
       border-bottom-color: var(--ux-primary);

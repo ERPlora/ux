@@ -106,6 +106,8 @@
   <script src="../components/ux-searchbar.js"></script>
   <script src="../components/ux-badge.js"></script>
   <script src="../components/ux-grid.js"></script>
+  <script src="../components/ux-sheet.js"></script>
+  <script src="../components/ux-select.js"></script>
   <link rel="stylesheet" href="../css/themes.css">
 </head>
 <body class="ux-app" x-data="uxTheme()">
@@ -122,94 +124,66 @@
           <button onclick="UXi18n.setLang('es')" class="ux-button ux-button--clear ux-button--sm" style="padding: 4px 8px; min-width: auto; opacity: 0.7;" :style="UXi18n.lang === 'es' ? 'opacity: 1; font-weight: 600;' : ''">ES</button>
           <button onclick="UXi18n.setLang('en')" class="ux-button ux-button--clear ux-button--sm" style="padding: 4px 8px; min-width: auto; opacity: 0.7;" :style="UXi18n.lang === 'en' ? 'opacity: 1; font-weight: 600;' : ''">EN</button>
         </div>
-        <div class="theme-switcher">
+        <div class="ux-flex ux-gap-xs">
           <!-- Dark/Light Toggle -->
-          <button class="theme-toggle-btn" @click="toggleDarkMode()" :title="darkMode ? 'Modo claro' : 'Modo oscuro'">
+          <button class="ux-button ux-button--clear ux-button--icon" @click="toggleDarkMode()" :title="darkMode ? UXi18n.t('lightMode') : UXi18n.t('darkMode')">
             <!-- Sun icon (dark mode active) -->
-            <svg x-show="darkMode" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg x-show="darkMode" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
             <!-- Moon icon (light mode active) -->
-            <svg x-show="!darkMode" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg x-show="!darkMode" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
             </svg>
           </button>
 
-          <!-- Color Theme Dropdown -->
-          <div class="theme-dropdown" @click.away="menuOpen = false">
-            <button class="theme-toggle-btn" @click="menuOpen = !menuOpen" title="Cambiar tema de color">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
-              </svg>
-            </button>
-            <div class="theme-dropdown__menu" :class="{ 'is-open': menuOpen }">
-              <div class="theme-dropdown__label">Tema de color</div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-ocean' }" @click="setColorTheme('ux-theme-ocean')">
-                <span class="theme-dropdown__color" style="background: #007aff;"></span>
-                <span>Ocean Blue</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-emerald' }" @click="setColorTheme('ux-theme-emerald')">
-                <span class="theme-dropdown__color" style="background: #10b981;"></span>
-                <span>Emerald</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-purple' }" @click="setColorTheme('ux-theme-purple')">
-                <span class="theme-dropdown__color" style="background: #8b5cf6;"></span>
-                <span>Purple</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-sunset' }" @click="setColorTheme('ux-theme-sunset')">
-                <span class="theme-dropdown__color" style="background: #f97316;"></span>
-                <span>Sunset</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-rose' }" @click="setColorTheme('ux-theme-rose')">
-                <span class="theme-dropdown__color" style="background: #f43f5e;"></span>
-                <span>Rose</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-teal' }" @click="setColorTheme('ux-theme-teal')">
-                <span class="theme-dropdown__color" style="background: #14b8a6;"></span>
-                <span>Teal</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-amber' }" @click="setColorTheme('ux-theme-amber')">
-                <span class="theme-dropdown__color" style="background: #f59e0b;"></span>
-                <span>Amber</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-slate' }" @click="setColorTheme('ux-theme-slate')">
-                <span class="theme-dropdown__color" style="background: #64748b;"></span>
-                <span>Slate</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-indigo' }" @click="setColorTheme('ux-theme-indigo')">
-                <span class="theme-dropdown__color" style="background: #6366f1;"></span>
-                <span>Indigo</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-cyan' }" @click="setColorTheme('ux-theme-cyan')">
-                <span class="theme-dropdown__color" style="background: #06b6d4;"></span>
-                <span>Cyan</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-crimson' }" @click="setColorTheme('ux-theme-crimson')">
-                <span class="theme-dropdown__color" style="background: #dc2626;"></span>
-                <span>Crimson</span>
-              </div>
-
-              <div class="theme-dropdown__item" :class="{ 'is-active': colorTheme === 'ux-theme-forest' }" @click="setColorTheme('ux-theme-forest')">
-                <span class="theme-dropdown__color" style="background: #166534;"></span>
-                <span>Forest</span>
-              </div>
-            </div>
-          </div>
+          <!-- Color Theme Button -->
+          <button class="ux-button ux-button--clear ux-button--icon"
+                  @click="openThemeSelect()"
+                  :title="UXi18n.t('colorTheme')"
+                  aria-haspopup="dialog">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
   </nav>
+
+  <!-- Theme Select Alert Modal (ion-select interface) -->
+  <div class="ux-select-alert"
+       :class="{ 'ux-select-alert--open': themeSelectOpen }"
+       x-show="themeSelectOpen"
+       x-cloak>
+    <div class="ux-select-alert__backdrop" @click="themeSelectOpen = false"></div>
+    <div class="ux-select-alert__content" @click.stop>
+      <div class="ux-select-alert__header">
+        <h3 class="ux-select-alert__title" x-text="UXi18n.t('colorTheme')">Tema de color</h3>
+      </div>
+      <div class="ux-select-alert__options">
+        <template x-for="theme in themeOptions" :key="theme.value">
+          <div class="ux-select-alert__option"
+               :class="{ 'ux-select-alert__option--selected': tempColorTheme === theme.value }"
+               @click="tempColorTheme = theme.value">
+            <span class="ux-select-alert__option-radio"></span>
+            <span class="ux-select-alert__option-icon" style="margin-right: var(--ux-space-md);">
+              <span class="ux-avatar ux-avatar--xs" :style="'background-color: ' + theme.color"></span>
+            </span>
+            <span class="ux-select-alert__option-label" x-text="theme.label"></span>
+          </div>
+        </template>
+      </div>
+      <div class="ux-select-alert__footer">
+        <button class="ux-select-alert__button ux-select-alert__button--cancel" @click="themeSelectOpen = false">
+          Cancel
+        </button>
+        <button class="ux-select-alert__button ux-select-alert__button--ok" @click="setColorTheme(tempColorTheme)">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Hero -->
   <div class="ux-card" style="margin: 0; border-radius: 0; background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-primary-shade) 100%); color: white; text-align: center;">
