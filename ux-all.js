@@ -72,6 +72,7 @@
     'ux-infinite-scroll',
     'ux-refresher',
     'ux-reorder',
+    'ux-rating',
 
     // Gesture directives
     'ux-swipe',
