@@ -1,0 +1,309 @@
+/**
+ * UX Spinner Component
+ * Indicadores de carga animados
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Spinner
+    ======================================== */
+
+    .ux-spinner {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(var(--ux-primary-rgb), 0.2);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-spinner-rotate 0.8s linear infinite;
+    }
+
+    @keyframes ux-spinner-rotate {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ========================================
+       Sizes
+    ======================================== */
+
+    .ux-spinner--xs {
+      width: 16px;
+      height: 16px;
+      border-width: 2px;
+    }
+
+    .ux-spinner--sm {
+      width: 20px;
+      height: 20px;
+      border-width: 2px;
+    }
+
+    .ux-spinner--lg {
+      width: 40px;
+      height: 40px;
+      border-width: 4px;
+    }
+
+    .ux-spinner--xl {
+      width: 56px;
+      height: 56px;
+      border-width: 5px;
+    }
+
+    /* ========================================
+       Color Variants
+    ======================================== */
+
+    .ux-spinner--primary {
+      border-color: rgba(var(--ux-primary-rgb), 0.2);
+      border-top-color: var(--ux-primary);
+    }
+
+    .ux-spinner--secondary {
+      border-color: rgba(var(--ux-secondary-rgb), 0.2);
+      border-top-color: var(--ux-secondary);
+    }
+
+    .ux-spinner--tertiary {
+      border-color: rgba(var(--ux-tertiary-rgb), 0.2);
+      border-top-color: var(--ux-tertiary);
+    }
+
+    .ux-spinner--success {
+      border-color: rgba(var(--ux-success-rgb), 0.2);
+      border-top-color: var(--ux-success);
+    }
+
+    .ux-spinner--warning {
+      border-color: rgba(var(--ux-warning-rgb), 0.2);
+      border-top-color: var(--ux-warning);
+    }
+
+    .ux-spinner--danger {
+      border-color: rgba(var(--ux-danger-rgb), 0.2);
+      border-top-color: var(--ux-danger);
+    }
+
+    .ux-spinner--dark {
+      border-color: rgba(var(--ux-dark-rgb), 0.2);
+      border-top-color: var(--ux-dark);
+    }
+
+    .ux-spinner--light {
+      border-color: rgba(255, 255, 255, 0.2);
+      border-top-color: #ffffff;
+    }
+
+    .ux-spinner--white {
+      border-color: rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+    }
+
+    /* ========================================
+       Dots Spinner
+    ======================================== */
+
+    .ux-spinner--dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      width: auto;
+      height: auto;
+      border: none;
+      animation: none;
+    }
+
+    .ux-spinner--dots span {
+      width: 8px;
+      height: 8px;
+      background-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-spinner-dots 1.4s ease-in-out infinite both;
+    }
+
+    .ux-spinner--dots span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .ux-spinner--dots span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes ux-spinner-dots {
+      0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .ux-spinner--dots.ux-spinner--sm span {
+      width: 6px;
+      height: 6px;
+    }
+
+    .ux-spinner--dots.ux-spinner--lg span {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* ========================================
+       Bars Spinner
+    ======================================== */
+
+    .ux-spinner--bars {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      width: auto;
+      height: 28px;
+      border: none;
+      animation: none;
+    }
+
+    .ux-spinner--bars span {
+      width: 4px;
+      height: 100%;
+      background-color: var(--ux-primary);
+      border-radius: 2px;
+      animation: ux-spinner-bars 1.2s ease-in-out infinite;
+    }
+
+    .ux-spinner--bars span:nth-child(1) { animation-delay: -1.2s; }
+    .ux-spinner--bars span:nth-child(2) { animation-delay: -1.1s; }
+    .ux-spinner--bars span:nth-child(3) { animation-delay: -1.0s; }
+    .ux-spinner--bars span:nth-child(4) { animation-delay: -0.9s; }
+
+    @keyframes ux-spinner-bars {
+      0%, 40%, 100% {
+        transform: scaleY(0.4);
+      }
+      20% {
+        transform: scaleY(1);
+      }
+    }
+
+    /* ========================================
+       Circular Progress (iOS style)
+    ======================================== */
+
+    .ux-spinner--ios {
+      width: 20px;
+      height: 20px;
+      border: none;
+      animation: none;
+    }
+
+    .ux-spinner--ios svg {
+      width: 100%;
+      height: 100%;
+      animation: ux-spinner-ios 1s steps(12) infinite;
+    }
+
+    @keyframes ux-spinner-ios {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ========================================
+       Spinner Container
+    ======================================== */
+
+    .ux-spinner-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-spinner-container__text {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    /* ========================================
+       Full Page Spinner
+    ======================================== */
+
+    .ux-spinner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(var(--ux-background-rgb), 0.8);
+      z-index: var(--ux-z-modal);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+
+    /* ========================================
+       Inline Spinner (for buttons, inputs)
+    ======================================== */
+
+    .ux-spinner--inline {
+      vertical-align: middle;
+      margin-right: var(--ux-space-sm);
+    }
+
+    /* ========================================
+       Paused State
+    ======================================== */
+
+    .ux-spinner--paused,
+    .ux-spinner--paused span {
+      animation-play-state: paused;
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-spinner-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-spinner-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for spinner with loading state
+  const spinnerComponent = (config = {}) => ({
+    visible: config.visible !== undefined ? config.visible : true,
+    text: config.text || '',
+
+    show(text = '') {
+      this.text = text;
+      this.visible = true;
+    },
+
+    hide() {
+      this.visible = false;
+    },
+
+    toggle() {
+      this.visible = !this.visible;
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxSpinner', spinnerComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxSpinner', spinnerComponent);
+    });
+  }
+})();

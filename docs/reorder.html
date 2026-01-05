@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Reorder - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-reorder.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .demo-box--no-padding { padding: 0; overflow: hidden; }
+    .code-block { background: var(--ux-dark); color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: var(--ux-font-size-xs); overflow-x: auto; white-space: pre; }
+    .tag { color: #f472b6; }
+    .attr { color: #fbbf24; }
+    .string { color: #a5f3fc; }
+    .comment { color: #6b7280; }
+  </style>
+</head>
+<body class="ux-app">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Reorder</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <div class="ux-content">
+    <!-- Intro -->
+    <section class="demo-section">
+      <h3>Reorder List</h3>
+      <p>Componente para reordenar listas con drag & drop, estilo iOS.</p>
+      <pre class="code-block"><span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="string">"components/ux-reorder.js"</span><span class="tag">&gt;&lt;/script&gt;</span></pre>
+    </section>
+
+    <!-- Basic Reorder -->
+    <section class="demo-section">
+      <h3>Lista Reordenable</h3>
+      <p>Activa el modo edicion para mostrar los handles de arrastre.</p>
+      <div class="demo-box demo-box--no-padding">
+        <div x-data="uxReorder({ items: ['Manzana', 'Banana', 'Cereza', 'Durazno', 'Fresa'] })">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--ux-space-md) var(--ux-space-lg); border-bottom: 1px solid var(--ux-border-color);">
+            <span style="font-weight: 500;">Frutas</span>
+            <button class="ux-button ux-button--clear ux-button--sm" @click="toggleEdit()" x-text="editing ? 'Listo' : 'Editar'"></button>
+          </div>
+          <div class="ux-reorder-group" :class="editing && 'ux-reorder-group--editing'" x-ref="items">
+            <template x-for="(item, index) in items" :key="item">
+              <div class="ux-reorder-item"
+                   :class="{ 'ux-reorder-item--dragging': isDragging(index), 'ux-reorder-item--ghost': isDragOver(index) }"
+                   draggable="true"
+                   @dragstart="handleDragStart($event, index)"
+                   @dragover="handleDragOver($event, index)"
+                   @dragend="handleDragEnd()"
+                   @touchstart="handleTouchStart($event, index)"
+                   @touchmove="handleTouchMove($event, index)"
+                   @touchend="handleTouchEnd()">
+                <div class="ux-reorder-handle">
+                  <svg class="ux-reorder-handle__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+                  </svg>
+                </div>
+                <div class="ux-reorder-item__content" style="padding: var(--ux-space-md) var(--ux-space-lg); padding-left: 0;">
+                  <span x-text="item"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxReorder({ items: ['Item 1', 'Item 2', 'Item 3'] })"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"toggleEdit()"</span><span class="tag">&gt;</span>Editar<span class="tag">&lt;/button&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-group"</span>
+       <span class="attr">:class</span>=<span class="string">"editing && 'ux-reorder-group--editing'"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;template</span> <span class="attr">x-for</span>=<span class="string">"(item, index) in items"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-item"</span>
+           <span class="attr">draggable</span>=<span class="string">"true"</span>
+           <span class="attr">@dragstart</span>=<span class="string">"handleDragStart($event, index)"</span>
+           <span class="attr">@dragover</span>=<span class="string">"handleDragOver($event, index)"</span>
+           <span class="attr">@dragend</span>=<span class="string">"handleDragEnd()"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-handle"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+        <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-item__content"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/template&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- With Delete -->
+    <section class="demo-section">
+      <h3>Con Boton Eliminar</h3>
+      <p>Agrega un boton de eliminar que aparece en modo edicion.</p>
+      <div class="demo-box demo-box--no-padding">
+        <div x-data="uxReorder({ items: ['Tarea 1', 'Tarea 2', 'Tarea 3', 'Tarea 4'] })">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--ux-space-md) var(--ux-space-lg); border-bottom: 1px solid var(--ux-border-color);">
+            <span style="font-weight: 500;">Tareas</span>
+            <button class="ux-button ux-button--clear ux-button--sm" @click="toggleEdit()" x-text="editing ? 'Listo' : 'Editar'"></button>
+          </div>
+          <div class="ux-reorder-group" :class="editing && 'ux-reorder-group--editing'" x-ref="items">
+            <template x-for="(item, index) in items" :key="item">
+              <div class="ux-reorder-item"
+                   :class="{ 'ux-reorder-item--dragging': isDragging(index) }"
+                   draggable="true"
+                   @dragstart="handleDragStart($event, index)"
+                   @dragover="handleDragOver($event, index)"
+                   @dragend="handleDragEnd()">
+                <div class="ux-reorder-handle">
+                  <svg class="ux-reorder-handle__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+                  </svg>
+                </div>
+                <div class="ux-reorder-item__content" style="padding: var(--ux-space-md) var(--ux-space-lg); padding-left: 0; flex: 1;">
+                  <span x-text="item"></span>
+                </div>
+                <button class="ux-reorder-delete" @click="removeItem(index)">
+                  <svg class="ux-reorder-delete__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-item"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-handle"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-item__content"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-reorder-delete"</span> <span class="attr">@click</span>=<span class="string">"removeItem(index)"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;svg&gt;</span>...<span class="tag">&lt;/svg&gt;</span>
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Inset Style -->
+    <section class="demo-section">
+      <h3>Estilo Inset</h3>
+      <p>Grupo con bordes redondeados estilo iOS Settings.</p>
+      <div class="demo-box" style="background: var(--ux-background);">
+        <div x-data="uxReorder({ items: ['Wi-Fi', 'Bluetooth', 'Datos Moviles', 'Hotspot'], editing: true })">
+          <div class="ux-reorder-group ux-reorder-group--inset ux-reorder-group--editing" x-ref="items">
+            <template x-for="(item, index) in items" :key="item">
+              <div class="ux-reorder-item"
+                   :class="{ 'ux-reorder-item--dragging': isDragging(index) }"
+                   draggable="true"
+                   @dragstart="handleDragStart($event, index)"
+                   @dragover="handleDragOver($event, index)"
+                   @dragend="handleDragEnd()">
+                <div class="ux-reorder-handle">
+                  <svg class="ux-reorder-handle__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+                  </svg>
+                </div>
+                <div class="ux-reorder-item__content" style="padding: var(--ux-space-md) var(--ux-space-lg); padding-left: 0;">
+                  <span x-text="item"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-group ux-reorder-group--inset ux-reorder-group--editing"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Cards Style -->
+    <section class="demo-section">
+      <h3>Estilo Cards</h3>
+      <p>Items separados con sombra como cards.</p>
+      <div class="demo-box" style="background: var(--ux-background);">
+        <div x-data="uxReorder({ items: ['Proyecto A', 'Proyecto B', 'Proyecto C'], editing: true })">
+          <div class="ux-reorder-group ux-reorder-group--cards ux-reorder-group--editing" style="padding: var(--ux-space-md);" x-ref="items">
+            <template x-for="(item, index) in items" :key="item">
+              <div class="ux-reorder-item"
+                   :class="{ 'ux-reorder-item--dragging': isDragging(index) }"
+                   draggable="true"
+                   @dragstart="handleDragStart($event, index)"
+                   @dragover="handleDragOver($event, index)"
+                   @dragend="handleDragEnd()">
+                <div class="ux-reorder-handle">
+                  <svg class="ux-reorder-handle__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+                  </svg>
+                </div>
+                <div class="ux-reorder-item__content" style="padding: var(--ux-space-md) var(--ux-space-lg); padding-left: 0;">
+                  <div style="font-weight: 500;" x-text="item"></div>
+                  <div style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Descripcion del proyecto</div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-group ux-reorder-group--cards ux-reorder-group--editing"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Handle Lines -->
+    <section class="demo-section">
+      <h3>Handle con Lineas</h3>
+      <p>Variante del handle usando lineas en vez de icono.</p>
+      <div class="demo-box demo-box--no-padding">
+        <div x-data="{ items: ['Item 1', 'Item 2', 'Item 3'] }">
+          <div class="ux-reorder-group ux-reorder-group--editing">
+            <template x-for="item in items" :key="item">
+              <div class="ux-reorder-item" style="border-bottom: 1px solid var(--ux-border-color);">
+                <div class="ux-reorder-handle ux-reorder-handle--lines">
+                  <div class="ux-reorder-handle__line"></div>
+                  <div class="ux-reorder-handle__line"></div>
+                  <div class="ux-reorder-handle__line"></div>
+                </div>
+                <div class="ux-reorder-item__content" style="padding: var(--ux-space-md) var(--ux-space-lg); padding-left: 0;">
+                  <span x-text="item"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-handle ux-reorder-handle--lines"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-handle__line"</span><span class="tag">&gt;&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-handle__line"</span><span class="tag">&gt;&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-handle__line"</span><span class="tag">&gt;&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Rich Content -->
+    <section class="demo-section">
+      <h3>Contenido Rico</h3>
+      <p>Items con avatar, titulo y subtitulo.</p>
+      <div class="demo-box demo-box--no-padding">
+        <div x-data="uxReorder({
+          items: [
+            { name: 'Ana Garcia', email: 'ana@email.com', avatar: 'AG' },
+            { name: 'Carlos Lopez', email: 'carlos@email.com', avatar: 'CL' },
+            { name: 'Maria Santos', email: 'maria@email.com', avatar: 'MS' }
+          ],
+          editing: true
+        })">
+          <div class="ux-reorder-group ux-reorder-group--editing" x-ref="items">
+            <template x-for="(item, index) in items" :key="item.email">
+              <div class="ux-reorder-item"
+                   style="border-bottom: 1px solid var(--ux-border-color);"
+                   :class="{ 'ux-reorder-item--dragging': isDragging(index) }"
+                   draggable="true"
+                   @dragstart="handleDragStart($event, index)"
+                   @dragover="handleDragOver($event, index)"
+                   @dragend="handleDragEnd()">
+                <div class="ux-reorder-handle">
+                  <svg class="ux-reorder-handle__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+                  </svg>
+                </div>
+                <div class="ux-reorder-item__content" style="padding: var(--ux-space-md) var(--ux-space-lg); padding-left: 0; display: flex; align-items: center; gap: var(--ux-space-md);">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--ux-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: var(--ux-font-size-sm);" x-text="item.avatar"></div>
+                  <div>
+                    <div style="font-weight: 500;" x-text="item.name"></div>
+                    <div style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);" x-text="item.email"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Static Example (no JS) -->
+    <section class="demo-section">
+      <h3>Solo CSS (Estatico)</h3>
+      <p>Estructura HTML basica sin funcionalidad de reordenamiento.</p>
+      <div class="demo-box demo-box--no-padding">
+        <div class="ux-reorder-group ux-reorder-group--editing">
+          <div class="ux-reorder-item" style="border-bottom: 1px solid var(--ux-border-color);">
+            <div class="ux-reorder-handle">
+              <svg class="ux-reorder-handle__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+              </svg>
+            </div>
+            <div class="ux-reorder-item__content" style="padding: var(--ux-space-md) var(--ux-space-lg); padding-left: 0;">
+              Item estatico 1
+            </div>
+          </div>
+          <div class="ux-reorder-item" style="border-bottom: 1px solid var(--ux-border-color);">
+            <div class="ux-reorder-handle">
+              <svg class="ux-reorder-handle__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+              </svg>
+            </div>
+            <div class="ux-reorder-item__content" style="padding: var(--ux-space-md) var(--ux-space-lg); padding-left: 0;">
+              Item estatico 2
+            </div>
+          </div>
+          <div class="ux-reorder-item">
+            <div class="ux-reorder-handle">
+              <svg class="ux-reorder-handle__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+              </svg>
+            </div>
+            <div class="ux-reorder-item__content" style="padding: var(--ux-space-md) var(--ux-space-lg); padding-left: 0;">
+              Item estatico 3
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="comment">&lt;!-- Sin Alpine, solo estructura visual --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-group ux-reorder-group--editing"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-item"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-handle"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-item__content"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- API Reference - CSS -->
+    <section class="demo-section">
+      <h3>API - Clases CSS</h3>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-sm);">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm); text-align: left;">Clase</th>
+              <th style="padding: var(--ux-space-sm); text-align: left;">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-group</code></td>
+              <td style="padding: var(--ux-space-sm);">Contenedor principal de la lista</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-group--editing</code></td>
+              <td style="padding: var(--ux-space-sm);">Muestra handles y habilita edicion</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-group--disabled</code></td>
+              <td style="padding: var(--ux-space-sm);">Deshabilita el reordenamiento</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-group--inset</code></td>
+              <td style="padding: var(--ux-space-sm);">Estilo inset con bordes redondeados</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-group--cards</code></td>
+              <td style="padding: var(--ux-space-sm);">Items separados como cards</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-group--horizontal</code></td>
+              <td style="padding: var(--ux-space-sm);">Layout horizontal</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-item</code></td>
+              <td style="padding: var(--ux-space-sm);">Item individual reordenable</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-item--dragging</code></td>
+              <td style="padding: var(--ux-space-sm);">Estado mientras se arrastra</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-item--ghost</code></td>
+              <td style="padding: var(--ux-space-sm);">Placeholder del item</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-handle</code></td>
+              <td style="padding: var(--ux-space-sm);">Handle de arrastre</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-handle--lines</code></td>
+              <td style="padding: var(--ux-space-sm);">Handle con patron de lineas</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-item__content</code></td>
+              <td style="padding: var(--ux-space-sm);">Contenido del item</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-delete</code></td>
+              <td style="padding: var(--ux-space-sm);">Boton de eliminar (aparece en editing)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-reorder-indicator</code></td>
+              <td style="padding: var(--ux-space-sm);">Indicador de posicion de drop</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- API Reference - Component -->
+    <section class="demo-section">
+      <h3>API - uxReorder()</h3>
+      <p>Componente Alpine para listas reordenables.</p>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-sm);">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm); text-align: left;">Propiedad/Metodo</th>
+              <th style="padding: var(--ux-space-sm); text-align: left;">Tipo</th>
+              <th style="padding: var(--ux-space-sm); text-align: left;">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>items</code></td>
+              <td style="padding: var(--ux-space-sm);">Array</td>
+              <td style="padding: var(--ux-space-sm);">Array de items (reactivo)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>editing</code></td>
+              <td style="padding: var(--ux-space-sm);">Boolean</td>
+              <td style="padding: var(--ux-space-sm);">Estado de modo edicion</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>disabled</code></td>
+              <td style="padding: var(--ux-space-sm);">Boolean</td>
+              <td style="padding: var(--ux-space-sm);">Deshabilita el componente</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>toggleEdit()</code></td>
+              <td style="padding: var(--ux-space-sm);">Method</td>
+              <td style="padding: var(--ux-space-sm);">Alterna modo edicion</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>startEdit()</code></td>
+              <td style="padding: var(--ux-space-sm);">Method</td>
+              <td style="padding: var(--ux-space-sm);">Activa modo edicion</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>endEdit()</code></td>
+              <td style="padding: var(--ux-space-sm);">Method</td>
+              <td style="padding: var(--ux-space-sm);">Desactiva modo edicion</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>moveItem(from, to)</code></td>
+              <td style="padding: var(--ux-space-sm);">Method</td>
+              <td style="padding: var(--ux-space-sm);">Mueve item de indice a indice</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>removeItem(index)</code></td>
+              <td style="padding: var(--ux-space-sm);">Method</td>
+              <td style="padding: var(--ux-space-sm);">Elimina item en indice</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>isDragging(index)</code></td>
+              <td style="padding: var(--ux-space-sm);">Method</td>
+              <td style="padding: var(--ux-space-sm);">true si item esta siendo arrastrado</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>isDragOver(index)</code></td>
+              <td style="padding: var(--ux-space-sm);">Method</td>
+              <td style="padding: var(--ux-space-sm);">true si cursor esta sobre item</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <pre class="code-block"><span class="comment">// Configuracion inicial</span>
+uxReorder({
+  items: ['Item 1', 'Item 2'],  <span class="comment">// Array inicial</span>
+  editing: false,               <span class="comment">// Modo edicion inicial</span>
+  disabled: false               <span class="comment">// Deshabilitar</span>
+})</pre>
+    </section>
+
+    <!-- Event Handlers -->
+    <section class="demo-section">
+      <h3>Event Handlers</h3>
+      <p>Metodos para manejar los eventos de drag en cada item.</p>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-reorder-item"</span>
+     <span class="attr">draggable</span>=<span class="string">"true"</span>
+     <span class="attr">@dragstart</span>=<span class="string">"handleDragStart($event, index)"</span>
+     <span class="attr">@dragover</span>=<span class="string">"handleDragOver($event, index)"</span>
+     <span class="attr">@dragend</span>=<span class="string">"handleDragEnd()"</span>
+     <span class="comment">&lt;!-- Para touch --&gt;</span>
+     <span class="attr">@touchstart</span>=<span class="string">"handleTouchStart($event, index)"</span>
+     <span class="attr">@touchmove</span>=<span class="string">"handleTouchMove($event, index)"</span>
+     <span class="attr">@touchend</span>=<span class="string">"handleTouchEnd()"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+  </div>
+</body>
+</html>

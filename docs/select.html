@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Select - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-select.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .code-block { background: var(--ux-dark); color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-xs); line-height: 1.6; }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+  </style>
+</head>
+<body class="ux-app">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Select</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <div class="ux-content ux-padding">
+    <!-- Native Select -->
+    <section class="demo-section">
+      <h3>Select Nativo</h3>
+      <p>Select HTML nativo estilizado. Ideal para formularios simples.</p>
+      <div class="demo-box">
+        <div class="ux-native-select">
+          <select class="ux-native-select__field">
+            <option value="" disabled selected>Selecciona un pais</option>
+            <option value="es">Espana</option>
+            <option value="mx">Mexico</option>
+            <option value="ar">Argentina</option>
+            <option value="co">Colombia</option>
+          </select>
+          <div class="ux-native-select__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-native-select"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;select</span> <span class="attr">class</span>=<span class="string">"ux-native-select__field"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="string">""</span> <span class="attr">disabled</span> <span class="attr">selected</span><span class="tag">&gt;</span>Selecciona...<span class="tag">&lt;/option&gt;</span>
+    <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="string">"1"</span><span class="tag">&gt;</span>Opcion 1<span class="tag">&lt;/option&gt;</span>
+  <span class="tag">&lt;/select&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-native-select__icon"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;svg&gt;</span>...<span class="tag">&lt;/svg&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Custom Select with Alpine -->
+    <section class="demo-section">
+      <h3>Select Personalizado (Alpine)</h3>
+      <p>Select con dropdown personalizado usando Alpine.js.</p>
+      <div class="demo-box">
+        <div class="ux-select"
+             x-data="uxSelect({
+               options: [
+                 { value: 'react', label: 'React' },
+                 { value: 'vue', label: 'Vue.js' },
+                 { value: 'angular', label: 'Angular' },
+                 { value: 'svelte', label: 'Svelte' }
+               ],
+               placeholder: 'Selecciona un framework'
+             })"
+             :class="{ 'ux-select--open': isOpen }"
+             @click.outside="close()">
+          <label class="ux-select__label">Framework</label>
+          <button type="button" class="ux-select__trigger" @click="toggle()" @keydown="handleKeydown">
+            <span class="ux-select__value" :class="{ 'ux-select__placeholder': !value }">
+              <span x-text="displayValue || placeholder"></span>
+            </span>
+            <span class="ux-select__icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+          <div class="ux-select__dropdown" x-show="isOpen" x-transition>
+            <template x-for="(option, index) in filteredOptions" :key="option.value">
+              <div class="ux-select__option"
+                   :class="{ 'ux-select__option--selected': isSelected(option) }"
+                   @click="select(option)">
+                <span x-text="option.label"></span>
+                <span class="ux-select__option-check">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select"</span>
+     <span class="attr">x-data</span>=<span class="string">"uxSelect({
+       options: [
+         { value: 'opt1', label: 'Opcion 1' },
+         { value: 'opt2', label: 'Opcion 2' }
+       ],
+       placeholder: 'Selecciona...'
+     })"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-select__trigger"</span> <span class="attr">@click</span>=<span class="string">"toggle()"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"displayValue || placeholder"</span><span class="tag">&gt;&lt;/span&gt;</span>
+  <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select__dropdown"</span> <span class="attr">x-show</span>=<span class="string">"isOpen"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- With Label and Helper -->
+    <section class="demo-section">
+      <h3>Con Label y Texto de Ayuda</h3>
+      <div class="demo-box">
+        <div class="ux-native-select ux-mb-md">
+          <label class="ux-select__label">Categoria</label>
+          <select class="ux-native-select__field">
+            <option value="" disabled selected>Selecciona una categoria</option>
+            <option value="tech">Tecnologia</option>
+            <option value="design">Diseno</option>
+            <option value="marketing">Marketing</option>
+          </select>
+          <div class="ux-native-select__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+          <span class="ux-select__helper">Selecciona la categoria principal del proyecto.</span>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-native-select"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;label</span> <span class="attr">class</span>=<span class="string">"ux-select__label"</span><span class="tag">&gt;</span>Categoria<span class="tag">&lt;/label&gt;</span>
+  <span class="tag">&lt;select</span> <span class="attr">class</span>=<span class="string">"ux-native-select__field"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/select&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-select__helper"</span><span class="tag">&gt;</span>Texto de ayuda<span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Sizes -->
+    <section class="demo-section">
+      <h3>Tamanos</h3>
+      <p>Small, default y large.</p>
+      <div class="demo-box">
+        <div class="ux-select ux-select--sm ux-mb-md"
+             x-data="uxSelect({ options: [{ value: '1', label: 'Small' }], placeholder: 'Small' })"
+             :class="{ 'ux-select--open': isOpen }"
+             @click.outside="close()">
+          <button type="button" class="ux-select__trigger" @click="toggle()">
+            <span class="ux-select__value ux-select__placeholder">Small</span>
+            <span class="ux-select__icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+        <div class="ux-select ux-mb-md"
+             x-data="uxSelect({ options: [{ value: '1', label: 'Default' }], placeholder: 'Default' })"
+             :class="{ 'ux-select--open': isOpen }"
+             @click.outside="close()">
+          <button type="button" class="ux-select__trigger" @click="toggle()">
+            <span class="ux-select__value ux-select__placeholder">Default</span>
+            <span class="ux-select__icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+        <div class="ux-select ux-select--lg"
+             x-data="uxSelect({ options: [{ value: '1', label: 'Large' }], placeholder: 'Large' })"
+             :class="{ 'ux-select--open': isOpen }"
+             @click.outside="close()">
+          <button type="button" class="ux-select__trigger" @click="toggle()">
+            <span class="ux-select__value ux-select__placeholder">Large</span>
+            <span class="ux-select__icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select ux-select--sm"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select ux-select--lg"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Variants -->
+    <section class="demo-section">
+      <h3>Variantes</h3>
+      <p>Filled y outline.</p>
+      <div class="demo-box">
+        <div class="ux-select ux-select--filled ux-mb-md"
+             x-data="uxSelect({ options: [{ value: '1', label: 'Opcion' }], placeholder: 'Filled variant' })"
+             :class="{ 'ux-select--open': isOpen }"
+             @click.outside="close()">
+          <button type="button" class="ux-select__trigger" @click="toggle()">
+            <span class="ux-select__value ux-select__placeholder">Filled variant</span>
+            <span class="ux-select__icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+        <div class="ux-select ux-select--outline"
+             x-data="uxSelect({ options: [{ value: '1', label: 'Opcion' }], placeholder: 'Outline variant' })"
+             :class="{ 'ux-select--open': isOpen }"
+             @click.outside="close()">
+          <button type="button" class="ux-select__trigger" @click="toggle()">
+            <span class="ux-select__value ux-select__placeholder">Outline variant</span>
+            <span class="ux-select__icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select ux-select--filled"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select ux-select--outline"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- With Option Groups -->
+    <section class="demo-section">
+      <h3>Grupos de Opciones</h3>
+      <p>Opciones agrupadas con etiquetas.</p>
+      <div class="demo-box">
+        <div class="ux-native-select">
+          <select class="ux-native-select__field">
+            <option value="" disabled selected>Selecciona una ciudad</option>
+            <optgroup label="Espana">
+              <option value="madrid">Madrid</option>
+              <option value="barcelona">Barcelona</option>
+              <option value="valencia">Valencia</option>
+            </optgroup>
+            <optgroup label="Mexico">
+              <option value="cdmx">Ciudad de Mexico</option>
+              <option value="gdl">Guadalajara</option>
+              <option value="mty">Monterrey</option>
+            </optgroup>
+          </select>
+          <div class="ux-native-select__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;select</span> <span class="attr">class</span>=<span class="string">"ux-native-select__field"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;optgroup</span> <span class="attr">label</span>=<span class="string">"Grupo 1"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="string">"1"</span><span class="tag">&gt;</span>Opcion 1<span class="tag">&lt;/option&gt;</span>
+  <span class="tag">&lt;/optgroup&gt;</span>
+<span class="tag">&lt;/select&gt;</span></pre>
+    </section>
+
+    <!-- Multi Select -->
+    <section class="demo-section">
+      <h3>Multi Select</h3>
+      <p>Seleccion multiple con chips.</p>
+      <div class="demo-box">
+        <div class="ux-select ux-select--multi"
+             x-data="uxMultiSelect({
+               options: [
+                 { value: 'js', label: 'JavaScript' },
+                 { value: 'ts', label: 'TypeScript' },
+                 { value: 'py', label: 'Python' },
+                 { value: 'go', label: 'Go' },
+                 { value: 'rust', label: 'Rust' }
+               ],
+               placeholder: 'Selecciona lenguajes'
+             })"
+             :class="{ 'ux-select--open': isOpen }"
+             @click.outside="close()">
+          <label class="ux-select__label">Lenguajes</label>
+          <button type="button" class="ux-select__trigger" @click="toggle()">
+            <span class="ux-select__value" :class="{ 'ux-select__placeholder': values.length === 0 }">
+              <template x-if="values.length === 0">
+                <span x-text="placeholder"></span>
+              </template>
+              <template x-for="opt in selectedOptions" :key="opt.value">
+                <span class="ux-select__chip">
+                  <span x-text="opt.label"></span>
+                  <button type="button" class="ux-select__chip-remove" @click.stop="removeValue(opt.value)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </span>
+              </template>
+            </span>
+            <span class="ux-select__icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+          <div class="ux-select__dropdown" x-show="isOpen" x-transition>
+            <template x-for="option in filteredOptions" :key="option.value">
+              <div class="ux-select__option"
+                   :class="{ 'ux-select__option--selected': isSelected(option) }"
+                   @click="toggleOption(option)">
+                <span x-text="option.label"></span>
+                <span class="ux-select__option-check">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select ux-select--multi"</span>
+     <span class="attr">x-data</span>=<span class="string">"uxMultiSelect({ options: [...] })"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Disabled -->
+    <section class="demo-section">
+      <h3>Disabled</h3>
+      <div class="demo-box">
+        <div class="ux-native-select ux-mb-md">
+          <select class="ux-native-select__field" disabled>
+            <option value="" disabled selected>Disabled</option>
+          </select>
+          <div class="ux-native-select__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+        </div>
+        <div class="ux-select ux-select--disabled">
+          <button type="button" class="ux-select__trigger" disabled>
+            <span class="ux-select__value ux-select__placeholder">Disabled</span>
+            <span class="ux-select__icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Error State -->
+    <section class="demo-section">
+      <h3>Estado de Error</h3>
+      <div class="demo-box">
+        <div class="ux-select ux-select--error"
+             x-data="uxSelect({ options: [{ value: '1', label: 'Opcion' }], placeholder: 'Selecciona...' })">
+          <label class="ux-select__label">Campo requerido</label>
+          <button type="button" class="ux-select__trigger">
+            <span class="ux-select__value ux-select__placeholder">Selecciona...</span>
+            <span class="ux-select__icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+          <span class="ux-select__error">Este campo es obligatorio.</span>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select ux-select--error"</span><span class="tag">&gt;</span>
+  ...
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-select__error"</span><span class="tag">&gt;</span>Mensaje de error<span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- HTMX Integration -->
+    <section class="demo-section">
+      <h3>Con HTMX</h3>
+      <p>Enviar seleccion al servidor.</p>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-native-select"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;select</span> <span class="attr">class</span>=<span class="string">"ux-native-select__field"</span>
+          <span class="attr">name</span>=<span class="string">"country"</span>
+          <span class="attr">hx-post</span>=<span class="string">"/api/set-country"</span>
+          <span class="attr">hx-trigger</span>=<span class="string">"change"</span>
+          <span class="attr">hx-swap</span>=<span class="string">"none"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="string">"es"</span><span class="tag">&gt;</span>Espana<span class="tag">&lt;/option&gt;</span>
+    <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="string">"mx"</span><span class="tag">&gt;</span>Mexico<span class="tag">&lt;/option&gt;</span>
+  <span class="tag">&lt;/select&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span style="color: #8b949e;">// Cargar opciones dinamicamente:</span>
+<span class="tag">&lt;select</span> <span class="attr">hx-get</span>=<span class="string">"/api/cities"</span>
+        <span class="attr">hx-trigger</span>=<span class="string">"load"</span>
+        <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;option&gt;</span>Cargando...<span class="tag">&lt;/option&gt;</span>
+<span class="tag">&lt;/select&gt;</span></pre>
+    </section>
+
+    <!-- API Methods -->
+    <section class="demo-section">
+      <h3>API Alpine</h3>
+      <p>Metodos disponibles en el componente.</p>
+      <pre class="code-block"><span style="color: #8b949e;">// uxSelect</span>
+toggle()        <span style="color: #8b949e;">// Abre/cierra el dropdown</span>
+open()          <span style="color: #8b949e;">// Abre el dropdown</span>
+close()         <span style="color: #8b949e;">// Cierra el dropdown</span>
+select(option)  <span style="color: #8b949e;">// Selecciona una opcion</span>
+reset()         <span style="color: #8b949e;">// Resetea el valor</span>
+validate()      <span style="color: #8b949e;">// Valida el campo</span>
+
+<span style="color: #8b949e;">// Propiedades</span>
+value           <span style="color: #8b949e;">// Valor seleccionado</span>
+displayValue    <span style="color: #8b949e;">// Label de la opcion seleccionada</span>
+isOpen          <span style="color: #8b949e;">// Estado del dropdown</span>
+error           <span style="color: #8b949e;">// Mensaje de error</span>
+
+<span style="color: #8b949e;">// uxMultiSelect (adicionales)</span>
+values          <span style="color: #8b949e;">// Array de valores seleccionados</span>
+toggleOption()  <span style="color: #8b949e;">// Toggle una opcion</span>
+removeValue()   <span style="color: #8b949e;">// Elimina un valor</span>
+selectAll()     <span style="color: #8b949e;">// Selecciona todas</span>
+clearAll()      <span style="color: #8b949e;">// Limpia seleccion</span></pre>
+    </section>
+  </div>
+</body>
+</html>

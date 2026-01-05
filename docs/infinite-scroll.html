@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Infinite Scroll - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-card.js"></script>
+  <script src="../components/ux-infinite-scroll.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .code-block { background: var(--ux-dark); color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: var(--ux-font-size-xs); overflow-x: auto; white-space: pre; }
+    .class-table { width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-sm); }
+    .class-table th, .class-table td { padding: var(--ux-space-sm) var(--ux-space-md); text-align: left; border-bottom: 1px solid var(--ux-border-color); }
+    .class-table th { font-weight: 600; background: var(--ux-surface-secondary); }
+    .class-table code { background: var(--ux-surface-secondary); padding: 2px 6px; border-radius: 4px; font-size: var(--ux-font-size-xs); }
+    .scroll-container { max-height: 300px; overflow-y: auto; border: 1px solid var(--ux-border-color); border-radius: var(--ux-border-radius); }
+    .list-item { padding: var(--ux-space-md) var(--ux-space-lg); border-bottom: 1px solid var(--ux-border-color); }
+    .list-item:last-child { border-bottom: none; }
+  </style>
+</head>
+<body class="ux-app">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Infinite Scroll</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <!-- Intro -->
+  <div class="demo-section">
+    <h3>Infinite Scroll</h3>
+    <p>Componente para cargar contenido automaticamente al hacer scroll, barra de progreso y virtual scroll para listas largas.</p>
+    <pre class="code-block">&lt;script src="components/ux-infinite-scroll.js"&gt;&lt;/script&gt;</pre>
+  </div>
+
+  <!-- Loading State -->
+  <div class="demo-section">
+    <h3>Estado de Carga</h3>
+    <p>Indicador de carga que aparece al final de la lista.</p>
+    <div class="demo-box">
+      <div class="ux-infinite-scroll">
+        <div class="ux-infinite-scroll__spinner">
+          <div class="ux-infinite-scroll__icon"></div>
+          <span class="ux-infinite-scroll__text">Cargando mas...</span>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-infinite-scroll"&gt;
+  &lt;div class="ux-infinite-scroll__spinner"&gt;
+    &lt;div class="ux-infinite-scroll__icon"&gt;&lt;/div&gt;
+    &lt;span class="ux-infinite-scroll__text"&gt;Cargando mas...&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Complete State -->
+  <div class="demo-section">
+    <h3>Estado Completado</h3>
+    <p>Mensaje cuando no hay mas contenido para cargar.</p>
+    <div class="demo-box">
+      <div class="ux-infinite-scroll ux-infinite-scroll--complete">
+        <div class="ux-infinite-scroll__end-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <span class="ux-infinite-scroll__end-text">No hay mas elementos</span>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-infinite-scroll ux-infinite-scroll--complete"&gt;
+  &lt;div class="ux-infinite-scroll__end-icon"&gt;
+    &lt;svg&gt;...&lt;/svg&gt;
+  &lt;/div&gt;
+  &lt;span class="ux-infinite-scroll__end-text"&gt;No hay mas elementos&lt;/span&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Error State -->
+  <div class="demo-section">
+    <h3>Estado de Error</h3>
+    <p>Mensaje de error con boton de reintentar.</p>
+    <div class="demo-box">
+      <div class="ux-infinite-scroll ux-infinite-scroll--error">
+        <span class="ux-infinite-scroll__error-text">Error al cargar contenido</span>
+        <button type="button" class="ux-infinite-scroll__retry">Reintentar</button>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-infinite-scroll ux-infinite-scroll--error"&gt;
+  &lt;span class="ux-infinite-scroll__error-text"&gt;Error al cargar&lt;/span&gt;
+  &lt;button class="ux-infinite-scroll__retry" @click="retry()"&gt;
+    Reintentar
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Demo con Alpine -->
+  <div class="demo-section">
+    <h3>Demo Interactiva</h3>
+    <p>Lista con scroll infinito simulado.</p>
+    <div class="demo-box"
+         x-data="{
+           items: Array.from({length: 10}, (_, i) => 'Item ' + (i + 1)),
+           loading: false,
+           complete: false,
+           async loadMore() {
+             if (this.loading || this.complete) return;
+             this.loading = true;
+             await new Promise(r => setTimeout(r, 1000));
+             const start = this.items.length;
+             if (start >= 30) {
+               this.complete = true;
+             } else {
+               for (let i = 0; i < 5; i++) {
+                 this.items.push('Item ' + (start + i + 1));
+               }
+             }
+             this.loading = false;
+           }
+         }">
+      <div class="scroll-container"
+           @scroll="if ($el.scrollHeight - $el.scrollTop - $el.clientHeight < 100) loadMore()">
+        <template x-for="item in items" :key="item">
+          <div class="list-item" x-text="item"></div>
+        </template>
+
+        <!-- Loading -->
+        <div class="ux-infinite-scroll" x-show="loading">
+          <div class="ux-infinite-scroll__spinner">
+            <div class="ux-infinite-scroll__icon"></div>
+            <span class="ux-infinite-scroll__text">Cargando...</span>
+          </div>
+        </div>
+
+        <!-- Complete -->
+        <div class="ux-infinite-scroll ux-infinite-scroll--complete" x-show="complete && !loading">
+          <span class="ux-infinite-scroll__end-text">No hay mas items</span>
+        </div>
+      </div>
+      <p style="margin-top: var(--ux-space-sm); font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary);">
+        <span x-text="items.length"></span> items cargados
+      </p>
+    </div>
+    <pre class="code-block">&lt;div x-data="{ items: [...], loading: false, complete: false }"&gt;
+  &lt;div class="scroll-container"
+       @scroll="if ($el.scrollHeight - $el.scrollTop - $el.clientHeight &lt; 100) loadMore()"&gt;
+    &lt;template x-for="item in items"&gt;
+      &lt;div class="list-item" x-text="item"&gt;&lt;/div&gt;
+    &lt;/template&gt;
+
+    &lt;div class="ux-infinite-scroll" x-show="loading"&gt;...&lt;/div&gt;
+    &lt;div class="ux-infinite-scroll--complete" x-show="complete"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Scroll Progress Bar -->
+  <div class="demo-section">
+    <h3>Barra de Progreso de Scroll</h3>
+    <p>Indicador visual del progreso de scroll en la pagina.</p>
+    <div class="demo-box">
+      <div style="position: relative; height: 200px; overflow-y: auto; border: 1px solid var(--ux-border-color); border-radius: var(--ux-border-radius);"
+           x-data="uxScrollProgress()"
+           @scroll="updateProgress($el)">
+        <div class="ux-scroll-progress" style="position: absolute;">
+          <div class="ux-scroll-progress__bar" :style="progressStyle"></div>
+        </div>
+        <div style="padding: var(--ux-space-lg);">
+          <p style="margin-bottom: var(--ux-space-md);">Haz scroll para ver la barra de progreso...</p>
+          <p style="margin-bottom: var(--ux-space-md);">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+          <p style="margin-bottom: var(--ux-space-md);">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          <p style="margin-bottom: var(--ux-space-md);">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+          <p style="margin-bottom: var(--ux-space-md);">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+          <p>Final del contenido</p>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;!-- Barra de progreso fija en top --&gt;
+&lt;div class="ux-scroll-progress" x-data="uxScrollProgress()"
+     @scroll.window="updateProgress(document.documentElement)"&gt;
+  &lt;div class="ux-scroll-progress__bar" :style="progressStyle"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+// Componente Alpine
+uxScrollProgress() => {
+  progress: 0,
+  updateProgress(el)  // Actualiza el progreso
+  progressStyle       // Estilo { width: 'X%' }
+}</pre>
+  </div>
+
+  <!-- Hidden State -->
+  <div class="demo-section">
+    <h3>Ocultar Indicador</h3>
+    <p>Clase para ocultar el indicador cuando no esta cargando.</p>
+    <div class="demo-box">
+      <div class="ux-infinite-scroll ux-infinite-scroll--hidden">
+        <div class="ux-infinite-scroll__spinner">
+          <div class="ux-infinite-scroll__icon"></div>
+          <span class="ux-infinite-scroll__text">No visible</span>
+        </div>
+      </div>
+      <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">
+        El indicador de arriba tiene <code>.ux-infinite-scroll--hidden</code>
+      </p>
+    </div>
+    <pre class="code-block">&lt;div class="ux-infinite-scroll"
+     :class="{ 'ux-infinite-scroll--hidden': !loading }"&gt;
+  ...
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Componente Alpine.js -->
+  <div class="demo-section">
+    <h3>Componentes Alpine.js</h3>
+    <div class="demo-box">
+      <pre class="code-block">// uxInfiniteScroll - Control de carga infinita
+uxInfiniteScroll({
+  threshold: 100,      // Distancia en px para disparar carga
+  disabled: false      // Deshabilitar carga automatica
+})
+
+// Propiedades:
+loading      // true mientras carga
+complete     // true cuando no hay mas datos
+error        // true si hubo error
+threshold    // Distancia del fondo para cargar
+disabled     // Si esta deshabilitado
+
+// Metodos:
+checkScroll(el)   // Verifica si debe cargar mas
+loadMore()        // Dispara la carga
+setComplete()     // Marca como completado
+setError()        // Marca como error
+reset()           // Resetea todos los estados
+finishLoading()   // Termina la carga actual
+retry()           // Reintenta despues de error
+
+
+// uxScrollProgress - Barra de progreso
+uxScrollProgress() => {
+  progress: 0,            // Porcentaje 0-100
+  updateProgress(el)      // Actualiza segun scroll
+  progressStyle           // { width: 'X%' }
+}
+
+
+// uxVirtualScroll - Virtual scroll para listas grandes
+uxVirtualScroll({
+  items: [],              // Array de items
+  itemHeight: 50,         // Altura fija de cada item (px)
+  containerHeight: 400,   // Altura del contenedor
+  buffer: 5               // Items extra a renderizar
+})
+
+// Propiedades:
+totalHeight      // Altura total del contenedor virtual
+visibleCount     // Cantidad de items visibles
+startIndex       // Indice del primer item visible
+endIndex         // Indice del ultimo item visible
+visibleItems     // Items actualmente visibles
+
+// Metodos:
+handleScroll(e)      // Manejar evento de scroll
+scrollToIndex(i)     // Scroll a un indice especifico</pre>
+    </div>
+  </div>
+
+  <!-- Virtual Scroll -->
+  <div class="demo-section">
+    <h3>Virtual Scroll</h3>
+    <p>Renderiza solo los elementos visibles para listas muy largas (1000+ items).</p>
+    <div class="demo-box"
+         x-data="uxVirtualScroll({
+           items: Array.from({length: 1000}, (_, i) => ({ id: i, name: 'Item #' + (i + 1) })),
+           itemHeight: 48,
+           containerHeight: 300,
+           buffer: 3
+         })">
+      <div class="ux-virtual-scroll"
+           x-ref="container"
+           @scroll="handleScroll($event)"
+           :style="{ height: containerHeight + 'px' }">
+        <div class="ux-virtual-scroll__spacer" :style="{ height: totalHeight + 'px' }"></div>
+        <div class="ux-virtual-scroll__content">
+          <template x-for="item in visibleItems" :key="item.id">
+            <div :style="item._style"
+                 style="display: flex; align-items: center; padding: 0 var(--ux-space-lg); border-bottom: 1px solid var(--ux-border-color);">
+              <span x-text="item.name"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+      <p style="margin-top: var(--ux-space-sm); font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary);">
+        1000 items, solo <span x-text="visibleItems.length"></span> renderizados
+      </p>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxVirtualScroll({
+       items: [...1000 items...],
+       itemHeight: 48,
+       containerHeight: 300
+     })"&gt;
+  &lt;div class="ux-virtual-scroll"
+       x-ref="container"
+       @scroll="handleScroll($event)"
+       :style="{ height: containerHeight + 'px' }"&gt;
+    &lt;div class="ux-virtual-scroll__spacer"
+         :style="{ height: totalHeight + 'px' }"&gt;&lt;/div&gt;
+    &lt;div class="ux-virtual-scroll__content"&gt;
+      &lt;template x-for="item in visibleItems" :key="item.id"&gt;
+        &lt;div :style="item._style"&gt;
+          &lt;span x-text="item.name"&gt;&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Integracion HTMX -->
+  <div class="demo-section">
+    <h3>Integracion con HTMX</h3>
+    <p>Scroll infinito cargando contenido desde el servidor.</p>
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Lista con infinite scroll --&gt;
+&lt;div id="items-list"
+     hx-get="/api/items?page=1"
+     hx-trigger="load"&gt;
+  &lt;!-- Items se cargan aqui --&gt;
+&lt;/div&gt;
+
+&lt;!-- Trigger para cargar mas (al final de la lista) --&gt;
+&lt;div hx-get="/api/items?page=2"
+     hx-trigger="revealed"
+     hx-target="#items-list"
+     hx-swap="beforeend"&gt;
+  &lt;div class="ux-infinite-scroll"&gt;
+    &lt;div class="ux-infinite-scroll__spinner"&gt;
+      &lt;div class="ux-infinite-scroll__icon"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Respuesta del servidor (incluye siguiente trigger) --&gt;
+&lt;div class="list-item"&gt;Item 11&lt;/div&gt;
+&lt;div class="list-item"&gt;Item 12&lt;/div&gt;
+...
+&lt;!-- Solo si hay mas items --&gt;
+&lt;div hx-get="/api/items?page=3"
+     hx-trigger="revealed"
+     hx-target="#items-list"
+     hx-swap="beforeend"&gt;
+  &lt;div class="ux-infinite-scroll"&gt;...&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- O si no hay mas --&gt;
+&lt;div class="ux-infinite-scroll ux-infinite-scroll--complete"&gt;
+  &lt;span class="ux-infinite-scroll__end-text"&gt;Fin de la lista&lt;/span&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Scroll infinito con intersectionObserver via hx-trigger --&gt;
+&lt;div class="scroll-container"&gt;
+  &lt;div id="feed"&gt;
+    &lt;!-- Posts cargados --&gt;
+  &lt;/div&gt;
+
+  &lt;div id="load-more"
+       hx-get="/api/feed/next"
+       hx-target="#feed"
+       hx-swap="beforeend"
+       hx-trigger="intersect once threshold:0.5"&gt;
+    &lt;div class="ux-infinite-scroll"&gt;
+      &lt;div class="ux-infinite-scroll__spinner"&gt;
+        &lt;div class="ux-infinite-scroll__icon"&gt;&lt;/div&gt;
+        &lt;span class="ux-infinite-scroll__text"&gt;Cargando...&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Manejo de errores con HTMX --&gt;
+&lt;div hx-get="/api/items"
+     hx-trigger="revealed"
+     hx-target="#items"
+     hx-swap="beforeend"
+     hx-on::error="this.innerHTML = errorTemplate"&gt;
+  &lt;div class="ux-infinite-scroll"&gt;...&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;template id="error-template"&gt;
+  &lt;div class="ux-infinite-scroll ux-infinite-scroll--error"&gt;
+    &lt;span class="ux-infinite-scroll__error-text"&gt;Error al cargar&lt;/span&gt;
+    &lt;button class="ux-infinite-scroll__retry"
+            hx-get="/api/items"
+            hx-target="#items"
+            hx-swap="beforeend"&gt;
+      Reintentar
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Barra de progreso de scroll global --&gt;
+&lt;div class="ux-scroll-progress"
+     x-data="uxScrollProgress()"
+     @scroll.window="updateProgress(document.documentElement)"
+     style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000;"&gt;
+  &lt;div class="ux-scroll-progress__bar" :style="progressStyle"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+  </div>
+
+  <!-- Referencia de Clases -->
+  <div class="demo-section">
+    <h3>Referencia de Clases CSS</h3>
+    <div style="overflow-x: auto;">
+      <table class="class-table">
+        <thead>
+          <tr>
+            <th>Clase</th>
+            <th>Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="2" style="font-weight: 600; background: var(--ux-surface-secondary);">Infinite Scroll</td></tr>
+          <tr><td><code>.ux-infinite-scroll</code></td><td>Contenedor del indicador</td></tr>
+          <tr><td><code>.ux-infinite-scroll--hidden</code></td><td>Oculta el indicador</td></tr>
+          <tr><td><code>.ux-infinite-scroll--complete</code></td><td>Estado completado</td></tr>
+          <tr><td><code>.ux-infinite-scroll--error</code></td><td>Estado de error</td></tr>
+          <tr><td colspan="2" style="font-weight: 600; background: var(--ux-surface-secondary);">Loading</td></tr>
+          <tr><td><code>.ux-infinite-scroll__spinner</code></td><td>Contenedor del spinner</td></tr>
+          <tr><td><code>.ux-infinite-scroll__icon</code></td><td>Icono animado de carga</td></tr>
+          <tr><td><code>.ux-infinite-scroll__text</code></td><td>Texto de carga</td></tr>
+          <tr><td colspan="2" style="font-weight: 600; background: var(--ux-surface-secondary);">Completado</td></tr>
+          <tr><td><code>.ux-infinite-scroll__end-icon</code></td><td>Icono de fin</td></tr>
+          <tr><td><code>.ux-infinite-scroll__end-text</code></td><td>Texto de fin</td></tr>
+          <tr><td colspan="2" style="font-weight: 600; background: var(--ux-surface-secondary);">Error</td></tr>
+          <tr><td><code>.ux-infinite-scroll__error-text</code></td><td>Texto de error</td></tr>
+          <tr><td><code>.ux-infinite-scroll__retry</code></td><td>Boton de reintentar</td></tr>
+          <tr><td colspan="2" style="font-weight: 600; background: var(--ux-surface-secondary);">Scroll Progress</td></tr>
+          <tr><td><code>.ux-scroll-progress</code></td><td>Contenedor de barra de progreso</td></tr>
+          <tr><td><code>.ux-scroll-progress__bar</code></td><td>Barra de progreso</td></tr>
+          <tr><td colspan="2" style="font-weight: 600; background: var(--ux-surface-secondary);">Virtual Scroll</td></tr>
+          <tr><td><code>.ux-virtual-scroll</code></td><td>Contenedor con scroll</td></tr>
+          <tr><td><code>.ux-virtual-scroll__spacer</code></td><td>Espaciador para altura total</td></tr>
+          <tr><td><code>.ux-virtual-scroll__content</code></td><td>Contenedor de items visibles</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="ux-padding" style="text-align: center; background: var(--ux-surface-secondary); color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">
+    <p>UX Library - Infinite Scroll Component</p>
+  </footer>
+</body>
+</html>
