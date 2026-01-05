@@ -17434,8 +17434,6 @@
       cursor: pointer;
       border-radius: calc(var(--ux-border-radius) - 2px);
       -webkit-tap-highlight-color: transparent;
-      transition:
-        color var(--ux-transition-fast) var(--ux-ease);
       z-index: 1;
     }
 
@@ -17454,6 +17452,7 @@
 
     /* ========================================
        Segment Indicator (sliding background)
+       Ionic-style animation with squish effect
     ======================================== */
 
     .ux-segment__indicator {
@@ -17464,9 +17463,42 @@
       border-radius: calc(var(--ux-border-radius) - 2px);
       box-shadow: var(--ux-shadow-sm);
       transition:
-        left var(--ux-transition-base) var(--ux-ease-spring),
-        width var(--ux-transition-base) var(--ux-ease-spring);
+        left 300ms cubic-bezier(0.4, 0.0, 0.2, 1),
+        width 300ms cubic-bezier(0.4, 0.0, 0.2, 1),
+        transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
       z-index: 0;
+      will-change: left, width, transform;
+    }
+
+    /* Squish animation during transition */
+    .ux-segment__indicator--animating {
+      animation: ux-segment-squish 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    @keyframes ux-segment-squish {
+      0% {
+        transform: scaleX(1) scaleY(1);
+      }
+      30% {
+        transform: scaleX(1.08) scaleY(0.92);
+      }
+      60% {
+        transform: scaleX(0.96) scaleY(1.02);
+      }
+      100% {
+        transform: scaleX(1) scaleY(1);
+      }
+    }
+
+    /* Subtle press effect on buttons */
+    .ux-segment-button:active:not(.ux-segment-button--selected) {
+      transform: scale(0.96);
+    }
+
+    .ux-segment-button {
+      transition:
+        color var(--ux-transition-fast) var(--ux-ease),
+        transform 150ms var(--ux-ease);
     }
 
     /* ========================================
@@ -17687,6 +17719,7 @@
     options: config.options || [],
     disabled: config.disabled || false,
     indicatorStyle: {},
+    isAnimating: false,
 
     init() {
       // Set first option as default if no value
@@ -17694,7 +17727,7 @@
         this.value = this.options[0].value;
       }
       this.$nextTick(() => {
-        this.updateIndicator();
+        this.updateIndicator(false);
       });
     },
 
@@ -17702,16 +17735,17 @@
       if (this.disabled) return;
       const option = this.options.find(o => o.value === optionValue);
       if (option?.disabled) return;
+      if (this.value === optionValue) return;
 
       this.value = optionValue;
-      this.updateIndicator();
+      this.updateIndicator(true);
     },
 
     isSelected(optionValue) {
       return this.value === optionValue;
     },
 
-    updateIndicator() {
+    updateIndicator(animate = true) {
       const container = this.$refs.segment;
       if (!container) return;
 
@@ -17720,6 +17754,14 @@
       const selectedButton = buttons[selectedIndex];
 
       if (selectedButton) {
+        // Trigger squish animation
+        if (animate) {
+          this.isAnimating = true;
+          setTimeout(() => {
+            this.isAnimating = false;
+          }, 300);
+        }
+
         this.indicatorStyle = {
           left: selectedButton.offsetLeft + 'px',
           width: selectedButton.offsetWidth + 'px'
