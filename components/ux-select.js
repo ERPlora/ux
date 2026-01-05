@@ -1,6 +1,6 @@
 /**
  * UX Select Component
- * Selectores y dropdowns estilo Ionic
+ * Selectores estilo Ionic con múltiples interfaces
  * @requires ux-core.js
  */
 (function() {
@@ -8,13 +8,202 @@
 
   const styles = `
     /* ========================================
-       UX Select
+       Native Select Wrapper
+    ======================================== */
+
+    .ux-native-select {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .ux-native-select__field {
+      width: 100%;
+      min-height: var(--ux-touch-target);
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      padding-right: calc(var(--ux-space-lg) + 24px);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text);
+      background-color: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      transition:
+        border-color var(--ux-transition-fast) var(--ux-ease),
+        box-shadow var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-native-select__field:hover {
+      border-color: var(--ux-medium);
+    }
+
+    .ux-native-select__field:focus {
+      outline: none;
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
+    }
+
+    .ux-native-select__field:disabled {
+      background-color: var(--ux-light);
+      color: var(--ux-text-tertiary);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .ux-native-select__icon {
+      position: absolute;
+      right: var(--ux-space-md);
+      bottom: var(--ux-space-md);
+      pointer-events: none;
+      color: var(--ux-text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ux-native-select__icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* When there's a label, position icon relative to the select field */
+    .ux-native-select .ux-select__label + .ux-native-select__field ~ .ux-native-select__icon,
+    .ux-native-select .ux-select__label ~ .ux-native-select__field ~ .ux-native-select__icon {
+      bottom: auto;
+      top: calc(var(--ux-space-xs) + var(--ux-font-size-sm) * 1.5 + var(--ux-touch-target) / 2);
+      transform: translateY(-50%);
+    }
+
+    /* Helper text for native select */
+    .ux-native-select .ux-select__helper {
+      margin-top: var(--ux-space-xs);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    /* ========================================
+       UX Select Container
     ======================================== */
 
     .ux-select {
       position: relative;
       display: flex;
       flex-direction: column;
+      width: 100%;
+    }
+
+    /* ========================================
+       Label Placements
+    ======================================== */
+
+    /* Default/Stacked - label above */
+    .ux-select__label {
+      display: block;
+      margin-bottom: var(--ux-space-xs);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-text-secondary);
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-select__label--required::after {
+      content: ' *';
+      color: var(--ux-danger);
+    }
+
+    /* Fixed - label inline with fixed width */
+    .ux-select--label-fixed {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .ux-select--label-fixed .ux-select__label {
+      width: 100px;
+      flex-shrink: 0;
+      margin-bottom: 0;
+      margin-right: var(--ux-space-md);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ux-select--label-fixed .ux-select__wrapper {
+      flex: 1;
+    }
+
+    /* Start - label inline at start */
+    .ux-select--label-start {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .ux-select--label-start .ux-select__label {
+      margin-bottom: 0;
+      margin-right: var(--ux-space-md);
+      flex-shrink: 0;
+    }
+
+    .ux-select--label-start .ux-select__wrapper {
+      flex: 1;
+    }
+
+    /* End - label inline at end */
+    .ux-select--label-end {
+      flex-direction: row-reverse;
+      align-items: center;
+    }
+
+    .ux-select--label-end .ux-select__label {
+      margin-bottom: 0;
+      margin-left: var(--ux-space-md);
+      flex-shrink: 0;
+    }
+
+    .ux-select--label-end .ux-select__wrapper {
+      flex: 1;
+    }
+
+    /* Floating - label floats above on focus/value */
+    .ux-select--label-floating {
+      position: relative;
+    }
+
+    .ux-select--label-floating .ux-select__label {
+      position: absolute;
+      left: var(--ux-space-lg);
+      top: 50%;
+      transform: translateY(-50%);
+      margin: 0;
+      padding: 0 var(--ux-space-xs);
+      background-color: var(--ux-surface);
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text-tertiary);
+      pointer-events: none;
+      z-index: 1;
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-select--label-floating.ux-select--has-value .ux-select__label,
+    .ux-select--label-floating.ux-select--open .ux-select__label {
+      top: 0;
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-primary);
+    }
+
+    .ux-select--label-floating .ux-select__trigger {
+      padding-top: var(--ux-space-lg);
+    }
+
+    /* ========================================
+       Select Trigger
+    ======================================== */
+
+    .ux-select__wrapper {
+      position: relative;
       width: 100%;
     }
 
@@ -48,6 +237,25 @@
       box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
     }
 
+    /* Fill variants */
+    .ux-select--fill-solid .ux-select__trigger {
+      background-color: var(--ux-surface-secondary);
+      border-color: transparent;
+    }
+
+    .ux-select--fill-outline .ux-select__trigger {
+      background-color: transparent;
+    }
+
+    /* Shape */
+    .ux-select--round .ux-select__trigger {
+      border-radius: 9999px;
+    }
+
+    /* ========================================
+       Value & Placeholder
+    ======================================== */
+
     .ux-select__value {
       flex: 1;
       text-align: left;
@@ -68,12 +276,7 @@
       height: 20px;
       margin-left: var(--ux-space-sm);
       color: var(--ux-text-secondary);
-      transition: transform var(--ux-transition-fast) var(--ux-ease);
       flex-shrink: 0;
-    }
-
-    .ux-select--open .ux-select__icon {
-      transform: rotate(180deg);
     }
 
     .ux-select__icon svg {
@@ -82,7 +285,322 @@
     }
 
     /* ========================================
-       Dropdown
+       Alert Interface (iOS Modal)
+    ======================================== */
+
+    .ux-select-alert {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--ux-z-modal);
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-select-alert__backdrop {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transition: opacity var(--ux-transition-base) var(--ux-ease);
+    }
+
+    .ux-select-alert--open .ux-select-alert__backdrop {
+      opacity: 1;
+    }
+
+    .ux-select-alert__content {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      max-height: 80vh;
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-border-radius-xl);
+      box-shadow: var(--ux-shadow-xl);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: all var(--ux-transition-base) var(--ux-ease-spring);
+    }
+
+    .ux-select-alert--open .ux-select-alert__content {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .ux-select-alert__header {
+      padding: var(--ux-space-lg) var(--ux-space-lg) var(--ux-space-md);
+      text-align: center;
+    }
+
+    .ux-select-alert__title {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0;
+    }
+
+    .ux-select-alert__message {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin-top: var(--ux-space-xs);
+    }
+
+    .ux-select-alert__options {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 var(--ux-space-sm);
+    }
+
+    .ux-select-alert__option {
+      display: flex;
+      align-items: center;
+      padding: var(--ux-space-md) var(--ux-space-md);
+      cursor: pointer;
+      border-radius: var(--ux-border-radius);
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-select-alert__option:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-select-alert__option-radio {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--ux-border-color);
+      border-radius: 50%;
+      margin-right: var(--ux-space-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-select-alert__option--selected .ux-select-alert__option-radio {
+      border-color: var(--ux-primary);
+    }
+
+    .ux-select-alert__option-radio::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: var(--ux-primary);
+      transform: scale(0);
+      transition: transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-select-alert__option--selected .ux-select-alert__option-radio::after {
+      transform: scale(1);
+    }
+
+    /* Checkbox for multiple - Ionic style (circular) */
+    .ux-select-alert__option-checkbox {
+      width: 26px;
+      height: 26px;
+      border: 2px solid var(--ux-medium);
+      border-radius: 50%;
+      margin-right: var(--ux-space-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+      background-color: transparent;
+    }
+
+    .ux-select-alert__option--selected .ux-select-alert__option-checkbox {
+      background-color: var(--ux-primary);
+      border-color: var(--ux-primary);
+    }
+
+    .ux-select-alert__option-checkbox svg {
+      width: 14px;
+      height: 14px;
+      color: white;
+      opacity: 0;
+      transform: scale(0.5);
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-select-alert__option--selected .ux-select-alert__option-checkbox svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .ux-select-alert__option-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      margin-right: var(--ux-space-sm);
+      flex-shrink: 0;
+    }
+
+    .ux-select-alert__option-label {
+      flex: 1;
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text);
+    }
+
+    .ux-select-alert__footer {
+      display: flex;
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    .ux-select-alert__button {
+      flex: 1;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-md);
+      font-weight: 500;
+      color: var(--ux-primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-select-alert__button:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-select-alert__button:active {
+      background-color: var(--ux-light);
+    }
+
+    .ux-select-alert__button--cancel {
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-select-alert__button + .ux-select-alert__button {
+      border-left: 1px solid var(--ux-border-color);
+    }
+
+    .ux-select-alert__button--ok {
+      font-weight: 600;
+    }
+
+    /* ========================================
+       Action Sheet Interface
+    ======================================== */
+
+    .ux-select-action-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: var(--ux-z-modal);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .ux-select-action-sheet__backdrop {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transition: opacity var(--ux-transition-base) var(--ux-ease);
+    }
+
+    .ux-select-action-sheet--open .ux-select-action-sheet__backdrop {
+      opacity: 1;
+    }
+
+    .ux-select-action-sheet__content {
+      position: relative;
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
+      max-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: env(safe-area-inset-bottom);
+      transform: translateY(100%);
+      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .ux-select-action-sheet--open .ux-select-action-sheet__content {
+      transform: translateY(0);
+    }
+
+    .ux-select-action-sheet__handle {
+      display: flex;
+      justify-content: center;
+      padding: var(--ux-space-sm) 0;
+    }
+
+    .ux-select-action-sheet__handle-bar {
+      width: 36px;
+      height: 4px;
+      background-color: var(--ux-light-shade);
+      border-radius: 2px;
+    }
+
+    .ux-select-action-sheet__header {
+      padding: var(--ux-space-sm) var(--ux-space-lg);
+      text-align: center;
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-select-action-sheet__title {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 600;
+      color: var(--ux-text-secondary);
+      margin: 0;
+    }
+
+    .ux-select-action-sheet__options {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .ux-select-action-sheet__option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      font-size: var(--ux-font-size-lg);
+      color: var(--ux-primary);
+      cursor: pointer;
+      border-bottom: 1px solid var(--ux-border-color);
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-select-action-sheet__option:last-child {
+      border-bottom: none;
+    }
+
+    .ux-select-action-sheet__option:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-select-action-sheet__option--selected {
+      font-weight: 600;
+    }
+
+    .ux-select-action-sheet__option-check {
+      width: 20px;
+      height: 20px;
+      margin-left: var(--ux-space-sm);
+      color: var(--ux-primary);
+    }
+
+    .ux-select-action-sheet__option-check svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ========================================
+       Popover Interface (Dropdown)
     ======================================== */
 
     .ux-select__dropdown {
@@ -96,18 +614,29 @@
       border-radius: var(--ux-border-radius);
       box-shadow: var(--ux-shadow-lg);
       overflow-y: auto;
-      z-index: 100;
+      z-index: var(--ux-z-dropdown);
       -webkit-overflow-scrolling: touch;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-select--open .ux-select__dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
     }
 
     .ux-select__dropdown--top {
       top: auto;
       bottom: calc(100% + 4px);
+      transform: translateY(8px);
     }
 
-    /* ========================================
-       Options
-    ======================================== */
+    .ux-select--open .ux-select__dropdown--top {
+      transform: translateY(0);
+    }
 
     .ux-select__option {
       display: flex;
@@ -121,10 +650,6 @@
 
     .ux-select__option:hover {
       background-color: var(--ux-surface-secondary);
-    }
-
-    .ux-select__option:active {
-      background-color: rgba(var(--ux-primary-rgb), 0.1);
     }
 
     .ux-select__option--selected {
@@ -154,60 +679,48 @@
       height: 100%;
     }
 
-    /* Option with icon */
-    .ux-select__option-icon {
-      width: 24px;
-      height: 24px;
-      margin-right: var(--ux-space-md);
-      color: var(--ux-text-secondary);
+    /* ========================================
+       Multi-select chips
+    ======================================== */
+
+    .ux-select--multi .ux-select__value {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--ux-space-xs);
     }
 
-    .ux-select__option--selected .ux-select__option-icon {
+    .ux-select__chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      padding: 2px 8px;
+      background-color: rgba(var(--ux-primary-rgb), 0.15);
       color: var(--ux-primary);
-    }
-
-    /* ========================================
-       Option Group
-    ======================================== */
-
-    .ux-select__group {
-      padding-top: var(--ux-space-sm);
-    }
-
-    .ux-select__group:first-child {
-      padding-top: 0;
-    }
-
-    .ux-select__group-label {
-      padding: var(--ux-space-sm) var(--ux-space-lg);
-      font-size: var(--ux-font-size-xs);
-      font-weight: 600;
-      color: var(--ux-text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .ux-select__divider {
-      height: 1px;
-      margin: var(--ux-space-sm) 0;
-      background-color: var(--ux-border-color);
-    }
-
-    /* ========================================
-       Label
-    ======================================== */
-
-    .ux-select__label {
-      display: block;
-      margin-bottom: var(--ux-space-xs);
+      border-radius: var(--ux-border-radius-sm);
       font-size: var(--ux-font-size-sm);
-      font-weight: 500;
-      color: var(--ux-text-secondary);
     }
 
-    .ux-select__label--required::after {
-      content: ' *';
-      color: var(--ux-danger);
+    .ux-select__chip-remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      padding: 0;
+      border: none;
+      background: none;
+      color: var(--ux-primary);
+      cursor: pointer;
+      opacity: 0.7;
+    }
+
+    .ux-select__chip-remove:hover {
+      opacity: 1;
+    }
+
+    .ux-select__chip-remove svg {
+      width: 10px;
+      height: 10px;
     }
 
     /* ========================================
@@ -242,38 +755,11 @@
     }
 
     /* ========================================
-       Variants
-    ======================================== */
-
-    /* Filled */
-    .ux-select--filled .ux-select__trigger {
-      background-color: var(--ux-surface-secondary);
-      border-color: transparent;
-      border-bottom: 2px solid var(--ux-border-color);
-      border-radius: var(--ux-border-radius) var(--ux-border-radius) 0 0;
-    }
-
-    .ux-select--filled.ux-select--open .ux-select__trigger {
-      border-bottom-color: var(--ux-primary);
-      box-shadow: none;
-    }
-
-    /* Outline */
-    .ux-select--outline .ux-select__trigger {
-      background-color: transparent;
-    }
-
-    /* ========================================
        Sizes
     ======================================== */
 
     .ux-select--sm .ux-select__trigger {
       min-height: var(--ux-touch-target-sm);
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      font-size: var(--ux-font-size-sm);
-    }
-
-    .ux-select--sm .ux-select__option {
       padding: var(--ux-space-sm) var(--ux-space-md);
       font-size: var(--ux-font-size-sm);
     }
@@ -284,168 +770,24 @@
       font-size: var(--ux-font-size-lg);
     }
 
-    .ux-select--lg .ux-select__option {
-      padding: var(--ux-space-lg) var(--ux-space-xl);
-      font-size: var(--ux-font-size-lg);
-    }
-
     /* ========================================
-       Multi Select
+       Item Integration (like ion-item)
     ======================================== */
 
-    .ux-select--multi .ux-select__value {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--ux-space-xs);
+    .ux-item .ux-select {
+      flex: 1;
     }
 
-    .ux-select__chip {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ux-space-xs);
-      padding: 2px 8px;
-      background-color: rgba(var(--ux-primary-rgb), 0.15);
-      color: var(--ux-primary);
-      border-radius: var(--ux-border-radius-sm);
-      font-size: var(--ux-font-size-sm);
-    }
-
-    .ux-select__chip-remove {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 14px;
-      height: 14px;
-      padding: 0;
+    .ux-item .ux-select__trigger {
       border: none;
-      background: none;
-      color: var(--ux-primary);
-      cursor: pointer;
-      opacity: 0.7;
-      transition: opacity var(--ux-transition-fast) var(--ux-ease);
+      border-radius: 0;
+      background: transparent;
+      padding-left: 0;
+      min-height: auto;
     }
 
-    .ux-select__chip-remove:hover {
-      opacity: 1;
-    }
-
-    .ux-select__chip-remove svg {
-      width: 10px;
-      height: 10px;
-    }
-
-    /* ========================================
-       Searchable
-    ======================================== */
-
-    .ux-select__search {
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      border-bottom: 1px solid var(--ux-border-color);
-    }
-
-    .ux-select__search-input {
-      width: 100%;
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      font-size: var(--ux-font-size-md);
-      color: var(--ux-text);
-      background-color: var(--ux-surface-secondary);
-      border: none;
-      border-radius: var(--ux-border-radius-sm);
-      outline: none;
-    }
-
-    .ux-select__search-input::placeholder {
-      color: var(--ux-text-tertiary);
-    }
-
-    .ux-select__no-results {
-      padding: var(--ux-space-lg);
-      text-align: center;
-      color: var(--ux-text-tertiary);
-      font-size: var(--ux-font-size-sm);
-    }
-
-    /* ========================================
-       Action Sheet Style (mobile)
-    ======================================== */
-
-    @media (max-width: 767px) {
-      .ux-select--action-sheet .ux-select__dropdown {
-        position: fixed;
-        top: auto;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        max-height: 60vh;
-        border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
-        border: none;
-        padding-bottom: env(safe-area-inset-bottom);
-      }
-
-      .ux-select--action-sheet .ux-select__dropdown::before {
-        content: '';
-        display: block;
-        width: 36px;
-        height: 4px;
-        margin: var(--ux-space-sm) auto var(--ux-space-md);
-        background-color: var(--ux-light-shade);
-        border-radius: 2px;
-      }
-    }
-
-    /* ========================================
-       Native Select (for forms)
-    ======================================== */
-
-    .ux-native-select {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-    }
-
-    .ux-native-select__field {
-      width: 100%;
-      min-height: var(--ux-touch-target);
-      padding: var(--ux-space-md) var(--ux-space-lg);
-      padding-right: calc(var(--ux-space-lg) + 24px);
-      font-family: var(--ux-font-family);
-      font-size: 16px;
-      color: var(--ux-text);
-      background-color: var(--ux-surface);
-      border: 1px solid var(--ux-border-color);
-      border-radius: var(--ux-border-radius);
-      outline: none;
-      appearance: none;
-      -webkit-appearance: none;
-      cursor: pointer;
-      transition:
-        border-color var(--ux-transition-fast) var(--ux-ease),
-        box-shadow var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-native-select__field:hover {
-      border-color: var(--ux-medium);
-    }
-
-    .ux-native-select__field:focus {
-      border-color: var(--ux-primary);
-      box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
-    }
-
-    .ux-native-select__icon {
-      position: absolute;
-      right: var(--ux-space-md);
-      bottom: calc(50% - 10px);
-      width: 20px;
-      height: 20px;
-      color: var(--ux-text-secondary);
-      pointer-events: none;
-    }
-
-    .ux-native-select__icon svg {
-      width: 100%;
-      height: 100%;
+    .ux-item .ux-select--open .ux-select__trigger {
+      box-shadow: none;
     }
   `;
 
@@ -459,50 +801,21 @@
     document.head.appendChild(styleEl);
   }
 
-  // Alpine component for select
-  // ARIA: role="listbox" on dropdown, role="option" on options, aria-expanded on trigger
+  // Alpine component for select with multiple interfaces
   const selectComponent = (config = {}) => ({
     isOpen: false,
     value: config.value || null,
+    tempValue: null, // For alert interface confirmation
     options: config.options || [],
     placeholder: config.placeholder || 'Select...',
     disabled: config.disabled || false,
-    searchable: config.searchable || false,
-    searchQuery: '',
+    interface: config.interface || 'popover', // 'alert', 'action-sheet', 'popover'
+    label: config.label || '',
+    labelPlacement: config.labelPlacement || 'stacked', // 'start', 'end', 'fixed', 'floating', 'stacked'
+    cancelText: config.cancelText || 'Cancel',
+    okText: config.okText || 'OK',
     error: '',
-    highlightedIndex: -1,
     selectId: config.id || 'ux-select-' + Math.random().toString(36).substr(2, 9),
-
-    // ARIA attributes for the trigger button
-    get triggerAriaAttrs() {
-      return {
-        'role': 'combobox',
-        'aria-haspopup': 'listbox',
-        'aria-expanded': this.isOpen ? 'true' : 'false',
-        'aria-controls': this.selectId + '-listbox',
-        'aria-activedescendant': this.highlightedIndex >= 0 ? this.selectId + '-option-' + this.highlightedIndex : '',
-        'aria-disabled': this.disabled ? 'true' : 'false'
-      };
-    },
-
-    // ARIA attributes for the listbox
-    get listboxAriaAttrs() {
-      return {
-        'role': 'listbox',
-        'id': this.selectId + '-listbox',
-        'aria-label': config.ariaLabel || 'Options'
-      };
-    },
-
-    // ARIA attributes for each option
-    getOptionAriaAttrs(option, index) {
-      return {
-        'role': 'option',
-        'id': this.selectId + '-option-' + index,
-        'aria-selected': this.isSelected(option) ? 'true' : 'false',
-        'aria-disabled': option.disabled ? 'true' : 'false'
-      };
-    },
 
     get selectedOption() {
       return this.options.find(opt => opt.value === this.value);
@@ -512,79 +825,66 @@
       return this.selectedOption ? this.selectedOption.label : '';
     },
 
-    get filteredOptions() {
-      if (!this.searchQuery) return this.options;
-      const query = this.searchQuery.toLowerCase();
-      return this.options.filter(opt =>
-        opt.label.toLowerCase().includes(query)
-      );
+    get hasValue() {
+      return this.value !== null && this.value !== undefined && this.value !== '';
     },
 
-    toggle() {
-      if (this.disabled) return;
-      this.isOpen = !this.isOpen;
-      if (this.isOpen) {
-        this.searchQuery = '';
-        this.highlightedIndex = -1;
-      }
+    get filteredOptions() {
+      return this.options;
+    },
+
+    select(option) {
+      this.selectOption(option);
     },
 
     open() {
-      if (!this.disabled) {
-        this.isOpen = true;
-        this.searchQuery = '';
-        this.highlightedIndex = -1;
-      }
+      if (this.disabled) return;
+      this.isOpen = true;
+      this.tempValue = this.value;
+      document.body.style.overflow = 'hidden';
     },
 
     close() {
       this.isOpen = false;
-      this.searchQuery = '';
+      document.body.style.overflow = '';
     },
 
-    select(option) {
+    toggle() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    },
+
+    selectOption(option) {
       if (option.disabled) return;
-      this.value = option.value;
+
+      if (this.interface === 'alert') {
+        this.tempValue = option.value;
+      } else {
+        this.value = option.value;
+        this.error = '';
+        this.close();
+      }
+    },
+
+    confirm() {
+      this.value = this.tempValue;
       this.error = '';
       this.close();
     },
 
-    isSelected(option) {
-      return this.value === option.value;
+    cancel() {
+      this.tempValue = this.value;
+      this.close();
     },
 
-    handleKeydown(event) {
-      if (!this.isOpen) {
-        if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
-          event.preventDefault();
-          this.open();
-        }
-        return;
+    isSelected(option) {
+      if (this.interface === 'alert') {
+        return this.tempValue === option.value;
       }
-
-      switch (event.key) {
-        case 'Escape':
-          event.preventDefault();
-          this.close();
-          break;
-        case 'ArrowDown':
-          event.preventDefault();
-          this.highlightedIndex = Math.min(
-            this.highlightedIndex + 1,
-            this.filteredOptions.length - 1
-          );
-          break;
-        case 'ArrowUp':
-          event.preventDefault();
-          this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
-          break;
-        case 'Enter':
-          event.preventDefault();
-          if (this.highlightedIndex >= 0) {
-            this.select(this.filteredOptions[this.highlightedIndex]);
-          }
-          break;
-      }
+      return this.value === option.value;
     },
 
     validate(required = false, message = 'Please select an option') {
@@ -598,9 +898,36 @@
 
     reset() {
       this.value = null;
+      this.tempValue = null;
       this.error = '';
-      this.searchQuery = '';
       this.close();
+    },
+
+    handleKeydown(event) {
+      switch (event.key) {
+        case 'Escape':
+          this.close();
+          break;
+        case 'Enter':
+        case ' ':
+          if (!this.isOpen) {
+            event.preventDefault();
+            this.open();
+          }
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          if (!this.isOpen) {
+            this.open();
+          }
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          if (!this.isOpen) {
+            this.open();
+          }
+          break;
+      }
     }
   });
 
@@ -613,98 +940,90 @@
   }
 
   // Alpine component for multi-select
-  // ARIA: role="listbox" with aria-multiselectable="true"
   const multiSelectComponent = (config = {}) => ({
     isOpen: false,
     values: config.values || [],
+    tempValues: [], // For alert interface confirmation
     options: config.options || [],
     placeholder: config.placeholder || 'Select...',
     disabled: config.disabled || false,
-    searchable: config.searchable || false,
-    searchQuery: '',
+    interface: config.interface || 'alert', // Multi-select typically uses alert
+    label: config.label || '',
+    labelPlacement: config.labelPlacement || 'stacked',
+    cancelText: config.cancelText || 'Cancel',
+    okText: config.okText || 'OK',
     error: '',
     maxSelections: config.maxSelections || null,
     multiSelectId: config.id || 'ux-multi-select-' + Math.random().toString(36).substr(2, 9),
-
-    // ARIA attributes for the trigger button
-    get triggerAriaAttrs() {
-      return {
-        'role': 'combobox',
-        'aria-haspopup': 'listbox',
-        'aria-expanded': this.isOpen ? 'true' : 'false',
-        'aria-controls': this.multiSelectId + '-listbox',
-        'aria-disabled': this.disabled ? 'true' : 'false'
-      };
-    },
-
-    // ARIA attributes for the listbox
-    get listboxAriaAttrs() {
-      return {
-        'role': 'listbox',
-        'id': this.multiSelectId + '-listbox',
-        'aria-label': config.ariaLabel || 'Options',
-        'aria-multiselectable': 'true'
-      };
-    },
-
-    // ARIA attributes for each option
-    getOptionAriaAttrs(option, index) {
-      return {
-        'role': 'option',
-        'id': this.multiSelectId + '-option-' + index,
-        'aria-selected': this.isSelected(option) ? 'true' : 'false',
-        'aria-disabled': option.disabled ? 'true' : 'false'
-      };
-    },
 
     get selectedOptions() {
       return this.options.filter(opt => this.values.includes(opt.value));
     },
 
-    get filteredOptions() {
-      if (!this.searchQuery) return this.options;
-      const query = this.searchQuery.toLowerCase();
-      return this.options.filter(opt =>
-        opt.label.toLowerCase().includes(query)
-      );
+    get displayValue() {
+      if (this.selectedOptions.length === 0) return '';
+      if (this.selectedOptions.length === 1) return this.selectedOptions[0].label;
+      return `${this.selectedOptions.length} selected`;
+    },
+
+    get hasValue() {
+      return this.values.length > 0;
     },
 
     get canSelectMore() {
-      return !this.maxSelections || this.values.length < this.maxSelections;
+      return !this.maxSelections || this.tempValues.length < this.maxSelections;
     },
 
-    toggle() {
-      if (this.disabled) return;
-      this.isOpen = !this.isOpen;
-      if (this.isOpen) {
-        this.searchQuery = '';
-      }
+    get filteredOptions() {
+      return this.options;
     },
 
     open() {
-      if (!this.disabled) {
-        this.isOpen = true;
-        this.searchQuery = '';
-      }
+      if (this.disabled) return;
+      this.isOpen = true;
+      this.tempValues = [...this.values];
+      document.body.style.overflow = 'hidden';
     },
 
     close() {
       this.isOpen = false;
-      this.searchQuery = '';
+      document.body.style.overflow = '';
+    },
+
+    toggle() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
     },
 
     toggleOption(option) {
       if (option.disabled) return;
 
-      const index = this.values.indexOf(option.value);
+      const index = this.tempValues.indexOf(option.value);
       if (index === -1) {
         if (this.canSelectMore) {
-          this.values.push(option.value);
+          this.tempValues.push(option.value);
         }
       } else {
-        this.values.splice(index, 1);
+        this.tempValues.splice(index, 1);
       }
+    },
+
+    isSelected(option) {
+      return this.tempValues.includes(option.value);
+    },
+
+    confirm() {
+      this.values = [...this.tempValues];
       this.error = '';
+      this.close();
+    },
+
+    cancel() {
+      this.tempValues = [...this.values];
+      this.close();
     },
 
     removeValue(value) {
@@ -712,20 +1031,6 @@
       if (index !== -1) {
         this.values.splice(index, 1);
       }
-    },
-
-    isSelected(option) {
-      return this.values.includes(option.value);
-    },
-
-    selectAll() {
-      this.values = this.options
-        .filter(opt => !opt.disabled)
-        .map(opt => opt.value);
-    },
-
-    clearAll() {
-      this.values = [];
     },
 
     validate(required = false, message = 'Please select at least one option') {
@@ -739,8 +1044,8 @@
 
     reset() {
       this.values = [];
+      this.tempValues = [];
       this.error = '';
-      this.searchQuery = '';
       this.close();
     }
   });

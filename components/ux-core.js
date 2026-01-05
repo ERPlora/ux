@@ -206,12 +206,12 @@
          They reference the primitives above.
       ======================================== */
 
-      /* Primary - Ionic Blue style */
-      --ux-primary: #3880ff;
-      --ux-primary-rgb: 56, 128, 255;
+      /* Primary - Shoelace Sky Blue */
+      --ux-primary: #0ea5e9;
+      --ux-primary-rgb: 14, 165, 233;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #3171e0;
-      --ux-primary-tint: #4c8dff;
+      --ux-primary-shade: #0284c7;
+      --ux-primary-tint: #38bdf8;
 
       /* Secondary - Cyan */
       --ux-secondary: var(--ux-cyan-400);
@@ -534,13 +534,13 @@
        not change these themes directly.
     ======================================== */
 
-    /* Ocean Blue (default - Ionic style) */
+    /* Ocean Blue (default - Shoelace Sky style) */
     .ux-theme-ocean {
-      --ux-primary: #3880ff;
-      --ux-primary-rgb: 56, 128, 255;
+      --ux-primary: #0ea5e9;
+      --ux-primary-rgb: 14, 165, 233;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #3171e0;
-      --ux-primary-tint: #4c8dff;
+      --ux-primary-shade: #0284c7;
+      --ux-primary-tint: #38bdf8;
     }
 
     /* Blue (Tailwind/Modern) */
@@ -1715,10 +1715,33 @@
       initialDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 
+    const savedColorTheme = localStorage.getItem('ux-color-theme') || 'ux-theme-ocean';
+
     return {
       darkMode: initialDarkMode,
-      colorTheme: localStorage.getItem('ux-color-theme') || 'ux-theme-ocean',
+      colorTheme: savedColorTheme,
+      tempColorTheme: savedColorTheme,
       menuOpen: false,
+      themeSheetOpen: false,
+      themeSelectOpen: false,
+
+      // Theme options for select interface
+      themeOptions: [
+        { value: 'ux-theme-ocean', label: 'Ocean Blue', color: '#0ea5e9' },
+        { value: 'ux-theme-blue', label: 'Blue', color: '#3b82f6' },
+        { value: 'ux-theme-emerald', label: 'Emerald', color: '#10b981' },
+        { value: 'ux-theme-purple', label: 'Purple', color: '#a855f7' },
+        { value: 'ux-theme-violet', label: 'Violet', color: '#8b5cf6' },
+        { value: 'ux-theme-sunset', label: 'Sunset', color: '#f97316' },
+        { value: 'ux-theme-rose', label: 'Rose', color: '#f43f5e' },
+        { value: 'ux-theme-teal', label: 'Teal', color: '#14b8a6' },
+        { value: 'ux-theme-amber', label: 'Amber', color: '#f59e0b' },
+        { value: 'ux-theme-slate', label: 'Slate', color: '#64748b' },
+        { value: 'ux-theme-indigo', label: 'Indigo', color: '#6366f1' },
+        { value: 'ux-theme-cyan', label: 'Cyan', color: '#06b6d4' },
+        { value: 'ux-theme-red', label: 'Red', color: '#ef4444' },
+        { value: 'ux-theme-green', label: 'Green', color: '#16a34a' }
+      ],
 
       init() {
         // Apply initial theme to body
@@ -1747,9 +1770,10 @@
 
         // Remove all theme classes and apply current one
         root.classList.remove(
-          'ux-theme-ocean', 'ux-theme-emerald', 'ux-theme-purple',
-          'ux-theme-sunset', 'ux-theme-rose', 'ux-theme-teal',
-          'ux-theme-amber', 'ux-theme-slate', 'ux-theme-indigo', 'ux-theme-cyan'
+          'ux-theme-ocean', 'ux-theme-blue', 'ux-theme-emerald', 'ux-theme-purple',
+          'ux-theme-violet', 'ux-theme-sunset', 'ux-theme-orange', 'ux-theme-rose',
+          'ux-theme-teal', 'ux-theme-amber', 'ux-theme-slate', 'ux-theme-indigo',
+          'ux-theme-cyan', 'ux-theme-red', 'ux-theme-crimson', 'ux-theme-green', 'ux-theme-forest'
         );
         root.classList.add(this.colorTheme);
       },
@@ -1762,9 +1786,16 @@
 
       setColorTheme(theme) {
         this.colorTheme = theme;
+        this.tempColorTheme = theme;
         localStorage.setItem('ux-color-theme', theme);
         this.menuOpen = false;
+        this.themeSelectOpen = false;
         this.applyTheme();
+      },
+
+      openThemeSelect() {
+        this.tempColorTheme = this.colorTheme;
+        this.themeSelectOpen = true;
       },
 
       // Reset to system preference

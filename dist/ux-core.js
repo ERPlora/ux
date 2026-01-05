@@ -13,84 +13,324 @@
     ======================================== */
 
     :root {
-      /* Primary */
-      --ux-primary: #3880ff;
-      --ux-primary-rgb: 56, 128, 255;
+      /* ========================================
+         LAYER 1: Color Primitives (Internal)
+         These are the raw color values.
+         Plugins should NOT use these directly.
+      ======================================== */
+
+      /* Gray Scale */
+      --ux-gray-50: #f9fafb;
+      --ux-gray-100: #f3f4f6;
+      --ux-gray-200: #e5e7eb;
+      --ux-gray-300: #d1d5db;
+      --ux-gray-400: #9ca3af;
+      --ux-gray-500: #6b7280;
+      --ux-gray-600: #4b5563;
+      --ux-gray-700: #374151;
+      --ux-gray-800: #1f2937;
+      --ux-gray-900: #111827;
+      --ux-gray-950: #030712;
+
+      /* Blue */
+      --ux-blue-50: #eff6ff;
+      --ux-blue-100: #dbeafe;
+      --ux-blue-200: #bfdbfe;
+      --ux-blue-300: #93c5fd;
+      --ux-blue-400: #60a5fa;
+      --ux-blue-500: #3b82f6;
+      --ux-blue-600: #2563eb;
+      --ux-blue-700: #1d4ed8;
+      --ux-blue-800: #1e40af;
+      --ux-blue-900: #1e3a8a;
+
+      /* Cyan / Secondary */
+      --ux-cyan-50: #ecfeff;
+      --ux-cyan-100: #cffafe;
+      --ux-cyan-200: #a5f3fc;
+      --ux-cyan-300: #67e8f9;
+      --ux-cyan-400: #22d3ee;
+      --ux-cyan-500: #06b6d4;
+      --ux-cyan-600: #0891b2;
+      --ux-cyan-700: #0e7490;
+      --ux-cyan-800: #155e75;
+      --ux-cyan-900: #164e63;
+
+      /* Indigo / Tertiary */
+      --ux-indigo-50: #eef2ff;
+      --ux-indigo-100: #e0e7ff;
+      --ux-indigo-200: #c7d2fe;
+      --ux-indigo-300: #a5b4fc;
+      --ux-indigo-400: #818cf8;
+      --ux-indigo-500: #6366f1;
+      --ux-indigo-600: #4f46e5;
+      --ux-indigo-700: #4338ca;
+      --ux-indigo-800: #3730a3;
+      --ux-indigo-900: #312e81;
+
+      /* Green / Success */
+      --ux-green-50: #f0fdf4;
+      --ux-green-100: #dcfce7;
+      --ux-green-200: #bbf7d0;
+      --ux-green-300: #86efac;
+      --ux-green-400: #4ade80;
+      --ux-green-500: #22c55e;
+      --ux-green-600: #16a34a;
+      --ux-green-700: #15803d;
+      --ux-green-800: #166534;
+      --ux-green-900: #14532d;
+
+      /* Yellow / Warning */
+      --ux-yellow-50: #fefce8;
+      --ux-yellow-100: #fef9c3;
+      --ux-yellow-200: #fef08a;
+      --ux-yellow-300: #fde047;
+      --ux-yellow-400: #facc15;
+      --ux-yellow-500: #eab308;
+      --ux-yellow-600: #ca8a04;
+      --ux-yellow-700: #a16207;
+      --ux-yellow-800: #854d0e;
+      --ux-yellow-900: #713f12;
+
+      /* Amber (alternative warning) */
+      --ux-amber-50: #fffbeb;
+      --ux-amber-100: #fef3c7;
+      --ux-amber-200: #fde68a;
+      --ux-amber-300: #fcd34d;
+      --ux-amber-400: #fbbf24;
+      --ux-amber-500: #f59e0b;
+      --ux-amber-600: #d97706;
+      --ux-amber-700: #b45309;
+      --ux-amber-800: #92400e;
+      --ux-amber-900: #78350f;
+
+      /* Red / Danger */
+      --ux-red-50: #fef2f2;
+      --ux-red-100: #fee2e2;
+      --ux-red-200: #fecaca;
+      --ux-red-300: #fca5a5;
+      --ux-red-400: #f87171;
+      --ux-red-500: #ef4444;
+      --ux-red-600: #dc2626;
+      --ux-red-700: #b91c1c;
+      --ux-red-800: #991b1b;
+      --ux-red-900: #7f1d1d;
+
+      /* Orange */
+      --ux-orange-50: #fff7ed;
+      --ux-orange-100: #ffedd5;
+      --ux-orange-200: #fed7aa;
+      --ux-orange-300: #fdba74;
+      --ux-orange-400: #fb923c;
+      --ux-orange-500: #f97316;
+      --ux-orange-600: #ea580c;
+      --ux-orange-700: #c2410c;
+      --ux-orange-800: #9a3412;
+      --ux-orange-900: #7c2d12;
+
+      /* Rose / Pink */
+      --ux-rose-50: #fff1f2;
+      --ux-rose-100: #ffe4e6;
+      --ux-rose-200: #fecdd3;
+      --ux-rose-300: #fda4af;
+      --ux-rose-400: #fb7185;
+      --ux-rose-500: #f43f5e;
+      --ux-rose-600: #e11d48;
+      --ux-rose-700: #be123c;
+      --ux-rose-800: #9f1239;
+      --ux-rose-900: #881337;
+
+      /* Purple */
+      --ux-purple-50: #faf5ff;
+      --ux-purple-100: #f3e8ff;
+      --ux-purple-200: #e9d5ff;
+      --ux-purple-300: #d8b4fe;
+      --ux-purple-400: #c084fc;
+      --ux-purple-500: #a855f7;
+      --ux-purple-600: #9333ea;
+      --ux-purple-700: #7e22ce;
+      --ux-purple-800: #6b21a8;
+      --ux-purple-900: #581c87;
+
+      /* Violet */
+      --ux-violet-50: #f5f3ff;
+      --ux-violet-100: #ede9fe;
+      --ux-violet-200: #ddd6fe;
+      --ux-violet-300: #c4b5fd;
+      --ux-violet-400: #a78bfa;
+      --ux-violet-500: #8b5cf6;
+      --ux-violet-600: #7c3aed;
+      --ux-violet-700: #6d28d9;
+      --ux-violet-800: #5b21b6;
+      --ux-violet-900: #4c1d95;
+
+      /* Teal */
+      --ux-teal-50: #f0fdfa;
+      --ux-teal-100: #ccfbf1;
+      --ux-teal-200: #99f6e4;
+      --ux-teal-300: #5eead4;
+      --ux-teal-400: #2dd4bf;
+      --ux-teal-500: #14b8a6;
+      --ux-teal-600: #0d9488;
+      --ux-teal-700: #0f766e;
+      --ux-teal-800: #115e59;
+      --ux-teal-900: #134e4a;
+
+      /* Emerald */
+      --ux-emerald-50: #ecfdf5;
+      --ux-emerald-100: #d1fae5;
+      --ux-emerald-200: #a7f3d0;
+      --ux-emerald-300: #6ee7b7;
+      --ux-emerald-400: #34d399;
+      --ux-emerald-500: #10b981;
+      --ux-emerald-600: #059669;
+      --ux-emerald-700: #047857;
+      --ux-emerald-800: #065f46;
+      --ux-emerald-900: #064e3b;
+
+      /* Slate */
+      --ux-slate-50: #f8fafc;
+      --ux-slate-100: #f1f5f9;
+      --ux-slate-200: #e2e8f0;
+      --ux-slate-300: #cbd5e1;
+      --ux-slate-400: #94a3b8;
+      --ux-slate-500: #64748b;
+      --ux-slate-600: #475569;
+      --ux-slate-700: #334155;
+      --ux-slate-800: #1e293b;
+      --ux-slate-900: #0f172a;
+
+      /* ========================================
+         LAYER 2: Semantic Tokens
+         These are what plugins/components use.
+         They reference the primitives above.
+      ======================================== */
+
+      /* Primary - Shoelace Sky Blue */
+      --ux-primary: #0ea5e9;
+      --ux-primary-rgb: 14, 165, 233;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #3171e0;
-      --ux-primary-tint: #4c8dff;
+      --ux-primary-shade: #0284c7;
+      --ux-primary-tint: #38bdf8;
 
-      /* Secondary */
-      --ux-secondary: #3dc2ff;
-      --ux-secondary-rgb: 61, 194, 255;
+      /* Secondary - Cyan */
+      --ux-secondary: var(--ux-cyan-400);
+      --ux-secondary-rgb: 34, 211, 238;
       --ux-secondary-contrast: #ffffff;
-      --ux-secondary-shade: #36abe0;
-      --ux-secondary-tint: #50c8ff;
+      --ux-secondary-shade: var(--ux-cyan-600);
+      --ux-secondary-tint: var(--ux-cyan-300);
 
-      /* Tertiary */
-      --ux-tertiary: #5260ff;
-      --ux-tertiary-rgb: 82, 96, 255;
+      /* Tertiary - Indigo */
+      --ux-tertiary: var(--ux-indigo-500);
+      --ux-tertiary-rgb: 99, 102, 241;
       --ux-tertiary-contrast: #ffffff;
-      --ux-tertiary-shade: #4854e0;
-      --ux-tertiary-tint: #6370ff;
+      --ux-tertiary-shade: var(--ux-indigo-600);
+      --ux-tertiary-tint: var(--ux-indigo-400);
 
-      /* Success */
-      --ux-success: #2dd36f;
-      --ux-success-rgb: 45, 211, 111;
+      /* Success - Green */
+      --ux-success: var(--ux-green-500);
+      --ux-success-rgb: 34, 197, 94;
       --ux-success-contrast: #ffffff;
-      --ux-success-shade: #28ba62;
-      --ux-success-tint: #42d77d;
+      --ux-success-shade: var(--ux-green-600);
+      --ux-success-tint: var(--ux-green-400);
 
-      /* Warning */
-      --ux-warning: #ffc409;
-      --ux-warning-rgb: 255, 196, 9;
+      /* Warning - Amber */
+      --ux-warning: var(--ux-amber-500);
+      --ux-warning-rgb: 245, 158, 11;
       --ux-warning-contrast: #000000;
-      --ux-warning-shade: #e0ac08;
-      --ux-warning-tint: #ffca22;
+      --ux-warning-shade: var(--ux-amber-600);
+      --ux-warning-tint: var(--ux-amber-400);
 
-      /* Danger */
-      --ux-danger: #eb445a;
-      --ux-danger-rgb: 235, 68, 90;
+      /* Danger - Red */
+      --ux-danger: var(--ux-red-500);
+      --ux-danger-rgb: 239, 68, 68;
       --ux-danger-contrast: #ffffff;
-      --ux-danger-shade: #cf3c4f;
-      --ux-danger-tint: #ed576b;
+      --ux-danger-shade: var(--ux-red-600);
+      --ux-danger-tint: var(--ux-red-400);
 
       /* Dark */
-      --ux-dark: #222428;
-      --ux-dark-rgb: 34, 36, 40;
+      --ux-dark: var(--ux-gray-900);
+      --ux-dark-rgb: 17, 24, 39;
       --ux-dark-contrast: #ffffff;
-      --ux-dark-shade: #1e2023;
-      --ux-dark-tint: #383a3e;
+      --ux-dark-shade: var(--ux-gray-950);
+      --ux-dark-tint: var(--ux-gray-800);
 
       /* Medium */
-      --ux-medium: #92949c;
-      --ux-medium-rgb: 146, 148, 156;
+      --ux-medium: var(--ux-gray-500);
+      --ux-medium-rgb: 107, 114, 128;
       --ux-medium-contrast: #ffffff;
-      --ux-medium-shade: #808289;
-      --ux-medium-tint: #9d9fa6;
+      --ux-medium-shade: var(--ux-gray-600);
+      --ux-medium-tint: var(--ux-gray-400);
 
       /* Light */
-      --ux-light: #f4f5f8;
-      --ux-light-rgb: 244, 245, 248;
+      --ux-light: var(--ux-gray-100);
+      --ux-light-rgb: 243, 244, 246;
       --ux-light-contrast: #000000;
-      --ux-light-shade: #d7d8da;
-      --ux-light-tint: #f5f6f9;
+      --ux-light-shade: var(--ux-gray-200);
+      --ux-light-tint: var(--ux-gray-50);
 
-      /* Background & Text */
+      /* Background & Surfaces */
       --ux-background: #ffffff;
       --ux-background-rgb: 255, 255, 255;
-      --ux-text: #000000;
-      --ux-text-rgb: 0, 0, 0;
-      --ux-text-secondary: #666666;
-      --ux-text-tertiary: #999999;
-
-      /* Surface */
       --ux-surface: #ffffff;
       --ux-surface-rgb: 255, 255, 255;
-      --ux-surface-secondary: #f4f5f8;
+      --ux-surface-secondary: var(--ux-gray-100);
+      --ux-surface-tertiary: var(--ux-gray-200);
+
+      /* Text Colors */
+      --ux-text: var(--ux-gray-900);
+      --ux-text-rgb: 17, 24, 39;
+      --ux-text-secondary: var(--ux-gray-600);
+      --ux-text-tertiary: var(--ux-gray-500);
+      --ux-text-muted: var(--ux-gray-400);
+
+      /* Borders & Dividers */
+      --ux-border-color: var(--ux-gray-200);
+      --ux-divider-color: var(--ux-gray-200);
+
+      /* ========================================
+         LAYER 3: Component Tokens
+         Specific tokens for UI components.
+         Components use these for consistency.
+      ======================================== */
+
+      /* Button */
+      --ux-button-bg: var(--ux-primary);
+      --ux-button-text: var(--ux-primary-contrast);
+      --ux-button-bg-hover: var(--ux-primary-shade);
+      --ux-button-border-radius: var(--ux-border-radius);
+
+      /* Card */
+      --ux-card-bg: var(--ux-surface);
+      --ux-card-border: var(--ux-border-color);
+      --ux-card-shadow: var(--ux-shadow-md);
+
+      /* Input */
+      --ux-input-bg: var(--ux-surface);
+      --ux-input-border: var(--ux-border-color);
+      --ux-input-text: var(--ux-text);
+      --ux-input-placeholder: var(--ux-text-tertiary);
+      --ux-input-focus-border: var(--ux-primary);
+
+      /* Modal */
+      --ux-modal-bg: var(--ux-surface);
+      --ux-modal-backdrop: rgba(0, 0, 0, 0.5);
+
+      /* List */
+      --ux-list-bg: var(--ux-surface);
+      --ux-list-item-hover: var(--ux-surface-secondary);
+      --ux-list-divider: var(--ux-divider-color);
+
+      /* Navbar */
+      --ux-navbar-bg: var(--ux-surface);
+      --ux-navbar-text: var(--ux-text);
+      --ux-navbar-border: var(--ux-border-color);
+
+      /* Toast */
+      --ux-toast-bg: var(--ux-gray-800);
+      --ux-toast-text: #ffffff;
 
       /* Borders */
-      --ux-border-color: rgba(0, 0, 0, 0.13);
       --ux-border-radius: 0.5rem;
       --ux-border-radius-sm: 0.25rem;
       --ux-border-radius-lg: 0.75rem;
@@ -156,25 +396,35 @@
       --ux-safe-left: env(safe-area-inset-left, 0px);
     }
 
+    /* ========================================
+       Dark Mode - Using Primitives
+       System preference + Manual class
+    ======================================== */
+
     /* Dark Mode - System preference */
     @media (prefers-color-scheme: dark) {
       :root:not(.ux-light) {
+        /* Background & Surfaces - iOS dark style */
         --ux-background: #000000;
         --ux-background-rgb: 0, 0, 0;
+        --ux-surface: #1c1c1e;
+        --ux-surface-rgb: 28, 28, 30;
+        --ux-surface-secondary: #2c2c2e;
+        --ux-surface-tertiary: #3a3a3c;
+
+        /* Text - using opacity for iOS feel */
         --ux-text: #ffffff;
         --ux-text-rgb: 255, 255, 255;
         --ux-text-secondary: rgba(235, 235, 245, 0.8);
         --ux-text-tertiary: rgba(235, 235, 245, 0.5);
         --ux-text-muted: rgba(235, 235, 245, 0.3);
-        --ux-surface: #1c1c1e;
-        --ux-surface-rgb: 28, 28, 30;
-        --ux-surface-secondary: #2c2c2e;
-        --ux-surface-tertiary: #3a3a3c;
+
+        /* Borders */
         --ux-border-color: rgba(255, 255, 255, 0.15);
         --ux-divider-color: rgba(255, 255, 255, 0.1);
         --ux-shadow-color: rgba(0, 0, 0, 0.5);
 
-        /* Invert light/dark for dark mode */
+        /* Invert light/dark semantic colors */
         --ux-light: #2c2c2e;
         --ux-light-rgb: 44, 44, 46;
         --ux-light-contrast: #ffffff;
@@ -184,8 +434,16 @@
         --ux-dark: #ffffff;
         --ux-dark-rgb: 255, 255, 255;
         --ux-dark-contrast: #1a1a1a;
-        --ux-dark-shade: #e5e5e5;
+        --ux-dark-shade: var(--ux-gray-200);
         --ux-dark-tint: #ffffff;
+
+        /* Component tokens - dark mode */
+        --ux-card-bg: var(--ux-surface);
+        --ux-input-bg: var(--ux-surface);
+        --ux-modal-bg: var(--ux-surface);
+        --ux-list-bg: var(--ux-surface);
+        --ux-navbar-bg: var(--ux-surface);
+        --ux-toast-bg: var(--ux-gray-700);
       }
     }
 
@@ -195,52 +453,59 @@
     .ux-light {
       --ux-background: #ffffff;
       --ux-background-rgb: 255, 255, 255;
-      --ux-text: #000000;
-      --ux-text-rgb: 0, 0, 0;
-      --ux-text-secondary: #666666;
-      --ux-text-tertiary: #999999;
-      --ux-text-muted: #b3b3b3;
       --ux-surface: #ffffff;
       --ux-surface-rgb: 255, 255, 255;
-      --ux-surface-secondary: #f4f5f8;
-      --ux-surface-tertiary: #e8e9ed;
-      --ux-border-color: rgba(0, 0, 0, 0.13);
-      --ux-divider-color: rgba(0, 0, 0, 0.08);
+      --ux-surface-secondary: var(--ux-gray-100);
+      --ux-surface-tertiary: var(--ux-gray-200);
+
+      --ux-text: var(--ux-gray-900);
+      --ux-text-rgb: 17, 24, 39;
+      --ux-text-secondary: var(--ux-gray-600);
+      --ux-text-tertiary: var(--ux-gray-500);
+      --ux-text-muted: var(--ux-gray-400);
+
+      --ux-border-color: var(--ux-gray-200);
+      --ux-divider-color: var(--ux-gray-200);
       --ux-shadow-color: rgba(0, 0, 0, 0.1);
 
-      --ux-light: #f4f5f8;
-      --ux-light-rgb: 244, 245, 248;
+      --ux-light: var(--ux-gray-100);
+      --ux-light-rgb: 243, 244, 246;
       --ux-light-contrast: #000000;
-      --ux-light-shade: #d7d8da;
-      --ux-light-tint: #f5f6f9;
+      --ux-light-shade: var(--ux-gray-200);
+      --ux-light-tint: var(--ux-gray-50);
 
-      --ux-dark: #222428;
-      --ux-dark-rgb: 34, 36, 40;
+      --ux-dark: var(--ux-gray-900);
+      --ux-dark-rgb: 17, 24, 39;
       --ux-dark-contrast: #ffffff;
-      --ux-dark-shade: #1e2023;
-      --ux-dark-tint: #383a3e;
+      --ux-dark-shade: var(--ux-gray-950);
+      --ux-dark-tint: var(--ux-gray-800);
     }
 
     /* Manual Dark Mode Class - applied to html or body */
     html.ux-dark,
     body.ux-dark,
     .ux-dark {
+      /* Background & Surfaces - iOS dark style */
       --ux-background: #000000;
       --ux-background-rgb: 0, 0, 0;
+      --ux-surface: #1c1c1e;
+      --ux-surface-rgb: 28, 28, 30;
+      --ux-surface-secondary: #2c2c2e;
+      --ux-surface-tertiary: #3a3a3c;
+
+      /* Text */
       --ux-text: #ffffff;
       --ux-text-rgb: 255, 255, 255;
       --ux-text-secondary: rgba(235, 235, 245, 0.8);
       --ux-text-tertiary: rgba(235, 235, 245, 0.5);
       --ux-text-muted: rgba(235, 235, 245, 0.3);
-      --ux-surface: #1c1c1e;
-      --ux-surface-rgb: 28, 28, 30;
-      --ux-surface-secondary: #2c2c2e;
-      --ux-surface-tertiary: #3a3a3c;
+
+      /* Borders */
       --ux-border-color: rgba(255, 255, 255, 0.15);
       --ux-divider-color: rgba(255, 255, 255, 0.1);
       --ux-shadow-color: rgba(0, 0, 0, 0.5);
 
-      /* Invert light/dark for dark mode */
+      /* Invert light/dark */
       --ux-light: #2c2c2e;
       --ux-light-rgb: 44, 44, 46;
       --ux-light-contrast: #ffffff;
@@ -250,103 +515,152 @@
       --ux-dark: #ffffff;
       --ux-dark-rgb: 255, 255, 255;
       --ux-dark-contrast: #1a1a1a;
-      --ux-dark-shade: #e5e5e5;
+      --ux-dark-shade: var(--ux-gray-200);
       --ux-dark-tint: #ffffff;
+
+      /* Component tokens - dark mode */
+      --ux-card-bg: var(--ux-surface);
+      --ux-input-bg: var(--ux-surface);
+      --ux-modal-bg: var(--ux-surface);
+      --ux-list-bg: var(--ux-surface);
+      --ux-navbar-bg: var(--ux-surface);
+      --ux-toast-bg: var(--ux-gray-700);
     }
 
     /* ========================================
-       Color Themes
+       Color Themes - Using Primitives
        Apply to body or any container
+       Plugins should use semantic tokens,
+       not change these themes directly.
     ======================================== */
 
-    /* Ocean Blue (default) */
+    /* Ocean Blue (default - Shoelace Sky style) */
     .ux-theme-ocean {
-      --ux-primary: #3880ff;
-      --ux-primary-rgb: 56, 128, 255;
+      --ux-primary: #0ea5e9;
+      --ux-primary-rgb: 14, 165, 233;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #3171e0;
-      --ux-primary-tint: #4c8dff;
+      --ux-primary-shade: #0284c7;
+      --ux-primary-tint: #38bdf8;
+    }
+
+    /* Blue (Tailwind/Modern) */
+    .ux-theme-blue {
+      --ux-primary: var(--ux-blue-500);
+      --ux-primary-rgb: 59, 130, 246;
+      --ux-primary-contrast: #ffffff;
+      --ux-primary-shade: var(--ux-blue-600);
+      --ux-primary-tint: var(--ux-blue-400);
     }
 
     /* Emerald Green */
     .ux-theme-emerald {
-      --ux-primary: #10b981;
+      --ux-primary: var(--ux-emerald-500);
       --ux-primary-rgb: 16, 185, 129;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #059669;
-      --ux-primary-tint: #34d399;
+      --ux-primary-shade: var(--ux-emerald-600);
+      --ux-primary-tint: var(--ux-emerald-400);
     }
 
-    /* Royal Purple */
+    /* Purple */
     .ux-theme-purple {
-      --ux-primary: #8b5cf6;
+      --ux-primary: var(--ux-purple-500);
+      --ux-primary-rgb: 168, 85, 247;
+      --ux-primary-contrast: #ffffff;
+      --ux-primary-shade: var(--ux-purple-600);
+      --ux-primary-tint: var(--ux-purple-400);
+    }
+
+    /* Violet */
+    .ux-theme-violet {
+      --ux-primary: var(--ux-violet-500);
       --ux-primary-rgb: 139, 92, 246;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #7c3aed;
-      --ux-primary-tint: #a78bfa;
+      --ux-primary-shade: var(--ux-violet-600);
+      --ux-primary-tint: var(--ux-violet-400);
     }
 
     /* Sunset Orange */
-    .ux-theme-sunset {
-      --ux-primary: #f97316;
+    .ux-theme-sunset,
+    .ux-theme-orange {
+      --ux-primary: var(--ux-orange-500);
       --ux-primary-rgb: 249, 115, 22;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #ea580c;
-      --ux-primary-tint: #fb923c;
+      --ux-primary-shade: var(--ux-orange-600);
+      --ux-primary-tint: var(--ux-orange-400);
     }
 
     /* Rose Pink */
     .ux-theme-rose {
-      --ux-primary: #f43f5e;
+      --ux-primary: var(--ux-rose-500);
       --ux-primary-rgb: 244, 63, 94;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #e11d48;
-      --ux-primary-tint: #fb7185;
+      --ux-primary-shade: var(--ux-rose-600);
+      --ux-primary-tint: var(--ux-rose-400);
     }
 
-    /* Teal Cyan */
+    /* Teal */
     .ux-theme-teal {
-      --ux-primary: #14b8a6;
+      --ux-primary: var(--ux-teal-500);
       --ux-primary-rgb: 20, 184, 166;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #0d9488;
-      --ux-primary-tint: #2dd4bf;
+      --ux-primary-shade: var(--ux-teal-600);
+      --ux-primary-tint: var(--ux-teal-400);
     }
 
     /* Amber Gold */
     .ux-theme-amber {
-      --ux-primary: #f59e0b;
+      --ux-primary: var(--ux-amber-500);
       --ux-primary-rgb: 245, 158, 11;
       --ux-primary-contrast: #000000;
-      --ux-primary-shade: #d97706;
-      --ux-primary-tint: #fbbf24;
+      --ux-primary-shade: var(--ux-amber-600);
+      --ux-primary-tint: var(--ux-amber-400);
     }
 
     /* Slate Gray */
     .ux-theme-slate {
-      --ux-primary: #64748b;
+      --ux-primary: var(--ux-slate-500);
       --ux-primary-rgb: 100, 116, 139;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #475569;
-      --ux-primary-tint: #94a3b8;
+      --ux-primary-shade: var(--ux-slate-600);
+      --ux-primary-tint: var(--ux-slate-400);
     }
 
     /* Indigo */
     .ux-theme-indigo {
-      --ux-primary: #6366f1;
+      --ux-primary: var(--ux-indigo-500);
       --ux-primary-rgb: 99, 102, 241;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #4f46e5;
-      --ux-primary-tint: #818cf8;
+      --ux-primary-shade: var(--ux-indigo-600);
+      --ux-primary-tint: var(--ux-indigo-400);
     }
 
     /* Cyan */
     .ux-theme-cyan {
-      --ux-primary: #06b6d4;
+      --ux-primary: var(--ux-cyan-500);
       --ux-primary-rgb: 6, 182, 212;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #0891b2;
-      --ux-primary-tint: #22d3ee;
+      --ux-primary-shade: var(--ux-cyan-600);
+      --ux-primary-tint: var(--ux-cyan-400);
+    }
+
+    /* Red / Crimson */
+    .ux-theme-red,
+    .ux-theme-crimson {
+      --ux-primary: var(--ux-red-500);
+      --ux-primary-rgb: 239, 68, 68;
+      --ux-primary-contrast: #ffffff;
+      --ux-primary-shade: var(--ux-red-600);
+      --ux-primary-tint: var(--ux-red-400);
+    }
+
+    /* Green / Forest */
+    .ux-theme-green,
+    .ux-theme-forest {
+      --ux-primary: var(--ux-green-600);
+      --ux-primary-rgb: 22, 163, 74;
+      --ux-primary-contrast: #ffffff;
+      --ux-primary-shade: var(--ux-green-700);
+      --ux-primary-tint: var(--ux-green-500);
     }
 
     /* ========================================
@@ -1405,6 +1719,7 @@
       darkMode: initialDarkMode,
       colorTheme: localStorage.getItem('ux-color-theme') || 'ux-theme-ocean',
       menuOpen: false,
+      themeSheetOpen: false,
 
       init() {
         // Apply initial theme to body
@@ -1435,7 +1750,8 @@
         root.classList.remove(
           'ux-theme-ocean', 'ux-theme-emerald', 'ux-theme-purple',
           'ux-theme-sunset', 'ux-theme-rose', 'ux-theme-teal',
-          'ux-theme-amber', 'ux-theme-slate', 'ux-theme-indigo', 'ux-theme-cyan'
+          'ux-theme-amber', 'ux-theme-slate', 'ux-theme-indigo',
+          'ux-theme-cyan', 'ux-theme-crimson', 'ux-theme-forest'
         );
         root.classList.add(this.colorTheme);
       },

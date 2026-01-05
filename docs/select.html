@@ -8,6 +8,7 @@
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-content.js"></script>
   <script src="../components/ux-select.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); }
@@ -44,7 +45,8 @@
       <p>Select HTML nativo estilizado. Ideal para formularios simples.</p>
       <div class="demo-box">
         <div class="ux-native-select">
-          <select class="ux-native-select__field">
+          <label for="country-select" class="ux-select__label">País</label>
+          <select id="country-select" class="ux-native-select__field">
             <option value="" disabled selected>Selecciona un pais</option>
             <option value="es">Espana</option>
             <option value="mx">Mexico</option>
@@ -52,7 +54,7 @@
             <option value="co">Colombia</option>
           </select>
           <div class="ux-native-select__icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </div>
@@ -86,13 +88,13 @@
              })"
              :class="{ 'ux-select--open': isOpen }"
              @click.outside="close()">
-          <label class="ux-select__label">Framework</label>
-          <button type="button" class="ux-select__trigger" @click="toggle()" @keydown="handleKeydown">
+          <span class="ux-select__label" id="framework-label">Framework</span>
+          <button type="button" class="ux-select__trigger" @click="toggle()" @keydown="handleKeydown" aria-labelledby="framework-label">
             <span class="ux-select__value" :class="{ 'ux-select__placeholder': !value }">
               <span x-text="displayValue || placeholder"></span>
             </span>
             <span class="ux-select__icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </span>
@@ -104,7 +106,7 @@
                    @click="select(option)">
                 <span x-text="option.label"></span>
                 <span class="ux-select__option-check">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                   </svg>
                 </span>
@@ -128,20 +130,431 @@
 <span class="tag">&lt;/div&gt;</span></pre>
     </section>
 
+    <!-- Alert Interface (iOS Modal) -->
+    <section class="demo-section">
+      <h3>Interface: Alert (Modal iOS)</h3>
+      <p>Abre un modal centrado con opciones de radio, estilo iOS. Ideal para seleccion unica con confirmacion.</p>
+      <div class="demo-box"
+           x-data="{
+             alertOpen: false,
+             tempValue: null,
+             value: null,
+             options: [
+               { value: 'apple', label: 'Apple' },
+               { value: 'banana', label: 'Banana' },
+               { value: 'cherry', label: 'Cherry' },
+               { value: 'grape', label: 'Grape' },
+               { value: 'orange', label: 'Orange' }
+             ],
+             get displayValue() {
+               const opt = this.options.find(o => o.value === this.value);
+               return opt ? opt.label : '';
+             },
+             openAlert() {
+               this.tempValue = this.value;
+               this.alertOpen = true;
+               document.body.style.overflow = 'hidden';
+             },
+             closeAlert() {
+               this.alertOpen = false;
+               document.body.style.overflow = '';
+             },
+             confirm() {
+               this.value = this.tempValue;
+               this.closeAlert();
+             }
+           }">
+        <!-- Trigger Button -->
+        <div class="ux-select">
+          <span class="ux-select__label">Fruta favorita</span>
+          <button type="button" class="ux-select__trigger" @click="openAlert()">
+            <span class="ux-select__value" :class="{ 'ux-select__placeholder': !value }">
+              <span x-text="displayValue || 'Selecciona una fruta'"></span>
+            </span>
+            <span class="ux-select__icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <!-- Alert Modal -->
+        <template x-teleport="body">
+          <div class="ux-select-alert"
+               :class="{ 'ux-select-alert--open': alertOpen }"
+               x-show="alertOpen"
+               x-cloak
+               @keydown.escape.window="closeAlert()">
+            <div class="ux-select-alert__backdrop" @click="closeAlert()"></div>
+            <div class="ux-select-alert__content" @click.stop>
+              <div class="ux-select-alert__header">
+                <h3 class="ux-select-alert__title">Fruta favorita</h3>
+                <p class="ux-select-alert__message">Selecciona tu fruta preferida</p>
+              </div>
+              <div class="ux-select-alert__options">
+                <template x-for="option in options" :key="option.value">
+                  <div class="ux-select-alert__option"
+                       :class="{ 'ux-select-alert__option--selected': tempValue === option.value }"
+                       @click="tempValue = option.value">
+                    <span class="ux-select-alert__option-radio"></span>
+                    <span class="ux-select-alert__option-label" x-text="option.label"></span>
+                  </div>
+                </template>
+              </div>
+              <div class="ux-select-alert__footer">
+                <button class="ux-select-alert__button ux-select-alert__button--cancel" @click="closeAlert()">Cancelar</button>
+                <button class="ux-select-alert__button ux-select-alert__button--ok" @click="confirm()">OK</button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"{ alertOpen: false, value: null, ... }"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"alertOpen = true"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/button&gt;</span>
+
+  <span style="color: #8b949e;">&lt;!-- Alert Modal --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-alert"</span>
+       <span class="attr">:class</span>=<span class="string">"{ 'ux-select-alert--open': alertOpen }"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__backdrop"</span><span class="tag">&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__content"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__header"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;h3</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__title"</span><span class="tag">&gt;</span>Titulo<span class="tag">&lt;/h3&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__options"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__option"</span><span class="tag">&gt;</span>
+          <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__option-radio"</span><span class="tag">&gt;&lt;/span&gt;</span>
+          <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__option-label"</span><span class="tag">&gt;</span>Opcion<span class="tag">&lt;/span&gt;</span>
+        <span class="tag">&lt;/div&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__footer"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__button--cancel"</span><span class="tag">&gt;</span>Cancelar<span class="tag">&lt;/button&gt;</span>
+        <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__button--ok"</span><span class="tag">&gt;</span>OK<span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Action Sheet Interface -->
+    <section class="demo-section">
+      <h3>Interface: Action Sheet</h3>
+      <p>Sheet que aparece desde abajo, ideal para movil. Seleccion rapida sin confirmacion.</p>
+      <div class="demo-box"
+           x-data="{
+             sheetOpen: false,
+             value: null,
+             options: [
+               { value: 'new', label: 'Crear nuevo' },
+               { value: 'edit', label: 'Editar' },
+               { value: 'duplicate', label: 'Duplicar' },
+               { value: 'archive', label: 'Archivar' },
+               { value: 'delete', label: 'Eliminar', danger: true }
+             ],
+             get displayValue() {
+               const opt = this.options.find(o => o.value === this.value);
+               return opt ? opt.label : '';
+             },
+             openSheet() {
+               this.sheetOpen = true;
+               document.body.style.overflow = 'hidden';
+             },
+             closeSheet() {
+               this.sheetOpen = false;
+               document.body.style.overflow = '';
+             },
+             selectOption(option) {
+               this.value = option.value;
+               this.closeSheet();
+             }
+           }">
+        <!-- Trigger Button -->
+        <div class="ux-select">
+          <span class="ux-select__label">Accion</span>
+          <button type="button" class="ux-select__trigger" @click="openSheet()">
+            <span class="ux-select__value" :class="{ 'ux-select__placeholder': !value }">
+              <span x-text="displayValue || 'Selecciona una accion'"></span>
+            </span>
+            <span class="ux-select__icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <!-- Action Sheet -->
+        <template x-teleport="body">
+          <div class="ux-select-action-sheet"
+               :class="{ 'ux-select-action-sheet--open': sheetOpen }"
+               x-show="sheetOpen"
+               x-cloak
+               @keydown.escape.window="closeSheet()">
+            <div class="ux-select-action-sheet__backdrop" @click="closeSheet()"></div>
+            <div class="ux-select-action-sheet__content" @click.stop>
+              <div class="ux-select-action-sheet__handle">
+                <div class="ux-select-action-sheet__handle-bar"></div>
+              </div>
+              <div class="ux-select-action-sheet__header">
+                <h3 class="ux-select-action-sheet__title">Selecciona una accion</h3>
+              </div>
+              <div class="ux-select-action-sheet__options">
+                <template x-for="option in options" :key="option.value">
+                  <div class="ux-select-action-sheet__option"
+                       :class="{
+                         'ux-select-action-sheet__option--selected': value === option.value,
+                         'ux-select-action-sheet__option--danger': option.danger
+                       }"
+                       :style="option.danger ? 'color: var(--ux-danger)' : ''"
+                       @click="selectOption(option)">
+                    <span x-text="option.label"></span>
+                    <span class="ux-select-action-sheet__option-check" x-show="value === option.value">
+                      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-action-sheet"</span>
+     <span class="attr">:class</span>=<span class="string">"{ 'ux-select-action-sheet--open': sheetOpen }"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-action-sheet__backdrop"</span><span class="tag">&gt;&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-action-sheet__content"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-action-sheet__handle"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-action-sheet__handle-bar"</span><span class="tag">&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-action-sheet__options"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-action-sheet__option"</span><span class="tag">&gt;</span>
+        Opcion 1
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Ionic Style Multi-Select (like screenshot) -->
+    <section class="demo-section">
+      <h3>Interface: Alert Multi-Select (Ionic Style)</h3>
+      <p>Modal con checkboxes circulares estilo iOS/Ionic. Sin titulo, opciones y botones Cancel/OK.</p>
+      <div class="demo-box"
+           x-data="{
+             alertOpen: false,
+             tempValues: [],
+             values: [],
+             options: [
+               { value: 'apples', label: 'Apples' },
+               { value: 'oranges', label: 'Oranges' },
+               { value: 'bananas', label: 'Bananas' }
+             ],
+             get displayValue() {
+               if (this.values.length === 0) return '';
+               return this.options.filter(o => this.values.includes(o.value)).map(o => o.label).join(', ');
+             },
+             openAlert() {
+               this.tempValues = [...this.values];
+               this.alertOpen = true;
+               document.body.style.overflow = 'hidden';
+             },
+             closeAlert() {
+               this.alertOpen = false;
+               document.body.style.overflow = '';
+             },
+             toggleOption(value) {
+               const idx = this.tempValues.indexOf(value);
+               if (idx === -1) {
+                 this.tempValues.push(value);
+               } else {
+                 this.tempValues.splice(idx, 1);
+               }
+             },
+             isSelected(value) {
+               return this.tempValues.includes(value);
+             },
+             confirm() {
+               this.values = [...this.tempValues];
+               this.closeAlert();
+             }
+           }">
+        <!-- Trigger Button -->
+        <div class="ux-select">
+          <span class="ux-select__label">Favorite Fruits</span>
+          <button type="button" class="ux-select__trigger" @click="openAlert()">
+            <span class="ux-select__value" :class="{ 'ux-select__placeholder': values.length === 0 }">
+              <span x-text="displayValue || 'Select fruits'"></span>
+            </span>
+            <span class="ux-select__icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <!-- Alert Modal - Ionic Style (no header) -->
+        <template x-teleport="body">
+          <div class="ux-select-alert"
+               :class="{ 'ux-select-alert--open': alertOpen }"
+               x-show="alertOpen"
+               x-cloak
+               @keydown.escape.window="closeAlert()">
+            <div class="ux-select-alert__backdrop" @click="closeAlert()"></div>
+            <div class="ux-select-alert__content" @click.stop style="max-width: 280px;">
+              <div class="ux-select-alert__options" style="padding-top: var(--ux-space-md);">
+                <template x-for="option in options" :key="option.value">
+                  <div class="ux-select-alert__option"
+                       :class="{ 'ux-select-alert__option--selected': isSelected(option.value) }"
+                       @click="toggleOption(option.value)">
+                    <span class="ux-select-alert__option-checkbox">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </span>
+                    <span class="ux-select-alert__option-label" x-text="option.label"></span>
+                  </div>
+                </template>
+              </div>
+              <div class="ux-select-alert__footer">
+                <button class="ux-select-alert__button ux-select-alert__button--cancel" @click="closeAlert()">Cancel</button>
+                <button class="ux-select-alert__button ux-select-alert__button--ok" @click="confirm()">OK</button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <pre class="code-block"><span style="color: #8b949e;">// Ionic-style circular checkboxes</span>
+<span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__option-checkbox"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;svg&gt;</span>...checkmark...<span class="tag">&lt;/svg&gt;</span>
+<span class="tag">&lt;/span&gt;</span>
+
+<span style="color: #8b949e;">// Sin header, solo opciones</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__options"</span><span class="tag">&gt;</span>
+  ...options...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Alert Multi-Select -->
+    <section class="demo-section">
+      <h3>Interface: Alert Multi-Select (con titulo)</h3>
+      <p>Modal con checkboxes para seleccion multiple con confirmacion.</p>
+      <div class="demo-box"
+           x-data="{
+             alertOpen: false,
+             tempValues: [],
+             values: [],
+             options: [
+               { value: 'wifi', label: 'WiFi' },
+               { value: 'bluetooth', label: 'Bluetooth' },
+               { value: 'nfc', label: 'NFC' },
+               { value: 'gps', label: 'GPS' },
+               { value: 'cellular', label: 'Datos moviles' }
+             ],
+             get displayValue() {
+               if (this.values.length === 0) return '';
+               if (this.values.length === 1) {
+                 const opt = this.options.find(o => o.value === this.values[0]);
+                 return opt ? opt.label : '';
+               }
+               return this.values.length + ' seleccionados';
+             },
+             openAlert() {
+               this.tempValues = [...this.values];
+               this.alertOpen = true;
+               document.body.style.overflow = 'hidden';
+             },
+             closeAlert() {
+               this.alertOpen = false;
+               document.body.style.overflow = '';
+             },
+             toggleOption(value) {
+               const idx = this.tempValues.indexOf(value);
+               if (idx === -1) {
+                 this.tempValues.push(value);
+               } else {
+                 this.tempValues.splice(idx, 1);
+               }
+             },
+             isSelected(value) {
+               return this.tempValues.includes(value);
+             },
+             confirm() {
+               this.values = [...this.tempValues];
+               this.closeAlert();
+             }
+           }">
+        <!-- Trigger Button -->
+        <div class="ux-select">
+          <span class="ux-select__label">Conexiones</span>
+          <button type="button" class="ux-select__trigger" @click="openAlert()">
+            <span class="ux-select__value" :class="{ 'ux-select__placeholder': values.length === 0 }">
+              <span x-text="displayValue || 'Selecciona conexiones'"></span>
+            </span>
+            <span class="ux-select__icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <!-- Alert Modal Multi -->
+        <template x-teleport="body">
+          <div class="ux-select-alert"
+               :class="{ 'ux-select-alert--open': alertOpen }"
+               x-show="alertOpen"
+               x-cloak
+               @keydown.escape.window="closeAlert()">
+            <div class="ux-select-alert__backdrop" @click="closeAlert()"></div>
+            <div class="ux-select-alert__content" @click.stop>
+              <div class="ux-select-alert__header">
+                <h3 class="ux-select-alert__title">Conexiones</h3>
+                <p class="ux-select-alert__message">Selecciona las conexiones a activar</p>
+              </div>
+              <div class="ux-select-alert__options">
+                <template x-for="option in options" :key="option.value">
+                  <div class="ux-select-alert__option"
+                       :class="{ 'ux-select-alert__option--selected': isSelected(option.value) }"
+                       @click="toggleOption(option.value)">
+                    <span class="ux-select-alert__option-checkbox">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </span>
+                    <span class="ux-select-alert__option-label" x-text="option.label"></span>
+                  </div>
+                </template>
+              </div>
+              <div class="ux-select-alert__footer">
+                <button class="ux-select-alert__button ux-select-alert__button--cancel" @click="closeAlert()">Cancelar</button>
+                <button class="ux-select-alert__button ux-select-alert__button--ok" @click="confirm()">OK</button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <pre class="code-block"><span style="color: #8b949e;">// Usar checkbox en lugar de radio para multi-select</span>
+<span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-select-alert__option-checkbox"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;svg&gt;</span>...<span class="tag">&lt;/svg&gt;</span>
+<span class="tag">&lt;/span&gt;</span></pre>
+    </section>
+
     <!-- With Label and Helper -->
     <section class="demo-section">
       <h3>Con Label y Texto de Ayuda</h3>
       <div class="demo-box">
         <div class="ux-native-select ux-mb-md">
-          <label class="ux-select__label">Categoria</label>
-          <select class="ux-native-select__field">
+          <label for="category-select" class="ux-select__label">Categoria</label>
+          <select id="category-select" class="ux-native-select__field">
             <option value="" disabled selected>Selecciona una categoria</option>
             <option value="tech">Tecnologia</option>
             <option value="design">Diseno</option>
             <option value="marketing">Marketing</option>
           </select>
           <div class="ux-native-select__icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </div>
@@ -164,10 +577,10 @@
              x-data="uxSelect({ options: [{ value: '1', label: 'Small' }], placeholder: 'Small' })"
              :class="{ 'ux-select--open': isOpen }"
              @click.outside="close()">
-          <button type="button" class="ux-select__trigger" @click="toggle()">
+          <button type="button" class="ux-select__trigger" @click="toggle()" aria-label="Small size select">
             <span class="ux-select__value ux-select__placeholder">Small</span>
             <span class="ux-select__icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </span>
@@ -177,10 +590,10 @@
              x-data="uxSelect({ options: [{ value: '1', label: 'Default' }], placeholder: 'Default' })"
              :class="{ 'ux-select--open': isOpen }"
              @click.outside="close()">
-          <button type="button" class="ux-select__trigger" @click="toggle()">
+          <button type="button" class="ux-select__trigger" @click="toggle()" aria-label="Default size select">
             <span class="ux-select__value ux-select__placeholder">Default</span>
             <span class="ux-select__icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </span>
@@ -190,10 +603,10 @@
              x-data="uxSelect({ options: [{ value: '1', label: 'Large' }], placeholder: 'Large' })"
              :class="{ 'ux-select--open': isOpen }"
              @click.outside="close()">
-          <button type="button" class="ux-select__trigger" @click="toggle()">
+          <button type="button" class="ux-select__trigger" @click="toggle()" aria-label="Large size select">
             <span class="ux-select__value ux-select__placeholder">Large</span>
             <span class="ux-select__icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </span>
@@ -214,10 +627,10 @@
              x-data="uxSelect({ options: [{ value: '1', label: 'Opcion' }], placeholder: 'Filled variant' })"
              :class="{ 'ux-select--open': isOpen }"
              @click.outside="close()">
-          <button type="button" class="ux-select__trigger" @click="toggle()">
+          <button type="button" class="ux-select__trigger" @click="toggle()" aria-label="Filled variant select">
             <span class="ux-select__value ux-select__placeholder">Filled variant</span>
             <span class="ux-select__icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </span>
@@ -227,10 +640,10 @@
              x-data="uxSelect({ options: [{ value: '1', label: 'Opcion' }], placeholder: 'Outline variant' })"
              :class="{ 'ux-select--open': isOpen }"
              @click.outside="close()">
-          <button type="button" class="ux-select__trigger" @click="toggle()">
+          <button type="button" class="ux-select__trigger" @click="toggle()" aria-label="Outline variant select">
             <span class="ux-select__value ux-select__placeholder">Outline variant</span>
             <span class="ux-select__icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </span>
@@ -247,7 +660,8 @@
       <p>Opciones agrupadas con etiquetas.</p>
       <div class="demo-box">
         <div class="ux-native-select">
-          <select class="ux-native-select__field">
+          <label for="city-select" class="ux-select__label">Ciudad</label>
+          <select id="city-select" class="ux-native-select__field">
             <option value="" disabled selected>Selecciona una ciudad</option>
             <optgroup label="Espana">
               <option value="madrid">Madrid</option>
@@ -261,7 +675,7 @@
             </optgroup>
           </select>
           <div class="ux-native-select__icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </div>
@@ -292,8 +706,8 @@
              })"
              :class="{ 'ux-select--open': isOpen }"
              @click.outside="close()">
-          <label class="ux-select__label">Lenguajes</label>
-          <button type="button" class="ux-select__trigger" @click="toggle()">
+          <span id="languages-label" class="ux-select__label">Lenguajes</span>
+          <button type="button" class="ux-select__trigger" @click="toggle()" aria-labelledby="languages-label">
             <span class="ux-select__value" :class="{ 'ux-select__placeholder': values.length === 0 }">
               <template x-if="values.length === 0">
                 <span x-text="placeholder"></span>
@@ -301,8 +715,8 @@
               <template x-for="opt in selectedOptions" :key="opt.value">
                 <span class="ux-select__chip">
                   <span x-text="opt.label"></span>
-                  <button type="button" class="ux-select__chip-remove" @click.stop="removeValue(opt.value)">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button type="button" class="ux-select__chip-remove" @click.stop="removeValue(opt.value)" aria-label="Remove">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                   </button>
@@ -310,7 +724,7 @@
               </template>
             </span>
             <span class="ux-select__icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </span>
@@ -322,7 +736,7 @@
                    @click="toggleOption(option)">
                 <span x-text="option.label"></span>
                 <span class="ux-select__option-check">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                   </svg>
                 </span>
@@ -342,20 +756,21 @@
       <h3>Disabled</h3>
       <div class="demo-box">
         <div class="ux-native-select ux-mb-md">
-          <select class="ux-native-select__field" disabled>
+          <label for="disabled-native" class="ux-select__label">Disabled Native</label>
+          <select id="disabled-native" class="ux-native-select__field" disabled>
             <option value="" disabled selected>Disabled</option>
           </select>
           <div class="ux-native-select__icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </div>
         </div>
         <div class="ux-select ux-select--disabled">
-          <button type="button" class="ux-select__trigger" disabled>
+          <button type="button" class="ux-select__trigger" disabled aria-label="Disabled select">
             <span class="ux-select__value ux-select__placeholder">Disabled</span>
             <span class="ux-select__icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </span>
@@ -370,16 +785,16 @@
       <div class="demo-box">
         <div class="ux-select ux-select--error"
              x-data="uxSelect({ options: [{ value: '1', label: 'Opcion' }], placeholder: 'Selecciona...' })">
-          <label class="ux-select__label">Campo requerido</label>
-          <button type="button" class="ux-select__trigger">
+          <span id="required-label" class="ux-select__label">Campo requerido</span>
+          <button type="button" class="ux-select__trigger" aria-labelledby="required-label" aria-describedby="required-error">
             <span class="ux-select__value ux-select__placeholder">Selecciona...</span>
             <span class="ux-select__icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </span>
           </button>
-          <span class="ux-select__error">Este campo es obligatorio.</span>
+          <span id="required-error" class="ux-select__error">Este campo es obligatorio.</span>
         </div>
       </div>
       <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-select ux-select--error"</span><span class="tag">&gt;</span>
