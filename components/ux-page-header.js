@@ -23,26 +23,6 @@
       flex: 1 1 auto;
     }
 
-    /* Page layout with horizontal padding */
-    .ux-page-layout--padded {
-      padding-left: var(--ux-space-lg);
-      padding-right: var(--ux-space-lg);
-    }
-
-    @media (min-width: 768px) {
-      .ux-page-layout--padded {
-        padding-left: var(--ux-space-xl);
-        padding-right: var(--ux-space-xl);
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .ux-page-layout--padded {
-        padding-left: var(--ux-space-2xl);
-        padding-right: var(--ux-space-2xl);
-      }
-    }
-
     /* ========================================
        UX Page Header
        Fixed header within a page (title + search + actions)
