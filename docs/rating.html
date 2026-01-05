@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Rating - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-rating.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: var(--ux-font-size-xs); overflow-x: auto; white-space: pre; }
+    .demo-row { display: flex; flex-wrap: wrap; gap: var(--ux-space-lg); align-items: center; }
+  </style>
+</head>
+<body class="ux-app">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Rating</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <!-- Basic Rating -->
+  <div class="demo-section">
+    <h3>Rating Basico</h3>
+    <p>Componente de valoracion con estrellas interactivas de 1 a 5.</p>
+    <div class="demo-box">
+      <div x-data="uxRating({ value: 3 })" class="ux-rating" @mouseleave="onMouseLeave()">
+        <div class="ux-rating__stars">
+          <template x-for="index in stars" :key="index">
+            <button
+              class="ux-rating__star"
+              :class="{
+                'ux-rating__star--filled': isStarFilled(index),
+                'ux-rating__star--half': isStarHalf(index)
+              }"
+              @click="setRating(index, $event)"
+              @mousemove="onStarHover(index, $event)"
+              @keydown="handleKeydown($event, index)"
+              x-html="getStarSvg(index)"
+              x-bind="getStarAriaAttrs(index)">
+            </button>
+          </template>
+        </div>
+        <span class="ux-rating__value" x-text="value"></span>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxRating({ value: 3 })" class="ux-rating" @mouseleave="onMouseLeave()"&gt;
+  &lt;div class="ux-rating__stars"&gt;
+    &lt;template x-for="index in stars" :key="index"&gt;
+      &lt;button
+        class="ux-rating__star"
+        :class="{ 'ux-rating__star--filled': isStarFilled(index) }"
+        @click="setRating(index, $event)"
+        @mousemove="onStarHover(index, $event)"
+        x-html="getStarSvg(index)"&gt;
+      &lt;/button&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
+  &lt;span class="ux-rating__value" x-text="value"&gt;&lt;/span&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Half Stars -->
+  <div class="demo-section">
+    <h3>Medias Estrellas</h3>
+    <p>Permite valoraciones con precision de media estrella.</p>
+    <div class="demo-box">
+      <div x-data="uxRating({ value: 3.5, allowHalf: true })" class="ux-rating" @mouseleave="onMouseLeave()">
+        <div class="ux-rating__stars">
+          <template x-for="index in stars" :key="index">
+            <button
+              class="ux-rating__star"
+              :class="{
+                'ux-rating__star--filled': isStarFilled(index),
+                'ux-rating__star--half': isStarHalf(index)
+              }"
+              @click="setRating(index, $event)"
+              @mousemove="onStarHover(index, $event)"
+              @keydown="handleKeydown($event, index)"
+              x-html="getStarSvg(index)">
+            </button>
+          </template>
+        </div>
+        <span class="ux-rating__value" x-text="value"></span>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxRating({ value: 3.5, allowHalf: true })" ...&gt;
+  ...
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Sizes -->
+  <div class="demo-section">
+    <h3>Tamanos</h3>
+    <p>Diferentes tamanos para distintos contextos.</p>
+    <div class="demo-box">
+      <div class="demo-row">
+        <div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-bottom: 4px;">Small</p>
+          <div x-data="uxRating({ value: 4 })" class="ux-rating ux-rating--sm" @mouseleave="onMouseLeave()">
+            <div class="ux-rating__stars">
+              <template x-for="index in stars" :key="index">
+                <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" @click="setRating(index, $event)" @mousemove="onStarHover(index, $event)" x-html="getStarSvg(index)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-bottom: 4px;">Default</p>
+          <div x-data="uxRating({ value: 4 })" class="ux-rating" @mouseleave="onMouseLeave()">
+            <div class="ux-rating__stars">
+              <template x-for="index in stars" :key="index">
+                <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" @click="setRating(index, $event)" @mousemove="onStarHover(index, $event)" x-html="getStarSvg(index)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-bottom: 4px;">Large</p>
+          <div x-data="uxRating({ value: 4 })" class="ux-rating ux-rating--lg" @mouseleave="onMouseLeave()">
+            <div class="ux-rating__stars">
+              <template x-for="index in stars" :key="index">
+                <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" @click="setRating(index, $event)" @mousemove="onStarHover(index, $event)" x-html="getStarSvg(index)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-bottom: 4px;">Extra Large</p>
+          <div x-data="uxRating({ value: 4 })" class="ux-rating ux-rating--xl" @mouseleave="onMouseLeave()">
+            <div class="ux-rating__stars">
+              <template x-for="index in stars" :key="index">
+                <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" @click="setRating(index, $event)" @mousemove="onStarHover(index, $event)" x-html="getStarSvg(index)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-rating ux-rating--sm"&gt;...&lt;/div&gt;
+&lt;div class="ux-rating"&gt;...&lt;/div&gt;
+&lt;div class="ux-rating ux-rating--lg"&gt;...&lt;/div&gt;
+&lt;div class="ux-rating ux-rating--xl"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Colors -->
+  <div class="demo-section">
+    <h3>Colores</h3>
+    <p>Diferentes colores para las estrellas.</p>
+    <div class="demo-box">
+      <div class="demo-row">
+        <div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-bottom: 4px;">Default (Warning)</p>
+          <div x-data="uxRating({ value: 4 })" class="ux-rating" @mouseleave="onMouseLeave()">
+            <div class="ux-rating__stars">
+              <template x-for="index in stars" :key="index">
+                <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" @click="setRating(index, $event)" @mousemove="onStarHover(index, $event)" x-html="getStarSvg(index)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-bottom: 4px;">Primary</p>
+          <div x-data="uxRating({ value: 4 })" class="ux-rating ux-rating--primary" @mouseleave="onMouseLeave()">
+            <div class="ux-rating__stars">
+              <template x-for="index in stars" :key="index">
+                <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" @click="setRating(index, $event)" @mousemove="onStarHover(index, $event)" x-html="getStarSvg(index)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-bottom: 4px;">Success</p>
+          <div x-data="uxRating({ value: 4 })" class="ux-rating ux-rating--success" @mouseleave="onMouseLeave()">
+            <div class="ux-rating__stars">
+              <template x-for="index in stars" :key="index">
+                <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" @click="setRating(index, $event)" @mousemove="onStarHover(index, $event)" x-html="getStarSvg(index)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary); margin-bottom: 4px;">Danger</p>
+          <div x-data="uxRating({ value: 4 })" class="ux-rating ux-rating--danger" @mouseleave="onMouseLeave()">
+            <div class="ux-rating__stars">
+              <template x-for="index in stars" :key="index">
+                <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" @click="setRating(index, $event)" @mousemove="onStarHover(index, $event)" x-html="getStarSvg(index)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-rating"&gt;...&lt;/div&gt;                    &lt;!-- Default: Warning/Yellow --&gt;
+&lt;div class="ux-rating ux-rating--primary"&gt;...&lt;/div&gt;
+&lt;div class="ux-rating ux-rating--success"&gt;...&lt;/div&gt;
+&lt;div class="ux-rating ux-rating--danger"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Readonly -->
+  <div class="demo-section">
+    <h3>Solo Lectura</h3>
+    <p>Rating no interactivo para mostrar valoraciones.</p>
+    <div class="demo-box">
+      <div class="demo-row">
+        <div x-data="uxRating({ value: 4.5, allowHalf: true, readonly: true })" class="ux-rating ux-rating--readonly">
+          <div class="ux-rating__stars">
+            <template x-for="index in stars" :key="index">
+              <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index), 'ux-rating__star--half': isStarHalf(index) }" x-html="getStarSvg(index)"></button>
+            </template>
+          </div>
+          <span class="ux-rating__value" x-text="value"></span>
+          <span class="ux-rating__count">(128 reviews)</span>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxRating({ value: 4.5, allowHalf: true, readonly: true })"
+     class="ux-rating ux-rating--readonly"&gt;
+  ...
+  &lt;span class="ux-rating__count"&gt;(128 reviews)&lt;/span&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Disabled -->
+  <div class="demo-section">
+    <h3>Deshabilitado</h3>
+    <p>Rating deshabilitado que no permite interaccion.</p>
+    <div class="demo-box">
+      <div x-data="uxRating({ value: 3, disabled: true })" class="ux-rating ux-rating--disabled">
+        <div class="ux-rating__stars">
+          <template x-for="index in stars" :key="index">
+            <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" x-html="getStarSvg(index)" disabled></button>
+          </template>
+        </div>
+        <span class="ux-rating__value" x-text="value"></span>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxRating({ value: 3, disabled: true })"
+     class="ux-rating ux-rating--disabled"&gt;
+  ...
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Compact -->
+  <div class="demo-section">
+    <h3>Compacto</h3>
+    <p>Version compacta para uso en listas o espacios reducidos.</p>
+    <div class="demo-box">
+      <div style="display: flex; flex-direction: column; gap: var(--ux-space-md);">
+        <div style="display: flex; align-items: center; gap: var(--ux-space-md);">
+          <span style="font-size: var(--ux-font-size-sm);">Producto A</span>
+          <div x-data="uxRating({ value: 4, readonly: true })" class="ux-rating ux-rating--compact ux-rating--readonly">
+            <div class="ux-rating__stars">
+              <template x-for="index in stars" :key="index">
+                <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" x-html="getStarSvg(index)"></button>
+              </template>
+            </div>
+            <span class="ux-rating__value" x-text="value"></span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: var(--ux-space-md);">
+          <span style="font-size: var(--ux-font-size-sm);">Producto B</span>
+          <div x-data="uxRating({ value: 3.5, allowHalf: true, readonly: true })" class="ux-rating ux-rating--compact ux-rating--readonly">
+            <div class="ux-rating__stars">
+              <template x-for="index in stars" :key="index">
+                <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index), 'ux-rating__star--half': isStarHalf(index) }" x-html="getStarSvg(index)"></button>
+              </template>
+            </div>
+            <span class="ux-rating__value" x-text="value"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-rating ux-rating--compact ux-rating--readonly"&gt;
+  ...
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- With Event -->
+  <div class="demo-section">
+    <h3>Con Evento</h3>
+    <p>Escucha cambios en la valoracion.</p>
+    <div class="demo-box">
+      <div x-data="{ selectedRating: 0 }">
+        <div x-data="uxRating({ value: 0 })" class="ux-rating" @mouseleave="onMouseLeave()" @rating-change.window="selectedRating = $event.detail.value">
+          <div class="ux-rating__stars">
+            <template x-for="index in stars" :key="index">
+              <button class="ux-rating__star" :class="{ 'ux-rating__star--filled': isStarFilled(index) }" @click="setRating(index, $event)" @mousemove="onStarHover(index, $event)" x-html="getStarSvg(index)"></button>
+            </template>
+          </div>
+        </div>
+        <p style="margin-top: var(--ux-space-md); font-size: var(--ux-font-size-sm);">
+          Valoracion seleccionada: <strong x-text="selectedRating"></strong>
+        </p>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="{ selectedRating: 0 }"&gt;
+  &lt;div x-data="uxRating({ value: 0 })"
+       @rating-change="selectedRating = $event.detail.value"&gt;
+    ...
+  &lt;/div&gt;
+  &lt;p&gt;Valoracion: &lt;span x-text="selectedRating"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Alpine.js Component -->
+  <div class="demo-section">
+    <h3>Componente Alpine.js</h3>
+    <div class="demo-box">
+      <pre class="code-block">// Configuracion del componente uxRating
+uxRating({
+  value: 0,           // Valor inicial (0-5)
+  max: 5,             // Numero maximo de estrellas
+  readonly: false,    // Solo lectura
+  disabled: false,    // Deshabilitado
+  allowHalf: false,   // Permitir medias estrellas
+  showValue: false    // Mostrar valor numerico
+})
+
+// Propiedades reactivas:
+value                 // Valor actual del rating
+hoverValue            // Valor durante hover
+isHovering            // Si esta en hover
+stars                 // Array de indices [0,1,2,3,4]
+
+// Metodos disponibles:
+setRating(index, event)    // Establece la valoracion
+onStarHover(index, event)  // Maneja el hover
+onMouseLeave()             // Resetea el hover
+getStarSvg(index)          // Obtiene el SVG de la estrella
+isStarFilled(index)        // Verifica si esta llena
+isStarHalf(index)          // Verifica si es media
+handleKeydown(event, index)// Navegacion por teclado
+
+// Evento emitido:
+@rating-change             // { value: number }</pre>
+    </div>
+  </div>
+
+  <!-- Keyboard Navigation -->
+  <div class="demo-section">
+    <h3>Navegacion por Teclado</h3>
+    <p>El componente soporta navegacion completa por teclado.</p>
+    <div class="demo-box">
+      <ul style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); list-style: none; padding: 0; margin: 0;">
+        <li style="margin-bottom: var(--ux-space-xs);"><strong>Arrow Right / Up:</strong> Incrementa la valoracion</li>
+        <li style="margin-bottom: var(--ux-space-xs);"><strong>Arrow Left / Down:</strong> Decrementa la valoracion</li>
+        <li style="margin-bottom: var(--ux-space-xs);"><strong>Home:</strong> Establece a 0</li>
+        <li style="margin-bottom: var(--ux-space-xs);"><strong>End:</strong> Establece al maximo</li>
+        <li style="margin-bottom: var(--ux-space-xs);"><strong>Enter / Space:</strong> Selecciona la estrella actual</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- HTMX Integration -->
+  <div class="demo-section">
+    <h3>Integracion con HTMX</h3>
+    <p>Enviar valoraciones al servidor.</p>
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Enviar rating al servidor --&gt;
+&lt;form hx-post="/api/reviews" hx-target="#response"&gt;
+  &lt;input type="hidden" name="product_id" value="123"&gt;
+
+  &lt;div x-data="uxRating({ value: 0 })"
+       class="ux-rating"
+       @rating-change="$refs.ratingInput.value = $event.detail.value"&gt;
+    &lt;input type="hidden" name="rating" x-ref="ratingInput" value="0"&gt;
+    &lt;div class="ux-rating__stars"&gt;
+      &lt;template x-for="index in stars" :key="index"&gt;
+        &lt;button type="button" class="ux-rating__star" ...&gt;&lt;/button&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;button type="submit" class="ux-button ux-button--primary"&gt;
+    Enviar valoracion
+  &lt;/button&gt;
+&lt;/form&gt;</pre>
+    </div>
+  </div>
+
+  <!-- Accessibility -->
+  <div class="demo-section">
+    <h3>Accesibilidad</h3>
+    <p>El componente incluye soporte ARIA completo.</p>
+    <div class="demo-box">
+      <pre class="code-block">// Atributos ARIA incluidos:
+role="radiogroup"           // En el contenedor
+aria-label="Rating: X out of Y stars"
+aria-valuenow, aria-valuemin, aria-valuemax
+
+// En cada estrella:
+role="radio"
+aria-checked="true/false"
+aria-label="X star(s)"
+tabindex (gestionado automaticamente)</pre>
+    </div>
+  </div>
+</body>
+</html>
