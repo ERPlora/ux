@@ -410,6 +410,7 @@
   }
 
   // Alpine component for searchbar
+  // ARIA: role="searchbox", aria-label, aria-autocomplete for autocomplete behavior
   const searchbarComponent = (config = {}) => ({
     query: config.query || '',
     isFocused: false,
@@ -421,6 +422,35 @@
     debounceTime: config.debounceTime || 300,
     minChars: config.minChars || 1,
     _debounceTimer: null,
+    searchbarId: config.id || 'ux-searchbar-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the search input
+    get inputAriaAttrs() {
+      return {
+        'role': 'searchbox',
+        'aria-label': config.ariaLabel || 'Search',
+        'aria-autocomplete': 'list',
+        'aria-controls': this.searchbarId + '-results',
+        'aria-expanded': this.shouldShowDropdown ? 'true' : 'false'
+      };
+    },
+
+    // ARIA attributes for the results container
+    get resultsAriaAttrs() {
+      return {
+        'role': 'listbox',
+        'id': this.searchbarId + '-results',
+        'aria-label': 'Search results'
+      };
+    },
+
+    // ARIA attributes for each result option
+    getResultAriaAttrs(index) {
+      return {
+        'role': 'option',
+        'id': this.searchbarId + '-result-' + index
+      };
+    },
 
     get hasValue() {
       return this.query.length > 0;

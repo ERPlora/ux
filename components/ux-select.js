@@ -460,6 +460,7 @@
   }
 
   // Alpine component for select
+  // ARIA: role="listbox" on dropdown, role="option" on options, aria-expanded on trigger
   const selectComponent = (config = {}) => ({
     isOpen: false,
     value: config.value || null,
@@ -470,6 +471,38 @@
     searchQuery: '',
     error: '',
     highlightedIndex: -1,
+    selectId: config.id || 'ux-select-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the trigger button
+    get triggerAriaAttrs() {
+      return {
+        'role': 'combobox',
+        'aria-haspopup': 'listbox',
+        'aria-expanded': this.isOpen ? 'true' : 'false',
+        'aria-controls': this.selectId + '-listbox',
+        'aria-activedescendant': this.highlightedIndex >= 0 ? this.selectId + '-option-' + this.highlightedIndex : '',
+        'aria-disabled': this.disabled ? 'true' : 'false'
+      };
+    },
+
+    // ARIA attributes for the listbox
+    get listboxAriaAttrs() {
+      return {
+        'role': 'listbox',
+        'id': this.selectId + '-listbox',
+        'aria-label': config.ariaLabel || 'Options'
+      };
+    },
+
+    // ARIA attributes for each option
+    getOptionAriaAttrs(option, index) {
+      return {
+        'role': 'option',
+        'id': this.selectId + '-option-' + index,
+        'aria-selected': this.isSelected(option) ? 'true' : 'false',
+        'aria-disabled': option.disabled ? 'true' : 'false'
+      };
+    },
 
     get selectedOption() {
       return this.options.find(opt => opt.value === this.value);
@@ -580,6 +613,7 @@
   }
 
   // Alpine component for multi-select
+  // ARIA: role="listbox" with aria-multiselectable="true"
   const multiSelectComponent = (config = {}) => ({
     isOpen: false,
     values: config.values || [],
@@ -590,6 +624,38 @@
     searchQuery: '',
     error: '',
     maxSelections: config.maxSelections || null,
+    multiSelectId: config.id || 'ux-multi-select-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the trigger button
+    get triggerAriaAttrs() {
+      return {
+        'role': 'combobox',
+        'aria-haspopup': 'listbox',
+        'aria-expanded': this.isOpen ? 'true' : 'false',
+        'aria-controls': this.multiSelectId + '-listbox',
+        'aria-disabled': this.disabled ? 'true' : 'false'
+      };
+    },
+
+    // ARIA attributes for the listbox
+    get listboxAriaAttrs() {
+      return {
+        'role': 'listbox',
+        'id': this.multiSelectId + '-listbox',
+        'aria-label': config.ariaLabel || 'Options',
+        'aria-multiselectable': 'true'
+      };
+    },
+
+    // ARIA attributes for each option
+    getOptionAriaAttrs(option, index) {
+      return {
+        'role': 'option',
+        'id': this.multiSelectId + '-option-' + index,
+        'aria-selected': this.isSelected(option) ? 'true' : 'false',
+        'aria-disabled': option.disabled ? 'true' : 'false'
+      };
+    },
 
     get selectedOptions() {
       return this.options.filter(opt => this.values.includes(opt.value));
