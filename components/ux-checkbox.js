@@ -133,37 +133,24 @@
     }
 
     /* ========================================
-       Color Variants
+       Color Variants - Using CSS Custom Property
+       Consolidated pattern for easier theming
     ======================================== */
 
-    .ux-checkbox--primary .ux-checkbox__input:checked + .ux-checkbox__box {
-      background-color: var(--ux-primary);
-      border-color: var(--ux-primary);
+    .ux-checkbox {
+      --ux-checkbox-color: var(--ux-primary);
     }
 
-    .ux-checkbox--secondary .ux-checkbox__input:checked + .ux-checkbox__box {
-      background-color: var(--ux-secondary);
-      border-color: var(--ux-secondary);
-    }
+    .ux-checkbox--primary { --ux-checkbox-color: var(--ux-primary); }
+    .ux-checkbox--secondary { --ux-checkbox-color: var(--ux-secondary); }
+    .ux-checkbox--tertiary { --ux-checkbox-color: var(--ux-tertiary); }
+    .ux-checkbox--success { --ux-checkbox-color: var(--ux-success); }
+    .ux-checkbox--warning { --ux-checkbox-color: var(--ux-warning); }
+    .ux-checkbox--danger { --ux-checkbox-color: var(--ux-danger); }
 
-    .ux-checkbox--tertiary .ux-checkbox__input:checked + .ux-checkbox__box {
-      background-color: var(--ux-tertiary);
-      border-color: var(--ux-tertiary);
-    }
-
-    .ux-checkbox--success .ux-checkbox__input:checked + .ux-checkbox__box {
-      background-color: var(--ux-success);
-      border-color: var(--ux-success);
-    }
-
-    .ux-checkbox--warning .ux-checkbox__input:checked + .ux-checkbox__box {
-      background-color: var(--ux-warning);
-      border-color: var(--ux-warning);
-    }
-
-    .ux-checkbox--danger .ux-checkbox__input:checked + .ux-checkbox__box {
-      background-color: var(--ux-danger);
-      border-color: var(--ux-danger);
+    .ux-checkbox__input:checked + .ux-checkbox__box {
+      background-color: var(--ux-checkbox-color);
+      border-color: var(--ux-checkbox-color);
     }
 
     /* ========================================

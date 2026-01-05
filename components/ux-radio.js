@@ -57,7 +57,7 @@
     .ux-radio__dot {
       width: 12px;
       height: 12px;
-      background-color: var(--ux-primary);
+      background-color: var(--ux-radio-color, var(--ux-primary));
       border-radius: 50%;
       transform: scale(0);
       transition: transform var(--ux-transition-fast) var(--ux-ease-spring);
@@ -65,7 +65,7 @@
 
     /* Checked State */
     .ux-radio__input:checked + .ux-radio__circle {
-      border-color: var(--ux-primary);
+      border-color: var(--ux-radio-color, var(--ux-primary));
     }
 
     .ux-radio__input:checked + .ux-radio__circle .ux-radio__dot {
@@ -74,7 +74,7 @@
 
     /* Hover State */
     .ux-radio:hover .ux-radio__circle {
-      border-color: var(--ux-primary);
+      border-color: var(--ux-radio-color, var(--ux-primary));
     }
 
     /* Active State */
@@ -96,56 +96,20 @@
     }
 
     /* ========================================
-       Color Variants
+       Color Variants - Using CSS Custom Property
+       Consolidated pattern for easier theming
     ======================================== */
 
-    .ux-radio--primary .ux-radio__input:checked + .ux-radio__circle {
-      border-color: var(--ux-primary);
+    .ux-radio {
+      --ux-radio-color: var(--ux-primary);
     }
 
-    .ux-radio--primary .ux-radio__dot {
-      background-color: var(--ux-primary);
-    }
-
-    .ux-radio--secondary .ux-radio__input:checked + .ux-radio__circle {
-      border-color: var(--ux-secondary);
-    }
-
-    .ux-radio--secondary .ux-radio__dot {
-      background-color: var(--ux-secondary);
-    }
-
-    .ux-radio--tertiary .ux-radio__input:checked + .ux-radio__circle {
-      border-color: var(--ux-tertiary);
-    }
-
-    .ux-radio--tertiary .ux-radio__dot {
-      background-color: var(--ux-tertiary);
-    }
-
-    .ux-radio--success .ux-radio__input:checked + .ux-radio__circle {
-      border-color: var(--ux-success);
-    }
-
-    .ux-radio--success .ux-radio__dot {
-      background-color: var(--ux-success);
-    }
-
-    .ux-radio--warning .ux-radio__input:checked + .ux-radio__circle {
-      border-color: var(--ux-warning);
-    }
-
-    .ux-radio--warning .ux-radio__dot {
-      background-color: var(--ux-warning);
-    }
-
-    .ux-radio--danger .ux-radio__input:checked + .ux-radio__circle {
-      border-color: var(--ux-danger);
-    }
-
-    .ux-radio--danger .ux-radio__dot {
-      background-color: var(--ux-danger);
-    }
+    .ux-radio--primary { --ux-radio-color: var(--ux-primary); }
+    .ux-radio--secondary { --ux-radio-color: var(--ux-secondary); }
+    .ux-radio--tertiary { --ux-radio-color: var(--ux-tertiary); }
+    .ux-radio--success { --ux-radio-color: var(--ux-success); }
+    .ux-radio--warning { --ux-radio-color: var(--ux-warning); }
+    .ux-radio--danger { --ux-radio-color: var(--ux-danger); }
 
     /* ========================================
        Sizes
