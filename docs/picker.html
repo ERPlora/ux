@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Picker - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-picker.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+    .demo-section p { font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-md); align-items: center; }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-xs); line-height: 1.6; }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+  </style>
+</head>
+<body class="ux-app">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Picker</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+    <!-- Basic Picker -->
+    <section class="demo-section" x-data="uxPicker({
+      columns: [
+        { label: 'Color', options: ['Rojo', 'Verde', 'Azul', 'Amarillo', 'Naranja', 'Morado', 'Rosa', 'Negro', 'Blanco'], selectedIndex: 2 }
+      ]
+    })">
+      <h3>Picker Basico</h3>
+      <p>Selector de columna unica estilo iOS.</p>
+      <div class="demo-box">
+        <button class="ux-button ux-button--primary" @click="open()">Seleccionar Color</button>
+        <span class="ux-text-secondary" x-text="'Seleccionado: ' + (columns[0].options[selectedIndexes[0]] || 'Ninguno')"></span>
+      </div>
+
+      <!-- Picker Backdrop -->
+      <div class="ux-picker-backdrop" :class="{ 'ux-picker-backdrop--open': isOpen }" @click.self="cancel()">
+        <div class="ux-picker">
+          <div class="ux-picker__header">
+            <button class="ux-picker__button ux-picker__button--cancel" @click="cancel()">Cancelar</button>
+            <span class="ux-picker__title" x-text="title || 'Seleccionar'"></span>
+            <button class="ux-picker__button ux-picker__button--confirm" @click="confirm()">Listo</button>
+          </div>
+          <div class="ux-picker__columns">
+            <template x-for="(column, colIndex) in columns" :key="colIndex">
+              <div class="ux-picker__column"
+                   :class="{ 'ux-picker__column--dragging': _columnStates[colIndex]?.isDragging }"
+                   @touchstart="onTouchStart($event, colIndex)"
+                   @touchmove="onTouchMove($event, colIndex)"
+                   @touchend="onTouchEnd($event, colIndex)"
+                   @mousedown="onTouchStart($event, colIndex)"
+                   @mousemove="onTouchMove($event, colIndex)"
+                   @mouseup="onTouchEnd($event, colIndex)"
+                   @mouseleave="onTouchEnd($event, colIndex)">
+                <div class="ux-picker__column-wrapper" :style="{ transform: getColumnTransform(colIndex) }">
+                  <template x-for="(option, optIndex) in column.options" :key="optIndex">
+                    <div class="ux-picker__item"
+                         :class="{ 'ux-picker__item--selected': isSelected(colIndex, optIndex) }"
+                         @click="selectItem(colIndex, optIndex)"
+                         x-text="typeof option === 'object' ? option.text : option"></div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxPicker({
+  columns: [{
+    label: 'Color',
+    options: ['Rojo', 'Verde', 'Azul'],
+    selectedIndex: 0
+  }]
+})"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"open()"</span><span class="tag">&gt;</span>Abrir Picker<span class="tag">&lt;/button&gt;</span>
+
+  <span class="comment">&lt;!-- Picker backdrop y contenido --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-picker-backdrop"</span>
+       <span class="attr">:class</span>=<span class="string">"{ 'ux-picker-backdrop--open': isOpen }"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-picker"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Multi-column Picker -->
+    <section class="demo-section" x-data="uxPicker({
+      title: 'Fecha',
+      columns: [
+        { label: 'Dia', options: Array.from({length: 31}, (_, i) => i + 1), selectedIndex: 14 },
+        { label: 'Mes', options: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'], selectedIndex: 5 },
+        { label: 'Ano', options: ['2022', '2023', '2024', '2025', '2026'], selectedIndex: 2 }
+      ]
+    })">
+      <h3>Picker Multi-columna</h3>
+      <p>Selector con multiples columnas para fechas u otros datos.</p>
+      <div class="demo-box">
+        <button class="ux-button ux-button--primary" @click="open()">Seleccionar Fecha</button>
+        <span class="ux-text-secondary" x-text="'Fecha: ' + columns[0].options[selectedIndexes[0]] + ' ' + columns[1].options[selectedIndexes[1]] + ' ' + columns[2].options[selectedIndexes[2]]"></span>
+      </div>
+
+      <!-- Picker Backdrop -->
+      <div class="ux-picker-backdrop" :class="{ 'ux-picker-backdrop--open': isOpen }" @click.self="cancel()">
+        <div class="ux-picker">
+          <div class="ux-picker__header">
+            <button class="ux-picker__button ux-picker__button--cancel" @click="cancel()">Cancelar</button>
+            <span class="ux-picker__title" x-text="title"></span>
+            <button class="ux-picker__button ux-picker__button--confirm" @click="confirm()">Listo</button>
+          </div>
+          <div class="ux-picker__columns">
+            <template x-for="(column, colIndex) in columns" :key="colIndex">
+              <div class="ux-picker__column"
+                   :class="{ 'ux-picker__column--dragging': _columnStates[colIndex]?.isDragging }"
+                   @touchstart="onTouchStart($event, colIndex)"
+                   @touchmove="onTouchMove($event, colIndex)"
+                   @touchend="onTouchEnd($event, colIndex)"
+                   @mousedown="onTouchStart($event, colIndex)"
+                   @mousemove="onTouchMove($event, colIndex)"
+                   @mouseup="onTouchEnd($event, colIndex)"
+                   @mouseleave="onTouchEnd($event, colIndex)">
+                <div class="ux-picker__column-wrapper" :style="{ transform: getColumnTransform(colIndex) }">
+                  <template x-for="(option, optIndex) in column.options" :key="optIndex">
+                    <div class="ux-picker__item"
+                         :class="{ 'ux-picker__item--selected': isSelected(colIndex, optIndex) }"
+                         @click="selectItem(colIndex, optIndex)"
+                         x-text="typeof option === 'object' ? option.text : option"></div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="attr">x-data</span>=<span class="string">"uxPicker({
+  title: 'Fecha',
+  columns: [
+    { label: 'Dia', options: [1, 2, 3, ...31], selectedIndex: 14 },
+    { label: 'Mes', options: ['Ene', 'Feb', ...], selectedIndex: 5 },
+    { label: 'Ano', options: ['2023', '2024', '2025'], selectedIndex: 1 }
+  ]
+})"</span></pre>
+    </section>
+
+    <!-- Time Picker -->
+    <section class="demo-section" x-data="uxPicker({
+      title: 'Hora',
+      columns: [
+        { label: 'Hora', options: Array.from({length: 12}, (_, i) => String(i + 1).padStart(2, '0')), selectedIndex: 8 },
+        { label: 'Minutos', options: Array.from({length: 60}, (_, i) => String(i).padStart(2, '0')), selectedIndex: 30 },
+        { label: 'AM/PM', options: ['AM', 'PM'], selectedIndex: 0 }
+      ]
+    })">
+      <h3>Selector de Hora</h3>
+      <p>Picker configurado como selector de hora.</p>
+      <div class="demo-box">
+        <button class="ux-button ux-button--secondary" @click="open()">Seleccionar Hora</button>
+        <span class="ux-text-secondary" x-text="'Hora: ' + columns[0].options[selectedIndexes[0]] + ':' + columns[1].options[selectedIndexes[1]] + ' ' + columns[2].options[selectedIndexes[2]]"></span>
+      </div>
+
+      <!-- Picker Backdrop -->
+      <div class="ux-picker-backdrop" :class="{ 'ux-picker-backdrop--open': isOpen }" @click.self="cancel()">
+        <div class="ux-picker">
+          <div class="ux-picker__header">
+            <button class="ux-picker__button ux-picker__button--cancel" @click="cancel()">Cancelar</button>
+            <span class="ux-picker__title" x-text="title"></span>
+            <button class="ux-picker__button ux-picker__button--confirm" @click="confirm()">Listo</button>
+          </div>
+          <div class="ux-picker__columns">
+            <template x-for="(column, colIndex) in columns" :key="colIndex">
+              <div class="ux-picker__column"
+                   :class="{ 'ux-picker__column--dragging': _columnStates[colIndex]?.isDragging }"
+                   @touchstart="onTouchStart($event, colIndex)"
+                   @touchmove="onTouchMove($event, colIndex)"
+                   @touchend="onTouchEnd($event, colIndex)"
+                   @mousedown="onTouchStart($event, colIndex)"
+                   @mousemove="onTouchMove($event, colIndex)"
+                   @mouseup="onTouchEnd($event, colIndex)"
+                   @mouseleave="onTouchEnd($event, colIndex)">
+                <div class="ux-picker__column-wrapper" :style="{ transform: getColumnTransform(colIndex) }">
+                  <template x-for="(option, optIndex) in column.options" :key="optIndex">
+                    <div class="ux-picker__item"
+                         :class="{ 'ux-picker__item--selected': isSelected(colIndex, optIndex) }"
+                         @click="selectItem(colIndex, optIndex)"
+                         x-text="typeof option === 'object' ? option.text : option"></div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Inline Picker -->
+    <section class="demo-section">
+      <h3>Picker Inline</h3>
+      <p>Picker mostrado directamente en la pagina sin modal.</p>
+      <div class="demo-box" style="flex-direction: column;">
+        <div class="ux-picker ux-picker--inline" style="max-width: 300px; width: 100%;"
+             x-data="uxPicker({
+               columns: [{ options: ['Pequeno', 'Mediano', 'Grande', 'Extra Grande'], selectedIndex: 1 }]
+             })"
+             x-init="isOpen = true">
+          <div class="ux-picker__columns">
+            <template x-for="(column, colIndex) in columns" :key="colIndex">
+              <div class="ux-picker__column"
+                   @touchstart="onTouchStart($event, colIndex)"
+                   @touchmove="onTouchMove($event, colIndex)"
+                   @touchend="onTouchEnd($event, colIndex)"
+                   @mousedown="onTouchStart($event, colIndex)"
+                   @mousemove="onTouchMove($event, colIndex)"
+                   @mouseup="onTouchEnd($event, colIndex)"
+                   @mouseleave="onTouchEnd($event, colIndex)">
+                <div class="ux-picker__column-wrapper" :style="{ transform: getColumnTransform(colIndex) }">
+                  <template x-for="(option, optIndex) in column.options" :key="optIndex">
+                    <div class="ux-picker__item"
+                         :class="{ 'ux-picker__item--selected': isSelected(colIndex, optIndex) }"
+                         @click="selectItem(colIndex, optIndex)"
+                         x-text="option"></div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-picker ux-picker--inline"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-picker__columns"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Events -->
+    <section class="demo-section">
+      <h3>Eventos</h3>
+      <p>Escuchar eventos del picker.</p>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxPicker({ columns: [...] })"</span>
+     <span class="attr">@picker-confirm</span>=<span class="string">"console.log('Valores:', $event.detail.values)"</span>
+     <span class="attr">@picker-cancel</span>=<span class="string">"console.log('Cancelado')"</span>
+     <span class="attr">@picker-change</span>=<span class="string">"console.log('Columna:', $event.detail.columnIndex, 'Valor:', $event.detail.value)"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- API Table -->
+    <section class="demo-section">
+      <h3>API Alpine</h3>
+      <table style="width: 100%; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Metodo/Propiedad</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: var(--ux-space-sm);"><code>open(options)</code></td><td style="padding: var(--ux-space-sm);">Abre el picker</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>close()</code></td><td style="padding: var(--ux-space-sm);">Cierra el picker</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>confirm()</code></td><td style="padding: var(--ux-space-sm);">Confirma y cierra</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>cancel()</code></td><td style="padding: var(--ux-space-sm);">Cancela y cierra</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>getValues()</code></td><td style="padding: var(--ux-space-sm);">Retorna array de valores seleccionados</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>setValues(values)</code></td><td style="padding: var(--ux-space-sm);">Establece valores programaticamente</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>scrollToIndex(col, idx)</code></td><td style="padding: var(--ux-space-sm);">Scroll a indice en columna</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>columns</code></td><td style="padding: var(--ux-space-sm);">Array de columnas con opciones</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>selectedIndexes</code></td><td style="padding: var(--ux-space-sm);">Array de indices seleccionados</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>isOpen</code></td><td style="padding: var(--ux-space-sm);">Estado de visibilidad</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CSS Classes -->
+    <section class="demo-section">
+      <h3>Clases CSS</h3>
+      <table style="width: 100%; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Clase</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker-backdrop</code></td><td style="padding: var(--ux-space-sm);">Fondo oscuro</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker-backdrop--open</code></td><td style="padding: var(--ux-space-sm);">Estado visible</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker</code></td><td style="padding: var(--ux-space-sm);">Contenedor del picker</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker--inline</code></td><td style="padding: var(--ux-space-sm);">Picker sin modal</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker--sm</code></td><td style="padding: var(--ux-space-sm);">Tamano pequeno</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker--lg</code></td><td style="padding: var(--ux-space-sm);">Tamano grande</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker__header</code></td><td style="padding: var(--ux-space-sm);">Cabecera con botones</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker__columns</code></td><td style="padding: var(--ux-space-sm);">Contenedor de columnas</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker__column</code></td><td style="padding: var(--ux-space-sm);">Columna individual</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker__item</code></td><td style="padding: var(--ux-space-sm);">Item de columna</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-picker__item--selected</code></td><td style="padding: var(--ux-space-sm);">Item seleccionado</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

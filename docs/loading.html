@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Loading - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-loading.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+    .demo-section p { font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-md); align-items: center; }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-xs); line-height: 1.6; }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+  </style>
+</head>
+<body class="ux-app" x-data="{ loadingOpen: false, loadingMessage: '', loadingSpinner: 'default' }">
+  <nav class="ux-navbar ux-navbar--sticky">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <span class="ux-navbar__title">Loading</span>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <!-- Loading Backdrop -->
+  <div class="ux-loading-backdrop" :class="{ 'ux-loading-backdrop--open': loadingOpen }" @click="loadingOpen = false">
+    <div class="ux-loading">
+      <div class="ux-loading__spinner" :class="'ux-loading__spinner--' + loadingSpinner"></div>
+      <div class="ux-loading__message" x-show="loadingMessage" x-text="loadingMessage"></div>
+    </div>
+  </div>
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+    <!-- Basic Loading -->
+    <section class="demo-section">
+      <h3>Loading Basico</h3>
+      <p>Indicador de carga con backdrop estilo iOS.</p>
+      <div class="demo-box">
+        <button class="ux-button ux-button--primary" @click="loadingSpinner = 'default'; loadingMessage = ''; loadingOpen = true; setTimeout(() => loadingOpen = false, 2000)">
+          Mostrar Loading
+        </button>
+        <button class="ux-button ux-button--secondary" @click="loadingSpinner = 'default'; loadingMessage = 'Cargando...'; loadingOpen = true; setTimeout(() => loadingOpen = false, 2000)">
+          Con Mensaje
+        </button>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading-backdrop ux-loading-backdrop--open"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading__spinner"</span><span class="tag">&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading__message"</span><span class="tag">&gt;</span>Cargando...<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Spinner Types -->
+    <section class="demo-section">
+      <h3>Tipos de Spinner</h3>
+      <p>Tres estilos de spinner: default, iOS (dots) y dots (bouncing).</p>
+      <div class="demo-box">
+        <button class="ux-button" @click="loadingSpinner = 'default'; loadingMessage = 'Default'; loadingOpen = true; setTimeout(() => loadingOpen = false, 2000)">
+          Default
+        </button>
+        <button class="ux-button" @click="loadingSpinner = 'ios'; loadingMessage = 'iOS Style'; loadingOpen = true; setTimeout(() => loadingOpen = false, 2000)">
+          iOS
+        </button>
+        <button class="ux-button" @click="loadingSpinner = 'dots'; loadingMessage = 'Dots'; loadingOpen = true; setTimeout(() => loadingOpen = false, 2000)">
+          Dots
+        </button>
+      </div>
+
+      <!-- Static previews -->
+      <div class="demo-box" style="justify-content: space-around; background: var(--ux-surface-secondary);">
+        <div style="text-align: center;">
+          <div class="ux-loading__spinner" style="margin: 0 auto var(--ux-space-sm);"></div>
+          <small>default</small>
+        </div>
+        <div style="text-align: center;">
+          <div class="ux-loading__spinner ux-loading__spinner--ios" style="margin: 0 auto var(--ux-space-sm);"></div>
+          <small>ios</small>
+        </div>
+        <div style="text-align: center;">
+          <div class="ux-loading__spinner ux-loading__spinner--dots" style="margin: 0 auto var(--ux-space-sm);"><span class="ux-loading__dot"></span></div>
+          <small>dots</small>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Default spinner --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading__spinner"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- iOS style spinner --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading__spinner ux-loading__spinner--ios"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Bouncing dots --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading__spinner ux-loading__spinner--dots"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-loading__dot"</span><span class="tag">&gt;&lt;/span&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Sizes -->
+    <section class="demo-section">
+      <h3>Tamanos</h3>
+      <p>Tres tamanos disponibles: sm, default, lg.</p>
+      <div class="demo-box" style="justify-content: space-around; background: var(--ux-surface-secondary);">
+        <div class="ux-loading ux-loading--sm" style="position: relative; transform: none; opacity: 1;">
+          <div class="ux-loading__spinner"></div>
+          <div class="ux-loading__message">Small</div>
+        </div>
+        <div class="ux-loading" style="position: relative; transform: none; opacity: 1;">
+          <div class="ux-loading__spinner"></div>
+          <div class="ux-loading__message">Default</div>
+        </div>
+        <div class="ux-loading ux-loading--lg" style="position: relative; transform: none; opacity: 1;">
+          <div class="ux-loading__spinner"></div>
+          <div class="ux-loading__message">Large</div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading ux-loading--sm"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading ux-loading--lg"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Dark Mode -->
+    <section class="demo-section">
+      <h3>Variante Oscura</h3>
+      <p>Loading con fondo oscuro para fondos claros.</p>
+      <div class="demo-box" style="background: var(--ux-light);">
+        <div class="ux-loading ux-loading--dark" style="position: relative; transform: none; opacity: 1;">
+          <div class="ux-loading__spinner"></div>
+          <div class="ux-loading__message">Cargando...</div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading ux-loading--dark"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading__spinner"</span><span class="tag">&gt;&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading__message"</span><span class="tag">&gt;</span>Cargando...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Inline Loading -->
+    <section class="demo-section">
+      <h3>Loading Inline</h3>
+      <p>Spinner pequeno para usar dentro del contenido.</p>
+      <div class="demo-box">
+        <div class="ux-loading-inline">
+          <div class="ux-loading-inline__spinner"></div>
+          <span class="ux-loading-inline__text">Cargando datos...</span>
+        </div>
+      </div>
+      <div class="demo-box">
+        <div class="ux-loading-inline ux-loading-inline--sm">
+          <div class="ux-loading-inline__spinner"></div>
+          <span class="ux-loading-inline__text">Pequeno</span>
+        </div>
+        <div class="ux-loading-inline ux-loading-inline--lg">
+          <div class="ux-loading-inline__spinner"></div>
+          <span class="ux-loading-inline__text">Grande</span>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading-inline"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading-inline__spinner"</span><span class="tag">&gt;&lt;/div&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-loading-inline__text"</span><span class="tag">&gt;</span>Cargando...<span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Tamanos --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading-inline ux-loading-inline--sm"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading-inline ux-loading-inline--lg"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Loading Overlay -->
+    <section class="demo-section">
+      <h3>Loading Overlay</h3>
+      <p>Overlay para cubrir un contenedor especifico.</p>
+      <div class="demo-box" style="position: relative; min-height: 150px;">
+        <p>Contenido del contenedor...</p>
+        <div class="ux-loading-overlay ux-loading-overlay--visible">
+          <div class="ux-loading-inline">
+            <div class="ux-loading-inline__spinner"></div>
+            <span class="ux-loading-inline__text">Actualizando...</span>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">style</span>=<span class="string">"position: relative;"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Contenido...<span class="tag">&lt;/p&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading-overlay ux-loading-overlay--visible"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading-inline"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading-inline__spinner"</span><span class="tag">&gt;&lt;/div&gt;</span>
+      <span class="tag">&lt;span&gt;</span>Actualizando...<span class="tag">&lt;/span&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Alpine Component -->
+    <section class="demo-section">
+      <h3>Componente Alpine</h3>
+      <p>Uso con Alpine.js para control programatico.</p>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxLoading({ message: 'Cargando...' })"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"show()"</span><span class="tag">&gt;</span>Mostrar<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"show({ message: 'Guardando...' })"</span><span class="tag">&gt;</span>Con mensaje<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"hide()"</span><span class="tag">&gt;</span>Ocultar<span class="tag">&lt;/button&gt;</span>
+
+  <span class="comment">&lt;!-- Backdrop y loading --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading-backdrop"</span>
+       <span class="attr">:class</span>=<span class="string">"{ 'ux-loading-backdrop--open': isOpen }"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading__spinner"</span> <span class="attr">:class</span>=<span class="string">"'ux-loading__spinner--' + spinner"</span><span class="tag">&gt;&lt;/div&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-loading__message"</span> <span class="attr">x-text</span>=<span class="string">"message"</span><span class="tag">&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- API Table -->
+    <section class="demo-section">
+      <h3>API Alpine</h3>
+      <table style="width: 100%; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Metodo/Propiedad</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>show(options)</code></td>
+            <td style="padding: var(--ux-space-sm);">Muestra el loading. Options: { message, spinner }</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>hide()</code></td>
+            <td style="padding: var(--ux-space-sm);">Oculta el loading</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>present(options)</code></td>
+            <td style="padding: var(--ux-space-sm);">Alias de show()</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>dismiss()</code></td>
+            <td style="padding: var(--ux-space-sm);">Alias de hide()</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>during(asyncFn, options)</code></td>
+            <td style="padding: var(--ux-space-sm);">Muestra loading durante una funcion async</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>showWithTimeout(options, ms)</code></td>
+            <td style="padding: var(--ux-space-sm);">Muestra loading con timeout maximo</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>isOpen</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean - estado de visibilidad</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>message</code></td>
+            <td style="padding: var(--ux-space-sm);">String - mensaje actual</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>spinner</code></td>
+            <td style="padding: var(--ux-space-sm);">String - tipo de spinner (default, ios, dots)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CSS Classes -->
+    <section class="demo-section">
+      <h3>Clases CSS</h3>
+      <table style="width: 100%; font-size: var(--ux-font-size-sm);">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Clase</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading-backdrop</code></td><td style="padding: var(--ux-space-sm);">Contenedor con fondo oscuro</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading-backdrop--open</code></td><td style="padding: var(--ux-space-sm);">Estado visible</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading-backdrop--transparent</code></td><td style="padding: var(--ux-space-sm);">Fondo transparente</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading</code></td><td style="padding: var(--ux-space-sm);">Contenedor del spinner</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading--sm</code></td><td style="padding: var(--ux-space-sm);">Tamano pequeno</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading--lg</code></td><td style="padding: var(--ux-space-sm);">Tamano grande</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading--dark</code></td><td style="padding: var(--ux-space-sm);">Fondo oscuro</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading__spinner--ios</code></td><td style="padding: var(--ux-space-sm);">Spinner estilo iOS</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading__spinner--dots</code></td><td style="padding: var(--ux-space-sm);">Spinner de puntos</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading-inline</code></td><td style="padding: var(--ux-space-sm);">Loading inline</td></tr>
+          <tr><td style="padding: var(--ux-space-sm);"><code>.ux-loading-overlay</code></td><td style="padding: var(--ux-space-sm);">Overlay para contenedores</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>
