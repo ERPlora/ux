@@ -423,6 +423,137 @@
     }
 
     /* ========================================
+       Fixed Slot (elements outside scroll)
+    ======================================== */
+
+    .ux-content__fixed {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .ux-content__fixed > * {
+      pointer-events: auto;
+    }
+
+    /* Fixed position helpers */
+    .ux-fixed-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .ux-fixed-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .ux-fixed-top-left {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .ux-fixed-top-right {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+
+    .ux-fixed-bottom-left {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+
+    .ux-fixed-bottom-right {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+    }
+
+    .ux-fixed-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* ========================================
+       Content Color Variants
+    ======================================== */
+
+    .ux-content--primary {
+      --ux-content-background: var(--ux-primary);
+      --ux-content-color: var(--ux-primary-contrast);
+      background-color: var(--ux-content-background);
+      color: var(--ux-content-color);
+    }
+
+    .ux-content--secondary {
+      --ux-content-background: var(--ux-secondary);
+      --ux-content-color: var(--ux-secondary-contrast);
+      background-color: var(--ux-content-background);
+      color: var(--ux-content-color);
+    }
+
+    .ux-content--tertiary {
+      --ux-content-background: var(--ux-tertiary);
+      --ux-content-color: var(--ux-tertiary-contrast);
+      background-color: var(--ux-content-background);
+      color: var(--ux-content-color);
+    }
+
+    .ux-content--success {
+      --ux-content-background: var(--ux-success);
+      --ux-content-color: var(--ux-success-contrast);
+      background-color: var(--ux-content-background);
+      color: var(--ux-content-color);
+    }
+
+    .ux-content--warning {
+      --ux-content-background: var(--ux-warning);
+      --ux-content-color: var(--ux-warning-contrast);
+      background-color: var(--ux-content-background);
+      color: var(--ux-content-color);
+    }
+
+    .ux-content--danger {
+      --ux-content-background: var(--ux-danger);
+      --ux-content-color: var(--ux-danger-contrast);
+      background-color: var(--ux-content-background);
+      color: var(--ux-content-color);
+    }
+
+    .ux-content--light {
+      --ux-content-background: var(--ux-light);
+      --ux-content-color: var(--ux-light-contrast);
+      background-color: var(--ux-content-background);
+      color: var(--ux-content-color);
+    }
+
+    .ux-content--dark {
+      --ux-content-background: var(--ux-dark);
+      --ux-content-color: var(--ux-dark-contrast);
+      background-color: var(--ux-content-background);
+      color: var(--ux-content-color);
+    }
+
+    .ux-content--medium {
+      --ux-content-background: var(--ux-medium);
+      --ux-content-color: var(--ux-medium-contrast);
+      background-color: var(--ux-content-background);
+      color: var(--ux-content-color);
+    }
+
+    /* ========================================
        Scroll to Top Button
     ======================================== */
 
@@ -485,6 +616,251 @@
     styleEl.id = 'ux-content-styles';
     styleEl.textContent = styles;
     document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for content with scroll events and methods
+  // ARIA: Main content landmark
+  const contentComponent = (config = {}) => ({
+    scrollTop: 0,
+    scrollLeft: 0,
+    scrollHeight: 0,
+    scrollWidth: 0,
+    clientHeight: 0,
+    clientWidth: 0,
+    isScrolling: false,
+    scrollEvents: config.scrollEvents || false,
+    _scrollTimeout: null,
+    _lastScrollTop: 0,
+    _scrollDirection: 'down',
+    contentId: config.id || 'ux-content-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'role': 'main',
+        'id': this.contentId
+      };
+    },
+
+    init() {
+      this.$nextTick(() => {
+        this.updateScrollInfo();
+      });
+    },
+
+    // Get content element
+    getContentElement() {
+      return this.$refs.content || this.$el;
+    },
+
+    // Update scroll information
+    updateScrollInfo() {
+      const el = this.getContentElement();
+      if (!el) return;
+
+      this.scrollTop = el.scrollTop;
+      this.scrollLeft = el.scrollLeft;
+      this.scrollHeight = el.scrollHeight;
+      this.scrollWidth = el.scrollWidth;
+      this.clientHeight = el.clientHeight;
+      this.clientWidth = el.clientWidth;
+    },
+
+    // Handle scroll event
+    handleScroll(event) {
+      const el = event.target;
+
+      // Determine scroll direction
+      this._scrollDirection = el.scrollTop > this._lastScrollTop ? 'down' : 'up';
+      this._lastScrollTop = el.scrollTop;
+
+      // Update scroll info
+      this.scrollTop = el.scrollTop;
+      this.scrollLeft = el.scrollLeft;
+
+      // Dispatch scroll start
+      if (!this.isScrolling) {
+        this.isScrolling = true;
+        this.$dispatch('ux-scroll-start', {
+          scrollTop: this.scrollTop,
+          scrollLeft: this.scrollLeft,
+          direction: this._scrollDirection
+        });
+      }
+
+      // Dispatch scroll event (throttled if scrollEvents is false)
+      if (this.scrollEvents) {
+        this.$dispatch('ux-scroll', {
+          scrollTop: this.scrollTop,
+          scrollLeft: this.scrollLeft,
+          scrollHeight: el.scrollHeight,
+          clientHeight: el.clientHeight,
+          direction: this._scrollDirection,
+          detail: {
+            currentY: this.scrollTop,
+            currentX: this.scrollLeft,
+            deltaY: el.scrollTop - this._lastScrollTop,
+            velocityY: 0 // Would need RAF for accurate velocity
+          }
+        });
+      }
+
+      // Dispatch scroll end (debounced)
+      clearTimeout(this._scrollTimeout);
+      this._scrollTimeout = setTimeout(() => {
+        this.isScrolling = false;
+        this.$dispatch('ux-scroll-end', {
+          scrollTop: this.scrollTop,
+          scrollLeft: this.scrollLeft,
+          direction: this._scrollDirection
+        });
+      }, 150);
+    },
+
+    // Scroll to top
+    scrollToTop(duration = 300) {
+      return this.scrollToPoint(0, 0, duration);
+    },
+
+    // Scroll to bottom
+    scrollToBottom(duration = 300) {
+      const el = this.getContentElement();
+      if (!el) return Promise.resolve();
+
+      return this.scrollToPoint(0, el.scrollHeight - el.clientHeight, duration);
+    },
+
+    // Scroll to specific point
+    scrollToPoint(x, y, duration = 300) {
+      const el = this.getContentElement();
+      if (!el) return Promise.resolve();
+
+      return new Promise((resolve) => {
+        if (duration === 0) {
+          el.scrollTop = y;
+          el.scrollLeft = x;
+          this.updateScrollInfo();
+          resolve();
+          return;
+        }
+
+        el.scrollTo({
+          top: y,
+          left: x,
+          behavior: 'smooth'
+        });
+
+        // Resolve after animation
+        setTimeout(() => {
+          this.updateScrollInfo();
+          resolve();
+        }, duration);
+      });
+    },
+
+    // Scroll by amount
+    scrollByPoint(x, y, duration = 300) {
+      const el = this.getContentElement();
+      if (!el) return Promise.resolve();
+
+      return this.scrollToPoint(
+        el.scrollLeft + x,
+        el.scrollTop + y,
+        duration
+      );
+    },
+
+    // Scroll to element
+    scrollToElement(selector, duration = 300) {
+      const el = this.getContentElement();
+      const target = el?.querySelector(selector);
+      if (!target) return Promise.resolve();
+
+      const targetRect = target.getBoundingClientRect();
+      const contentRect = el.getBoundingClientRect();
+
+      return this.scrollToPoint(
+        el.scrollLeft,
+        el.scrollTop + (targetRect.top - contentRect.top),
+        duration
+      );
+    },
+
+    // Get scroll element (for external use)
+    getScrollElement() {
+      return this.getContentElement();
+    },
+
+    // Check if scrolled to top
+    get isAtTop() {
+      return this.scrollTop <= 0;
+    },
+
+    // Check if scrolled to bottom
+    get isAtBottom() {
+      const el = this.getContentElement();
+      if (!el) return false;
+      return this.scrollTop >= el.scrollHeight - el.clientHeight - 1;
+    },
+
+    // Get scroll progress (0 to 1)
+    get scrollProgress() {
+      const el = this.getContentElement();
+      if (!el || el.scrollHeight <= el.clientHeight) return 0;
+      return this.scrollTop / (el.scrollHeight - el.clientHeight);
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxContent', contentComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxContent', contentComponent);
+    });
+  }
+
+  // Alpine component for page
+  // Handles page-level concerns like visibility, lifecycle
+  const pageComponent = (config = {}) => ({
+    isActive: config.isActive !== false,
+    pageId: config.id || 'ux-page-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'role': 'document',
+        'id': this.pageId,
+        'aria-hidden': !this.isActive ? 'true' : 'false'
+      };
+    },
+
+    // Lifecycle methods
+    onEnter() {
+      this.isActive = true;
+      this.$dispatch('ux-page-enter', { pageId: this.pageId });
+    },
+
+    onLeave() {
+      this.isActive = false;
+      this.$dispatch('ux-page-leave', { pageId: this.pageId });
+    },
+
+    // For use with routers
+    activate() {
+      this.onEnter();
+    },
+
+    deactivate() {
+      this.onLeave();
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxPage', pageComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxPage', pageComponent);
+    });
   }
 
   // Alpine component for scroll-to-top
