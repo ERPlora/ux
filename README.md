@@ -32,8 +32,8 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 
 | Bundle | Size | Gzipped |
 |--------|------|---------|
-| ux.min.js | 514 KB | ~70 KB |
-| ux-core.min.js | 34 KB | ~7 KB |
+| ux.min.js | 519 KB | ~74 KB |
+| ux-core.min.js | 39 KB | ~8 KB |
 
 ### Local Installation
 

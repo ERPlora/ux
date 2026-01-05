@@ -420,6 +420,182 @@
       font-size: 16px;
     }
 
+    /* ========================================
+       Typography (Ionic-style)
+    ======================================== */
+
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 16px;
+      margin-bottom: 10px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--ux-text);
+    }
+
+    h1 {
+      margin-top: 20px;
+      font-size: 26px;
+    }
+
+    h2 {
+      margin-top: 18px;
+      font-size: 24px;
+    }
+
+    h3 {
+      font-size: 22px;
+    }
+
+    h4 {
+      font-size: 20px;
+    }
+
+    h5 {
+      font-size: 18px;
+    }
+
+    h6 {
+      font-size: 16px;
+    }
+
+    /* Paragraphs */
+    p {
+      margin-top: 0;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Links */
+    a {
+      color: var(--ux-primary);
+      text-decoration: none;
+      background-color: transparent;
+    }
+
+    a:hover {
+      color: var(--ux-primary-shade);
+      text-decoration: underline;
+    }
+
+    /* Small text */
+    small {
+      font-size: 75%;
+    }
+
+    /* Superscript & Subscript */
+    sub, sup {
+      font-size: 75%;
+      line-height: 0;
+      position: relative;
+      vertical-align: baseline;
+    }
+
+    sup {
+      top: -0.5em;
+    }
+
+    sub {
+      bottom: -0.25em;
+    }
+
+    /* Bold & Strong */
+    b, strong {
+      font-weight: 600;
+    }
+
+    /* Code & Pre */
+    code, kbd, pre, samp {
+      font-family: var(--ux-font-family-mono);
+      font-size: 0.875em;
+    }
+
+    code {
+      padding: 2px 6px;
+      background-color: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-sm);
+      color: var(--ux-danger);
+    }
+
+    pre {
+      display: block;
+      padding: var(--ux-space-md);
+      margin-top: 0;
+      margin-bottom: 16px;
+      overflow: auto;
+      background-color: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius);
+    }
+
+    pre code {
+      padding: 0;
+      background-color: transparent;
+      color: inherit;
+    }
+
+    /* Blockquote */
+    blockquote {
+      margin: 0 0 16px;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      border-left: 4px solid var(--ux-primary);
+      background-color: var(--ux-surface-secondary);
+      font-style: italic;
+    }
+
+    blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Horizontal Rule */
+    hr {
+      margin: var(--ux-space-lg) 0;
+      border: 0;
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    /* Mark / Highlight */
+    mark {
+      padding: 2px 4px;
+      background-color: rgba(var(--ux-warning-rgb), 0.3);
+      border-radius: 2px;
+    }
+
+    /* Abbreviation */
+    abbr[title] {
+      text-decoration: underline dotted;
+      cursor: help;
+      border-bottom: 0;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-top: 0;
+      margin-bottom: 16px;
+      padding-left: 24px;
+    }
+
+    ul ul, ul ol, ol ul, ol ol {
+      margin-bottom: 0;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    /* Definition List */
+    dl {
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    dt {
+      font-weight: 600;
+    }
+
+    dd {
+      margin-left: 0;
+      margin-bottom: 8px;
+    }
+
     /* Smooth scrolling */
     .ux-scroll {
       -webkit-overflow-scrolling: touch;
@@ -667,6 +843,62 @@
     .ux-text-success { color: var(--ux-success); }
     .ux-text-warning { color: var(--ux-warning); }
     .ux-text-danger { color: var(--ux-danger); }
+
+    /* Text Transform (Ionic-style) */
+    .ux-text-uppercase { text-transform: uppercase; }
+    .ux-text-lowercase { text-transform: lowercase; }
+    .ux-text-capitalize { text-transform: capitalize; }
+
+    /* Text Wrap */
+    .ux-text-wrap { white-space: normal; }
+    .ux-text-nowrap { white-space: nowrap; }
+
+    /* Text Alignment (RTL-aware) */
+    .ux-text-start { text-align: start; }
+    .ux-text-end { text-align: end; }
+    .ux-text-justify { text-align: justify; }
+
+    /* Text Decoration */
+    .ux-text-underline { text-decoration: underline; }
+    .ux-text-line-through { text-decoration: line-through; }
+    .ux-text-no-underline { text-decoration: none; }
+
+    /* Text Overflow */
+    .ux-text-truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Line Clamp (multi-line truncation) */
+    .ux-line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .ux-line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Font Style */
+    .ux-font-italic { font-style: italic; }
+    .ux-font-not-italic { font-style: normal; }
+
+    /* Letter Spacing */
+    .ux-tracking-tight { letter-spacing: -0.025em; }
+    .ux-tracking-normal { letter-spacing: 0; }
+    .ux-tracking-wide { letter-spacing: 0.025em; }
+
+    /* Line Height */
+    .ux-leading-none { line-height: 1; }
+    .ux-leading-tight { line-height: 1.25; }
+    .ux-leading-normal { line-height: 1.5; }
+    .ux-leading-relaxed { line-height: 1.75; }
 
     /* Display */
     .ux-hidden { display: none; }

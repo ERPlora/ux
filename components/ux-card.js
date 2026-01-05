@@ -414,6 +414,7 @@
 
     /* ========================================
        Icon Card (component/feature card style)
+       Supports icons, avatars, or any element
     ======================================== */
 
     .ux-card--icon {
@@ -442,7 +443,18 @@
       transform: translateY(0) scale(0.98);
     }
 
-    .ux-card__icon {
+    /* Generic slot for icon, avatar, or any element */
+    .ux-card__slot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--ux-space-md);
+      flex-shrink: 0;
+    }
+
+    /* Legacy .ux-card__icon support + default icon styling */
+    .ux-card__icon,
+    .ux-card__slot--icon {
       width: 48px;
       height: 48px;
       margin-bottom: var(--ux-space-md);
@@ -450,7 +462,8 @@
       flex-shrink: 0;
     }
 
-    .ux-card__icon svg {
+    .ux-card__icon svg,
+    .ux-card__slot--icon svg {
       width: 100%;
       height: 100%;
     }
@@ -461,10 +474,20 @@
       color: var(--ux-text);
     }
 
+    /* Description - now supports any content (text, badges, etc.) */
     .ux-card__description {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-xs);
       font-size: var(--ux-font-size-xs);
       color: var(--ux-text-secondary);
       margin-top: var(--ux-space-xs);
+    }
+
+    /* When description contains only text */
+    .ux-card__description--text {
+      display: block;
     }
 
     /* Icon card sizes */
@@ -472,9 +495,14 @@
       padding: var(--ux-space-md);
     }
 
-    .ux-card--icon.ux-card--sm .ux-card__icon {
+    .ux-card--icon.ux-card--sm .ux-card__icon,
+    .ux-card--icon.ux-card--sm .ux-card__slot--icon {
       width: 32px;
       height: 32px;
+      margin-bottom: var(--ux-space-sm);
+    }
+
+    .ux-card--icon.ux-card--sm .ux-card__slot {
       margin-bottom: var(--ux-space-sm);
     }
 
@@ -486,9 +514,14 @@
       padding: var(--ux-space-xl);
     }
 
-    .ux-card--icon.ux-card--lg .ux-card__icon {
+    .ux-card--icon.ux-card--lg .ux-card__icon,
+    .ux-card--icon.ux-card--lg .ux-card__slot--icon {
       width: 64px;
       height: 64px;
+      margin-bottom: var(--ux-space-lg);
+    }
+
+    .ux-card--icon.ux-card--lg .ux-card__slot {
       margin-bottom: var(--ux-space-lg);
     }
 
@@ -497,7 +530,8 @@
     }
 
     /* Icon card color variants (icon-only, not background) */
-    .ux-card--icon.ux-card--icon-success .ux-card__icon {
+    .ux-card--icon.ux-card--icon-success .ux-card__icon,
+    .ux-card--icon.ux-card--icon-success .ux-card__slot--icon {
       color: var(--ux-success);
     }
 
@@ -505,7 +539,8 @@
       border-color: var(--ux-success);
     }
 
-    .ux-card--icon.ux-card--icon-warning .ux-card__icon {
+    .ux-card--icon.ux-card--icon-warning .ux-card__icon,
+    .ux-card--icon.ux-card--icon-warning .ux-card__slot--icon {
       color: var(--ux-warning);
     }
 
@@ -513,7 +548,8 @@
       border-color: var(--ux-warning);
     }
 
-    .ux-card--icon.ux-card--icon-danger .ux-card__icon {
+    .ux-card--icon.ux-card--icon-danger .ux-card__icon,
+    .ux-card--icon.ux-card--icon-danger .ux-card__slot--icon {
       color: var(--ux-danger);
     }
 
@@ -521,7 +557,8 @@
       border-color: var(--ux-danger);
     }
 
-    .ux-card--icon.ux-card--icon-secondary .ux-card__icon {
+    .ux-card--icon.ux-card--icon-secondary .ux-card__icon,
+    .ux-card--icon.ux-card--icon-secondary .ux-card__slot--icon {
       color: var(--ux-secondary);
     }
 
@@ -529,7 +566,8 @@
       border-color: var(--ux-secondary);
     }
 
-    .ux-card--icon.ux-card--icon-tertiary .ux-card__icon {
+    .ux-card--icon.ux-card--icon-tertiary .ux-card__icon,
+    .ux-card--icon.ux-card--icon-tertiary .ux-card__slot--icon {
       color: var(--ux-tertiary);
     }
 
