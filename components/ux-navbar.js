@@ -20,7 +20,7 @@
       padding: 0 var(--ux-space-sm);
       background-color: var(--ux-surface);
       border-bottom: 1px solid var(--ux-border-color);
-      z-index: 10;
+      z-index: var(--ux-z-base);
     }
 
     /* Safe area support */
@@ -331,11 +331,13 @@
       top: 0;
       left: 0;
       right: 0;
+      z-index: var(--ux-z-fixed);
     }
 
     .ux-navbar--sticky {
       position: sticky;
       top: 0;
+      z-index: var(--ux-z-sticky);
     }
 
     /* ========================================

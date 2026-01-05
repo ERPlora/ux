@@ -15,7 +15,7 @@
       position: fixed;
       inset: 0;
       background-color: rgba(0, 0, 0, 0.4);
-      z-index: 1000;
+      z-index: var(--ux-z-modal-backdrop);
       opacity: 0;
       visibility: hidden;
       transition:
@@ -46,7 +46,7 @@
       box-shadow: var(--ux-shadow-xl);
       display: flex;
       flex-direction: column;
-      z-index: 1001;
+      z-index: var(--ux-z-modal);
       transform: translateY(100%);
       /* iOS-style smooth spring transition for closing */
       transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
@@ -245,7 +245,7 @@
       box-shadow: var(--ux-shadow-xl);
       display: flex;
       flex-direction: column;
-      z-index: 1001;
+      z-index: var(--ux-z-modal);
       /* iOS-style smooth transition for closing */
       transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
       will-change: transform;
@@ -307,7 +307,7 @@
       display: flex;
       flex-direction: column;
       gap: var(--ux-space-sm);
-      z-index: 1001;
+      z-index: var(--ux-z-modal);
       transform: translateY(calc(100% + var(--ux-space-lg)));
       /* iOS-style smooth transition for closing */
       transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);

@@ -13,7 +13,7 @@
 
     .ux-toast-container {
       position: fixed;
-      z-index: 1200;
+      z-index: var(--ux-z-toast);
       display: flex;
       flex-direction: column;
       gap: var(--ux-space-sm);

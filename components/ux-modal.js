@@ -15,7 +15,7 @@
       position: fixed;
       inset: 0;
       background-color: rgba(0, 0, 0, 0.4);
-      z-index: 1000;
+      z-index: var(--ux-z-modal-backdrop);
       display: flex;
       align-items: center;
       justify-content: center;
