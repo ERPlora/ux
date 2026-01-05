@@ -1481,6 +1481,70 @@
     }
 
     /* ========================================
+       Bootstrap Grid Compatibility
+       Overrides Bootstrap's gutter to match Ionic spacing
+       Load order: Bootstrap Grid CSS → ux-core.js
+    ======================================== */
+
+    :root {
+      --bs-gutter-x: var(--ux-space-md); /* 0.75rem vs Bootstrap 1.5rem */
+      --bs-gutter-y: var(--ux-space-md);
+    }
+
+    .container,
+    .container-fluid,
+    .container-sm,
+    .container-md,
+    .container-lg,
+    .container-xl,
+    .container-xxl {
+      --bs-gutter-x: var(--ux-responsive-space);
+    }
+
+    /* ========================================
+       CSS Grid Utilities
+       Native CSS Grid (not available in Bootstrap)
+    ======================================== */
+
+    .ux-css-grid {
+      display: grid;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-css-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    .ux-css-grid--3 { grid-template-columns: repeat(3, 1fr); }
+    .ux-css-grid--4 { grid-template-columns: repeat(4, 1fr); }
+    .ux-css-grid--6 { grid-template-columns: repeat(6, 1fr); }
+    .ux-css-grid--12 { grid-template-columns: repeat(12, 1fr); }
+
+    .ux-css-grid--auto-fit {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .ux-css-grid--auto-fill {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    /* Gap utilities with UX variables */
+    .ux-gap-0 { gap: 0; }
+    .ux-gap-xs { gap: var(--ux-space-xs); }
+    .ux-gap-sm { gap: var(--ux-space-sm); }
+    .ux-gap-md { gap: var(--ux-space-md); }
+    .ux-gap-lg { gap: var(--ux-space-lg); }
+    .ux-gap-xl { gap: var(--ux-space-xl); }
+    .ux-gap-2xl { gap: var(--ux-space-2xl); }
+
+    .ux-row-gap-0 { row-gap: 0; }
+    .ux-row-gap-sm { row-gap: var(--ux-space-sm); }
+    .ux-row-gap-md { row-gap: var(--ux-space-md); }
+    .ux-row-gap-lg { row-gap: var(--ux-space-lg); }
+
+    .ux-col-gap-0 { column-gap: 0; }
+    .ux-col-gap-sm { column-gap: var(--ux-space-sm); }
+    .ux-col-gap-md { column-gap: var(--ux-space-md); }
+    .ux-col-gap-lg { column-gap: var(--ux-space-lg); }
+
+    /* ========================================
        Flex Utilities Extended
     ======================================== */
 

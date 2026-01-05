@@ -45,7 +45,6 @@
     // Layout components
     'ux-card',
     'ux-list',
-    'ux-grid',
     'ux-content',
     'ux-page-header',
 
