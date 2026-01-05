@@ -377,15 +377,49 @@
   }
 
   // Alpine component for menu
+  // ARIA: role="menu", aria-expanded on trigger, role="menuitem" on items
   const menuComponent = (config = {}) => ({
     isOpen: false,
     position: config.position || 'bottom-left',
     items: config.items || [],
     selectedValue: config.selectedValue || null,
+    menuId: config.id || 'ux-menu-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the trigger button
+    get triggerAriaAttrs() {
+      return {
+        'aria-haspopup': 'menu',
+        'aria-expanded': this.isOpen ? 'true' : 'false',
+        'aria-controls': this.menuId + '-content'
+      };
+    },
+
+    // ARIA attributes for the menu content
+    get menuAriaAttrs() {
+      return {
+        'role': 'menu',
+        'id': this.menuId + '-content',
+        'aria-orientation': 'vertical'
+      };
+    },
+
+    // ARIA attributes for each menu item
+    getItemAriaAttrs(item, index) {
+      return {
+        'role': 'menuitem',
+        'tabindex': index === 0 ? '0' : '-1',
+        'aria-disabled': item.disabled ? 'true' : 'false'
+      };
+    },
 
     open() {
       this.isOpen = true;
       document.body.style.overflow = 'hidden';
+      // Focus first menu item
+      this.$nextTick(() => {
+        const firstItem = this.$refs.content?.querySelector('.ux-menu__item:not(.ux-menu__item--disabled)');
+        if (firstItem) firstItem.focus();
+      });
     },
 
     close() {
@@ -465,11 +499,31 @@
   }
 
   // Alpine component for context menu
+  // ARIA: role="menu" for context menus
   const contextMenuComponent = (config = {}) => ({
     isOpen: false,
     x: 0,
     y: 0,
     items: config.items || [],
+    contextMenuId: config.id || 'ux-context-menu-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for context menu
+    get menuAriaAttrs() {
+      return {
+        'role': 'menu',
+        'id': this.contextMenuId,
+        'aria-orientation': 'vertical'
+      };
+    },
+
+    // ARIA attributes for each menu item
+    getItemAriaAttrs(item, index) {
+      return {
+        'role': 'menuitem',
+        'tabindex': index === 0 ? '0' : '-1',
+        'aria-disabled': item.disabled ? 'true' : 'false'
+      };
+    },
 
     show(event) {
       event.preventDefault();

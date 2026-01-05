@@ -74,7 +74,10 @@
     'ux-reorder',
 
     // Gesture directives
-    'ux-swipe'
+    'ux-swipe',
+
+    // PWA / Offline support
+    'ux-pwa'
   ];
 
   // Get the base path from the current script

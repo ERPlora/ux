@@ -373,14 +373,42 @@
   }
 
   // Alpine component for modal
+  // ARIA: role="dialog", aria-modal="true", aria-labelledby, aria-describedby
   const modalComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
     closeOnBackdrop: config.closeOnBackdrop !== false,
     closeOnEscape: config.closeOnEscape !== false,
+    modalId: config.id || 'ux-modal-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the modal
+    get ariaAttrs() {
+      return {
+        'role': 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': this.modalId + '-title',
+        'aria-describedby': this.modalId + '-content'
+      };
+    },
+
+    get titleId() {
+      return this.modalId + '-title';
+    },
+
+    get contentId() {
+      return this.modalId + '-content';
+    },
 
     open() {
       this.isOpen = true;
       document.body.style.overflow = 'hidden';
+      // Focus trap: focus first focusable element
+      this.$nextTick(() => {
+        const modal = this.$refs.modal || this.$el.querySelector('.ux-modal');
+        if (modal) {
+          const focusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (focusable) focusable.focus();
+        }
+      });
     },
 
     close() {

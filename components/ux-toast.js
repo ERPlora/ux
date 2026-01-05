@@ -387,6 +387,7 @@
   }
 
   // Alpine component for toast
+  // ARIA: role="status" or "alert", aria-live for announcements
   const toastComponent = (config = {}) => ({
     visible: false,
     message: config.message || '',
@@ -397,6 +398,16 @@
     progress: 100,
     _timer: null,
     _progressTimer: null,
+
+    // ARIA attributes - use "alert" for danger/errors, "status" for info
+    get ariaAttrs() {
+      const isUrgent = this.color === 'danger' || this.color === 'warning';
+      return {
+        'role': isUrgent ? 'alert' : 'status',
+        'aria-live': isUrgent ? 'assertive' : 'polite',
+        'aria-atomic': 'true'
+      };
+    },
 
     show(options = {}) {
       if (options.message) this.message = options.message;
@@ -492,11 +503,20 @@
   }
 
   // Toast manager for multiple toasts
+  // ARIA: Container with aria-live region for toast announcements
   // Posiciones disponibles: top, bottom, center, top-start, top-end, bottom-start, bottom-end, center-start, center-end
   const toastManagerComponent = (config = {}) => ({
     toasts: [],
     position: config.position || 'bottom',
     maxToasts: config.maxToasts || 5,
+
+    // ARIA attributes for toast container (live region)
+    get containerAriaAttrs() {
+      return {
+        'aria-live': 'polite',
+        'aria-atomic': 'false'
+      };
+    },
 
     // Computed class for container position
     get containerClass() {
