@@ -412,28 +412,33 @@
       document.body.style.overflow = '';
     },
 
-    confirm(title, message) {
+    confirm(title, message, options = {}) {
+      const cancelText = options.cancelText || 'Cancel';
+      const okText = options.okText || 'OK';
       return new Promise((resolve) => {
         this.open({
           title,
           message,
           buttons: [
-            { text: 'Cancel', role: 'cancel', handler: () => resolve(false) },
-            { text: 'OK', role: 'confirm', handler: () => resolve(true) }
+            { text: cancelText, role: 'cancel', handler: () => resolve(false) },
+            { text: okText, role: 'confirm', handler: () => resolve(true) }
           ]
         });
       });
     },
 
-    prompt(title, message, placeholder = '') {
+    prompt(title, message, options = {}) {
+      const cancelText = options.cancelText || 'Cancel';
+      const okText = options.okText || 'OK';
+      const placeholder = options.placeholder || '';
       return new Promise((resolve) => {
         this.open({
           title,
           message,
           inputs: [{ name: 'value', placeholder }],
           buttons: [
-            { text: 'Cancel', role: 'cancel', handler: () => resolve(null) },
-            { text: 'OK', role: 'confirm', handler: () => resolve(this.inputValues.value) }
+            { text: cancelText, role: 'cancel', handler: () => resolve(null) },
+            { text: okText, role: 'confirm', handler: () => resolve(this.inputValues.value) }
           ]
         });
       });

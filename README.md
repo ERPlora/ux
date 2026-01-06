@@ -292,6 +292,46 @@ All components use CSS variables for sizing, making it easy to customize globall
 }
 ```
 
+## Text Customization (i18n)
+
+All component text can be customized via config parameters. No hardcoded strings - pass your own translations.
+
+### Alert Dialogs
+```javascript
+// Default usage
+alert.confirm('Title', 'Message')
+
+// With custom button text
+alert.confirm('Título', 'Mensaje', {
+  cancelText: 'Cancelar',
+  okText: 'Aceptar'
+})
+
+alert.prompt('Título', 'Mensaje', {
+  cancelText: 'Cancelar',
+  okText: 'Aceptar',
+  placeholder: 'Escribe aquí...'
+})
+```
+
+### Other Components
+```html
+<!-- Picker -->
+<div x-data="uxPicker({ cancelText: 'Cancelar', confirmText: 'Hecho' })">
+
+<!-- Select -->
+<div x-data="uxSelect({ cancelText: 'Cancelar', okText: 'Aceptar' })">
+
+<!-- Back Button -->
+<div x-data="uxBackButton({ text: 'Atrás' })">
+
+<!-- Searchbar placeholder -->
+<input class="ux-searchbar" placeholder="Buscar...">
+
+<!-- Loading message -->
+<div x-data="uxLoading({ message: 'Cargando...' })">
+```
+
 ## Browser Support
 
 Chrome 88+ | Firefox 78+ | Safari 14+ | Edge 88+
