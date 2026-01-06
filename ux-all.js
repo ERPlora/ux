@@ -45,7 +45,8 @@
     // Layout components
     'ux-card',
     'ux-list',
-    'ux-content',
+    'ux-scroll',      // Renamed from ux-content (backward compatible)
+    'ux-screen',      // New: iOS-style screen layout
     'ux-page-header',
 
     // Navigation components
@@ -83,8 +84,9 @@
     'ux-swipe',
     'ux-carousel',
 
-    // Admin components
-    'ux-shell',
+    // Admin/Layout components
+    'ux-admin',       // Renamed from ux-shell (backward compatible)
+    'ux-website',     // New: Traditional website layout
     'ux-panel',
 
     // PWA / Offline support
