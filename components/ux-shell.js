@@ -375,16 +375,17 @@
     .ux-shell__main {
       flex: 1;
       margin-top: var(--ux-shell-navbar);
-      min-height: calc(100vh - var(--ux-shell-navbar));
-      min-height: calc(100dvh - var(--ux-shell-navbar));
+      height: calc(100vh - var(--ux-shell-navbar));
+      height: calc(100dvh - var(--ux-shell-navbar));
+      overflow: hidden;
       background-color: var(--ux-surface-secondary);
     }
 
     /* With toolbar */
     .ux-shell--toolbar .ux-shell__main {
       margin-top: calc(var(--ux-shell-navbar) + var(--ux-shell-toolbar));
-      min-height: calc(100vh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
-      min-height: calc(100dvh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
+      height: calc(100vh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
+      height: calc(100dvh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
     }
 
     /* With sidebar */
@@ -404,13 +405,10 @@
     }
 
     /* With bottom nav (mobile) */
-    .ux-shell--bottom-nav .ux-shell__main {
-      padding-bottom: var(--ux-shell-bottom-nav);
-    }
-
-    @media (min-width: 768px) {
+    @media (max-width: 767px) {
       .ux-shell--bottom-nav .ux-shell__main {
-        padding-bottom: 0;
+        height: calc(100vh - var(--ux-shell-navbar) - var(--ux-shell-bottom-nav));
+        height: calc(100dvh - var(--ux-shell-navbar) - var(--ux-shell-bottom-nav));
       }
     }
 
