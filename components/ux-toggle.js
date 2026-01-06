@@ -90,20 +90,14 @@
     }
 
     /* ========================================
-       Color Variants - Using CSS Custom Property
-       Consolidated pattern for easier theming
+       Color - Uses composition system
+       Default: success (green) per iOS convention
+       Override with .ux-color-* classes
     ======================================== */
 
     .ux-toggle {
-      --ux-toggle-color: var(--ux-success);
+      --ux-toggle-color: var(--ux-variant-bg, var(--ux-success));
     }
-
-    .ux-toggle--primary { --ux-toggle-color: var(--ux-primary); }
-    .ux-toggle--secondary { --ux-toggle-color: var(--ux-secondary); }
-    .ux-toggle--tertiary { --ux-toggle-color: var(--ux-tertiary); }
-    .ux-toggle--success { --ux-toggle-color: var(--ux-success); }
-    .ux-toggle--warning { --ux-toggle-color: var(--ux-warning); }
-    .ux-toggle--danger { --ux-toggle-color: var(--ux-danger); }
 
     /* ========================================
        Sizes

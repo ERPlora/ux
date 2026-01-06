@@ -133,20 +133,14 @@
     }
 
     /* ========================================
-       Color Variants - Using CSS Custom Property
-       Consolidated pattern for easier theming
+       Color - Uses composition system
+       Default: primary (blue)
+       Override with .ux-color-* classes
     ======================================== */
 
     .ux-checkbox {
-      --ux-checkbox-color: var(--ux-primary);
+      --ux-checkbox-color: var(--ux-variant-bg, var(--ux-primary));
     }
-
-    .ux-checkbox--primary { --ux-checkbox-color: var(--ux-primary); }
-    .ux-checkbox--secondary { --ux-checkbox-color: var(--ux-secondary); }
-    .ux-checkbox--tertiary { --ux-checkbox-color: var(--ux-tertiary); }
-    .ux-checkbox--success { --ux-checkbox-color: var(--ux-success); }
-    .ux-checkbox--warning { --ux-checkbox-color: var(--ux-warning); }
-    .ux-checkbox--danger { --ux-checkbox-color: var(--ux-danger); }
 
     .ux-checkbox__input:checked + .ux-checkbox__box {
       background-color: var(--ux-checkbox-color);

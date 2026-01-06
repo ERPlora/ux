@@ -2050,6 +2050,7 @@
     /* Filled variants */
     .ux-color-primary {
       --ux-variant-bg: var(--ux-primary);
+      --ux-variant-bg-rgb: var(--ux-primary-rgb);
       --ux-variant-color: var(--ux-primary-contrast);
       --ux-variant-border: var(--ux-primary);
       --ux-variant-bg-hover: var(--ux-primary-shade);
@@ -2057,6 +2058,7 @@
 
     .ux-color-secondary {
       --ux-variant-bg: var(--ux-secondary);
+      --ux-variant-bg-rgb: var(--ux-secondary-rgb);
       --ux-variant-color: var(--ux-secondary-contrast);
       --ux-variant-border: var(--ux-secondary);
       --ux-variant-bg-hover: var(--ux-secondary-shade);
@@ -2064,6 +2066,7 @@
 
     .ux-color-tertiary {
       --ux-variant-bg: var(--ux-tertiary);
+      --ux-variant-bg-rgb: var(--ux-tertiary-rgb);
       --ux-variant-color: var(--ux-tertiary-contrast);
       --ux-variant-border: var(--ux-tertiary);
       --ux-variant-bg-hover: var(--ux-tertiary-shade);
@@ -2071,6 +2074,7 @@
 
     .ux-color-success {
       --ux-variant-bg: var(--ux-success);
+      --ux-variant-bg-rgb: var(--ux-success-rgb);
       --ux-variant-color: var(--ux-success-contrast);
       --ux-variant-border: var(--ux-success);
       --ux-variant-bg-hover: var(--ux-success-shade);
@@ -2078,6 +2082,7 @@
 
     .ux-color-warning {
       --ux-variant-bg: var(--ux-warning);
+      --ux-variant-bg-rgb: var(--ux-warning-rgb);
       --ux-variant-color: var(--ux-warning-contrast);
       --ux-variant-border: var(--ux-warning);
       --ux-variant-bg-hover: var(--ux-warning-shade);
@@ -2085,6 +2090,7 @@
 
     .ux-color-danger {
       --ux-variant-bg: var(--ux-danger);
+      --ux-variant-bg-rgb: var(--ux-danger-rgb);
       --ux-variant-color: var(--ux-danger-contrast);
       --ux-variant-border: var(--ux-danger);
       --ux-variant-bg-hover: var(--ux-danger-shade);
@@ -2092,6 +2098,7 @@
 
     .ux-color-dark {
       --ux-variant-bg: var(--ux-dark);
+      --ux-variant-bg-rgb: var(--ux-dark-rgb);
       --ux-variant-color: var(--ux-dark-contrast);
       --ux-variant-border: var(--ux-dark);
       --ux-variant-bg-hover: var(--ux-dark-shade);
@@ -2099,6 +2106,7 @@
 
     .ux-color-light {
       --ux-variant-bg: var(--ux-light);
+      --ux-variant-bg-rgb: var(--ux-light-rgb);
       --ux-variant-color: var(--ux-light-contrast);
       --ux-variant-border: var(--ux-light);
       --ux-variant-bg-hover: var(--ux-light-shade);
@@ -2106,6 +2114,7 @@
 
     .ux-color-medium {
       --ux-variant-bg: var(--ux-medium);
+      --ux-variant-bg-rgb: var(--ux-medium-rgb);
       --ux-variant-color: var(--ux-medium-contrast);
       --ux-variant-border: var(--ux-medium);
       --ux-variant-bg-hover: var(--ux-medium-shade);
