@@ -23,16 +23,20 @@
       line-height: 1;
       white-space: nowrap;
       border-radius: var(--ux-chip-border-radius);
-      background-color: var(--ux-light);
-      color: var(--ux-text);
-      border: none;
+      /* Uses composition system: combine with .ux-color-* classes */
+      /* Default is soft/tinted style - use .ux-color-*--soft */
+      background-color: var(--ux-variant-bg, var(--ux-light));
+      color: var(--ux-variant-color, var(--ux-text));
+      border: 1px solid var(--ux-variant-border, transparent);
       cursor: default;
       user-select: none;
       -webkit-user-select: none;
-      transition:
-        background-color var(--ux-transition-fast) var(--ux-ease),
-        color var(--ux-transition-fast) var(--ux-ease),
+      transition: var(--ux-transition-colors),
         transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-chip:hover {
+      background-color: var(--ux-variant-bg-hover, var(--ux-light-shade));
     }
 
     /* ========================================
@@ -43,119 +47,29 @@
       cursor: pointer;
     }
 
-    .ux-chip--interactive:hover {
-      background-color: var(--ux-light-shade);
-    }
-
     .ux-chip--interactive:active {
       transform: scale(0.96);
     }
 
     /* ========================================
-       Color Variants
-    ======================================== */
-
-    .ux-chip--primary {
-      background-color: rgba(var(--ux-primary-rgb), 0.15);
-      color: var(--ux-primary);
-    }
-
-    .ux-chip--primary:hover {
-      background-color: rgba(var(--ux-primary-rgb), 0.25);
-    }
-
-    .ux-chip--secondary {
-      background-color: rgba(var(--ux-secondary-rgb), 0.15);
-      color: var(--ux-secondary-shade);
-    }
-
-    .ux-chip--tertiary {
-      background-color: rgba(var(--ux-tertiary-rgb), 0.15);
-      color: var(--ux-tertiary);
-    }
-
-    .ux-chip--success {
-      background-color: rgba(var(--ux-success-rgb), 0.15);
-      color: var(--ux-success-shade);
-    }
-
-    .ux-chip--warning {
-      background-color: rgba(var(--ux-warning-rgb), 0.15);
-      color: var(--ux-warning-shade);
-    }
-
-    .ux-chip--danger {
-      background-color: rgba(var(--ux-danger-rgb), 0.15);
-      color: var(--ux-danger);
-    }
-
-    .ux-chip--dark {
-      background-color: var(--ux-dark);
-      color: var(--ux-dark-contrast);
-    }
-
-    /* ========================================
-       Filled Variants
+       Filled Variant
+       Use with .ux-color-* classes (not --soft)
     ======================================== */
 
     .ux-chip--filled {
-      background-color: var(--ux-primary);
-      color: var(--ux-primary-contrast);
-    }
-
-    .ux-chip--filled.ux-chip--secondary {
-      background-color: var(--ux-secondary);
-      color: var(--ux-secondary-contrast);
-    }
-
-    .ux-chip--filled.ux-chip--success {
-      background-color: var(--ux-success);
-      color: var(--ux-success-contrast);
-    }
-
-    .ux-chip--filled.ux-chip--warning {
-      background-color: var(--ux-warning);
-      color: var(--ux-warning-contrast);
-    }
-
-    .ux-chip--filled.ux-chip--danger {
-      background-color: var(--ux-danger);
-      color: var(--ux-danger-contrast);
+      background-color: var(--ux-variant-bg, var(--ux-primary));
+      color: var(--ux-variant-color, var(--ux-primary-contrast));
     }
 
     /* ========================================
-       Outline Variants
+       Outline Variant
+       Use with .ux-color-*--outline classes
     ======================================== */
 
     .ux-chip--outline {
-      background-color: transparent;
-      border: 1px solid var(--ux-border-color);
-      color: var(--ux-text);
-    }
-
-    .ux-chip--outline.ux-chip--primary {
-      border-color: var(--ux-primary);
-      color: var(--ux-primary);
-    }
-
-    .ux-chip--outline.ux-chip--secondary {
-      border-color: var(--ux-secondary);
-      color: var(--ux-secondary);
-    }
-
-    .ux-chip--outline.ux-chip--success {
-      border-color: var(--ux-success);
-      color: var(--ux-success);
-    }
-
-    .ux-chip--outline.ux-chip--warning {
-      border-color: var(--ux-warning);
-      color: var(--ux-warning);
-    }
-
-    .ux-chip--outline.ux-chip--danger {
-      border-color: var(--ux-danger);
-      color: var(--ux-danger);
+      background-color: var(--ux-variant-bg, transparent);
+      color: var(--ux-variant-color, var(--ux-text));
+      border: 1px solid var(--ux-variant-border, var(--ux-border-color));
     }
 
     /* ========================================
@@ -181,14 +95,14 @@
     ======================================== */
 
     .ux-chip--selected {
-      background-color: var(--ux-primary);
-      color: var(--ux-primary-contrast);
+      background-color: var(--ux-variant-bg, var(--ux-primary));
+      color: var(--ux-variant-color, var(--ux-primary-contrast));
     }
 
     .ux-chip--selected.ux-chip--outline {
-      background-color: var(--ux-primary);
-      border-color: var(--ux-primary);
-      color: var(--ux-primary-contrast);
+      background-color: var(--ux-variant-bg, var(--ux-primary));
+      border-color: var(--ux-variant-border, var(--ux-primary));
+      color: var(--ux-variant-color, var(--ux-primary-contrast));
     }
 
     /* ========================================

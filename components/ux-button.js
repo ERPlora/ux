@@ -27,20 +27,24 @@
       text-align: center;
       text-decoration: none;
       white-space: nowrap;
-      border: none;
+      /* Uses composition system: combine with .ux-color-* classes */
+      background-color: var(--ux-variant-bg, var(--ux-primary));
+      color: var(--ux-variant-color, var(--ux-primary-contrast));
+      border: 2px solid var(--ux-variant-border, transparent);
       border-radius: var(--ux-button-border-radius);
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
-      transition:
-        background-color var(--ux-transition-fast) var(--ux-ease),
-        color var(--ux-transition-fast) var(--ux-ease),
-        border-color var(--ux-transition-fast) var(--ux-ease),
+      transition: var(--ux-transition-colors),
         transform var(--ux-transition-fast) var(--ux-ease),
         box-shadow var(--ux-transition-fast) var(--ux-ease);
       position: relative;
       overflow: hidden;
+    }
+
+    .ux-button:hover {
+      background-color: var(--ux-variant-bg-hover, var(--ux-primary-shade));
     }
 
     /* Ripple effect */
@@ -78,181 +82,52 @@
     }
 
     /* ========================================
-       Variants - Filled (default)
-    ======================================== */
-
-    .ux-button--primary,
-    .ux-button:not([class*="--"]) {
-      background-color: var(--ux-primary);
-      color: var(--ux-primary-contrast);
-    }
-
-    .ux-button--primary:hover,
-    .ux-button:not([class*="--"]):hover {
-      background-color: var(--ux-primary-shade);
-    }
-
-    .ux-button--secondary {
-      background-color: var(--ux-secondary);
-      color: var(--ux-secondary-contrast);
-    }
-
-    .ux-button--secondary:hover {
-      background-color: var(--ux-secondary-shade);
-    }
-
-    .ux-button--tertiary {
-      background-color: var(--ux-tertiary);
-      color: var(--ux-tertiary-contrast);
-    }
-
-    .ux-button--tertiary:hover {
-      background-color: var(--ux-tertiary-shade);
-    }
-
-    .ux-button--success {
-      background-color: var(--ux-success);
-      color: var(--ux-success-contrast);
-    }
-
-    .ux-button--success:hover {
-      background-color: var(--ux-success-shade);
-    }
-
-    .ux-button--warning {
-      background-color: var(--ux-warning);
-      color: var(--ux-warning-contrast);
-    }
-
-    .ux-button--warning:hover {
-      background-color: var(--ux-warning-shade);
-    }
-
-    .ux-button--danger {
-      background-color: var(--ux-danger);
-      color: var(--ux-danger-contrast);
-    }
-
-    .ux-button--danger:hover {
-      background-color: var(--ux-danger-shade);
-    }
-
-    .ux-button--dark {
-      background-color: var(--ux-dark);
-      color: var(--ux-dark-contrast);
-    }
-
-    .ux-button--dark:hover {
-      background-color: var(--ux-dark-shade);
-    }
-
-    .ux-button--medium {
-      background-color: var(--ux-medium);
-      color: var(--ux-medium-contrast);
-    }
-
-    .ux-button--medium:hover {
-      background-color: var(--ux-medium-shade);
-    }
-
-    .ux-button--light {
-      background-color: var(--ux-light);
-      color: var(--ux-light-contrast);
-    }
-
-    .ux-button--light:hover {
-      background-color: var(--ux-light-shade);
-    }
-
-    /* ========================================
        Outline Variant
+       Use with .ux-color-*--outline classes
     ======================================== */
 
     .ux-button--outline {
-      background-color: transparent;
-      border: 2px solid currentColor;
+      background-color: var(--ux-variant-bg, transparent);
+      color: var(--ux-variant-color, var(--ux-primary));
+      border: 2px solid var(--ux-variant-border, var(--ux-primary));
     }
 
-    .ux-button--outline.ux-button--primary,
-    .ux-button--outline:not([class*="--primary"]):not([class*="--secondary"]):not([class*="--tertiary"]):not([class*="--success"]):not([class*="--warning"]):not([class*="--danger"]):not([class*="--dark"]):not([class*="--medium"]):not([class*="--light"]) {
-      color: var(--ux-primary);
-      border-color: var(--ux-primary);
-      background-color: transparent;
-    }
-
-    .ux-button--outline.ux-button--primary:hover {
-      background-color: rgba(var(--ux-primary-rgb), 0.1);
-    }
-
-    .ux-button--outline.ux-button--secondary {
-      color: var(--ux-secondary);
-      border-color: var(--ux-secondary);
-    }
-
-    .ux-button--outline.ux-button--secondary:hover {
-      background-color: rgba(var(--ux-secondary-rgb), 0.1);
-    }
-
-    .ux-button--outline.ux-button--success {
-      color: var(--ux-success);
-      border-color: var(--ux-success);
-    }
-
-    .ux-button--outline.ux-button--success:hover {
-      background-color: rgba(var(--ux-success-rgb), 0.1);
-    }
-
-    .ux-button--outline.ux-button--warning {
-      color: var(--ux-warning);
-      border-color: var(--ux-warning);
-    }
-
-    .ux-button--outline.ux-button--warning:hover {
-      background-color: rgba(var(--ux-warning-rgb), 0.1);
-    }
-
-    .ux-button--outline.ux-button--danger {
-      color: var(--ux-danger);
-      border-color: var(--ux-danger);
-    }
-
-    .ux-button--outline.ux-button--danger:hover {
-      background-color: rgba(var(--ux-danger-rgb), 0.1);
-    }
-
-    .ux-button--outline.ux-button--dark {
-      color: var(--ux-dark);
-      border-color: var(--ux-dark);
-    }
-
-    .ux-button--outline.ux-button--dark:hover {
-      background-color: rgba(var(--ux-dark-rgb), 0.1);
+    .ux-button--outline:hover {
+      background-color: var(--ux-variant-bg-hover, rgba(var(--ux-primary-rgb), 0.1));
     }
 
     /* ========================================
        Clear Variant (text only)
+       Use with .ux-color-* classes for color
     ======================================== */
 
     .ux-button--clear {
       background-color: transparent;
+      color: var(--ux-variant-color, var(--ux-primary));
       border: none;
     }
 
-    .ux-button--clear.ux-button--primary,
-    .ux-button--clear:not([class*="--secondary"]):not([class*="--tertiary"]):not([class*="--success"]):not([class*="--warning"]):not([class*="--danger"]):not([class*="--dark"]) {
-      color: var(--ux-primary);
-    }
-
     .ux-button--clear:hover {
-      background-color: rgba(0, 0, 0, 0.05);
+      background-color: var(--ux-variant-bg-hover, rgba(0, 0, 0, 0.05));
     }
 
-    .ux-button--clear.ux-button--danger {
-      color: var(--ux-danger);
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-button--glass {
+      box-shadow: var(--ux-glass-highlight);
+      border: 0.5px solid var(--ux-glass-border);
+      color: var(--ux-text);
     }
 
-    .ux-button--clear.ux-button--success {
-      color: var(--ux-success);
+    .ux-button--glass:hover {
+      background: var(--ux-glass-bg-thick);
+    }
+
+    .ux-button--glass:active {
+      background: var(--ux-glass-bg);
     }
 
     /* ========================================
@@ -343,8 +218,7 @@
       animation: ux-button-spin 0.6s linear infinite;
     }
 
-    .ux-button--loading.ux-button--primary::after,
-    .ux-button--loading:not([class*="--outline"]):not([class*="--clear"])::after {
+    .ux-button--loading:not(.ux-button--outline):not(.ux-button--clear)::after {
       border-color: rgba(255, 255, 255, 0.8);
       border-right-color: transparent;
     }

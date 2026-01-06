@@ -586,6 +586,41 @@
       --ux-safe-right: env(safe-area-inset-right, 0px);
       --ux-safe-bottom: env(safe-area-inset-bottom, 0px);
       --ux-safe-left: env(safe-area-inset-left, 0px);
+
+      /* ========================================
+         Utility System - Composition Variables
+         Used by utility classes for composition
+      ======================================== */
+
+      /* Opacity States */
+      --ux-opacity-hidden: 0;
+      --ux-opacity-muted: 0.5;
+      --ux-opacity-visible: 1;
+
+      /* Backdrop/Overlay */
+      --ux-backdrop-color: rgba(0, 0, 0, 0.4);
+      --ux-backdrop-color-light: rgba(0, 0, 0, 0.2);
+      --ux-backdrop-color-heavy: rgba(0, 0, 0, 0.6);
+
+      /* Transition Presets */
+      --ux-transition-fade: opacity var(--ux-transition-base) var(--ux-ease),
+                            visibility var(--ux-transition-base) var(--ux-ease);
+      --ux-transition-transform: transform var(--ux-transition-base) var(--ux-ease-spring);
+      --ux-transition-colors: background-color var(--ux-transition-fast) var(--ux-ease),
+                              color var(--ux-transition-fast) var(--ux-ease),
+                              border-color var(--ux-transition-fast) var(--ux-ease);
+
+      /* Focus Ring */
+      --ux-focus-ring-color: var(--ux-primary);
+      --ux-focus-ring-width: 2px;
+      --ux-focus-ring-offset: 2px;
+
+      /* Color Variant System (Composition) */
+      --ux-variant-bg: transparent;
+      --ux-variant-color: inherit;
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: transparent;
+      --ux-variant-soft-opacity: 0.15;
     }
 
     /* ========================================
@@ -644,6 +679,11 @@
         --ux-glass-border: rgba(255, 255, 255, 0.08);
         --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
         --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+        /* Backdrop - Dark mode */
+        --ux-backdrop-color: rgba(0, 0, 0, 0.6);
+        --ux-backdrop-color-light: rgba(0, 0, 0, 0.4);
+        --ux-backdrop-color-heavy: rgba(0, 0, 0, 0.8);
       }
     }
 
@@ -732,6 +772,11 @@
       --ux-glass-bg-thin: rgba(28, 28, 30, 0.45);
       --ux-glass-border: rgba(255, 255, 255, 0.08);
       --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+
+      /* Backdrop - Dark mode */
+      --ux-backdrop-color: rgba(0, 0, 0, 0.6);
+      --ux-backdrop-color-light: rgba(0, 0, 0, 0.4);
+      --ux-backdrop-color-heavy: rgba(0, 0, 0, 0.8);
       --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
@@ -1441,6 +1486,40 @@
     .ux-inline { display: inline; }
     .ux-inline-block { display: inline-block; }
 
+    /* ========================================
+       State Utilities (Animated)
+       Hidden/visible with transitions
+    ======================================== */
+
+    .ux-state-hidden {
+      opacity: var(--ux-opacity-hidden);
+      visibility: hidden;
+      pointer-events: none;
+      transition: var(--ux-transition-fade);
+    }
+
+    .ux-state-visible {
+      opacity: var(--ux-opacity-visible);
+      visibility: visible;
+      pointer-events: auto;
+      transition: var(--ux-transition-fade);
+    }
+
+    .ux-state-hidden--fast,
+    .ux-state-visible--fast {
+      transition-duration: var(--ux-transition-fast);
+    }
+
+    .ux-state-hidden--slow,
+    .ux-state-visible--slow {
+      transition-duration: var(--ux-transition-slow);
+    }
+
+    .ux-invisible {
+      opacity: var(--ux-opacity-hidden);
+      visibility: hidden;
+    }
+
     /* Width */
     .ux-w-full { width: 100%; }
     .ux-w-auto { width: auto; }
@@ -1894,11 +1973,228 @@
     .ux-glass-radius-lg { border-radius: var(--ux-glass-radius-lg); }
     .ux-glass-radius-xl { border-radius: var(--ux-glass-radius-xl); }
 
+    /* Glass with highlight (premium iOS 26 feel) */
+    .ux-glass--highlight {
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+    }
+
+    /* Universal glass selector for --glass variants */
+    [class*="--glass"] {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+    }
+
+    [class*="--glass-heavy"] {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+    }
+
     /* Fallback for browsers without backdrop-filter */
     @supports not (backdrop-filter: blur(10px)) {
-      .ux-glass {
+      .ux-glass,
+      [class*="--glass"] {
         background: var(--ux-glass-bg-thick);
       }
+    }
+
+    /* ========================================
+       Focus Ring Utilities
+       Standardized focus indicators
+    ======================================== */
+
+    .ux-focus-ring:focus-visible {
+      outline: var(--ux-focus-ring-width) solid var(--ux-focus-ring-color);
+      outline-offset: var(--ux-focus-ring-offset);
+    }
+
+    .ux-focus-ring--inset:focus-visible {
+      outline-offset: calc(-1 * var(--ux-focus-ring-offset));
+    }
+
+    .ux-focus-ring--none:focus-visible {
+      outline: none;
+    }
+
+    /* ========================================
+       Backdrop/Overlay Utilities
+       For modals, sheets, dialogs
+    ======================================== */
+
+    .ux-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: var(--ux-backdrop-color);
+      z-index: var(--ux-z-modal-backdrop);
+    }
+
+    .ux-backdrop--light {
+      background-color: var(--ux-backdrop-color-light);
+    }
+
+    .ux-backdrop--heavy {
+      background-color: var(--ux-backdrop-color-heavy);
+    }
+
+    .ux-backdrop--blur {
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    /* ========================================
+       Color Variant Utilities (Composition)
+       Use with components: .ux-button .ux-color-primary
+    ======================================== */
+
+    /* Filled variants */
+    .ux-color-primary {
+      --ux-variant-bg: var(--ux-primary);
+      --ux-variant-color: var(--ux-primary-contrast);
+      --ux-variant-border: var(--ux-primary);
+      --ux-variant-bg-hover: var(--ux-primary-shade);
+    }
+
+    .ux-color-secondary {
+      --ux-variant-bg: var(--ux-secondary);
+      --ux-variant-color: var(--ux-secondary-contrast);
+      --ux-variant-border: var(--ux-secondary);
+      --ux-variant-bg-hover: var(--ux-secondary-shade);
+    }
+
+    .ux-color-tertiary {
+      --ux-variant-bg: var(--ux-tertiary);
+      --ux-variant-color: var(--ux-tertiary-contrast);
+      --ux-variant-border: var(--ux-tertiary);
+      --ux-variant-bg-hover: var(--ux-tertiary-shade);
+    }
+
+    .ux-color-success {
+      --ux-variant-bg: var(--ux-success);
+      --ux-variant-color: var(--ux-success-contrast);
+      --ux-variant-border: var(--ux-success);
+      --ux-variant-bg-hover: var(--ux-success-shade);
+    }
+
+    .ux-color-warning {
+      --ux-variant-bg: var(--ux-warning);
+      --ux-variant-color: var(--ux-warning-contrast);
+      --ux-variant-border: var(--ux-warning);
+      --ux-variant-bg-hover: var(--ux-warning-shade);
+    }
+
+    .ux-color-danger {
+      --ux-variant-bg: var(--ux-danger);
+      --ux-variant-color: var(--ux-danger-contrast);
+      --ux-variant-border: var(--ux-danger);
+      --ux-variant-bg-hover: var(--ux-danger-shade);
+    }
+
+    .ux-color-dark {
+      --ux-variant-bg: var(--ux-dark);
+      --ux-variant-color: var(--ux-dark-contrast);
+      --ux-variant-border: var(--ux-dark);
+      --ux-variant-bg-hover: var(--ux-dark-shade);
+    }
+
+    .ux-color-light {
+      --ux-variant-bg: var(--ux-light);
+      --ux-variant-color: var(--ux-light-contrast);
+      --ux-variant-border: var(--ux-light);
+      --ux-variant-bg-hover: var(--ux-light-shade);
+    }
+
+    .ux-color-medium {
+      --ux-variant-bg: var(--ux-medium);
+      --ux-variant-color: var(--ux-medium-contrast);
+      --ux-variant-border: var(--ux-medium);
+      --ux-variant-bg-hover: var(--ux-medium-shade);
+    }
+
+    /* Soft variants (tinted background) */
+    .ux-color-primary--soft {
+      --ux-variant-bg: rgba(var(--ux-primary-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-primary-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-primary-rgb), 0.25);
+    }
+
+    .ux-color-secondary--soft {
+      --ux-variant-bg: rgba(var(--ux-secondary-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-secondary-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-secondary-rgb), 0.25);
+    }
+
+    .ux-color-success--soft {
+      --ux-variant-bg: rgba(var(--ux-success-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-success-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-success-rgb), 0.25);
+    }
+
+    .ux-color-warning--soft {
+      --ux-variant-bg: rgba(var(--ux-warning-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-warning-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-warning-rgb), 0.25);
+    }
+
+    .ux-color-danger--soft {
+      --ux-variant-bg: rgba(var(--ux-danger-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-danger-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-danger-rgb), 0.25);
+    }
+
+    /* Outline variants */
+    .ux-color-primary--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-primary);
+      --ux-variant-border: var(--ux-primary);
+      --ux-variant-bg-hover: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    .ux-color-secondary--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-secondary);
+      --ux-variant-border: var(--ux-secondary);
+      --ux-variant-bg-hover: rgba(var(--ux-secondary-rgb), 0.1);
+    }
+
+    .ux-color-success--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-success);
+      --ux-variant-border: var(--ux-success);
+      --ux-variant-bg-hover: rgba(var(--ux-success-rgb), 0.1);
+    }
+
+    .ux-color-warning--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-warning);
+      --ux-variant-border: var(--ux-warning);
+      --ux-variant-bg-hover: rgba(var(--ux-warning-rgb), 0.1);
+    }
+
+    .ux-color-danger--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-danger);
+      --ux-variant-border: var(--ux-danger);
+      --ux-variant-bg-hover: rgba(var(--ux-danger-rgb), 0.1);
+    }
+
+    .ux-color-dark--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-dark);
+      --ux-variant-border: var(--ux-dark);
+      --ux-variant-bg-hover: rgba(var(--ux-dark-rgb), 0.1);
+    }
+
+    .ux-color-light--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-light-contrast);
+      --ux-variant-border: var(--ux-light);
+      --ux-variant-bg-hover: rgba(var(--ux-light-rgb), 0.3);
     }
 
   `;
