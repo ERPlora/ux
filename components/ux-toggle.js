@@ -30,10 +30,10 @@
 
     .ux-toggle__track {
       position: relative;
-      width: 51px;
-      height: 31px;
+      width: var(--ux-toggle-width);
+      height: var(--ux-toggle-height);
       background-color: var(--ux-light-shade);
-      border-radius: 31px;
+      border-radius: var(--ux-toggle-border-radius);
       transition:
         background-color var(--ux-transition-base) var(--ux-ease);
       flex-shrink: 0;
@@ -43,8 +43,8 @@
       position: absolute;
       top: 2px;
       left: 2px;
-      width: 27px;
-      height: 27px;
+      width: var(--ux-toggle-handle-size);
+      height: var(--ux-toggle-handle-size);
       background-color: white;
       border-radius: 50%;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);

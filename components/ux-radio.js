@@ -34,8 +34,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
+      width: var(--ux-radio-size);
+      height: var(--ux-radio-size);
       background-color: transparent;
       border: 2px solid var(--ux-medium);
       border-radius: 50%;
