@@ -11006,8 +11006,8 @@
   }
 })();
 /**
- * UX Content Component
- * Contenedor principal de contenido estilo Ionic
+ * UX Scroll Component
+ * Contenedor scrollable con utilidades de layout
  * @requires ux-core.js
  */
 (function() {
@@ -11060,8 +11060,8 @@
 
     .ux-header--translucent {
       background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(1.25rem);
+      -webkit-backdrop-filter: blur(1.25rem);
     }
 
     .ux-header--collapse {
@@ -11073,9 +11073,10 @@
     }
 
     /* ========================================
-       UX Content
+       UX Scroll / UX Content
     ======================================== */
 
+    .ux-scroll,
     .ux-content {
       position: relative;
       display: flex;
@@ -11088,6 +11089,7 @@
       overscroll-behavior-y: contain;
     }
 
+    .ux-scroll--fullscreen,
     .ux-content--fullscreen {
       position: absolute;
       top: 0;
@@ -11096,24 +11098,29 @@
       bottom: 0;
     }
 
+    .ux-scroll--y,
     .ux-content--scroll-y {
       overflow-y: scroll;
     }
 
+    .ux-scroll--no-scroll,
     .ux-content--no-scroll {
       overflow: hidden;
     }
 
     /* Header offset */
+    .ux-scroll--has-header,
     .ux-content--has-header {
-      padding-top: var(--ux-header-height, 56px);
+      padding-top: var(--ux-header-height, 3.5rem);
     }
 
+    .ux-scroll--has-footer,
     .ux-content--has-footer {
-      padding-bottom: var(--ux-footer-height, 56px);
+      padding-bottom: var(--ux-footer-height, 3.5rem);
     }
 
     /* Safe area padding */
+    .ux-scroll--safe-area,
     .ux-content--safe-area {
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
@@ -11121,14 +11128,16 @@
       padding-right: env(safe-area-inset-right);
     }
 
-    /* Content inner wrapper */
+    /* Scroll inner wrapper */
+    .ux-scroll__inner,
     .ux-content__inner {
       display: flex;
       flex-direction: column;
       flex: 1;
-      padding: var(--ux-content-padding, var(--ux-space-lg));
+      padding: var(--ux-scroll-padding, var(--ux-space-lg));
     }
 
+    .ux-scroll__inner--centered,
     .ux-content__inner--centered {
       align-items: center;
       justify-content: center;
@@ -11157,8 +11166,8 @@
 
     .ux-footer--translucent {
       background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(1.25rem);
+      -webkit-backdrop-filter: blur(1.25rem);
       border-top: none;
     }
 
@@ -11179,7 +11188,7 @@
     .ux-split-pane__side {
       display: none;
       flex-shrink: 0;
-      width: var(--ux-split-pane-width, 270px);
+      width: var(--ux-split-pane-width, 16.875rem);
       border-right: 1px solid var(--ux-border-color);
       background-color: var(--ux-surface);
       overflow-y: auto;
@@ -11203,12 +11212,6 @@
     /* ========================================
        Scroll Utilities
     ======================================== */
-
-    .ux-scroll {
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-    }
 
     .ux-scroll--x {
       overflow-x: auto;
@@ -11248,7 +11251,7 @@
 
     .ux-container {
       width: 100%;
-      max-width: var(--ux-container-max-width, 1200px);
+      max-width: var(--ux-container-max-width, 75rem);
       margin-left: auto;
       margin-right: auto;
       padding-left: var(--ux-space-lg);
@@ -11260,11 +11263,11 @@
     }
 
     .ux-container--narrow {
-      max-width: 680px;
+      max-width: 42.5rem;
     }
 
     .ux-container--wide {
-      max-width: 1400px;
+      max-width: 87.5rem;
     }
 
     /* ========================================
@@ -11316,7 +11319,7 @@
     }
 
     .ux-divider--thick {
-      height: 8px;
+      height: 0.5rem;
       background-color: var(--ux-surface-secondary);
     }
 
@@ -11411,12 +11414,13 @@
        Pull to Refresh Target
     ======================================== */
 
+    .ux-scroll__refresher,
     .ux-content__refresher {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 60px;
+      height: 3.75rem;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -11425,6 +11429,7 @@
       transition: transform var(--ux-transition-base) var(--ux-ease);
     }
 
+    .ux-scroll--refreshing .ux-scroll__refresher,
     .ux-content--refreshing .ux-content__refresher {
       transform: translateY(0);
     }
@@ -11433,6 +11438,7 @@
        Fixed Slot (elements outside scroll)
     ======================================== */
 
+    .ux-scroll__fixed,
     .ux-content__fixed {
       position: absolute;
       top: 0;
@@ -11443,6 +11449,7 @@
       z-index: 2;
     }
 
+    .ux-scroll__fixed > *,
     .ux-content__fixed > * {
       pointer-events: auto;
     }
@@ -11494,70 +11501,79 @@
     }
 
     /* ========================================
-       Content Color Variants
+       Scroll Color Variants
     ======================================== */
 
+    .ux-scroll--primary,
     .ux-content--primary {
-      --ux-content-background: var(--ux-primary);
-      --ux-content-color: var(--ux-primary-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
+      --ux-scroll-background: var(--ux-primary);
+      --ux-scroll-color: var(--ux-primary-contrast);
+      background-color: var(--ux-scroll-background);
+      color: var(--ux-scroll-color);
     }
 
+    .ux-scroll--secondary,
     .ux-content--secondary {
-      --ux-content-background: var(--ux-secondary);
-      --ux-content-color: var(--ux-secondary-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
+      --ux-scroll-background: var(--ux-secondary);
+      --ux-scroll-color: var(--ux-secondary-contrast);
+      background-color: var(--ux-scroll-background);
+      color: var(--ux-scroll-color);
     }
 
+    .ux-scroll--tertiary,
     .ux-content--tertiary {
-      --ux-content-background: var(--ux-tertiary);
-      --ux-content-color: var(--ux-tertiary-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
+      --ux-scroll-background: var(--ux-tertiary);
+      --ux-scroll-color: var(--ux-tertiary-contrast);
+      background-color: var(--ux-scroll-background);
+      color: var(--ux-scroll-color);
     }
 
+    .ux-scroll--success,
     .ux-content--success {
-      --ux-content-background: var(--ux-success);
-      --ux-content-color: var(--ux-success-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
+      --ux-scroll-background: var(--ux-success);
+      --ux-scroll-color: var(--ux-success-contrast);
+      background-color: var(--ux-scroll-background);
+      color: var(--ux-scroll-color);
     }
 
+    .ux-scroll--warning,
     .ux-content--warning {
-      --ux-content-background: var(--ux-warning);
-      --ux-content-color: var(--ux-warning-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
+      --ux-scroll-background: var(--ux-warning);
+      --ux-scroll-color: var(--ux-warning-contrast);
+      background-color: var(--ux-scroll-background);
+      color: var(--ux-scroll-color);
     }
 
+    .ux-scroll--danger,
     .ux-content--danger {
-      --ux-content-background: var(--ux-danger);
-      --ux-content-color: var(--ux-danger-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
+      --ux-scroll-background: var(--ux-danger);
+      --ux-scroll-color: var(--ux-danger-contrast);
+      background-color: var(--ux-scroll-background);
+      color: var(--ux-scroll-color);
     }
 
+    .ux-scroll--light,
     .ux-content--light {
-      --ux-content-background: var(--ux-light);
-      --ux-content-color: var(--ux-light-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
+      --ux-scroll-background: var(--ux-light);
+      --ux-scroll-color: var(--ux-light-contrast);
+      background-color: var(--ux-scroll-background);
+      color: var(--ux-scroll-color);
     }
 
+    .ux-scroll--dark,
     .ux-content--dark {
-      --ux-content-background: var(--ux-dark);
-      --ux-content-color: var(--ux-dark-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
+      --ux-scroll-background: var(--ux-dark);
+      --ux-scroll-color: var(--ux-dark-contrast);
+      background-color: var(--ux-scroll-background);
+      color: var(--ux-scroll-color);
     }
 
+    .ux-scroll--medium,
     .ux-content--medium {
-      --ux-content-background: var(--ux-medium);
-      --ux-content-color: var(--ux-medium-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
+      --ux-scroll-background: var(--ux-medium);
+      --ux-scroll-color: var(--ux-medium-contrast);
+      background-color: var(--ux-scroll-background);
+      color: var(--ux-scroll-color);
     }
 
     /* ========================================
@@ -11568,8 +11584,8 @@
       position: fixed;
       bottom: calc(var(--ux-space-lg) + env(safe-area-inset-bottom));
       right: var(--ux-space-lg);
-      width: 48px;
-      height: 48px;
+      width: 3rem;
+      height: 3rem;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -11580,7 +11596,7 @@
       cursor: pointer;
       opacity: 0;
       visibility: hidden;
-      transform: translateY(20px);
+      transform: translateY(1.25rem);
       transition:
         opacity var(--ux-transition-base) var(--ux-ease),
         visibility var(--ux-transition-base) var(--ux-ease),
@@ -11604,8 +11620,8 @@
     }
 
     .ux-scroll-top__icon {
-      width: 24px;
-      height: 24px;
+      width: 1.5rem;
+      height: 1.5rem;
       color: var(--ux-text);
     }
 
@@ -11617,17 +11633,17 @@
 
   // Inject styles
   if (window.UX) {
-    window.UX.injectStyles('ux-content-styles', styles);
+    window.UX.injectStyles('ux-scroll-styles', styles);
   } else {
     const styleEl = document.createElement('style');
-    styleEl.id = 'ux-content-styles';
+    styleEl.id = 'ux-scroll-styles';
     styleEl.textContent = styles;
     document.head.appendChild(styleEl);
   }
 
-  // Alpine component for content with scroll events and methods
+  // Alpine component for scroll with scroll events and methods
   // ARIA: Main content landmark
-  const contentComponent = (config = {}) => ({
+  const scrollComponent = (config = {}) => ({
     scrollTop: 0,
     scrollLeft: 0,
     scrollHeight: 0,
@@ -11639,13 +11655,13 @@
     _scrollTimeout: null,
     _lastScrollTop: 0,
     _scrollDirection: 'down',
-    contentId: config.id || 'ux-content-' + Math.random().toString(36).substr(2, 9),
+    scrollId: config.id || 'ux-scroll-' + Math.random().toString(36).substr(2, 9),
 
     // ARIA attributes
     get ariaAttrs() {
       return {
         'role': 'main',
-        'id': this.contentId
+        'id': this.scrollId
       };
     },
 
@@ -11655,14 +11671,14 @@
       });
     },
 
-    // Get content element
-    getContentElement() {
-      return this.$refs.content || this.$el;
+    // Get scroll element
+    getScrollElement() {
+      return this.$refs.scroll || this.$refs.content || this.$el;
     },
 
     // Update scroll information
     updateScrollInfo() {
-      const el = this.getContentElement();
+      const el = this.getScrollElement();
       if (!el) return;
 
       this.scrollTop = el.scrollTop;
@@ -11731,7 +11747,7 @@
 
     // Scroll to bottom
     scrollToBottom(duration = 300) {
-      const el = this.getContentElement();
+      const el = this.getScrollElement();
       if (!el) return Promise.resolve();
 
       return this.scrollToPoint(0, el.scrollHeight - el.clientHeight, duration);
@@ -11739,7 +11755,7 @@
 
     // Scroll to specific point
     scrollToPoint(x, y, duration = 300) {
-      const el = this.getContentElement();
+      const el = this.getScrollElement();
       if (!el) return Promise.resolve();
 
       return new Promise((resolve) => {
@@ -11767,7 +11783,7 @@
 
     // Scroll by amount
     scrollByPoint(x, y, duration = 300) {
-      const el = this.getContentElement();
+      const el = this.getScrollElement();
       if (!el) return Promise.resolve();
 
       return this.scrollToPoint(
@@ -11779,23 +11795,18 @@
 
     // Scroll to element
     scrollToElement(selector, duration = 300) {
-      const el = this.getContentElement();
+      const el = this.getScrollElement();
       const target = el?.querySelector(selector);
       if (!target) return Promise.resolve();
 
       const targetRect = target.getBoundingClientRect();
-      const contentRect = el.getBoundingClientRect();
+      const scrollRect = el.getBoundingClientRect();
 
       return this.scrollToPoint(
         el.scrollLeft,
-        el.scrollTop + (targetRect.top - contentRect.top),
+        el.scrollTop + (targetRect.top - scrollRect.top),
         duration
       );
-    },
-
-    // Get scroll element (for external use)
-    getScrollElement() {
-      return this.getContentElement();
     },
 
     // Check if scrolled to top
@@ -11805,24 +11816,27 @@
 
     // Check if scrolled to bottom
     get isAtBottom() {
-      const el = this.getContentElement();
+      const el = this.getScrollElement();
       if (!el) return false;
       return this.scrollTop >= el.scrollHeight - el.clientHeight - 1;
     },
 
     // Get scroll progress (0 to 1)
     get scrollProgress() {
-      const el = this.getContentElement();
+      const el = this.getScrollElement();
       if (!el || el.scrollHeight <= el.clientHeight) return 0;
       return this.scrollTop / (el.scrollHeight - el.clientHeight);
     }
   });
 
+  // Register with both new and old names
   if (window.UX) {
-    window.UX.registerComponent('uxContent', contentComponent);
+    window.UX.registerComponent('uxScroll', scrollComponent);
+    window.UX.registerComponent('uxContent', scrollComponent); // Backward compatibility
   } else {
     document.addEventListener('alpine:init', () => {
-      Alpine.data('uxContent', contentComponent);
+      Alpine.data('uxScroll', scrollComponent);
+      Alpine.data('uxContent', scrollComponent); // Backward compatibility
     });
   }
 
@@ -11884,9 +11898,9 @@
     },
 
     scrollToTop() {
-      const content = document.querySelector('.ux-content');
-      if (content) {
-        content.scrollTo({
+      const scroll = document.querySelector('.ux-scroll') || document.querySelector('.ux-content');
+      if (scroll) {
+        scroll.scrollTo({
           top: 0,
           behavior: 'smooth'
         });
@@ -11929,6 +11943,620 @@
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxCollapsibleHeader', collapsibleHeaderComponent);
     });
+  }
+})();
+/**
+ * UX Screen Layout
+ * Pantalla estilo iOS/Ionic para páginas internas
+ * Header + Content scrollable + Footer condicional
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Screen - CSS Variables
+    ======================================== */
+
+    :root {
+      --ux-screen-header-height: 3.5rem;  /* 56px */
+      --ux-screen-footer-height: 3.5rem;  /* 56px */
+    }
+
+    /* ========================================
+       UX Screen Container
+    ======================================== */
+
+    .ux-screen {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: var(--ux-background);
+    }
+
+    /* ========================================
+       UX Screen Header
+    ======================================== */
+
+    .ux-screen__header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      height: var(--ux-screen-header-height);
+      min-height: var(--ux-screen-header-height);
+      padding: 0 var(--ux-space-md);
+      background-color: var(--ux-surface);
+      border-bottom: 1px solid var(--ux-border-color);
+      gap: var(--ux-space-sm);
+      z-index: 10;
+    }
+
+    /* Header slots */
+    .ux-screen__back {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .ux-screen__title {
+      flex: 1;
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0;
+      /* Truncate long titles */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Center title when back button present */
+    .ux-screen__header--centered .ux-screen__title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 60%;
+      text-align: center;
+    }
+
+    .ux-screen__actions {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    /* Header variants */
+    .ux-screen__header--transparent {
+      background-color: transparent;
+      border-bottom: none;
+    }
+
+    .ux-screen__header--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
+    }
+
+    /* Large title variant (iOS style) */
+    .ux-screen__header--large {
+      flex-direction: column;
+      align-items: flex-start;
+      height: auto;
+      min-height: var(--ux-screen-header-height);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+    }
+
+    .ux-screen__header--large .ux-screen__title {
+      font-size: var(--ux-font-size-2xl);
+      font-weight: 700;
+      margin-top: var(--ux-space-xs);
+    }
+
+    .ux-screen__header--large .ux-screen__row {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      gap: var(--ux-space-sm);
+    }
+
+    /* ========================================
+       UX Screen Content
+    ======================================== */
+
+    .ux-screen__content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+    }
+
+    /* Content padding variants */
+    .ux-screen__content--padded {
+      padding: var(--ux-space-md);
+    }
+
+    /* No scroll variant */
+    .ux-screen__content--no-scroll {
+      overflow: hidden;
+    }
+
+    /* ========================================
+       UX Screen Footer
+    ======================================== */
+
+    .ux-screen__footer {
+      flex-shrink: 0;
+      min-height: var(--ux-screen-footer-height);
+      background-color: var(--ux-surface);
+      border-top: 1px solid var(--ux-border-color);
+      z-index: 10;
+    }
+
+    /* Hide footer when empty */
+    .ux-screen__footer:empty {
+      display: none;
+    }
+
+    /* Footer variants */
+    .ux-screen__footer--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-top: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-screen__footer--transparent {
+      background-color: transparent;
+      border-top: none;
+    }
+
+    /* Footer with tab bar */
+    .ux-screen__footer .ux-tab-bar {
+      height: 100%;
+    }
+
+    /* Footer with toolbar */
+    .ux-screen__footer .ux-toolbar {
+      height: 100%;
+      border-top: none;
+    }
+
+    /* Safe area padding for notched devices */
+    .ux-screen__footer--safe {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* ========================================
+       UX Screen Modifiers
+    ======================================== */
+
+    /* Full height (for use outside ux-admin) */
+    .ux-screen--full {
+      height: 100vh;
+      height: 100dvh;
+    }
+
+    /* With fixed header */
+    .ux-screen--fixed-header .ux-screen__header {
+      position: sticky;
+      top: 0;
+    }
+
+    /* With fixed footer */
+    .ux-screen--fixed-footer .ux-screen__footer {
+      position: sticky;
+      bottom: 0;
+    }
+
+    /* ========================================
+       Backward Compatibility Aliases
+    ======================================== */
+
+    /* Map old class names to new ones */
+    .ux-page-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .ux-page-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      min-height: var(--ux-screen-header-height);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-page-header__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-page-header__title h1 {
+      font-size: var(--ux-font-size-xl);
+      font-weight: 700;
+      color: var(--ux-text);
+      margin: 0;
+    }
+
+    .ux-page-header__subtitle {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin: 0;
+    }
+
+    .ux-page-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-page-header__search {
+      width: 100%;
+      margin-top: var(--ux-space-sm);
+    }
+
+    .ux-page-content,
+    .ux-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-screen-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-screen-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for screen
+  const screenComponent = (config = {}) => ({
+    // Scroll state
+    scrollTop: 0,
+    isScrolling: false,
+    scrollDirection: 'down',
+    _lastScrollTop: 0,
+    _scrollTimeout: null,
+
+    init() {
+      // Initialize scroll tracking if content element exists
+      this.$nextTick(() => {
+        const content = this.$el.querySelector('.ux-screen__content');
+        if (content) {
+          content.addEventListener('scroll', this.handleScroll.bind(this));
+        }
+      });
+    },
+
+    destroy() {
+      const content = this.$el.querySelector('.ux-screen__content');
+      if (content) {
+        content.removeEventListener('scroll', this.handleScroll.bind(this));
+      }
+    },
+
+    handleScroll(event) {
+      const el = event.target;
+
+      // Determine scroll direction
+      this.scrollDirection = el.scrollTop > this._lastScrollTop ? 'down' : 'up';
+      this._lastScrollTop = el.scrollTop;
+      this.scrollTop = el.scrollTop;
+
+      // Track scrolling state
+      if (!this.isScrolling) {
+        this.isScrolling = true;
+        this.$dispatch('ux-screen-scroll-start', { scrollTop: this.scrollTop });
+      }
+
+      // Dispatch scroll event
+      this.$dispatch('ux-screen-scroll', {
+        scrollTop: this.scrollTop,
+        direction: this.scrollDirection
+      });
+
+      // Debounce scroll end
+      clearTimeout(this._scrollTimeout);
+      this._scrollTimeout = setTimeout(() => {
+        this.isScrolling = false;
+        this.$dispatch('ux-screen-scroll-end', { scrollTop: this.scrollTop });
+      }, 150);
+    },
+
+    // Scroll methods
+    scrollToTop(duration = 300) {
+      const content = this.$el.querySelector('.ux-screen__content');
+      if (content) {
+        content.scrollTo({ top: 0, behavior: duration > 0 ? 'smooth' : 'auto' });
+      }
+    },
+
+    scrollToBottom(duration = 300) {
+      const content = this.$el.querySelector('.ux-screen__content');
+      if (content) {
+        content.scrollTo({
+          top: content.scrollHeight - content.clientHeight,
+          behavior: duration > 0 ? 'smooth' : 'auto'
+        });
+      }
+    },
+
+    // Check scroll position
+    get isAtTop() {
+      return this.scrollTop <= 0;
+    },
+
+    get isAtBottom() {
+      const content = this.$el.querySelector('.ux-screen__content');
+      if (!content) return false;
+      return this.scrollTop >= content.scrollHeight - content.clientHeight - 1;
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxScreen', screenComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxScreen', screenComponent);
+    });
+  }
+})();
+/**
+ * UX Page Header Component
+ * Header de página con título, subtítulo, búsqueda y acciones
+ * Para usar dentro de ux-content como header fijo de página
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Page Layout
+       Container for page-header + scrollable content
+    ======================================== */
+
+    .ux-page-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      /* Ensure it fills flex container */
+      flex: 1 1 auto;
+    }
+
+    /* ========================================
+       UX Page Header
+       Fixed header within a page (title + search + actions)
+    ======================================== */
+
+    .ux-page-header {
+      flex-shrink: 0;
+      padding: var(--ux-space-lg);
+      background-color: var(--ux-surface);
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-page-header--transparent {
+      background-color: transparent;
+      border-bottom: none;
+    }
+
+    .ux-page-header--sticky {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    /* Title row */
+    .ux-page-header__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-page-header__title h1,
+    .ux-page-header__title .ux-page-header__heading {
+      margin: 0;
+      font-size: var(--ux-font-size-xl);
+      font-weight: 600;
+      color: var(--ux-text);
+      line-height: 1.3;
+    }
+
+    .ux-page-header__title h2 {
+      margin: 0;
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+
+    .ux-page-header__subtitle {
+      margin: var(--ux-space-xs) 0 0 0;
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    /* Actions container */
+    .ux-page-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      flex-shrink: 0;
+    }
+
+    /* Search container */
+    .ux-page-header__search {
+      margin-top: var(--ux-space-md);
+    }
+
+    /* Filter/toolbar row below search */
+    .ux-page-header__toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      margin-top: var(--ux-space-md);
+      flex-wrap: wrap;
+    }
+
+    /* Breadcrumb */
+    .ux-page-header__breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      margin-bottom: var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-page-header__breadcrumb a {
+      color: var(--ux-primary);
+      text-decoration: none;
+    }
+
+    .ux-page-header__breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .ux-page-header__breadcrumb-separator {
+      color: var(--ux-text-tertiary);
+    }
+
+    /* With back button */
+    .ux-page-header--with-back .ux-page-header__title {
+      align-items: center;
+    }
+
+    .ux-page-header__back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      margin-right: var(--ux-space-sm);
+      margin-left: calc(var(--ux-space-sm) * -1);
+      border-radius: var(--ux-border-radius);
+      color: var(--ux-text-secondary);
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+      cursor: pointer;
+    }
+
+    .ux-page-header__back:hover {
+      background-color: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+
+    .ux-page-header__back svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ========================================
+       UX Page Content
+       Scrollable content area within page-layout
+    ======================================== */
+
+    .ux-page-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-page-content--sm {
+      padding: var(--ux-space-md);
+    }
+
+    .ux-page-content--lg {
+      padding: var(--ux-space-2xl);
+    }
+
+    .ux-page-content--no-padding {
+      padding: 0;
+    }
+
+    .ux-page-content--flush {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    /* ========================================
+       Size Variants
+    ======================================== */
+
+    .ux-page-header--sm {
+      padding: var(--ux-space-md);
+    }
+
+    .ux-page-header--sm .ux-page-header__title h1 {
+      font-size: var(--ux-font-size-lg);
+    }
+
+    .ux-page-header--lg {
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-page-header--lg .ux-page-header__title h1 {
+      font-size: var(--ux-font-size-2xl);
+    }
+
+    /* ========================================
+       Responsive
+    ======================================== */
+
+    @media (max-width: 640px) {
+      .ux-page-header {
+        padding: var(--ux-space-md);
+      }
+
+      .ux-page-header__title {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .ux-page-header__actions {
+        margin-top: var(--ux-space-sm);
+        justify-content: flex-end;
+      }
+
+      .ux-page-content {
+        padding: var(--ux-space-md);
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-page-header-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-page-header-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
   }
 })();
 /**
@@ -14602,6 +15230,327 @@
       Alpine.data('uxContextMenu', contextMenuComponent);
     });
   }
+})();
+/**
+ * UX Back Button Component
+ * iOS-style back button with arrow and text
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Back Button
+    ======================================== */
+
+    .ux-back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      min-height: var(--ux-touch-target);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      padding-left: 0;
+      background: none;
+      border: none;
+      color: var(--ux-primary);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-md);
+      font-weight: 400;
+      text-decoration: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-back-button:hover {
+      opacity: 0.7;
+    }
+
+    .ux-back-button:active {
+      opacity: 0.5;
+      transform: scale(0.97);
+    }
+
+    /* ========================================
+       Back Button Icon
+    ======================================== */
+
+    .ux-back-button__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      transition: transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-back-button__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Hover animation - slide left */
+    .ux-back-button:hover .ux-back-button__icon {
+      transform: translateX(-2px);
+    }
+
+    /* ========================================
+       Back Button Text
+    ======================================== */
+
+    .ux-back-button__text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+
+    /* Icon only */
+    .ux-back-button--icon-only .ux-back-button__text {
+      display: none;
+    }
+
+    .ux-back-button--icon-only {
+      padding: var(--ux-space-xs);
+    }
+
+    /* ========================================
+       Back Button Sizes
+    ======================================== */
+
+    .ux-back-button--sm {
+      min-height: var(--ux-touch-target-sm);
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-back-button--sm .ux-back-button__icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ux-back-button--sm .ux-back-button__text {
+      max-width: 100px;
+    }
+
+    .ux-back-button--lg {
+      font-size: var(--ux-font-size-lg);
+    }
+
+    .ux-back-button--lg .ux-back-button__icon {
+      width: 28px;
+      height: 28px;
+    }
+
+    .ux-back-button--lg .ux-back-button__text {
+      max-width: 160px;
+    }
+
+    /* ========================================
+       Back Button Colors
+    ======================================== */
+
+    .ux-back-button--light {
+      color: white;
+    }
+
+    .ux-back-button--dark {
+      color: var(--ux-text);
+    }
+
+    .ux-back-button--secondary {
+      color: var(--ux-text-secondary);
+    }
+
+    /* ========================================
+       Back Button in Navbar
+    ======================================== */
+
+    .ux-navbar .ux-back-button {
+      margin-left: calc(-1 * var(--ux-space-sm));
+    }
+
+    .ux-navbar--primary .ux-back-button,
+    .ux-navbar--dark .ux-back-button {
+      color: white;
+    }
+
+    /* ========================================
+       Back Button in Toolbar
+    ======================================== */
+
+    .ux-toolbar .ux-back-button {
+      margin-left: calc(-1 * var(--ux-space-xs));
+    }
+
+    /* ========================================
+       Back Button in Modal
+    ======================================== */
+
+    .ux-modal__header .ux-back-button {
+      margin-left: calc(-1 * var(--ux-space-sm));
+    }
+
+    /* ========================================
+       Disabled State
+    ======================================== */
+
+    .ux-back-button:disabled,
+    .ux-back-button--disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* ========================================
+       Custom Icon Positions
+    ======================================== */
+
+    .ux-back-button--icon-end {
+      flex-direction: row-reverse;
+    }
+
+    .ux-back-button--icon-end .ux-back-button__icon {
+      transform: rotate(180deg);
+    }
+
+    .ux-back-button--icon-end:hover .ux-back-button__icon {
+      transform: rotate(180deg) translateX(-2px);
+    }
+
+    /* ========================================
+       Animated Entrance (for page transitions)
+    ======================================== */
+
+    @keyframes ux-back-button-enter {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .ux-back-button--animate-in {
+      animation: ux-back-button-enter 300ms var(--ux-ease-spring) forwards;
+    }
+
+    /* ========================================
+       Collapse/Expand Animation (iOS-style)
+    ======================================== */
+
+    .ux-back-button--collapsible .ux-back-button__text {
+      transition:
+        max-width 200ms var(--ux-ease),
+        opacity 200ms var(--ux-ease);
+    }
+
+    .ux-back-button--collapsed .ux-back-button__text {
+      max-width: 0;
+      opacity: 0;
+      padding: 0;
+    }
+  `;
+
+  // Default back arrow SVG
+  const backArrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-back-button-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-back-button-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for back button with routing
+  // ARIA: aria-label for accessibility
+  const backButtonComponent = (config = {}) => ({
+    text: config.text || 'Back',
+    href: config.href || null,
+    defaultHref: config.defaultHref || '/',
+    showIcon: config.showIcon !== false,
+    showText: config.showText !== false,
+    disabled: config.disabled || false,
+    collapsed: config.collapsed || false,
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'aria-label': this.text || 'Go back',
+        'role': this.href ? 'link' : 'button'
+      };
+    },
+
+    // Get the back arrow SVG
+    get iconSvg() {
+      return backArrowSvg;
+    },
+
+    // Navigate back
+    goBack() {
+      if (this.disabled) return;
+
+      // If href is provided, navigate to it
+      if (this.href) {
+        window.location.href = this.href;
+        return;
+      }
+
+      // Check if there's history to go back to
+      if (window.history.length > 1) {
+        window.history.back();
+      } else if (this.defaultHref) {
+        // Fallback to default href
+        window.location.href = this.defaultHref;
+      }
+
+      // Dispatch event for custom handling
+      this.$dispatch('back-button-click');
+    },
+
+    // Handle click
+    handleClick(event) {
+      // If it's a link and href is set, let it navigate normally
+      if (this.href && event.currentTarget.tagName === 'A') {
+        return;
+      }
+
+      event.preventDefault();
+      this.goBack();
+    },
+
+    // Collapse/expand text (iOS scroll behavior)
+    collapse() {
+      this.collapsed = true;
+    },
+
+    expand() {
+      this.collapsed = false;
+    },
+
+    toggle() {
+      this.collapsed = !this.collapsed;
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxBackButton', backButtonComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxBackButton', backButtonComponent);
+    });
+  }
+
+  // Export SVG for use in templates
+  window.UX = window.UX || {};
+  window.UX.backArrowSvg = backArrowSvg;
 })();
 /**
  * UX Modal Component
@@ -17750,6 +18699,1043 @@
       Alpine.data('uxTooltip', tooltipComponent);
     });
   }
+})();
+/**
+ * UX Loading Component
+ * Loading indicator with backdrop (iOS style)
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Loading Backdrop
+    ======================================== */
+
+    .ux-loading-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      z-index: var(--ux-z-toast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 200ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .ux-loading-backdrop--open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .ux-loading-backdrop--transparent {
+      background-color: transparent;
+    }
+
+    /* ========================================
+       UX Loading Container
+    ======================================== */
+
+    .ux-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-md);
+      min-width: 100px;
+      min-height: 100px;
+      padding: var(--ux-space-lg);
+      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--ux-border-radius-lg);
+      box-shadow: var(--ux-shadow-lg);
+      transform: scale(0.9);
+      opacity: 0;
+      transition:
+        transform 300ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .ux-loading-backdrop--open .ux-loading {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    /* ========================================
+       Loading Spinner
+    ======================================== */
+
+    .ux-loading__spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--ux-border-color);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-loading-spin 0.8s linear infinite;
+    }
+
+    @keyframes ux-loading-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* iOS-style spinner (dots) */
+    .ux-loading__spinner--ios {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      position: relative;
+      animation: none;
+    }
+
+    .ux-loading__spinner--ios::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23999' stroke-width='3' stroke-linecap='round'%3E%3Cline x1='20' y1='4' x2='20' y2='10' opacity='0.125'/%3E%3Cline x1='32.5' y1='7.5' x2='28.5' y2='11.5' opacity='0.25'/%3E%3Cline x1='36' y1='20' x2='30' y2='20' opacity='0.375'/%3E%3Cline x1='32.5' y1='32.5' x2='28.5' y2='28.5' opacity='0.5'/%3E%3Cline x1='20' y1='36' x2='20' y2='30' opacity='0.625'/%3E%3Cline x1='7.5' y1='32.5' x2='11.5' y2='28.5' opacity='0.75'/%3E%3Cline x1='4' y1='20' x2='10' y2='20' opacity='0.875'/%3E%3Cline x1='7.5' y1='7.5' x2='11.5' y2='11.5' opacity='1'/%3E%3C/g%3E%3C/svg%3E");
+      animation: ux-loading-ios-spin 0.8s steps(8) infinite;
+    }
+
+    @keyframes ux-loading-ios-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Dots spinner */
+    .ux-loading__spinner--dots {
+      width: 60px;
+      height: 20px;
+      border: none;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      animation: none;
+    }
+
+    .ux-loading__spinner--dots::before,
+    .ux-loading__spinner--dots::after,
+    .ux-loading__dot {
+      content: '';
+      width: 12px;
+      height: 12px;
+      background-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-loading-bounce 1.4s ease-in-out infinite both;
+    }
+
+    .ux-loading__spinner--dots::before {
+      animation-delay: -0.32s;
+    }
+
+    .ux-loading__dot {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes ux-loading-bounce {
+      0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* ========================================
+       Loading Message
+    ======================================== */
+
+    .ux-loading__message {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      text-align: center;
+      max-width: 200px;
+    }
+
+    /* ========================================
+       Loading Sizes
+    ======================================== */
+
+    .ux-loading--sm {
+      min-width: 80px;
+      min-height: 80px;
+      padding: var(--ux-space-md);
+    }
+
+    .ux-loading--sm .ux-loading__spinner {
+      width: 28px;
+      height: 28px;
+      border-width: 2px;
+    }
+
+    .ux-loading--sm .ux-loading__message {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-loading--lg {
+      min-width: 140px;
+      min-height: 140px;
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-loading--lg .ux-loading__spinner {
+      width: 48px;
+      height: 48px;
+      border-width: 4px;
+    }
+
+    .ux-loading--lg .ux-loading__message {
+      font-size: var(--ux-font-size-md);
+    }
+
+    /* ========================================
+       Loading Colors
+    ======================================== */
+
+    .ux-loading--dark {
+      background-color: rgba(0, 0, 0, 0.85);
+    }
+
+    .ux-loading--dark .ux-loading__spinner {
+      border-color: rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+    }
+
+    .ux-loading--dark .ux-loading__message {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* ========================================
+       Inline Loading
+    ======================================== */
+
+    .ux-loading-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-loading-inline__spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--ux-border-color);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-loading-spin 0.8s linear infinite;
+    }
+
+    .ux-loading-inline__text {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    /* Sizes */
+    .ux-loading-inline--sm .ux-loading-inline__spinner {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-loading-inline--sm .ux-loading-inline__text {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-loading-inline--lg .ux-loading-inline__spinner {
+      width: 28px;
+      height: 28px;
+      border-width: 3px;
+    }
+
+    /* ========================================
+       Full Page Loading
+    ======================================== */
+
+    .ux-loading--fullpage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--ux-background);
+      z-index: 9999;
+    }
+
+    .ux-loading--fullpage .ux-loading {
+      background-color: transparent;
+      box-shadow: none;
+    }
+
+    /* ========================================
+       Loading Overlay (for containers)
+    ======================================== */
+
+    .ux-loading-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(var(--ux-background-rgb, 255, 255, 255), 0.8);
+      z-index: 10;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease),
+        visibility var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-loading-overlay--visible {
+      opacity: 1;
+      visibility: visible;
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-loading-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-loading-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for loading
+  // ARIA: role="alert", aria-busy for loading state
+  const loadingComponent = (config = {}) => ({
+    isOpen: config.isOpen || false,
+    message: config.message || '',
+    spinner: config.spinner || 'default', // default, ios, dots
+    showBackdrop: config.showBackdrop !== false,
+    dismissOnBackdrop: config.dismissOnBackdrop || false,
+    loadingId: config.id || 'ux-loading-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'role': 'alert',
+        'aria-live': 'assertive',
+        'aria-busy': this.isOpen ? 'true' : 'false',
+        'aria-label': this.message || 'Loading'
+      };
+    },
+
+    show(options = {}) {
+      if (options.message !== undefined) this.message = options.message;
+      if (options.spinner) this.spinner = options.spinner;
+
+      this.isOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+
+    hide() {
+      this.isOpen = false;
+      document.body.style.overflow = '';
+    },
+
+    // Alias methods
+    present(options) {
+      this.show(options);
+    },
+
+    dismiss() {
+      this.hide();
+    },
+
+    handleBackdropClick(event) {
+      if (this.dismissOnBackdrop && event.target === event.currentTarget) {
+        this.hide();
+      }
+    },
+
+    // Show loading with timeout
+    showWithTimeout(options = {}, timeout = 30000) {
+      this.show(options);
+
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          this.hide();
+          resolve();
+        }, timeout);
+      });
+    },
+
+    // Show loading during async operation
+    async during(asyncFn, options = {}) {
+      this.show(options);
+      try {
+        const result = await asyncFn();
+        return result;
+      } finally {
+        this.hide();
+      }
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxLoading', loadingComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxLoading', loadingComponent);
+    });
+  }
+
+  // Global loading controller (singleton)
+  const loadingController = {
+    _instance: null,
+    _queue: [],
+
+    async create(options = {}) {
+      return {
+        present: () => this.show(options),
+        dismiss: () => this.hide()
+      };
+    },
+
+    show(options = {}) {
+      // Create loading element if it doesn't exist
+      if (!this._instance) {
+        const container = document.createElement('div');
+        container.id = 'ux-loading-controller';
+        container.innerHTML = `
+          <div class="ux-loading-backdrop"
+               :class="{ 'ux-loading-backdrop--open': isOpen }"
+               @click="handleBackdropClick($event)"
+               x-data="uxLoading()">
+            <div class="ux-loading" :class="'ux-loading--' + (size || '')" role="alert" aria-live="assertive">
+              <div class="ux-loading__spinner" :class="'ux-loading__spinner--' + spinner"></div>
+              <div class="ux-loading__message" x-show="message" x-text="message"></div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(container);
+      }
+
+      // Show via Alpine
+      const el = document.querySelector('#ux-loading-controller [x-data]');
+      if (el && el._x_dataStack) {
+        const data = el._x_dataStack[0];
+        data.show(options);
+      }
+    },
+
+    hide() {
+      const el = document.querySelector('#ux-loading-controller [x-data]');
+      if (el && el._x_dataStack) {
+        const data = el._x_dataStack[0];
+        data.hide();
+      }
+    }
+  };
+
+  // Export to UX namespace
+  if (window.UX) {
+    window.UX.loading = loadingController;
+  }
+})();
+/**
+ * UX Picker Component
+ * iOS-style column picker (wheel selector)
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Picker Backdrop
+    ======================================== */
+
+    .ux-picker-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: var(--ux-z-modal-backdrop);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 300ms cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 300ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .ux-picker-backdrop--open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ========================================
+       UX Picker Container
+    ======================================== */
+
+    .ux-picker {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
+      z-index: var(--ux-z-modal);
+      transform: translateY(100%);
+      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+      padding-bottom: env(safe-area-inset-bottom);
+      will-change: transform;
+    }
+
+    .ux-picker-backdrop--open .ux-picker {
+      transform: translateY(0);
+    }
+
+    /* ========================================
+       Picker Header
+    ======================================== */
+
+    .ux-picker__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 44px;
+      padding: 0 var(--ux-space-sm);
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-picker__button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 60px;
+      min-height: 44px;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      background: none;
+      border: none;
+      color: var(--ux-primary);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-md);
+      font-weight: 400;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-picker__button:active {
+      opacity: 0.5;
+    }
+
+    .ux-picker__button--cancel {
+      font-weight: 400;
+    }
+
+    .ux-picker__button--confirm {
+      font-weight: 600;
+    }
+
+    .ux-picker__title {
+      flex: 1;
+      text-align: center;
+      font-size: var(--ux-font-size-md);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0;
+    }
+
+    /* ========================================
+       Picker Columns Container
+    ======================================== */
+
+    .ux-picker__columns {
+      display: flex;
+      height: 216px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Selection highlight */
+    .ux-picker__columns::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 36px;
+      transform: translateY(-50%);
+      background-color: var(--ux-surface-secondary);
+      border-top: 1px solid var(--ux-border-color);
+      border-bottom: 1px solid var(--ux-border-color);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Gradient masks */
+    .ux-picker__columns::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        var(--ux-surface) 0%,
+        transparent 20%,
+        transparent 80%,
+        var(--ux-surface) 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ========================================
+       Picker Column
+    ======================================== */
+
+    .ux-picker__column {
+      flex: 1;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ux-picker__column-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      transform: translateY(-50%);
+      transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+      will-change: transform;
+    }
+
+    .ux-picker__column--dragging .ux-picker__column-wrapper {
+      transition: none;
+    }
+
+    /* ========================================
+       Picker Item
+    ======================================== */
+
+    .ux-picker__item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 36px;
+      padding: 0 var(--ux-space-md);
+      color: var(--ux-text-secondary);
+      font-size: var(--ux-font-size-lg);
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      transition:
+        color var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-picker__item--selected {
+      color: var(--ux-text);
+      font-weight: 500;
+    }
+
+    .ux-picker__item--disabled {
+      color: var(--ux-text-tertiary);
+      pointer-events: none;
+    }
+
+    /* 3D wheel effect */
+    .ux-picker--3d .ux-picker__item {
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+    }
+
+    /* ========================================
+       Picker Sizes
+    ======================================== */
+
+    .ux-picker--sm .ux-picker__columns {
+      height: 180px;
+    }
+
+    .ux-picker--sm .ux-picker__item {
+      height: 30px;
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-picker--sm .ux-picker__columns::before {
+      height: 30px;
+    }
+
+    .ux-picker--lg .ux-picker__columns {
+      height: 252px;
+    }
+
+    .ux-picker--lg .ux-picker__item {
+      height: 42px;
+      font-size: var(--ux-font-size-xl);
+    }
+
+    .ux-picker--lg .ux-picker__columns::before {
+      height: 42px;
+    }
+
+    /* ========================================
+       Inline Picker (not in modal)
+    ======================================== */
+
+    .ux-picker--inline {
+      position: static;
+      transform: none;
+      border-radius: var(--ux-border-radius-lg);
+      border: 1px solid var(--ux-border-color);
+    }
+
+    .ux-picker--inline .ux-picker__header {
+      border-bottom: none;
+      background-color: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-lg) var(--ux-border-radius-lg) 0 0;
+    }
+
+    /* ========================================
+       Multi-column Dividers
+    ======================================== */
+
+    .ux-picker__divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 var(--ux-space-xs);
+      color: var(--ux-text);
+      font-size: var(--ux-font-size-lg);
+      font-weight: 500;
+    }
+
+    /* ========================================
+       Column Labels
+    ======================================== */
+
+    .ux-picker__column-label {
+      position: absolute;
+      top: var(--ux-space-xs);
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: var(--ux-font-size-xs);
+      font-weight: 600;
+      color: var(--ux-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      z-index: 2;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-picker--glass {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-picker--glass .ux-picker__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-picker--glass .ux-picker__highlight {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-picker-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-picker-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for picker
+  // ARIA: role="listbox" for columns, role="option" for items
+  const pickerComponent = (config = {}) => ({
+    isOpen: false,
+    columns: config.columns || [],
+    selectedIndexes: [],
+    title: config.title || '',
+    cancelText: config.cancelText || 'Cancel',
+    confirmText: config.confirmText || 'Done',
+    showHeader: config.showHeader !== false,
+    itemHeight: config.itemHeight || 36,
+    visibleItems: config.visibleItems || 5,
+    pickerId: config.id || 'ux-picker-' + Math.random().toString(36).substr(2, 9),
+    _columnStates: [],
+    _startY: 0,
+    _currentY: 0,
+    _activeColumn: null,
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'role': 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': this.pickerId + '-title'
+      };
+    },
+
+    get titleId() {
+      return this.pickerId + '-title';
+    },
+
+    // ARIA for column
+    getColumnAriaAttrs(columnIndex) {
+      return {
+        'role': 'listbox',
+        'aria-label': this.columns[columnIndex]?.label || `Column ${columnIndex + 1}`,
+        'tabindex': '0'
+      };
+    },
+
+    // ARIA for item
+    getItemAriaAttrs(columnIndex, itemIndex) {
+      const isSelected = this.selectedIndexes[columnIndex] === itemIndex;
+      return {
+        'role': 'option',
+        'aria-selected': isSelected ? 'true' : 'false',
+        'id': `${this.pickerId}-col${columnIndex}-item${itemIndex}`
+      };
+    },
+
+    init() {
+      // Initialize selected indexes
+      this.selectedIndexes = this.columns.map((col, i) => {
+        return col.selectedIndex || 0;
+      });
+
+      // Initialize column states for drag
+      this._columnStates = this.columns.map((col, i) => ({
+        offset: -this.selectedIndexes[i] * this.itemHeight,
+        isDragging: false
+      }));
+    },
+
+    open(options = {}) {
+      if (options.columns) {
+        this.columns = options.columns;
+        this.init();
+      }
+      if (options.title) this.title = options.title;
+
+      this.isOpen = true;
+      document.body.style.overflow = 'hidden';
+
+      this.$nextTick(() => {
+        // Update column positions
+        this.columns.forEach((_, i) => {
+          this.scrollToIndex(i, this.selectedIndexes[i], false);
+        });
+      });
+    },
+
+    close() {
+      this.isOpen = false;
+      document.body.style.overflow = '';
+    },
+
+    cancel() {
+      this.$dispatch('picker-cancel');
+      this.close();
+    },
+
+    confirm() {
+      const values = this.columns.map((col, i) => {
+        const idx = this.selectedIndexes[i];
+        return col.options[idx];
+      });
+
+      this.$dispatch('picker-confirm', {
+        values,
+        indexes: [...this.selectedIndexes]
+      });
+
+      this.close();
+    },
+
+    // Get transform for column
+    getColumnTransform(columnIndex) {
+      const state = this._columnStates[columnIndex];
+      if (!state) return 'translateY(0)';
+      return `translateY(${state.offset}px)`;
+    },
+
+    // Scroll column to index
+    scrollToIndex(columnIndex, itemIndex, animate = true) {
+      const column = this.columns[columnIndex];
+      if (!column) return;
+
+      // Clamp index
+      const maxIndex = column.options.length - 1;
+      itemIndex = Math.max(0, Math.min(maxIndex, itemIndex));
+
+      this.selectedIndexes[columnIndex] = itemIndex;
+      this._columnStates[columnIndex].offset = -itemIndex * this.itemHeight;
+
+      // Dispatch change event
+      this.$dispatch('picker-change', {
+        columnIndex,
+        itemIndex,
+        value: column.options[itemIndex]
+      });
+    },
+
+    // Select item by click
+    selectItem(columnIndex, itemIndex) {
+      this.scrollToIndex(columnIndex, itemIndex);
+    },
+
+    // Check if item is selected
+    isSelected(columnIndex, itemIndex) {
+      return this.selectedIndexes[columnIndex] === itemIndex;
+    },
+
+    // Touch/drag handlers
+    onTouchStart(event, columnIndex) {
+      const state = this._columnStates[columnIndex];
+      state.isDragging = true;
+      this._activeColumn = columnIndex;
+      this._startY = event.touches ? event.touches[0].clientY : event.clientY;
+      this._startOffset = state.offset;
+    },
+
+    onTouchMove(event, columnIndex) {
+      const state = this._columnStates[columnIndex];
+      if (!state.isDragging) return;
+
+      const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+      const deltaY = clientY - this._startY;
+
+      // Apply resistance at boundaries
+      const column = this.columns[columnIndex];
+      const maxOffset = 0;
+      const minOffset = -(column.options.length - 1) * this.itemHeight;
+
+      let newOffset = this._startOffset + deltaY;
+
+      // Rubber band effect
+      if (newOffset > maxOffset) {
+        newOffset = maxOffset + (newOffset - maxOffset) * 0.3;
+      } else if (newOffset < minOffset) {
+        newOffset = minOffset + (newOffset - minOffset) * 0.3;
+      }
+
+      state.offset = newOffset;
+
+      event.preventDefault();
+    },
+
+    onTouchEnd(event, columnIndex) {
+      const state = this._columnStates[columnIndex];
+      if (!state.isDragging) return;
+
+      state.isDragging = false;
+
+      // Snap to nearest item
+      const column = this.columns[columnIndex];
+      const nearestIndex = Math.round(-state.offset / this.itemHeight);
+      const clampedIndex = Math.max(0, Math.min(column.options.length - 1, nearestIndex));
+
+      this.scrollToIndex(columnIndex, clampedIndex);
+    },
+
+    // Keyboard navigation
+    handleKeydown(event, columnIndex) {
+      const column = this.columns[columnIndex];
+      const currentIndex = this.selectedIndexes[columnIndex];
+
+      switch (event.key) {
+        case 'ArrowUp':
+          event.preventDefault();
+          if (currentIndex > 0) {
+            this.scrollToIndex(columnIndex, currentIndex - 1);
+          }
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          if (currentIndex < column.options.length - 1) {
+            this.scrollToIndex(columnIndex, currentIndex + 1);
+          }
+          break;
+        case 'Home':
+          event.preventDefault();
+          this.scrollToIndex(columnIndex, 0);
+          break;
+        case 'End':
+          event.preventDefault();
+          this.scrollToIndex(columnIndex, column.options.length - 1);
+          break;
+        case 'Enter':
+          event.preventDefault();
+          this.confirm();
+          break;
+        case 'Escape':
+          event.preventDefault();
+          this.cancel();
+          break;
+      }
+    },
+
+    // Get selected values
+    getValues() {
+      return this.columns.map((col, i) => {
+        const idx = this.selectedIndexes[i];
+        return col.options[idx];
+      });
+    },
+
+    // Set values programmatically
+    setValues(values) {
+      values.forEach((value, i) => {
+        const column = this.columns[i];
+        if (!column) return;
+
+        const index = column.options.findIndex(opt => {
+          if (typeof opt === 'object') {
+            return opt.value === value || opt.text === value;
+          }
+          return opt === value;
+        });
+
+        if (index !== -1) {
+          this.scrollToIndex(i, index, false);
+        }
+      });
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxPicker', pickerComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxPicker', pickerComponent);
+    });
+  }
+
+  // Helper to format picker option display
+  window.UX = window.UX || {};
+  window.UX.getPickerOptionText = function(option) {
+    if (typeof option === 'object') {
+      return option.text || option.label || option.value;
+    }
+    return option;
+  };
 })();
 /**
  * UX Skeleton Component
@@ -21018,6 +23004,1437 @@
   }
 })();
 /**
+ * UX Rating Component
+ * Star rating component with 1-5 scale
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Rating
+    ======================================== */
+
+    .ux-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-rating__stars {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .ux-rating__star {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      background: none;
+      border: none;
+      color: var(--ux-light-shade);
+      cursor: pointer;
+      transition:
+        color var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-rating__star svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-rating__star:hover {
+      transform: scale(1.15);
+    }
+
+    .ux-rating__star:active {
+      transform: scale(0.95);
+    }
+
+    .ux-rating__star--filled {
+      color: var(--ux-warning);
+    }
+
+    .ux-rating__star--half {
+      position: relative;
+      color: var(--ux-light-shade);
+    }
+
+    .ux-rating__star--half::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Readonly state */
+    .ux-rating--readonly .ux-rating__star {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .ux-rating--readonly .ux-rating__star:hover {
+      transform: none;
+    }
+
+    /* Disabled state */
+    .ux-rating--disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* ========================================
+       Sizes
+    ======================================== */
+
+    .ux-rating--sm .ux-rating__star {
+      width: 18px;
+      height: 18px;
+    }
+
+    .ux-rating--lg .ux-rating__star {
+      width: 32px;
+      height: 32px;
+    }
+
+    .ux-rating--xl .ux-rating__star {
+      width: 40px;
+      height: 40px;
+    }
+
+    /* ========================================
+       Colors
+    ======================================== */
+
+    .ux-rating--primary .ux-rating__star--filled {
+      color: var(--ux-primary);
+    }
+
+    .ux-rating--danger .ux-rating__star--filled {
+      color: var(--ux-danger);
+    }
+
+    .ux-rating--success .ux-rating__star--filled {
+      color: var(--ux-success);
+    }
+
+    /* ========================================
+       Rating Value Display
+    ======================================== */
+
+    .ux-rating__value {
+      font-size: var(--ux-font-size-md);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin-left: var(--ux-space-xs);
+    }
+
+    .ux-rating--sm .ux-rating__value {
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-rating--lg .ux-rating__value {
+      font-size: var(--ux-font-size-lg);
+    }
+
+    .ux-rating__count {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin-left: var(--ux-space-xs);
+    }
+
+    /* ========================================
+       Hover Preview
+    ======================================== */
+
+    .ux-rating:not(.ux-rating--readonly):not(.ux-rating--disabled) .ux-rating__star--preview {
+      color: var(--ux-warning);
+      opacity: 0.7;
+    }
+
+    /* ========================================
+       Compact Rating (inline display)
+    ======================================== */
+
+    .ux-rating--compact {
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-rating--compact .ux-rating__stars {
+      gap: 0;
+    }
+
+    .ux-rating--compact .ux-rating__star {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ========================================
+       Rating with Labels
+    ======================================== */
+
+    .ux-rating__label {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-rating__label--start {
+      margin-right: var(--ux-space-sm);
+    }
+
+    .ux-rating__label--end {
+      margin-left: var(--ux-space-sm);
+    }
+
+    /* ========================================
+       Animation
+    ======================================== */
+
+    @keyframes ux-rating-pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    .ux-rating__star--animate {
+      animation: ux-rating-pop 0.3s var(--ux-ease);
+    }
+  `;
+
+  // Star SVG paths
+  const starFilled = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+  const starEmpty = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+  const starHalf = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><linearGradient id="half"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path fill="url(#half)" stroke="currentColor" stroke-width="2" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-rating-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-rating-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for rating
+  // ARIA: role="radiogroup" for interactive, aria-label for each star
+  const ratingComponent = (config = {}) => ({
+    value: config.value || 0,
+    max: config.max || 5,
+    readonly: config.readonly || false,
+    disabled: config.disabled || false,
+    allowHalf: config.allowHalf || false,
+    showValue: config.showValue || false,
+    hoverValue: 0,
+    isHovering: false,
+    ratingId: config.id || 'ux-rating-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for the rating group
+    get ariaAttrs() {
+      return {
+        'role': this.readonly ? 'img' : 'radiogroup',
+        'aria-label': `Rating: ${this.value} out of ${this.max} stars`,
+        'aria-valuenow': this.value,
+        'aria-valuemin': 0,
+        'aria-valuemax': this.max
+      };
+    },
+
+    // ARIA attributes for each star
+    getStarAriaAttrs(index) {
+      const starValue = index + 1;
+      return {
+        'role': this.readonly ? 'presentation' : 'radio',
+        'aria-checked': this.value >= starValue ? 'true' : 'false',
+        'aria-label': `${starValue} star${starValue > 1 ? 's' : ''}`,
+        'tabindex': this.readonly || this.disabled ? '-1' : (this.value === starValue ? '0' : '-1')
+      };
+    },
+
+    // Get star SVG based on value
+    getStarSvg(index) {
+      const starValue = index + 1;
+      const displayValue = this.isHovering && !this.readonly ? this.hoverValue : this.value;
+
+      if (displayValue >= starValue) {
+        return starFilled;
+      } else if (this.allowHalf && displayValue >= starValue - 0.5) {
+        return starHalf;
+      }
+      return starEmpty;
+    },
+
+    // Check if star is filled
+    isStarFilled(index) {
+      const starValue = index + 1;
+      const displayValue = this.isHovering && !this.readonly ? this.hoverValue : this.value;
+      return displayValue >= starValue;
+    },
+
+    // Check if star is half filled
+    isStarHalf(index) {
+      const starValue = index + 1;
+      const displayValue = this.isHovering && !this.readonly ? this.hoverValue : this.value;
+      return this.allowHalf && displayValue >= starValue - 0.5 && displayValue < starValue;
+    },
+
+    // Handle star click
+    setRating(index, event) {
+      if (this.readonly || this.disabled) return;
+
+      let newValue = index + 1;
+
+      // Support half stars on click
+      if (this.allowHalf && event) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        if (x < rect.width / 2) {
+          newValue = index + 0.5;
+        }
+      }
+
+      // Toggle off if clicking same value
+      if (this.value === newValue) {
+        this.value = 0;
+      } else {
+        this.value = newValue;
+      }
+
+      // Dispatch change event
+      this.$dispatch('rating-change', { value: this.value });
+    },
+
+    // Handle hover
+    onStarHover(index, event) {
+      if (this.readonly || this.disabled) return;
+      this.isHovering = true;
+
+      let hoverVal = index + 1;
+
+      if (this.allowHalf && event) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        if (x < rect.width / 2) {
+          hoverVal = index + 0.5;
+        }
+      }
+
+      this.hoverValue = hoverVal;
+    },
+
+    // Handle mouse leave
+    onMouseLeave() {
+      this.isHovering = false;
+      this.hoverValue = 0;
+    },
+
+    // Handle keyboard navigation
+    handleKeydown(event, index) {
+      if (this.readonly || this.disabled) return;
+
+      let newValue = this.value;
+
+      switch (event.key) {
+        case 'ArrowRight':
+        case 'ArrowUp':
+          event.preventDefault();
+          newValue = Math.min(this.max, this.value + (this.allowHalf ? 0.5 : 1));
+          break;
+        case 'ArrowLeft':
+        case 'ArrowDown':
+          event.preventDefault();
+          newValue = Math.max(0, this.value - (this.allowHalf ? 0.5 : 1));
+          break;
+        case 'Home':
+          event.preventDefault();
+          newValue = 0;
+          break;
+        case 'End':
+          event.preventDefault();
+          newValue = this.max;
+          break;
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          this.setRating(index, null);
+          return;
+      }
+
+      if (newValue !== this.value) {
+        this.value = newValue;
+        this.$dispatch('rating-change', { value: this.value });
+      }
+    },
+
+    // Get array of star indices
+    get stars() {
+      return Array.from({ length: this.max }, (_, i) => i);
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxRating', ratingComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxRating', ratingComponent);
+    });
+  }
+})();
+/**
+ * UX DataTable Component
+ * Responsive data table with standard and "no more tables" mobile views
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX DataTable Container
+    ======================================== */
+
+    .ux-datatable {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+    }
+
+    .ux-datatable--inset {
+      margin: var(--ux-space-lg);
+    }
+
+    .ux-datatable--bordered {
+      border: 1px solid var(--ux-border-color);
+    }
+
+    /* ========================================
+       DataTable Header (Title & Actions)
+    ======================================== */
+
+    .ux-datatable__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      background-color: var(--ux-surface);
+      border-bottom: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+    }
+
+    .ux-datatable__title {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0;
+    }
+
+    .ux-datatable__subtitle {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin-top: 2px;
+    }
+
+    .ux-datatable__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    /* ========================================
+       DataTable Toolbar (Filters & Search)
+    ======================================== */
+
+    .ux-datatable__toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-sm) var(--ux-space-lg);
+      background-color: var(--ux-surface-secondary);
+      border-bottom: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .ux-datatable__toolbar-start {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-datatable__toolbar-end {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-datatable__search {
+      min-width: 200px;
+    }
+
+    @media (max-width: 767px) {
+      .ux-datatable__toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .ux-datatable__search {
+        width: 100%;
+      }
+    }
+
+    /* ========================================
+       DataTable Body (Scrollable Content)
+    ======================================== */
+
+    .ux-datatable__body {
+      flex: 1;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .ux-datatable__body--fixed-height {
+      max-height: 400px;
+    }
+
+    /* ========================================
+       Standard Table View
+    ======================================== */
+
+    .ux-datatable__table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: auto;
+    }
+
+    .ux-datatable__table--fixed {
+      table-layout: fixed;
+    }
+
+    /* Table Head */
+    .ux-datatable__thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-datatable__th {
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      text-align: left;
+      font-size: var(--ux-font-size-sm);
+      font-weight: 600;
+      color: var(--ux-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      border-bottom: 2px solid var(--ux-border-color);
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-datatable__th--sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__th--sortable:hover {
+      color: var(--ux-primary);
+    }
+
+    .ux-datatable__th--sorted {
+      color: var(--ux-primary);
+    }
+
+    .ux-datatable__sort-icon {
+      display: inline-flex;
+      margin-left: var(--ux-space-xs);
+      opacity: 0.5;
+      transition: transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__th--sorted .ux-datatable__sort-icon {
+      opacity: 1;
+    }
+
+    .ux-datatable__th--sorted-desc .ux-datatable__sort-icon {
+      transform: rotate(180deg);
+    }
+
+    /* Alignment */
+    .ux-datatable__th--center,
+    .ux-datatable__td--center {
+      text-align: center;
+    }
+
+    .ux-datatable__th--right,
+    .ux-datatable__td--right {
+      text-align: right;
+    }
+
+    /* Table Body */
+    .ux-datatable__tbody {
+      background-color: var(--ux-surface);
+    }
+
+    .ux-datatable__tr {
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__tr:hover {
+      background-color: rgba(var(--ux-primary-rgb), 0.05);
+    }
+
+    .ux-datatable__tr--selected {
+      background-color: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    .ux-datatable__tr--clickable {
+      cursor: pointer;
+    }
+
+    .ux-datatable__td {
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text);
+      border-bottom: 1px solid var(--ux-border-color);
+      vertical-align: middle;
+    }
+
+    .ux-datatable__tr:last-child .ux-datatable__td {
+      border-bottom: none;
+    }
+
+    /* Cell content truncation */
+    .ux-datatable__td--truncate {
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Cell with badge/chip */
+    .ux-datatable__td .ux-badge,
+    .ux-datatable__td .ux-chip {
+      vertical-align: middle;
+    }
+
+    /* ========================================
+       Checkbox Column
+    ======================================== */
+
+    .ux-datatable__th--checkbox,
+    .ux-datatable__td--checkbox {
+      width: 48px;
+      padding-left: var(--ux-space-md);
+      padding-right: var(--ux-space-sm);
+    }
+
+    /* ========================================
+       Actions Column
+    ======================================== */
+
+    .ux-datatable__th--actions,
+    .ux-datatable__td--actions {
+      width: 80px;
+      text-align: center;
+    }
+
+    .ux-datatable__row-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-datatable__row-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: var(--ux-border-radius);
+      color: var(--ux-text-secondary);
+      cursor: pointer;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__row-action:hover {
+      background-color: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+
+    .ux-datatable__row-action--danger:hover {
+      background-color: rgba(var(--ux-danger-rgb, 255, 59, 48), 0.1);
+      color: var(--ux-danger);
+    }
+
+    .ux-datatable__row-action svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Empty State
+    ======================================== */
+
+    .ux-datatable__empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-2xl) var(--ux-space-lg);
+      text-align: center;
+    }
+
+    .ux-datatable__empty-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-datatable__empty-title {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0 0 var(--ux-space-xs);
+    }
+
+    .ux-datatable__empty-text {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin: 0;
+    }
+
+    /* ========================================
+       Loading State
+    ======================================== */
+
+    .ux-datatable__loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-2xl);
+    }
+
+    .ux-datatable--loading .ux-datatable__tbody {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* ========================================
+       DataTable Footer (Pagination)
+    ======================================== */
+
+    .ux-datatable__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      background-color: var(--ux-surface);
+      border-top: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-datatable__info {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-datatable__pagination {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-datatable__page-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 var(--ux-space-sm);
+      background: none;
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      cursor: pointer;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        border-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__page-btn:hover:not(:disabled) {
+      background-color: var(--ux-surface-secondary);
+      border-color: var(--ux-primary);
+    }
+
+    .ux-datatable__page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ux-datatable__page-btn--active {
+      background-color: var(--ux-primary);
+      border-color: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+    }
+
+    .ux-datatable__page-btn--active:hover:not(:disabled) {
+      background-color: var(--ux-primary-shade);
+      border-color: var(--ux-primary-shade);
+    }
+
+    .ux-datatable__page-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-datatable__per-page {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-datatable__per-page select {
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      background-color: var(--ux-surface);
+      color: var(--ux-text);
+      font-size: var(--ux-font-size-sm);
+    }
+
+    @media (max-width: 767px) {
+      .ux-datatable__footer {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    /* ========================================
+       View Toggle Buttons
+    ======================================== */
+
+    .ux-datatable__view-toggle {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius);
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .ux-datatable__view-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: calc(var(--ux-border-radius) - 2px);
+      color: var(--ux-text-tertiary);
+      cursor: pointer;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__view-btn:hover {
+      color: var(--ux-text);
+    }
+
+    .ux-datatable__view-btn--active {
+      background-color: var(--ux-surface);
+      color: var(--ux-primary);
+      box-shadow: var(--ux-shadow-sm);
+    }
+
+    .ux-datatable__view-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Responsive "No More Tables" View
+    ======================================== */
+
+    @media (max-width: 767px) {
+      .ux-datatable--responsive .ux-datatable__table,
+      .ux-datatable--responsive .ux-datatable__thead,
+      .ux-datatable--responsive .ux-datatable__tbody,
+      .ux-datatable--responsive .ux-datatable__th,
+      .ux-datatable--responsive .ux-datatable__tr,
+      .ux-datatable--responsive .ux-datatable__td {
+        display: block;
+      }
+
+      .ux-datatable--responsive .ux-datatable__thead {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+        visibility: hidden;
+      }
+
+      .ux-datatable--responsive .ux-datatable__tr {
+        margin-bottom: var(--ux-space-md);
+        background-color: var(--ux-surface);
+        border-radius: var(--ux-border-radius-lg);
+        border: 1px solid var(--ux-border-color);
+        overflow: hidden;
+      }
+
+      .ux-datatable--responsive .ux-datatable__tr:last-child {
+        margin-bottom: 0;
+      }
+
+      .ux-datatable--responsive .ux-datatable__td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--ux-space-md) var(--ux-space-lg);
+        text-align: right;
+        border-bottom: 1px solid var(--ux-border-color);
+      }
+
+      .ux-datatable--responsive .ux-datatable__tr .ux-datatable__td:last-child {
+        border-bottom: none;
+      }
+
+      .ux-datatable--responsive .ux-datatable__td::before {
+        content: attr(data-label);
+        flex: 1;
+        font-weight: 600;
+        font-size: var(--ux-font-size-sm);
+        color: var(--ux-text-secondary);
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding-right: var(--ux-space-md);
+      }
+
+      .ux-datatable--responsive .ux-datatable__td--checkbox,
+      .ux-datatable--responsive .ux-datatable__td--actions {
+        justify-content: flex-end;
+      }
+
+      .ux-datatable--responsive .ux-datatable__td--checkbox::before,
+      .ux-datatable--responsive .ux-datatable__td--actions::before {
+        content: none;
+      }
+
+      /* Card header style for first cell */
+      .ux-datatable--responsive .ux-datatable__td--primary {
+        background-color: var(--ux-surface-secondary);
+        font-weight: 600;
+      }
+
+      .ux-datatable--responsive .ux-datatable__td--primary::before {
+        display: none;
+      }
+
+      .ux-datatable--responsive .ux-datatable__td--primary {
+        justify-content: flex-start;
+        text-align: left;
+      }
+    }
+
+    /* Force responsive view */
+    .ux-datatable--force-responsive .ux-datatable__table,
+    .ux-datatable--force-responsive .ux-datatable__thead,
+    .ux-datatable--force-responsive .ux-datatable__tbody,
+    .ux-datatable--force-responsive .ux-datatable__th,
+    .ux-datatable--force-responsive .ux-datatable__tr,
+    .ux-datatable--force-responsive .ux-datatable__td {
+      display: block;
+    }
+
+    .ux-datatable--force-responsive .ux-datatable__thead {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      visibility: hidden;
+    }
+
+    .ux-datatable--force-responsive .ux-datatable__tr {
+      margin-bottom: var(--ux-space-md);
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      border: 1px solid var(--ux-border-color);
+      overflow: hidden;
+    }
+
+    .ux-datatable--force-responsive .ux-datatable__td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      text-align: right;
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-datatable--force-responsive .ux-datatable__tr .ux-datatable__td:last-child {
+      border-bottom: none;
+    }
+
+    .ux-datatable--force-responsive .ux-datatable__td::before {
+      content: attr(data-label);
+      flex: 1;
+      font-weight: 600;
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-right: var(--ux-space-md);
+    }
+
+    /* ========================================
+       Striped Rows
+    ======================================== */
+
+    .ux-datatable--striped .ux-datatable__tr:nth-child(even) {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    /* ========================================
+       Compact Size
+    ======================================== */
+
+    .ux-datatable--compact .ux-datatable__th,
+    .ux-datatable--compact .ux-datatable__td {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      font-size: var(--ux-font-size-sm);
+    }
+
+    /* ========================================
+       DataTable Sizes
+    ======================================== */
+
+    .ux-datatable--sm .ux-datatable__th,
+    .ux-datatable--sm .ux-datatable__td {
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-datatable--lg .ux-datatable__th,
+    .ux-datatable--lg .ux-datatable__td {
+      padding: var(--ux-space-lg) var(--ux-space-xl);
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-datatable--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+    }
+
+    .ux-datatable--glass .ux-datatable__th {
+      background: var(--ux-glass-bg-thin);
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-datatable--glass .ux-datatable__td {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-datatable--glass .ux-datatable__tr:hover .ux-datatable__td {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-datatable--glass .ux-datatable__tr--selected .ux-datatable__td {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-datatable--glass .ux-datatable__footer {
+      background: var(--ux-glass-bg-thin);
+      border-top-color: var(--ux-glass-border);
+    }
+  `;
+
+  // Icons
+  const icons = {
+    sortAsc: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>',
+    sortDesc: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>',
+    chevronLeft: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>',
+    chevronRight: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
+    chevronsLeft: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>',
+    chevronsRight: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 7l5 5-5 5M6 7l5 5-5 5"/></svg>',
+    empty: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>',
+    edit: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+    delete: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+    view: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    // View toggle icons
+    viewTable: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
+    viewCards: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+    viewList: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>'
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-datatable-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-datatable-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for datatable
+  // ARIA: role="table", role="rowgroup", role="row", role="columnheader", role="cell"
+  const datatableComponent = (config = {}) => ({
+    // Data
+    columns: config.columns || [],
+    rows: config.rows || [],
+
+    // Selection
+    selectable: config.selectable || false,
+    selectedRows: [],
+    selectAll: false,
+
+    // Sorting
+    sortable: config.sortable !== false,
+    sortColumn: config.sortColumn || null,
+    sortDirection: config.sortDirection || 'asc',
+
+    // Pagination
+    paginated: config.paginated !== false,
+    currentPage: 1,
+    perPage: config.perPage || 10,
+    perPageOptions: config.perPageOptions || [10, 25, 50, 100],
+
+    // Search
+    searchable: config.searchable !== false,
+    searchQuery: '',
+    searchPlaceholder: config.searchPlaceholder || 'Search...',
+
+    // Responsive
+    responsive: config.responsive !== false,
+    forceResponsive: config.forceResponsive || false,
+
+    // View mode (table, cards)
+    viewMode: config.viewMode || 'table',
+    showViewToggle: config.showViewToggle || false,
+
+    // Loading
+    loading: config.loading || false,
+
+    // Empty state
+    emptyTitle: config.emptyTitle || 'No data',
+    emptyText: config.emptyText || 'There are no records to display.',
+
+    // Labels (for i18n)
+    labels: {
+      showing: config.labels?.showing || 'Showing',
+      to: config.labels?.to || 'to',
+      of: config.labels?.of || 'of',
+      entries: config.labels?.entries || 'entries',
+      perPage: config.labels?.perPage || 'per page',
+      noResults: config.labels?.noResults || 'No results found',
+      viewTable: config.labels?.viewTable || 'Table view',
+      viewCards: config.labels?.viewCards || 'Cards view',
+      ...config.labels
+    },
+
+    // Component ID
+    tableId: config.id || 'ux-datatable-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'role': 'table',
+        'aria-label': config.ariaLabel || 'Data table',
+        'aria-busy': this.loading ? 'true' : 'false'
+      };
+    },
+
+    // Initialize
+    init() {
+      // Watch for external data changes
+      if (config.watchData) {
+        this.$watch('rows', () => {
+          this.currentPage = 1;
+          this.selectedRows = [];
+          this.selectAll = false;
+        });
+      }
+    },
+
+    // Computed: Filtered rows (search)
+    get filteredRows() {
+      if (!this.searchQuery.trim()) {
+        return this.rows;
+      }
+
+      const query = this.searchQuery.toLowerCase().trim();
+      return this.rows.filter(row => {
+        return this.columns.some(col => {
+          const value = this.getCellValue(row, col);
+          if (value === null || value === undefined) return false;
+          return String(value).toLowerCase().includes(query);
+        });
+      });
+    },
+
+    // Computed: Sorted rows
+    get sortedRows() {
+      if (!this.sortColumn) {
+        return this.filteredRows;
+      }
+
+      const col = this.columns.find(c => c.key === this.sortColumn);
+      if (!col) return this.filteredRows;
+
+      return [...this.filteredRows].sort((a, b) => {
+        let valA = this.getCellValue(a, col);
+        let valB = this.getCellValue(b, col);
+
+        // Handle nulls
+        if (valA === null || valA === undefined) valA = '';
+        if (valB === null || valB === undefined) valB = '';
+
+        // Numeric sort
+        if (col.type === 'number') {
+          valA = parseFloat(valA) || 0;
+          valB = parseFloat(valB) || 0;
+        }
+        // Date sort
+        else if (col.type === 'date') {
+          valA = new Date(valA).getTime() || 0;
+          valB = new Date(valB).getTime() || 0;
+        }
+        // String sort
+        else {
+          valA = String(valA).toLowerCase();
+          valB = String(valB).toLowerCase();
+        }
+
+        let result = 0;
+        if (valA < valB) result = -1;
+        if (valA > valB) result = 1;
+
+        return this.sortDirection === 'desc' ? -result : result;
+      });
+    },
+
+    // Computed: Paginated rows
+    get paginatedRows() {
+      if (!this.paginated) {
+        return this.sortedRows;
+      }
+
+      const start = (this.currentPage - 1) * this.perPage;
+      const end = start + this.perPage;
+      return this.sortedRows.slice(start, end);
+    },
+
+    // Computed: Total pages
+    get totalPages() {
+      return Math.ceil(this.sortedRows.length / this.perPage);
+    },
+
+    // Computed: Visible page numbers
+    get visiblePages() {
+      const pages = [];
+      const total = this.totalPages;
+      const current = this.currentPage;
+      const delta = 2;
+
+      for (let i = 1; i <= total; i++) {
+        if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
+          pages.push(i);
+        } else if (pages[pages.length - 1] !== '...') {
+          pages.push('...');
+        }
+      }
+
+      return pages;
+    },
+
+    // Computed: Showing info text
+    get showingInfo() {
+      const total = this.sortedRows.length;
+      if (total === 0) return '';
+
+      const start = (this.currentPage - 1) * this.perPage + 1;
+      const end = Math.min(this.currentPage * this.perPage, total);
+
+      return `${this.labels.showing} ${start} ${this.labels.to} ${end} ${this.labels.of} ${total} ${this.labels.entries}`;
+    },
+
+    // Get cell value
+    getCellValue(row, col) {
+      if (col.getValue) {
+        return col.getValue(row);
+      }
+
+      // Support nested keys like "user.name"
+      const keys = col.key.split('.');
+      let value = row;
+      for (const key of keys) {
+        value = value?.[key];
+      }
+      return value;
+    },
+
+    // Format cell value
+    formatCellValue(row, col) {
+      const value = this.getCellValue(row, col);
+
+      if (col.format) {
+        return col.format(value, row);
+      }
+
+      if (value === null || value === undefined) {
+        return col.defaultValue || '-';
+      }
+
+      return value;
+    },
+
+    // Sort by column
+    sortBy(column) {
+      if (!this.sortable || !column.sortable) return;
+
+      if (this.sortColumn === column.key) {
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortColumn = column.key;
+        this.sortDirection = 'asc';
+      }
+
+      this.$dispatch('sort-change', {
+        column: this.sortColumn,
+        direction: this.sortDirection
+      });
+    },
+
+    // Check if column is sorted
+    isSorted(column) {
+      return this.sortColumn === column.key;
+    },
+
+    // Go to page
+    goToPage(page) {
+      if (page < 1 || page > this.totalPages) return;
+      this.currentPage = page;
+      this.$dispatch('page-change', { page: this.currentPage });
+    },
+
+    // Change per page
+    changePerPage(value) {
+      this.perPage = parseInt(value);
+      this.currentPage = 1;
+      this.$dispatch('per-page-change', { perPage: this.perPage });
+    },
+
+    // Search
+    onSearch() {
+      this.currentPage = 1;
+      this.$dispatch('search', { query: this.searchQuery });
+    },
+
+    // View mode
+    setViewMode(mode) {
+      this.viewMode = mode;
+      this.$dispatch('view-mode-change', { mode });
+    },
+
+    get viewModeClass() {
+      if (this.viewMode === 'cards') {
+        return 'ux-datatable--force-responsive';
+      }
+      return this.responsive ? 'ux-datatable--responsive' : '';
+    },
+
+    // Selection
+    toggleSelectAll() {
+      if (this.selectAll) {
+        this.selectedRows = this.paginatedRows.map(row => this.getRowId(row));
+      } else {
+        this.selectedRows = [];
+      }
+      this.$dispatch('selection-change', { selected: this.selectedRows });
+    },
+
+    toggleRowSelection(row) {
+      const rowId = this.getRowId(row);
+      const index = this.selectedRows.indexOf(rowId);
+
+      if (index > -1) {
+        this.selectedRows.splice(index, 1);
+      } else {
+        this.selectedRows.push(rowId);
+      }
+
+      this.selectAll = this.selectedRows.length === this.paginatedRows.length;
+      this.$dispatch('selection-change', { selected: this.selectedRows });
+    },
+
+    isRowSelected(row) {
+      return this.selectedRows.includes(this.getRowId(row));
+    },
+
+    getRowId(row) {
+      return row.id || row._id || JSON.stringify(row);
+    },
+
+    // Row click
+    onRowClick(row, event) {
+      this.$dispatch('row-click', { row, event });
+    },
+
+    // Actions
+    onAction(action, row, event) {
+      event.stopPropagation();
+      this.$dispatch('row-action', { action, row, event });
+    },
+
+    // Get icons
+    getIcon(name) {
+      return icons[name] || '';
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxDatatable', datatableComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxDatatable', datatableComponent);
+    });
+  }
+})();
+/**
  * UX Swipe Directives
  * Directivas Alpine para gestos táctiles
  * @requires Alpine.js
@@ -22562,8 +25979,8 @@
   }
 })();
 /**
- * UX Shell Component
- * Layouts de estructura para admin panels
+ * UX Admin Layout
+ * Panel administrativo con navbar, sidebar colapsable y bottom nav
  * @requires ux-core.js
  */
 (function() {
@@ -22571,21 +25988,37 @@
 
   const styles = `
     /* ========================================
-       UX Shell - CSS Variables
+       UX Admin - CSS Variables
     ======================================== */
 
     :root {
-      --ux-shell-navbar: 56px;
-      --ux-shell-toolbar: 48px;
-      --ux-shell-sidebar: 250px;
-      --ux-shell-sidebar-collapsed: 56px;
-      --ux-shell-bottom-nav: 56px;
+      --ux-admin-navbar-height: 3.5rem;      /* 56px */
+      --ux-admin-toolbar-height: 3rem;       /* 48px */
+      --ux-admin-sidebar-width: 15.625rem;   /* 250px */
+      --ux-admin-sidebar-collapsed: 3.5rem;  /* 56px */
+      --ux-admin-bottom-nav-height: 3.5rem;  /* 56px */
+
+      /* Backward compatibility aliases */
+      --ux-shell-navbar: var(--ux-admin-navbar-height);
+      --ux-shell-toolbar: var(--ux-admin-toolbar-height);
+      --ux-shell-sidebar: var(--ux-admin-sidebar-width);
+      --ux-shell-sidebar-collapsed: var(--ux-admin-sidebar-collapsed);
+      --ux-shell-bottom-nav: var(--ux-admin-bottom-nav-height);
     }
 
     /* ========================================
-       Base Shell
+       Base Admin Layout
     ======================================== */
 
+    .ux-admin {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background-color: var(--ux-background);
+    }
+
+    /* Backward compatibility alias */
     .ux-shell {
       display: flex;
       flex-direction: column;
@@ -22595,15 +26028,15 @@
     }
 
     /* ========================================
-       Shell Navbar
+       Admin Navbar
     ======================================== */
 
-    .ux-shell__navbar {
+    .ux-admin__navbar {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: var(--ux-shell-navbar);
+      height: var(--ux-admin-navbar-height);
       display: flex;
       align-items: center;
       padding: 0 var(--ux-space-lg);
@@ -22613,6 +26046,23 @@
       gap: var(--ux-space-md);
     }
 
+    /* Backward compatibility alias */
+    .ux-shell__navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--ux-admin-navbar-height);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--ux-space-lg);
+      background-color: var(--ux-surface);
+      border-bottom: 1px solid var(--ux-border-color);
+      z-index: var(--ux-z-fixed);
+      gap: var(--ux-space-md);
+    }
+
+    .ux-admin__navbar-brand,
     .ux-shell__navbar-brand {
       display: flex;
       align-items: center;
@@ -22622,11 +26072,13 @@
       color: var(--ux-text);
     }
 
+    .ux-admin__navbar-brand img,
     .ux-shell__navbar-brand img {
-      height: 32px;
+      height: 2rem;
       width: auto;
     }
 
+    .ux-admin__navbar-toggle,
     .ux-shell__navbar-toggle {
       display: flex;
       align-items: center;
@@ -22638,15 +26090,18 @@
       transition: background-color var(--ux-transition-fast) var(--ux-ease);
     }
 
+    .ux-admin__navbar-toggle:hover,
     .ux-shell__navbar-toggle:hover {
       background-color: var(--ux-surface-secondary);
     }
 
+    .ux-admin__navbar-toggle svg,
     .ux-shell__navbar-toggle svg {
-      width: 24px;
-      height: 24px;
+      width: 1.5rem;
+      height: 1.5rem;
     }
 
+    .ux-admin__navbar-content,
     .ux-shell__navbar-content {
       flex: 1;
       display: flex;
@@ -22654,6 +26109,7 @@
       gap: var(--ux-space-md);
     }
 
+    .ux-admin__navbar-actions,
     .ux-shell__navbar-actions {
       display: flex;
       align-items: center;
@@ -22661,15 +26117,16 @@
     }
 
     /* ========================================
-       Shell Toolbar
+       Admin Toolbar
     ======================================== */
 
+    .ux-admin__toolbar,
     .ux-shell__toolbar {
       position: fixed;
-      top: var(--ux-shell-navbar);
+      top: var(--ux-admin-navbar-height);
       left: 0;
       right: 0;
-      height: var(--ux-shell-toolbar);
+      height: var(--ux-admin-toolbar-height);
       display: flex;
       align-items: center;
       padding: 0 var(--ux-space-lg);
@@ -22680,31 +26137,35 @@
     }
 
     /* Adjust toolbar position when sidebar exists */
+    .ux-admin--sidebar .ux-admin__toolbar,
     .ux-shell--sidebar .ux-shell__toolbar {
-      left: var(--ux-shell-sidebar);
+      left: var(--ux-admin-sidebar-width);
       transition: left var(--ux-transition-base) var(--ux-ease);
     }
 
+    .ux-admin--sidebar.ux-admin--collapsed .ux-admin__toolbar,
     .ux-shell--sidebar.ux-shell--collapsed .ux-shell__toolbar {
-      left: var(--ux-shell-sidebar-collapsed);
+      left: var(--ux-admin-sidebar-collapsed);
     }
 
     @media (max-width: 767px) {
+      .ux-admin--sidebar .ux-admin__toolbar,
       .ux-shell--sidebar .ux-shell__toolbar {
         left: 0;
       }
     }
 
     /* ========================================
-       Shell Sidebar
+       Admin Sidebar
     ======================================== */
 
+    .ux-admin__sidebar,
     .ux-shell__sidebar {
       position: fixed;
-      top: var(--ux-shell-navbar);
+      top: var(--ux-admin-navbar-height);
       left: 0;
       bottom: 0;
-      width: var(--ux-shell-sidebar);
+      width: var(--ux-admin-sidebar-width);
       /* Liquid Glass effect - iOS 26 style */
       background: var(--ux-glass-bg);
       backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
@@ -22721,33 +26182,41 @@
 
     /* Fallback for browsers without backdrop-filter */
     @supports not (backdrop-filter: blur(10px)) {
+      .ux-admin__sidebar,
       .ux-shell__sidebar {
         background: var(--ux-surface);
         border-right: 1px solid var(--ux-border-color);
       }
     }
 
+    .ux-admin__sidebar-content,
     .ux-shell__sidebar-content {
       display: flex;
       flex-direction: column;
       min-height: 100%;
     }
 
+    .ux-admin__sidebar-nav,
     .ux-shell__sidebar-nav {
       flex: 1;
       padding: var(--ux-space-sm);
     }
 
+    .ux-admin__sidebar-footer,
     .ux-shell__sidebar-footer {
       padding: var(--ux-space-md);
       border-top: 1px solid var(--ux-border-color);
     }
 
     /* Collapsed sidebar */
+    .ux-admin--collapsed .ux-admin__sidebar,
     .ux-shell--collapsed .ux-shell__sidebar {
-      width: var(--ux-shell-sidebar-collapsed);
+      width: var(--ux-admin-sidebar-collapsed);
     }
 
+    .ux-admin--collapsed .ux-admin__sidebar-item-text,
+    .ux-admin--collapsed .ux-admin__sidebar-section-title,
+    .ux-admin--collapsed .ux-admin__sidebar-header,
     .ux-shell--collapsed .ux-shell__sidebar-item-text,
     .ux-shell--collapsed .ux-shell__sidebar-section-title,
     .ux-shell--collapsed .ux-shell__sidebar-header {
@@ -22757,21 +26226,27 @@
 
     /* Mobile sidebar (drawer) */
     @media (max-width: 767px) {
+      .ux-admin__sidebar,
       .ux-shell__sidebar {
         transform: translateX(-100%);
-        width: 280px;
+        width: 17.5rem;
         z-index: calc(var(--ux-z-modal) + 1);
         box-shadow: var(--ux-shadow-xl);
       }
 
+      .ux-admin--sidebar-open .ux-admin__sidebar,
       .ux-shell--sidebar-open .ux-shell__sidebar {
         transform: translateX(0);
       }
 
+      .ux-admin--collapsed .ux-admin__sidebar,
       .ux-shell--collapsed .ux-shell__sidebar {
-        width: 280px;
+        width: 17.5rem;
       }
 
+      .ux-admin--collapsed .ux-admin__sidebar-item-text,
+      .ux-admin--collapsed .ux-admin__sidebar-section-title,
+      .ux-admin--collapsed .ux-admin__sidebar-header,
       .ux-shell--collapsed .ux-shell__sidebar-item-text,
       .ux-shell--collapsed .ux-shell__sidebar-section-title,
       .ux-shell--collapsed .ux-shell__sidebar-header {
@@ -22781,6 +26256,7 @@
     }
 
     /* Sidebar backdrop (mobile) */
+    .ux-admin__sidebar-backdrop,
     .ux-shell__sidebar-backdrop {
       position: fixed;
       inset: 0;
@@ -22793,22 +26269,27 @@
         visibility var(--ux-transition-base) var(--ux-ease);
     }
 
+    .ux-admin--sidebar-open .ux-admin__sidebar-backdrop,
     .ux-shell--sidebar-open .ux-shell__sidebar-backdrop {
       opacity: 1;
       visibility: visible;
     }
 
     @media (min-width: 768px) {
+      .ux-admin__sidebar-backdrop,
       .ux-shell__sidebar-backdrop {
         display: none;
       }
     }
 
     /* Sidebar navigation items */
+    .ux-admin__sidebar-section,
     .ux-shell__sidebar-section {
       margin-bottom: var(--ux-space-md);
     }
 
+    .ux-admin__sidebar-section-title,
+    .ux-admin__sidebar-header,
     .ux-shell__sidebar-section-title,
     .ux-shell__sidebar-header {
       padding: var(--ux-space-md) var(--ux-space-md) var(--ux-space-xs);
@@ -22823,6 +26304,7 @@
       transition: opacity var(--ux-transition-fast) var(--ux-ease);
     }
 
+    .ux-admin__sidebar-item,
     .ux-shell__sidebar-item {
       display: flex;
       align-items: center;
@@ -22841,16 +26323,19 @@
       cursor: pointer;
     }
 
+    .ux-admin__sidebar-item:hover,
     .ux-shell__sidebar-item:hover {
       background-color: rgba(0, 0, 0, 0.04);
       color: var(--ux-text);
       text-decoration: none;
     }
 
+    .ux-admin__sidebar-item:active,
     .ux-shell__sidebar-item:active {
       transform: scale(0.98);
     }
 
+    .ux-admin__sidebar-item--active,
     .ux-shell__sidebar-item--active {
       /* iOS 26 style: glass-like active state */
       background: var(--ux-glass-bg-thick);
@@ -22860,25 +26345,29 @@
       color: var(--ux-primary);
     }
 
+    .ux-admin__sidebar-item--active:hover,
     .ux-shell__sidebar-item--active:hover {
       background: var(--ux-glass-bg-thick);
       color: var(--ux-primary);
     }
 
+    .ux-admin__sidebar-item-icon,
     .ux-shell__sidebar-item-icon {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
+      width: 1.5rem;
+      height: 1.5rem;
       flex-shrink: 0;
     }
 
+    .ux-admin__sidebar-item-icon svg,
     .ux-shell__sidebar-item-icon svg {
-      width: 20px;
-      height: 20px;
+      width: 1.25rem;
+      height: 1.25rem;
     }
 
+    .ux-admin__sidebar-item-text,
     .ux-shell__sidebar-item-text {
       flex: 1;
       white-space: nowrap;
@@ -22887,8 +26376,9 @@
       transition: opacity var(--ux-transition-fast) var(--ux-ease);
     }
 
+    .ux-admin__sidebar-item-badge,
     .ux-shell__sidebar-item-badge {
-      padding: 2px 8px;
+      padding: 2px 0.5rem;
       font-size: var(--ux-font-size-xs);
       font-weight: 600;
       background-color: var(--ux-primary);
@@ -22898,15 +26388,18 @@
 
     /* Dark mode sidebar adjustments */
     @media (prefers-color-scheme: dark) {
+      .ux-admin__sidebar,
       .ux-shell__sidebar {
         background: var(--ux-glass-bg);
         border-right-color: var(--ux-glass-border);
       }
 
+      .ux-admin__sidebar-item:hover,
       .ux-shell__sidebar-item:hover {
         background-color: rgba(255, 255, 255, 0.08);
       }
 
+      .ux-admin__sidebar-item--active,
       .ux-shell__sidebar-item--active {
         background: var(--ux-glass-bg-thick);
         box-shadow:
@@ -22915,15 +26408,18 @@
       }
     }
 
+    .ux-dark .ux-admin__sidebar,
     .ux-dark .ux-shell__sidebar {
       background: var(--ux-glass-bg);
       border-right-color: var(--ux-glass-border);
     }
 
+    .ux-dark .ux-admin__sidebar-item:hover,
     .ux-dark .ux-shell__sidebar-item:hover {
       background-color: rgba(255, 255, 255, 0.08);
     }
 
+    .ux-dark .ux-admin__sidebar-item--active,
     .ux-dark .ux-shell__sidebar-item--active {
       background: var(--ux-glass-bg-thick);
       box-shadow:
@@ -22932,62 +26428,70 @@
     }
 
     /* ========================================
-       Shell Main Content
+       Admin Main Content
     ======================================== */
 
+    .ux-admin__main,
     .ux-shell__main {
       flex: 1;
-      margin-top: var(--ux-shell-navbar);
-      height: calc(100vh - var(--ux-shell-navbar));
-      height: calc(100dvh - var(--ux-shell-navbar));
+      margin-top: var(--ux-admin-navbar-height);
+      height: calc(100vh - var(--ux-admin-navbar-height));
+      height: calc(100dvh - var(--ux-admin-navbar-height));
       overflow: hidden;
       background-color: var(--ux-surface-secondary);
     }
 
     /* With toolbar */
+    .ux-admin--toolbar .ux-admin__main,
     .ux-shell--toolbar .ux-shell__main {
-      margin-top: calc(var(--ux-shell-navbar) + var(--ux-shell-toolbar));
-      height: calc(100vh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
-      height: calc(100dvh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
+      margin-top: calc(var(--ux-admin-navbar-height) + var(--ux-admin-toolbar-height));
+      height: calc(100vh - var(--ux-admin-navbar-height) - var(--ux-admin-toolbar-height));
+      height: calc(100dvh - var(--ux-admin-navbar-height) - var(--ux-admin-toolbar-height));
     }
 
     /* With sidebar */
+    .ux-admin--sidebar .ux-admin__main,
     .ux-shell--sidebar .ux-shell__main {
-      margin-left: var(--ux-shell-sidebar);
+      margin-left: var(--ux-admin-sidebar-width);
       transition: margin-left var(--ux-transition-base) var(--ux-ease);
     }
 
+    .ux-admin--sidebar.ux-admin--collapsed .ux-admin__main,
     .ux-shell--sidebar.ux-shell--collapsed .ux-shell__main {
-      margin-left: var(--ux-shell-sidebar-collapsed);
+      margin-left: var(--ux-admin-sidebar-collapsed);
     }
 
     @media (max-width: 767px) {
+      .ux-admin--sidebar .ux-admin__main,
       .ux-shell--sidebar .ux-shell__main {
         margin-left: 0;
       }
     }
 
     /* With bottom nav (mobile) */
+    .ux-admin--bottom-nav .ux-admin__main,
     .ux-shell--bottom-nav .ux-shell__main {
-      padding-bottom: var(--ux-shell-bottom-nav);
+      padding-bottom: var(--ux-admin-bottom-nav-height);
     }
 
     @media (min-width: 768px) {
+      .ux-admin--bottom-nav .ux-admin__main,
       .ux-shell--bottom-nav .ux-shell__main {
         padding-bottom: 0;
       }
     }
 
     /* ========================================
-       Shell Bottom Navigation
+       Admin Bottom Navigation
     ======================================== */
 
+    .ux-admin__bottom-nav,
     .ux-shell__bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      height: var(--ux-shell-bottom-nav);
+      height: var(--ux-admin-bottom-nav-height);
       padding-bottom: var(--ux-safe-bottom);
       display: flex;
       align-items: center;
@@ -22998,11 +26502,13 @@
     }
 
     @media (min-width: 768px) {
+      .ux-admin__bottom-nav,
       .ux-shell__bottom-nav {
         display: none;
       }
     }
 
+    .ux-admin__bottom-nav-item,
     .ux-shell__bottom-nav-item {
       display: flex;
       flex-direction: column;
@@ -23016,12 +26522,15 @@
       transition: color var(--ux-transition-fast) var(--ux-ease);
     }
 
+    .ux-admin__bottom-nav-item:hover,
+    .ux-admin__bottom-nav-item--active,
     .ux-shell__bottom-nav-item:hover,
     .ux-shell__bottom-nav-item--active {
       color: var(--ux-primary);
       text-decoration: none;
     }
 
+    .ux-admin__bottom-nav-item-icon,
     .ux-shell__bottom-nav-item-icon {
       display: flex;
       align-items: center;
@@ -23029,21 +26538,24 @@
       margin-bottom: 2px;
     }
 
+    .ux-admin__bottom-nav-item-icon svg,
     .ux-shell__bottom-nav-item-icon svg {
-      width: 24px;
-      height: 24px;
+      width: 1.5rem;
+      height: 1.5rem;
     }
 
+    .ux-admin__bottom-nav-item-label,
     .ux-shell__bottom-nav-item-label {
       font-size: var(--ux-font-size-xs);
       font-weight: 500;
     }
 
     /* ========================================
-       Shell Layouts
+       Admin Layouts
     ======================================== */
 
     /* Layout: Sidebar (navbar + collapsible sidebar) */
+    .ux-admin-sidebar,
     .ux-shell-sidebar {
       display: flex;
       flex-direction: column;
@@ -23052,6 +26564,7 @@
     }
 
     /* Layout: Toolbar (navbar + toolbar) */
+    .ux-admin-toolbar,
     .ux-shell-toolbar {
       display: flex;
       flex-direction: column;
@@ -23060,6 +26573,7 @@
     }
 
     /* Layout: Simple (navbar only) */
+    .ux-admin-simple,
     .ux-shell-simple {
       display: flex;
       flex-direction: column;
@@ -23068,9 +26582,10 @@
     }
 
     /* ========================================
-       Shell Section (scrollable content areas)
+       Admin Section (scrollable content areas)
     ======================================== */
 
+    .ux-admin__section,
     .ux-shell__section {
       height: 100%;
       overflow: auto;
@@ -23088,16 +26603,16 @@
 
   // Inject styles
   if (window.UX) {
-    window.UX.injectStyles('ux-shell-styles', styles);
+    window.UX.injectStyles('ux-admin-styles', styles);
   } else {
     const styleEl = document.createElement('style');
-    styleEl.id = 'ux-shell-styles';
+    styleEl.id = 'ux-admin-styles';
     styleEl.textContent = styles;
     document.head.appendChild(styleEl);
   }
 
-  // Alpine component for shell with sidebar
-  const shellComponent = (config = {}) => ({
+  // Alpine component for admin with sidebar
+  const adminComponent = (config = {}) => ({
     sidebarOpen: false,
     sidebarCollapsed: config.collapsed || false,
     isMobile: window.innerWidth < 768,
@@ -23188,6 +26703,15 @@
       }
     },
 
+    get adminClasses() {
+      return {
+        'ux-admin--sidebar': true,
+        'ux-admin--sidebar-open': this.sidebarOpen,
+        'ux-admin--collapsed': this.sidebarCollapsed && !this.isMobile
+      };
+    },
+
+    // Backward compatibility alias
     get shellClasses() {
       return {
         'ux-shell--sidebar': true,
@@ -23197,12 +26721,471 @@
     }
   });
 
-  // Register component
+  // Register component with both new and old names
   if (window.UX) {
-    window.UX.registerComponent('uxShell', shellComponent);
+    window.UX.registerComponent('uxAdmin', adminComponent);
+    window.UX.registerComponent('uxShell', adminComponent); // Backward compatibility
   } else {
     document.addEventListener('alpine:init', () => {
-      Alpine.data('uxShell', shellComponent);
+      Alpine.data('uxAdmin', adminComponent);
+      Alpine.data('uxShell', adminComponent); // Backward compatibility
+    });
+  }
+})();
+/**
+ * UX Website Layout
+ * Sitio web tradicional para landing pages y documentación
+ * Navbar + Main + Footer
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Website - CSS Variables
+    ======================================== */
+
+    :root {
+      --ux-website-navbar-height: 4rem;  /* 64px */
+    }
+
+    /* ========================================
+       UX Website Container
+    ======================================== */
+
+    .ux-website {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background-color: var(--ux-background);
+    }
+
+    /* ========================================
+       UX Website Navbar
+    ======================================== */
+
+    .ux-website__navbar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      height: var(--ux-website-navbar-height);
+      padding: 0 var(--ux-space-lg);
+      background-color: var(--ux-surface);
+      border-bottom: 1px solid var(--ux-border-color);
+      gap: var(--ux-space-lg);
+      z-index: var(--ux-z-sticky);
+    }
+
+    /* Sticky navbar */
+    .ux-website__navbar--sticky {
+      position: sticky;
+      top: 0;
+    }
+
+    /* Transparent navbar */
+    .ux-website__navbar--transparent {
+      background-color: transparent;
+      border-bottom: none;
+    }
+
+    /* Glass navbar */
+    .ux-website__navbar--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
+    }
+
+    /* Brand/Logo */
+    .ux-website__brand {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      font-size: var(--ux-font-size-xl);
+      font-weight: 700;
+      color: var(--ux-text);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .ux-website__brand:hover {
+      color: var(--ux-text);
+      text-decoration: none;
+    }
+
+    .ux-website__brand img {
+      height: 2rem;
+      width: auto;
+    }
+
+    /* Navigation links */
+    .ux-website__nav {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-website__nav a {
+      color: var(--ux-text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      border-radius: var(--ux-border-radius);
+      transition: color var(--ux-transition-fast) var(--ux-ease),
+                  background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-website__nav a:hover {
+      color: var(--ux-text);
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-website__nav a.active,
+    .ux-website__nav a[aria-current="page"] {
+      color: var(--ux-primary);
+    }
+
+    /* Actions (CTA buttons) */
+    .ux-website__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      flex-shrink: 0;
+    }
+
+    /* Mobile toggle (burger) */
+    .ux-website__toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: var(--ux-touch-target);
+      height: var(--ux-touch-target);
+      padding: 0;
+      border: none;
+      background: none;
+      color: var(--ux-text);
+      cursor: pointer;
+      border-radius: var(--ux-border-radius);
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-website__toggle:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-website__toggle svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 767px) {
+      .ux-website__nav {
+        display: none;
+      }
+
+      .ux-website__toggle {
+        display: flex;
+      }
+
+      .ux-website__actions {
+        display: none;
+      }
+
+      /* Show actions on mobile when specified */
+      .ux-website__navbar--show-actions .ux-website__actions {
+        display: flex;
+      }
+    }
+
+    /* ========================================
+       UX Website Mobile Menu
+    ======================================== */
+
+    .ux-website__mobile-menu {
+      position: fixed;
+      top: var(--ux-website-navbar-height);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--ux-surface);
+      z-index: calc(var(--ux-z-sticky) - 1);
+      padding: var(--ux-space-lg);
+      overflow-y: auto;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: transform var(--ux-transition-base) var(--ux-ease),
+                  opacity var(--ux-transition-base) var(--ux-ease),
+                  visibility var(--ux-transition-base) var(--ux-ease);
+    }
+
+    .ux-website__mobile-menu--open {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .ux-website__mobile-menu a {
+      display: block;
+      padding: var(--ux-space-md);
+      color: var(--ux-text);
+      text-decoration: none;
+      font-size: var(--ux-font-size-lg);
+      font-weight: 500;
+      border-radius: var(--ux-border-radius);
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-website__mobile-menu a:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-website__mobile-menu .ux-website__actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-sm);
+      margin-top: var(--ux-space-lg);
+      padding-top: var(--ux-space-lg);
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    .ux-website__mobile-menu .ux-website__actions .ux-button {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* ========================================
+       UX Website Main
+    ======================================== */
+
+    .ux-website__main {
+      flex: 1;
+    }
+
+    /* ========================================
+       UX Website Footer
+    ======================================== */
+
+    .ux-website__footer {
+      flex-shrink: 0;
+      padding: var(--ux-space-2xl) var(--ux-space-lg);
+      background-color: var(--ux-surface-secondary);
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    .ux-website__footer--dark {
+      background-color: var(--ux-dark);
+      color: var(--ux-dark-contrast);
+      border-top: none;
+    }
+
+    .ux-website__footer--dark a {
+      color: var(--ux-dark-contrast);
+      opacity: 0.8;
+    }
+
+    .ux-website__footer--dark a:hover {
+      opacity: 1;
+    }
+
+    /* Footer grid */
+    .ux-website__footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+      gap: var(--ux-space-xl);
+      max-width: 75rem;
+      margin: 0 auto;
+    }
+
+    .ux-website__footer-section h4 {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ux-text-secondary);
+      margin: 0 0 var(--ux-space-md);
+    }
+
+    .ux-website__footer-section a {
+      display: block;
+      color: var(--ux-text);
+      text-decoration: none;
+      padding: var(--ux-space-xs) 0;
+      transition: color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-website__footer-section a:hover {
+      color: var(--ux-primary);
+    }
+
+    /* Footer bottom */
+    .ux-website__footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--ux-space-md);
+      max-width: 75rem;
+      margin: var(--ux-space-xl) auto 0;
+      padding-top: var(--ux-space-xl);
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    .ux-website__footer--dark .ux-website__footer-bottom {
+      border-top-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .ux-website__copyright {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-website__social {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-website__social a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--ux-touch-target);
+      height: var(--ux-touch-target);
+      color: var(--ux-text-secondary);
+      border-radius: var(--ux-border-radius);
+      transition: color var(--ux-transition-fast) var(--ux-ease),
+                  background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-website__social a:hover {
+      color: var(--ux-text);
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-website__footer--dark .ux-website__social a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ========================================
+       UX Website Sections
+    ======================================== */
+
+    .ux-website__section {
+      padding: var(--ux-space-3xl) var(--ux-space-lg);
+    }
+
+    .ux-website__section--hero {
+      padding: var(--ux-space-4xl) var(--ux-space-lg);
+      text-align: center;
+    }
+
+    .ux-website__section--alt {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-website__section--dark {
+      background-color: var(--ux-dark);
+      color: var(--ux-dark-contrast);
+    }
+
+    .ux-website__container {
+      max-width: 75rem;
+      margin: 0 auto;
+    }
+
+    .ux-website__container--narrow {
+      max-width: 50rem;
+    }
+
+    .ux-website__container--wide {
+      max-width: 90rem;
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-website-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-website-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for website
+  const websiteComponent = (config = {}) => ({
+    mobileMenuOpen: false,
+    scrolled: false,
+    _scrollHandler: null,
+
+    init() {
+      // Track scroll for navbar effects
+      this._scrollHandler = () => {
+        this.scrolled = window.scrollY > 10;
+      };
+      window.addEventListener('scroll', this._scrollHandler, { passive: true });
+
+      // Close mobile menu on resize
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768 && this.mobileMenuOpen) {
+          this.closeMobileMenu();
+        }
+      });
+
+      // Close mobile menu on escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.mobileMenuOpen) {
+          this.closeMobileMenu();
+        }
+      });
+    },
+
+    destroy() {
+      if (this._scrollHandler) {
+        window.removeEventListener('scroll', this._scrollHandler);
+      }
+    },
+
+    toggleMobileMenu() {
+      this.mobileMenuOpen = !this.mobileMenuOpen;
+      if (this.mobileMenuOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    },
+
+    openMobileMenu() {
+      this.mobileMenuOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+
+    closeMobileMenu() {
+      this.mobileMenuOpen = false;
+      document.body.style.overflow = '';
+    },
+
+    // Smooth scroll to section
+    scrollToSection(selector) {
+      const el = document.querySelector(selector);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        this.closeMobileMenu();
+      }
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxWebsite', websiteComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxWebsite', websiteComponent);
     });
   }
 })();
@@ -24475,1437 +28458,6 @@
   }
 })();
 /**
- * UX Rating Component
- * Star rating component with 1-5 scale
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Rating
-    ======================================== */
-
-    .ux-rating {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ux-space-xs);
-    }
-
-    .ux-rating__stars {
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
-    }
-
-    .ux-rating__star {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      padding: 0;
-      background: none;
-      border: none;
-      color: var(--ux-light-shade);
-      cursor: pointer;
-      transition:
-        color var(--ux-transition-fast) var(--ux-ease),
-        transform var(--ux-transition-fast) var(--ux-ease);
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .ux-rating__star svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .ux-rating__star:hover {
-      transform: scale(1.15);
-    }
-
-    .ux-rating__star:active {
-      transform: scale(0.95);
-    }
-
-    .ux-rating__star--filled {
-      color: var(--ux-warning);
-    }
-
-    .ux-rating__star--half {
-      position: relative;
-      color: var(--ux-light-shade);
-    }
-
-    .ux-rating__star--half::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 50%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    /* Readonly state */
-    .ux-rating--readonly .ux-rating__star {
-      cursor: default;
-      pointer-events: none;
-    }
-
-    .ux-rating--readonly .ux-rating__star:hover {
-      transform: none;
-    }
-
-    /* Disabled state */
-    .ux-rating--disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    /* ========================================
-       Sizes
-    ======================================== */
-
-    .ux-rating--sm .ux-rating__star {
-      width: 18px;
-      height: 18px;
-    }
-
-    .ux-rating--lg .ux-rating__star {
-      width: 32px;
-      height: 32px;
-    }
-
-    .ux-rating--xl .ux-rating__star {
-      width: 40px;
-      height: 40px;
-    }
-
-    /* ========================================
-       Colors
-    ======================================== */
-
-    .ux-rating--primary .ux-rating__star--filled {
-      color: var(--ux-primary);
-    }
-
-    .ux-rating--danger .ux-rating__star--filled {
-      color: var(--ux-danger);
-    }
-
-    .ux-rating--success .ux-rating__star--filled {
-      color: var(--ux-success);
-    }
-
-    /* ========================================
-       Rating Value Display
-    ======================================== */
-
-    .ux-rating__value {
-      font-size: var(--ux-font-size-md);
-      font-weight: 600;
-      color: var(--ux-text);
-      margin-left: var(--ux-space-xs);
-    }
-
-    .ux-rating--sm .ux-rating__value {
-      font-size: var(--ux-font-size-sm);
-    }
-
-    .ux-rating--lg .ux-rating__value {
-      font-size: var(--ux-font-size-lg);
-    }
-
-    .ux-rating__count {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-      margin-left: var(--ux-space-xs);
-    }
-
-    /* ========================================
-       Hover Preview
-    ======================================== */
-
-    .ux-rating:not(.ux-rating--readonly):not(.ux-rating--disabled) .ux-rating__star--preview {
-      color: var(--ux-warning);
-      opacity: 0.7;
-    }
-
-    /* ========================================
-       Compact Rating (inline display)
-    ======================================== */
-
-    .ux-rating--compact {
-      gap: var(--ux-space-xs);
-    }
-
-    .ux-rating--compact .ux-rating__stars {
-      gap: 0;
-    }
-
-    .ux-rating--compact .ux-rating__star {
-      width: 16px;
-      height: 16px;
-    }
-
-    /* ========================================
-       Rating with Labels
-    ======================================== */
-
-    .ux-rating__label {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    .ux-rating__label--start {
-      margin-right: var(--ux-space-sm);
-    }
-
-    .ux-rating__label--end {
-      margin-left: var(--ux-space-sm);
-    }
-
-    /* ========================================
-       Animation
-    ======================================== */
-
-    @keyframes ux-rating-pop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.3); }
-      100% { transform: scale(1); }
-    }
-
-    .ux-rating__star--animate {
-      animation: ux-rating-pop 0.3s var(--ux-ease);
-    }
-  `;
-
-  // Star SVG paths
-  const starFilled = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
-  const starEmpty = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
-  const starHalf = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><linearGradient id="half"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path fill="url(#half)" stroke="currentColor" stroke-width="2" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-rating-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-rating-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-
-  // Alpine component for rating
-  // ARIA: role="radiogroup" for interactive, aria-label for each star
-  const ratingComponent = (config = {}) => ({
-    value: config.value || 0,
-    max: config.max || 5,
-    readonly: config.readonly || false,
-    disabled: config.disabled || false,
-    allowHalf: config.allowHalf || false,
-    showValue: config.showValue || false,
-    hoverValue: 0,
-    isHovering: false,
-    ratingId: config.id || 'ux-rating-' + Math.random().toString(36).substr(2, 9),
-
-    // ARIA attributes for the rating group
-    get ariaAttrs() {
-      return {
-        'role': this.readonly ? 'img' : 'radiogroup',
-        'aria-label': `Rating: ${this.value} out of ${this.max} stars`,
-        'aria-valuenow': this.value,
-        'aria-valuemin': 0,
-        'aria-valuemax': this.max
-      };
-    },
-
-    // ARIA attributes for each star
-    getStarAriaAttrs(index) {
-      const starValue = index + 1;
-      return {
-        'role': this.readonly ? 'presentation' : 'radio',
-        'aria-checked': this.value >= starValue ? 'true' : 'false',
-        'aria-label': `${starValue} star${starValue > 1 ? 's' : ''}`,
-        'tabindex': this.readonly || this.disabled ? '-1' : (this.value === starValue ? '0' : '-1')
-      };
-    },
-
-    // Get star SVG based on value
-    getStarSvg(index) {
-      const starValue = index + 1;
-      const displayValue = this.isHovering && !this.readonly ? this.hoverValue : this.value;
-
-      if (displayValue >= starValue) {
-        return starFilled;
-      } else if (this.allowHalf && displayValue >= starValue - 0.5) {
-        return starHalf;
-      }
-      return starEmpty;
-    },
-
-    // Check if star is filled
-    isStarFilled(index) {
-      const starValue = index + 1;
-      const displayValue = this.isHovering && !this.readonly ? this.hoverValue : this.value;
-      return displayValue >= starValue;
-    },
-
-    // Check if star is half filled
-    isStarHalf(index) {
-      const starValue = index + 1;
-      const displayValue = this.isHovering && !this.readonly ? this.hoverValue : this.value;
-      return this.allowHalf && displayValue >= starValue - 0.5 && displayValue < starValue;
-    },
-
-    // Handle star click
-    setRating(index, event) {
-      if (this.readonly || this.disabled) return;
-
-      let newValue = index + 1;
-
-      // Support half stars on click
-      if (this.allowHalf && event) {
-        const rect = event.currentTarget.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        if (x < rect.width / 2) {
-          newValue = index + 0.5;
-        }
-      }
-
-      // Toggle off if clicking same value
-      if (this.value === newValue) {
-        this.value = 0;
-      } else {
-        this.value = newValue;
-      }
-
-      // Dispatch change event
-      this.$dispatch('rating-change', { value: this.value });
-    },
-
-    // Handle hover
-    onStarHover(index, event) {
-      if (this.readonly || this.disabled) return;
-      this.isHovering = true;
-
-      let hoverVal = index + 1;
-
-      if (this.allowHalf && event) {
-        const rect = event.currentTarget.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        if (x < rect.width / 2) {
-          hoverVal = index + 0.5;
-        }
-      }
-
-      this.hoverValue = hoverVal;
-    },
-
-    // Handle mouse leave
-    onMouseLeave() {
-      this.isHovering = false;
-      this.hoverValue = 0;
-    },
-
-    // Handle keyboard navigation
-    handleKeydown(event, index) {
-      if (this.readonly || this.disabled) return;
-
-      let newValue = this.value;
-
-      switch (event.key) {
-        case 'ArrowRight':
-        case 'ArrowUp':
-          event.preventDefault();
-          newValue = Math.min(this.max, this.value + (this.allowHalf ? 0.5 : 1));
-          break;
-        case 'ArrowLeft':
-        case 'ArrowDown':
-          event.preventDefault();
-          newValue = Math.max(0, this.value - (this.allowHalf ? 0.5 : 1));
-          break;
-        case 'Home':
-          event.preventDefault();
-          newValue = 0;
-          break;
-        case 'End':
-          event.preventDefault();
-          newValue = this.max;
-          break;
-        case 'Enter':
-        case ' ':
-          event.preventDefault();
-          this.setRating(index, null);
-          return;
-      }
-
-      if (newValue !== this.value) {
-        this.value = newValue;
-        this.$dispatch('rating-change', { value: this.value });
-      }
-    },
-
-    // Get array of star indices
-    get stars() {
-      return Array.from({ length: this.max }, (_, i) => i);
-    }
-  });
-
-  if (window.UX) {
-    window.UX.registerComponent('uxRating', ratingComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxRating', ratingComponent);
-    });
-  }
-})();
-/**
- * UX DataTable Component
- * Responsive data table with standard and "no more tables" mobile views
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX DataTable Container
-    ======================================== */
-
-    .ux-datatable {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      background-color: var(--ux-surface);
-      border-radius: var(--ux-border-radius-lg);
-      overflow: hidden;
-    }
-
-    .ux-datatable--inset {
-      margin: var(--ux-space-lg);
-    }
-
-    .ux-datatable--bordered {
-      border: 1px solid var(--ux-border-color);
-    }
-
-    /* ========================================
-       DataTable Header (Title & Actions)
-    ======================================== */
-
-    .ux-datatable__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--ux-space-md) var(--ux-space-lg);
-      background-color: var(--ux-surface);
-      border-bottom: 1px solid var(--ux-border-color);
-      flex-shrink: 0;
-    }
-
-    .ux-datatable__title {
-      font-size: var(--ux-font-size-lg);
-      font-weight: 600;
-      color: var(--ux-text);
-      margin: 0;
-    }
-
-    .ux-datatable__subtitle {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-      margin-top: 2px;
-    }
-
-    .ux-datatable__actions {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-    }
-
-    /* ========================================
-       DataTable Toolbar (Filters & Search)
-    ======================================== */
-
-    .ux-datatable__toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--ux-space-md);
-      padding: var(--ux-space-sm) var(--ux-space-lg);
-      background-color: var(--ux-surface-secondary);
-      border-bottom: 1px solid var(--ux-border-color);
-      flex-shrink: 0;
-      flex-wrap: wrap;
-    }
-
-    .ux-datatable__toolbar-start {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-    }
-
-    .ux-datatable__toolbar-end {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-    }
-
-    .ux-datatable__search {
-      min-width: 200px;
-    }
-
-    @media (max-width: 767px) {
-      .ux-datatable__toolbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .ux-datatable__search {
-        width: 100%;
-      }
-    }
-
-    /* ========================================
-       DataTable Body (Scrollable Content)
-    ======================================== */
-
-    .ux-datatable__body {
-      flex: 1;
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .ux-datatable__body--fixed-height {
-      max-height: 400px;
-    }
-
-    /* ========================================
-       Standard Table View
-    ======================================== */
-
-    .ux-datatable__table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: auto;
-    }
-
-    .ux-datatable__table--fixed {
-      table-layout: fixed;
-    }
-
-    /* Table Head */
-    .ux-datatable__thead {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background-color: var(--ux-surface-secondary);
-    }
-
-    .ux-datatable__th {
-      padding: var(--ux-space-md) var(--ux-space-lg);
-      text-align: left;
-      font-size: var(--ux-font-size-sm);
-      font-weight: 600;
-      color: var(--ux-text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-      border-bottom: 2px solid var(--ux-border-color);
-      background-color: var(--ux-surface-secondary);
-    }
-
-    .ux-datatable__th--sortable {
-      cursor: pointer;
-      user-select: none;
-      transition: color var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-datatable__th--sortable:hover {
-      color: var(--ux-primary);
-    }
-
-    .ux-datatable__th--sorted {
-      color: var(--ux-primary);
-    }
-
-    .ux-datatable__sort-icon {
-      display: inline-flex;
-      margin-left: var(--ux-space-xs);
-      opacity: 0.5;
-      transition: transform var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-datatable__th--sorted .ux-datatable__sort-icon {
-      opacity: 1;
-    }
-
-    .ux-datatable__th--sorted-desc .ux-datatable__sort-icon {
-      transform: rotate(180deg);
-    }
-
-    /* Alignment */
-    .ux-datatable__th--center,
-    .ux-datatable__td--center {
-      text-align: center;
-    }
-
-    .ux-datatable__th--right,
-    .ux-datatable__td--right {
-      text-align: right;
-    }
-
-    /* Table Body */
-    .ux-datatable__tbody {
-      background-color: var(--ux-surface);
-    }
-
-    .ux-datatable__tr {
-      transition: background-color var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-datatable__tr:hover {
-      background-color: rgba(var(--ux-primary-rgb), 0.05);
-    }
-
-    .ux-datatable__tr--selected {
-      background-color: rgba(var(--ux-primary-rgb), 0.1);
-    }
-
-    .ux-datatable__tr--clickable {
-      cursor: pointer;
-    }
-
-    .ux-datatable__td {
-      padding: var(--ux-space-md) var(--ux-space-lg);
-      font-size: var(--ux-font-size-md);
-      color: var(--ux-text);
-      border-bottom: 1px solid var(--ux-border-color);
-      vertical-align: middle;
-    }
-
-    .ux-datatable__tr:last-child .ux-datatable__td {
-      border-bottom: none;
-    }
-
-    /* Cell content truncation */
-    .ux-datatable__td--truncate {
-      max-width: 200px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* Cell with badge/chip */
-    .ux-datatable__td .ux-badge,
-    .ux-datatable__td .ux-chip {
-      vertical-align: middle;
-    }
-
-    /* ========================================
-       Checkbox Column
-    ======================================== */
-
-    .ux-datatable__th--checkbox,
-    .ux-datatable__td--checkbox {
-      width: 48px;
-      padding-left: var(--ux-space-md);
-      padding-right: var(--ux-space-sm);
-    }
-
-    /* ========================================
-       Actions Column
-    ======================================== */
-
-    .ux-datatable__th--actions,
-    .ux-datatable__td--actions {
-      width: 80px;
-      text-align: center;
-    }
-
-    .ux-datatable__row-actions {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--ux-space-xs);
-    }
-
-    .ux-datatable__row-action {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      background: none;
-      border: none;
-      border-radius: var(--ux-border-radius);
-      color: var(--ux-text-secondary);
-      cursor: pointer;
-      transition:
-        background-color var(--ux-transition-fast) var(--ux-ease),
-        color var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-datatable__row-action:hover {
-      background-color: var(--ux-surface-secondary);
-      color: var(--ux-text);
-    }
-
-    .ux-datatable__row-action--danger:hover {
-      background-color: rgba(var(--ux-danger-rgb, 255, 59, 48), 0.1);
-      color: var(--ux-danger);
-    }
-
-    .ux-datatable__row-action svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* ========================================
-       Empty State
-    ======================================== */
-
-    .ux-datatable__empty {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: var(--ux-space-2xl) var(--ux-space-lg);
-      text-align: center;
-    }
-
-    .ux-datatable__empty-icon {
-      width: 64px;
-      height: 64px;
-      margin-bottom: var(--ux-space-md);
-      color: var(--ux-text-tertiary);
-    }
-
-    .ux-datatable__empty-title {
-      font-size: var(--ux-font-size-lg);
-      font-weight: 600;
-      color: var(--ux-text);
-      margin: 0 0 var(--ux-space-xs);
-    }
-
-    .ux-datatable__empty-text {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-      margin: 0;
-    }
-
-    /* ========================================
-       Loading State
-    ======================================== */
-
-    .ux-datatable__loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--ux-space-2xl);
-    }
-
-    .ux-datatable--loading .ux-datatable__tbody {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    /* ========================================
-       DataTable Footer (Pagination)
-    ======================================== */
-
-    .ux-datatable__footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--ux-space-md) var(--ux-space-lg);
-      background-color: var(--ux-surface);
-      border-top: 1px solid var(--ux-border-color);
-      flex-shrink: 0;
-      flex-wrap: wrap;
-      gap: var(--ux-space-md);
-    }
-
-    .ux-datatable__info {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    .ux-datatable__pagination {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-xs);
-    }
-
-    .ux-datatable__page-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 36px;
-      height: 36px;
-      padding: 0 var(--ux-space-sm);
-      background: none;
-      border: 1px solid var(--ux-border-color);
-      border-radius: var(--ux-border-radius);
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text);
-      cursor: pointer;
-      transition:
-        background-color var(--ux-transition-fast) var(--ux-ease),
-        border-color var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-datatable__page-btn:hover:not(:disabled) {
-      background-color: var(--ux-surface-secondary);
-      border-color: var(--ux-primary);
-    }
-
-    .ux-datatable__page-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .ux-datatable__page-btn--active {
-      background-color: var(--ux-primary);
-      border-color: var(--ux-primary);
-      color: var(--ux-primary-contrast);
-    }
-
-    .ux-datatable__page-btn--active:hover:not(:disabled) {
-      background-color: var(--ux-primary-shade);
-      border-color: var(--ux-primary-shade);
-    }
-
-    .ux-datatable__page-btn svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .ux-datatable__per-page {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    .ux-datatable__per-page select {
-      padding: var(--ux-space-xs) var(--ux-space-sm);
-      border: 1px solid var(--ux-border-color);
-      border-radius: var(--ux-border-radius);
-      background-color: var(--ux-surface);
-      color: var(--ux-text);
-      font-size: var(--ux-font-size-sm);
-    }
-
-    @media (max-width: 767px) {
-      .ux-datatable__footer {
-        flex-direction: column;
-        align-items: center;
-      }
-    }
-
-    /* ========================================
-       View Toggle Buttons
-    ======================================== */
-
-    .ux-datatable__view-toggle {
-      display: inline-flex;
-      align-items: center;
-      background-color: var(--ux-surface-secondary);
-      border-radius: var(--ux-border-radius);
-      padding: 2px;
-      gap: 2px;
-    }
-
-    .ux-datatable__view-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      background: none;
-      border: none;
-      border-radius: calc(var(--ux-border-radius) - 2px);
-      color: var(--ux-text-tertiary);
-      cursor: pointer;
-      transition:
-        background-color var(--ux-transition-fast) var(--ux-ease),
-        color var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-datatable__view-btn:hover {
-      color: var(--ux-text);
-    }
-
-    .ux-datatable__view-btn--active {
-      background-color: var(--ux-surface);
-      color: var(--ux-primary);
-      box-shadow: var(--ux-shadow-sm);
-    }
-
-    .ux-datatable__view-btn svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* ========================================
-       Responsive "No More Tables" View
-    ======================================== */
-
-    @media (max-width: 767px) {
-      .ux-datatable--responsive .ux-datatable__table,
-      .ux-datatable--responsive .ux-datatable__thead,
-      .ux-datatable--responsive .ux-datatable__tbody,
-      .ux-datatable--responsive .ux-datatable__th,
-      .ux-datatable--responsive .ux-datatable__tr,
-      .ux-datatable--responsive .ux-datatable__td {
-        display: block;
-      }
-
-      .ux-datatable--responsive .ux-datatable__thead {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-        visibility: hidden;
-      }
-
-      .ux-datatable--responsive .ux-datatable__tr {
-        margin-bottom: var(--ux-space-md);
-        background-color: var(--ux-surface);
-        border-radius: var(--ux-border-radius-lg);
-        border: 1px solid var(--ux-border-color);
-        overflow: hidden;
-      }
-
-      .ux-datatable--responsive .ux-datatable__tr:last-child {
-        margin-bottom: 0;
-      }
-
-      .ux-datatable--responsive .ux-datatable__td {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: var(--ux-space-md) var(--ux-space-lg);
-        text-align: right;
-        border-bottom: 1px solid var(--ux-border-color);
-      }
-
-      .ux-datatable--responsive .ux-datatable__tr .ux-datatable__td:last-child {
-        border-bottom: none;
-      }
-
-      .ux-datatable--responsive .ux-datatable__td::before {
-        content: attr(data-label);
-        flex: 1;
-        font-weight: 600;
-        font-size: var(--ux-font-size-sm);
-        color: var(--ux-text-secondary);
-        text-align: left;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding-right: var(--ux-space-md);
-      }
-
-      .ux-datatable--responsive .ux-datatable__td--checkbox,
-      .ux-datatable--responsive .ux-datatable__td--actions {
-        justify-content: flex-end;
-      }
-
-      .ux-datatable--responsive .ux-datatable__td--checkbox::before,
-      .ux-datatable--responsive .ux-datatable__td--actions::before {
-        content: none;
-      }
-
-      /* Card header style for first cell */
-      .ux-datatable--responsive .ux-datatable__td--primary {
-        background-color: var(--ux-surface-secondary);
-        font-weight: 600;
-      }
-
-      .ux-datatable--responsive .ux-datatable__td--primary::before {
-        display: none;
-      }
-
-      .ux-datatable--responsive .ux-datatable__td--primary {
-        justify-content: flex-start;
-        text-align: left;
-      }
-    }
-
-    /* Force responsive view */
-    .ux-datatable--force-responsive .ux-datatable__table,
-    .ux-datatable--force-responsive .ux-datatable__thead,
-    .ux-datatable--force-responsive .ux-datatable__tbody,
-    .ux-datatable--force-responsive .ux-datatable__th,
-    .ux-datatable--force-responsive .ux-datatable__tr,
-    .ux-datatable--force-responsive .ux-datatable__td {
-      display: block;
-    }
-
-    .ux-datatable--force-responsive .ux-datatable__thead {
-      position: absolute;
-      top: -9999px;
-      left: -9999px;
-      visibility: hidden;
-    }
-
-    .ux-datatable--force-responsive .ux-datatable__tr {
-      margin-bottom: var(--ux-space-md);
-      background-color: var(--ux-surface);
-      border-radius: var(--ux-border-radius-lg);
-      border: 1px solid var(--ux-border-color);
-      overflow: hidden;
-    }
-
-    .ux-datatable--force-responsive .ux-datatable__td {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--ux-space-md) var(--ux-space-lg);
-      text-align: right;
-      border-bottom: 1px solid var(--ux-border-color);
-    }
-
-    .ux-datatable--force-responsive .ux-datatable__tr .ux-datatable__td:last-child {
-      border-bottom: none;
-    }
-
-    .ux-datatable--force-responsive .ux-datatable__td::before {
-      content: attr(data-label);
-      flex: 1;
-      font-weight: 600;
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-      text-align: left;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding-right: var(--ux-space-md);
-    }
-
-    /* ========================================
-       Striped Rows
-    ======================================== */
-
-    .ux-datatable--striped .ux-datatable__tr:nth-child(even) {
-      background-color: var(--ux-surface-secondary);
-    }
-
-    /* ========================================
-       Compact Size
-    ======================================== */
-
-    .ux-datatable--compact .ux-datatable__th,
-    .ux-datatable--compact .ux-datatable__td {
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      font-size: var(--ux-font-size-sm);
-    }
-
-    /* ========================================
-       DataTable Sizes
-    ======================================== */
-
-    .ux-datatable--sm .ux-datatable__th,
-    .ux-datatable--sm .ux-datatable__td {
-      padding: var(--ux-space-xs) var(--ux-space-sm);
-      font-size: var(--ux-font-size-sm);
-    }
-
-    .ux-datatable--lg .ux-datatable__th,
-    .ux-datatable--lg .ux-datatable__td {
-      padding: var(--ux-space-lg) var(--ux-space-xl);
-    }
-
-    /* ========================================
-       Glass Variant (iOS 26 Liquid Glass)
-    ======================================== */
-
-    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
-    .ux-datatable--glass {
-      border: 0.5px solid var(--ux-glass-border);
-      border-radius: var(--ux-border-radius-lg);
-      overflow: hidden;
-    }
-
-    .ux-datatable--glass .ux-datatable__th {
-      background: var(--ux-glass-bg-thin);
-      border-bottom-color: var(--ux-glass-border);
-    }
-
-    .ux-datatable--glass .ux-datatable__td {
-      border-bottom-color: var(--ux-glass-border);
-    }
-
-    .ux-datatable--glass .ux-datatable__tr:hover .ux-datatable__td {
-      background: var(--ux-glass-bg-thin);
-    }
-
-    .ux-datatable--glass .ux-datatable__tr--selected .ux-datatable__td {
-      background: var(--ux-glass-bg);
-    }
-
-    .ux-datatable--glass .ux-datatable__footer {
-      background: var(--ux-glass-bg-thin);
-      border-top-color: var(--ux-glass-border);
-    }
-  `;
-
-  // Icons
-  const icons = {
-    sortAsc: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>',
-    sortDesc: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>',
-    chevronLeft: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>',
-    chevronRight: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
-    chevronsLeft: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>',
-    chevronsRight: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 7l5 5-5 5M6 7l5 5-5 5"/></svg>',
-    empty: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>',
-    edit: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
-    delete: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
-    view: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
-    // View toggle icons
-    viewTable: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
-    viewCards: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
-    viewList: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>'
-  };
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-datatable-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-datatable-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-
-  // Alpine component for datatable
-  // ARIA: role="table", role="rowgroup", role="row", role="columnheader", role="cell"
-  const datatableComponent = (config = {}) => ({
-    // Data
-    columns: config.columns || [],
-    rows: config.rows || [],
-
-    // Selection
-    selectable: config.selectable || false,
-    selectedRows: [],
-    selectAll: false,
-
-    // Sorting
-    sortable: config.sortable !== false,
-    sortColumn: config.sortColumn || null,
-    sortDirection: config.sortDirection || 'asc',
-
-    // Pagination
-    paginated: config.paginated !== false,
-    currentPage: 1,
-    perPage: config.perPage || 10,
-    perPageOptions: config.perPageOptions || [10, 25, 50, 100],
-
-    // Search
-    searchable: config.searchable !== false,
-    searchQuery: '',
-    searchPlaceholder: config.searchPlaceholder || 'Search...',
-
-    // Responsive
-    responsive: config.responsive !== false,
-    forceResponsive: config.forceResponsive || false,
-
-    // View mode (table, cards)
-    viewMode: config.viewMode || 'table',
-    showViewToggle: config.showViewToggle || false,
-
-    // Loading
-    loading: config.loading || false,
-
-    // Empty state
-    emptyTitle: config.emptyTitle || 'No data',
-    emptyText: config.emptyText || 'There are no records to display.',
-
-    // Labels (for i18n)
-    labels: {
-      showing: config.labels?.showing || 'Showing',
-      to: config.labels?.to || 'to',
-      of: config.labels?.of || 'of',
-      entries: config.labels?.entries || 'entries',
-      perPage: config.labels?.perPage || 'per page',
-      noResults: config.labels?.noResults || 'No results found',
-      viewTable: config.labels?.viewTable || 'Table view',
-      viewCards: config.labels?.viewCards || 'Cards view',
-      ...config.labels
-    },
-
-    // Component ID
-    tableId: config.id || 'ux-datatable-' + Math.random().toString(36).substr(2, 9),
-
-    // ARIA attributes
-    get ariaAttrs() {
-      return {
-        'role': 'table',
-        'aria-label': config.ariaLabel || 'Data table',
-        'aria-busy': this.loading ? 'true' : 'false'
-      };
-    },
-
-    // Initialize
-    init() {
-      // Watch for external data changes
-      if (config.watchData) {
-        this.$watch('rows', () => {
-          this.currentPage = 1;
-          this.selectedRows = [];
-          this.selectAll = false;
-        });
-      }
-    },
-
-    // Computed: Filtered rows (search)
-    get filteredRows() {
-      if (!this.searchQuery.trim()) {
-        return this.rows;
-      }
-
-      const query = this.searchQuery.toLowerCase().trim();
-      return this.rows.filter(row => {
-        return this.columns.some(col => {
-          const value = this.getCellValue(row, col);
-          if (value === null || value === undefined) return false;
-          return String(value).toLowerCase().includes(query);
-        });
-      });
-    },
-
-    // Computed: Sorted rows
-    get sortedRows() {
-      if (!this.sortColumn) {
-        return this.filteredRows;
-      }
-
-      const col = this.columns.find(c => c.key === this.sortColumn);
-      if (!col) return this.filteredRows;
-
-      return [...this.filteredRows].sort((a, b) => {
-        let valA = this.getCellValue(a, col);
-        let valB = this.getCellValue(b, col);
-
-        // Handle nulls
-        if (valA === null || valA === undefined) valA = '';
-        if (valB === null || valB === undefined) valB = '';
-
-        // Numeric sort
-        if (col.type === 'number') {
-          valA = parseFloat(valA) || 0;
-          valB = parseFloat(valB) || 0;
-        }
-        // Date sort
-        else if (col.type === 'date') {
-          valA = new Date(valA).getTime() || 0;
-          valB = new Date(valB).getTime() || 0;
-        }
-        // String sort
-        else {
-          valA = String(valA).toLowerCase();
-          valB = String(valB).toLowerCase();
-        }
-
-        let result = 0;
-        if (valA < valB) result = -1;
-        if (valA > valB) result = 1;
-
-        return this.sortDirection === 'desc' ? -result : result;
-      });
-    },
-
-    // Computed: Paginated rows
-    get paginatedRows() {
-      if (!this.paginated) {
-        return this.sortedRows;
-      }
-
-      const start = (this.currentPage - 1) * this.perPage;
-      const end = start + this.perPage;
-      return this.sortedRows.slice(start, end);
-    },
-
-    // Computed: Total pages
-    get totalPages() {
-      return Math.ceil(this.sortedRows.length / this.perPage);
-    },
-
-    // Computed: Visible page numbers
-    get visiblePages() {
-      const pages = [];
-      const total = this.totalPages;
-      const current = this.currentPage;
-      const delta = 2;
-
-      for (let i = 1; i <= total; i++) {
-        if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
-          pages.push(i);
-        } else if (pages[pages.length - 1] !== '...') {
-          pages.push('...');
-        }
-      }
-
-      return pages;
-    },
-
-    // Computed: Showing info text
-    get showingInfo() {
-      const total = this.sortedRows.length;
-      if (total === 0) return '';
-
-      const start = (this.currentPage - 1) * this.perPage + 1;
-      const end = Math.min(this.currentPage * this.perPage, total);
-
-      return `${this.labels.showing} ${start} ${this.labels.to} ${end} ${this.labels.of} ${total} ${this.labels.entries}`;
-    },
-
-    // Get cell value
-    getCellValue(row, col) {
-      if (col.getValue) {
-        return col.getValue(row);
-      }
-
-      // Support nested keys like "user.name"
-      const keys = col.key.split('.');
-      let value = row;
-      for (const key of keys) {
-        value = value?.[key];
-      }
-      return value;
-    },
-
-    // Format cell value
-    formatCellValue(row, col) {
-      const value = this.getCellValue(row, col);
-
-      if (col.format) {
-        return col.format(value, row);
-      }
-
-      if (value === null || value === undefined) {
-        return col.defaultValue || '-';
-      }
-
-      return value;
-    },
-
-    // Sort by column
-    sortBy(column) {
-      if (!this.sortable || !column.sortable) return;
-
-      if (this.sortColumn === column.key) {
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-      } else {
-        this.sortColumn = column.key;
-        this.sortDirection = 'asc';
-      }
-
-      this.$dispatch('sort-change', {
-        column: this.sortColumn,
-        direction: this.sortDirection
-      });
-    },
-
-    // Check if column is sorted
-    isSorted(column) {
-      return this.sortColumn === column.key;
-    },
-
-    // Go to page
-    goToPage(page) {
-      if (page < 1 || page > this.totalPages) return;
-      this.currentPage = page;
-      this.$dispatch('page-change', { page: this.currentPage });
-    },
-
-    // Change per page
-    changePerPage(value) {
-      this.perPage = parseInt(value);
-      this.currentPage = 1;
-      this.$dispatch('per-page-change', { perPage: this.perPage });
-    },
-
-    // Search
-    onSearch() {
-      this.currentPage = 1;
-      this.$dispatch('search', { query: this.searchQuery });
-    },
-
-    // View mode
-    setViewMode(mode) {
-      this.viewMode = mode;
-      this.$dispatch('view-mode-change', { mode });
-    },
-
-    get viewModeClass() {
-      if (this.viewMode === 'cards') {
-        return 'ux-datatable--force-responsive';
-      }
-      return this.responsive ? 'ux-datatable--responsive' : '';
-    },
-
-    // Selection
-    toggleSelectAll() {
-      if (this.selectAll) {
-        this.selectedRows = this.paginatedRows.map(row => this.getRowId(row));
-      } else {
-        this.selectedRows = [];
-      }
-      this.$dispatch('selection-change', { selected: this.selectedRows });
-    },
-
-    toggleRowSelection(row) {
-      const rowId = this.getRowId(row);
-      const index = this.selectedRows.indexOf(rowId);
-
-      if (index > -1) {
-        this.selectedRows.splice(index, 1);
-      } else {
-        this.selectedRows.push(rowId);
-      }
-
-      this.selectAll = this.selectedRows.length === this.paginatedRows.length;
-      this.$dispatch('selection-change', { selected: this.selectedRows });
-    },
-
-    isRowSelected(row) {
-      return this.selectedRows.includes(this.getRowId(row));
-    },
-
-    getRowId(row) {
-      return row.id || row._id || JSON.stringify(row);
-    },
-
-    // Row click
-    onRowClick(row, event) {
-      this.$dispatch('row-click', { row, event });
-    },
-
-    // Actions
-    onAction(action, row, event) {
-      event.stopPropagation();
-      this.$dispatch('row-action', { action, row, event });
-    },
-
-    // Get icons
-    getIcon(name) {
-      return icons[name] || '';
-    }
-  });
-
-  if (window.UX) {
-    window.UX.registerComponent('uxDatatable', datatableComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxDatatable', datatableComponent);
-    });
-  }
-})();
-/**
  * UX PWA - Progressive Web App Support
  * Service Worker registration, offline detection, and install prompts
  * @requires ux-core.js
@@ -26389,1600 +28941,4 @@
   // Auto-init
   window.UXOffline.init();
 
-})();
-/**
- * UX Picker Component
- * iOS-style column picker (wheel selector)
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Picker Backdrop
-    ======================================== */
-
-    .ux-picker-backdrop {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.4);
-      z-index: var(--ux-z-modal-backdrop);
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity 300ms cubic-bezier(0.32, 0.72, 0, 1),
-        visibility 300ms cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .ux-picker-backdrop--open {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    /* ========================================
-       UX Picker Container
-    ======================================== */
-
-    .ux-picker {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--ux-surface);
-      border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
-      z-index: var(--ux-z-modal);
-      transform: translateY(100%);
-      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
-      padding-bottom: env(safe-area-inset-bottom);
-      will-change: transform;
-    }
-
-    .ux-picker-backdrop--open .ux-picker {
-      transform: translateY(0);
-    }
-
-    /* ========================================
-       Picker Header
-    ======================================== */
-
-    .ux-picker__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 44px;
-      padding: 0 var(--ux-space-sm);
-      border-bottom: 1px solid var(--ux-border-color);
-    }
-
-    .ux-picker__button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 60px;
-      min-height: 44px;
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      background: none;
-      border: none;
-      color: var(--ux-primary);
-      font-family: var(--ux-font-family);
-      font-size: var(--ux-font-size-md);
-      font-weight: 400;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: opacity var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-picker__button:active {
-      opacity: 0.5;
-    }
-
-    .ux-picker__button--cancel {
-      font-weight: 400;
-    }
-
-    .ux-picker__button--confirm {
-      font-weight: 600;
-    }
-
-    .ux-picker__title {
-      flex: 1;
-      text-align: center;
-      font-size: var(--ux-font-size-md);
-      font-weight: 600;
-      color: var(--ux-text);
-      margin: 0;
-    }
-
-    /* ========================================
-       Picker Columns Container
-    ======================================== */
-
-    .ux-picker__columns {
-      display: flex;
-      height: 216px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Selection highlight */
-    .ux-picker__columns::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 36px;
-      transform: translateY(-50%);
-      background-color: var(--ux-surface-secondary);
-      border-top: 1px solid var(--ux-border-color);
-      border-bottom: 1px solid var(--ux-border-color);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Gradient masks */
-    .ux-picker__columns::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to bottom,
-        var(--ux-surface) 0%,
-        transparent 20%,
-        transparent 80%,
-        var(--ux-surface) 100%
-      );
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* ========================================
-       Picker Column
-    ======================================== */
-
-    .ux-picker__column {
-      flex: 1;
-      height: 100%;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .ux-picker__column-wrapper {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      transform: translateY(-50%);
-      transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
-      will-change: transform;
-    }
-
-    .ux-picker__column--dragging .ux-picker__column-wrapper {
-      transition: none;
-    }
-
-    /* ========================================
-       Picker Item
-    ======================================== */
-
-    .ux-picker__item {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 36px;
-      padding: 0 var(--ux-space-md);
-      color: var(--ux-text-secondary);
-      font-size: var(--ux-font-size-lg);
-      font-weight: 400;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: pointer;
-      transition:
-        color var(--ux-transition-fast) var(--ux-ease),
-        transform var(--ux-transition-fast) var(--ux-ease);
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .ux-picker__item--selected {
-      color: var(--ux-text);
-      font-weight: 500;
-    }
-
-    .ux-picker__item--disabled {
-      color: var(--ux-text-tertiary);
-      pointer-events: none;
-    }
-
-    /* 3D wheel effect */
-    .ux-picker--3d .ux-picker__item {
-      transform-style: preserve-3d;
-      backface-visibility: hidden;
-    }
-
-    /* ========================================
-       Picker Sizes
-    ======================================== */
-
-    .ux-picker--sm .ux-picker__columns {
-      height: 180px;
-    }
-
-    .ux-picker--sm .ux-picker__item {
-      height: 30px;
-      font-size: var(--ux-font-size-md);
-    }
-
-    .ux-picker--sm .ux-picker__columns::before {
-      height: 30px;
-    }
-
-    .ux-picker--lg .ux-picker__columns {
-      height: 252px;
-    }
-
-    .ux-picker--lg .ux-picker__item {
-      height: 42px;
-      font-size: var(--ux-font-size-xl);
-    }
-
-    .ux-picker--lg .ux-picker__columns::before {
-      height: 42px;
-    }
-
-    /* ========================================
-       Inline Picker (not in modal)
-    ======================================== */
-
-    .ux-picker--inline {
-      position: static;
-      transform: none;
-      border-radius: var(--ux-border-radius-lg);
-      border: 1px solid var(--ux-border-color);
-    }
-
-    .ux-picker--inline .ux-picker__header {
-      border-bottom: none;
-      background-color: var(--ux-surface-secondary);
-      border-radius: var(--ux-border-radius-lg) var(--ux-border-radius-lg) 0 0;
-    }
-
-    /* ========================================
-       Multi-column Dividers
-    ======================================== */
-
-    .ux-picker__divider {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 var(--ux-space-xs);
-      color: var(--ux-text);
-      font-size: var(--ux-font-size-lg);
-      font-weight: 500;
-    }
-
-    /* ========================================
-       Column Labels
-    ======================================== */
-
-    .ux-picker__column-label {
-      position: absolute;
-      top: var(--ux-space-xs);
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-size: var(--ux-font-size-xs);
-      font-weight: 600;
-      color: var(--ux-text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      z-index: 2;
-    }
-
-    /* ========================================
-       Glass Variant (iOS 26 Liquid Glass)
-    ======================================== */
-
-    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
-    .ux-picker--glass {
-      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
-      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
-      border: 0.5px solid var(--ux-glass-border);
-    }
-
-    .ux-picker--glass .ux-picker__header {
-      border-bottom-color: var(--ux-glass-border);
-    }
-
-    .ux-picker--glass .ux-picker__highlight {
-      background: var(--ux-glass-bg);
-      border-color: var(--ux-glass-border);
-    }
-  `;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-picker-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-picker-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-
-  // Alpine component for picker
-  // ARIA: role="listbox" for columns, role="option" for items
-  const pickerComponent = (config = {}) => ({
-    isOpen: false,
-    columns: config.columns || [],
-    selectedIndexes: [],
-    title: config.title || '',
-    cancelText: config.cancelText || 'Cancel',
-    confirmText: config.confirmText || 'Done',
-    showHeader: config.showHeader !== false,
-    itemHeight: config.itemHeight || 36,
-    visibleItems: config.visibleItems || 5,
-    pickerId: config.id || 'ux-picker-' + Math.random().toString(36).substr(2, 9),
-    _columnStates: [],
-    _startY: 0,
-    _currentY: 0,
-    _activeColumn: null,
-
-    // ARIA attributes
-    get ariaAttrs() {
-      return {
-        'role': 'dialog',
-        'aria-modal': 'true',
-        'aria-labelledby': this.pickerId + '-title'
-      };
-    },
-
-    get titleId() {
-      return this.pickerId + '-title';
-    },
-
-    // ARIA for column
-    getColumnAriaAttrs(columnIndex) {
-      return {
-        'role': 'listbox',
-        'aria-label': this.columns[columnIndex]?.label || `Column ${columnIndex + 1}`,
-        'tabindex': '0'
-      };
-    },
-
-    // ARIA for item
-    getItemAriaAttrs(columnIndex, itemIndex) {
-      const isSelected = this.selectedIndexes[columnIndex] === itemIndex;
-      return {
-        'role': 'option',
-        'aria-selected': isSelected ? 'true' : 'false',
-        'id': `${this.pickerId}-col${columnIndex}-item${itemIndex}`
-      };
-    },
-
-    init() {
-      // Initialize selected indexes
-      this.selectedIndexes = this.columns.map((col, i) => {
-        return col.selectedIndex || 0;
-      });
-
-      // Initialize column states for drag
-      this._columnStates = this.columns.map((col, i) => ({
-        offset: -this.selectedIndexes[i] * this.itemHeight,
-        isDragging: false
-      }));
-    },
-
-    open(options = {}) {
-      if (options.columns) {
-        this.columns = options.columns;
-        this.init();
-      }
-      if (options.title) this.title = options.title;
-
-      this.isOpen = true;
-      document.body.style.overflow = 'hidden';
-
-      this.$nextTick(() => {
-        // Update column positions
-        this.columns.forEach((_, i) => {
-          this.scrollToIndex(i, this.selectedIndexes[i], false);
-        });
-      });
-    },
-
-    close() {
-      this.isOpen = false;
-      document.body.style.overflow = '';
-    },
-
-    cancel() {
-      this.$dispatch('picker-cancel');
-      this.close();
-    },
-
-    confirm() {
-      const values = this.columns.map((col, i) => {
-        const idx = this.selectedIndexes[i];
-        return col.options[idx];
-      });
-
-      this.$dispatch('picker-confirm', {
-        values,
-        indexes: [...this.selectedIndexes]
-      });
-
-      this.close();
-    },
-
-    // Get transform for column
-    getColumnTransform(columnIndex) {
-      const state = this._columnStates[columnIndex];
-      if (!state) return 'translateY(0)';
-      return `translateY(${state.offset}px)`;
-    },
-
-    // Scroll column to index
-    scrollToIndex(columnIndex, itemIndex, animate = true) {
-      const column = this.columns[columnIndex];
-      if (!column) return;
-
-      // Clamp index
-      const maxIndex = column.options.length - 1;
-      itemIndex = Math.max(0, Math.min(maxIndex, itemIndex));
-
-      this.selectedIndexes[columnIndex] = itemIndex;
-      this._columnStates[columnIndex].offset = -itemIndex * this.itemHeight;
-
-      // Dispatch change event
-      this.$dispatch('picker-change', {
-        columnIndex,
-        itemIndex,
-        value: column.options[itemIndex]
-      });
-    },
-
-    // Select item by click
-    selectItem(columnIndex, itemIndex) {
-      this.scrollToIndex(columnIndex, itemIndex);
-    },
-
-    // Check if item is selected
-    isSelected(columnIndex, itemIndex) {
-      return this.selectedIndexes[columnIndex] === itemIndex;
-    },
-
-    // Touch/drag handlers
-    onTouchStart(event, columnIndex) {
-      const state = this._columnStates[columnIndex];
-      state.isDragging = true;
-      this._activeColumn = columnIndex;
-      this._startY = event.touches ? event.touches[0].clientY : event.clientY;
-      this._startOffset = state.offset;
-    },
-
-    onTouchMove(event, columnIndex) {
-      const state = this._columnStates[columnIndex];
-      if (!state.isDragging) return;
-
-      const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-      const deltaY = clientY - this._startY;
-
-      // Apply resistance at boundaries
-      const column = this.columns[columnIndex];
-      const maxOffset = 0;
-      const minOffset = -(column.options.length - 1) * this.itemHeight;
-
-      let newOffset = this._startOffset + deltaY;
-
-      // Rubber band effect
-      if (newOffset > maxOffset) {
-        newOffset = maxOffset + (newOffset - maxOffset) * 0.3;
-      } else if (newOffset < minOffset) {
-        newOffset = minOffset + (newOffset - minOffset) * 0.3;
-      }
-
-      state.offset = newOffset;
-
-      event.preventDefault();
-    },
-
-    onTouchEnd(event, columnIndex) {
-      const state = this._columnStates[columnIndex];
-      if (!state.isDragging) return;
-
-      state.isDragging = false;
-
-      // Snap to nearest item
-      const column = this.columns[columnIndex];
-      const nearestIndex = Math.round(-state.offset / this.itemHeight);
-      const clampedIndex = Math.max(0, Math.min(column.options.length - 1, nearestIndex));
-
-      this.scrollToIndex(columnIndex, clampedIndex);
-    },
-
-    // Keyboard navigation
-    handleKeydown(event, columnIndex) {
-      const column = this.columns[columnIndex];
-      const currentIndex = this.selectedIndexes[columnIndex];
-
-      switch (event.key) {
-        case 'ArrowUp':
-          event.preventDefault();
-          if (currentIndex > 0) {
-            this.scrollToIndex(columnIndex, currentIndex - 1);
-          }
-          break;
-        case 'ArrowDown':
-          event.preventDefault();
-          if (currentIndex < column.options.length - 1) {
-            this.scrollToIndex(columnIndex, currentIndex + 1);
-          }
-          break;
-        case 'Home':
-          event.preventDefault();
-          this.scrollToIndex(columnIndex, 0);
-          break;
-        case 'End':
-          event.preventDefault();
-          this.scrollToIndex(columnIndex, column.options.length - 1);
-          break;
-        case 'Enter':
-          event.preventDefault();
-          this.confirm();
-          break;
-        case 'Escape':
-          event.preventDefault();
-          this.cancel();
-          break;
-      }
-    },
-
-    // Get selected values
-    getValues() {
-      return this.columns.map((col, i) => {
-        const idx = this.selectedIndexes[i];
-        return col.options[idx];
-      });
-    },
-
-    // Set values programmatically
-    setValues(values) {
-      values.forEach((value, i) => {
-        const column = this.columns[i];
-        if (!column) return;
-
-        const index = column.options.findIndex(opt => {
-          if (typeof opt === 'object') {
-            return opt.value === value || opt.text === value;
-          }
-          return opt === value;
-        });
-
-        if (index !== -1) {
-          this.scrollToIndex(i, index, false);
-        }
-      });
-    }
-  });
-
-  if (window.UX) {
-    window.UX.registerComponent('uxPicker', pickerComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxPicker', pickerComponent);
-    });
-  }
-
-  // Helper to format picker option display
-  window.UX = window.UX || {};
-  window.UX.getPickerOptionText = function(option) {
-    if (typeof option === 'object') {
-      return option.text || option.label || option.value;
-    }
-    return option;
-  };
-})();
-/**
- * UX Loading Component
- * Loading indicator with backdrop (iOS style)
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Loading Backdrop
-    ======================================== */
-
-    .ux-loading-backdrop {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.3);
-      z-index: var(--ux-z-toast);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1),
-        visibility 200ms cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .ux-loading-backdrop--open {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .ux-loading-backdrop--transparent {
-      background-color: transparent;
-    }
-
-    /* ========================================
-       UX Loading Container
-    ======================================== */
-
-    .ux-loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: var(--ux-space-md);
-      min-width: 100px;
-      min-height: 100px;
-      padding: var(--ux-space-lg);
-      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.95);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: var(--ux-border-radius-lg);
-      box-shadow: var(--ux-shadow-lg);
-      transform: scale(0.9);
-      opacity: 0;
-      transition:
-        transform 300ms cubic-bezier(0.32, 0.72, 0, 1),
-        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .ux-loading-backdrop--open .ux-loading {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    /* ========================================
-       Loading Spinner
-    ======================================== */
-
-    .ux-loading__spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid var(--ux-border-color);
-      border-top-color: var(--ux-primary);
-      border-radius: 50%;
-      animation: ux-loading-spin 0.8s linear infinite;
-    }
-
-    @keyframes ux-loading-spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* iOS-style spinner (dots) */
-    .ux-loading__spinner--ios {
-      width: 40px;
-      height: 40px;
-      border: none;
-      background: transparent;
-      position: relative;
-      animation: none;
-    }
-
-    .ux-loading__spinner--ios::before {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23999' stroke-width='3' stroke-linecap='round'%3E%3Cline x1='20' y1='4' x2='20' y2='10' opacity='0.125'/%3E%3Cline x1='32.5' y1='7.5' x2='28.5' y2='11.5' opacity='0.25'/%3E%3Cline x1='36' y1='20' x2='30' y2='20' opacity='0.375'/%3E%3Cline x1='32.5' y1='32.5' x2='28.5' y2='28.5' opacity='0.5'/%3E%3Cline x1='20' y1='36' x2='20' y2='30' opacity='0.625'/%3E%3Cline x1='7.5' y1='32.5' x2='11.5' y2='28.5' opacity='0.75'/%3E%3Cline x1='4' y1='20' x2='10' y2='20' opacity='0.875'/%3E%3Cline x1='7.5' y1='7.5' x2='11.5' y2='11.5' opacity='1'/%3E%3C/g%3E%3C/svg%3E");
-      animation: ux-loading-ios-spin 0.8s steps(8) infinite;
-    }
-
-    @keyframes ux-loading-ios-spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Dots spinner */
-    .ux-loading__spinner--dots {
-      width: 60px;
-      height: 20px;
-      border: none;
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      animation: none;
-    }
-
-    .ux-loading__spinner--dots::before,
-    .ux-loading__spinner--dots::after,
-    .ux-loading__dot {
-      content: '';
-      width: 12px;
-      height: 12px;
-      background-color: var(--ux-primary);
-      border-radius: 50%;
-      animation: ux-loading-bounce 1.4s ease-in-out infinite both;
-    }
-
-    .ux-loading__spinner--dots::before {
-      animation-delay: -0.32s;
-    }
-
-    .ux-loading__dot {
-      animation-delay: -0.16s;
-    }
-
-    @keyframes ux-loading-bounce {
-      0%, 80%, 100% {
-        transform: scale(0.6);
-        opacity: 0.5;
-      }
-      40% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    /* ========================================
-       Loading Message
-    ======================================== */
-
-    .ux-loading__message {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-      text-align: center;
-      max-width: 200px;
-    }
-
-    /* ========================================
-       Loading Sizes
-    ======================================== */
-
-    .ux-loading--sm {
-      min-width: 80px;
-      min-height: 80px;
-      padding: var(--ux-space-md);
-    }
-
-    .ux-loading--sm .ux-loading__spinner {
-      width: 28px;
-      height: 28px;
-      border-width: 2px;
-    }
-
-    .ux-loading--sm .ux-loading__message {
-      font-size: var(--ux-font-size-xs);
-    }
-
-    .ux-loading--lg {
-      min-width: 140px;
-      min-height: 140px;
-      padding: var(--ux-space-xl);
-    }
-
-    .ux-loading--lg .ux-loading__spinner {
-      width: 48px;
-      height: 48px;
-      border-width: 4px;
-    }
-
-    .ux-loading--lg .ux-loading__message {
-      font-size: var(--ux-font-size-md);
-    }
-
-    /* ========================================
-       Loading Colors
-    ======================================== */
-
-    .ux-loading--dark {
-      background-color: rgba(0, 0, 0, 0.85);
-    }
-
-    .ux-loading--dark .ux-loading__spinner {
-      border-color: rgba(255, 255, 255, 0.2);
-      border-top-color: white;
-    }
-
-    .ux-loading--dark .ux-loading__message {
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    /* ========================================
-       Inline Loading
-    ======================================== */
-
-    .ux-loading-inline {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-    }
-
-    .ux-loading-inline__spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--ux-border-color);
-      border-top-color: var(--ux-primary);
-      border-radius: 50%;
-      animation: ux-loading-spin 0.8s linear infinite;
-    }
-
-    .ux-loading-inline__text {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    /* Sizes */
-    .ux-loading-inline--sm .ux-loading-inline__spinner {
-      width: 14px;
-      height: 14px;
-    }
-
-    .ux-loading-inline--sm .ux-loading-inline__text {
-      font-size: var(--ux-font-size-xs);
-    }
-
-    .ux-loading-inline--lg .ux-loading-inline__spinner {
-      width: 28px;
-      height: 28px;
-      border-width: 3px;
-    }
-
-    /* ========================================
-       Full Page Loading
-    ======================================== */
-
-    .ux-loading--fullpage {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: var(--ux-background);
-      z-index: 9999;
-    }
-
-    .ux-loading--fullpage .ux-loading {
-      background-color: transparent;
-      box-shadow: none;
-    }
-
-    /* ========================================
-       Loading Overlay (for containers)
-    ======================================== */
-
-    .ux-loading-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: rgba(var(--ux-background-rgb, 255, 255, 255), 0.8);
-      z-index: 10;
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity var(--ux-transition-fast) var(--ux-ease),
-        visibility var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-loading-overlay--visible {
-      opacity: 1;
-      visibility: visible;
-    }
-  `;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-loading-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-loading-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-
-  // Alpine component for loading
-  // ARIA: role="alert", aria-busy for loading state
-  const loadingComponent = (config = {}) => ({
-    isOpen: config.isOpen || false,
-    message: config.message || '',
-    spinner: config.spinner || 'default', // default, ios, dots
-    showBackdrop: config.showBackdrop !== false,
-    dismissOnBackdrop: config.dismissOnBackdrop || false,
-    loadingId: config.id || 'ux-loading-' + Math.random().toString(36).substr(2, 9),
-
-    // ARIA attributes
-    get ariaAttrs() {
-      return {
-        'role': 'alert',
-        'aria-live': 'assertive',
-        'aria-busy': this.isOpen ? 'true' : 'false',
-        'aria-label': this.message || 'Loading'
-      };
-    },
-
-    show(options = {}) {
-      if (options.message !== undefined) this.message = options.message;
-      if (options.spinner) this.spinner = options.spinner;
-
-      this.isOpen = true;
-      document.body.style.overflow = 'hidden';
-    },
-
-    hide() {
-      this.isOpen = false;
-      document.body.style.overflow = '';
-    },
-
-    // Alias methods
-    present(options) {
-      this.show(options);
-    },
-
-    dismiss() {
-      this.hide();
-    },
-
-    handleBackdropClick(event) {
-      if (this.dismissOnBackdrop && event.target === event.currentTarget) {
-        this.hide();
-      }
-    },
-
-    // Show loading with timeout
-    showWithTimeout(options = {}, timeout = 30000) {
-      this.show(options);
-
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          this.hide();
-          resolve();
-        }, timeout);
-      });
-    },
-
-    // Show loading during async operation
-    async during(asyncFn, options = {}) {
-      this.show(options);
-      try {
-        const result = await asyncFn();
-        return result;
-      } finally {
-        this.hide();
-      }
-    }
-  });
-
-  if (window.UX) {
-    window.UX.registerComponent('uxLoading', loadingComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxLoading', loadingComponent);
-    });
-  }
-
-  // Global loading controller (singleton)
-  const loadingController = {
-    _instance: null,
-    _queue: [],
-
-    async create(options = {}) {
-      return {
-        present: () => this.show(options),
-        dismiss: () => this.hide()
-      };
-    },
-
-    show(options = {}) {
-      // Create loading element if it doesn't exist
-      if (!this._instance) {
-        const container = document.createElement('div');
-        container.id = 'ux-loading-controller';
-        container.innerHTML = `
-          <div class="ux-loading-backdrop"
-               :class="{ 'ux-loading-backdrop--open': isOpen }"
-               @click="handleBackdropClick($event)"
-               x-data="uxLoading()">
-            <div class="ux-loading" :class="'ux-loading--' + (size || '')" role="alert" aria-live="assertive">
-              <div class="ux-loading__spinner" :class="'ux-loading__spinner--' + spinner"></div>
-              <div class="ux-loading__message" x-show="message" x-text="message"></div>
-            </div>
-          </div>
-        `;
-        document.body.appendChild(container);
-      }
-
-      // Show via Alpine
-      const el = document.querySelector('#ux-loading-controller [x-data]');
-      if (el && el._x_dataStack) {
-        const data = el._x_dataStack[0];
-        data.show(options);
-      }
-    },
-
-    hide() {
-      const el = document.querySelector('#ux-loading-controller [x-data]');
-      if (el && el._x_dataStack) {
-        const data = el._x_dataStack[0];
-        data.hide();
-      }
-    }
-  };
-
-  // Export to UX namespace
-  if (window.UX) {
-    window.UX.loading = loadingController;
-  }
-})();
-/**
- * UX Page Header Component
- * Header de página con título, subtítulo, búsqueda y acciones
- * Para usar dentro de ux-content como header fijo de página
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Page Layout
-       Container for page-header + scrollable content
-    ======================================== */
-
-    .ux-page-layout {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-height: 0;
-      overflow: hidden;
-      /* Ensure it fills flex container */
-      flex: 1 1 auto;
-    }
-
-    /* ========================================
-       UX Page Header
-       Fixed header within a page (title + search + actions)
-    ======================================== */
-
-    .ux-page-header {
-      flex-shrink: 0;
-      padding: var(--ux-space-lg);
-      background-color: var(--ux-surface);
-      border-bottom: 1px solid var(--ux-border-color);
-    }
-
-    .ux-page-header--transparent {
-      background-color: transparent;
-      border-bottom: none;
-    }
-
-    .ux-page-header--sticky {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    /* Title row */
-    .ux-page-header__title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--ux-space-md);
-    }
-
-    .ux-page-header__title h1,
-    .ux-page-header__title .ux-page-header__heading {
-      margin: 0;
-      font-size: var(--ux-font-size-xl);
-      font-weight: 600;
-      color: var(--ux-text);
-      line-height: 1.3;
-    }
-
-    .ux-page-header__title h2 {
-      margin: 0;
-      font-size: var(--ux-font-size-lg);
-      font-weight: 600;
-      color: var(--ux-text);
-    }
-
-    .ux-page-header__subtitle {
-      margin: var(--ux-space-xs) 0 0 0;
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    /* Actions container */
-    .ux-page-header__actions {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-      flex-shrink: 0;
-    }
-
-    /* Search container */
-    .ux-page-header__search {
-      margin-top: var(--ux-space-md);
-    }
-
-    /* Filter/toolbar row below search */
-    .ux-page-header__toolbar {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-      margin-top: var(--ux-space-md);
-      flex-wrap: wrap;
-    }
-
-    /* Breadcrumb */
-    .ux-page-header__breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-xs);
-      margin-bottom: var(--ux-space-sm);
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    .ux-page-header__breadcrumb a {
-      color: var(--ux-primary);
-      text-decoration: none;
-    }
-
-    .ux-page-header__breadcrumb a:hover {
-      text-decoration: underline;
-    }
-
-    .ux-page-header__breadcrumb-separator {
-      color: var(--ux-text-tertiary);
-    }
-
-    /* With back button */
-    .ux-page-header--with-back .ux-page-header__title {
-      align-items: center;
-    }
-
-    .ux-page-header__back {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      margin-right: var(--ux-space-sm);
-      margin-left: calc(var(--ux-space-sm) * -1);
-      border-radius: var(--ux-border-radius);
-      color: var(--ux-text-secondary);
-      transition: background-color var(--ux-transition-fast) var(--ux-ease);
-      cursor: pointer;
-    }
-
-    .ux-page-header__back:hover {
-      background-color: var(--ux-surface-secondary);
-      color: var(--ux-text);
-    }
-
-    .ux-page-header__back svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    /* ========================================
-       UX Page Content
-       Scrollable content area within page-layout
-    ======================================== */
-
-    .ux-page-content {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-      padding: var(--ux-space-xl);
-    }
-
-    .ux-page-content--sm {
-      padding: var(--ux-space-md);
-    }
-
-    .ux-page-content--lg {
-      padding: var(--ux-space-2xl);
-    }
-
-    .ux-page-content--no-padding {
-      padding: 0;
-    }
-
-    .ux-page-content--flush {
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    /* ========================================
-       Size Variants
-    ======================================== */
-
-    .ux-page-header--sm {
-      padding: var(--ux-space-md);
-    }
-
-    .ux-page-header--sm .ux-page-header__title h1 {
-      font-size: var(--ux-font-size-lg);
-    }
-
-    .ux-page-header--lg {
-      padding: var(--ux-space-xl);
-    }
-
-    .ux-page-header--lg .ux-page-header__title h1 {
-      font-size: var(--ux-font-size-2xl);
-    }
-
-    /* ========================================
-       Responsive
-    ======================================== */
-
-    @media (max-width: 640px) {
-      .ux-page-header {
-        padding: var(--ux-space-md);
-      }
-
-      .ux-page-header__title {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .ux-page-header__actions {
-        margin-top: var(--ux-space-sm);
-        justify-content: flex-end;
-      }
-
-      .ux-page-content {
-        padding: var(--ux-space-md);
-      }
-    }
-  `;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-page-header-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-page-header-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-})();
-/**
- * UX Back Button Component
- * iOS-style back button with arrow and text
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Back Button
-    ======================================== */
-
-    .ux-back-button {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ux-space-xs);
-      min-height: var(--ux-touch-target);
-      padding: var(--ux-space-xs) var(--ux-space-sm);
-      padding-left: 0;
-      background: none;
-      border: none;
-      color: var(--ux-primary);
-      font-family: var(--ux-font-family);
-      font-size: var(--ux-font-size-md);
-      font-weight: 400;
-      text-decoration: none;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition:
-        opacity var(--ux-transition-fast) var(--ux-ease),
-        transform var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-back-button:hover {
-      opacity: 0.7;
-    }
-
-    .ux-back-button:active {
-      opacity: 0.5;
-      transform: scale(0.97);
-    }
-
-    /* ========================================
-       Back Button Icon
-    ======================================== */
-
-    .ux-back-button__icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      flex-shrink: 0;
-      transition: transform var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-back-button__icon svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Hover animation - slide left */
-    .ux-back-button:hover .ux-back-button__icon {
-      transform: translateX(-2px);
-    }
-
-    /* ========================================
-       Back Button Text
-    ======================================== */
-
-    .ux-back-button__text {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 120px;
-    }
-
-    /* Icon only */
-    .ux-back-button--icon-only .ux-back-button__text {
-      display: none;
-    }
-
-    .ux-back-button--icon-only {
-      padding: var(--ux-space-xs);
-    }
-
-    /* ========================================
-       Back Button Sizes
-    ======================================== */
-
-    .ux-back-button--sm {
-      min-height: var(--ux-touch-target-sm);
-      font-size: var(--ux-font-size-sm);
-    }
-
-    .ux-back-button--sm .ux-back-button__icon {
-      width: 20px;
-      height: 20px;
-    }
-
-    .ux-back-button--sm .ux-back-button__text {
-      max-width: 100px;
-    }
-
-    .ux-back-button--lg {
-      font-size: var(--ux-font-size-lg);
-    }
-
-    .ux-back-button--lg .ux-back-button__icon {
-      width: 28px;
-      height: 28px;
-    }
-
-    .ux-back-button--lg .ux-back-button__text {
-      max-width: 160px;
-    }
-
-    /* ========================================
-       Back Button Colors
-    ======================================== */
-
-    .ux-back-button--light {
-      color: white;
-    }
-
-    .ux-back-button--dark {
-      color: var(--ux-text);
-    }
-
-    .ux-back-button--secondary {
-      color: var(--ux-text-secondary);
-    }
-
-    /* ========================================
-       Back Button in Navbar
-    ======================================== */
-
-    .ux-navbar .ux-back-button {
-      margin-left: calc(-1 * var(--ux-space-sm));
-    }
-
-    .ux-navbar--primary .ux-back-button,
-    .ux-navbar--dark .ux-back-button {
-      color: white;
-    }
-
-    /* ========================================
-       Back Button in Toolbar
-    ======================================== */
-
-    .ux-toolbar .ux-back-button {
-      margin-left: calc(-1 * var(--ux-space-xs));
-    }
-
-    /* ========================================
-       Back Button in Modal
-    ======================================== */
-
-    .ux-modal__header .ux-back-button {
-      margin-left: calc(-1 * var(--ux-space-sm));
-    }
-
-    /* ========================================
-       Disabled State
-    ======================================== */
-
-    .ux-back-button:disabled,
-    .ux-back-button--disabled {
-      opacity: 0.4;
-      pointer-events: none;
-    }
-
-    /* ========================================
-       Custom Icon Positions
-    ======================================== */
-
-    .ux-back-button--icon-end {
-      flex-direction: row-reverse;
-    }
-
-    .ux-back-button--icon-end .ux-back-button__icon {
-      transform: rotate(180deg);
-    }
-
-    .ux-back-button--icon-end:hover .ux-back-button__icon {
-      transform: rotate(180deg) translateX(-2px);
-    }
-
-    /* ========================================
-       Animated Entrance (for page transitions)
-    ======================================== */
-
-    @keyframes ux-back-button-enter {
-      from {
-        opacity: 0;
-        transform: translateX(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .ux-back-button--animate-in {
-      animation: ux-back-button-enter 300ms var(--ux-ease-spring) forwards;
-    }
-
-    /* ========================================
-       Collapse/Expand Animation (iOS-style)
-    ======================================== */
-
-    .ux-back-button--collapsible .ux-back-button__text {
-      transition:
-        max-width 200ms var(--ux-ease),
-        opacity 200ms var(--ux-ease);
-    }
-
-    .ux-back-button--collapsed .ux-back-button__text {
-      max-width: 0;
-      opacity: 0;
-      padding: 0;
-    }
-  `;
-
-  // Default back arrow SVG
-  const backArrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-back-button-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-back-button-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-
-  // Alpine component for back button with routing
-  // ARIA: aria-label for accessibility
-  const backButtonComponent = (config = {}) => ({
-    text: config.text || 'Back',
-    href: config.href || null,
-    defaultHref: config.defaultHref || '/',
-    showIcon: config.showIcon !== false,
-    showText: config.showText !== false,
-    disabled: config.disabled || false,
-    collapsed: config.collapsed || false,
-
-    // ARIA attributes
-    get ariaAttrs() {
-      return {
-        'aria-label': this.text || 'Go back',
-        'role': this.href ? 'link' : 'button'
-      };
-    },
-
-    // Get the back arrow SVG
-    get iconSvg() {
-      return backArrowSvg;
-    },
-
-    // Navigate back
-    goBack() {
-      if (this.disabled) return;
-
-      // If href is provided, navigate to it
-      if (this.href) {
-        window.location.href = this.href;
-        return;
-      }
-
-      // Check if there's history to go back to
-      if (window.history.length > 1) {
-        window.history.back();
-      } else if (this.defaultHref) {
-        // Fallback to default href
-        window.location.href = this.defaultHref;
-      }
-
-      // Dispatch event for custom handling
-      this.$dispatch('back-button-click');
-    },
-
-    // Handle click
-    handleClick(event) {
-      // If it's a link and href is set, let it navigate normally
-      if (this.href && event.currentTarget.tagName === 'A') {
-        return;
-      }
-
-      event.preventDefault();
-      this.goBack();
-    },
-
-    // Collapse/expand text (iOS scroll behavior)
-    collapse() {
-      this.collapsed = true;
-    },
-
-    expand() {
-      this.collapsed = false;
-    },
-
-    toggle() {
-      this.collapsed = !this.collapsed;
-    }
-  });
-
-  if (window.UX) {
-    window.UX.registerComponent('uxBackButton', backButtonComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxBackButton', backButtonComponent);
-    });
-  }
-
-  // Export SVG for use in templates
-  window.UX = window.UX || {};
-  window.UX.backArrowSvg = backArrowSvg;
 })();
