@@ -1657,6 +1657,7 @@
       margin-right: 0;
       vertical-align: middle;
     }
+
   `;
 
   // Inject styles
