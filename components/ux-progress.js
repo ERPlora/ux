@@ -21,7 +21,8 @@
 
     .ux-progress__bar {
       height: 100%;
-      background-color: var(--ux-primary);
+      /* Uses composition system: combine with .ux-color-* classes */
+      background-color: var(--ux-variant-bg, var(--ux-primary));
       border-radius: var(--ux-progress-border-radius);
       transition: width var(--ux-transition-base) var(--ux-ease);
     }
@@ -50,34 +51,6 @@
 
     .ux-progress--lg .ux-progress__bar {
       border-radius: 6px;
-    }
-
-    /* ========================================
-       Color Variants
-    ======================================== */
-
-    .ux-progress--primary .ux-progress__bar {
-      background-color: var(--ux-primary);
-    }
-
-    .ux-progress--secondary .ux-progress__bar {
-      background-color: var(--ux-secondary);
-    }
-
-    .ux-progress--tertiary .ux-progress__bar {
-      background-color: var(--ux-tertiary);
-    }
-
-    .ux-progress--success .ux-progress__bar {
-      background-color: var(--ux-success);
-    }
-
-    .ux-progress--warning .ux-progress__bar {
-      background-color: var(--ux-warning);
-    }
-
-    .ux-progress--danger .ux-progress__bar {
-      background-color: var(--ux-danger);
     }
 
     /* ========================================
@@ -200,7 +173,8 @@
 
     .ux-progress-circular__bar {
       fill: none;
-      stroke: var(--ux-primary);
+      /* Uses composition system: combine with .ux-color-* classes */
+      stroke: var(--ux-variant-bg, var(--ux-primary));
       stroke-linecap: round;
       transition: stroke-dashoffset var(--ux-transition-slow) var(--ux-ease);
     }
@@ -297,19 +271,6 @@
         animation: none;
         stroke-dasharray: 90, 150;
       }
-    }
-
-    /* Circular Colors */
-    .ux-progress-circular--success .ux-progress-circular__bar {
-      stroke: var(--ux-success);
-    }
-
-    .ux-progress-circular--warning .ux-progress-circular__bar {
-      stroke: var(--ux-warning);
-    }
-
-    .ux-progress-circular--danger .ux-progress-circular__bar {
-      stroke: var(--ux-danger);
     }
 
     /* ========================================

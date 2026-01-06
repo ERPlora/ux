@@ -12,11 +12,15 @@
     ======================================== */
 
     .ux-spinner {
+      /* Internal color variable - set by .ux-color-* or direct */
+      --_spinner-color: var(--ux-variant-bg, var(--ux-primary));
+      --_spinner-color-rgb: var(--ux-variant-bg-rgb, var(--ux-primary-rgb));
+
       display: inline-block;
       width: var(--ux-spinner-size);
       height: var(--ux-spinner-size);
-      border: 3px solid rgba(var(--ux-primary-rgb), 0.2);
-      border-top-color: var(--ux-primary);
+      border: 3px solid rgba(var(--_spinner-color-rgb), 0.2);
+      border-top-color: var(--_spinner-color);
       border-radius: 50%;
       animation: ux-spinner-rotate 0.8s linear infinite;
     }
@@ -56,52 +60,13 @@
     }
 
     /* ========================================
-       Color Variants
+       Special Color Variants (light backgrounds)
     ======================================== */
 
-    .ux-spinner--primary {
-      border-color: rgba(var(--ux-primary-rgb), 0.2);
-      border-top-color: var(--ux-primary);
-    }
-
-    .ux-spinner--secondary {
-      border-color: rgba(var(--ux-secondary-rgb), 0.2);
-      border-top-color: var(--ux-secondary);
-    }
-
-    .ux-spinner--tertiary {
-      border-color: rgba(var(--ux-tertiary-rgb), 0.2);
-      border-top-color: var(--ux-tertiary);
-    }
-
-    .ux-spinner--success {
-      border-color: rgba(var(--ux-success-rgb), 0.2);
-      border-top-color: var(--ux-success);
-    }
-
-    .ux-spinner--warning {
-      border-color: rgba(var(--ux-warning-rgb), 0.2);
-      border-top-color: var(--ux-warning);
-    }
-
-    .ux-spinner--danger {
-      border-color: rgba(var(--ux-danger-rgb), 0.2);
-      border-top-color: var(--ux-danger);
-    }
-
-    .ux-spinner--dark {
-      border-color: rgba(var(--ux-dark-rgb), 0.2);
-      border-top-color: var(--ux-dark);
-    }
-
-    .ux-spinner--light {
-      border-color: rgba(255, 255, 255, 0.2);
-      border-top-color: #ffffff;
-    }
-
+    .ux-spinner--light,
     .ux-spinner--white {
-      border-color: rgba(255, 255, 255, 0.3);
-      border-top-color: #ffffff;
+      --_spinner-color: #ffffff;
+      --_spinner-color-rgb: 255, 255, 255;
     }
 
     /* ========================================
@@ -121,7 +86,7 @@
     .ux-spinner--dots span {
       width: 8px;
       height: 8px;
-      background-color: var(--ux-primary);
+      background-color: var(--_spinner-color);
       border-radius: 50%;
       animation: ux-spinner-dots 1.4s ease-in-out infinite both;
     }
@@ -172,7 +137,7 @@
     .ux-spinner--bars span {
       width: 4px;
       height: 100%;
-      background-color: var(--ux-primary);
+      background-color: var(--_spinner-color);
       border-radius: 2px;
       animation: ux-spinner-bars 1.2s ease-in-out infinite;
     }
@@ -273,7 +238,7 @@
     @media (prefers-reduced-motion: reduce) {
       .ux-spinner {
         animation: none;
-        border-top-color: var(--ux-primary);
+        border-top-color: var(--_spinner-color);
         opacity: 0.8;
       }
 

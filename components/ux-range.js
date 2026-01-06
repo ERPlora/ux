@@ -47,7 +47,8 @@
     .ux-range__fill {
       position: absolute;
       height: 100%;
-      background-color: var(--ux-primary);
+      /* Uses composition system: combine with .ux-color-* classes */
+      background-color: var(--ux-variant-bg, var(--ux-primary));
       border-radius: 2px;
       transition: width 0.05s ease-out;
     }
@@ -102,34 +103,6 @@
 
     .ux-range--disabled .ux-range__input {
       cursor: not-allowed;
-    }
-
-    /* ========================================
-       Color Variants
-    ======================================== */
-
-    .ux-range--primary .ux-range__fill {
-      background-color: var(--ux-primary);
-    }
-
-    .ux-range--secondary .ux-range__fill {
-      background-color: var(--ux-secondary);
-    }
-
-    .ux-range--tertiary .ux-range__fill {
-      background-color: var(--ux-tertiary);
-    }
-
-    .ux-range--success .ux-range__fill {
-      background-color: var(--ux-success);
-    }
-
-    .ux-range--warning .ux-range__fill {
-      background-color: var(--ux-warning);
-    }
-
-    .ux-range--danger .ux-range__fill {
-      background-color: var(--ux-danger);
     }
 
     /* ========================================

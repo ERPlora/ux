@@ -96,20 +96,14 @@
     }
 
     /* ========================================
-       Color Variants - Using CSS Custom Property
-       Consolidated pattern for easier theming
+       Color - Uses composition system
+       Default: primary (blue)
+       Override with .ux-color-* classes
     ======================================== */
 
     .ux-radio {
-      --ux-radio-color: var(--ux-primary);
+      --ux-radio-color: var(--ux-variant-bg, var(--ux-primary));
     }
-
-    .ux-radio--primary { --ux-radio-color: var(--ux-primary); }
-    .ux-radio--secondary { --ux-radio-color: var(--ux-secondary); }
-    .ux-radio--tertiary { --ux-radio-color: var(--ux-tertiary); }
-    .ux-radio--success { --ux-radio-color: var(--ux-success); }
-    .ux-radio--warning { --ux-radio-color: var(--ux-warning); }
-    .ux-radio--danger { --ux-radio-color: var(--ux-danger); }
 
     /* ========================================
        Sizes
