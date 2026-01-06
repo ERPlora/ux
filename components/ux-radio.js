@@ -116,23 +116,23 @@
     ======================================== */
 
     .ux-radio--sm .ux-radio__circle {
-      width: 18px;
-      height: 18px;
+      width: var(--ux-radio-size-sm);
+      height: var(--ux-radio-size-sm);
     }
 
     .ux-radio--sm .ux-radio__dot {
-      width: 8px;
-      height: 8px;
+      width: calc(var(--ux-radio-size-sm) * 0.5);
+      height: calc(var(--ux-radio-size-sm) * 0.5);
     }
 
     .ux-radio--lg .ux-radio__circle {
-      width: 28px;
-      height: 28px;
+      width: var(--ux-radio-size-lg);
+      height: var(--ux-radio-size-lg);
     }
 
     .ux-radio--lg .ux-radio__dot {
-      width: 16px;
-      height: 16px;
+      width: calc(var(--ux-radio-size-lg) * 0.6);
+      height: calc(var(--ux-radio-size-lg) * 0.6);
     }
 
     /* ========================================

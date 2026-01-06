@@ -83,12 +83,13 @@
       display: flex;
       align-items: center;
       gap: var(--ux-space-md);
+      min-height: var(--ux-toast-min-height);
       min-width: 200px;
-      max-width: 400px;
-      padding: var(--ux-space-md) var(--ux-space-lg);
+      max-width: var(--ux-toast-max-width);
+      padding: var(--ux-toast-padding);
       background-color: var(--ux-dark);
       color: var(--ux-dark-contrast);
-      border-radius: var(--ux-border-radius-lg);
+      border-radius: var(--ux-toast-border-radius);
       box-shadow: var(--ux-shadow-lg);
       pointer-events: auto;
       opacity: 0;

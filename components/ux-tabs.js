@@ -63,13 +63,13 @@
       align-items: center;
       justify-content: center;
       flex: 1;
-      min-width: 0;
-      min-height: 48px;
+      min-width: var(--ux-tab-min-width);
+      min-height: var(--ux-tabs-height);
       padding: var(--ux-space-sm) var(--ux-space-md);
       background: none;
       border: none;
       color: var(--ux-text-secondary);
-      font-size: var(--ux-font-size-sm);
+      font-size: var(--ux-tab-font-size);
       font-weight: 500;
       white-space: nowrap;
       cursor: pointer;

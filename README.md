@@ -209,6 +209,89 @@ UX Library uses **Bootstrap Grid** externally with Ionic-style spacing overrides
 }
 ```
 
+## Component Sizing System (Ionic-based)
+
+All components use CSS variables for sizing, making it easy to customize globally or per-theme. Override these variables to create compact, large, or custom-sized themes.
+
+### Button Sizing
+```css
+--ux-button-height: 3.1em;          /* Default height */
+--ux-button-height-sm: 2.1em;       /* Small variant */
+--ux-button-height-lg: 3.1em;       /* Large variant */
+--ux-button-min-height: 36px;
+--ux-button-padding-y: 13px;
+--ux-button-padding-x: 1em;
+--ux-button-border-radius: 14px;
+--ux-button-font-size: 1rem;
+```
+
+### Input Sizing
+```css
+--ux-input-height: 44px;            /* Standard iOS height */
+--ux-input-height-sm: 36px;
+--ux-input-height-lg: 52px;
+--ux-input-padding-y: 10px;
+--ux-input-padding-x: 16px;
+--ux-input-font-size: 16px;         /* Prevents zoom on iOS */
+```
+
+### Other Component Variables
+```css
+/* Avatar */
+--ux-avatar-size: 48px;
+--ux-avatar-size-sm: 36px;
+--ux-avatar-size-lg: 64px;
+
+/* FAB */
+--ux-fab-size: 56px;
+--ux-fab-size-sm: 40px;
+--ux-fab-size-lg: 72px;
+
+/* Chip */
+--ux-chip-height: 32px;
+--ux-chip-height-sm: 24px;
+--ux-chip-height-lg: 40px;
+
+/* Toggle (iOS-style) */
+--ux-toggle-width: 51px;
+--ux-toggle-height: 31px;
+--ux-toggle-handle-size: 27px;
+
+/* Checkbox/Radio */
+--ux-checkbox-size: 22px;
+--ux-radio-size: 20px;
+
+/* Segment */
+--ux-segment-min-height: 28px;
+--ux-segment-border-radius: 7px;
+
+/* Modal/Sheet/Toast */
+--ux-modal-max-width: 500px;
+--ux-modal-border-radius: 14px;
+--ux-toast-border-radius: 14px;
+```
+
+### Custom Theme Example
+```css
+/* Compact theme */
+.ux-theme-compact {
+  --ux-button-height: 2.5em;
+  --ux-button-min-height: 32px;
+  --ux-input-height: 36px;
+  --ux-avatar-size: 36px;
+  --ux-fab-size: 44px;
+}
+
+/* Large touch theme */
+.ux-theme-large {
+  --ux-button-height: 4em;
+  --ux-button-min-height: 52px;
+  --ux-input-height: 56px;
+  --ux-avatar-size: 64px;
+  --ux-fab-size: 72px;
+}
+```
+
 ## Browser Support
 
 Chrome 88+ | Firefox 78+ | Safari 14+ | Edge 88+

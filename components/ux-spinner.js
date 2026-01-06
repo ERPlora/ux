@@ -13,8 +13,8 @@
 
     .ux-spinner {
       display: inline-block;
-      width: 28px;
-      height: 28px;
+      width: var(--ux-spinner-size);
+      height: var(--ux-spinner-size);
       border: 3px solid rgba(var(--ux-primary-rgb), 0.2);
       border-top-color: var(--ux-primary);
       border-radius: 50%;
@@ -32,26 +32,26 @@
     ======================================== */
 
     .ux-spinner--xs {
-      width: 16px;
-      height: 16px;
+      width: calc(var(--ux-spinner-size-sm) * 0.8);
+      height: calc(var(--ux-spinner-size-sm) * 0.8);
       border-width: 2px;
     }
 
     .ux-spinner--sm {
-      width: 20px;
-      height: 20px;
+      width: var(--ux-spinner-size-sm);
+      height: var(--ux-spinner-size-sm);
       border-width: 2px;
     }
 
     .ux-spinner--lg {
-      width: 40px;
-      height: 40px;
+      width: var(--ux-spinner-size-lg);
+      height: var(--ux-spinner-size-lg);
       border-width: 4px;
     }
 
     .ux-spinner--xl {
-      width: 56px;
-      height: 56px;
+      width: calc(var(--ux-spinner-size-lg) * 1.4);
+      height: calc(var(--ux-spinner-size-lg) * 1.4);
       border-width: 5px;
     }
 

@@ -72,8 +72,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 56px;
-      height: 56px;
+      width: var(--ux-fab-size);
+      height: var(--ux-fab-size);
       padding: 0;
       background-color: var(--ux-primary);
       color: var(--ux-primary-contrast);
@@ -123,23 +123,23 @@
     ======================================== */
 
     .ux-fab__button--sm {
-      width: 40px;
-      height: 40px;
+      width: var(--ux-fab-size-sm);
+      height: var(--ux-fab-size-sm);
     }
 
     .ux-fab__button--sm .ux-fab__button-icon {
-      width: 20px;
-      height: 20px;
+      width: var(--ux-fab-icon-size-sm);
+      height: var(--ux-fab-icon-size-sm);
     }
 
     .ux-fab__button--lg {
-      width: 72px;
-      height: 72px;
+      width: var(--ux-fab-size-lg);
+      height: var(--ux-fab-size-lg);
     }
 
     .ux-fab__button--lg .ux-fab__button-icon {
-      width: 32px;
-      height: 32px;
+      width: var(--ux-fab-icon-size-lg);
+      height: var(--ux-fab-icon-size-lg);
     }
 
     /* ========================================

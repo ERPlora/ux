@@ -15,14 +15,14 @@
       display: inline-flex;
       align-items: center;
       gap: var(--ux-space-xs);
-      height: 32px;
-      padding: 0 var(--ux-space-md);
+      height: var(--ux-chip-height);
+      padding: 0 var(--ux-chip-padding-x);
       font-family: var(--ux-font-family);
-      font-size: var(--ux-font-size-sm);
+      font-size: var(--ux-chip-font-size);
       font-weight: 500;
       line-height: 1;
       white-space: nowrap;
-      border-radius: 16px;
+      border-radius: var(--ux-chip-border-radius);
       background-color: var(--ux-light);
       color: var(--ux-text);
       border: none;
@@ -163,17 +163,17 @@
     ======================================== */
 
     .ux-chip--sm {
-      height: 24px;
-      padding: 0 var(--ux-space-sm);
-      font-size: var(--ux-font-size-xs);
-      border-radius: 12px;
+      height: var(--ux-chip-height-sm);
+      padding: 0 calc(var(--ux-chip-padding-x) * 0.75);
+      font-size: calc(var(--ux-chip-font-size) * 0.85);
+      border-radius: calc(var(--ux-chip-height-sm) / 2);
     }
 
     .ux-chip--lg {
-      height: 40px;
-      padding: 0 var(--ux-space-lg);
-      font-size: var(--ux-font-size-base);
-      border-radius: 20px;
+      height: var(--ux-chip-height-lg);
+      padding: 0 calc(var(--ux-chip-padding-x) * 1.25);
+      font-size: calc(var(--ux-chip-font-size) * 1.15);
+      border-radius: calc(var(--ux-chip-height-lg) / 2);
     }
 
     /* ========================================
