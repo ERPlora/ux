@@ -32,12 +32,29 @@
        Navbar Variants
     ======================================== */
 
-    /* Translucent (iOS style) */
+    /* Translucent (iOS style - uses Liquid Glass variables) */
     .ux-navbar--translucent {
-      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
+    }
+
+    /* Glass (iOS 26 Liquid Glass style) */
+    .ux-navbar--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-navbar--translucent,
+      .ux-navbar--glass {
+        background-color: var(--ux-surface);
+      }
     }
 
     /* Transparent */

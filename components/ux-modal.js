@@ -294,6 +294,42 @@
     }
 
     /* ========================================
+       Glass Modal (iOS 26 Liquid Glass)
+    ======================================== */
+
+    .ux-modal--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-glass-radius-xl);
+      box-shadow:
+        var(--ux-glass-shadow),
+        var(--ux-glass-highlight);
+    }
+
+    .ux-modal--glass .ux-modal__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-modal--glass .ux-modal__footer {
+      border-top-color: var(--ux-glass-border);
+    }
+
+    @media (max-width: 767px) {
+      .ux-modal--glass {
+        border-radius: var(--ux-glass-radius-xl) var(--ux-glass-radius-xl) 0 0;
+      }
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-modal--glass {
+        background-color: var(--ux-surface);
+      }
+    }
+
+    /* ========================================
        Fullscreen Modal
     ======================================== */
 

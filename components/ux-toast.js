@@ -254,6 +254,72 @@
     }
 
     /* ========================================
+       Glass Toast (iOS 26 Liquid Glass)
+    ======================================== */
+
+    .ux-toast--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      color: var(--ux-text);
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-glass-radius-lg);
+      box-shadow:
+        var(--ux-glass-shadow),
+        var(--ux-glass-highlight);
+    }
+
+    .ux-toast--glass .ux-toast__action {
+      color: var(--ux-primary);
+    }
+
+    .ux-toast--glass .ux-toast__action:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .ux-toast--glass .ux-toast__close {
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-toast--glass .ux-toast__close:hover {
+      color: var(--ux-text);
+    }
+
+    .ux-toast--glass .ux-toast__progress {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .ux-toast--glass .ux-toast__progress-bar {
+      background-color: var(--ux-primary);
+    }
+
+    /* Dark mode glass toast */
+    @media (prefers-color-scheme: dark) {
+      .ux-toast--glass .ux-toast__action:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .ux-toast--glass .ux-toast__progress {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .ux-dark .ux-toast--glass .ux-toast__action:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .ux-dark .ux-toast--glass .ux-toast__progress {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Fallback */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-toast--glass {
+        background-color: var(--ux-surface);
+      }
+    }
+
+    /* ========================================
        Toast Progress Bar
     ======================================== */
 
