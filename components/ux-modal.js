@@ -1,6 +1,6 @@
 /**
  * UX Modal Component
- * Modales estilo iOS
+ * Modal centrado con soporte Bootstrap Grid
  * @requires ux-core.js
  */
 (function() {
@@ -16,15 +16,15 @@
       inset: 0;
       background-color: rgba(0, 0, 0, 0.4);
       z-index: var(--ux-z-modal-backdrop);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--ux-space-lg);
+      display: block;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       opacity: 0;
       visibility: hidden;
+      /* iOS-style fade - slightly faster than modal */
       transition:
-        opacity var(--ux-transition-base) var(--ux-ease),
-        visibility var(--ux-transition-base) var(--ux-ease);
+        opacity 300ms cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 300ms cubic-bezier(0.32, 0.72, 0, 1);
     }
 
     .ux-modal-backdrop--open {
@@ -32,12 +32,11 @@
       visibility: visible;
     }
 
-    /* Mobile: align to bottom */
-    @media (max-width: 767px) {
-      .ux-modal-backdrop {
-        align-items: flex-end;
-        padding: 0;
-      }
+    /* Faster fade out when closing */
+    .ux-modal-backdrop:not(.ux-modal-backdrop--open) {
+      transition:
+        opacity 250ms ease-in,
+        visibility 250ms ease-in;
     }
 
     /* ========================================
@@ -47,69 +46,151 @@
     .ux-modal {
       position: relative;
       width: 100%;
-      max-width: var(--ux-modal-max-width);
-      max-height: var(--ux-modal-max-height);
       background-color: var(--ux-surface);
       border-radius: var(--ux-modal-border-radius);
       box-shadow: var(--ux-shadow-xl);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transform: scale(0.95) translateY(20px);
+      /* iOS-style entrance: scale up with spring */
+      transform: scale(0.9);
       opacity: 0;
       will-change: transform, opacity;
+      /* iOS spring animation curve */
       transition:
-        transform var(--ux-transition-base) var(--ux-ease-spring),
-        opacity var(--ux-transition-base) var(--ux-ease);
+        transform 400ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 250ms ease-out;
     }
 
     .ux-modal-backdrop--open .ux-modal {
-      transform: scale(1) translateY(0);
+      transform: scale(1);
       opacity: 1;
       will-change: auto;
     }
 
-    /* Mobile: sheet style */
+    /* Closing animation - slightly faster */
+    .ux-modal-backdrop:not(.ux-modal-backdrop--open) .ux-modal {
+      transition:
+        transform 300ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 200ms ease-in;
+    }
+
+    /* Mobile: sheet style from bottom */
     @media (max-width: 767px) {
       .ux-modal {
-        max-width: none;
-        max-height: 90vh;
         border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
         transform: translateY(100%);
+        /* iOS sheet animation */
+        transition:
+          transform 400ms cubic-bezier(0.32, 0.72, 0, 1),
+          opacity 250ms ease-out;
       }
 
       .ux-modal-backdrop--open .ux-modal {
         transform: translateY(0);
       }
+
+      .ux-modal-backdrop:not(.ux-modal-backdrop--open) .ux-modal {
+        transition:
+          transform 350ms cubic-bezier(0.32, 0.72, 0, 1),
+          opacity 200ms ease-in;
+      }
     }
 
     /* ========================================
-       Modal Sizes
+       Full Height Modifier
     ======================================== */
 
-    .ux-modal--sm {
-      max-width: 360px;
-    }
-
-    .ux-modal--lg {
-      max-width: 680px;
-    }
-
-    .ux-modal--xl {
-      max-width: 900px;
-    }
-
-    .ux-modal--full {
-      max-width: none;
-      max-height: none;
-      width: 100vw;
+    .ux-modal--full-height {
       height: 100vh;
+      max-height: 100vh;
       border-radius: 0;
     }
 
     @media (max-width: 767px) {
-      .ux-modal--full {
-        max-height: 100vh;
+      .ux-modal--full-height {
+        border-radius: 0;
+      }
+    }
+
+    /* ========================================
+       Side Modals (Left/Right)
+       Full height panels from sides
+    ======================================== */
+
+    /* Backdrop for side modals - no grid centering needed */
+    .ux-modal-backdrop--side {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .ux-modal-backdrop--side.ux-modal-backdrop--left {
+      justify-content: flex-start;
+    }
+
+    .ux-modal-backdrop--side.ux-modal-backdrop--right {
+      justify-content: flex-end;
+    }
+
+    /* Side modal base */
+    .ux-modal--side {
+      position: relative;
+      height: 100vh;
+      max-height: 100vh;
+      border-radius: 0;
+      flex-shrink: 0;
+    }
+
+    /* Left side modal */
+    .ux-modal--left {
+      transform: translateX(-100%);
+      border-radius: 0 var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0;
+    }
+
+    .ux-modal-backdrop--open .ux-modal--left {
+      transform: translateX(0);
+    }
+
+    /* Right side modal */
+    .ux-modal--right {
+      transform: translateX(100%);
+      border-radius: var(--ux-border-radius-xl) 0 0 var(--ux-border-radius-xl);
+    }
+
+    .ux-modal-backdrop--open .ux-modal--right {
+      transform: translateX(0);
+    }
+
+    /* Side modal animations - iOS spring curve */
+    .ux-modal--left,
+    .ux-modal--right {
+      transition:
+        transform 400ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 300ms var(--ux-ease);
+    }
+
+    /* Mobile: side modals take full width */
+    @media (max-width: 767px) {
+      .ux-modal--left,
+      .ux-modal--right {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0;
+      }
+    }
+
+    /* Glass variant for side modals */
+    .ux-modal--glass.ux-modal--left {
+      border-radius: 0 var(--ux-glass-radius-xl) var(--ux-glass-radius-xl) 0;
+    }
+
+    .ux-modal--glass.ux-modal--right {
+      border-radius: var(--ux-glass-radius-xl) 0 0 var(--ux-glass-radius-xl);
+    }
+
+    @media (max-width: 767px) {
+      .ux-modal--glass.ux-modal--left,
+      .ux-modal--glass.ux-modal--right {
         border-radius: 0;
       }
     }
@@ -204,7 +285,27 @@
 
     /* Close X button */
     .ux-modal__close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      min-height: 44px;
+      padding: var(--ux-space-xs);
+      background: none;
+      border: none;
       color: var(--ux-text-secondary);
+      cursor: pointer;
+      border-radius: var(--ux-border-radius);
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-modal__close:hover {
+      opacity: 0.7;
+    }
+
+    .ux-modal__close:active {
+      opacity: 0.5;
     }
 
     /* ========================================
@@ -242,6 +343,14 @@
       padding: 0;
     }
 
+    .ux-modal__content--centered {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
     /* ========================================
        Modal Footer
     ======================================== */
@@ -273,32 +382,19 @@
     }
 
     /* ========================================
-       Card Modal (iOS style)
+       Modal Image
     ======================================== */
 
-    .ux-modal--card {
-      margin: var(--ux-space-md);
-    }
-
-    @media (max-width: 767px) {
-      .ux-modal--card {
-        margin: var(--ux-space-sm);
-        margin-bottom: 0;
-        max-height: calc(100vh - var(--ux-space-sm));
-        border-radius: var(--ux-border-radius-xl);
-      }
-
-      .ux-modal-backdrop--open .ux-modal--card {
-        transform: translateY(0);
-      }
+    .ux-modal__image {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
     }
 
     /* ========================================
        Glass Modal (iOS 26 Liquid Glass)
     ======================================== */
 
-    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
-    /* Modal uses heavier blur for prominence */
     .ux-modal--glass {
       backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
       -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
@@ -319,44 +415,6 @@
       .ux-modal--glass {
         border-radius: var(--ux-glass-radius-xl) var(--ux-glass-radius-xl) 0 0;
       }
-    }
-
-    /* ========================================
-       Fullscreen Modal
-    ======================================== */
-
-    .ux-modal--fullscreen {
-      max-width: 100%;
-      max-height: 100%;
-      width: 100%;
-      height: 100%;
-      border-radius: 0;
-      transform: translateY(100%);
-    }
-
-    .ux-modal-backdrop--open .ux-modal--fullscreen {
-      transform: translateY(0);
-    }
-
-    /* ========================================
-       Centered Content Modal (for alerts)
-    ======================================== */
-
-    .ux-modal--centered .ux-modal__content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    /* ========================================
-       Modal with Image
-    ======================================== */
-
-    .ux-modal__image {
-      width: 100%;
-      max-height: 200px;
-      object-fit: cover;
     }
 
     /* ========================================
@@ -390,6 +448,20 @@
         transform: translateY(0);
       }
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-modal-backdrop {
+        transition: none;
+      }
+
+      .ux-modal {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -406,7 +478,7 @@
   // ARIA: role="dialog", aria-modal="true", aria-labelledby, aria-describedby
   const modalComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
-    closeOnBackdrop: config.closeOnBackdrop !== false,
+    closeOnBackdrop: config.closeOnBackdrop !== false, // true by default
     closeOnEscape: config.closeOnEscape !== false,
     modalId: config.id || 'ux-modal-' + Math.random().toString(36).substr(2, 9),
     _previousActiveElement: null,

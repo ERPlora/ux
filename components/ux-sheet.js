@@ -479,6 +479,65 @@
       transition: none !important;
     }
 
+    /* ========================================
+       Bootstrap Grid Support
+       Use with: .ux-sheet-backdrop--grid .container .row .col-*
+       Higher specificity selectors to override base fixed positioning
+    ======================================== */
+
+    .ux-sheet-backdrop.ux-sheet-backdrop--grid {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow-x: hidden;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .ux-sheet-backdrop.ux-sheet-backdrop--grid > .container,
+    .ux-sheet-backdrop.ux-sheet-backdrop--grid > .container-fluid {
+      width: 100%;
+      max-width: 100%;
+      padding-bottom: calc(var(--ux-space-lg) + env(safe-area-inset-bottom));
+    }
+
+    .ux-sheet-backdrop.ux-sheet-backdrop--grid .row {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    /* Bottom sheet with grid - override fixed positioning */
+    .ux-sheet-backdrop.ux-sheet-backdrop--grid .ux-sheet {
+      position: static;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      transform: translateY(100%);
+      margin: 0;
+      width: 100%;
+    }
+
+    .ux-sheet-backdrop.ux-sheet-backdrop--grid.ux-sheet-backdrop--open .ux-sheet {
+      transform: translateY(0);
+    }
+
+    /* Action sheet with grid - override fixed positioning */
+    .ux-sheet-backdrop.ux-sheet-backdrop--grid .ux-action-sheet {
+      position: static;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      transform: translateY(calc(100% + var(--ux-space-lg)));
+      margin: 0;
+      width: 100%;
+      will-change: transform;
+    }
+
+    .ux-sheet-backdrop.ux-sheet-backdrop--grid.ux-sheet-backdrop--open .ux-action-sheet {
+      transform: translateY(0);
+      will-change: auto;
+    }
+
     /* Reduced motion support */
     @media (prefers-reduced-motion: reduce) {
       .ux-sheet-backdrop {
