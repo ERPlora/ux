@@ -121,33 +121,92 @@
       color: var(--ux-text-tertiary);
     }
 
-    /* With back button */
-    .ux-page-header--with-back .ux-page-header__title {
+    /* With back button - Navbar style (iOS) */
+    .ux-page-header--with-back {
+      display: flex;
       align-items: center;
+      min-height: 56px;
+      padding: 0 var(--ux-space-sm);
+      border-bottom: 0.5px solid var(--ux-glass-border);
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
     }
 
+    .ux-page-header--with-back .ux-page-header__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: inherit;
+      position: relative;
+    }
+
+    /* Back button - iOS style rounded */
     .ux-page-header__back {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      height: 36px;
-      margin-right: var(--ux-space-sm);
-      margin-left: calc(var(--ux-space-sm) * -1);
-      border-radius: var(--ux-border-radius);
-      color: var(--ux-text-secondary);
-      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+      min-width: var(--ux-touch-target);
+      min-height: var(--ux-touch-target);
+      padding: var(--ux-space-sm);
+      background: none;
+      border: none;
+      color: var(--ux-primary);
+      font-size: var(--ux-font-size-md);
+      font-weight: 500;
       cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      border-radius: var(--ux-border-radius);
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        opacity var(--ux-transition-fast) var(--ux-ease);
+      text-decoration: none;
+      flex-shrink: 0;
+      z-index: 1;
     }
 
     .ux-page-header__back:hover {
-      background-color: var(--ux-surface-secondary);
-      color: var(--ux-text);
+      background-color: rgba(var(--ux-primary-rgb), 0.1);
     }
 
-    .ux-page-header__back svg {
+    .ux-page-header__back:active {
+      opacity: 0.7;
+    }
+
+    .ux-page-header__back svg,
+    .ux-page-header__back .ionicon {
       width: 24px;
       height: 24px;
+    }
+
+    /* Title in center when with-back */
+    .ux-page-header--with-back .ux-page-header__title h1 {
+      position: absolute;
+      left: var(--ux-touch-target);
+      right: var(--ux-touch-target);
+      text-align: center;
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
+      pointer-events: none;
+    }
+
+    /* Actions in --with-back mode */
+    .ux-page-header--with-back .ux-page-header__actions {
+      margin-left: auto;
+      z-index: 1;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-page-header--with-back {
+        background-color: var(--ux-surface);
+      }
     }
 
     /* ========================================
