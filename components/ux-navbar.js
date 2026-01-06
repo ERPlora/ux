@@ -33,6 +33,7 @@
     ======================================== */
 
     /* Translucent (iOS style - uses Liquid Glass variables) */
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
     .ux-navbar--translucent {
       background-color: var(--ux-glass-bg);
       backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
@@ -41,18 +42,15 @@
     }
 
     /* Glass (iOS 26 Liquid Glass style) */
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
     .ux-navbar--glass {
-      background: var(--ux-glass-bg);
-      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
-      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
-      border-bottom: 0.5px solid var(--ux-glass-border);
       box-shadow: var(--ux-glass-highlight);
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
-    /* Fallback for browsers without backdrop-filter */
+    /* Fallback for browsers without backdrop-filter (translucent only - glass handled by core) */
     @supports not (backdrop-filter: blur(1px)) {
-      .ux-navbar--translucent,
-      .ux-navbar--glass {
+      .ux-navbar--translucent {
         background-color: var(--ux-surface);
       }
     }

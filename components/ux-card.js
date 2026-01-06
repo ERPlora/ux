@@ -262,6 +262,28 @@
     }
 
     /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-card--glass {
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-card--glass .ux-card__header--bordered {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-card--glass .ux-card__footer {
+      border-top-color: var(--ux-glass-border);
+    }
+
+    .ux-card--glass.ux-card--clickable:hover {
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight), 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    /* ========================================
        Clickable Card
     ======================================== */
 

@@ -375,16 +375,17 @@
     .ux-shell__main {
       flex: 1;
       margin-top: var(--ux-shell-navbar);
-      min-height: calc(100vh - var(--ux-shell-navbar));
-      min-height: calc(100dvh - var(--ux-shell-navbar));
+      height: calc(100vh - var(--ux-shell-navbar));
+      height: calc(100dvh - var(--ux-shell-navbar));
+      overflow: hidden;
       background-color: var(--ux-surface-secondary);
     }
 
     /* With toolbar */
     .ux-shell--toolbar .ux-shell__main {
       margin-top: calc(var(--ux-shell-navbar) + var(--ux-shell-toolbar));
-      min-height: calc(100vh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
-      min-height: calc(100dvh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
+      height: calc(100vh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
+      height: calc(100dvh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
     }
 
     /* With sidebar */

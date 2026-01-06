@@ -26,57 +26,9 @@
       white-space: nowrap;
       vertical-align: middle;
       border-radius: var(--ux-badge-border-radius);
-      background-color: var(--ux-primary);
-      color: var(--ux-primary-contrast);
-    }
-
-    /* ========================================
-       Color Variants
-    ======================================== */
-
-    .ux-badge--primary {
-      background-color: var(--ux-primary);
-      color: var(--ux-primary-contrast);
-    }
-
-    .ux-badge--secondary {
-      background-color: var(--ux-secondary);
-      color: var(--ux-secondary-contrast);
-    }
-
-    .ux-badge--tertiary {
-      background-color: var(--ux-tertiary);
-      color: var(--ux-tertiary-contrast);
-    }
-
-    .ux-badge--success {
-      background-color: var(--ux-success);
-      color: var(--ux-success-contrast);
-    }
-
-    .ux-badge--warning {
-      background-color: var(--ux-warning);
-      color: var(--ux-warning-contrast);
-    }
-
-    .ux-badge--danger {
-      background-color: var(--ux-danger);
-      color: var(--ux-danger-contrast);
-    }
-
-    .ux-badge--dark {
-      background-color: var(--ux-dark);
-      color: var(--ux-dark-contrast);
-    }
-
-    .ux-badge--medium {
-      background-color: var(--ux-medium);
-      color: var(--ux-medium-contrast);
-    }
-
-    .ux-badge--light {
-      background-color: var(--ux-light);
-      color: var(--ux-light-contrast);
+      /* Uses composition system: combine with .ux-color-* classes */
+      background-color: var(--ux-variant-bg, var(--ux-primary));
+      color: var(--ux-variant-color, var(--ux-primary-contrast));
     }
 
     /* ========================================
@@ -151,80 +103,23 @@
 
     /* ========================================
        Outline Variant
+       Use with .ux-color-*--outline classes
     ======================================== */
 
     .ux-badge--outline {
-      background-color: transparent;
-      border: 1px solid currentColor;
-    }
-
-    .ux-badge--outline.ux-badge--primary {
-      color: var(--ux-primary);
-      border-color: var(--ux-primary);
-    }
-
-    .ux-badge--outline.ux-badge--secondary {
-      color: var(--ux-secondary);
-      border-color: var(--ux-secondary);
-    }
-
-    .ux-badge--outline.ux-badge--success {
-      color: var(--ux-success);
-      border-color: var(--ux-success);
-    }
-
-    .ux-badge--outline.ux-badge--warning {
-      color: var(--ux-warning);
-      border-color: var(--ux-warning);
-    }
-
-    .ux-badge--outline.ux-badge--danger {
-      color: var(--ux-danger);
-      border-color: var(--ux-danger);
-    }
-
-    .ux-badge--outline.ux-badge--dark {
-      color: var(--ux-dark);
-      border-color: var(--ux-dark);
+      background-color: var(--ux-variant-bg, transparent);
+      color: var(--ux-variant-color, var(--ux-primary));
+      border: 1px solid var(--ux-variant-border, currentColor);
     }
 
     /* ========================================
        Soft Variant (tinted background)
+       Use with .ux-color-*--soft classes
     ======================================== */
 
-    .ux-badge--soft.ux-badge--primary {
-      background-color: rgba(var(--ux-primary-rgb), 0.15);
-      color: var(--ux-primary-shade);
-    }
-
-    .ux-badge--soft.ux-badge--secondary {
-      background-color: rgba(var(--ux-secondary-rgb), 0.15);
-      color: var(--ux-secondary-shade);
-    }
-
-    .ux-badge--soft.ux-badge--tertiary {
-      background-color: rgba(var(--ux-tertiary-rgb), 0.15);
-      color: var(--ux-tertiary-shade);
-    }
-
-    .ux-badge--soft.ux-badge--success {
-      background-color: rgba(var(--ux-success-rgb), 0.15);
-      color: var(--ux-success-shade);
-    }
-
-    .ux-badge--soft.ux-badge--warning {
-      background-color: rgba(var(--ux-warning-rgb), 0.15);
-      color: var(--ux-warning-shade);
-    }
-
-    .ux-badge--soft.ux-badge--danger {
-      background-color: rgba(var(--ux-danger-rgb), 0.15);
-      color: var(--ux-danger-shade);
-    }
-
-    .ux-badge--soft.ux-badge--dark {
-      background-color: rgba(var(--ux-dark-rgb), 0.1);
-      color: var(--ux-dark);
+    .ux-badge--soft {
+      background-color: var(--ux-variant-bg, rgba(var(--ux-primary-rgb), 0.15));
+      color: var(--ux-variant-color, var(--ux-primary-shade));
     }
 
     /* ========================================

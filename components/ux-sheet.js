@@ -235,14 +235,13 @@
        Glass Sheet (iOS 26 Liquid Glass)
     ======================================== */
 
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    /* Sheet uses heavier blur for prominence */
     .ux-sheet--glass {
-      background: var(--ux-glass-bg);
       backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
       -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
       border-top: 0.5px solid var(--ux-glass-border);
-      box-shadow:
-        var(--ux-glass-shadow),
-        var(--ux-glass-highlight);
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
     }
 
     .ux-sheet--glass .ux-sheet__header {
@@ -266,13 +265,6 @@
 
     .ux-dark .ux-sheet--glass .ux-sheet__handle-bar {
       background-color: rgba(255, 255, 255, 0.3);
-    }
-
-    /* Fallback for browsers without backdrop-filter */
-    @supports not (backdrop-filter: blur(1px)) {
-      .ux-sheet--glass {
-        background-color: var(--ux-surface);
-      }
     }
 
     /* ========================================
@@ -442,8 +434,9 @@
        Glass Action Sheet (iOS 26 Liquid Glass)
     ======================================== */
 
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    /* Action sheet uses heavier blur for prominence */
     .ux-action-sheet--glass .ux-action-sheet__group {
-      background: var(--ux-glass-bg);
       backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
       -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
       border: 0.5px solid var(--ux-glass-border);
@@ -471,13 +464,6 @@
 
     .ux-dark .ux-action-sheet--glass .ux-action-sheet__button:hover {
       background-color: rgba(255, 255, 255, 0.08);
-    }
-
-    /* Fallback */
-    @supports not (backdrop-filter: blur(1px)) {
-      .ux-action-sheet--glass .ux-action-sheet__group {
-        background-color: var(--ux-surface);
-      }
     }
 
     /* ========================================
