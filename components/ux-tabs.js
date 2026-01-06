@@ -43,6 +43,13 @@
       -webkit-backdrop-filter: blur(20px);
     }
 
+    /* Glass (iOS 26 Liquid Glass) */
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-tab-bar--glass {
+      box-shadow: var(--ux-glass-highlight);
+      border-top: 0.5px solid var(--ux-glass-border);
+    }
+
     .ux-tab-bar--primary {
       background-color: var(--ux-primary);
       border-bottom-color: rgba(0, 0, 0, 0.1);

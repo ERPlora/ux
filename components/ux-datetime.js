@@ -445,6 +445,35 @@
       padding: var(--ux-space-lg) var(--ux-space-xl);
       font-size: var(--ux-font-size-lg);
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-datetime--glass .ux-datetime__trigger {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-datetime--glass .ux-datetime__trigger:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-calendar--glass {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-calendar--glass .ux-calendar__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-calendar--glass .ux-calendar__day:hover:not(.ux-calendar__day--selected) {
+      background: var(--ux-glass-bg-thin);
+    }
   `;
 
   // Inject styles

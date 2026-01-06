@@ -655,6 +655,39 @@
     .ux-datatable--lg .ux-datatable__td {
       padding: var(--ux-space-lg) var(--ux-space-xl);
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-datatable--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+    }
+
+    .ux-datatable--glass .ux-datatable__th {
+      background: var(--ux-glass-bg-thin);
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-datatable--glass .ux-datatable__td {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-datatable--glass .ux-datatable__tr:hover .ux-datatable__td {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-datatable--glass .ux-datatable__tr--selected .ux-datatable__td {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-datatable--glass .ux-datatable__footer {
+      background: var(--ux-glass-bg-thin);
+      border-top-color: var(--ux-glass-border);
+    }
   `;
 
   // Icons

@@ -32,6 +32,18 @@
       border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
     }
 
+    /* Glass (iOS 26 Liquid Glass) */
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-toolbar--glass {
+      box-shadow: var(--ux-glass-highlight);
+      border-bottom: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-toolbar--glass.ux-toolbar--border-top {
+      border-bottom: none;
+      border-top: 0.5px solid var(--ux-glass-border);
+    }
+
     /* Transparent */
     .ux-toolbar--transparent {
       background-color: transparent;

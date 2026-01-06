@@ -262,6 +262,21 @@
       border-radius: 50%;
     }
 
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-checkbox--glass .ux-checkbox__box {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-checkbox--glass .ux-checkbox__input:checked + .ux-checkbox__box {
+      background: var(--ux-checkbox-color, var(--ux-primary));
+      border-color: var(--ux-checkbox-color, var(--ux-primary));
+    }
+
     /* Reduced motion support */
     @media (prefers-reduced-motion: reduce) {
       .ux-checkbox__box {

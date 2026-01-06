@@ -254,6 +254,26 @@
     }
 
     /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-textarea--glass .ux-textarea__field {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-textarea--glass .ux-textarea__field:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-textarea--glass .ux-textarea__field:focus {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    /* ========================================
        Resize Options
     ======================================== */
 
