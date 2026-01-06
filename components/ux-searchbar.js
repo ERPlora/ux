@@ -24,10 +24,10 @@
       display: flex;
       align-items: center;
       flex: 1;
-      min-height: 36px;
-      padding: 0 var(--ux-space-md);
+      min-height: var(--ux-searchbar-height);
+      padding: 0 var(--ux-searchbar-padding-x);
       background-color: var(--ux-surface-secondary);
-      border-radius: var(--ux-border-radius);
+      border-radius: var(--ux-searchbar-border-radius);
       transition:
         background-color var(--ux-transition-fast) var(--ux-ease),
         box-shadow var(--ux-transition-fast) var(--ux-ease);
@@ -56,10 +56,10 @@
     .ux-searchbar__input {
       flex: 1;
       width: 100%;
-      height: 36px;
+      height: var(--ux-searchbar-height);
       padding: 0 var(--ux-space-sm);
       font-family: var(--ux-font-family);
-      font-size: 16px; /* Prevent zoom on iOS */
+      font-size: var(--ux-input-font-size); /* Prevent zoom on iOS */
       color: var(--ux-text);
       background: transparent;
       border: none;

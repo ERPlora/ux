@@ -16,10 +16,12 @@
       display: flex;
       flex-direction: column;
       background-color: var(--ux-surface);
-      border-radius: var(--ux-border-radius-lg);
+      border-radius: var(--ux-card-border-radius);
       box-shadow: var(--ux-shadow-sm);
       overflow: hidden;
-      margin: var(--ux-space-md) 0;
+      margin: var(--ux-card-margin-x) 0;
+      min-height: var(--ux-card-min-height);
+      max-height: var(--ux-card-max-height);
     }
 
     /* ========================================
@@ -29,7 +31,7 @@
     .ux-card__header {
       display: flex;
       align-items: center;
-      padding: var(--ux-space-lg);
+      padding: var(--ux-card-padding);
       gap: var(--ux-space-md);
     }
 
@@ -108,7 +110,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      padding: var(--ux-space-lg);
+      padding: var(--ux-card-padding);
       background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
       color: white;
     }
@@ -126,7 +128,7 @@
     ======================================== */
 
     .ux-card__body {
-      padding: var(--ux-space-lg);
+      padding: var(--ux-card-padding);
     }
 
     .ux-card__body .ux-card__header,

@@ -47,10 +47,10 @@
     .ux-modal {
       position: relative;
       width: 100%;
-      max-width: 500px;
-      max-height: calc(100vh - var(--ux-space-2xl) * 2);
+      max-width: var(--ux-modal-max-width);
+      max-height: var(--ux-modal-max-height);
       background-color: var(--ux-surface);
-      border-radius: var(--ux-border-radius-xl);
+      border-radius: var(--ux-modal-border-radius);
       box-shadow: var(--ux-shadow-xl);
       overflow: hidden;
       display: flex;

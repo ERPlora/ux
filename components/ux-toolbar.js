@@ -14,8 +14,8 @@
     .ux-toolbar {
       display: flex;
       align-items: center;
-      min-height: 44px;
-      padding: var(--ux-space-sm) var(--ux-space-md);
+      min-height: var(--ux-toolbar-min-height);
+      padding: var(--ux-toolbar-padding-y) var(--ux-toolbar-padding-x);
       background-color: var(--ux-surface);
       border-bottom: 1px solid var(--ux-border-color);
     }

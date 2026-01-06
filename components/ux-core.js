@@ -432,8 +432,8 @@
       --ux-toolbar-height-sm: 36px;
       --ux-toolbar-height-lg: 56px;
       --ux-toolbar-min-height: 44px;
-      --ux-toolbar-padding-y: 3px;
-      --ux-toolbar-padding-x: 4px;
+      --ux-toolbar-padding-y: 8px;
+      --ux-toolbar-padding-x: 16px;
 
       /* Avatar Sizes - Based on Ionic iOS */
       --ux-avatar-size: 48px;

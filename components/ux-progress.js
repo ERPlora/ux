@@ -13,16 +13,16 @@
 
     .ux-progress {
       width: 100%;
-      height: 4px;
+      height: var(--ux-progress-height);
       background-color: var(--ux-light);
-      border-radius: 2px;
+      border-radius: var(--ux-progress-border-radius);
       overflow: hidden;
     }
 
     .ux-progress__bar {
       height: 100%;
       background-color: var(--ux-primary);
-      border-radius: 2px;
+      border-radius: var(--ux-progress-border-radius);
       transition: width var(--ux-transition-base) var(--ux-ease);
     }
 

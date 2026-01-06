@@ -15,8 +15,8 @@
       display: inline-flex;
       align-items: stretch;
       background-color: var(--ux-surface-secondary);
-      border-radius: var(--ux-border-radius);
-      padding: 2px;
+      border-radius: var(--ux-segment-border-radius);
+      padding: var(--ux-segment-padding);
       position: relative;
     }
 
@@ -35,18 +35,18 @@
       align-items: center;
       justify-content: center;
       flex: 1;
-      min-width: 0;
-      min-height: 32px;
+      min-width: var(--ux-segment-min-width);
+      min-height: var(--ux-segment-min-height);
       padding: var(--ux-space-sm) var(--ux-space-md);
       background: transparent;
       border: none;
       color: var(--ux-text-secondary);
       font-family: var(--ux-font-family);
-      font-size: var(--ux-font-size-sm);
+      font-size: var(--ux-segment-font-size);
       font-weight: 500;
       white-space: nowrap;
       cursor: pointer;
-      border-radius: calc(var(--ux-border-radius) - 2px);
+      border-radius: calc(var(--ux-segment-border-radius) - var(--ux-segment-padding));
       -webkit-tap-highlight-color: transparent;
       z-index: 1;
     }
@@ -71,10 +71,10 @@
 
     .ux-segment__indicator {
       position: absolute;
-      top: 2px;
-      bottom: 2px;
+      top: var(--ux-segment-padding);
+      bottom: var(--ux-segment-padding);
       background-color: var(--ux-surface);
-      border-radius: calc(var(--ux-border-radius) - 2px);
+      border-radius: calc(var(--ux-segment-border-radius) - var(--ux-segment-padding));
       box-shadow: var(--ux-shadow-sm);
       transition:
         left 300ms cubic-bezier(0.4, 0.0, 0.2, 1),

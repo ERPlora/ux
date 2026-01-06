@@ -16,8 +16,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
+      width: var(--ux-avatar-size);
+      height: var(--ux-avatar-size);
       border-radius: 50%;
       background-color: var(--ux-medium);
       color: var(--ux-medium-contrast);
@@ -40,38 +40,38 @@
     ======================================== */
 
     .ux-avatar--xs {
-      width: 24px;
-      height: 24px;
+      width: var(--ux-avatar-size-xs);
+      height: var(--ux-avatar-size-xs);
       font-size: var(--ux-font-size-xs);
     }
 
     .ux-avatar--sm {
-      width: 32px;
-      height: 32px;
+      width: var(--ux-avatar-size-sm);
+      height: var(--ux-avatar-size-sm);
       font-size: var(--ux-font-size-sm);
     }
 
     .ux-avatar--md {
-      width: 48px;
-      height: 48px;
+      width: var(--ux-avatar-size);
+      height: var(--ux-avatar-size);
       font-size: var(--ux-font-size-lg);
     }
 
     .ux-avatar--lg {
-      width: 64px;
-      height: 64px;
+      width: var(--ux-avatar-size-lg);
+      height: var(--ux-avatar-size-lg);
       font-size: var(--ux-font-size-xl);
     }
 
     .ux-avatar--xl {
-      width: 96px;
-      height: 96px;
+      width: var(--ux-avatar-size-xl);
+      height: var(--ux-avatar-size-xl);
       font-size: var(--ux-font-size-3xl);
     }
 
     .ux-avatar--2xl {
-      width: 128px;
-      height: 128px;
+      width: calc(var(--ux-avatar-size-xl) * 1.33);
+      height: calc(var(--ux-avatar-size-xl) * 1.33);
       font-size: var(--ux-font-size-4xl);
     }
 

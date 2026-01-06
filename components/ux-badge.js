@@ -15,17 +15,17 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 20px;
-      height: 20px;
-      padding: 0 6px;
+      min-width: var(--ux-badge-min-height);
+      height: var(--ux-badge-min-height);
+      padding: 0 var(--ux-badge-padding-x);
       font-family: var(--ux-font-family);
-      font-size: var(--ux-font-size-xs);
+      font-size: var(--ux-badge-font-size);
       font-weight: 600;
       line-height: 1;
       text-align: center;
       white-space: nowrap;
       vertical-align: middle;
-      border-radius: 10px;
+      border-radius: var(--ux-badge-border-radius);
       background-color: var(--ux-primary);
       color: var(--ux-primary-contrast);
     }

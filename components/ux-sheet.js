@@ -40,9 +40,9 @@
       left: 0;
       right: 0;
       bottom: 0;
-      max-height: 90vh;
+      max-height: var(--ux-modal-max-height);
       background-color: var(--ux-surface);
-      border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
+      border-radius: var(--ux-sheet-border-radius) var(--ux-sheet-border-radius) 0 0;
       box-shadow: var(--ux-shadow-xl);
       display: flex;
       flex-direction: column;
@@ -78,10 +78,10 @@
     }
 
     .ux-sheet__handle-bar {
-      width: 36px;
-      height: 4px;
+      width: var(--ux-sheet-handle-width);
+      height: var(--ux-sheet-handle-height);
       background-color: var(--ux-light-shade);
-      border-radius: 2px;
+      border-radius: calc(var(--ux-sheet-handle-height) / 2);
     }
 
     /* ========================================
