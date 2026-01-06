@@ -15492,43 +15492,24 @@
 
     .ux-action-sheet {
       position: fixed;
-      left: 50%;
+      left: var(--ux-space-sm);
+      right: var(--ux-space-sm);
       bottom: var(--ux-space-sm);
-      transform: translateX(-50%) translateY(calc(100% + var(--ux-space-lg)));
       display: flex;
       flex-direction: column;
       gap: var(--ux-space-sm);
       z-index: var(--ux-z-modal);
+      transform: translateY(calc(100% + var(--ux-space-lg)));
       /* iOS-style smooth transition for closing */
       transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
       padding-bottom: env(safe-area-inset-bottom);
       will-change: transform;
-      /* Responsive widths using Bootstrap grid percentages */
-      /* Mobile: 12 cols = ~100% minus padding */
-      width: calc(100% - var(--ux-space-md) * 2);
-      max-width: 100%;
     }
 
     .ux-sheet-backdrop--open .ux-action-sheet {
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(0);
       /* Smooth spring for opening */
       transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    /* Medium screens (md): 6 columns = 50% */
-    @media (min-width: 768px) {
-      .ux-action-sheet {
-        width: 50%;
-        max-width: 400px;
-      }
-    }
-
-    /* Large screens (lg): 4 columns = 33.333% */
-    @media (min-width: 992px) {
-      .ux-action-sheet {
-        width: 33.333%;
-        max-width: 360px;
-      }
     }
 
     .ux-action-sheet__group {
