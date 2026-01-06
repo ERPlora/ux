@@ -4,241 +4,300 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>UX Library - Documentation</title>
-  <script>
-    // Simple i18n system
-    window.UXi18n = {
-      lang: new URLSearchParams(location.search).get('lang') || localStorage.getItem('ux-lang') || 'es',
-      translations: {
-        es: {
-          heroSubtitle: 'Componentes iOS-style para web, optimizados para HTMX y Alpine.js',
-          quickStart: 'Quick Start',
-          components: 'Componentes',
-          quickStartTitle: 'Quick Start',
-          loadComponents: 'Carga solo los componentes que necesitas:',
-          features: 'Caracteristicas',
-          zeroBuild: 'Zero Build',
-          zeroBuildDesc: 'Sin compilacion',
-          selfContained: 'Autocontenido',
-          selfContainedDesc: 'CSS + JS en uno',
-          htmxCompatible: 'HTMX',
-          htmxCompatibleDesc: 'Compatible',
-          touchFirst: 'Touch-First',
-          touchFirstDesc: 'Optimizado mobile',
-          iosStyle: 'iOS Style',
-          iosStyleDesc: 'Pixel-perfect',
-          darkModeFeature: 'Dark Mode',
-          darkModeDesc: 'Claro y oscuro',
-          basic: 'Basicos',
-          forms: 'Formularios',
-          layout: 'Layout',
-          navigation: 'Navegacion',
-          overlay: 'Overlay',
-          feedback: 'Feedback',
-          interactive: 'Interactivos',
-          adminLayouts: 'Admin Layouts',
-          utilities: 'Clases Utility (ux-core.js)',
-          utilitiesDesc: 'Clases CSS incluidas en el core para uso rapido sin componentes adicionales.',
-          colorTheme: 'Tema de color',
-          lightMode: 'Modo claro',
-          darkMode: 'Modo oscuro'
-        },
-        en: {
-          heroSubtitle: 'iOS-style components for web, optimized for HTMX and Alpine.js',
-          quickStart: 'Quick Start',
-          components: 'Components',
-          quickStartTitle: 'Quick Start',
-          loadComponents: 'Load only the components you need:',
-          features: 'Features',
-          zeroBuild: 'Zero Build',
-          zeroBuildDesc: 'No compilation',
-          selfContained: 'Self-contained',
-          selfContainedDesc: 'CSS + JS in one',
-          htmxCompatible: 'HTMX',
-          htmxCompatibleDesc: 'Compatible',
-          touchFirst: 'Touch-First',
-          touchFirstDesc: 'Mobile optimized',
-          iosStyle: 'iOS Style',
-          iosStyleDesc: 'Pixel-perfect',
-          darkModeFeature: 'Dark Mode',
-          darkModeDesc: 'Light and dark',
-          basic: 'Basic',
-          forms: 'Forms',
-          layout: 'Layout',
-          navigation: 'Navigation',
-          overlay: 'Overlay',
-          feedback: 'Feedback',
-          interactive: 'Interactive',
-          adminLayouts: 'Admin Layouts',
-          utilities: 'Utility Classes (ux-core.js)',
-          utilitiesDesc: 'CSS classes included in core for quick use without additional components.',
-          colorTheme: 'Color theme',
-          lightMode: 'Light mode',
-          darkMode: 'Dark mode'
-        }
-      },
-      t(key) {
-        return this.translations[this.lang]?.[key] || this.translations.es[key] || key;
-      },
-      setLang(lang) {
-        this.lang = lang;
-        localStorage.setItem('ux-lang', lang);
-        location.search = `?lang=${lang}`;
-      },
-      apply() {
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-          el.textContent = this.t(el.dataset.i18n);
-        });
-        document.querySelectorAll('[data-i18n-title]').forEach(el => {
-          el.title = this.t(el.dataset.i18nTitle);
-        });
-        document.documentElement.lang = this.lang;
-      }
-    };
-    document.addEventListener('DOMContentLoaded', () => UXi18n.apply());
-  </script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-button.js"></script>
-  <script src="../components/ux-card.js"></script>
   <script src="../components/ux-list.js"></script>
   <script src="../components/ux-navbar.js"></script>
-  <script src="../components/ux-content.js"></script>
-  <script src="../components/ux-searchbar.js"></script>
   <script src="../components/ux-badge.js"></script>
+  <script src="../components/ux-searchbar.js"></script>
   <!-- Bootstrap Grid -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/themes.css">
 
-  <!-- Page-specific styles for component grid demo -->
   <style>
-    /* Feature card styling (compact cards for feature showcase) */
-    .ux-card--feature {
-      max-width: 10rem;
-      min-height: 6rem;
-      max-height: 8rem;
-      margin: 0 auto;
+    /* Split Layout */
+    .ux-split {
+      display: flex;
+      min-height: 100vh;
+      min-height: 100dvh;
     }
 
-    /* Component card styling (compact for grid display) */
-    .ux-card--component {
-      min-width: 4rem;
-      max-width: 8rem;
-      min-height: 5rem;
-      max-height: 7rem;
-      margin: 0 auto;
+    /* Sidebar */
+    .ux-split__sidebar {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--ux-surface);
+      border-right: 1px solid var(--ux-border-color);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: var(--ux-z-fixed);
+      transition: transform var(--ux-transition-base) var(--ux-ease);
     }
 
-    /* Responsive adjustments for component cards */
-    @media (max-width: 991.98px) {
-      .ux-card--component {
-        max-width: 100%;
-        max-height: none;
+    .ux-split__sidebar-header {
+      flex-shrink: 0;
+      padding: var(--ux-space-lg);
+      border-bottom: 1px solid var(--ux-border-color);
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-split__sidebar-search {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-split__sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--ux-space-sm);
+    }
+
+    /* Main area */
+    .ux-split__main {
+      flex: 1;
+      margin-left: 280px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    .ux-split__navbar {
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: var(--ux-z-sticky);
+    }
+
+    .ux-split__content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Backdrop for mobile */
+    .ux-split__backdrop {
+      display: none;
+    }
+
+    /* Menu item styles */
+    .menu-section {
+      padding: var(--ux-space-xs) var(--ux-space-md);
+      font-size: var(--ux-font-size-xs);
+      font-weight: 600;
+      color: var(--ux-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: var(--ux-space-md);
+    }
+
+    .menu-section:first-child {
+      margin-top: 0;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      color: var(--ux-text);
+      text-decoration: none;
+      border-radius: var(--ux-border-radius);
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast);
+    }
+
+    .menu-item:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    .menu-item.active {
+      background: rgba(var(--ux-primary-rgb), 0.12);
+      color: var(--ux-primary);
+    }
+
+    .menu-item__icon {
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+    }
+
+    .menu-item.active .menu-item__icon {
+      opacity: 1;
+    }
+
+    /* Loading state */
+    .content-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+      color: var(--ux-text-secondary);
+    }
+
+    /* Content frame */
+    .content-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* Mobile */
+    @media (max-width: 991px) {
+      .ux-split__sidebar {
+        transform: translateX(-100%);
+      }
+
+      .ux-split__sidebar.is-open {
+        transform: translateX(0);
+      }
+
+      .ux-split__main {
+        margin-left: 0;
+      }
+
+      .ux-split__backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: calc(var(--ux-z-fixed) - 1);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity var(--ux-transition-base), visibility var(--ux-transition-base);
+      }
+
+      .ux-split__backdrop.is-open {
+        opacity: 1;
+        visibility: visible;
       }
     }
   </style>
-  <script src="../components/ux-sheet.js"></script>
-  <script src="../components/ux-select.js"></script>
-  <link rel="stylesheet" href="../css/themes.css">
 </head>
-<body class="ux-app" x-data="uxTheme()">
-  <!-- Navbar -->
-  <nav class="ux-navbar ux-navbar--sticky">
-    <div class="ux-navbar__content">
-      <div class="ux-navbar__start">
-        <span class="ux-navbar__title">UX Library</span>
-        <span class="ux-badge ux-color-primary">v1.0</span>
-      </div>
-      <div class="ux-navbar__end">
-        <!-- Language Switcher -->
-        <div style="display: flex; gap: 4px; margin-right: 12px;">
-          <button onclick="UXi18n.setLang('es')" class="ux-button ux-button--clear ux-button--sm" style="padding: 4px 8px; min-width: auto; opacity: 0.7;" :style="UXi18n.lang === 'es' ? 'opacity: 1; font-weight: 600;' : ''">ES</button>
-          <button onclick="UXi18n.setLang('en')" class="ux-button ux-button--clear ux-button--sm" style="padding: 4px 8px; min-width: auto; opacity: 0.7;" :style="UXi18n.lang === 'en' ? 'opacity: 1; font-weight: 600;' : ''">EN</button>
-        </div>
-        <div class="ux-flex ux-gap-xs">
-          <!-- Dark/Light Toggle -->
-          <button class="ux-button ux-button--clear ux-button--icon" @click="toggleDarkMode()" :title="darkMode ? UXi18n.t('lightMode') : UXi18n.t('darkMode')">
-            <!-- Sun icon (dark mode active) -->
-            <svg x-show="darkMode" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            <!-- Moon icon (light mode active) -->
-            <svg x-show="!darkMode" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-            </svg>
-          </button>
+<body class="ux-app" x-data="docsApp()">
+  <div class="ux-split">
+    <!-- Backdrop (mobile) -->
+    <div class="ux-split__backdrop"
+         :class="{ 'is-open': sidebarOpen }"
+         @click="sidebarOpen = false"></div>
 
-          <!-- Color Theme Button -->
-          <button class="ux-button ux-button--clear ux-button--icon"
-                  @click="openThemeSelect()"
-                  :title="UXi18n.t('colorTheme')"
-                  aria-haspopup="dialog">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+    <!-- Sidebar -->
+    <aside class="ux-split__sidebar" :class="{ 'is-open': sidebarOpen }">
+      <div class="ux-split__sidebar-header">
+        <a href="index.html" style="font-size: var(--ux-font-size-xl); font-weight: 700; color: var(--ux-text); text-decoration: none; display: flex; align-items: center; gap: var(--ux-space-sm);">
+          UX Library
+          <span class="ux-badge ux-color-primary">v1.0</span>
+        </a>
+
+        <!-- Close button (mobile) -->
+        <button class="ux-button ux-button--clear ux-button--sm d-lg-none"
+                style="margin-left: auto;"
+                @click="sidebarOpen = false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="ux-split__sidebar-search">
+        <div class="ux-searchbar ux-searchbar--sm">
+          <span class="ux-searchbar__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
-          </button>
+          </span>
+          <input type="search"
+                 class="ux-searchbar__input"
+                 placeholder="Buscar componente..."
+                 x-model="searchQuery"
+                 @input="filterMenu()">
         </div>
       </div>
-    </div>
-  </nav>
 
-  <!-- Theme Select Alert Modal (ion-select interface) -->
-  <div class="ux-select-alert"
-       :class="{ 'ux-select-alert--open': themeSelectOpen }"
-       x-show="themeSelectOpen"
-       x-cloak>
-    <div class="ux-select-alert__backdrop" @click="themeSelectOpen = false"></div>
-    <div class="ux-select-alert__content" @click.stop>
-      <div class="ux-select-alert__header">
-        <h3 class="ux-select-alert__title" x-text="UXi18n.t('colorTheme')">Tema de color</h3>
-      </div>
-      <div class="ux-select-alert__options">
-        <template x-for="theme in themeOptions" :key="theme.value">
-          <div class="ux-select-alert__option"
-               :class="{ 'ux-select-alert__option--selected': tempColorTheme === theme.value }"
-               @click="tempColorTheme = theme.value">
-            <span class="ux-select-alert__option-radio"></span>
-            <span class="ux-select-alert__option-icon" style="margin-right: var(--ux-space-md);">
-              <span class="ux-avatar ux-avatar--xs" :style="'background-color: ' + theme.color"></span>
-            </span>
-            <span class="ux-select-alert__option-label" x-text="theme.label"></span>
+      <nav class="ux-split__sidebar-content">
+        <!-- Getting Started -->
+        <div class="menu-section" x-show="!searchQuery || 'getting started inicio'.includes(searchQuery.toLowerCase())">Getting Started</div>
+        <a class="menu-item"
+           :class="{ 'active': currentPage === 'home' }"
+           @click="loadPage('home', 'Home')">
+          <svg class="menu-item__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          Home
+        </a>
+
+        <!-- Basic Components -->
+        <template x-for="section in filteredMenu" :key="section.name">
+          <div>
+            <div class="menu-section" x-text="section.name"></div>
+            <template x-for="item in section.items" :key="item.page">
+              <a class="menu-item"
+                 :class="{ 'active': currentPage === item.page }"
+                 @click="loadPage(item.page, item.name)">
+                <svg class="menu-item__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-html="item.icon"></svg>
+                <span x-text="item.name"></span>
+              </a>
+            </template>
           </div>
         </template>
-      </div>
-      <div class="ux-select-alert__footer">
-        <button class="ux-select-alert__button ux-select-alert__button--cancel" @click="themeSelectOpen = false">
-          Cancel
-        </button>
-        <button class="ux-select-alert__button ux-select-alert__button--ok" @click="setColorTheme(tempColorTheme)">
-          OK
-        </button>
-      </div>
-    </div>
-  </div>
+      </nav>
+    </aside>
 
-  <!-- Hero -->
-  <div class="ux-card" style="margin: 0; border-radius: 0; background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-primary-shade) 100%); color: white; text-align: center;">
-    <div class="ux-card__content ux-py-xl">
-      <h1 class="ux-text-3xl ux-font-bold ux-mb-md">UX Library</h1>
-      <p class="ux-text-lg ux-mb-lg" style="opacity: 0.9; max-width: 600px; margin-left: auto; margin-right: auto;" data-i18n="heroSubtitle">Componentes iOS-style para web, optimizados para HTMX y Alpine.js</p>
-      <div class="ux-flex ux-justify-center ux-gap-md" style="flex-wrap: wrap;">
-        <a href="#quick-start" class="ux-button ux-button--light" data-i18n="quickStart">Quick Start</a>
-        <a href="#components" class="ux-button ux-button--outline" style="border-color: white; color: white;" data-i18n="components">Componentes</a>
-      </div>
-    </div>
-  </div>
+    <!-- Main -->
+    <main class="ux-split__main">
+      <!-- Navbar -->
+      <nav class="ux-split__navbar ux-navbar ux-navbar--glass">
+        <div class="ux-navbar__content">
+          <div class="ux-navbar__start">
+            <!-- Toggle sidebar (mobile) -->
+            <button class="ux-navbar__button d-lg-none" @click="sidebarOpen = true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="ux-navbar__center">
+            <span class="ux-navbar__title" x-text="pageTitle"></span>
+          </div>
+          <div class="ux-navbar__end">
+            <!-- Dark/Light Toggle -->
+            <button class="ux-navbar__button" @click="toggleDarkMode()">
+              <svg x-show="darkMode" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+              </svg>
+              <svg x-show="!darkMode" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </nav>
 
-  <div class="ux-content">
-    <!-- Quick Start -->
-    <section id="quick-start" class="ux-padding">
-      <h2 class="ux-text-xl ux-font-semibold ux-mb-lg" data-i18n="quickStartTitle">Quick Start</h2>
+      <!-- Content -->
+      <div class="ux-split__content">
+        <!-- Home content -->
+        <div x-show="currentPage === 'home'" style="padding: var(--ux-space-xl);">
+          <div style="max-width: 800px; margin: 0 auto;">
+            <h1 class="ux-text-2xl ux-font-bold ux-mb-md">UX Library</h1>
+            <p class="ux-text-lg ux-text-secondary ux-mb-xl">
+              Componentes iOS-style para web, optimizados para HTMX y Alpine.js. Zero-build, touch-first, y completamente autocontenidos.
+            </p>
 
-      <div class="ux-card">
-        <div class="ux-card__content">
-          <p class="ux-text-secondary ux-mb-md" data-i18n="loadComponents">Carga solo los componentes que necesitas:</p>
-          <pre style="background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-size: var(--ux-font-size-sm); font-family: 'SF Mono', Monaco, monospace;"><code>&lt;!-- Dependencias opcionales --&gt;
-&lt;script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"&gt;&lt;/script&gt;
-&lt;script src="https://unpkg.com/htmx.org@1.x.x"&gt;&lt;/script&gt;
-
-&lt;!-- Core (requerido) --&gt;
+            <!-- Quick Start -->
+            <div class="ux-card ux-mb-xl">
+              <div class="ux-card__header">
+                <h2 class="ux-card__title">Quick Start</h2>
+              </div>
+              <div class="ux-card__content">
+                <pre style="background: var(--ux-surface-secondary); padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-size: var(--ux-font-size-sm);"><code>&lt;!-- Core (requerido) --&gt;
 &lt;script src="components/ux-core.js"&gt;&lt;/script&gt;
 
 &lt;!-- Componentes individuales --&gt;
@@ -246,1165 +305,268 @@
 &lt;script src="components/ux-modal.js"&gt;&lt;/script&gt;
 
 &lt;!-- O cargar todos --&gt;
-&lt;script src="ux-all.js"&gt;&lt;/script&gt;</code></pre>
+&lt;script src="dist/ux.min.js"&gt;&lt;/script&gt;
+
+&lt;!-- Dependencias opcionales --&gt;
+&lt;script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"&gt;&lt;/script&gt;</code></pre>
+              </div>
+            </div>
+
+            <!-- Features -->
+            <h2 class="ux-text-lg ux-font-semibold ux-mb-md">Caracteristicas</h2>
+            <div class="row ux-gap-md ux-mb-xl">
+              <div class="col-6 col-md-4">
+                <div class="ux-card">
+                  <div class="ux-card__content ux-text-center">
+                    <div class="ux-text-2xl ux-mb-sm">&#9889;</div>
+                    <div class="ux-font-semibold">Zero Build</div>
+                    <div class="ux-text-sm ux-text-secondary">Sin compilacion</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-4">
+                <div class="ux-card">
+                  <div class="ux-card__content ux-text-center">
+                    <div class="ux-text-2xl ux-mb-sm">&#128230;</div>
+                    <div class="ux-font-semibold">Autocontenido</div>
+                    <div class="ux-text-sm ux-text-secondary">CSS + JS en uno</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-4">
+                <div class="ux-card">
+                  <div class="ux-card__content ux-text-center">
+                    <div class="ux-text-2xl ux-mb-sm">&#128241;</div>
+                    <div class="ux-font-semibold">Touch-First</div>
+                    <div class="ux-text-sm ux-text-secondary">Optimizado mobile</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-4">
+                <div class="ux-card">
+                  <div class="ux-card__content ux-text-center">
+                    <div class="ux-text-2xl ux-mb-sm">&#127822;</div>
+                    <div class="ux-font-semibold">iOS Style</div>
+                    <div class="ux-text-sm ux-text-secondary">Pixel-perfect</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-4">
+                <div class="ux-card">
+                  <div class="ux-card__content ux-text-center">
+                    <div class="ux-text-2xl ux-mb-sm">&#127769;</div>
+                    <div class="ux-font-semibold">Dark Mode</div>
+                    <div class="ux-text-sm ux-text-secondary">Claro y oscuro</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-4">
+                <div class="ux-card">
+                  <div class="ux-card__content ux-text-center">
+                    <div class="ux-text-2xl ux-mb-sm">&#128736;</div>
+                    <div class="ux-font-semibold">HTMX Ready</div>
+                    <div class="ux-text-sm ux-text-secondary">Compatible</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Component count -->
+            <div class="ux-card" style="background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-primary-shade) 100%); color: white;">
+              <div class="ux-card__content ux-text-center">
+                <div class="ux-text-3xl ux-font-bold ux-mb-sm">40+</div>
+                <div>Componentes disponibles</div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- iframe for component pages -->
+        <iframe x-show="currentPage !== 'home'"
+                :src="currentPage !== 'home' ? currentPage + '.html' : ''"
+                class="content-frame"
+                @load="loading = false"></iframe>
       </div>
-
-      <h3 class="ux-text-lg ux-font-semibold ux-mb-md ux-mt-xl" data-i18n="features">Caracteristicas</h3>
-
-      <div class="row ux-gap-md justify-content-center">
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <div class="ux-card ux-card--clickable ux-card--feature ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-success ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium" data-i18n="zeroBuild">Zero Build</div>
-              <div class="ux-text-xs ux-text-secondary" data-i18n="zeroBuildDesc">Sin compilacion</div>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <div class="ux-card ux-card--clickable ux-card--feature ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium" data-i18n="selfContained">Autocontenido</div>
-              <div class="ux-text-xs ux-text-secondary" data-i18n="selfContainedDesc">CSS + JS en uno</div>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <div class="ux-card ux-card--clickable ux-card--feature ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-warning ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium" data-i18n="htmxCompatible">HTMX</div>
-              <div class="ux-text-xs ux-text-secondary" data-i18n="htmxCompatibleDesc">Compatible</div>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <div class="ux-card ux-card--clickable ux-card--feature ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium" data-i18n="touchFirst">Touch-First</div>
-              <div class="ux-text-xs ux-text-secondary" data-i18n="touchFirstDesc">Optimizado mobile</div>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <div class="ux-card ux-card--clickable ux-card--feature ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium" data-i18n="iosStyle">iOS Style</div>
-              <div class="ux-text-xs ux-text-secondary" data-i18n="iosStyleDesc">Pixel-perfect</div>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <div class="ux-card ux-card--clickable ux-card--feature ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-info ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium" data-i18n="darkModeFeature">Dark Mode</div>
-              <div class="ux-text-xs ux-text-secondary" data-i18n="darkModeDesc">Claro y oscuro</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Components -->
-    <section id="components" class="ux-padding">
-      <h2 class="ux-text-xl ux-font-semibold ux-mb-lg" data-i18n="components">Componentes</h2>
-
-      <!-- Basic -->
-      <span class="ux-badge ux-badge--soft ux-color-primary--soft ux-mb-md" style="display: inline-block;" data-i18n="basic">Basicos</span>
-      <div class="row ux-gap-md ux-mb-xl">
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="button.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="6" width="18" height="12" rx="2" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Button</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="badge.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="8" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Badge</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="chip.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="2" y="8" width="20" height="8" rx="4" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Chip</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="spinner.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="8" stroke-width="2" stroke-dasharray="40" stroke-dashoffset="10"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Spinner</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="progress.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="2" y="10" width="20" height="4" rx="2" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Progress</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="avatar.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="8" r="4" stroke-width="2"/>
-                <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Avatar</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="img.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/>
-                <circle cx="8" cy="8" r="2" stroke-width="2"/>
-                <path d="M21 15l-5-5L5 21" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Img</div>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      <!-- Form -->
-      <span class="ux-badge ux-badge--soft ux-color-success--soft ux-mb-md" style="display: inline-block;" data-i18n="forms">Formularios</span>
-      <div class="row ux-gap-md ux-mb-xl">
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="input.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="6" width="18" height="12" rx="2" stroke-width="2"/>
-                <path d="M7 12h4" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Input</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="checkbox.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/>
-                <path d="M8 12l3 3 5-6" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Checkbox</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="radio.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="8" stroke-width="2"/>
-                <circle cx="12" cy="12" r="4" fill="currentColor"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Radio</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="toggle.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="2" y="8" width="20" height="8" rx="4" stroke-width="2"/>
-                <circle cx="17" cy="12" r="3" fill="currentColor"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Toggle</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="range.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 12h16" stroke-width="2"/>
-                <circle cx="14" cy="12" r="3" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Range</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="select.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="6" width="18" height="12" rx="2" stroke-width="2"/>
-                <path d="M9 10l3 3 3-3" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Select</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="searchbar.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="10" cy="10" r="6" stroke-width="2"/>
-                <path d="M14 14l6 6" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Searchbar</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="textarea.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/>
-                <path d="M7 8h10M7 12h8M7 16h6" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Textarea</div>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      <!-- Layout -->
-      <span class="ux-badge ux-badge--soft ux-color-warning--soft ux-mb-md" style="display: inline-block;" data-i18n="layout">Layout</span>
-      <div class="row ux-gap-md ux-mb-xl">
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="card.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Card</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="list.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">List</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="content.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/>
-                <path d="M3 9h18" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Content</div>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      <!-- Navigation -->
-      <span class="ux-badge ux-badge--soft ux-color-tertiary--soft ux-mb-md" style="display: inline-block;" data-i18n="navigation">Navegacion</span>
-      <div class="row ux-gap-md ux-mb-xl">
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="navbar.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="2" y="4" width="20" height="6" rx="1" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Navbar</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="toolbar.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="2" y="14" width="20" height="6" rx="1" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Toolbar</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="tabs.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 18h16M4 18V8h5l2-3h6v13" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Tabs</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="segment.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="2" y="8" width="20" height="8" rx="2" stroke-width="2"/>
-                <path d="M9 8v8M15 8v8" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Segment</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="breadcrumbs.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 12h4m4 0h4m4 0h0" stroke-width="2"/>
-                <path d="M10 8l4 4-4 4" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Breadcrumbs</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="menu.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Menu</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="back-button.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M15 18l-6-6 6-6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Back Button</div>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      <!-- Overlay -->
-      <span class="ux-badge ux-badge--soft ux-color-danger--soft ux-mb-md" style="display: inline-block;" data-i18n="overlay">Overlay</span>
-      <div class="row ux-gap-md ux-mb-xl">
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="modal.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/>
-                <path d="M4 9h16" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Modal</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="sheet.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 14h16v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6z" stroke-width="2"/>
-                <path d="M10 14V4h4v10" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Sheet</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="alert.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 9v4m0 4h.01" stroke-width="2"/>
-                <circle cx="12" cy="12" r="9" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Alert</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="toast.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="14" width="18" height="6" rx="2" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Toast</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="popover.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="4" y="4" width="16" height="12" rx="2" stroke-width="2"/>
-                <path d="M12 16l-3 4h6l-3-4z" fill="currentColor"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Popover</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="loading.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="8" stroke-width="2" stroke-dasharray="40" stroke-dashoffset="10"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Loading</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="picker.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/>
-                <path d="M4 10h16M4 14h16" stroke-width="2"/>
-                <path d="M12 7v10" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Picker</div>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      <!-- Feedback -->
-      <span class="ux-badge ux-badge--soft ux-color-secondary--soft ux-mb-md" style="display: inline-block;" data-i18n="feedback">Feedback</span>
-      <div class="row ux-gap-md ux-mb-xl">
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="skeleton.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="6" width="18" height="4" rx="1" stroke-width="2" stroke-dasharray="4"/>
-                <rect x="3" y="14" width="12" height="4" rx="1" stroke-width="2" stroke-dasharray="4"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Skeleton</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="fab.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="8" stroke-width="2"/>
-                <path d="M12 8v8M8 12h8" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">FAB</div>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      <!-- Interactive -->
-      <span class="ux-badge ux-badge--soft ux-color-primary--soft ux-mb-md" style="display: inline-block;" data-i18n="interactive">Interactivos</span>
-      <div class="row ux-gap-md ux-mb-xl">
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="accordion.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="4" rx="1" stroke-width="2"/>
-                <rect x="3" y="10" width="18" height="4" rx="1" stroke-width="2"/>
-                <rect x="3" y="16" width="18" height="4" rx="1" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Accordion</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="datetime.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
-                <path d="M3 10h18M8 2v4M16 2v4" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Datetime</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="infinite-scroll.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 4v16m0 0l-4-4m4 4l4-4" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Infinite Scroll</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="refresher.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 12a8 8 0 0116 0" stroke-width="2"/>
-                <path d="M20 4v4h-4" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Refresher</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="reorder.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M8 6h8M8 12h8M8 18h8" stroke-width="2"/>
-                <circle cx="4" cy="6" r="1" fill="currentColor"/>
-                <circle cx="4" cy="12" r="1" fill="currentColor"/>
-                <circle cx="4" cy="18" r="1" fill="currentColor"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Reorder</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="swipe.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Swipe</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="carousel.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="2" y="6" width="20" height="12" rx="2" stroke-width="2"/>
-                <path d="M6 12l3-3m0 0l3 3m-3-3v6" stroke-width="2" transform="rotate(90 9 12)"/>
-                <path d="M18 12l-3-3m0 0l-3 3m3-3v6" stroke-width="2" transform="rotate(-90 15 12)"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Carousel</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="rating.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Rating</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="datatable.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/>
-                <path d="M3 9h18M3 15h18M9 9v12M15 9v12" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">DataTable</div>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      <!-- Admin Layouts -->
-      <span class="ux-badge ux-badge--soft ux-color-dark--soft ux-mb-md" style="display: inline-block;" data-i18n="adminLayouts">Admin Layouts</span>
-      <div class="row ux-gap-md ux-mb-xl">
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="shell.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="2" y="3" width="20" height="18" rx="2" stroke-width="2"/>
-                <path d="M2 8h20M8 8v13" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Shell</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="panel.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/>
-                <path d="M3 9h18M12 9v12" stroke-width="2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">Panel</div>
-            </div>
-          </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <a href="pwa.html" class="ux-card ux-card--clickable ux-card--component ux-text-center">
-            <div class="ux-card__content">
-              <svg class="ux-icon ux-icon--lg ux-text-primary ux-mb-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11V7m0 0l-2 2m2-2l2 2"/>
-              </svg>
-              <div class="ux-text-sm ux-font-medium">PWA</div>
-            </div>
-          </a>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- Component Sizing System -->
-    <section id="sizing-system" class="ux-padding">
-      <h2 class="ux-text-xl ux-font-semibold ux-mb-lg">Sistema de Tamaños (Ionic-based)</h2>
-      <p class="ux-text-secondary ux-mb-lg">
-        Todos los componentes usan variables CSS para sizing. Puedes sobrescribir estas variables para crear temas compactos, grandes o personalizados.
-      </p>
-
-      <div class="row ux-gap-md ux-mb-xl">
-        <!-- Button Sizing -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Button</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>--ux-button-height</code> <span class="ux-text-secondary">3.1em</span><br>
-              <code>--ux-button-min-height</code> <span class="ux-text-secondary">36px</span><br>
-              <code>--ux-button-padding-y/x</code><br>
-              <code>--ux-button-border-radius</code> <span class="ux-text-secondary">14px</span><br>
-              <code>--ux-button-font-size</code> <span class="ux-text-secondary">1rem</span><br>
-              <span class="ux-text-xs ux-text-tertiary">+ variantes -sm, -lg</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Input Sizing -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Input</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>--ux-input-height</code> <span class="ux-text-secondary">44px</span><br>
-              <code>--ux-input-min-height</code> <span class="ux-text-secondary">44px</span><br>
-              <code>--ux-input-padding-y/x</code><br>
-              <code>--ux-input-font-size</code> <span class="ux-text-secondary">16px</span><br>
-              <span class="ux-text-xs ux-text-tertiary">+ variantes -sm (36px), -lg (52px)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Toggle/Checkbox/Radio -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Toggle / Checkbox / Radio</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>--ux-toggle-width/height</code> <span class="ux-text-secondary">51×31px</span><br>
-              <code>--ux-toggle-handle-size</code> <span class="ux-text-secondary">27px</span><br>
-              <code>--ux-checkbox-size</code> <span class="ux-text-secondary">22px</span><br>
-              <code>--ux-radio-size</code> <span class="ux-text-secondary">20px</span><br>
-              <span class="ux-text-xs ux-text-tertiary">+ variantes -sm, -lg</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Avatar -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Avatar</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>--ux-avatar-size</code> <span class="ux-text-secondary">48px</span><br>
-              <code>--ux-avatar-size-xs</code> <span class="ux-text-secondary">24px</span><br>
-              <code>--ux-avatar-size-sm</code> <span class="ux-text-secondary">36px</span><br>
-              <code>--ux-avatar-size-lg</code> <span class="ux-text-secondary">64px</span><br>
-              <code>--ux-avatar-size-xl</code> <span class="ux-text-secondary">96px</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- FAB -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">FAB</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>--ux-fab-size</code> <span class="ux-text-secondary">56px</span><br>
-              <code>--ux-fab-size-sm</code> <span class="ux-text-secondary">40px</span><br>
-              <code>--ux-fab-size-lg</code> <span class="ux-text-secondary">72px</span><br>
-              <code>--ux-fab-icon-size</code> <span class="ux-text-secondary">28px</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Chip/Badge -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Chip / Badge</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>--ux-chip-height</code> <span class="ux-text-secondary">32px</span><br>
-              <code>--ux-chip-height-sm/lg</code> <span class="ux-text-secondary">24/40px</span><br>
-              <code>--ux-badge-min-height</code> <span class="ux-text-secondary">20px</span><br>
-              <code>--ux-badge-border-radius</code> <span class="ux-text-secondary">10px</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Toolbar/Segment/Tabs -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Toolbar / Segment / Tabs</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>--ux-toolbar-min-height</code> <span class="ux-text-secondary">44px</span><br>
-              <code>--ux-segment-min-height</code> <span class="ux-text-secondary">28px</span><br>
-              <code>--ux-segment-border-radius</code> <span class="ux-text-secondary">7px</span><br>
-              <code>--ux-tabs-height</code> <span class="ux-text-secondary">50px</span><br>
-              <code>--ux-tab-min-width</code> <span class="ux-text-secondary">64px</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal/Sheet/Toast -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Modal / Sheet / Toast</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>--ux-modal-max-width</code> <span class="ux-text-secondary">500px</span><br>
-              <code>--ux-modal-border-radius</code> <span class="ux-text-secondary">14px</span><br>
-              <code>--ux-sheet-border-radius</code> <span class="ux-text-secondary">14px</span><br>
-              <code>--ux-toast-border-radius</code> <span class="ux-text-secondary">14px</span><br>
-              <code>--ux-toast-max-width</code> <span class="ux-text-secondary">400px</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Other Components -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Otros</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>--ux-card-padding</code> <span class="ux-text-secondary">16px</span><br>
-              <code>--ux-card-border-radius</code> <span class="ux-text-secondary">8px</span><br>
-              <code>--ux-searchbar-height</code> <span class="ux-text-secondary">36px</span><br>
-              <code>--ux-spinner-size</code> <span class="ux-text-secondary">28px</span><br>
-              <code>--ux-progress-height</code> <span class="ux-text-secondary">4px</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Custom Theme Example -->
-      <h3 class="ux-text-lg ux-font-semibold ux-mb-md">Ejemplo: Tema Personalizado</h3>
-      <div class="ux-card">
-        <div class="ux-card__content">
-          <pre style="background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-size: var(--ux-font-size-sm); font-family: 'SF Mono', Monaco, monospace;"><code>/* Tema compacto */
-.ux-theme-compact {
-  --ux-button-height: 2.5em;
-  --ux-button-min-height: 32px;
-  --ux-input-height: 36px;
-  --ux-avatar-size: 36px;
-  --ux-fab-size: 44px;
-  --ux-chip-height: 24px;
-}
-
-/* Tema con controles grandes */
-.ux-theme-large {
-  --ux-button-height: 4em;
-  --ux-button-min-height: 52px;
-  --ux-input-height: 56px;
-  --ux-avatar-size: 64px;
-  --ux-fab-size: 72px;
-  --ux-checkbox-size: 28px;
-}</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <!-- Color System -->
-    <section id="color-system" class="ux-padding">
-      <h2 class="ux-text-xl ux-font-semibold ux-mb-lg">Sistema de Colores (3 Capas)</h2>
-      <p class="ux-text-secondary ux-mb-lg">
-        Arquitectura de colores escalable y mantenible. Los plugins solo deben usar tokens semánticos (Capa 2).
-      </p>
-
-      <div class="row ux-gap-md ux-mb-xl">
-        <!-- Layer 1 -->
-        <div class="col-12 col-md-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Capa 1: Primitivos</h3>
-            </div>
-            <div class="ux-card__content">
-              <p class="ux-text-secondary ux-mb-md">Colores base (uso interno)</p>
-              <code>--ux-gray-{50-950}</code><br>
-              <code>--ux-blue-{50-900}</code><br>
-              <code>--ux-red-{50-900}</code><br>
-              <code>--ux-green-{50-900}</code><br>
-              <code>--ux-amber-{50-900}</code><br>
-              <code>--ux-purple-{50-900}</code><br>
-              <code>--ux-teal-{50-900}</code><br>
-              <span class="ux-text-secondary">+ cyan, indigo, orange, rose, violet, emerald, slate</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Layer 2 -->
-        <div class="col-12 col-md-4">
-          <div class="ux-card" style="border: 2px solid var(--ux-primary);">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Capa 2: Semánticos</h3>
-              <span class="ux-badge ux-color-primary">Usar estos</span>
-            </div>
-            <div class="ux-card__content">
-              <p class="ux-text-secondary ux-mb-md">Tokens con significado</p>
-              <code>--ux-primary</code> <span class="ux-text-secondary">+ shade/tint</span><br>
-              <code>--ux-secondary</code><br>
-              <code>--ux-success</code><br>
-              <code>--ux-warning</code><br>
-              <code>--ux-danger</code><br>
-              <code>--ux-text</code> <span class="ux-text-secondary">+ secondary/tertiary</span><br>
-              <code>--ux-surface</code> <span class="ux-text-secondary">+ secondary</span><br>
-              <code>--ux-border-color</code>
-            </div>
-          </div>
-        </div>
-
-        <!-- Layer 3 -->
-        <div class="col-12 col-md-4">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Capa 3: Componentes</h3>
-            </div>
-            <div class="ux-card__content">
-              <p class="ux-text-secondary ux-mb-md">Tokens específicos</p>
-              <code>--ux-button-bg</code><br>
-              <code>--ux-card-bg</code><br>
-              <code>--ux-input-bg</code><br>
-              <code>--ux-input-border</code><br>
-              <code>--ux-modal-bg</code><br>
-              <code>--ux-navbar-bg</code><br>
-              <code>--ux-toast-bg</code><br>
-              <code>--ux-list-bg</code>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Color Themes -->
-      <h3 class="ux-text-lg ux-font-semibold ux-mb-md">Temas de Color Disponibles</h3>
-      <div class="ux-card ux-mb-lg">
-        <div class="ux-card__content">
-          <div class="ux-flex ux-flex-wrap ux-gap-sm">
-            <span class="ux-chip" style="background: #3880ff; color: white;">ux-theme-ocean</span>
-            <span class="ux-chip" style="background: #3b82f6; color: white;">ux-theme-blue</span>
-            <span class="ux-chip" style="background: #10b981; color: white;">ux-theme-emerald</span>
-            <span class="ux-chip" style="background: #a855f7; color: white;">ux-theme-purple</span>
-            <span class="ux-chip" style="background: #8b5cf6; color: white;">ux-theme-violet</span>
-            <span class="ux-chip" style="background: #f97316; color: white;">ux-theme-orange</span>
-            <span class="ux-chip" style="background: #f43f5e; color: white;">ux-theme-rose</span>
-            <span class="ux-chip" style="background: #14b8a6; color: white;">ux-theme-teal</span>
-            <span class="ux-chip" style="background: #f59e0b; color: black;">ux-theme-amber</span>
-            <span class="ux-chip" style="background: #64748b; color: white;">ux-theme-slate</span>
-            <span class="ux-chip" style="background: #6366f1; color: white;">ux-theme-indigo</span>
-            <span class="ux-chip" style="background: #06b6d4; color: white;">ux-theme-cyan</span>
-            <span class="ux-chip" style="background: #ef4444; color: white;">ux-theme-red</span>
-            <span class="ux-chip" style="background: #16a34a; color: white;">ux-theme-green</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Reference -->
-      <div class="ux-card" style="background: var(--ux-surface-secondary);">
-        <div class="ux-card__content">
-          <h4 class="ux-font-semibold ux-mb-sm">Referencia de Colores</h4>
-          <p class="ux-text-secondary ux-mb-md">
-            Archivo de referencia con la arquitectura de colores. Usar para crear temas personalizados.
-          </p>
-          <a href="../css/themes.css" class="ux-button ux-button--outline" target="_blank">
-            Ver css/themes.css
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Utilities -->
-    <section id="utilities" class="ux-padding">
-      <h2 class="ux-text-xl ux-font-semibold ux-mb-lg" data-i18n="utilities">Clases Utility (ux-core.js)</h2>
-      <p class="ux-text-secondary ux-mb-lg" data-i18n="utilitiesDesc">
-        Clases CSS incluidas en el core para uso rapido sin componentes adicionales.
-      </p>
-
-      <div class="row ux-gap-md">
-        <!-- Flexbox -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Flexbox</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-flex</code> <span class="ux-text-secondary">- display: flex</span><br>
-              <code>.ux-flex-col</code> <span class="ux-text-secondary">- flex-direction: column</span><br>
-              <code>.ux-flex-wrap</code> <span class="ux-text-secondary">- flex-wrap: wrap</span><br>
-              <code>.ux-items-center</code> <span class="ux-text-secondary">- align-items: center</span><br>
-              <code>.ux-justify-center</code> <span class="ux-text-secondary">- justify-content: center</span><br>
-              <code>.ux-justify-between</code> <span class="ux-text-secondary">- space-between</span><br>
-              <code>.ux-gap-{xs|sm|md|lg}</code> <span class="ux-text-secondary">- gap spacing</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Spacing -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Spacing</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-p-{size}</code> <span class="ux-text-secondary">- padding all sides</span><br>
-              <code>.ux-m-{size}</code> <span class="ux-text-secondary">- margin all sides</span><br>
-              <code>.ux-px-{size}</code> <span class="ux-text-secondary">- padding horizontal</span><br>
-              <code>.ux-py-{size}</code> <span class="ux-text-secondary">- padding vertical</span><br>
-              <code>.ux-mt-{size}</code> <span class="ux-text-secondary">- margin-top</span><br>
-              <code>.ux-mb-{size}</code> <span class="ux-text-secondary">- margin-bottom</span><br>
-              <code>.ux-mx-auto</code> <span class="ux-text-secondary">- margin horizontal auto</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Typography -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Typography</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-text-{xs|sm|base|md|lg|xl|2xl|3xl}</code><br>
-              <code>.ux-text-center</code> <span class="ux-text-secondary">- text-align: center</span><br>
-              <code>.ux-font-{normal|medium|semibold|bold}</code><br>
-              <code>.ux-text-primary</code> <span class="ux-text-secondary">- color primary</span><br>
-              <code>.ux-text-secondary</code> <span class="ux-text-secondary">- color secondary</span><br>
-              <code>.ux-text-success</code> <span class="ux-text-secondary">- color success</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Display & Effects -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Display & Effects</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-hidden</code> <span class="ux-text-secondary">- display: none</span><br>
-              <code>.ux-block</code> <span class="ux-text-secondary">- display: block</span><br>
-              <code>.ux-rounded-{sm|lg|xl|full}</code><br>
-              <code>.ux-shadow-{sm|md|lg|xl}</code><br>
-              <code>.ux-ripple</code> <span class="ux-text-secondary">- ripple effect on tap</span><br>
-              <code>.ux-tap</code> <span class="ux-text-secondary">- scale down on press</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Positioning -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Positioning</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-relative</code> <span class="ux-text-secondary">- position: relative</span><br>
-              <code>.ux-absolute</code> <span class="ux-text-secondary">- position: absolute</span><br>
-              <code>.ux-fixed</code> <span class="ux-text-secondary">- position: fixed</span><br>
-              <code>.ux-sticky</code> <span class="ux-text-secondary">- position: sticky</span><br>
-              <code>.ux-position-{relative|absolute|fixed|sticky}</code>
-            </div>
-          </div>
-        </div>
-
-        <!-- Overflow -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Overflow</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-overflow-hidden</code> <span class="ux-text-secondary">- overflow: hidden</span><br>
-              <code>.ux-overflow-auto</code> <span class="ux-text-secondary">- overflow: auto</span><br>
-              <code>.ux-overflow-scroll</code> <span class="ux-text-secondary">- overflow: scroll</span><br>
-              <code>.ux-overflow-x-auto</code> <span class="ux-text-secondary">- overflow-x: auto</span><br>
-              <code>.ux-overflow-y-auto</code> <span class="ux-text-secondary">- overflow-y: auto</span><br>
-              <code>.ux-overflow-{x|y}-hidden</code>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cursor -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Cursor</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-cursor-pointer</code> <span class="ux-text-secondary">- cursor: pointer</span><br>
-              <code>.ux-cursor-default</code> <span class="ux-text-secondary">- cursor: default</span><br>
-              <code>.ux-cursor-not-allowed</code> <span class="ux-text-secondary">- cursor: not-allowed</span><br>
-              <code>.ux-cursor-grab</code> <span class="ux-text-secondary">- cursor: grab</span><br>
-              <code>.ux-cursor-grabbing</code> <span class="ux-text-secondary">- cursor: grabbing</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Transform / Rotate -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Transform / Rotate</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-rotate-{0|45|90|180|270}</code><br>
-              <code>.-ux-rotate-90</code> <span class="ux-text-secondary">- rotate(-90deg)</span><br>
-              <code>.-ux-rotate-180</code> <span class="ux-text-secondary">- rotate(-180deg)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Width -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Width</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-w-full</code> <span class="ux-text-secondary">- width: 100%</span><br>
-              <code>.ux-w-auto</code> <span class="ux-text-secondary">- width: auto</span><br>
-              <code>.ux-min-w-0</code> <span class="ux-text-secondary">- min-width: 0</span><br>
-              <code>.ux-min-w-full</code> <span class="ux-text-secondary">- min-width: 100%</span><br>
-              <code>.ux-max-w-full</code> <span class="ux-text-secondary">- max-width: 100%</span><br>
-              <code>.ux-max-w-none</code> <span class="ux-text-secondary">- max-width: none</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Text Utilities -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Text Utilities</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-text-truncate</code> <span class="ux-text-secondary">- truncate with ellipsis</span><br>
-              <code>.ux-text-nowrap</code> <span class="ux-text-secondary">- white-space: nowrap</span><br>
-              <code>.ux-line-clamp-{2|3}</code> <span class="ux-text-secondary">- multi-line truncation</span><br>
-              <code>.ux-text-uppercase</code> <span class="ux-text-secondary">- text-transform</span><br>
-              <code>.ux-text-capitalize</code>
-            </div>
-          </div>
-        </div>
-
-        <!-- Responsive Breakpoints -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Responsive Breakpoints</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>sm</code> <span class="ux-text-secondary">- 576px+</span><br>
-              <code>md</code> <span class="ux-text-secondary">- 768px+</span><br>
-              <code>lg</code> <span class="ux-text-secondary">- 992px+</span><br>
-              <code>xl</code> <span class="ux-text-secondary">- 1200px+</span><br>
-              <code>.ux-hidden-{sm|md|lg|xl}</code><br>
-              <code>.ux-hidden-mobile</code> <span class="ux-text-secondary">- &lt;768px</span><br>
-              <code>.ux-hidden-desktop</code> <span class="ux-text-secondary">- &ge;768px</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ionic-style Padding/Margin -->
-        <div class="col-12 col-md-6">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Ionic-style Padding/Margin</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.ux-padding</code> <span class="ux-text-secondary">- padding responsive</span><br>
-              <code>.ux-padding-{top|bottom|start|end}</code><br>
-              <code>.ux-padding-{horizontal|vertical}</code><br>
-              <code>.ux-margin</code> <span class="ux-text-secondary">- margin responsive</span><br>
-              <code>.ux-margin-{top|bottom|start|end}</code><br>
-              <code>.ux-margin-{horizontal|vertical}</code><br>
-              <code>.ux-no-padding</code> / <code>.ux-no-margin</code>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Grid System -->
-      <h3 class="ux-text-lg ux-font-semibold ux-mt-xl ux-mb-md">Sistema de Grid</h3>
-      <div class="ux-card ux-mb-lg">
-        <div class="ux-card__content">
-          <p class="ux-mb-md">Para layouts complejos con columnas responsive, recomendamos usar <strong>Bootstrap Grid</strong> (solo CSS, ~7KB gzipped):</p>
-          <pre><code>&lt;!-- Solo el grid de Bootstrap, sin JS --&gt;
-&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap-grid.min.css"&gt;</code></pre>
-          <p class="ux-mt-md ux-mb-md">Ejemplo de uso con UX Library:</p>
-          <pre><code>&lt;div class="container"&gt;
-  &lt;div class="row g-3"&gt;
-    &lt;div class="col-12 col-md-6 col-lg-4"&gt;
-      &lt;div class="ux-card"&gt;Card 1&lt;/div&gt;
-    &lt;/div&gt;
-    &lt;div class="col-12 col-md-6 col-lg-4"&gt;
-      &lt;div class="ux-card"&gt;Card 2&lt;/div&gt;
-    &lt;/div&gt;
-    &lt;div class="col-12 col-md-12 col-lg-4"&gt;
-      &lt;div class="ux-card"&gt;Card 3&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-        </div>
-      </div>
-
-      <!-- Container -->
-      <div class="row ux-gap-md">
-        <div class="col-12">
-          <div class="ux-card">
-            <div class="ux-card__header">
-              <h3 class="ux-card__title">Container</h3>
-            </div>
-            <div class="ux-card__content">
-              <code>.container</code> <span class="ux-text-secondary">- Bootstrap container (responsive)</span><br>
-              <code>.ux-container</code> <span class="ux-text-secondary">- max-width: 1200px, padding responsive</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    </main>
   </div>
 
-  <!-- Footer -->
-  <footer class="ux-padding ux-text-center" style="background: var(--ux-surface-secondary);">
-    <p class="ux-text-sm ux-text-secondary">UX Library v1.0 - Componentes iOS-style para HTMX</p>
-  </footer>
+  <script>
+    function docsApp() {
+      return {
+        sidebarOpen: false,
+        darkMode: false,
+        currentPage: 'home',
+        pageTitle: 'Home',
+        loading: false,
+        searchQuery: '',
 
+        menu: [
+          {
+            name: 'Basicos',
+            items: [
+              { name: 'Button', page: 'button', icon: '<rect x="3" y="6" width="18" height="12" rx="2" stroke-width="2"/>' },
+              { name: 'Badge', page: 'badge', icon: '<circle cx="12" cy="12" r="8" stroke-width="2"/>' },
+              { name: 'Chip', page: 'chip', icon: '<rect x="2" y="8" width="20" height="8" rx="4" stroke-width="2"/>' },
+              { name: 'Spinner', page: 'spinner', icon: '<circle cx="12" cy="12" r="8" stroke-width="2" stroke-dasharray="40" stroke-dashoffset="10"/>' },
+              { name: 'Progress', page: 'progress', icon: '<rect x="2" y="10" width="20" height="4" rx="2" stroke-width="2"/>' },
+              { name: 'Avatar', page: 'avatar', icon: '<circle cx="12" cy="8" r="4" stroke-width="2"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke-width="2"/>' },
+              { name: 'Img', page: 'img', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><path d="M21 15l-5-5L5 21" stroke-width="2"/>' },
+            ]
+          },
+          {
+            name: 'Formularios',
+            items: [
+              { name: 'Input', page: 'input', icon: '<rect x="3" y="6" width="18" height="12" rx="2" stroke-width="2"/><path d="M7 12h4" stroke-width="2"/>' },
+              { name: 'Checkbox', page: 'checkbox', icon: '<rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/><path d="M8 12l3 3 5-6" stroke-width="2"/>' },
+              { name: 'Radio', page: 'radio', icon: '<circle cx="12" cy="12" r="8" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="currentColor"/>' },
+              { name: 'Toggle', page: 'toggle', icon: '<rect x="2" y="8" width="20" height="8" rx="4" stroke-width="2"/><circle cx="17" cy="12" r="3" fill="currentColor"/>' },
+              { name: 'Select', page: 'select', icon: '<rect x="3" y="6" width="18" height="12" rx="2" stroke-width="2"/><path d="M9 10l3 3 3-3" stroke-width="2"/>' },
+              { name: 'Searchbar', page: 'searchbar', icon: '<circle cx="10" cy="10" r="6" stroke-width="2"/><path d="M14 14l6 6" stroke-width="2"/>' },
+              { name: 'Textarea', page: 'textarea', icon: '<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/><path d="M7 8h10M7 12h8M7 16h6" stroke-width="2"/>' },
+              { name: 'Range', page: 'range', icon: '<path d="M4 12h16" stroke-width="2"/><circle cx="14" cy="12" r="3" fill="currentColor"/>' },
+            ]
+          },
+          {
+            name: 'Layout',
+            items: [
+              { name: 'Card', page: 'card', icon: '<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/>' },
+              { name: 'List', page: 'list', icon: '<path d="M4 6h16M4 12h16M4 18h16" stroke-width="2"/>' },
+              { name: 'Content', page: 'content', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M3 9h18" stroke-width="2"/>' },
+              { name: 'Grid', page: 'grid', icon: '<rect x="3" y="3" width="7" height="7" stroke-width="2"/><rect x="14" y="3" width="7" height="7" stroke-width="2"/><rect x="3" y="14" width="7" height="7" stroke-width="2"/><rect x="14" y="14" width="7" height="7" stroke-width="2"/>' },
+            ]
+          },
+          {
+            name: 'Navegacion',
+            items: [
+              { name: 'Navbar', page: 'navbar', icon: '<rect x="2" y="4" width="20" height="6" rx="1" stroke-width="2"/>' },
+              { name: 'Toolbar', page: 'toolbar', icon: '<rect x="2" y="6" width="20" height="4" rx="1" stroke-width="2"/><rect x="2" y="14" width="20" height="4" rx="1" stroke-width="2"/>' },
+              { name: 'Tabs', page: 'tabs', icon: '<path d="M4 18h16M4 18V8h5l2-3h6v13" stroke-width="2"/>' },
+              { name: 'Segment', page: 'segment', icon: '<rect x="2" y="8" width="20" height="8" rx="2" stroke-width="2"/><path d="M9 8v8M15 8v8" stroke-width="2"/>' },
+              { name: 'Menu', page: 'menu', icon: '<path d="M4 6h16M4 12h16M4 18h16" stroke-width="2"/>' },
+              { name: 'Breadcrumbs', page: 'breadcrumbs', icon: '<path d="M4 12h4m4 0h4m4 0h0" stroke-width="2"/><path d="M10 8l4 4-4 4" stroke-width="2"/>' },
+              { name: 'Back Button', page: 'back-button', icon: '<path d="M15 18l-6-6 6-6" stroke-width="2"/>' },
+            ]
+          },
+          {
+            name: 'Overlay',
+            items: [
+              { name: 'Modal', page: 'modal', icon: '<rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/><path d="M4 9h16" stroke-width="2"/>' },
+              { name: 'Sheet', page: 'sheet', icon: '<path d="M4 14h16v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6z" stroke-width="2"/><path d="M10 14V4h4v10" stroke-width="2"/>' },
+              { name: 'Alert', page: 'alert', icon: '<path d="M12 9v4m0 4h.01" stroke-width="2"/><circle cx="12" cy="12" r="9" stroke-width="2"/>' },
+              { name: 'Toast', page: 'toast', icon: '<rect x="3" y="14" width="18" height="6" rx="2" stroke-width="2"/>' },
+              { name: 'Popover', page: 'popover', icon: '<rect x="4" y="4" width="16" height="12" rx="2" stroke-width="2"/><path d="M12 16l-3 4h6l-3-4z" fill="currentColor"/>' },
+              { name: 'Loading', page: 'loading', icon: '<circle cx="12" cy="12" r="8" stroke-width="2" stroke-dasharray="40" stroke-dashoffset="10"/>' },
+              { name: 'Picker', page: 'picker', icon: '<rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/><path d="M4 10h16M4 14h16" stroke-width="2"/>' },
+            ]
+          },
+          {
+            name: 'Feedback',
+            items: [
+              { name: 'Skeleton', page: 'skeleton', icon: '<rect x="3" y="4" width="18" height="4" rx="1" stroke-width="2" opacity="0.5"/><rect x="3" y="12" width="12" height="4" rx="1" stroke-width="2" opacity="0.5"/>' },
+              { name: 'FAB', page: 'fab', icon: '<circle cx="12" cy="12" r="8" stroke-width="2"/><path d="M12 8v8M8 12h8" stroke-width="2"/>' },
+              { name: 'Rating', page: 'rating', icon: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>' },
+            ]
+          },
+          {
+            name: 'Interactivos',
+            items: [
+              { name: 'Accordion', page: 'accordion', icon: '<rect x="3" y="4" width="18" height="4" rx="1" stroke-width="2"/><rect x="3" y="10" width="18" height="4" rx="1" stroke-width="2"/><rect x="3" y="16" width="18" height="4" rx="1" stroke-width="2"/>' },
+              { name: 'Carousel', page: 'carousel', icon: '<rect x="2" y="6" width="20" height="12" rx="2" stroke-width="2"/><path d="M6 18h2M11 18h2M16 18h2" stroke-width="2"/>' },
+              { name: 'Datetime', page: 'datetime', icon: '<rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/>' },
+              { name: 'Datatable', page: 'datatable', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M3 9h18M3 15h18M9 9v12M15 9v12" stroke-width="2"/>' },
+            ]
+          },
+          {
+            name: 'Gestos',
+            items: [
+              { name: 'Swipe', page: 'swipe', icon: '<path d="M14 4l6 6-6 6" stroke-width="2"/><path d="M4 10h14" stroke-width="2"/>' },
+              { name: 'Infinite Scroll', page: 'infinite-scroll', icon: '<path d="M12 5v14M5 12l7 7 7-7" stroke-width="2"/>' },
+              { name: 'Refresher', page: 'refresher', icon: '<path d="M4 4v5h5" stroke-width="2"/><path d="M20 20v-5h-5" stroke-width="2"/><path d="M4 9a8 8 0 0114.33-4.5M20 15a8 8 0 01-14.33 4.5" stroke-width="2"/>' },
+              { name: 'Reorder', page: 'reorder', icon: '<path d="M4 6h16M4 12h16M4 18h16" stroke-width="2"/><path d="M8 3v6M8 15v6" stroke-width="2"/>' },
+            ]
+          },
+          {
+            name: 'Otros',
+            items: [
+              { name: 'PWA', page: 'pwa', icon: '<rect x="5" y="2" width="14" height="20" rx="2" stroke-width="2"/><path d="M12 18h.01" stroke-width="2"/>' },
+              { name: 'Scroll', page: 'scroll', icon: '<rect x="4" y="2" width="16" height="20" rx="2" stroke-width="2"/><path d="M8 6h8M8 10h8M8 14h4" stroke-width="2"/>' },
+            ]
+          },
+        ],
+
+        filteredMenu: [],
+
+        init() {
+          this.filteredMenu = this.menu;
+
+          // Check dark mode preference
+          if (localStorage.getItem('ux-dark-mode') === 'true' ||
+              (!localStorage.getItem('ux-dark-mode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            this.darkMode = true;
+            document.documentElement.classList.add('ux-dark');
+          }
+
+          // Check URL hash for initial page
+          if (window.location.hash) {
+            const page = window.location.hash.slice(1);
+            const item = this.findMenuItem(page);
+            if (item) {
+              this.loadPage(item.page, item.name);
+            }
+          }
+        },
+
+        findMenuItem(page) {
+          for (const section of this.menu) {
+            const item = section.items.find(i => i.page === page);
+            if (item) return item;
+          }
+          return null;
+        },
+
+        loadPage(page, title) {
+          this.currentPage = page;
+          this.pageTitle = title;
+          this.loading = true;
+          this.sidebarOpen = false;
+
+          if (page !== 'home') {
+            window.location.hash = page;
+          } else {
+            window.location.hash = '';
+          }
+        },
+
+        filterMenu() {
+          if (!this.searchQuery) {
+            this.filteredMenu = this.menu;
+            return;
+          }
+
+          const query = this.searchQuery.toLowerCase();
+          this.filteredMenu = this.menu
+            .map(section => ({
+              ...section,
+              items: section.items.filter(item =>
+                item.name.toLowerCase().includes(query) ||
+                item.page.toLowerCase().includes(query)
+              )
+            }))
+            .filter(section => section.items.length > 0);
+        },
+
+        toggleDarkMode() {
+          this.darkMode = !this.darkMode;
+          localStorage.setItem('ux-dark-mode', this.darkMode);
+
+          if (this.darkMode) {
+            document.documentElement.classList.add('ux-dark');
+          } else {
+            document.documentElement.classList.remove('ux-dark');
+          }
+        }
+      };
+    }
+  </script>
 </body>
 </html>

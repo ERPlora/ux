@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload - UX Library</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-upload.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-2xl); }
+    .demo-box {
+      padding: var(--ux-space-xl);
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      border: 1px solid var(--ux-border-color);
+    }
+    .code-block {
+      background: var(--ux-surface-secondary);
+      padding: var(--ux-space-md);
+      border-radius: var(--ux-border-radius-md);
+      font-size: var(--ux-font-size-sm);
+      overflow-x: auto;
+      margin-top: var(--ux-space-md);
+    }
+  </style>
+</head>
+<body class="ux-body ux-theme-ocean">
+  <nav class="ux-navbar">
+    <div class="ux-navbar__content">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-button ux-button--clear ux-button--sm">← Back</a>
+      </div>
+      <div class="ux-navbar__center">
+        <h1 class="ux-navbar__title">Upload</h1>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </nav>
+
+  <main class="ux-padding">
+    <!-- Introduccion -->
+    <div class="demo-section">
+      <h3>File Upload</h3>
+      <p>Componente para subir archivos con soporte para drag & drop, previews y barra de progreso.</p>
+    </div>
+
+    <!-- Upload Basico -->
+    <div class="demo-section">
+      <h3>Upload Básico</h3>
+      <p>Zona de drop con click para seleccionar archivos.</p>
+
+      <div class="demo-box" x-data="uxUpload()">
+        <div class="ux-upload" :class="{ 'ux-upload--dragover': isDragover }">
+          <input type="file"
+                 class="ux-upload__input"
+                 x-ref="input"
+                 multiple
+                 @change="handleFiles($event.target.files)">
+
+          <div class="ux-upload__dropzone"
+               @click="browse()"
+               @dragenter="onDragEnter($event)"
+               @dragover="onDragOver($event)"
+               @dragleave="onDragLeave($event)"
+               @drop="onDrop($event)">
+            <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <p class="ux-upload__text">
+              Arrastra archivos aquí o <span class="ux-upload__browse">busca en tu dispositivo</span>
+            </p>
+            <p class="ux-upload__hint">PNG, JPG, PDF hasta 10MB</p>
+          </div>
+
+          <!-- Lista de archivos -->
+          <div class="ux-upload__files" x-show="hasFiles">
+            <template x-for="file in files" :key="file.id">
+              <div class="ux-upload__file"
+                   :class="{
+                     'ux-upload__file--error': file.status === 'error',
+                     'ux-upload__file--success': file.status === 'success'
+                   }">
+                <div class="ux-upload__preview">
+                  <template x-if="file.preview">
+                    <img :src="file.preview" alt="">
+                  </template>
+                  <template x-if="!file.preview">
+                    <div class="ux-upload__preview-icon" x-html="getFileIcon(file.type)"></div>
+                  </template>
+                </div>
+                <div class="ux-upload__file-info">
+                  <p class="ux-upload__file-name" x-text="file.name"></p>
+                  <p class="ux-upload__file-meta">
+                    <span x-text="formatSize(file.size)"></span>
+                    <span x-show="file.status === 'uploading'" x-text="file.progress + '%'"></span>
+                  </p>
+                  <p class="ux-upload__file-error" x-show="file.error" x-text="file.error"></p>
+                  <div class="ux-upload__progress" x-show="file.status === 'uploading'">
+                    <div class="ux-upload__progress-bar" :style="{ width: file.progress + '%' }"></div>
+                  </div>
+                </div>
+                <div class="ux-upload__file-actions">
+                  <button class="ux-upload__file-action ux-upload__file-action--danger"
+                          @click="removeFile(file.id)"
+                          title="Eliminar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <p class="ux-upload__error-message" x-show="error" x-text="error"></p>
+        </div>
+      </div>
+
+      <pre class="code-block">&lt;div x-data="uxUpload()"&gt;
+  &lt;div class="ux-upload" :class="{ 'ux-upload--dragover': isDragover }"&gt;
+    &lt;input type="file" class="ux-upload__input" x-ref="input" multiple
+           @change="handleFiles($event.target.files)"&gt;
+
+    &lt;div class="ux-upload__dropzone"
+         @click="browse()"
+         @dragenter="onDragEnter($event)"
+         @dragover="onDragOver($event)"
+         @dragleave="onDragLeave($event)"
+         @drop="onDrop($event)"&gt;
+      &lt;svg class="ux-upload__icon"&gt;...&lt;/svg&gt;
+      &lt;p class="ux-upload__text"&gt;Arrastra archivos aquí&lt;/p&gt;
+      &lt;p class="ux-upload__hint"&gt;PNG, JPG, PDF hasta 10MB&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-upload__files" x-show="hasFiles"&gt;
+      &lt;template x-for="file in files"&gt;
+        &lt;div class="ux-upload__file"&gt;...&lt;/div&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <!-- Upload Compacto -->
+    <div class="demo-section">
+      <h3>Upload Compacto</h3>
+      <p>Versión más pequeña para espacios reducidos.</p>
+
+      <div class="demo-box" x-data="uxUpload()">
+        <div class="ux-upload ux-upload--compact" :class="{ 'ux-upload--dragover': isDragover }">
+          <input type="file" class="ux-upload__input" x-ref="input" multiple
+                 @change="handleFiles($event.target.files)">
+
+          <div class="ux-upload__dropzone"
+               @click="browse()"
+               @dragenter="onDragEnter($event)"
+               @dragover="onDragOver($event)"
+               @dragleave="onDragLeave($event)"
+               @drop="onDrop($event)">
+            <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <div class="ux-upload__content">
+              <p class="ux-upload__text">Arrastra archivos o <span class="ux-upload__browse">selecciona</span></p>
+            </div>
+          </div>
+
+          <div class="ux-upload__files" x-show="hasFiles">
+            <template x-for="file in files" :key="file.id">
+              <div class="ux-upload__file">
+                <div class="ux-upload__preview">
+                  <template x-if="file.preview">
+                    <img :src="file.preview" alt="">
+                  </template>
+                  <template x-if="!file.preview">
+                    <div class="ux-upload__preview-icon" x-html="getFileIcon(file.type)"></div>
+                  </template>
+                </div>
+                <div class="ux-upload__file-info">
+                  <p class="ux-upload__file-name" x-text="file.name"></p>
+                  <p class="ux-upload__file-meta"><span x-text="formatSize(file.size)"></span></p>
+                </div>
+                <div class="ux-upload__file-actions">
+                  <button class="ux-upload__file-action ux-upload__file-action--danger" @click="removeFile(file.id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block">&lt;div class="ux-upload ux-upload--compact"&gt;
+  ...
+&lt;/div&gt;</pre>
+    </div>
+
+    <!-- Upload Button -->
+    <div class="demo-section">
+      <h3>Upload Button</h3>
+      <p>Estilo de botón para subir archivos.</p>
+
+      <div class="demo-box" x-data="uxUpload({ maxFiles: 5 })">
+        <div class="ux-upload ux-upload--button">
+          <input type="file" class="ux-upload__input" x-ref="input" multiple
+                 @change="handleFiles($event.target.files)">
+
+          <div class="ux-upload__dropzone" @click="browse()">
+            <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <span class="ux-upload__text">Subir archivos</span>
+          </div>
+        </div>
+
+        <div style="margin-top: var(--ux-space-md);" x-show="hasFiles">
+          <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-sm);">
+            <span x-text="files.length"></span> archivo(s) seleccionado(s)
+          </p>
+          <template x-for="file in files" :key="file.id">
+            <div style="display: flex; align-items: center; gap: var(--ux-space-sm); margin-bottom: var(--ux-space-xs);">
+              <span style="font-size: var(--ux-font-size-sm);" x-text="file.name"></span>
+              <span style="font-size: var(--ux-font-size-xs); color: var(--ux-text-secondary);" x-text="formatSize(file.size)"></span>
+              <button style="background: none; border: none; color: var(--ux-danger); cursor: pointer; padding: 2px;"
+                      @click="removeFile(file.id)">×</button>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <pre class="code-block">&lt;div class="ux-upload ux-upload--button"&gt;
+  &lt;input type="file" class="ux-upload__input" x-ref="input"&gt;
+  &lt;div class="ux-upload__dropzone" @click="browse()"&gt;
+    &lt;svg class="ux-upload__icon"&gt;...&lt;/svg&gt;
+    &lt;span class="ux-upload__text"&gt;Subir archivos&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <!-- Avatar Upload -->
+    <div class="demo-section">
+      <h3>Avatar Upload</h3>
+      <p>Upload circular para fotos de perfil.</p>
+
+      <div class="demo-box" x-data="uxUpload({ maxFiles: 1, accept: 'image/*' })">
+        <div style="display: flex; align-items: center; gap: var(--ux-space-xl);">
+          <div class="ux-upload ux-upload--avatar">
+            <input type="file" class="ux-upload__input" x-ref="input" accept="image/*"
+                   @change="handleFiles($event.target.files)">
+
+            <div class="ux-upload__dropzone"
+                 @click="browse()"
+                 @dragenter="onDragEnter($event)"
+                 @dragover="onDragOver($event)"
+                 @dragleave="onDragLeave($event)"
+                 @drop="onDrop($event)">
+              <template x-if="files.length && files[0].preview">
+                <img class="ux-upload__preview-image" :src="files[0].preview" alt="Avatar">
+              </template>
+              <template x-if="!files.length || !files[0].preview">
+                <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px;">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </template>
+              <div class="ux-upload__overlay">
+                <svg class="ux-upload__overlay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="margin-bottom: var(--ux-space-xs);">Foto de perfil</h4>
+            <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">
+              Click o arrastra una imagen
+            </p>
+            <button class="ux-button ux-button--sm ux-button--outline"
+                    style="margin-top: var(--ux-space-sm);"
+                    x-show="files.length"
+                    @click="clearFiles()">
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block">&lt;div class="ux-upload ux-upload--avatar"&gt;
+  &lt;input type="file" accept="image/*" ...&gt;
+  &lt;div class="ux-upload__dropzone"&gt;
+    &lt;img class="ux-upload__preview-image" x-show="hasPreview"&gt;
+    &lt;div class="ux-upload__overlay"&gt;
+      &lt;svg class="ux-upload__overlay-icon"&gt;...&lt;/svg&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <!-- Grid Preview -->
+    <div class="demo-section">
+      <h3>Grid Preview</h3>
+      <p>Vista en grid para múltiples imágenes.</p>
+
+      <div class="demo-box" x-data="uxUpload({ accept: 'image/*', maxFiles: 8 })">
+        <div class="ux-upload ux-upload--grid" :class="{ 'ux-upload--dragover': isDragover }">
+          <input type="file" class="ux-upload__input" x-ref="input" multiple accept="image/*"
+                 @change="handleFiles($event.target.files)">
+
+          <div class="ux-upload__dropzone"
+               @click="browse()"
+               @dragenter="onDragEnter($event)"
+               @dragover="onDragOver($event)"
+               @dragleave="onDragLeave($event)"
+               @drop="onDrop($event)">
+            <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="m21 15-5-5L5 21"/>
+            </svg>
+            <p class="ux-upload__text">Arrastra imágenes aquí</p>
+            <p class="ux-upload__hint">Hasta 8 imágenes</p>
+          </div>
+
+          <div class="ux-upload__files" x-show="hasFiles">
+            <template x-for="file in files" :key="file.id">
+              <div class="ux-upload__file">
+                <div class="ux-upload__preview">
+                  <template x-if="file.preview">
+                    <img :src="file.preview" alt="">
+                  </template>
+                </div>
+                <div class="ux-upload__file-info">
+                  <p class="ux-upload__file-name" x-text="file.name"></p>
+                  <p class="ux-upload__file-meta"><span x-text="formatSize(file.size)"></span></p>
+                </div>
+                <div class="ux-upload__file-actions">
+                  <button class="ux-upload__file-action ux-upload__file-action--danger" @click="removeFile(file.id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block">&lt;div class="ux-upload ux-upload--grid"&gt;
+  ...
+&lt;/div&gt;</pre>
+    </div>
+
+    <!-- API Reference -->
+    <div class="demo-section">
+      <h3>API Alpine.js</h3>
+      <div class="demo-box">
+        <pre class="code-block" style="margin-top: 0;">// Configuración
+uxUpload({
+  multiple: true,           // Permitir múltiples archivos
+  accept: '*/*',            // Tipos MIME aceptados
+  maxSize: 10485760,        // Tamaño máximo (10MB)
+  maxFiles: 10,             // Máximo de archivos
+  autoUpload: false,        // Subir automáticamente
+  uploadUrl: ''             // URL para upload
+})
+
+// Propiedades
+files            // Array de archivos
+isDragover       // Estado de drag over
+isLoading        // Estado de carga
+error            // Mensaje de error
+hasFiles         // ¿Hay archivos?
+pendingFiles     // Archivos pendientes
+uploadingFiles   // Archivos subiendo
+completedFiles   // Archivos completados
+failedFiles      // Archivos fallidos
+totalProgress    // Progreso total (0-100)
+
+// Métodos
+browse()                    // Abrir selector de archivos
+handleFiles(FileList)       // Procesar archivos
+uploadFile(fileObj)         // Subir un archivo
+uploadAll()                 // Subir todos los pendientes
+removeFile(id)              // Eliminar archivo
+clearFiles()                // Limpiar todos
+retryFile(id)               // Reintentar upload fallido
+
+// Utilidades
+formatSize(bytes)           // Formatear tamaño (ej: "1.5 MB")
+getFileIcon(mimeType)       // Obtener icono SVG
+
+// Drag handlers (usar en dropzone)
+onDragEnter(event)
+onDragOver(event)
+onDragLeave(event)
+onDrop(event)</pre>
+      </div>
+    </div>
+
+    <!-- Referencia de Clases -->
+    <div class="demo-section">
+      <h3>Referencia de Clases</h3>
+      <div class="demo-box" style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--ux-border-color);">
+              <th style="text-align: left; padding: var(--ux-space-sm);">Clase</th>
+              <th style="text-align: left; padding: var(--ux-space-sm);">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload</code></td>
+              <td style="padding: var(--ux-space-sm);">Contenedor principal</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload--compact</code></td>
+              <td style="padding: var(--ux-space-sm);">Versión compacta horizontal</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload--button</code></td>
+              <td style="padding: var(--ux-space-sm);">Estilo botón</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload--avatar</code></td>
+              <td style="padding: var(--ux-space-sm);">Circular para avatar</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload--grid</code></td>
+              <td style="padding: var(--ux-space-sm);">Preview en grid</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload--dragover</code></td>
+              <td style="padding: var(--ux-space-sm);">Estado drag over</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__dropzone</code></td>
+              <td style="padding: var(--ux-space-sm);">Zona de drop</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__files</code></td>
+              <td style="padding: var(--ux-space-sm);">Lista de archivos</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__file</code></td>
+              <td style="padding: var(--ux-space-sm);">Item de archivo</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__file--error</code></td>
+              <td style="padding: var(--ux-space-sm);">Archivo con error</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__file--success</code></td>
+              <td style="padding: var(--ux-space-sm);">Archivo subido exitosamente</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__preview</code></td>
+              <td style="padding: var(--ux-space-sm);">Preview del archivo</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__progress</code></td>
+              <td style="padding: var(--ux-space-sm);">Barra de progreso</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</body>
+</html>

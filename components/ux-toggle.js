@@ -32,7 +32,7 @@
       position: relative;
       width: var(--ux-toggle-width);
       height: var(--ux-toggle-height);
-      background-color: var(--ux-light-shade);
+      background-color: var(--ux-medium);
       border-radius: var(--ux-toggle-border-radius);
       transition:
         background-color var(--ux-transition-base) var(--ux-ease);
@@ -53,9 +53,9 @@
         width var(--ux-transition-fast) var(--ux-ease);
     }
 
-    /* Checked State */
+    /* Checked State - Default uses primary color like Ionic */
     .ux-toggle input[type="checkbox"]:checked + .ux-toggle__track {
-      background-color: var(--ux-toggle-color, var(--ux-success));
+      background-color: var(--ux-primary);
     }
 
     .ux-toggle input[type="checkbox"]:checked + .ux-toggle__track .ux-toggle__thumb {
@@ -90,14 +90,14 @@
     }
 
     /* ========================================
-       Color - Uses composition system
-       Default: success (green) per iOS convention
-       Override with .ux-color-* classes
+       Color Variants
+       Default: primary (like Ionic)
     ======================================== */
 
-    .ux-toggle {
-      --ux-toggle-color: var(--ux-variant-bg, var(--ux-success));
-    }
+    .ux-toggle.ux-color-success input[type="checkbox"]:checked + .ux-toggle__track { background-color: var(--ux-success); }
+    .ux-toggle.ux-color-warning input[type="checkbox"]:checked + .ux-toggle__track { background-color: var(--ux-warning); }
+    .ux-toggle.ux-color-danger input[type="checkbox"]:checked + .ux-toggle__track { background-color: var(--ux-danger); }
+    .ux-toggle.ux-color-dark input[type="checkbox"]:checked + .ux-toggle__track { background-color: var(--ux-dark); }
 
     /* ========================================
        Sizes
@@ -237,7 +237,7 @@
     }
 
     .ux-toggle--glass input[type="checkbox"]:checked + .ux-toggle__track {
-      background: var(--ux-toggle-color, var(--ux-success));
+      background: var(--ux-primary);
     }
   `;
 
