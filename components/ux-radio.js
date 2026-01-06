@@ -57,7 +57,7 @@
     .ux-radio__dot {
       width: 12px;
       height: 12px;
-      background-color: var(--ux-radio-color, var(--ux-primary));
+      background-color: var(--ux-primary);
       border-radius: 50%;
       transform: scale(0);
       transition: transform var(--ux-transition-fast) var(--ux-ease-spring);
@@ -65,7 +65,7 @@
 
     /* Checked State */
     .ux-radio__input:checked + .ux-radio__circle {
-      border-color: var(--ux-radio-color, var(--ux-primary));
+      border-color: var(--ux-primary);
     }
 
     .ux-radio__input:checked + .ux-radio__circle .ux-radio__dot {
@@ -74,7 +74,7 @@
 
     /* Hover State */
     .ux-radio:hover .ux-radio__circle {
-      border-color: var(--ux-radio-color, var(--ux-primary));
+      border-color: var(--ux-primary);
     }
 
     /* Active State */
@@ -96,14 +96,28 @@
     }
 
     /* ========================================
-       Color - Uses composition system
-       Default: primary (blue)
-       Override with .ux-color-* classes
+       Color Variants
     ======================================== */
 
-    .ux-radio {
-      --ux-radio-color: var(--ux-variant-bg, var(--ux-primary));
-    }
+    .ux-radio.ux-color-success .ux-radio__dot { background-color: var(--ux-success); }
+    .ux-radio.ux-color-success .ux-radio__input:checked + .ux-radio__circle { border-color: var(--ux-success); }
+    .ux-radio.ux-color-success:hover .ux-radio__circle { border-color: var(--ux-success); }
+
+    .ux-radio.ux-color-warning .ux-radio__dot { background-color: var(--ux-warning); }
+    .ux-radio.ux-color-warning .ux-radio__input:checked + .ux-radio__circle { border-color: var(--ux-warning); }
+    .ux-radio.ux-color-warning:hover .ux-radio__circle { border-color: var(--ux-warning); }
+
+    .ux-radio.ux-color-danger .ux-radio__dot { background-color: var(--ux-danger); }
+    .ux-radio.ux-color-danger .ux-radio__input:checked + .ux-radio__circle { border-color: var(--ux-danger); }
+    .ux-radio.ux-color-danger:hover .ux-radio__circle { border-color: var(--ux-danger); }
+
+    .ux-radio.ux-color-dark .ux-radio__dot { background-color: var(--ux-dark); }
+    .ux-radio.ux-color-dark .ux-radio__input:checked + .ux-radio__circle { border-color: var(--ux-dark); }
+    .ux-radio.ux-color-dark:hover .ux-radio__circle { border-color: var(--ux-dark); }
+
+    .ux-radio.ux-color-medium .ux-radio__dot { background-color: var(--ux-medium); }
+    .ux-radio.ux-color-medium .ux-radio__input:checked + .ux-radio__circle { border-color: var(--ux-medium); }
+    .ux-radio.ux-color-medium:hover .ux-radio__circle { border-color: var(--ux-medium); }
 
     /* ========================================
        Sizes
@@ -305,7 +319,7 @@
     }
 
     .ux-radio--glass .ux-radio__input:checked + .ux-radio__circle {
-      border-color: var(--ux-radio-color, var(--ux-primary));
+      border-color: var(--ux-primary);
     }
 
     /* Reduced motion support */
