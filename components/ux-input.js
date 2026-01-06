@@ -16,10 +16,12 @@
     textarea.ux-input,
     select.ux-input {
       width: 100%;
-      min-height: var(--ux-touch-target);
-      padding: var(--ux-space-md) var(--ux-space-lg);
+      height: var(--ux-input-height);
+      min-height: var(--ux-input-min-height);
+      max-height: var(--ux-input-max-height);
+      padding: var(--ux-input-padding-y) var(--ux-input-padding-x);
       font-family: var(--ux-font-family);
-      font-size: 16px;
+      font-size: var(--ux-input-font-size);
       line-height: 1.5;
       color: var(--ux-text);
       background-color: var(--ux-surface);
@@ -76,17 +78,19 @@
     .ux-input--sm,
     input.ux-input--sm,
     textarea.ux-input--sm {
-      min-height: var(--ux-touch-target-sm);
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      font-size: var(--ux-font-size-sm);
+      height: var(--ux-input-height-sm);
+      min-height: var(--ux-input-min-height-sm);
+      padding: var(--ux-input-padding-y-sm) var(--ux-input-padding-x-sm);
+      font-size: var(--ux-input-font-size-sm);
     }
 
     .ux-input--lg,
     input.ux-input--lg,
     textarea.ux-input--lg {
-      min-height: 52px;
-      padding: var(--ux-space-lg) var(--ux-space-xl);
-      font-size: var(--ux-font-size-lg);
+      height: var(--ux-input-height-lg);
+      min-height: var(--ux-input-min-height-lg);
+      padding: var(--ux-input-padding-y-lg) var(--ux-input-padding-x-lg);
+      font-size: var(--ux-input-font-size-lg);
     }
 
     /* Variant styles for direct input */
@@ -133,7 +137,9 @@
 
     /* Textarea specific */
     textarea.ux-input {
+      height: auto;
       min-height: 100px;
+      max-height: none;
       resize: vertical;
     }
 

@@ -361,6 +361,165 @@
       --ux-touch-target: 2.75rem;
       --ux-touch-target-sm: 2.25rem;
 
+      /* ========================================
+         Component Sizing System (Ionic-based)
+         All sizes use CSS variables for theming
+         Override these via theme classes or custom CSS
+      ======================================== */
+
+      /* Button Sizes - Based on Ionic iOS */
+      --ux-button-height: 3.1em;           /* ~50px at 16px base */
+      --ux-button-height-sm: 2.1em;        /* ~34px at 16px base */
+      --ux-button-height-lg: 3.1em;        /* Same height, more padding */
+      --ux-button-min-height: 36px;
+      --ux-button-min-height-sm: 28px;
+      --ux-button-min-height-lg: 46px;
+      --ux-button-max-height: none;
+      --ux-button-padding-y: 13px;
+      --ux-button-padding-x: 1em;
+      --ux-button-padding-y-sm: 4px;
+      --ux-button-padding-x-sm: 0.9em;
+      --ux-button-padding-y-lg: 17px;
+      --ux-button-padding-x-lg: 1em;
+      --ux-button-border-radius: 14px;
+      --ux-button-border-radius-sm: 6px;
+      --ux-button-border-radius-lg: 16px;
+      --ux-button-font-size: 1rem;
+      --ux-button-font-size-sm: 0.8125rem;  /* 13px */
+      --ux-button-font-size-lg: 1.125rem;   /* 18px */
+      --ux-button-font-weight: 500;
+      --ux-button-icon-size: 1.25em;
+      --ux-button-icon-only-size: clamp(30px, 2.125em, 60px);
+      --ux-button-icon-only-size-sm: clamp(23px, 2.16em, 54px);
+      --ux-button-icon-only-size-lg: clamp(46px, 2.5em, 78px);
+
+      /* Input Sizes - Based on Ionic iOS */
+      --ux-input-height: 44px;
+      --ux-input-height-sm: 36px;
+      --ux-input-height-lg: 52px;
+      --ux-input-min-height: 44px;
+      --ux-input-min-height-sm: 36px;
+      --ux-input-min-height-lg: 52px;
+      --ux-input-max-height: none;
+      --ux-input-padding-y: 10px;
+      --ux-input-padding-x: 16px;
+      --ux-input-padding-y-sm: 8px;
+      --ux-input-padding-x-sm: 12px;
+      --ux-input-padding-y-lg: 14px;
+      --ux-input-padding-x-lg: 20px;
+      --ux-input-font-size: 16px;          /* Prevents zoom on iOS */
+      --ux-input-font-size-sm: 14px;
+      --ux-input-font-size-lg: 18px;
+
+      /* Item/List Sizes - Based on Ionic iOS */
+      --ux-item-min-height: 44px;
+      --ux-item-min-height-sm: 36px;
+      --ux-item-min-height-lg: 56px;
+      --ux-item-padding-y: 10px;
+      --ux-item-padding-x: 16px;
+      --ux-item-font-size: 16px;
+
+      /* Card Sizes - Based on Ionic iOS */
+      --ux-card-margin-y: 24px;
+      --ux-card-margin-x: 16px;
+      --ux-card-padding: 16px;
+      --ux-card-border-radius: 8px;
+      --ux-card-min-height: none;
+      --ux-card-max-height: none;
+
+      /* Toolbar/Navbar - Based on Ionic iOS */
+      --ux-toolbar-height: 44px;
+      --ux-toolbar-height-sm: 36px;
+      --ux-toolbar-height-lg: 56px;
+      --ux-toolbar-min-height: 44px;
+      --ux-toolbar-padding-y: 3px;
+      --ux-toolbar-padding-x: 4px;
+
+      /* Avatar Sizes - Based on Ionic iOS */
+      --ux-avatar-size: 48px;
+      --ux-avatar-size-xs: 24px;
+      --ux-avatar-size-sm: 36px;
+      --ux-avatar-size-lg: 64px;
+      --ux-avatar-size-xl: 96px;
+
+      /* Toggle/Switch - Based on Ionic iOS */
+      --ux-toggle-width: 51px;
+      --ux-toggle-height: 31px;
+      --ux-toggle-handle-size: 27px;
+      --ux-toggle-border-radius: 15.5px;
+
+      /* Checkbox - Based on Ionic iOS */
+      --ux-checkbox-size: 22px;
+      --ux-checkbox-size-sm: 18px;
+      --ux-checkbox-size-lg: 26px;
+      --ux-checkbox-border-radius: 50%;
+
+      /* Radio - Based on Ionic iOS */
+      --ux-radio-size: 20px;
+      --ux-radio-size-sm: 16px;
+      --ux-radio-size-lg: 24px;
+
+      /* Segment - Based on Ionic iOS */
+      --ux-segment-min-width: 70px;
+      --ux-segment-min-height: 28px;
+      --ux-segment-padding: 2px;
+      --ux-segment-border-radius: 7px;
+      --ux-segment-font-size: 13px;
+
+      /* FAB - Based on Ionic iOS */
+      --ux-fab-size: 56px;
+      --ux-fab-size-sm: 40px;
+      --ux-fab-size-lg: 72px;
+      --ux-fab-icon-size: 28px;
+      --ux-fab-icon-size-sm: 18px;
+      --ux-fab-icon-size-lg: 36px;
+
+      /* Chip/Badge - Based on Ionic iOS */
+      --ux-chip-height: 32px;
+      --ux-chip-height-sm: 24px;
+      --ux-chip-height-lg: 40px;
+      --ux-chip-padding-x: 12px;
+      --ux-chip-border-radius: 16px;
+      --ux-chip-font-size: 14px;
+      --ux-badge-min-height: 20px;
+      --ux-badge-padding-x: 8px;
+      --ux-badge-border-radius: 10px;
+      --ux-badge-font-size: 12px;
+
+      /* Modal/Sheet - Based on Ionic iOS */
+      --ux-modal-max-width: 500px;
+      --ux-modal-max-height: 90vh;
+      --ux-modal-border-radius: 14px;
+      --ux-modal-padding: 16px;
+      --ux-sheet-border-radius: 14px;
+      --ux-sheet-handle-width: 36px;
+      --ux-sheet-handle-height: 5px;
+
+      /* Toast - Based on Ionic iOS */
+      --ux-toast-min-height: 44px;
+      --ux-toast-max-width: 400px;
+      --ux-toast-padding: 14px 16px;
+      --ux-toast-border-radius: 14px;
+
+      /* Tabs - Based on Ionic iOS */
+      --ux-tabs-height: 50px;
+      --ux-tabs-height-compact: 44px;
+      --ux-tab-min-width: 64px;
+      --ux-tab-font-size: 10px;
+      --ux-tab-icon-size: 24px;
+
+      /* Searchbar - Based on Ionic iOS */
+      --ux-searchbar-height: 36px;
+      --ux-searchbar-border-radius: 10px;
+      --ux-searchbar-padding-x: 12px;
+
+      /* Progress/Spinner */
+      --ux-progress-height: 4px;
+      --ux-progress-border-radius: 2px;
+      --ux-spinner-size: 28px;
+      --ux-spinner-size-sm: 20px;
+      --ux-spinner-size-lg: 40px;
+
       /* Transitions */
       --ux-transition-instant: 50ms;
       --ux-transition-fast: 150ms;

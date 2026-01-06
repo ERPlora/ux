@@ -34,11 +34,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
+      width: var(--ux-checkbox-size);
+      height: var(--ux-checkbox-size);
       background-color: transparent;
       border: 2px solid var(--ux-medium);
-      border-radius: var(--ux-border-radius-sm);
+      border-radius: var(--ux-checkbox-border-radius);
       transition:
         background-color var(--ux-transition-fast) var(--ux-ease),
         border-color var(--ux-transition-fast) var(--ux-ease),
@@ -158,23 +158,23 @@
     ======================================== */
 
     .ux-checkbox--sm .ux-checkbox__box {
-      width: 18px;
-      height: 18px;
+      width: var(--ux-checkbox-size-sm);
+      height: var(--ux-checkbox-size-sm);
     }
 
     .ux-checkbox--sm .ux-checkbox__checkmark {
-      width: 10px;
-      height: 10px;
+      width: calc(var(--ux-checkbox-size-sm) * 0.55);
+      height: calc(var(--ux-checkbox-size-sm) * 0.55);
     }
 
     .ux-checkbox--lg .ux-checkbox__box {
-      width: 28px;
-      height: 28px;
+      width: var(--ux-checkbox-size-lg);
+      height: var(--ux-checkbox-size-lg);
     }
 
     .ux-checkbox--lg .ux-checkbox__checkmark {
-      width: 18px;
-      height: 18px;
+      width: calc(var(--ux-checkbox-size-lg) * 0.65);
+      height: calc(var(--ux-checkbox-size-lg) * 0.65);
     }
 
     /* ========================================
