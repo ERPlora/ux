@@ -306,6 +306,7 @@
 
     /* ========================================
        Fixed Position
+       Glass effect by default (iOS style)
     ======================================== */
 
     .ux-toolbar--fixed-top {
@@ -314,6 +315,11 @@
       left: 0;
       right: 0;
       z-index: 100;
+      /* Glass by default */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-toolbar--fixed-bottom {
@@ -322,6 +328,20 @@
       left: 0;
       right: 0;
       z-index: 100;
+      /* Glass by default */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-top: 0.5px solid var(--ux-glass-border);
+      border-bottom: none;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-toolbar--fixed-top,
+      .ux-toolbar--fixed-bottom {
+        background-color: var(--ux-surface);
+      }
     }
 
     /* Safe area for bottom toolbar */

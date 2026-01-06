@@ -267,6 +267,7 @@
 
     /* ========================================
        Bottom Tab Bar (iOS style)
+       Glass effect by default
     ======================================== */
 
     .ux-tab-bar--bottom {
@@ -276,9 +277,20 @@
       right: 0;
       min-height: 49px;
       border-bottom: none;
-      border-top: 1px solid var(--ux-border-color);
+      /* Glass by default */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-top: 0.5px solid var(--ux-glass-border);
       padding-bottom: env(safe-area-inset-bottom);
       z-index: 100;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-tab-bar--bottom {
+        background-color: var(--ux-surface);
+      }
     }
 
     .ux-tab-bar--bottom .ux-tab-button {

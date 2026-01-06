@@ -42,7 +42,7 @@
     }
 
     /* Glass (iOS 26 Liquid Glass style) */
-    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    /* Note: backdrop-filter comes from universal selector [class*="--glass"] in ux-core.js */
     .ux-navbar--glass {
       box-shadow: var(--ux-glass-highlight);
       border-bottom: 0.5px solid var(--ux-glass-border);
@@ -345,6 +345,7 @@
 
     /* ========================================
        Fixed/Sticky Navbar
+       Glass effect by default (iOS style)
     ======================================== */
 
     .ux-navbar--fixed {
@@ -353,12 +354,30 @@
       left: 0;
       right: 0;
       z-index: var(--ux-z-fixed);
+      /* Glass by default */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-navbar--sticky {
       position: sticky;
       top: 0;
       z-index: var(--ux-z-sticky);
+      /* Glass by default */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-navbar--fixed,
+      .ux-navbar--sticky {
+        background-color: var(--ux-surface);
+      }
     }
 
     /* ========================================
