@@ -41,9 +41,13 @@
       right: 0;
       bottom: 0;
       max-height: var(--ux-modal-max-height);
-      background-color: var(--ux-surface);
+      /* Glass by default (iOS style) */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
       border-radius: var(--ux-sheet-border-radius) var(--ux-sheet-border-radius) 0 0;
-      box-shadow: var(--ux-shadow-xl);
+      border-top: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
       display: flex;
       flex-direction: column;
       z-index: var(--ux-z-modal);
@@ -52,6 +56,13 @@
       transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
       padding-bottom: env(safe-area-inset-bottom);
       will-change: transform;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-sheet {
+        background-color: var(--ux-surface);
+      }
     }
 
     .ux-sheet-backdrop--open .ux-sheet {
@@ -93,7 +104,7 @@
       align-items: center;
       justify-content: space-between;
       padding: var(--ux-space-sm) var(--ux-space-lg);
-      border-bottom: 1px solid var(--ux-border-color);
+      border-bottom: 0.5px solid var(--ux-glass-border);
       flex-shrink: 0;
     }
 
@@ -166,7 +177,7 @@
       flex-direction: column;
       gap: var(--ux-space-sm);
       padding: var(--ux-space-md) var(--ux-space-lg);
-      border-top: 1px solid var(--ux-border-color);
+      border-top: 0.5px solid var(--ux-glass-border);
       flex-shrink: 0;
     }
 
@@ -277,14 +288,24 @@
       bottom: 0;
       width: 320px;
       max-width: 85vw;
-      background-color: var(--ux-surface);
-      box-shadow: var(--ux-shadow-xl);
+      /* Glass by default (iOS style) */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
       display: flex;
       flex-direction: column;
       z-index: var(--ux-z-modal);
       /* iOS-style smooth transition for closing */
       transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
       will-change: transform;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-side-sheet {
+        background-color: var(--ux-surface);
+      }
     }
 
     .ux-side-sheet--left {
@@ -314,7 +335,7 @@
       min-height: 56px;
       padding: var(--ux-space-md) var(--ux-space-lg);
       padding-top: calc(var(--ux-space-md) + env(safe-area-inset-top));
-      border-bottom: 1px solid var(--ux-border-color);
+      border-bottom: 0.5px solid var(--ux-glass-border);
       flex-shrink: 0;
     }
 
@@ -327,7 +348,7 @@
     .ux-side-sheet__footer {
       padding: var(--ux-space-md) var(--ux-space-lg);
       padding-bottom: calc(var(--ux-space-md) + env(safe-area-inset-bottom));
-      border-top: 1px solid var(--ux-border-color);
+      border-top: 0.5px solid var(--ux-glass-border);
       flex-shrink: 0;
     }
 
@@ -358,15 +379,27 @@
     }
 
     .ux-action-sheet__group {
-      background-color: var(--ux-surface);
+      /* Glass by default (iOS style) */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
       border-radius: var(--ux-border-radius-lg);
       overflow: hidden;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-action-sheet__group {
+        background-color: var(--ux-surface);
+      }
     }
 
     .ux-action-sheet__header {
       padding: var(--ux-space-md) var(--ux-space-lg);
       text-align: center;
-      border-bottom: 1px solid var(--ux-border-color);
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-action-sheet__title {
@@ -400,7 +433,7 @@
     }
 
     .ux-action-sheet__button:not(:last-child) {
-      border-bottom: 1px solid var(--ux-border-color);
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-action-sheet__button:hover {

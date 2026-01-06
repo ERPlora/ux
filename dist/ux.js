@@ -562,9 +562,9 @@
       --ux-glass-blur: 20px;
       --ux-glass-blur-heavy: 40px;
       --ux-glass-saturation: 180%;
-      --ux-glass-bg: rgba(255, 255, 255, 0.72);
-      --ux-glass-bg-thick: rgba(255, 255, 255, 0.85);
-      --ux-glass-bg-thin: rgba(255, 255, 255, 0.45);
+      --ux-glass-bg: rgba(255, 255, 255, 0.45);
+      --ux-glass-bg-thick: rgba(255, 255, 255, 0.65);
+      --ux-glass-bg-thin: rgba(255, 255, 255, 0.25);
       --ux-glass-border: rgba(255, 255, 255, 0.18);
       --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
       --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.5);
@@ -673,9 +673,9 @@
         --ux-toast-bg: var(--ux-gray-700);
 
         /* Liquid Glass - Dark mode */
-        --ux-glass-bg: rgba(28, 28, 30, 0.72);
-        --ux-glass-bg-thick: rgba(28, 28, 30, 0.85);
-        --ux-glass-bg-thin: rgba(28, 28, 30, 0.45);
+        --ux-glass-bg: rgba(28, 28, 30, 0.45);
+        --ux-glass-bg-thick: rgba(28, 28, 30, 0.65);
+        --ux-glass-bg-thin: rgba(28, 28, 30, 0.25);
         --ux-glass-border: rgba(255, 255, 255, 0.08);
         --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
         --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -767,9 +767,9 @@
       --ux-toast-bg: var(--ux-gray-700);
 
       /* Liquid Glass - Dark mode */
-      --ux-glass-bg: rgba(28, 28, 30, 0.72);
-      --ux-glass-bg-thick: rgba(28, 28, 30, 0.85);
-      --ux-glass-bg-thin: rgba(28, 28, 30, 0.45);
+      --ux-glass-bg: rgba(28, 28, 30, 0.45);
+      --ux-glass-bg-thick: rgba(28, 28, 30, 0.65);
+      --ux-glass-bg-thin: rgba(28, 28, 30, 0.25);
       --ux-glass-border: rgba(255, 255, 255, 0.08);
       --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
 
@@ -4803,6 +4803,115 @@
       max-width: 0;
       opacity: 0;
       padding: 0;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+       Circular button with frosted glass effect
+    ======================================== */
+
+    .ux-back-button--glass {
+      width: 36px;
+      height: 36px;
+      min-height: 36px;
+      padding: 0;
+      border-radius: 50%;
+      background: rgba(120, 120, 128, 0.24);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      color: var(--ux-text);
+      justify-content: center;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-back-button--glass .ux-back-button__text {
+      display: none;
+    }
+
+    .ux-back-button--glass .ux-back-button__icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ux-back-button--glass:hover {
+      background: rgba(120, 120, 128, 0.36);
+      opacity: 1;
+    }
+
+    .ux-back-button--glass:hover .ux-back-button__icon {
+      transform: none;
+    }
+
+    .ux-back-button--glass:active {
+      background: rgba(120, 120, 128, 0.48);
+      transform: scale(0.92);
+      opacity: 1;
+    }
+
+    /* Glass button sizes */
+    .ux-back-button--glass.ux-back-button--sm {
+      width: 28px;
+      height: 28px;
+      min-height: 28px;
+    }
+
+    .ux-back-button--glass.ux-back-button--sm .ux-back-button__icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-back-button--glass.ux-back-button--lg {
+      width: 44px;
+      height: 44px;
+      min-height: 44px;
+    }
+
+    .ux-back-button--glass.ux-back-button--lg .ux-back-button__icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Dark mode glass */
+    .ux-dark .ux-back-button--glass {
+      background: rgba(120, 120, 128, 0.32);
+      color: #ffffff;
+    }
+
+    .ux-dark .ux-back-button--glass:hover {
+      background: rgba(120, 120, 128, 0.44);
+    }
+
+    .ux-dark .ux-back-button--glass:active {
+      background: rgba(120, 120, 128, 0.56);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .ux-back-button--glass {
+        background: rgba(120, 120, 128, 0.32);
+        color: #ffffff;
+      }
+
+      .ux-back-button--glass:hover {
+        background: rgba(120, 120, 128, 0.44);
+      }
+
+      .ux-back-button--glass:active {
+        background: rgba(120, 120, 128, 0.56);
+      }
+    }
+
+    /* Glass button in glass navbar */
+    .ux-navbar--glass .ux-back-button--glass {
+      margin-left: 0;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-back-button--glass {
+        background: rgba(120, 120, 128, 0.5);
+      }
     }
   `;
 
@@ -9669,9 +9778,9 @@
       --ux-glass-blur: 20px;
       --ux-glass-blur-heavy: 40px;
       --ux-glass-saturation: 180%;
-      --ux-glass-bg: rgba(255, 255, 255, 0.72);
-      --ux-glass-bg-thick: rgba(255, 255, 255, 0.85);
-      --ux-glass-bg-thin: rgba(255, 255, 255, 0.45);
+      --ux-glass-bg: rgba(255, 255, 255, 0.45);
+      --ux-glass-bg-thick: rgba(255, 255, 255, 0.65);
+      --ux-glass-bg-thin: rgba(255, 255, 255, 0.25);
       --ux-glass-border: rgba(255, 255, 255, 0.18);
       --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
       --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.5);
@@ -9780,9 +9889,9 @@
         --ux-toast-bg: var(--ux-gray-700);
 
         /* Liquid Glass - Dark mode */
-        --ux-glass-bg: rgba(28, 28, 30, 0.72);
-        --ux-glass-bg-thick: rgba(28, 28, 30, 0.85);
-        --ux-glass-bg-thin: rgba(28, 28, 30, 0.45);
+        --ux-glass-bg: rgba(28, 28, 30, 0.45);
+        --ux-glass-bg-thick: rgba(28, 28, 30, 0.65);
+        --ux-glass-bg-thin: rgba(28, 28, 30, 0.25);
         --ux-glass-border: rgba(255, 255, 255, 0.08);
         --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
         --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -9874,9 +9983,9 @@
       --ux-toast-bg: var(--ux-gray-700);
 
       /* Liquid Glass - Dark mode */
-      --ux-glass-bg: rgba(28, 28, 30, 0.72);
-      --ux-glass-bg-thick: rgba(28, 28, 30, 0.85);
-      --ux-glass-bg-thin: rgba(28, 28, 30, 0.45);
+      --ux-glass-bg: rgba(28, 28, 30, 0.45);
+      --ux-glass-bg-thick: rgba(28, 28, 30, 0.65);
+      --ux-glass-bg-thin: rgba(28, 28, 30, 0.25);
       --ux-glass-border: rgba(255, 255, 255, 0.08);
       --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
 
@@ -17591,7 +17700,7 @@
     }
 
     /* Glass (iOS 26 Liquid Glass style) */
-    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    /* Note: backdrop-filter comes from universal selector [class*="--glass"] in ux-core.js */
     .ux-navbar--glass {
       box-shadow: var(--ux-glass-highlight);
       border-bottom: 0.5px solid var(--ux-glass-border);
@@ -17894,6 +18003,7 @@
 
     /* ========================================
        Fixed/Sticky Navbar
+       Glass effect by default (iOS style)
     ======================================== */
 
     .ux-navbar--fixed {
@@ -17902,12 +18012,30 @@
       left: 0;
       right: 0;
       z-index: var(--ux-z-fixed);
+      /* Glass by default */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-navbar--sticky {
       position: sticky;
       top: 0;
       z-index: var(--ux-z-sticky);
+      /* Glass by default */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-navbar--fixed,
+      .ux-navbar--sticky {
+        background-color: var(--ux-surface);
+      }
     }
 
     /* ========================================
@@ -27015,9 +27143,13 @@
       right: 0;
       bottom: 0;
       max-height: var(--ux-modal-max-height);
-      background-color: var(--ux-surface);
+      /* Glass by default (iOS style) */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
       border-radius: var(--ux-sheet-border-radius) var(--ux-sheet-border-radius) 0 0;
-      box-shadow: var(--ux-shadow-xl);
+      border-top: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
       display: flex;
       flex-direction: column;
       z-index: var(--ux-z-modal);
@@ -27026,6 +27158,13 @@
       transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
       padding-bottom: env(safe-area-inset-bottom);
       will-change: transform;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-sheet {
+        background-color: var(--ux-surface);
+      }
     }
 
     .ux-sheet-backdrop--open .ux-sheet {
@@ -27067,7 +27206,7 @@
       align-items: center;
       justify-content: space-between;
       padding: var(--ux-space-sm) var(--ux-space-lg);
-      border-bottom: 1px solid var(--ux-border-color);
+      border-bottom: 0.5px solid var(--ux-glass-border);
       flex-shrink: 0;
     }
 
@@ -27140,7 +27279,7 @@
       flex-direction: column;
       gap: var(--ux-space-sm);
       padding: var(--ux-space-md) var(--ux-space-lg);
-      border-top: 1px solid var(--ux-border-color);
+      border-top: 0.5px solid var(--ux-glass-border);
       flex-shrink: 0;
     }
 
@@ -27251,14 +27390,24 @@
       bottom: 0;
       width: 320px;
       max-width: 85vw;
-      background-color: var(--ux-surface);
-      box-shadow: var(--ux-shadow-xl);
+      /* Glass by default (iOS style) */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
       display: flex;
       flex-direction: column;
       z-index: var(--ux-z-modal);
       /* iOS-style smooth transition for closing */
       transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
       will-change: transform;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-side-sheet {
+        background-color: var(--ux-surface);
+      }
     }
 
     .ux-side-sheet--left {
@@ -27288,7 +27437,7 @@
       min-height: 56px;
       padding: var(--ux-space-md) var(--ux-space-lg);
       padding-top: calc(var(--ux-space-md) + env(safe-area-inset-top));
-      border-bottom: 1px solid var(--ux-border-color);
+      border-bottom: 0.5px solid var(--ux-glass-border);
       flex-shrink: 0;
     }
 
@@ -27301,7 +27450,7 @@
     .ux-side-sheet__footer {
       padding: var(--ux-space-md) var(--ux-space-lg);
       padding-bottom: calc(var(--ux-space-md) + env(safe-area-inset-bottom));
-      border-top: 1px solid var(--ux-border-color);
+      border-top: 0.5px solid var(--ux-glass-border);
       flex-shrink: 0;
     }
 
@@ -27332,15 +27481,27 @@
     }
 
     .ux-action-sheet__group {
-      background-color: var(--ux-surface);
+      /* Glass by default (iOS style) */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
       border-radius: var(--ux-border-radius-lg);
       overflow: hidden;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-action-sheet__group {
+        background-color: var(--ux-surface);
+      }
     }
 
     .ux-action-sheet__header {
       padding: var(--ux-space-md) var(--ux-space-lg);
       text-align: center;
-      border-bottom: 1px solid var(--ux-border-color);
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-action-sheet__title {
@@ -27374,7 +27535,7 @@
     }
 
     .ux-action-sheet__button:not(:last-child) {
-      border-bottom: 1px solid var(--ux-border-color);
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-action-sheet__button:hover {
@@ -30450,6 +30611,7 @@
 
     /* ========================================
        Bottom Tab Bar (iOS style)
+       Glass effect by default
     ======================================== */
 
     .ux-tab-bar--bottom {
@@ -30459,9 +30621,20 @@
       right: 0;
       min-height: 49px;
       border-bottom: none;
-      border-top: 1px solid var(--ux-border-color);
+      /* Glass by default */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-top: 0.5px solid var(--ux-glass-border);
       padding-bottom: env(safe-area-inset-bottom);
       z-index: 100;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-tab-bar--bottom {
+        background-color: var(--ux-surface);
+      }
     }
 
     .ux-tab-bar--bottom .ux-tab-button {
@@ -32465,6 +32638,7 @@
 
     /* ========================================
        Fixed Position
+       Glass effect by default (iOS style)
     ======================================== */
 
     .ux-toolbar--fixed-top {
@@ -32473,6 +32647,11 @@
       left: 0;
       right: 0;
       z-index: 100;
+      /* Glass by default */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-toolbar--fixed-bottom {
@@ -32481,6 +32660,20 @@
       left: 0;
       right: 0;
       z-index: 100;
+      /* Glass by default */
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-top: 0.5px solid var(--ux-glass-border);
+      border-bottom: none;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-toolbar--fixed-top,
+      .ux-toolbar--fixed-bottom {
+        background-color: var(--ux-surface);
+      }
     }
 
     /* Safe area for bottom toolbar */

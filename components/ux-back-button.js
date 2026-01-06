@@ -221,6 +221,115 @@
       opacity: 0;
       padding: 0;
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+       Circular button with frosted glass effect
+    ======================================== */
+
+    .ux-back-button--glass {
+      width: 36px;
+      height: 36px;
+      min-height: 36px;
+      padding: 0;
+      border-radius: 50%;
+      background: rgba(120, 120, 128, 0.24);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      color: var(--ux-text);
+      justify-content: center;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-back-button--glass .ux-back-button__text {
+      display: none;
+    }
+
+    .ux-back-button--glass .ux-back-button__icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ux-back-button--glass:hover {
+      background: rgba(120, 120, 128, 0.36);
+      opacity: 1;
+    }
+
+    .ux-back-button--glass:hover .ux-back-button__icon {
+      transform: none;
+    }
+
+    .ux-back-button--glass:active {
+      background: rgba(120, 120, 128, 0.48);
+      transform: scale(0.92);
+      opacity: 1;
+    }
+
+    /* Glass button sizes */
+    .ux-back-button--glass.ux-back-button--sm {
+      width: 28px;
+      height: 28px;
+      min-height: 28px;
+    }
+
+    .ux-back-button--glass.ux-back-button--sm .ux-back-button__icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-back-button--glass.ux-back-button--lg {
+      width: 44px;
+      height: 44px;
+      min-height: 44px;
+    }
+
+    .ux-back-button--glass.ux-back-button--lg .ux-back-button__icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Dark mode glass */
+    .ux-dark .ux-back-button--glass {
+      background: rgba(120, 120, 128, 0.32);
+      color: #ffffff;
+    }
+
+    .ux-dark .ux-back-button--glass:hover {
+      background: rgba(120, 120, 128, 0.44);
+    }
+
+    .ux-dark .ux-back-button--glass:active {
+      background: rgba(120, 120, 128, 0.56);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .ux-back-button--glass {
+        background: rgba(120, 120, 128, 0.32);
+        color: #ffffff;
+      }
+
+      .ux-back-button--glass:hover {
+        background: rgba(120, 120, 128, 0.44);
+      }
+
+      .ux-back-button--glass:active {
+        background: rgba(120, 120, 128, 0.56);
+      }
+    }
+
+    /* Glass button in glass navbar */
+    .ux-navbar--glass .ux-back-button--glass {
+      margin-left: 0;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-back-button--glass {
+        background: rgba(120, 120, 128, 0.5);
+      }
+    }
   `;
 
   // Default back arrow SVG
