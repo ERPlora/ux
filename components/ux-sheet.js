@@ -232,6 +232,50 @@
     }
 
     /* ========================================
+       Glass Sheet (iOS 26 Liquid Glass)
+    ======================================== */
+
+    .ux-sheet--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border-top: 0.5px solid var(--ux-glass-border);
+      box-shadow:
+        var(--ux-glass-shadow),
+        var(--ux-glass-highlight);
+    }
+
+    .ux-sheet--glass .ux-sheet__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-sheet--glass .ux-sheet__footer {
+      border-top-color: var(--ux-glass-border);
+    }
+
+    .ux-sheet--glass .ux-sheet__handle-bar {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Dark mode glass sheet */
+    @media (prefers-color-scheme: dark) {
+      .ux-sheet--glass .ux-sheet__handle-bar {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    .ux-dark .ux-sheet--glass .ux-sheet__handle-bar {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-sheet--glass {
+        background-color: var(--ux-surface);
+      }
+    }
+
+    /* ========================================
        Side Sheet
     ======================================== */
 
@@ -392,6 +436,48 @@
     .ux-action-sheet__button-icon svg {
       width: 100%;
       height: 100%;
+    }
+
+    /* ========================================
+       Glass Action Sheet (iOS 26 Liquid Glass)
+    ======================================== */
+
+    .ux-action-sheet--glass .ux-action-sheet__group {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-action-sheet--glass .ux-action-sheet__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-action-sheet--glass .ux-action-sheet__button:not(:last-child) {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-action-sheet--glass .ux-action-sheet__button:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Dark mode glass action sheet */
+    @media (prefers-color-scheme: dark) {
+      .ux-action-sheet--glass .ux-action-sheet__button:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+    }
+
+    .ux-dark .ux-action-sheet--glass .ux-action-sheet__button:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Fallback */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-action-sheet--glass .ux-action-sheet__group {
+        background-color: var(--ux-surface);
+      }
     }
 
     /* ========================================

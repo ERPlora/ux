@@ -142,8 +142,11 @@
       left: 0;
       bottom: 0;
       width: var(--ux-shell-sidebar);
-      background-color: var(--ux-surface);
-      border-right: 1px solid var(--ux-border-color);
+      /* Liquid Glass effect - iOS 26 style */
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-right: 0.5px solid var(--ux-glass-border);
       z-index: var(--ux-z-sticky);
       overflow-y: auto;
       overflow-x: hidden;
@@ -151,6 +154,14 @@
         width var(--ux-transition-base) var(--ux-ease),
         transform var(--ux-transition-base) var(--ux-ease);
       -webkit-overflow-scrolling: touch;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(10px)) {
+      .ux-shell__sidebar {
+        background: var(--ux-surface);
+        border-right: 1px solid var(--ux-border-color);
+      }
     }
 
     .ux-shell__sidebar-content {
@@ -161,7 +172,7 @@
 
     .ux-shell__sidebar-nav {
       flex: 1;
-      padding: var(--ux-space-md) 0;
+      padding: var(--ux-space-sm);
     }
 
     .ux-shell__sidebar-footer {
@@ -237,12 +248,13 @@
 
     .ux-shell__sidebar-section-title,
     .ux-shell__sidebar-header {
-      padding: var(--ux-space-sm) var(--ux-space-lg);
-      font-size: var(--ux-font-size-xs);
+      padding: var(--ux-space-md) var(--ux-space-md) var(--ux-space-xs);
+      font-size: var(--ux-font-size-sm);
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--ux-text-tertiary);
+      /* iOS 26: sentence case, not uppercase */
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--ux-text-secondary);
       white-space: nowrap;
       overflow: hidden;
       transition: opacity var(--ux-transition-fast) var(--ux-ease);
@@ -252,28 +264,41 @@
       display: flex;
       align-items: center;
       gap: var(--ux-space-md);
-      padding: var(--ux-space-md) var(--ux-space-lg);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      margin: 2px 0;
+      /* iOS 26 style: rounded items */
+      border-radius: var(--ux-glass-radius-sm);
       color: var(--ux-text-secondary);
       text-decoration: none;
+      font-weight: 500;
       transition:
-        background-color var(--ux-transition-fast) var(--ux-ease),
-        color var(--ux-transition-fast) var(--ux-ease);
+        background-color var(--ux-transition-fast) var(--ux-spring-smooth),
+        color var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
       cursor: pointer;
     }
 
     .ux-shell__sidebar-item:hover {
-      background-color: var(--ux-surface-secondary);
+      background-color: rgba(0, 0, 0, 0.04);
       color: var(--ux-text);
       text-decoration: none;
     }
 
+    .ux-shell__sidebar-item:active {
+      transform: scale(0.98);
+    }
+
     .ux-shell__sidebar-item--active {
-      background-color: rgba(var(--ux-primary-rgb), 0.1);
+      /* iOS 26 style: glass-like active state */
+      background: var(--ux-glass-bg-thick);
+      box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.08),
+        var(--ux-glass-highlight);
       color: var(--ux-primary);
     }
 
     .ux-shell__sidebar-item--active:hover {
-      background-color: rgba(var(--ux-primary-rgb), 0.15);
+      background: var(--ux-glass-bg-thick);
       color: var(--ux-primary);
     }
 
@@ -306,6 +331,41 @@
       background-color: var(--ux-primary);
       color: var(--ux-primary-contrast);
       border-radius: 9999px;
+    }
+
+    /* Dark mode sidebar adjustments */
+    @media (prefers-color-scheme: dark) {
+      .ux-shell__sidebar {
+        background: var(--ux-glass-bg);
+        border-right-color: var(--ux-glass-border);
+      }
+
+      .ux-shell__sidebar-item:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+
+      .ux-shell__sidebar-item--active {
+        background: var(--ux-glass-bg-thick);
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .ux-dark .ux-shell__sidebar {
+      background: var(--ux-glass-bg);
+      border-right-color: var(--ux-glass-border);
+    }
+
+    .ux-dark .ux-shell__sidebar-item:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .ux-dark .ux-shell__sidebar-item--active {
+      background: var(--ux-glass-bg-thick);
+      box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     /* ========================================

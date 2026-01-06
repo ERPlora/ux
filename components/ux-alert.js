@@ -39,16 +39,25 @@
     .ux-alert {
       width: 100%;
       max-width: 270px;
-      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.95);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 14px;
+      background: var(--ux-glass-bg-thick);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border-radius: var(--ux-glass-radius-md);
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
       overflow: hidden;
       transform: scale(1.1);
       opacity: 0;
       transition:
         transform var(--ux-transition-fast) var(--ux-ease-spring),
         opacity var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-alert {
+        background-color: var(--ux-surface);
+      }
     }
 
     .ux-alert-backdrop--open .ux-alert {
@@ -140,7 +149,7 @@
 
     .ux-alert__buttons {
       display: flex;
-      border-top: 1px solid var(--ux-border-color);
+      border-top: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-alert__buttons--stacked {
@@ -166,12 +175,12 @@
     }
 
     .ux-alert__button:not(:last-child) {
-      border-right: 1px solid var(--ux-border-color);
+      border-right: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-alert__buttons--stacked .ux-alert__button:not(:last-child) {
       border-right: none;
-      border-bottom: 1px solid var(--ux-border-color);
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-alert__button:hover {

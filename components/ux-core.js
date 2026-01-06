@@ -394,6 +394,34 @@
       --ux-z-tooltip: 700;
       --ux-z-toast: 800;
 
+      /* ========================================
+         Liquid Glass - iOS 26 Style (WWDC 2025)
+         Semi-transparent materials with blur
+      ======================================== */
+
+      /* Glass Materials */
+      --ux-glass-blur: 20px;
+      --ux-glass-blur-heavy: 40px;
+      --ux-glass-saturation: 180%;
+      --ux-glass-bg: rgba(255, 255, 255, 0.72);
+      --ux-glass-bg-thick: rgba(255, 255, 255, 0.85);
+      --ux-glass-bg-thin: rgba(255, 255, 255, 0.45);
+      --ux-glass-border: rgba(255, 255, 255, 0.18);
+      --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+      /* Glass Border Radii (iOS 26 style) */
+      --ux-glass-radius-xs: 6px;
+      --ux-glass-radius-sm: 10px;
+      --ux-glass-radius-md: 16px;
+      --ux-glass-radius-lg: 22px;
+      --ux-glass-radius-xl: 28px;
+
+      /* Spring Animations */
+      --ux-spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ux-spring-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --ux-spring-snappy: cubic-bezier(0.22, 0.68, 0, 1.71);
+
       /* Safe Areas (iOS notch) */
       --ux-safe-top: env(safe-area-inset-top, 0px);
       --ux-safe-right: env(safe-area-inset-right, 0px);
@@ -449,6 +477,14 @@
         --ux-list-bg: var(--ux-surface);
         --ux-navbar-bg: var(--ux-surface);
         --ux-toast-bg: var(--ux-gray-700);
+
+        /* Liquid Glass - Dark mode */
+        --ux-glass-bg: rgba(28, 28, 30, 0.72);
+        --ux-glass-bg-thick: rgba(28, 28, 30, 0.85);
+        --ux-glass-bg-thin: rgba(28, 28, 30, 0.45);
+        --ux-glass-border: rgba(255, 255, 255, 0.08);
+        --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+        --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
       }
     }
 
@@ -530,6 +566,14 @@
       --ux-list-bg: var(--ux-surface);
       --ux-navbar-bg: var(--ux-surface);
       --ux-toast-bg: var(--ux-gray-700);
+
+      /* Liquid Glass - Dark mode */
+      --ux-glass-bg: rgba(28, 28, 30, 0.72);
+      --ux-glass-bg-thick: rgba(28, 28, 30, 0.85);
+      --ux-glass-bg-thin: rgba(28, 28, 30, 0.45);
+      --ux-glass-border: rgba(255, 255, 255, 0.08);
+      --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+      --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     /* ========================================
@@ -1656,6 +1700,46 @@
       margin-left: 0;
       margin-right: 0;
       vertical-align: middle;
+    }
+
+    /* ========================================
+       Liquid Glass Utilities
+       iOS 26 style glass effects
+    ======================================== */
+
+    .ux-glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-glass--thick {
+      background: var(--ux-glass-bg-thick);
+    }
+
+    .ux-glass--thin {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-glass--heavy {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+    }
+
+    /* Glass border radii */
+    .ux-glass-radius-xs { border-radius: var(--ux-glass-radius-xs); }
+    .ux-glass-radius-sm { border-radius: var(--ux-glass-radius-sm); }
+    .ux-glass-radius-md { border-radius: var(--ux-glass-radius-md); }
+    .ux-glass-radius-lg { border-radius: var(--ux-glass-radius-lg); }
+    .ux-glass-radius-xl { border-radius: var(--ux-glass-radius-xl); }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(10px)) {
+      .ux-glass {
+        background: var(--ux-glass-bg-thick);
+      }
     }
 
   `;

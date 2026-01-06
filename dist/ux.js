@@ -394,6 +394,34 @@
       --ux-z-tooltip: 700;
       --ux-z-toast: 800;
 
+      /* ========================================
+         Liquid Glass - iOS 26 Style (WWDC 2025)
+         Semi-transparent materials with blur
+      ======================================== */
+
+      /* Glass Materials */
+      --ux-glass-blur: 20px;
+      --ux-glass-blur-heavy: 40px;
+      --ux-glass-saturation: 180%;
+      --ux-glass-bg: rgba(255, 255, 255, 0.72);
+      --ux-glass-bg-thick: rgba(255, 255, 255, 0.85);
+      --ux-glass-bg-thin: rgba(255, 255, 255, 0.45);
+      --ux-glass-border: rgba(255, 255, 255, 0.18);
+      --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+      /* Glass Border Radii (iOS 26 style) */
+      --ux-glass-radius-xs: 6px;
+      --ux-glass-radius-sm: 10px;
+      --ux-glass-radius-md: 16px;
+      --ux-glass-radius-lg: 22px;
+      --ux-glass-radius-xl: 28px;
+
+      /* Spring Animations */
+      --ux-spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ux-spring-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --ux-spring-snappy: cubic-bezier(0.22, 0.68, 0, 1.71);
+
       /* Safe Areas (iOS notch) */
       --ux-safe-top: env(safe-area-inset-top, 0px);
       --ux-safe-right: env(safe-area-inset-right, 0px);
@@ -449,6 +477,14 @@
         --ux-list-bg: var(--ux-surface);
         --ux-navbar-bg: var(--ux-surface);
         --ux-toast-bg: var(--ux-gray-700);
+
+        /* Liquid Glass - Dark mode */
+        --ux-glass-bg: rgba(28, 28, 30, 0.72);
+        --ux-glass-bg-thick: rgba(28, 28, 30, 0.85);
+        --ux-glass-bg-thin: rgba(28, 28, 30, 0.45);
+        --ux-glass-border: rgba(255, 255, 255, 0.08);
+        --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+        --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
       }
     }
 
@@ -530,6 +566,14 @@
       --ux-list-bg: var(--ux-surface);
       --ux-navbar-bg: var(--ux-surface);
       --ux-toast-bg: var(--ux-gray-700);
+
+      /* Liquid Glass - Dark mode */
+      --ux-glass-bg: rgba(28, 28, 30, 0.72);
+      --ux-glass-bg-thick: rgba(28, 28, 30, 0.85);
+      --ux-glass-bg-thin: rgba(28, 28, 30, 0.45);
+      --ux-glass-border: rgba(255, 255, 255, 0.08);
+      --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+      --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     /* ========================================
@@ -1656,6 +1700,46 @@
       margin-left: 0;
       margin-right: 0;
       vertical-align: middle;
+    }
+
+    /* ========================================
+       Liquid Glass Utilities
+       iOS 26 style glass effects
+    ======================================== */
+
+    .ux-glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-glass--thick {
+      background: var(--ux-glass-bg-thick);
+    }
+
+    .ux-glass--thin {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-glass--heavy {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+    }
+
+    /* Glass border radii */
+    .ux-glass-radius-xs { border-radius: var(--ux-glass-radius-xs); }
+    .ux-glass-radius-sm { border-radius: var(--ux-glass-radius-sm); }
+    .ux-glass-radius-md { border-radius: var(--ux-glass-radius-md); }
+    .ux-glass-radius-lg { border-radius: var(--ux-glass-radius-lg); }
+    .ux-glass-radius-xl { border-radius: var(--ux-glass-radius-xl); }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(10px)) {
+      .ux-glass {
+        background: var(--ux-glass-bg-thick);
+      }
     }
 
   `;
@@ -9593,6 +9677,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       text-align: center;
       text-decoration: none;
       color: inherit;
@@ -9606,6 +9691,9 @@
         transform var(--ux-transition-fast) var(--ux-ease),
         background-color var(--ux-transition-fast) var(--ux-ease);
       -webkit-tap-highlight-color: transparent;
+      /* Reset button styles when used as button */
+      border: none;
+      font-family: inherit;
     }
 
     .ux-card--app:hover {
@@ -11439,12 +11527,29 @@
        Navbar Variants
     ======================================== */
 
-    /* Translucent (iOS style) */
+    /* Translucent (iOS style - uses Liquid Glass variables) */
     .ux-navbar--translucent {
-      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
+    }
+
+    /* Glass (iOS 26 Liquid Glass style) */
+    .ux-navbar--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-bottom: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-navbar--translucent,
+      .ux-navbar--glass {
+        background-color: var(--ux-surface);
+      }
     }
 
     /* Transparent */
@@ -14293,6 +14398,42 @@
     }
 
     /* ========================================
+       Glass Modal (iOS 26 Liquid Glass)
+    ======================================== */
+
+    .ux-modal--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-glass-radius-xl);
+      box-shadow:
+        var(--ux-glass-shadow),
+        var(--ux-glass-highlight);
+    }
+
+    .ux-modal--glass .ux-modal__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-modal--glass .ux-modal__footer {
+      border-top-color: var(--ux-glass-border);
+    }
+
+    @media (max-width: 767px) {
+      .ux-modal--glass {
+        border-radius: var(--ux-glass-radius-xl) var(--ux-glass-radius-xl) 0 0;
+      }
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-modal--glass {
+        background-color: var(--ux-surface);
+      }
+    }
+
+    /* ========================================
        Fullscreen Modal
     ======================================== */
 
@@ -14753,6 +14894,50 @@
     }
 
     /* ========================================
+       Glass Sheet (iOS 26 Liquid Glass)
+    ======================================== */
+
+    .ux-sheet--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border-top: 0.5px solid var(--ux-glass-border);
+      box-shadow:
+        var(--ux-glass-shadow),
+        var(--ux-glass-highlight);
+    }
+
+    .ux-sheet--glass .ux-sheet__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-sheet--glass .ux-sheet__footer {
+      border-top-color: var(--ux-glass-border);
+    }
+
+    .ux-sheet--glass .ux-sheet__handle-bar {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Dark mode glass sheet */
+    @media (prefers-color-scheme: dark) {
+      .ux-sheet--glass .ux-sheet__handle-bar {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    .ux-dark .ux-sheet--glass .ux-sheet__handle-bar {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-sheet--glass {
+        background-color: var(--ux-surface);
+      }
+    }
+
+    /* ========================================
        Side Sheet
     ======================================== */
 
@@ -14913,6 +15098,48 @@
     .ux-action-sheet__button-icon svg {
       width: 100%;
       height: 100%;
+    }
+
+    /* ========================================
+       Glass Action Sheet (iOS 26 Liquid Glass)
+    ======================================== */
+
+    .ux-action-sheet--glass .ux-action-sheet__group {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-action-sheet--glass .ux-action-sheet__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-action-sheet--glass .ux-action-sheet__button:not(:last-child) {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-action-sheet--glass .ux-action-sheet__button:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Dark mode glass action sheet */
+    @media (prefers-color-scheme: dark) {
+      .ux-action-sheet--glass .ux-action-sheet__button:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+    }
+
+    .ux-dark .ux-action-sheet--glass .ux-action-sheet__button:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Fallback */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-action-sheet--glass .ux-action-sheet__group {
+        background-color: var(--ux-surface);
+      }
     }
 
     /* ========================================
@@ -15289,16 +15516,25 @@
     .ux-alert {
       width: 100%;
       max-width: 270px;
-      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.95);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 14px;
+      background: var(--ux-glass-bg-thick);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border-radius: var(--ux-glass-radius-md);
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
       overflow: hidden;
       transform: scale(1.1);
       opacity: 0;
       transition:
         transform var(--ux-transition-fast) var(--ux-ease-spring),
         opacity var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-alert {
+        background-color: var(--ux-surface);
+      }
     }
 
     .ux-alert-backdrop--open .ux-alert {
@@ -15390,7 +15626,7 @@
 
     .ux-alert__buttons {
       display: flex;
-      border-top: 1px solid var(--ux-border-color);
+      border-top: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-alert__buttons--stacked {
@@ -15416,12 +15652,12 @@
     }
 
     .ux-alert__button:not(:last-child) {
-      border-right: 1px solid var(--ux-border-color);
+      border-right: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-alert__buttons--stacked .ux-alert__button:not(:last-child) {
       border-right: none;
-      border-bottom: 1px solid var(--ux-border-color);
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-alert__button:hover {
@@ -15980,6 +16216,72 @@
 
     .ux-toast--light .ux-toast__close:hover {
       color: var(--ux-text);
+    }
+
+    /* ========================================
+       Glass Toast (iOS 26 Liquid Glass)
+    ======================================== */
+
+    .ux-toast--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      color: var(--ux-text);
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-glass-radius-lg);
+      box-shadow:
+        var(--ux-glass-shadow),
+        var(--ux-glass-highlight);
+    }
+
+    .ux-toast--glass .ux-toast__action {
+      color: var(--ux-primary);
+    }
+
+    .ux-toast--glass .ux-toast__action:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .ux-toast--glass .ux-toast__close {
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-toast--glass .ux-toast__close:hover {
+      color: var(--ux-text);
+    }
+
+    .ux-toast--glass .ux-toast__progress {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .ux-toast--glass .ux-toast__progress-bar {
+      background-color: var(--ux-primary);
+    }
+
+    /* Dark mode glass toast */
+    @media (prefers-color-scheme: dark) {
+      .ux-toast--glass .ux-toast__action:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .ux-toast--glass .ux-toast__progress {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .ux-dark .ux-toast--glass .ux-toast__action:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .ux-dark .ux-toast--glass .ux-toast__progress {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Fallback */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-toast--glass {
+        background-color: var(--ux-surface);
+      }
     }
 
     /* ========================================
@@ -21754,8 +22056,11 @@
       left: 0;
       bottom: 0;
       width: var(--ux-shell-sidebar);
-      background-color: var(--ux-surface);
-      border-right: 1px solid var(--ux-border-color);
+      /* Liquid Glass effect - iOS 26 style */
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-right: 0.5px solid var(--ux-glass-border);
       z-index: var(--ux-z-sticky);
       overflow-y: auto;
       overflow-x: hidden;
@@ -21763,6 +22068,14 @@
         width var(--ux-transition-base) var(--ux-ease),
         transform var(--ux-transition-base) var(--ux-ease);
       -webkit-overflow-scrolling: touch;
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(10px)) {
+      .ux-shell__sidebar {
+        background: var(--ux-surface);
+        border-right: 1px solid var(--ux-border-color);
+      }
     }
 
     .ux-shell__sidebar-content {
@@ -21773,7 +22086,7 @@
 
     .ux-shell__sidebar-nav {
       flex: 1;
-      padding: var(--ux-space-md) 0;
+      padding: var(--ux-space-sm);
     }
 
     .ux-shell__sidebar-footer {
@@ -21849,12 +22162,13 @@
 
     .ux-shell__sidebar-section-title,
     .ux-shell__sidebar-header {
-      padding: var(--ux-space-sm) var(--ux-space-lg);
-      font-size: var(--ux-font-size-xs);
+      padding: var(--ux-space-md) var(--ux-space-md) var(--ux-space-xs);
+      font-size: var(--ux-font-size-sm);
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--ux-text-tertiary);
+      /* iOS 26: sentence case, not uppercase */
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--ux-text-secondary);
       white-space: nowrap;
       overflow: hidden;
       transition: opacity var(--ux-transition-fast) var(--ux-ease);
@@ -21864,28 +22178,41 @@
       display: flex;
       align-items: center;
       gap: var(--ux-space-md);
-      padding: var(--ux-space-md) var(--ux-space-lg);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      margin: 2px 0;
+      /* iOS 26 style: rounded items */
+      border-radius: var(--ux-glass-radius-sm);
       color: var(--ux-text-secondary);
       text-decoration: none;
+      font-weight: 500;
       transition:
-        background-color var(--ux-transition-fast) var(--ux-ease),
-        color var(--ux-transition-fast) var(--ux-ease);
+        background-color var(--ux-transition-fast) var(--ux-spring-smooth),
+        color var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
       cursor: pointer;
     }
 
     .ux-shell__sidebar-item:hover {
-      background-color: var(--ux-surface-secondary);
+      background-color: rgba(0, 0, 0, 0.04);
       color: var(--ux-text);
       text-decoration: none;
     }
 
+    .ux-shell__sidebar-item:active {
+      transform: scale(0.98);
+    }
+
     .ux-shell__sidebar-item--active {
-      background-color: rgba(var(--ux-primary-rgb), 0.1);
+      /* iOS 26 style: glass-like active state */
+      background: var(--ux-glass-bg-thick);
+      box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.08),
+        var(--ux-glass-highlight);
       color: var(--ux-primary);
     }
 
     .ux-shell__sidebar-item--active:hover {
-      background-color: rgba(var(--ux-primary-rgb), 0.15);
+      background: var(--ux-glass-bg-thick);
       color: var(--ux-primary);
     }
 
@@ -21918,6 +22245,41 @@
       background-color: var(--ux-primary);
       color: var(--ux-primary-contrast);
       border-radius: 9999px;
+    }
+
+    /* Dark mode sidebar adjustments */
+    @media (prefers-color-scheme: dark) {
+      .ux-shell__sidebar {
+        background: var(--ux-glass-bg);
+        border-right-color: var(--ux-glass-border);
+      }
+
+      .ux-shell__sidebar-item:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+
+      .ux-shell__sidebar-item--active {
+        background: var(--ux-glass-bg-thick);
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .ux-dark .ux-shell__sidebar {
+      background: var(--ux-glass-bg);
+      border-right-color: var(--ux-glass-border);
+    }
+
+    .ux-dark .ux-shell__sidebar-item:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .ux-dark .ux-shell__sidebar-item--active {
+      background: var(--ux-glass-bg-thick);
+      box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     /* ========================================

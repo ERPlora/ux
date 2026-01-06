@@ -667,6 +667,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       text-align: center;
       text-decoration: none;
       color: inherit;
@@ -680,6 +681,9 @@
         transform var(--ux-transition-fast) var(--ux-ease),
         background-color var(--ux-transition-fast) var(--ux-ease);
       -webkit-tap-highlight-color: transparent;
+      /* Reset button styles when used as button */
+      border: none;
+      font-family: inherit;
     }
 
     .ux-card--app:hover {
@@ -716,6 +720,14 @@
       width: 28px;
       height: 28px;
       fill: currentColor;
+    }
+
+    /* Text content in icon (e.g., initials) */
+    .ux-card--app .ux-card__icon > span {
+      font-size: 18px;
+      font-weight: 600;
+      color: inherit;
+      line-height: 1;
     }
 
     /* App icon name */
