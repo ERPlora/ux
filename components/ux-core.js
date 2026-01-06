@@ -1630,6 +1630,33 @@
     .ux-py-md { padding-top: var(--ux-space-md); padding-bottom: var(--ux-space-md); }
     .ux-py-lg { padding-top: var(--ux-space-lg); padding-bottom: var(--ux-space-lg); }
     .ux-py-xl { padding-top: var(--ux-space-xl); padding-bottom: var(--ux-space-xl); }
+
+    /* ========================================
+       Icon Utilities
+       Responsive icon sizes with display block and margin auto
+    ======================================== */
+
+    .ux-icon {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      flex-shrink: 0;
+    }
+
+    .ux-icon--xs { width: 1rem; height: 1rem; }       /* 16px */
+    .ux-icon--sm { width: 1.5rem; height: 1.5rem; }   /* 24px */
+    .ux-icon--md { width: 2rem; height: 2rem; }       /* 32px */
+    .ux-icon--lg { width: 3rem; height: 3rem; }       /* 48px */
+    .ux-icon--xl { width: 4rem; height: 4rem; }       /* 64px */
+    .ux-icon--2xl { width: 5rem; height: 5rem; }      /* 80px */
+
+    /* Inline icon (no margin auto, inline-flex) */
+    .ux-icon--inline {
+      display: inline-flex;
+      margin-left: 0;
+      margin-right: 0;
+      vertical-align: middle;
+    }
   `;
 
   // Inject styles
