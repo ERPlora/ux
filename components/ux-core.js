@@ -2502,5 +2502,18 @@
   // Apply immediately - documentElement is always available
   applyTheme();
 
+  // Listen for theme changes from parent (when in iframe)
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'ux-theme') {
+      const root = document.documentElement;
+      root.classList.remove('ux-dark', 'ux-light');
+      if (event.data.darkMode) {
+        root.classList.add('ux-dark');
+      } else {
+        root.classList.add('ux-light');
+      }
+    }
+  });
+
   console.log('UX Core loaded v1.0.0');
 })();

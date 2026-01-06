@@ -39,7 +39,7 @@
       position: absolute;
       width: 100%;
       height: 4px;
-      background-color: var(--ux-light-shade);
+      background-color: var(--ux-medium);
       border-radius: 2px;
       overflow: hidden;
     }
