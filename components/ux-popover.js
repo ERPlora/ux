@@ -161,6 +161,25 @@
     }
 
     /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-popover--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-popover--glass .ux-popover__arrow {
+      background-color: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-popover--glass .ux-popover__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    /* ========================================
        Tooltip (Simple Popover)
     ======================================== */
 

@@ -3019,6 +3019,16 @@
       50% { transform: scale(1.2); }
       100% { transform: scale(1); }
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-badge--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      color: var(--ux-text);
+    }
   `;
 
   // Inject styles
@@ -3261,6 +3271,33 @@
 
     .ux-chip-group--scroll::-webkit-scrollbar {
       display: none;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-chip--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      color: var(--ux-text);
+    }
+
+    .ux-chip--glass:hover {
+      background: var(--ux-glass-bg-thick);
+    }
+
+    .ux-chip--glass.ux-chip--selected {
+      background: var(--ux-glass-bg-thick);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    .ux-chip--glass .ux-chip__close {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-chip--glass .ux-chip__close:hover {
+      background: var(--ux-glass-bg-thick);
     }
   `;
 
@@ -4006,6 +4043,20 @@
 
     .ux-progress-circular--danger .ux-progress-circular__bar {
       stroke: var(--ux-danger);
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-progress--glass .ux-progress__track {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-progress-circular--glass .ux-progress-circular__track {
+      stroke: var(--ux-glass-border);
     }
   `;
 
@@ -5065,6 +5116,35 @@
       box-shadow: none;
     }
 
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-input--glass,
+    input.ux-input--glass,
+    textarea.ux-input--glass,
+    select.ux-input--glass {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-input--glass:hover,
+    input.ux-input--glass:hover,
+    textarea.ux-input--glass:hover,
+    select.ux-input--glass:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-input--glass:focus,
+    input.ux-input--glass:focus,
+    textarea.ux-input--glass:focus,
+    select.ux-input--glass:focus {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
     /* Textarea specific */
     textarea.ux-input {
       height: auto;
@@ -5753,6 +5833,26 @@
       color: var(--ux-text-secondary);
       margin-top: var(--ux-space-xs);
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-toggle--glass .ux-toggle__track {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-toggle--glass .ux-toggle__thumb {
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+    }
+
+    .ux-toggle--glass input[type="checkbox"]:checked + .ux-toggle__track {
+      background: var(--ux-toggle-color, var(--ux-success));
+    }
   `;
 
   // Inject styles
@@ -6069,6 +6169,21 @@
 
     .ux-checkbox--round .ux-checkbox__box {
       border-radius: 50%;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-checkbox--glass .ux-checkbox__box {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-checkbox--glass .ux-checkbox__input:checked + .ux-checkbox__box {
+      background: var(--ux-checkbox-color, var(--ux-primary));
+      border-color: var(--ux-checkbox-color, var(--ux-primary));
     }
 
     /* Reduced motion support */
@@ -6479,6 +6594,20 @@
       gap: var(--ux-space-md);
     }
 
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-radio--glass .ux-radio__circle {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-radio--glass .ux-radio__input:checked + .ux-radio__circle {
+      border-color: var(--ux-radio-color, var(--ux-primary));
+    }
+
     /* Reduced motion support */
     @media (prefers-reduced-motion: reduce) {
       .ux-radio__circle {
@@ -6860,6 +6989,22 @@
 
     .ux-range--snapping .ux-range__fill {
       transition: width var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-range--glass .ux-range__track {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-range--glass .ux-range__thumb {
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
     }
   `;
 
@@ -7759,6 +7904,54 @@
     }
 
     /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-select--glass .ux-select__trigger {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-select--glass .ux-select__trigger:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-select--glass.ux-select--open .ux-select__trigger {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    .ux-select--glass .ux-select__dropdown {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-select--glass .ux-select__option:hover {
+      background-color: var(--ux-glass-bg-thick);
+    }
+
+    /* Native select glass */
+    .ux-native-select--glass .ux-native-select__field {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-native-select--glass .ux-native-select__field:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-native-select--glass .ux-native-select__field:focus {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    /* ========================================
        Item Integration (like ion-item)
     ======================================== */
 
@@ -8266,6 +8459,21 @@
     /* Filled */
     .ux-searchbar--filled .ux-searchbar__container {
       background-color: var(--ux-light);
+    }
+
+    /* Glass (iOS 26 Liquid Glass) */
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-searchbar--glass .ux-searchbar__container {
+      background: var(--ux-glass-bg-thin);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-searchbar--glass.ux-searchbar--focused .ux-searchbar__container {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
     }
 
     /* ========================================
@@ -8928,6 +9136,26 @@
 
     .ux-textarea--borderless .ux-textarea__field:focus {
       box-shadow: none;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-textarea--glass .ux-textarea__field {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-textarea--glass .ux-textarea__field:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-textarea--glass .ux-textarea__field:focus {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
     }
 
     /* ========================================
@@ -10639,6 +10867,30 @@
     .ux-virtual-list__content {
       position: relative;
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-list--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+    }
+
+    .ux-list--glass .ux-list__item {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-list--glass .ux-list__item:hover {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-list--glass .ux-list__header {
+      background: var(--ux-glass-bg-thin);
+      border-bottom-color: var(--ux-glass-border);
+    }
   `;
 
   // Inject styles
@@ -11680,244 +11932,6 @@
   }
 })();
 /**
- * UX Page Header Component
- * Header de página con título, subtítulo, búsqueda y acciones
- * Para usar dentro de ux-content como header fijo de página
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Page Layout
-       Container for page-header + scrollable content
-    ======================================== */
-
-    .ux-page-layout {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-height: 0;
-      overflow: hidden;
-      /* Ensure it fills flex container */
-      flex: 1 1 auto;
-    }
-
-    /* ========================================
-       UX Page Header
-       Fixed header within a page (title + search + actions)
-    ======================================== */
-
-    .ux-page-header {
-      flex-shrink: 0;
-      padding: var(--ux-space-lg);
-      background-color: var(--ux-surface);
-      border-bottom: 1px solid var(--ux-border-color);
-    }
-
-    .ux-page-header--transparent {
-      background-color: transparent;
-      border-bottom: none;
-    }
-
-    .ux-page-header--sticky {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    /* Title row */
-    .ux-page-header__title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--ux-space-md);
-    }
-
-    .ux-page-header__title h1,
-    .ux-page-header__title .ux-page-header__heading {
-      margin: 0;
-      font-size: var(--ux-font-size-xl);
-      font-weight: 600;
-      color: var(--ux-text);
-      line-height: 1.3;
-    }
-
-    .ux-page-header__title h2 {
-      margin: 0;
-      font-size: var(--ux-font-size-lg);
-      font-weight: 600;
-      color: var(--ux-text);
-    }
-
-    .ux-page-header__subtitle {
-      margin: var(--ux-space-xs) 0 0 0;
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    /* Actions container */
-    .ux-page-header__actions {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-      flex-shrink: 0;
-    }
-
-    /* Search container */
-    .ux-page-header__search {
-      margin-top: var(--ux-space-md);
-    }
-
-    /* Filter/toolbar row below search */
-    .ux-page-header__toolbar {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-      margin-top: var(--ux-space-md);
-      flex-wrap: wrap;
-    }
-
-    /* Breadcrumb */
-    .ux-page-header__breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-xs);
-      margin-bottom: var(--ux-space-sm);
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    .ux-page-header__breadcrumb a {
-      color: var(--ux-primary);
-      text-decoration: none;
-    }
-
-    .ux-page-header__breadcrumb a:hover {
-      text-decoration: underline;
-    }
-
-    .ux-page-header__breadcrumb-separator {
-      color: var(--ux-text-tertiary);
-    }
-
-    /* With back button */
-    .ux-page-header--with-back .ux-page-header__title {
-      align-items: center;
-    }
-
-    .ux-page-header__back {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      margin-right: var(--ux-space-sm);
-      margin-left: calc(var(--ux-space-sm) * -1);
-      border-radius: var(--ux-border-radius);
-      color: var(--ux-text-secondary);
-      transition: background-color var(--ux-transition-fast) var(--ux-ease);
-      cursor: pointer;
-    }
-
-    .ux-page-header__back:hover {
-      background-color: var(--ux-surface-secondary);
-      color: var(--ux-text);
-    }
-
-    .ux-page-header__back svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    /* ========================================
-       UX Page Content
-       Scrollable content area within page-layout
-    ======================================== */
-
-    .ux-page-content {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-      padding: var(--ux-space-xl);
-    }
-
-    .ux-page-content--sm {
-      padding: var(--ux-space-md);
-    }
-
-    .ux-page-content--lg {
-      padding: var(--ux-space-2xl);
-    }
-
-    .ux-page-content--no-padding {
-      padding: 0;
-    }
-
-    .ux-page-content--flush {
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    /* ========================================
-       Size Variants
-    ======================================== */
-
-    .ux-page-header--sm {
-      padding: var(--ux-space-md);
-    }
-
-    .ux-page-header--sm .ux-page-header__title h1 {
-      font-size: var(--ux-font-size-lg);
-    }
-
-    .ux-page-header--lg {
-      padding: var(--ux-space-xl);
-    }
-
-    .ux-page-header--lg .ux-page-header__title h1 {
-      font-size: var(--ux-font-size-2xl);
-    }
-
-    /* ========================================
-       Responsive
-    ======================================== */
-
-    @media (max-width: 640px) {
-      .ux-page-header {
-        padding: var(--ux-space-md);
-      }
-
-      .ux-page-header__title {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .ux-page-header__actions {
-        margin-top: var(--ux-space-sm);
-        justify-content: flex-end;
-      }
-
-      .ux-page-content {
-        padding: var(--ux-space-md);
-      }
-    }
-  `;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-page-header-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-page-header-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-})();
-/**
  * UX Navbar Component
  * Barra de navegación estilo iOS
  * @requires ux-core.js
@@ -12378,6 +12392,18 @@
       border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
     }
 
+    /* Glass (iOS 26 Liquid Glass) */
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-toolbar--glass {
+      box-shadow: var(--ux-glass-highlight);
+      border-bottom: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-toolbar--glass.ux-toolbar--border-top {
+      border-bottom: none;
+      border-top: 0.5px solid var(--ux-glass-border);
+    }
+
     /* Transparent */
     .ux-toolbar--transparent {
       background-color: transparent;
@@ -12801,6 +12827,13 @@
       background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.8);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* Glass (iOS 26 Liquid Glass) */
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-tab-bar--glass {
+      box-shadow: var(--ux-glass-highlight);
+      border-top: 0.5px solid var(--ux-glass-border);
     }
 
     .ux-tab-bar--primary {
@@ -13537,6 +13570,25 @@
     .ux-segment--scrollable .ux-segment-button {
       flex: 0 0 auto;
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-segment--glass {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-segment--glass .ux-segment__indicator {
+      background: var(--ux-glass-bg-thick);
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+    }
+
+    .ux-segment--glass .ux-segment-button--selected {
+      color: var(--ux-text);
+    }
   `;
 
   // Inject styles
@@ -13861,6 +13913,17 @@
       .ux-breadcrumbs--responsive .ux-breadcrumb--show-mobile {
         display: inline-flex;
       }
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-breadcrumbs--glass {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      border-radius: var(--ux-border-radius);
+      border: 0.5px solid var(--ux-glass-border);
     }
   `;
 
@@ -14304,6 +14367,22 @@
     .ux-menu--open .ux-menu__backdrop {
       opacity: 1;
       visibility: visible;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-menu--glass .ux-menu__content {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border-right: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-menu--glass.ux-menu--end .ux-menu__content {
+      border-right: none;
+      border-left: 0.5px solid var(--ux-glass-border);
     }
   `;
 
@@ -16227,6 +16306,28 @@
       gap: var(--ux-space-sm);
       margin-top: var(--ux-space-md);
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-alert--glass .ux-alert__content {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-alert--glass .ux-alert__footer {
+      border-top-color: var(--ux-glass-border);
+    }
+
+    .ux-alert-banner--glass {
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+    }
   `;
 
   // Inject styles
@@ -17236,6 +17337,25 @@
     }
 
     /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-popover--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-popover--glass .ux-popover__arrow {
+      background-color: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-popover--glass .ux-popover__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    /* ========================================
        Tooltip (Simple Popover)
     ======================================== */
 
@@ -18106,6 +18226,27 @@
       opacity: 0;
       transition: opacity var(--ux-transition-base) var(--ux-ease);
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-skeleton--glass,
+    .ux-skeleton-item--glass {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-skeleton--glass::after,
+    .ux-skeleton-item--glass::after {
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--ux-glass-bg),
+        transparent
+      );
+    }
   `;
 
   // Inject styles
@@ -18567,6 +18708,27 @@
     .ux-fab--bottom-center.ux-fab--hidden {
       transform: translateX(-50%) translateY(100px);
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-fab__button--glass {
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+      border: 0.5px solid var(--ux-glass-border);
+      color: var(--ux-text);
+    }
+
+    .ux-fab__button--glass:hover {
+      background: var(--ux-glass-bg-thick);
+    }
+
+    .ux-fab__action--glass {
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+      border: 0.5px solid var(--ux-glass-border);
+      color: var(--ux-text);
+    }
   `;
 
   // Inject styles
@@ -18877,6 +19039,33 @@
       content: 'A: ';
       font-weight: 600;
       color: var(--ux-success);
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-accordion--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+    }
+
+    .ux-accordion--glass .ux-accordion-item {
+      border-bottom: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-accordion--glass .ux-accordion-item:last-child {
+      border-bottom: none;
+    }
+
+    .ux-accordion--glass .ux-accordion-item__header {
+      background: transparent;
+    }
+
+    .ux-accordion--glass .ux-accordion-item__header:hover {
+      background: var(--ux-glass-bg-thin);
     }
   `;
 
@@ -19508,6 +19697,35 @@
       padding: var(--ux-space-lg) var(--ux-space-xl);
       font-size: var(--ux-font-size-lg);
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-datetime--glass .ux-datetime__trigger {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-datetime--glass .ux-datetime__trigger:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-calendar--glass {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-calendar--glass .ux-calendar__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-calendar--glass .ux-calendar__day:hover:not(.ux-calendar__day--selected) {
+      background: var(--ux-glass-bg-thin);
+    }
   `;
 
   // Inject styles
@@ -19707,580 +19925,6 @@
       Alpine.data('uxDatetime', datetimeComponent);
     });
   }
-})();
-/**
- * UX Picker Component
- * iOS-style column picker (wheel selector)
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Picker Backdrop
-    ======================================== */
-
-    .ux-picker-backdrop {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.4);
-      z-index: var(--ux-z-modal-backdrop);
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity 300ms cubic-bezier(0.32, 0.72, 0, 1),
-        visibility 300ms cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .ux-picker-backdrop--open {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    /* ========================================
-       UX Picker Container
-    ======================================== */
-
-    .ux-picker {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--ux-surface);
-      border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
-      z-index: var(--ux-z-modal);
-      transform: translateY(100%);
-      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
-      padding-bottom: env(safe-area-inset-bottom);
-      will-change: transform;
-    }
-
-    .ux-picker-backdrop--open .ux-picker {
-      transform: translateY(0);
-    }
-
-    /* ========================================
-       Picker Header
-    ======================================== */
-
-    .ux-picker__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 44px;
-      padding: 0 var(--ux-space-sm);
-      border-bottom: 1px solid var(--ux-border-color);
-    }
-
-    .ux-picker__button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 60px;
-      min-height: 44px;
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      background: none;
-      border: none;
-      color: var(--ux-primary);
-      font-family: var(--ux-font-family);
-      font-size: var(--ux-font-size-md);
-      font-weight: 400;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: opacity var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-picker__button:active {
-      opacity: 0.5;
-    }
-
-    .ux-picker__button--cancel {
-      font-weight: 400;
-    }
-
-    .ux-picker__button--confirm {
-      font-weight: 600;
-    }
-
-    .ux-picker__title {
-      flex: 1;
-      text-align: center;
-      font-size: var(--ux-font-size-md);
-      font-weight: 600;
-      color: var(--ux-text);
-      margin: 0;
-    }
-
-    /* ========================================
-       Picker Columns Container
-    ======================================== */
-
-    .ux-picker__columns {
-      display: flex;
-      height: 216px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Selection highlight */
-    .ux-picker__columns::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 36px;
-      transform: translateY(-50%);
-      background-color: var(--ux-surface-secondary);
-      border-top: 1px solid var(--ux-border-color);
-      border-bottom: 1px solid var(--ux-border-color);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Gradient masks */
-    .ux-picker__columns::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to bottom,
-        var(--ux-surface) 0%,
-        transparent 20%,
-        transparent 80%,
-        var(--ux-surface) 100%
-      );
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* ========================================
-       Picker Column
-    ======================================== */
-
-    .ux-picker__column {
-      flex: 1;
-      height: 100%;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .ux-picker__column-wrapper {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      transform: translateY(-50%);
-      transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
-      will-change: transform;
-    }
-
-    .ux-picker__column--dragging .ux-picker__column-wrapper {
-      transition: none;
-    }
-
-    /* ========================================
-       Picker Item
-    ======================================== */
-
-    .ux-picker__item {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 36px;
-      padding: 0 var(--ux-space-md);
-      color: var(--ux-text-secondary);
-      font-size: var(--ux-font-size-lg);
-      font-weight: 400;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: pointer;
-      transition:
-        color var(--ux-transition-fast) var(--ux-ease),
-        transform var(--ux-transition-fast) var(--ux-ease);
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .ux-picker__item--selected {
-      color: var(--ux-text);
-      font-weight: 500;
-    }
-
-    .ux-picker__item--disabled {
-      color: var(--ux-text-tertiary);
-      pointer-events: none;
-    }
-
-    /* 3D wheel effect */
-    .ux-picker--3d .ux-picker__item {
-      transform-style: preserve-3d;
-      backface-visibility: hidden;
-    }
-
-    /* ========================================
-       Picker Sizes
-    ======================================== */
-
-    .ux-picker--sm .ux-picker__columns {
-      height: 180px;
-    }
-
-    .ux-picker--sm .ux-picker__item {
-      height: 30px;
-      font-size: var(--ux-font-size-md);
-    }
-
-    .ux-picker--sm .ux-picker__columns::before {
-      height: 30px;
-    }
-
-    .ux-picker--lg .ux-picker__columns {
-      height: 252px;
-    }
-
-    .ux-picker--lg .ux-picker__item {
-      height: 42px;
-      font-size: var(--ux-font-size-xl);
-    }
-
-    .ux-picker--lg .ux-picker__columns::before {
-      height: 42px;
-    }
-
-    /* ========================================
-       Inline Picker (not in modal)
-    ======================================== */
-
-    .ux-picker--inline {
-      position: static;
-      transform: none;
-      border-radius: var(--ux-border-radius-lg);
-      border: 1px solid var(--ux-border-color);
-    }
-
-    .ux-picker--inline .ux-picker__header {
-      border-bottom: none;
-      background-color: var(--ux-surface-secondary);
-      border-radius: var(--ux-border-radius-lg) var(--ux-border-radius-lg) 0 0;
-    }
-
-    /* ========================================
-       Multi-column Dividers
-    ======================================== */
-
-    .ux-picker__divider {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 var(--ux-space-xs);
-      color: var(--ux-text);
-      font-size: var(--ux-font-size-lg);
-      font-weight: 500;
-    }
-
-    /* ========================================
-       Column Labels
-    ======================================== */
-
-    .ux-picker__column-label {
-      position: absolute;
-      top: var(--ux-space-xs);
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-size: var(--ux-font-size-xs);
-      font-weight: 600;
-      color: var(--ux-text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      z-index: 2;
-    }
-  `;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-picker-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-picker-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-
-  // Alpine component for picker
-  // ARIA: role="listbox" for columns, role="option" for items
-  const pickerComponent = (config = {}) => ({
-    isOpen: false,
-    columns: config.columns || [],
-    selectedIndexes: [],
-    title: config.title || '',
-    cancelText: config.cancelText || 'Cancel',
-    confirmText: config.confirmText || 'Done',
-    showHeader: config.showHeader !== false,
-    itemHeight: config.itemHeight || 36,
-    visibleItems: config.visibleItems || 5,
-    pickerId: config.id || 'ux-picker-' + Math.random().toString(36).substr(2, 9),
-    _columnStates: [],
-    _startY: 0,
-    _currentY: 0,
-    _activeColumn: null,
-
-    // ARIA attributes
-    get ariaAttrs() {
-      return {
-        'role': 'dialog',
-        'aria-modal': 'true',
-        'aria-labelledby': this.pickerId + '-title'
-      };
-    },
-
-    get titleId() {
-      return this.pickerId + '-title';
-    },
-
-    // ARIA for column
-    getColumnAriaAttrs(columnIndex) {
-      return {
-        'role': 'listbox',
-        'aria-label': this.columns[columnIndex]?.label || `Column ${columnIndex + 1}`,
-        'tabindex': '0'
-      };
-    },
-
-    // ARIA for item
-    getItemAriaAttrs(columnIndex, itemIndex) {
-      const isSelected = this.selectedIndexes[columnIndex] === itemIndex;
-      return {
-        'role': 'option',
-        'aria-selected': isSelected ? 'true' : 'false',
-        'id': `${this.pickerId}-col${columnIndex}-item${itemIndex}`
-      };
-    },
-
-    init() {
-      // Initialize selected indexes
-      this.selectedIndexes = this.columns.map((col, i) => {
-        return col.selectedIndex || 0;
-      });
-
-      // Initialize column states for drag
-      this._columnStates = this.columns.map((col, i) => ({
-        offset: -this.selectedIndexes[i] * this.itemHeight,
-        isDragging: false
-      }));
-    },
-
-    open(options = {}) {
-      if (options.columns) {
-        this.columns = options.columns;
-        this.init();
-      }
-      if (options.title) this.title = options.title;
-
-      this.isOpen = true;
-      document.body.style.overflow = 'hidden';
-
-      this.$nextTick(() => {
-        // Update column positions
-        this.columns.forEach((_, i) => {
-          this.scrollToIndex(i, this.selectedIndexes[i], false);
-        });
-      });
-    },
-
-    close() {
-      this.isOpen = false;
-      document.body.style.overflow = '';
-    },
-
-    cancel() {
-      this.$dispatch('picker-cancel');
-      this.close();
-    },
-
-    confirm() {
-      const values = this.columns.map((col, i) => {
-        const idx = this.selectedIndexes[i];
-        return col.options[idx];
-      });
-
-      this.$dispatch('picker-confirm', {
-        values,
-        indexes: [...this.selectedIndexes]
-      });
-
-      this.close();
-    },
-
-    // Get transform for column
-    getColumnTransform(columnIndex) {
-      const state = this._columnStates[columnIndex];
-      if (!state) return 'translateY(0)';
-      return `translateY(${state.offset}px)`;
-    },
-
-    // Scroll column to index
-    scrollToIndex(columnIndex, itemIndex, animate = true) {
-      const column = this.columns[columnIndex];
-      if (!column) return;
-
-      // Clamp index
-      const maxIndex = column.options.length - 1;
-      itemIndex = Math.max(0, Math.min(maxIndex, itemIndex));
-
-      this.selectedIndexes[columnIndex] = itemIndex;
-      this._columnStates[columnIndex].offset = -itemIndex * this.itemHeight;
-
-      // Dispatch change event
-      this.$dispatch('picker-change', {
-        columnIndex,
-        itemIndex,
-        value: column.options[itemIndex]
-      });
-    },
-
-    // Select item by click
-    selectItem(columnIndex, itemIndex) {
-      this.scrollToIndex(columnIndex, itemIndex);
-    },
-
-    // Check if item is selected
-    isSelected(columnIndex, itemIndex) {
-      return this.selectedIndexes[columnIndex] === itemIndex;
-    },
-
-    // Touch/drag handlers
-    onTouchStart(event, columnIndex) {
-      const state = this._columnStates[columnIndex];
-      state.isDragging = true;
-      this._activeColumn = columnIndex;
-      this._startY = event.touches ? event.touches[0].clientY : event.clientY;
-      this._startOffset = state.offset;
-    },
-
-    onTouchMove(event, columnIndex) {
-      const state = this._columnStates[columnIndex];
-      if (!state.isDragging) return;
-
-      const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-      const deltaY = clientY - this._startY;
-
-      // Apply resistance at boundaries
-      const column = this.columns[columnIndex];
-      const maxOffset = 0;
-      const minOffset = -(column.options.length - 1) * this.itemHeight;
-
-      let newOffset = this._startOffset + deltaY;
-
-      // Rubber band effect
-      if (newOffset > maxOffset) {
-        newOffset = maxOffset + (newOffset - maxOffset) * 0.3;
-      } else if (newOffset < minOffset) {
-        newOffset = minOffset + (newOffset - minOffset) * 0.3;
-      }
-
-      state.offset = newOffset;
-
-      event.preventDefault();
-    },
-
-    onTouchEnd(event, columnIndex) {
-      const state = this._columnStates[columnIndex];
-      if (!state.isDragging) return;
-
-      state.isDragging = false;
-
-      // Snap to nearest item
-      const column = this.columns[columnIndex];
-      const nearestIndex = Math.round(-state.offset / this.itemHeight);
-      const clampedIndex = Math.max(0, Math.min(column.options.length - 1, nearestIndex));
-
-      this.scrollToIndex(columnIndex, clampedIndex);
-    },
-
-    // Keyboard navigation
-    handleKeydown(event, columnIndex) {
-      const column = this.columns[columnIndex];
-      const currentIndex = this.selectedIndexes[columnIndex];
-
-      switch (event.key) {
-        case 'ArrowUp':
-          event.preventDefault();
-          if (currentIndex > 0) {
-            this.scrollToIndex(columnIndex, currentIndex - 1);
-          }
-          break;
-        case 'ArrowDown':
-          event.preventDefault();
-          if (currentIndex < column.options.length - 1) {
-            this.scrollToIndex(columnIndex, currentIndex + 1);
-          }
-          break;
-        case 'Home':
-          event.preventDefault();
-          this.scrollToIndex(columnIndex, 0);
-          break;
-        case 'End':
-          event.preventDefault();
-          this.scrollToIndex(columnIndex, column.options.length - 1);
-          break;
-        case 'Enter':
-          event.preventDefault();
-          this.confirm();
-          break;
-        case 'Escape':
-          event.preventDefault();
-          this.cancel();
-          break;
-      }
-    },
-
-    // Get selected values
-    getValues() {
-      return this.columns.map((col, i) => {
-        const idx = this.selectedIndexes[i];
-        return col.options[idx];
-      });
-    },
-
-    // Set values programmatically
-    setValues(values) {
-      values.forEach((value, i) => {
-        const column = this.columns[i];
-        if (!column) return;
-
-        const index = column.options.findIndex(opt => {
-          if (typeof opt === 'object') {
-            return opt.value === value || opt.text === value;
-          }
-          return opt === value;
-        });
-
-        if (index !== -1) {
-          this.scrollToIndex(i, index, false);
-        }
-      });
-    }
-  });
-
-  if (window.UX) {
-    window.UX.registerComponent('uxPicker', pickerComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxPicker', pickerComponent);
-    });
-  }
-
-  // Helper to format picker option display
-  window.UX = window.UX || {};
-  window.UX.getPickerOptionText = function(option) {
-    if (typeof option === 'object') {
-      return option.text || option.label || option.value;
-    }
-    return option;
-  };
 })();
 /**
  * UX Infinite Scroll Component
@@ -22567,6 +22211,31 @@
         animation: none;
       }
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-carousel--glass .ux-carousel__nav-button {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-carousel--glass .ux-carousel__nav-button:hover {
+      background: var(--ux-glass-bg-thick);
+    }
+
+    .ux-carousel--glass .ux-carousel__pagination {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-radius: 100px;
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+    }
   `;
 
   // Inject styles
@@ -23269,16 +22938,17 @@
     .ux-shell__main {
       flex: 1;
       margin-top: var(--ux-shell-navbar);
-      min-height: calc(100vh - var(--ux-shell-navbar));
-      min-height: calc(100dvh - var(--ux-shell-navbar));
+      height: calc(100vh - var(--ux-shell-navbar));
+      height: calc(100dvh - var(--ux-shell-navbar));
+      overflow: hidden;
       background-color: var(--ux-surface-secondary);
     }
 
     /* With toolbar */
     .ux-shell--toolbar .ux-shell__main {
       margin-top: calc(var(--ux-shell-navbar) + var(--ux-shell-toolbar));
-      min-height: calc(100vh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
-      min-height: calc(100dvh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
+      height: calc(100vh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
+      height: calc(100dvh - var(--ux-shell-navbar) - var(--ux-shell-toolbar));
     }
 
     /* With sidebar */
@@ -24635,6 +24305,35 @@
       overflow: auto;
       -webkit-overflow-scrolling: touch;
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-panel--glass {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border-right: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-panel--glass.ux-panel--end {
+      border-right: none;
+      border-left: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-panel--glass .ux-panel__header {
+      background: transparent;
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-panel--glass .ux-panel__nav-item:hover {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-panel--glass .ux-panel__nav-item--active {
+      background: var(--ux-glass-bg);
+    }
   `;
 
   // Inject styles
@@ -25819,6 +25518,39 @@
     .ux-datatable--lg .ux-datatable__td {
       padding: var(--ux-space-lg) var(--ux-space-xl);
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-datatable--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+    }
+
+    .ux-datatable--glass .ux-datatable__th {
+      background: var(--ux-glass-bg-thin);
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-datatable--glass .ux-datatable__td {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-datatable--glass .ux-datatable__tr:hover .ux-datatable__td {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-datatable--glass .ux-datatable__tr--selected .ux-datatable__td {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-datatable--glass .ux-datatable__footer {
+      background: var(--ux-glass-bg-thin);
+      border-top-color: var(--ux-glass-border);
+    }
   `;
 
   // Icons
@@ -26172,770 +25904,6 @@
       Alpine.data('uxDatatable', datatableComponent);
     });
   }
-})();
-/**
- * UX Loading Component
- * Loading indicator with backdrop (iOS style)
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Loading Backdrop
-    ======================================== */
-
-    .ux-loading-backdrop {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.3);
-      z-index: var(--ux-z-toast);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1),
-        visibility 200ms cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .ux-loading-backdrop--open {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .ux-loading-backdrop--transparent {
-      background-color: transparent;
-    }
-
-    /* ========================================
-       UX Loading Container
-    ======================================== */
-
-    .ux-loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: var(--ux-space-md);
-      min-width: 100px;
-      min-height: 100px;
-      padding: var(--ux-space-lg);
-      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.95);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: var(--ux-border-radius-lg);
-      box-shadow: var(--ux-shadow-lg);
-      transform: scale(0.9);
-      opacity: 0;
-      transition:
-        transform 300ms cubic-bezier(0.32, 0.72, 0, 1),
-        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .ux-loading-backdrop--open .ux-loading {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    /* ========================================
-       Loading Spinner
-    ======================================== */
-
-    .ux-loading__spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid var(--ux-border-color);
-      border-top-color: var(--ux-primary);
-      border-radius: 50%;
-      animation: ux-loading-spin 0.8s linear infinite;
-    }
-
-    @keyframes ux-loading-spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* iOS-style spinner (dots) */
-    .ux-loading__spinner--ios {
-      width: 40px;
-      height: 40px;
-      border: none;
-      background: transparent;
-      position: relative;
-      animation: none;
-    }
-
-    .ux-loading__spinner--ios::before {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23999' stroke-width='3' stroke-linecap='round'%3E%3Cline x1='20' y1='4' x2='20' y2='10' opacity='0.125'/%3E%3Cline x1='32.5' y1='7.5' x2='28.5' y2='11.5' opacity='0.25'/%3E%3Cline x1='36' y1='20' x2='30' y2='20' opacity='0.375'/%3E%3Cline x1='32.5' y1='32.5' x2='28.5' y2='28.5' opacity='0.5'/%3E%3Cline x1='20' y1='36' x2='20' y2='30' opacity='0.625'/%3E%3Cline x1='7.5' y1='32.5' x2='11.5' y2='28.5' opacity='0.75'/%3E%3Cline x1='4' y1='20' x2='10' y2='20' opacity='0.875'/%3E%3Cline x1='7.5' y1='7.5' x2='11.5' y2='11.5' opacity='1'/%3E%3C/g%3E%3C/svg%3E");
-      animation: ux-loading-ios-spin 0.8s steps(8) infinite;
-    }
-
-    @keyframes ux-loading-ios-spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Dots spinner */
-    .ux-loading__spinner--dots {
-      width: 60px;
-      height: 20px;
-      border: none;
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      animation: none;
-    }
-
-    .ux-loading__spinner--dots::before,
-    .ux-loading__spinner--dots::after,
-    .ux-loading__dot {
-      content: '';
-      width: 12px;
-      height: 12px;
-      background-color: var(--ux-primary);
-      border-radius: 50%;
-      animation: ux-loading-bounce 1.4s ease-in-out infinite both;
-    }
-
-    .ux-loading__spinner--dots::before {
-      animation-delay: -0.32s;
-    }
-
-    .ux-loading__dot {
-      animation-delay: -0.16s;
-    }
-
-    @keyframes ux-loading-bounce {
-      0%, 80%, 100% {
-        transform: scale(0.6);
-        opacity: 0.5;
-      }
-      40% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    /* ========================================
-       Loading Message
-    ======================================== */
-
-    .ux-loading__message {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-      text-align: center;
-      max-width: 200px;
-    }
-
-    /* ========================================
-       Loading Sizes
-    ======================================== */
-
-    .ux-loading--sm {
-      min-width: 80px;
-      min-height: 80px;
-      padding: var(--ux-space-md);
-    }
-
-    .ux-loading--sm .ux-loading__spinner {
-      width: 28px;
-      height: 28px;
-      border-width: 2px;
-    }
-
-    .ux-loading--sm .ux-loading__message {
-      font-size: var(--ux-font-size-xs);
-    }
-
-    .ux-loading--lg {
-      min-width: 140px;
-      min-height: 140px;
-      padding: var(--ux-space-xl);
-    }
-
-    .ux-loading--lg .ux-loading__spinner {
-      width: 48px;
-      height: 48px;
-      border-width: 4px;
-    }
-
-    .ux-loading--lg .ux-loading__message {
-      font-size: var(--ux-font-size-md);
-    }
-
-    /* ========================================
-       Loading Colors
-    ======================================== */
-
-    .ux-loading--dark {
-      background-color: rgba(0, 0, 0, 0.85);
-    }
-
-    .ux-loading--dark .ux-loading__spinner {
-      border-color: rgba(255, 255, 255, 0.2);
-      border-top-color: white;
-    }
-
-    .ux-loading--dark .ux-loading__message {
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    /* ========================================
-       Inline Loading
-    ======================================== */
-
-    .ux-loading-inline {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-    }
-
-    .ux-loading-inline__spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--ux-border-color);
-      border-top-color: var(--ux-primary);
-      border-radius: 50%;
-      animation: ux-loading-spin 0.8s linear infinite;
-    }
-
-    .ux-loading-inline__text {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    /* Sizes */
-    .ux-loading-inline--sm .ux-loading-inline__spinner {
-      width: 14px;
-      height: 14px;
-    }
-
-    .ux-loading-inline--sm .ux-loading-inline__text {
-      font-size: var(--ux-font-size-xs);
-    }
-
-    .ux-loading-inline--lg .ux-loading-inline__spinner {
-      width: 28px;
-      height: 28px;
-      border-width: 3px;
-    }
-
-    /* ========================================
-       Full Page Loading
-    ======================================== */
-
-    .ux-loading--fullpage {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: var(--ux-background);
-      z-index: 9999;
-    }
-
-    .ux-loading--fullpage .ux-loading {
-      background-color: transparent;
-      box-shadow: none;
-    }
-
-    /* ========================================
-       Loading Overlay (for containers)
-    ======================================== */
-
-    .ux-loading-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: rgba(var(--ux-background-rgb, 255, 255, 255), 0.8);
-      z-index: 10;
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity var(--ux-transition-fast) var(--ux-ease),
-        visibility var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-loading-overlay--visible {
-      opacity: 1;
-      visibility: visible;
-    }
-  `;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-loading-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-loading-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-
-  // Alpine component for loading
-  // ARIA: role="alert", aria-busy for loading state
-  const loadingComponent = (config = {}) => ({
-    isOpen: config.isOpen || false,
-    message: config.message || '',
-    spinner: config.spinner || 'default', // default, ios, dots
-    showBackdrop: config.showBackdrop !== false,
-    dismissOnBackdrop: config.dismissOnBackdrop || false,
-    loadingId: config.id || 'ux-loading-' + Math.random().toString(36).substr(2, 9),
-
-    // ARIA attributes
-    get ariaAttrs() {
-      return {
-        'role': 'alert',
-        'aria-live': 'assertive',
-        'aria-busy': this.isOpen ? 'true' : 'false',
-        'aria-label': this.message || 'Loading'
-      };
-    },
-
-    show(options = {}) {
-      if (options.message !== undefined) this.message = options.message;
-      if (options.spinner) this.spinner = options.spinner;
-
-      this.isOpen = true;
-      document.body.style.overflow = 'hidden';
-    },
-
-    hide() {
-      this.isOpen = false;
-      document.body.style.overflow = '';
-    },
-
-    // Alias methods
-    present(options) {
-      this.show(options);
-    },
-
-    dismiss() {
-      this.hide();
-    },
-
-    handleBackdropClick(event) {
-      if (this.dismissOnBackdrop && event.target === event.currentTarget) {
-        this.hide();
-      }
-    },
-
-    // Show loading with timeout
-    showWithTimeout(options = {}, timeout = 30000) {
-      this.show(options);
-
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          this.hide();
-          resolve();
-        }, timeout);
-      });
-    },
-
-    // Show loading during async operation
-    async during(asyncFn, options = {}) {
-      this.show(options);
-      try {
-        const result = await asyncFn();
-        return result;
-      } finally {
-        this.hide();
-      }
-    }
-  });
-
-  if (window.UX) {
-    window.UX.registerComponent('uxLoading', loadingComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxLoading', loadingComponent);
-    });
-  }
-
-  // Global loading controller (singleton)
-  const loadingController = {
-    _instance: null,
-    _queue: [],
-
-    async create(options = {}) {
-      return {
-        present: () => this.show(options),
-        dismiss: () => this.hide()
-      };
-    },
-
-    show(options = {}) {
-      // Create loading element if it doesn't exist
-      if (!this._instance) {
-        const container = document.createElement('div');
-        container.id = 'ux-loading-controller';
-        container.innerHTML = `
-          <div class="ux-loading-backdrop"
-               :class="{ 'ux-loading-backdrop--open': isOpen }"
-               @click="handleBackdropClick($event)"
-               x-data="uxLoading()">
-            <div class="ux-loading" :class="'ux-loading--' + (size || '')" role="alert" aria-live="assertive">
-              <div class="ux-loading__spinner" :class="'ux-loading__spinner--' + spinner"></div>
-              <div class="ux-loading__message" x-show="message" x-text="message"></div>
-            </div>
-          </div>
-        `;
-        document.body.appendChild(container);
-      }
-
-      // Show via Alpine
-      const el = document.querySelector('#ux-loading-controller [x-data]');
-      if (el && el._x_dataStack) {
-        const data = el._x_dataStack[0];
-        data.show(options);
-      }
-    },
-
-    hide() {
-      const el = document.querySelector('#ux-loading-controller [x-data]');
-      if (el && el._x_dataStack) {
-        const data = el._x_dataStack[0];
-        data.hide();
-      }
-    }
-  };
-
-  // Export to UX namespace
-  if (window.UX) {
-    window.UX.loading = loadingController;
-  }
-})();
-/**
- * UX Back Button Component
- * iOS-style back button with arrow and text
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Back Button
-    ======================================== */
-
-    .ux-back-button {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ux-space-xs);
-      min-height: var(--ux-touch-target);
-      padding: var(--ux-space-xs) var(--ux-space-sm);
-      padding-left: 0;
-      background: none;
-      border: none;
-      color: var(--ux-primary);
-      font-family: var(--ux-font-family);
-      font-size: var(--ux-font-size-md);
-      font-weight: 400;
-      text-decoration: none;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition:
-        opacity var(--ux-transition-fast) var(--ux-ease),
-        transform var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-back-button:hover {
-      opacity: 0.7;
-    }
-
-    .ux-back-button:active {
-      opacity: 0.5;
-      transform: scale(0.97);
-    }
-
-    /* ========================================
-       Back Button Icon
-    ======================================== */
-
-    .ux-back-button__icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      flex-shrink: 0;
-      transition: transform var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-back-button__icon svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Hover animation - slide left */
-    .ux-back-button:hover .ux-back-button__icon {
-      transform: translateX(-2px);
-    }
-
-    /* ========================================
-       Back Button Text
-    ======================================== */
-
-    .ux-back-button__text {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 120px;
-    }
-
-    /* Icon only */
-    .ux-back-button--icon-only .ux-back-button__text {
-      display: none;
-    }
-
-    .ux-back-button--icon-only {
-      padding: var(--ux-space-xs);
-    }
-
-    /* ========================================
-       Back Button Sizes
-    ======================================== */
-
-    .ux-back-button--sm {
-      min-height: var(--ux-touch-target-sm);
-      font-size: var(--ux-font-size-sm);
-    }
-
-    .ux-back-button--sm .ux-back-button__icon {
-      width: 20px;
-      height: 20px;
-    }
-
-    .ux-back-button--sm .ux-back-button__text {
-      max-width: 100px;
-    }
-
-    .ux-back-button--lg {
-      font-size: var(--ux-font-size-lg);
-    }
-
-    .ux-back-button--lg .ux-back-button__icon {
-      width: 28px;
-      height: 28px;
-    }
-
-    .ux-back-button--lg .ux-back-button__text {
-      max-width: 160px;
-    }
-
-    /* ========================================
-       Back Button Colors
-    ======================================== */
-
-    .ux-back-button--light {
-      color: white;
-    }
-
-    .ux-back-button--dark {
-      color: var(--ux-text);
-    }
-
-    .ux-back-button--secondary {
-      color: var(--ux-text-secondary);
-    }
-
-    /* ========================================
-       Back Button in Navbar
-    ======================================== */
-
-    .ux-navbar .ux-back-button {
-      margin-left: calc(-1 * var(--ux-space-sm));
-    }
-
-    .ux-navbar--primary .ux-back-button,
-    .ux-navbar--dark .ux-back-button {
-      color: white;
-    }
-
-    /* ========================================
-       Back Button in Toolbar
-    ======================================== */
-
-    .ux-toolbar .ux-back-button {
-      margin-left: calc(-1 * var(--ux-space-xs));
-    }
-
-    /* ========================================
-       Back Button in Modal
-    ======================================== */
-
-    .ux-modal__header .ux-back-button {
-      margin-left: calc(-1 * var(--ux-space-sm));
-    }
-
-    /* ========================================
-       Disabled State
-    ======================================== */
-
-    .ux-back-button:disabled,
-    .ux-back-button--disabled {
-      opacity: 0.4;
-      pointer-events: none;
-    }
-
-    /* ========================================
-       Custom Icon Positions
-    ======================================== */
-
-    .ux-back-button--icon-end {
-      flex-direction: row-reverse;
-    }
-
-    .ux-back-button--icon-end .ux-back-button__icon {
-      transform: rotate(180deg);
-    }
-
-    .ux-back-button--icon-end:hover .ux-back-button__icon {
-      transform: rotate(180deg) translateX(-2px);
-    }
-
-    /* ========================================
-       Animated Entrance (for page transitions)
-    ======================================== */
-
-    @keyframes ux-back-button-enter {
-      from {
-        opacity: 0;
-        transform: translateX(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .ux-back-button--animate-in {
-      animation: ux-back-button-enter 300ms var(--ux-ease-spring) forwards;
-    }
-
-    /* ========================================
-       Collapse/Expand Animation (iOS-style)
-    ======================================== */
-
-    .ux-back-button--collapsible .ux-back-button__text {
-      transition:
-        max-width 200ms var(--ux-ease),
-        opacity 200ms var(--ux-ease);
-    }
-
-    .ux-back-button--collapsed .ux-back-button__text {
-      max-width: 0;
-      opacity: 0;
-      padding: 0;
-    }
-  `;
-
-  // Default back arrow SVG
-  const backArrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-back-button-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-back-button-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-
-  // Alpine component for back button with routing
-  // ARIA: aria-label for accessibility
-  const backButtonComponent = (config = {}) => ({
-    text: config.text || 'Back',
-    href: config.href || null,
-    defaultHref: config.defaultHref || '/',
-    showIcon: config.showIcon !== false,
-    showText: config.showText !== false,
-    disabled: config.disabled || false,
-    collapsed: config.collapsed || false,
-
-    // ARIA attributes
-    get ariaAttrs() {
-      return {
-        'aria-label': this.text || 'Go back',
-        'role': this.href ? 'link' : 'button'
-      };
-    },
-
-    // Get the back arrow SVG
-    get iconSvg() {
-      return backArrowSvg;
-    },
-
-    // Navigate back
-    goBack() {
-      if (this.disabled) return;
-
-      // If href is provided, navigate to it
-      if (this.href) {
-        window.location.href = this.href;
-        return;
-      }
-
-      // Check if there's history to go back to
-      if (window.history.length > 1) {
-        window.history.back();
-      } else if (this.defaultHref) {
-        // Fallback to default href
-        window.location.href = this.defaultHref;
-      }
-
-      // Dispatch event for custom handling
-      this.$dispatch('back-button-click');
-    },
-
-    // Handle click
-    handleClick(event) {
-      // If it's a link and href is set, let it navigate normally
-      if (this.href && event.currentTarget.tagName === 'A') {
-        return;
-      }
-
-      event.preventDefault();
-      this.goBack();
-    },
-
-    // Collapse/expand text (iOS scroll behavior)
-    collapse() {
-      this.collapsed = true;
-    },
-
-    expand() {
-      this.collapsed = false;
-    },
-
-    toggle() {
-      this.collapsed = !this.collapsed;
-    }
-  });
-
-  if (window.UX) {
-    window.UX.registerComponent('uxBackButton', backButtonComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxBackButton', backButtonComponent);
-    });
-  }
-
-  // Export SVG for use in templates
-  window.UX = window.UX || {};
-  window.UX.backArrowSvg = backArrowSvg;
 })();
 /**
  * UX PWA - Progressive Web App Support
@@ -27421,4 +26389,1600 @@
   // Auto-init
   window.UXOffline.init();
 
+})();
+/**
+ * UX Picker Component
+ * iOS-style column picker (wheel selector)
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Picker Backdrop
+    ======================================== */
+
+    .ux-picker-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: var(--ux-z-modal-backdrop);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 300ms cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 300ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .ux-picker-backdrop--open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ========================================
+       UX Picker Container
+    ======================================== */
+
+    .ux-picker {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
+      z-index: var(--ux-z-modal);
+      transform: translateY(100%);
+      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+      padding-bottom: env(safe-area-inset-bottom);
+      will-change: transform;
+    }
+
+    .ux-picker-backdrop--open .ux-picker {
+      transform: translateY(0);
+    }
+
+    /* ========================================
+       Picker Header
+    ======================================== */
+
+    .ux-picker__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 44px;
+      padding: 0 var(--ux-space-sm);
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-picker__button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 60px;
+      min-height: 44px;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      background: none;
+      border: none;
+      color: var(--ux-primary);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-md);
+      font-weight: 400;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-picker__button:active {
+      opacity: 0.5;
+    }
+
+    .ux-picker__button--cancel {
+      font-weight: 400;
+    }
+
+    .ux-picker__button--confirm {
+      font-weight: 600;
+    }
+
+    .ux-picker__title {
+      flex: 1;
+      text-align: center;
+      font-size: var(--ux-font-size-md);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0;
+    }
+
+    /* ========================================
+       Picker Columns Container
+    ======================================== */
+
+    .ux-picker__columns {
+      display: flex;
+      height: 216px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Selection highlight */
+    .ux-picker__columns::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 36px;
+      transform: translateY(-50%);
+      background-color: var(--ux-surface-secondary);
+      border-top: 1px solid var(--ux-border-color);
+      border-bottom: 1px solid var(--ux-border-color);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Gradient masks */
+    .ux-picker__columns::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        var(--ux-surface) 0%,
+        transparent 20%,
+        transparent 80%,
+        var(--ux-surface) 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ========================================
+       Picker Column
+    ======================================== */
+
+    .ux-picker__column {
+      flex: 1;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ux-picker__column-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      transform: translateY(-50%);
+      transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+      will-change: transform;
+    }
+
+    .ux-picker__column--dragging .ux-picker__column-wrapper {
+      transition: none;
+    }
+
+    /* ========================================
+       Picker Item
+    ======================================== */
+
+    .ux-picker__item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 36px;
+      padding: 0 var(--ux-space-md);
+      color: var(--ux-text-secondary);
+      font-size: var(--ux-font-size-lg);
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      transition:
+        color var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-picker__item--selected {
+      color: var(--ux-text);
+      font-weight: 500;
+    }
+
+    .ux-picker__item--disabled {
+      color: var(--ux-text-tertiary);
+      pointer-events: none;
+    }
+
+    /* 3D wheel effect */
+    .ux-picker--3d .ux-picker__item {
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+    }
+
+    /* ========================================
+       Picker Sizes
+    ======================================== */
+
+    .ux-picker--sm .ux-picker__columns {
+      height: 180px;
+    }
+
+    .ux-picker--sm .ux-picker__item {
+      height: 30px;
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-picker--sm .ux-picker__columns::before {
+      height: 30px;
+    }
+
+    .ux-picker--lg .ux-picker__columns {
+      height: 252px;
+    }
+
+    .ux-picker--lg .ux-picker__item {
+      height: 42px;
+      font-size: var(--ux-font-size-xl);
+    }
+
+    .ux-picker--lg .ux-picker__columns::before {
+      height: 42px;
+    }
+
+    /* ========================================
+       Inline Picker (not in modal)
+    ======================================== */
+
+    .ux-picker--inline {
+      position: static;
+      transform: none;
+      border-radius: var(--ux-border-radius-lg);
+      border: 1px solid var(--ux-border-color);
+    }
+
+    .ux-picker--inline .ux-picker__header {
+      border-bottom: none;
+      background-color: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-lg) var(--ux-border-radius-lg) 0 0;
+    }
+
+    /* ========================================
+       Multi-column Dividers
+    ======================================== */
+
+    .ux-picker__divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 var(--ux-space-xs);
+      color: var(--ux-text);
+      font-size: var(--ux-font-size-lg);
+      font-weight: 500;
+    }
+
+    /* ========================================
+       Column Labels
+    ======================================== */
+
+    .ux-picker__column-label {
+      position: absolute;
+      top: var(--ux-space-xs);
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: var(--ux-font-size-xs);
+      font-weight: 600;
+      color: var(--ux-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      z-index: 2;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-picker--glass {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-picker--glass .ux-picker__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-picker--glass .ux-picker__highlight {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-picker-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-picker-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for picker
+  // ARIA: role="listbox" for columns, role="option" for items
+  const pickerComponent = (config = {}) => ({
+    isOpen: false,
+    columns: config.columns || [],
+    selectedIndexes: [],
+    title: config.title || '',
+    cancelText: config.cancelText || 'Cancel',
+    confirmText: config.confirmText || 'Done',
+    showHeader: config.showHeader !== false,
+    itemHeight: config.itemHeight || 36,
+    visibleItems: config.visibleItems || 5,
+    pickerId: config.id || 'ux-picker-' + Math.random().toString(36).substr(2, 9),
+    _columnStates: [],
+    _startY: 0,
+    _currentY: 0,
+    _activeColumn: null,
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'role': 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': this.pickerId + '-title'
+      };
+    },
+
+    get titleId() {
+      return this.pickerId + '-title';
+    },
+
+    // ARIA for column
+    getColumnAriaAttrs(columnIndex) {
+      return {
+        'role': 'listbox',
+        'aria-label': this.columns[columnIndex]?.label || `Column ${columnIndex + 1}`,
+        'tabindex': '0'
+      };
+    },
+
+    // ARIA for item
+    getItemAriaAttrs(columnIndex, itemIndex) {
+      const isSelected = this.selectedIndexes[columnIndex] === itemIndex;
+      return {
+        'role': 'option',
+        'aria-selected': isSelected ? 'true' : 'false',
+        'id': `${this.pickerId}-col${columnIndex}-item${itemIndex}`
+      };
+    },
+
+    init() {
+      // Initialize selected indexes
+      this.selectedIndexes = this.columns.map((col, i) => {
+        return col.selectedIndex || 0;
+      });
+
+      // Initialize column states for drag
+      this._columnStates = this.columns.map((col, i) => ({
+        offset: -this.selectedIndexes[i] * this.itemHeight,
+        isDragging: false
+      }));
+    },
+
+    open(options = {}) {
+      if (options.columns) {
+        this.columns = options.columns;
+        this.init();
+      }
+      if (options.title) this.title = options.title;
+
+      this.isOpen = true;
+      document.body.style.overflow = 'hidden';
+
+      this.$nextTick(() => {
+        // Update column positions
+        this.columns.forEach((_, i) => {
+          this.scrollToIndex(i, this.selectedIndexes[i], false);
+        });
+      });
+    },
+
+    close() {
+      this.isOpen = false;
+      document.body.style.overflow = '';
+    },
+
+    cancel() {
+      this.$dispatch('picker-cancel');
+      this.close();
+    },
+
+    confirm() {
+      const values = this.columns.map((col, i) => {
+        const idx = this.selectedIndexes[i];
+        return col.options[idx];
+      });
+
+      this.$dispatch('picker-confirm', {
+        values,
+        indexes: [...this.selectedIndexes]
+      });
+
+      this.close();
+    },
+
+    // Get transform for column
+    getColumnTransform(columnIndex) {
+      const state = this._columnStates[columnIndex];
+      if (!state) return 'translateY(0)';
+      return `translateY(${state.offset}px)`;
+    },
+
+    // Scroll column to index
+    scrollToIndex(columnIndex, itemIndex, animate = true) {
+      const column = this.columns[columnIndex];
+      if (!column) return;
+
+      // Clamp index
+      const maxIndex = column.options.length - 1;
+      itemIndex = Math.max(0, Math.min(maxIndex, itemIndex));
+
+      this.selectedIndexes[columnIndex] = itemIndex;
+      this._columnStates[columnIndex].offset = -itemIndex * this.itemHeight;
+
+      // Dispatch change event
+      this.$dispatch('picker-change', {
+        columnIndex,
+        itemIndex,
+        value: column.options[itemIndex]
+      });
+    },
+
+    // Select item by click
+    selectItem(columnIndex, itemIndex) {
+      this.scrollToIndex(columnIndex, itemIndex);
+    },
+
+    // Check if item is selected
+    isSelected(columnIndex, itemIndex) {
+      return this.selectedIndexes[columnIndex] === itemIndex;
+    },
+
+    // Touch/drag handlers
+    onTouchStart(event, columnIndex) {
+      const state = this._columnStates[columnIndex];
+      state.isDragging = true;
+      this._activeColumn = columnIndex;
+      this._startY = event.touches ? event.touches[0].clientY : event.clientY;
+      this._startOffset = state.offset;
+    },
+
+    onTouchMove(event, columnIndex) {
+      const state = this._columnStates[columnIndex];
+      if (!state.isDragging) return;
+
+      const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+      const deltaY = clientY - this._startY;
+
+      // Apply resistance at boundaries
+      const column = this.columns[columnIndex];
+      const maxOffset = 0;
+      const minOffset = -(column.options.length - 1) * this.itemHeight;
+
+      let newOffset = this._startOffset + deltaY;
+
+      // Rubber band effect
+      if (newOffset > maxOffset) {
+        newOffset = maxOffset + (newOffset - maxOffset) * 0.3;
+      } else if (newOffset < minOffset) {
+        newOffset = minOffset + (newOffset - minOffset) * 0.3;
+      }
+
+      state.offset = newOffset;
+
+      event.preventDefault();
+    },
+
+    onTouchEnd(event, columnIndex) {
+      const state = this._columnStates[columnIndex];
+      if (!state.isDragging) return;
+
+      state.isDragging = false;
+
+      // Snap to nearest item
+      const column = this.columns[columnIndex];
+      const nearestIndex = Math.round(-state.offset / this.itemHeight);
+      const clampedIndex = Math.max(0, Math.min(column.options.length - 1, nearestIndex));
+
+      this.scrollToIndex(columnIndex, clampedIndex);
+    },
+
+    // Keyboard navigation
+    handleKeydown(event, columnIndex) {
+      const column = this.columns[columnIndex];
+      const currentIndex = this.selectedIndexes[columnIndex];
+
+      switch (event.key) {
+        case 'ArrowUp':
+          event.preventDefault();
+          if (currentIndex > 0) {
+            this.scrollToIndex(columnIndex, currentIndex - 1);
+          }
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          if (currentIndex < column.options.length - 1) {
+            this.scrollToIndex(columnIndex, currentIndex + 1);
+          }
+          break;
+        case 'Home':
+          event.preventDefault();
+          this.scrollToIndex(columnIndex, 0);
+          break;
+        case 'End':
+          event.preventDefault();
+          this.scrollToIndex(columnIndex, column.options.length - 1);
+          break;
+        case 'Enter':
+          event.preventDefault();
+          this.confirm();
+          break;
+        case 'Escape':
+          event.preventDefault();
+          this.cancel();
+          break;
+      }
+    },
+
+    // Get selected values
+    getValues() {
+      return this.columns.map((col, i) => {
+        const idx = this.selectedIndexes[i];
+        return col.options[idx];
+      });
+    },
+
+    // Set values programmatically
+    setValues(values) {
+      values.forEach((value, i) => {
+        const column = this.columns[i];
+        if (!column) return;
+
+        const index = column.options.findIndex(opt => {
+          if (typeof opt === 'object') {
+            return opt.value === value || opt.text === value;
+          }
+          return opt === value;
+        });
+
+        if (index !== -1) {
+          this.scrollToIndex(i, index, false);
+        }
+      });
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxPicker', pickerComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxPicker', pickerComponent);
+    });
+  }
+
+  // Helper to format picker option display
+  window.UX = window.UX || {};
+  window.UX.getPickerOptionText = function(option) {
+    if (typeof option === 'object') {
+      return option.text || option.label || option.value;
+    }
+    return option;
+  };
+})();
+/**
+ * UX Loading Component
+ * Loading indicator with backdrop (iOS style)
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Loading Backdrop
+    ======================================== */
+
+    .ux-loading-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      z-index: var(--ux-z-toast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 200ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .ux-loading-backdrop--open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .ux-loading-backdrop--transparent {
+      background-color: transparent;
+    }
+
+    /* ========================================
+       UX Loading Container
+    ======================================== */
+
+    .ux-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-md);
+      min-width: 100px;
+      min-height: 100px;
+      padding: var(--ux-space-lg);
+      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--ux-border-radius-lg);
+      box-shadow: var(--ux-shadow-lg);
+      transform: scale(0.9);
+      opacity: 0;
+      transition:
+        transform 300ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .ux-loading-backdrop--open .ux-loading {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    /* ========================================
+       Loading Spinner
+    ======================================== */
+
+    .ux-loading__spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--ux-border-color);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-loading-spin 0.8s linear infinite;
+    }
+
+    @keyframes ux-loading-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* iOS-style spinner (dots) */
+    .ux-loading__spinner--ios {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      position: relative;
+      animation: none;
+    }
+
+    .ux-loading__spinner--ios::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23999' stroke-width='3' stroke-linecap='round'%3E%3Cline x1='20' y1='4' x2='20' y2='10' opacity='0.125'/%3E%3Cline x1='32.5' y1='7.5' x2='28.5' y2='11.5' opacity='0.25'/%3E%3Cline x1='36' y1='20' x2='30' y2='20' opacity='0.375'/%3E%3Cline x1='32.5' y1='32.5' x2='28.5' y2='28.5' opacity='0.5'/%3E%3Cline x1='20' y1='36' x2='20' y2='30' opacity='0.625'/%3E%3Cline x1='7.5' y1='32.5' x2='11.5' y2='28.5' opacity='0.75'/%3E%3Cline x1='4' y1='20' x2='10' y2='20' opacity='0.875'/%3E%3Cline x1='7.5' y1='7.5' x2='11.5' y2='11.5' opacity='1'/%3E%3C/g%3E%3C/svg%3E");
+      animation: ux-loading-ios-spin 0.8s steps(8) infinite;
+    }
+
+    @keyframes ux-loading-ios-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Dots spinner */
+    .ux-loading__spinner--dots {
+      width: 60px;
+      height: 20px;
+      border: none;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      animation: none;
+    }
+
+    .ux-loading__spinner--dots::before,
+    .ux-loading__spinner--dots::after,
+    .ux-loading__dot {
+      content: '';
+      width: 12px;
+      height: 12px;
+      background-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-loading-bounce 1.4s ease-in-out infinite both;
+    }
+
+    .ux-loading__spinner--dots::before {
+      animation-delay: -0.32s;
+    }
+
+    .ux-loading__dot {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes ux-loading-bounce {
+      0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* ========================================
+       Loading Message
+    ======================================== */
+
+    .ux-loading__message {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      text-align: center;
+      max-width: 200px;
+    }
+
+    /* ========================================
+       Loading Sizes
+    ======================================== */
+
+    .ux-loading--sm {
+      min-width: 80px;
+      min-height: 80px;
+      padding: var(--ux-space-md);
+    }
+
+    .ux-loading--sm .ux-loading__spinner {
+      width: 28px;
+      height: 28px;
+      border-width: 2px;
+    }
+
+    .ux-loading--sm .ux-loading__message {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-loading--lg {
+      min-width: 140px;
+      min-height: 140px;
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-loading--lg .ux-loading__spinner {
+      width: 48px;
+      height: 48px;
+      border-width: 4px;
+    }
+
+    .ux-loading--lg .ux-loading__message {
+      font-size: var(--ux-font-size-md);
+    }
+
+    /* ========================================
+       Loading Colors
+    ======================================== */
+
+    .ux-loading--dark {
+      background-color: rgba(0, 0, 0, 0.85);
+    }
+
+    .ux-loading--dark .ux-loading__spinner {
+      border-color: rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+    }
+
+    .ux-loading--dark .ux-loading__message {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* ========================================
+       Inline Loading
+    ======================================== */
+
+    .ux-loading-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-loading-inline__spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--ux-border-color);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-loading-spin 0.8s linear infinite;
+    }
+
+    .ux-loading-inline__text {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    /* Sizes */
+    .ux-loading-inline--sm .ux-loading-inline__spinner {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-loading-inline--sm .ux-loading-inline__text {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-loading-inline--lg .ux-loading-inline__spinner {
+      width: 28px;
+      height: 28px;
+      border-width: 3px;
+    }
+
+    /* ========================================
+       Full Page Loading
+    ======================================== */
+
+    .ux-loading--fullpage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--ux-background);
+      z-index: 9999;
+    }
+
+    .ux-loading--fullpage .ux-loading {
+      background-color: transparent;
+      box-shadow: none;
+    }
+
+    /* ========================================
+       Loading Overlay (for containers)
+    ======================================== */
+
+    .ux-loading-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(var(--ux-background-rgb, 255, 255, 255), 0.8);
+      z-index: 10;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease),
+        visibility var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-loading-overlay--visible {
+      opacity: 1;
+      visibility: visible;
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-loading-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-loading-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for loading
+  // ARIA: role="alert", aria-busy for loading state
+  const loadingComponent = (config = {}) => ({
+    isOpen: config.isOpen || false,
+    message: config.message || '',
+    spinner: config.spinner || 'default', // default, ios, dots
+    showBackdrop: config.showBackdrop !== false,
+    dismissOnBackdrop: config.dismissOnBackdrop || false,
+    loadingId: config.id || 'ux-loading-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'role': 'alert',
+        'aria-live': 'assertive',
+        'aria-busy': this.isOpen ? 'true' : 'false',
+        'aria-label': this.message || 'Loading'
+      };
+    },
+
+    show(options = {}) {
+      if (options.message !== undefined) this.message = options.message;
+      if (options.spinner) this.spinner = options.spinner;
+
+      this.isOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+
+    hide() {
+      this.isOpen = false;
+      document.body.style.overflow = '';
+    },
+
+    // Alias methods
+    present(options) {
+      this.show(options);
+    },
+
+    dismiss() {
+      this.hide();
+    },
+
+    handleBackdropClick(event) {
+      if (this.dismissOnBackdrop && event.target === event.currentTarget) {
+        this.hide();
+      }
+    },
+
+    // Show loading with timeout
+    showWithTimeout(options = {}, timeout = 30000) {
+      this.show(options);
+
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          this.hide();
+          resolve();
+        }, timeout);
+      });
+    },
+
+    // Show loading during async operation
+    async during(asyncFn, options = {}) {
+      this.show(options);
+      try {
+        const result = await asyncFn();
+        return result;
+      } finally {
+        this.hide();
+      }
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxLoading', loadingComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxLoading', loadingComponent);
+    });
+  }
+
+  // Global loading controller (singleton)
+  const loadingController = {
+    _instance: null,
+    _queue: [],
+
+    async create(options = {}) {
+      return {
+        present: () => this.show(options),
+        dismiss: () => this.hide()
+      };
+    },
+
+    show(options = {}) {
+      // Create loading element if it doesn't exist
+      if (!this._instance) {
+        const container = document.createElement('div');
+        container.id = 'ux-loading-controller';
+        container.innerHTML = `
+          <div class="ux-loading-backdrop"
+               :class="{ 'ux-loading-backdrop--open': isOpen }"
+               @click="handleBackdropClick($event)"
+               x-data="uxLoading()">
+            <div class="ux-loading" :class="'ux-loading--' + (size || '')" role="alert" aria-live="assertive">
+              <div class="ux-loading__spinner" :class="'ux-loading__spinner--' + spinner"></div>
+              <div class="ux-loading__message" x-show="message" x-text="message"></div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(container);
+      }
+
+      // Show via Alpine
+      const el = document.querySelector('#ux-loading-controller [x-data]');
+      if (el && el._x_dataStack) {
+        const data = el._x_dataStack[0];
+        data.show(options);
+      }
+    },
+
+    hide() {
+      const el = document.querySelector('#ux-loading-controller [x-data]');
+      if (el && el._x_dataStack) {
+        const data = el._x_dataStack[0];
+        data.hide();
+      }
+    }
+  };
+
+  // Export to UX namespace
+  if (window.UX) {
+    window.UX.loading = loadingController;
+  }
+})();
+/**
+ * UX Page Header Component
+ * Header de página con título, subtítulo, búsqueda y acciones
+ * Para usar dentro de ux-content como header fijo de página
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Page Layout
+       Container for page-header + scrollable content
+    ======================================== */
+
+    .ux-page-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      /* Ensure it fills flex container */
+      flex: 1 1 auto;
+    }
+
+    /* ========================================
+       UX Page Header
+       Fixed header within a page (title + search + actions)
+    ======================================== */
+
+    .ux-page-header {
+      flex-shrink: 0;
+      padding: var(--ux-space-lg);
+      background-color: var(--ux-surface);
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-page-header--transparent {
+      background-color: transparent;
+      border-bottom: none;
+    }
+
+    .ux-page-header--sticky {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    /* Title row */
+    .ux-page-header__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-page-header__title h1,
+    .ux-page-header__title .ux-page-header__heading {
+      margin: 0;
+      font-size: var(--ux-font-size-xl);
+      font-weight: 600;
+      color: var(--ux-text);
+      line-height: 1.3;
+    }
+
+    .ux-page-header__title h2 {
+      margin: 0;
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+
+    .ux-page-header__subtitle {
+      margin: var(--ux-space-xs) 0 0 0;
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    /* Actions container */
+    .ux-page-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      flex-shrink: 0;
+    }
+
+    /* Search container */
+    .ux-page-header__search {
+      margin-top: var(--ux-space-md);
+    }
+
+    /* Filter/toolbar row below search */
+    .ux-page-header__toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      margin-top: var(--ux-space-md);
+      flex-wrap: wrap;
+    }
+
+    /* Breadcrumb */
+    .ux-page-header__breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      margin-bottom: var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-page-header__breadcrumb a {
+      color: var(--ux-primary);
+      text-decoration: none;
+    }
+
+    .ux-page-header__breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .ux-page-header__breadcrumb-separator {
+      color: var(--ux-text-tertiary);
+    }
+
+    /* With back button */
+    .ux-page-header--with-back .ux-page-header__title {
+      align-items: center;
+    }
+
+    .ux-page-header__back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      margin-right: var(--ux-space-sm);
+      margin-left: calc(var(--ux-space-sm) * -1);
+      border-radius: var(--ux-border-radius);
+      color: var(--ux-text-secondary);
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+      cursor: pointer;
+    }
+
+    .ux-page-header__back:hover {
+      background-color: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+
+    .ux-page-header__back svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ========================================
+       UX Page Content
+       Scrollable content area within page-layout
+    ======================================== */
+
+    .ux-page-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-page-content--sm {
+      padding: var(--ux-space-md);
+    }
+
+    .ux-page-content--lg {
+      padding: var(--ux-space-2xl);
+    }
+
+    .ux-page-content--no-padding {
+      padding: 0;
+    }
+
+    .ux-page-content--flush {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    /* ========================================
+       Size Variants
+    ======================================== */
+
+    .ux-page-header--sm {
+      padding: var(--ux-space-md);
+    }
+
+    .ux-page-header--sm .ux-page-header__title h1 {
+      font-size: var(--ux-font-size-lg);
+    }
+
+    .ux-page-header--lg {
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-page-header--lg .ux-page-header__title h1 {
+      font-size: var(--ux-font-size-2xl);
+    }
+
+    /* ========================================
+       Responsive
+    ======================================== */
+
+    @media (max-width: 640px) {
+      .ux-page-header {
+        padding: var(--ux-space-md);
+      }
+
+      .ux-page-header__title {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .ux-page-header__actions {
+        margin-top: var(--ux-space-sm);
+        justify-content: flex-end;
+      }
+
+      .ux-page-content {
+        padding: var(--ux-space-md);
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-page-header-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-page-header-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+})();
+/**
+ * UX Back Button Component
+ * iOS-style back button with arrow and text
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Back Button
+    ======================================== */
+
+    .ux-back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      min-height: var(--ux-touch-target);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      padding-left: 0;
+      background: none;
+      border: none;
+      color: var(--ux-primary);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-md);
+      font-weight: 400;
+      text-decoration: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-back-button:hover {
+      opacity: 0.7;
+    }
+
+    .ux-back-button:active {
+      opacity: 0.5;
+      transform: scale(0.97);
+    }
+
+    /* ========================================
+       Back Button Icon
+    ======================================== */
+
+    .ux-back-button__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      transition: transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-back-button__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Hover animation - slide left */
+    .ux-back-button:hover .ux-back-button__icon {
+      transform: translateX(-2px);
+    }
+
+    /* ========================================
+       Back Button Text
+    ======================================== */
+
+    .ux-back-button__text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+
+    /* Icon only */
+    .ux-back-button--icon-only .ux-back-button__text {
+      display: none;
+    }
+
+    .ux-back-button--icon-only {
+      padding: var(--ux-space-xs);
+    }
+
+    /* ========================================
+       Back Button Sizes
+    ======================================== */
+
+    .ux-back-button--sm {
+      min-height: var(--ux-touch-target-sm);
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-back-button--sm .ux-back-button__icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ux-back-button--sm .ux-back-button__text {
+      max-width: 100px;
+    }
+
+    .ux-back-button--lg {
+      font-size: var(--ux-font-size-lg);
+    }
+
+    .ux-back-button--lg .ux-back-button__icon {
+      width: 28px;
+      height: 28px;
+    }
+
+    .ux-back-button--lg .ux-back-button__text {
+      max-width: 160px;
+    }
+
+    /* ========================================
+       Back Button Colors
+    ======================================== */
+
+    .ux-back-button--light {
+      color: white;
+    }
+
+    .ux-back-button--dark {
+      color: var(--ux-text);
+    }
+
+    .ux-back-button--secondary {
+      color: var(--ux-text-secondary);
+    }
+
+    /* ========================================
+       Back Button in Navbar
+    ======================================== */
+
+    .ux-navbar .ux-back-button {
+      margin-left: calc(-1 * var(--ux-space-sm));
+    }
+
+    .ux-navbar--primary .ux-back-button,
+    .ux-navbar--dark .ux-back-button {
+      color: white;
+    }
+
+    /* ========================================
+       Back Button in Toolbar
+    ======================================== */
+
+    .ux-toolbar .ux-back-button {
+      margin-left: calc(-1 * var(--ux-space-xs));
+    }
+
+    /* ========================================
+       Back Button in Modal
+    ======================================== */
+
+    .ux-modal__header .ux-back-button {
+      margin-left: calc(-1 * var(--ux-space-sm));
+    }
+
+    /* ========================================
+       Disabled State
+    ======================================== */
+
+    .ux-back-button:disabled,
+    .ux-back-button--disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* ========================================
+       Custom Icon Positions
+    ======================================== */
+
+    .ux-back-button--icon-end {
+      flex-direction: row-reverse;
+    }
+
+    .ux-back-button--icon-end .ux-back-button__icon {
+      transform: rotate(180deg);
+    }
+
+    .ux-back-button--icon-end:hover .ux-back-button__icon {
+      transform: rotate(180deg) translateX(-2px);
+    }
+
+    /* ========================================
+       Animated Entrance (for page transitions)
+    ======================================== */
+
+    @keyframes ux-back-button-enter {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .ux-back-button--animate-in {
+      animation: ux-back-button-enter 300ms var(--ux-ease-spring) forwards;
+    }
+
+    /* ========================================
+       Collapse/Expand Animation (iOS-style)
+    ======================================== */
+
+    .ux-back-button--collapsible .ux-back-button__text {
+      transition:
+        max-width 200ms var(--ux-ease),
+        opacity 200ms var(--ux-ease);
+    }
+
+    .ux-back-button--collapsed .ux-back-button__text {
+      max-width: 0;
+      opacity: 0;
+      padding: 0;
+    }
+  `;
+
+  // Default back arrow SVG
+  const backArrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-back-button-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-back-button-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for back button with routing
+  // ARIA: aria-label for accessibility
+  const backButtonComponent = (config = {}) => ({
+    text: config.text || 'Back',
+    href: config.href || null,
+    defaultHref: config.defaultHref || '/',
+    showIcon: config.showIcon !== false,
+    showText: config.showText !== false,
+    disabled: config.disabled || false,
+    collapsed: config.collapsed || false,
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'aria-label': this.text || 'Go back',
+        'role': this.href ? 'link' : 'button'
+      };
+    },
+
+    // Get the back arrow SVG
+    get iconSvg() {
+      return backArrowSvg;
+    },
+
+    // Navigate back
+    goBack() {
+      if (this.disabled) return;
+
+      // If href is provided, navigate to it
+      if (this.href) {
+        window.location.href = this.href;
+        return;
+      }
+
+      // Check if there's history to go back to
+      if (window.history.length > 1) {
+        window.history.back();
+      } else if (this.defaultHref) {
+        // Fallback to default href
+        window.location.href = this.defaultHref;
+      }
+
+      // Dispatch event for custom handling
+      this.$dispatch('back-button-click');
+    },
+
+    // Handle click
+    handleClick(event) {
+      // If it's a link and href is set, let it navigate normally
+      if (this.href && event.currentTarget.tagName === 'A') {
+        return;
+      }
+
+      event.preventDefault();
+      this.goBack();
+    },
+
+    // Collapse/expand text (iOS scroll behavior)
+    collapse() {
+      this.collapsed = true;
+    },
+
+    expand() {
+      this.collapsed = false;
+    },
+
+    toggle() {
+      this.collapsed = !this.collapsed;
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxBackButton', backButtonComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxBackButton', backButtonComponent);
+    });
+  }
+
+  // Export SVG for use in templates
+  window.UX = window.UX || {};
+  window.UX.backArrowSvg = backArrowSvg;
 })();

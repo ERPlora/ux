@@ -310,6 +310,22 @@
     .ux-range--snapping .ux-range__fill {
       transition: width var(--ux-transition-fast) var(--ux-ease);
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-range--glass .ux-range__track {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-range--glass .ux-range__thumb {
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+    }
   `;
 
   // Inject styles

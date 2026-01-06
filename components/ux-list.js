@@ -490,6 +490,30 @@
     .ux-virtual-list__content {
       position: relative;
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-list--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+    }
+
+    .ux-list--glass .ux-list__item {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-list--glass .ux-list__item:hover {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-list--glass .ux-list__header {
+      background: var(--ux-glass-bg-thin);
+      border-bottom-color: var(--ux-glass-border);
+    }
   `;
 
   // Inject styles

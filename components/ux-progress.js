@@ -311,6 +311,20 @@
     .ux-progress-circular--danger .ux-progress-circular__bar {
       stroke: var(--ux-danger);
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-progress--glass .ux-progress__track {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-progress-circular--glass .ux-progress-circular__track {
+      stroke: var(--ux-glass-border);
+    }
   `;
 
   // Inject styles

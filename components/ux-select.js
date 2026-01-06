@@ -777,6 +777,54 @@
     }
 
     /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-select--glass .ux-select__trigger {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-select--glass .ux-select__trigger:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-select--glass.ux-select--open .ux-select__trigger {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    .ux-select--glass .ux-select__dropdown {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-select--glass .ux-select__option:hover {
+      background-color: var(--ux-glass-bg-thick);
+    }
+
+    /* Native select glass */
+    .ux-native-select--glass .ux-native-select__field {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-native-select--glass .ux-native-select__field:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-native-select--glass .ux-native-select__field:focus {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    /* ========================================
        Item Integration (like ion-item)
     ======================================== */
 

@@ -344,6 +344,31 @@
         animation: none;
       }
     }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-carousel--glass .ux-carousel__nav-button {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-carousel--glass .ux-carousel__nav-button:hover {
+      background: var(--ux-glass-bg-thick);
+    }
+
+    .ux-carousel--glass .ux-carousel__pagination {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-radius: 100px;
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+    }
   `;
 
   // Inject styles

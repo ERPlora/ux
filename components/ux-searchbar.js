@@ -177,6 +177,21 @@
       background-color: var(--ux-light);
     }
 
+    /* Glass (iOS 26 Liquid Glass) */
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-searchbar--glass .ux-searchbar__container {
+      background: var(--ux-glass-bg-thin);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-searchbar--glass.ux-searchbar--focused .ux-searchbar__container {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
     /* ========================================
        Sizes
     ======================================== */

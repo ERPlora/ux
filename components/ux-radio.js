@@ -300,6 +300,20 @@
       gap: var(--ux-space-md);
     }
 
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-radio--glass .ux-radio__circle {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-radio--glass .ux-radio__input:checked + .ux-radio__circle {
+      border-color: var(--ux-radio-color, var(--ux-primary));
+    }
+
     /* Reduced motion support */
     @media (prefers-reduced-motion: reduce) {
       .ux-radio__circle {
