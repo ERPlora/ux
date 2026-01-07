@@ -331,6 +331,65 @@
       background-color: var(--ux-primary);
     }
 
+    /* Active Item (iOS native style navigation) */
+    .ux-item--active {
+      background-color: rgba(var(--ux-primary-rgb), 0.12);
+      color: var(--ux-primary);
+    }
+
+    .ux-item--active .ux-item__label {
+      color: var(--ux-primary);
+      font-weight: var(--ux-font-weight-semibold, 600);
+    }
+
+    .ux-item--active .ux-item__icon {
+      color: var(--ux-primary);
+    }
+
+    .ux-item--active .ux-item__note {
+      color: rgba(var(--ux-primary-rgb), 0.7);
+    }
+
+    .ux-item--active::after {
+      background-color: rgba(var(--ux-primary-rgb), 0.2);
+    }
+
+    /* Active item with left accent bar (iOS Settings style) */
+    .ux-item--active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: var(--ux-space-sm);
+      bottom: var(--ux-space-sm);
+      width: 3px;
+      background-color: var(--ux-primary);
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* Hover only on devices that support it */
+    @media (hover: hover) and (pointer: fine) {
+      .ux-item--active:hover {
+        background-color: rgba(var(--ux-primary-rgb), 0.16);
+      }
+    }
+
+    /* Active item pressed state */
+    .ux-item--active:active {
+      background-color: rgba(var(--ux-primary-rgb), 0.2);
+    }
+
+    /* Active item in dark mode */
+    .ux-dark .ux-item--active,
+    @media (prefers-color-scheme: dark) {
+      .ux-item--active {
+        background-color: rgba(var(--ux-primary-rgb), 0.18);
+      }
+
+      .ux-item--active:hover {
+        background-color: rgba(var(--ux-primary-rgb), 0.24);
+      }
+    }
+
     /* ========================================
        Item Colors
     ======================================== */

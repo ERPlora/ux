@@ -10675,6 +10675,65 @@
       background-color: var(--ux-primary);
     }
 
+    /* Active Item (iOS native style navigation) */
+    .ux-item--active {
+      background-color: rgba(var(--ux-primary-rgb), 0.12);
+      color: var(--ux-primary);
+    }
+
+    .ux-item--active .ux-item__label {
+      color: var(--ux-primary);
+      font-weight: var(--ux-font-weight-semibold, 600);
+    }
+
+    .ux-item--active .ux-item__icon {
+      color: var(--ux-primary);
+    }
+
+    .ux-item--active .ux-item__note {
+      color: rgba(var(--ux-primary-rgb), 0.7);
+    }
+
+    .ux-item--active::after {
+      background-color: rgba(var(--ux-primary-rgb), 0.2);
+    }
+
+    /* Active item with left accent bar (iOS Settings style) */
+    .ux-item--active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: var(--ux-space-sm);
+      bottom: var(--ux-space-sm);
+      width: 3px;
+      background-color: var(--ux-primary);
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* Hover only on devices that support it */
+    @media (hover: hover) and (pointer: fine) {
+      .ux-item--active:hover {
+        background-color: rgba(var(--ux-primary-rgb), 0.16);
+      }
+    }
+
+    /* Active item pressed state */
+    .ux-item--active:active {
+      background-color: rgba(var(--ux-primary-rgb), 0.2);
+    }
+
+    /* Active item in dark mode */
+    .ux-dark .ux-item--active,
+    @media (prefers-color-scheme: dark) {
+      .ux-item--active {
+        background-color: rgba(var(--ux-primary-rgb), 0.18);
+      }
+
+      .ux-item--active:hover {
+        background-color: rgba(var(--ux-primary-rgb), 0.24);
+      }
+    }
+
     /* ========================================
        Item Colors
     ======================================== */
@@ -25036,6 +25095,449 @@
 
 })();
 /**
+ * UX Loading Component
+ * Loading indicator with backdrop (iOS style)
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Loading Backdrop
+    ======================================== */
+
+    .ux-loading-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      z-index: var(--ux-z-toast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 200ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .ux-loading-backdrop--open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .ux-loading-backdrop--transparent {
+      background-color: transparent;
+    }
+
+    /* ========================================
+       UX Loading Container
+    ======================================== */
+
+    .ux-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-md);
+      min-width: 100px;
+      min-height: 100px;
+      padding: var(--ux-space-lg);
+      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--ux-border-radius-lg);
+      box-shadow: var(--ux-shadow-lg);
+      transform: scale(0.9);
+      opacity: 0;
+      transition:
+        transform 300ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .ux-loading-backdrop--open .ux-loading {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    /* ========================================
+       Loading Spinner
+    ======================================== */
+
+    .ux-loading__spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--ux-border-color);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-loading-spin 0.8s linear infinite;
+    }
+
+    @keyframes ux-loading-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* iOS-style spinner (dots) */
+    .ux-loading__spinner--ios {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      position: relative;
+      animation: none;
+    }
+
+    .ux-loading__spinner--ios::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23999' stroke-width='3' stroke-linecap='round'%3E%3Cline x1='20' y1='4' x2='20' y2='10' opacity='0.125'/%3E%3Cline x1='32.5' y1='7.5' x2='28.5' y2='11.5' opacity='0.25'/%3E%3Cline x1='36' y1='20' x2='30' y2='20' opacity='0.375'/%3E%3Cline x1='32.5' y1='32.5' x2='28.5' y2='28.5' opacity='0.5'/%3E%3Cline x1='20' y1='36' x2='20' y2='30' opacity='0.625'/%3E%3Cline x1='7.5' y1='32.5' x2='11.5' y2='28.5' opacity='0.75'/%3E%3Cline x1='4' y1='20' x2='10' y2='20' opacity='0.875'/%3E%3Cline x1='7.5' y1='7.5' x2='11.5' y2='11.5' opacity='1'/%3E%3C/g%3E%3C/svg%3E");
+      animation: ux-loading-ios-spin 0.8s steps(8) infinite;
+    }
+
+    @keyframes ux-loading-ios-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Dots spinner */
+    .ux-loading__spinner--dots {
+      width: 60px;
+      height: 20px;
+      border: none;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      animation: none;
+    }
+
+    .ux-loading__spinner--dots::before,
+    .ux-loading__spinner--dots::after,
+    .ux-loading__dot {
+      content: '';
+      width: 12px;
+      height: 12px;
+      background-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-loading-bounce 1.4s ease-in-out infinite both;
+    }
+
+    .ux-loading__spinner--dots::before {
+      animation-delay: -0.32s;
+    }
+
+    .ux-loading__dot {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes ux-loading-bounce {
+      0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* ========================================
+       Loading Message
+    ======================================== */
+
+    .ux-loading__message {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      text-align: center;
+      max-width: 200px;
+    }
+
+    /* ========================================
+       Loading Sizes
+    ======================================== */
+
+    .ux-loading--sm {
+      min-width: 80px;
+      min-height: 80px;
+      padding: var(--ux-space-md);
+    }
+
+    .ux-loading--sm .ux-loading__spinner {
+      width: 28px;
+      height: 28px;
+      border-width: 2px;
+    }
+
+    .ux-loading--sm .ux-loading__message {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-loading--lg {
+      min-width: 140px;
+      min-height: 140px;
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-loading--lg .ux-loading__spinner {
+      width: 48px;
+      height: 48px;
+      border-width: 4px;
+    }
+
+    .ux-loading--lg .ux-loading__message {
+      font-size: var(--ux-font-size-md);
+    }
+
+    /* ========================================
+       Loading Colors
+    ======================================== */
+
+    .ux-loading--dark {
+      background-color: rgba(0, 0, 0, 0.85);
+    }
+
+    .ux-loading--dark .ux-loading__spinner {
+      border-color: rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+    }
+
+    .ux-loading--dark .ux-loading__message {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* ========================================
+       Inline Loading
+    ======================================== */
+
+    .ux-loading-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-loading-inline__spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--ux-border-color);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-loading-spin 0.8s linear infinite;
+    }
+
+    .ux-loading-inline__text {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    /* Sizes */
+    .ux-loading-inline--sm .ux-loading-inline__spinner {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-loading-inline--sm .ux-loading-inline__text {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-loading-inline--lg .ux-loading-inline__spinner {
+      width: 28px;
+      height: 28px;
+      border-width: 3px;
+    }
+
+    /* ========================================
+       Full Page Loading
+    ======================================== */
+
+    .ux-loading--fullpage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--ux-background);
+      z-index: 9999;
+    }
+
+    .ux-loading--fullpage .ux-loading {
+      background-color: transparent;
+      box-shadow: none;
+    }
+
+    /* ========================================
+       Loading Overlay (for containers)
+    ======================================== */
+
+    .ux-loading-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(var(--ux-background-rgb, 255, 255, 255), 0.8);
+      z-index: 10;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease),
+        visibility var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-loading-overlay--visible {
+      opacity: 1;
+      visibility: visible;
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-loading-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-loading-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for loading
+  // ARIA: role="alert", aria-busy for loading state
+  const loadingComponent = (config = {}) => ({
+    isOpen: config.isOpen || false,
+    message: config.message || '',
+    spinner: config.spinner || 'default', // default, ios, dots
+    showBackdrop: config.showBackdrop !== false,
+    dismissOnBackdrop: config.dismissOnBackdrop || false,
+    loadingId: config.id || 'ux-loading-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes
+    get ariaAttrs() {
+      return {
+        'role': 'alert',
+        'aria-live': 'assertive',
+        'aria-busy': this.isOpen ? 'true' : 'false',
+        'aria-label': this.message || 'Loading'
+      };
+    },
+
+    show(options = {}) {
+      if (options.message !== undefined) this.message = options.message;
+      if (options.spinner) this.spinner = options.spinner;
+
+      this.isOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+
+    hide() {
+      this.isOpen = false;
+      document.body.style.overflow = '';
+    },
+
+    // Alias methods
+    present(options) {
+      this.show(options);
+    },
+
+    dismiss() {
+      this.hide();
+    },
+
+    handleBackdropClick(event) {
+      if (this.dismissOnBackdrop && event.target === event.currentTarget) {
+        this.hide();
+      }
+    },
+
+    // Show loading with timeout
+    showWithTimeout(options = {}, timeout = 30000) {
+      this.show(options);
+
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          this.hide();
+          resolve();
+        }, timeout);
+      });
+    },
+
+    // Show loading during async operation
+    async during(asyncFn, options = {}) {
+      this.show(options);
+      try {
+        const result = await asyncFn();
+        return result;
+      } finally {
+        this.hide();
+      }
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxLoading', loadingComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxLoading', loadingComponent);
+    });
+  }
+
+  // Global loading controller (singleton)
+  const loadingController = {
+    _instance: null,
+    _queue: [],
+
+    async create(options = {}) {
+      return {
+        present: () => this.show(options),
+        dismiss: () => this.hide()
+      };
+    },
+
+    show(options = {}) {
+      // Create loading element if it doesn't exist
+      if (!this._instance) {
+        const container = document.createElement('div');
+        container.id = 'ux-loading-controller';
+        container.innerHTML = `
+          <div class="ux-loading-backdrop"
+               :class="{ 'ux-loading-backdrop--open': isOpen }"
+               @click="handleBackdropClick($event)"
+               x-data="uxLoading()">
+            <div class="ux-loading" :class="'ux-loading--' + (size || '')" role="alert" aria-live="assertive">
+              <div class="ux-loading__spinner" :class="'ux-loading__spinner--' + spinner"></div>
+              <div class="ux-loading__message" x-show="message" x-text="message"></div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(container);
+      }
+
+      // Show via Alpine
+      const el = document.querySelector('#ux-loading-controller [x-data]');
+      if (el && el._x_dataStack) {
+        const data = el._x_dataStack[0];
+        data.show(options);
+      }
+    },
+
+    hide() {
+      const el = document.querySelector('#ux-loading-controller [x-data]');
+      if (el && el._x_dataStack) {
+        const data = el._x_dataStack[0];
+        data.hide();
+      }
+    }
+  };
+
+  // Export to UX namespace
+  if (window.UX) {
+    window.UX.loading = loadingController;
+  }
+})();
+/**
  * UX Picker Component
  * iOS-style column picker (wheel selector)
  * @requires ux-core.js
@@ -25628,449 +26130,6 @@
     }
     return option;
   };
-})();
-/**
- * UX Loading Component
- * Loading indicator with backdrop (iOS style)
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Loading Backdrop
-    ======================================== */
-
-    .ux-loading-backdrop {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.3);
-      z-index: var(--ux-z-toast);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1),
-        visibility 200ms cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .ux-loading-backdrop--open {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .ux-loading-backdrop--transparent {
-      background-color: transparent;
-    }
-
-    /* ========================================
-       UX Loading Container
-    ======================================== */
-
-    .ux-loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: var(--ux-space-md);
-      min-width: 100px;
-      min-height: 100px;
-      padding: var(--ux-space-lg);
-      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.95);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: var(--ux-border-radius-lg);
-      box-shadow: var(--ux-shadow-lg);
-      transform: scale(0.9);
-      opacity: 0;
-      transition:
-        transform 300ms cubic-bezier(0.32, 0.72, 0, 1),
-        opacity 200ms cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .ux-loading-backdrop--open .ux-loading {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    /* ========================================
-       Loading Spinner
-    ======================================== */
-
-    .ux-loading__spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid var(--ux-border-color);
-      border-top-color: var(--ux-primary);
-      border-radius: 50%;
-      animation: ux-loading-spin 0.8s linear infinite;
-    }
-
-    @keyframes ux-loading-spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* iOS-style spinner (dots) */
-    .ux-loading__spinner--ios {
-      width: 40px;
-      height: 40px;
-      border: none;
-      background: transparent;
-      position: relative;
-      animation: none;
-    }
-
-    .ux-loading__spinner--ios::before {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23999' stroke-width='3' stroke-linecap='round'%3E%3Cline x1='20' y1='4' x2='20' y2='10' opacity='0.125'/%3E%3Cline x1='32.5' y1='7.5' x2='28.5' y2='11.5' opacity='0.25'/%3E%3Cline x1='36' y1='20' x2='30' y2='20' opacity='0.375'/%3E%3Cline x1='32.5' y1='32.5' x2='28.5' y2='28.5' opacity='0.5'/%3E%3Cline x1='20' y1='36' x2='20' y2='30' opacity='0.625'/%3E%3Cline x1='7.5' y1='32.5' x2='11.5' y2='28.5' opacity='0.75'/%3E%3Cline x1='4' y1='20' x2='10' y2='20' opacity='0.875'/%3E%3Cline x1='7.5' y1='7.5' x2='11.5' y2='11.5' opacity='1'/%3E%3C/g%3E%3C/svg%3E");
-      animation: ux-loading-ios-spin 0.8s steps(8) infinite;
-    }
-
-    @keyframes ux-loading-ios-spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Dots spinner */
-    .ux-loading__spinner--dots {
-      width: 60px;
-      height: 20px;
-      border: none;
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      animation: none;
-    }
-
-    .ux-loading__spinner--dots::before,
-    .ux-loading__spinner--dots::after,
-    .ux-loading__dot {
-      content: '';
-      width: 12px;
-      height: 12px;
-      background-color: var(--ux-primary);
-      border-radius: 50%;
-      animation: ux-loading-bounce 1.4s ease-in-out infinite both;
-    }
-
-    .ux-loading__spinner--dots::before {
-      animation-delay: -0.32s;
-    }
-
-    .ux-loading__dot {
-      animation-delay: -0.16s;
-    }
-
-    @keyframes ux-loading-bounce {
-      0%, 80%, 100% {
-        transform: scale(0.6);
-        opacity: 0.5;
-      }
-      40% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    /* ========================================
-       Loading Message
-    ======================================== */
-
-    .ux-loading__message {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-      text-align: center;
-      max-width: 200px;
-    }
-
-    /* ========================================
-       Loading Sizes
-    ======================================== */
-
-    .ux-loading--sm {
-      min-width: 80px;
-      min-height: 80px;
-      padding: var(--ux-space-md);
-    }
-
-    .ux-loading--sm .ux-loading__spinner {
-      width: 28px;
-      height: 28px;
-      border-width: 2px;
-    }
-
-    .ux-loading--sm .ux-loading__message {
-      font-size: var(--ux-font-size-xs);
-    }
-
-    .ux-loading--lg {
-      min-width: 140px;
-      min-height: 140px;
-      padding: var(--ux-space-xl);
-    }
-
-    .ux-loading--lg .ux-loading__spinner {
-      width: 48px;
-      height: 48px;
-      border-width: 4px;
-    }
-
-    .ux-loading--lg .ux-loading__message {
-      font-size: var(--ux-font-size-md);
-    }
-
-    /* ========================================
-       Loading Colors
-    ======================================== */
-
-    .ux-loading--dark {
-      background-color: rgba(0, 0, 0, 0.85);
-    }
-
-    .ux-loading--dark .ux-loading__spinner {
-      border-color: rgba(255, 255, 255, 0.2);
-      border-top-color: white;
-    }
-
-    .ux-loading--dark .ux-loading__message {
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    /* ========================================
-       Inline Loading
-    ======================================== */
-
-    .ux-loading-inline {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-    }
-
-    .ux-loading-inline__spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--ux-border-color);
-      border-top-color: var(--ux-primary);
-      border-radius: 50%;
-      animation: ux-loading-spin 0.8s linear infinite;
-    }
-
-    .ux-loading-inline__text {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    /* Sizes */
-    .ux-loading-inline--sm .ux-loading-inline__spinner {
-      width: 14px;
-      height: 14px;
-    }
-
-    .ux-loading-inline--sm .ux-loading-inline__text {
-      font-size: var(--ux-font-size-xs);
-    }
-
-    .ux-loading-inline--lg .ux-loading-inline__spinner {
-      width: 28px;
-      height: 28px;
-      border-width: 3px;
-    }
-
-    /* ========================================
-       Full Page Loading
-    ======================================== */
-
-    .ux-loading--fullpage {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: var(--ux-background);
-      z-index: 9999;
-    }
-
-    .ux-loading--fullpage .ux-loading {
-      background-color: transparent;
-      box-shadow: none;
-    }
-
-    /* ========================================
-       Loading Overlay (for containers)
-    ======================================== */
-
-    .ux-loading-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: rgba(var(--ux-background-rgb, 255, 255, 255), 0.8);
-      z-index: 10;
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity var(--ux-transition-fast) var(--ux-ease),
-        visibility var(--ux-transition-fast) var(--ux-ease);
-    }
-
-    .ux-loading-overlay--visible {
-      opacity: 1;
-      visibility: visible;
-    }
-  `;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-loading-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-loading-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-
-  // Alpine component for loading
-  // ARIA: role="alert", aria-busy for loading state
-  const loadingComponent = (config = {}) => ({
-    isOpen: config.isOpen || false,
-    message: config.message || '',
-    spinner: config.spinner || 'default', // default, ios, dots
-    showBackdrop: config.showBackdrop !== false,
-    dismissOnBackdrop: config.dismissOnBackdrop || false,
-    loadingId: config.id || 'ux-loading-' + Math.random().toString(36).substr(2, 9),
-
-    // ARIA attributes
-    get ariaAttrs() {
-      return {
-        'role': 'alert',
-        'aria-live': 'assertive',
-        'aria-busy': this.isOpen ? 'true' : 'false',
-        'aria-label': this.message || 'Loading'
-      };
-    },
-
-    show(options = {}) {
-      if (options.message !== undefined) this.message = options.message;
-      if (options.spinner) this.spinner = options.spinner;
-
-      this.isOpen = true;
-      document.body.style.overflow = 'hidden';
-    },
-
-    hide() {
-      this.isOpen = false;
-      document.body.style.overflow = '';
-    },
-
-    // Alias methods
-    present(options) {
-      this.show(options);
-    },
-
-    dismiss() {
-      this.hide();
-    },
-
-    handleBackdropClick(event) {
-      if (this.dismissOnBackdrop && event.target === event.currentTarget) {
-        this.hide();
-      }
-    },
-
-    // Show loading with timeout
-    showWithTimeout(options = {}, timeout = 30000) {
-      this.show(options);
-
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          this.hide();
-          resolve();
-        }, timeout);
-      });
-    },
-
-    // Show loading during async operation
-    async during(asyncFn, options = {}) {
-      this.show(options);
-      try {
-        const result = await asyncFn();
-        return result;
-      } finally {
-        this.hide();
-      }
-    }
-  });
-
-  if (window.UX) {
-    window.UX.registerComponent('uxLoading', loadingComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxLoading', loadingComponent);
-    });
-  }
-
-  // Global loading controller (singleton)
-  const loadingController = {
-    _instance: null,
-    _queue: [],
-
-    async create(options = {}) {
-      return {
-        present: () => this.show(options),
-        dismiss: () => this.hide()
-      };
-    },
-
-    show(options = {}) {
-      // Create loading element if it doesn't exist
-      if (!this._instance) {
-        const container = document.createElement('div');
-        container.id = 'ux-loading-controller';
-        container.innerHTML = `
-          <div class="ux-loading-backdrop"
-               :class="{ 'ux-loading-backdrop--open': isOpen }"
-               @click="handleBackdropClick($event)"
-               x-data="uxLoading()">
-            <div class="ux-loading" :class="'ux-loading--' + (size || '')" role="alert" aria-live="assertive">
-              <div class="ux-loading__spinner" :class="'ux-loading__spinner--' + spinner"></div>
-              <div class="ux-loading__message" x-show="message" x-text="message"></div>
-            </div>
-          </div>
-        `;
-        document.body.appendChild(container);
-      }
-
-      // Show via Alpine
-      const el = document.querySelector('#ux-loading-controller [x-data]');
-      if (el && el._x_dataStack) {
-        const data = el._x_dataStack[0];
-        data.show(options);
-      }
-    },
-
-    hide() {
-      const el = document.querySelector('#ux-loading-controller [x-data]');
-      if (el && el._x_dataStack) {
-        const data = el._x_dataStack[0];
-        data.hide();
-      }
-    }
-  };
-
-  // Export to UX namespace
-  if (window.UX) {
-    window.UX.loading = loadingController;
-  }
 })();
 /**
  * UX Back Button Component
@@ -27108,6 +27167,372 @@
   }
 })();
 /**
+ * UX Tooltip Component
+ * Tooltips estilo iOS/macOS para hints en hover
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Tooltip
+    ======================================== */
+
+    .ux-tooltip {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .ux-tooltip__content {
+      position: absolute;
+      z-index: var(--ux-z-tooltip);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      background-color: var(--ux-dark);
+      color: white;
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      line-height: 1.4;
+      border-radius: var(--ux-border-radius-sm);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease),
+        visibility var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Arrow */
+    .ux-tooltip__content::before {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border: 6px solid transparent;
+    }
+
+    /* Show on hover/focus */
+    .ux-tooltip:hover .ux-tooltip__content,
+    .ux-tooltip:focus-within .ux-tooltip__content,
+    .ux-tooltip--open .ux-tooltip__content {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ========================================
+       Positions
+    ======================================== */
+
+    /* Top (default) */
+    .ux-tooltip__content,
+    .ux-tooltip--top .ux-tooltip__content {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+    }
+
+    .ux-tooltip:hover .ux-tooltip__content,
+    .ux-tooltip:focus-within .ux-tooltip__content,
+    .ux-tooltip--open .ux-tooltip__content,
+    .ux-tooltip--top:hover .ux-tooltip__content,
+    .ux-tooltip--top:focus-within .ux-tooltip__content,
+    .ux-tooltip--top.ux-tooltip--open .ux-tooltip__content {
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    .ux-tooltip__content::before,
+    .ux-tooltip--top .ux-tooltip__content::before {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: var(--ux-dark);
+    }
+
+    /* Bottom */
+    .ux-tooltip--bottom .ux-tooltip__content {
+      top: 100%;
+      bottom: auto;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+    }
+
+    .ux-tooltip--bottom:hover .ux-tooltip__content,
+    .ux-tooltip--bottom:focus-within .ux-tooltip__content,
+    .ux-tooltip--bottom.ux-tooltip--open .ux-tooltip__content {
+      transform: translateX(-50%) translateY(4px);
+    }
+
+    .ux-tooltip--bottom .ux-tooltip__content::before {
+      top: auto;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: transparent;
+      border-bottom-color: var(--ux-dark);
+    }
+
+    /* Left */
+    .ux-tooltip--left .ux-tooltip__content {
+      top: 50%;
+      right: 100%;
+      bottom: auto;
+      left: auto;
+      transform: translateY(-50%) translateX(-8px);
+    }
+
+    .ux-tooltip--left:hover .ux-tooltip__content,
+    .ux-tooltip--left:focus-within .ux-tooltip__content,
+    .ux-tooltip--left.ux-tooltip--open .ux-tooltip__content {
+      transform: translateY(-50%) translateX(-4px);
+    }
+
+    .ux-tooltip--left .ux-tooltip__content::before {
+      top: 50%;
+      right: auto;
+      left: 100%;
+      transform: translateY(-50%);
+      border-top-color: transparent;
+      border-left-color: var(--ux-dark);
+    }
+
+    /* Right */
+    .ux-tooltip--right .ux-tooltip__content {
+      top: 50%;
+      left: 100%;
+      bottom: auto;
+      right: auto;
+      transform: translateY(-50%) translateX(8px);
+    }
+
+    .ux-tooltip--right:hover .ux-tooltip__content,
+    .ux-tooltip--right:focus-within .ux-tooltip__content,
+    .ux-tooltip--right.ux-tooltip--open .ux-tooltip__content {
+      transform: translateY(-50%) translateX(4px);
+    }
+
+    .ux-tooltip--right .ux-tooltip__content::before {
+      top: 50%;
+      left: auto;
+      right: 100%;
+      transform: translateY(-50%);
+      border-top-color: transparent;
+      border-right-color: var(--ux-dark);
+    }
+
+    /* ========================================
+       Variants
+    ======================================== */
+
+    /* Light variant */
+    .ux-tooltip--light .ux-tooltip__content {
+      background-color: var(--ux-surface);
+      color: var(--ux-text);
+      border: 1px solid var(--ux-border-color);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .ux-tooltip--light .ux-tooltip__content::before,
+    .ux-tooltip--light.ux-tooltip--top .ux-tooltip__content::before {
+      border-top-color: var(--ux-surface);
+    }
+
+    .ux-tooltip--light.ux-tooltip--bottom .ux-tooltip__content::before {
+      border-top-color: transparent;
+      border-bottom-color: var(--ux-surface);
+    }
+
+    .ux-tooltip--light.ux-tooltip--left .ux-tooltip__content::before {
+      border-top-color: transparent;
+      border-left-color: var(--ux-surface);
+    }
+
+    .ux-tooltip--light.ux-tooltip--right .ux-tooltip__content::before {
+      border-top-color: transparent;
+      border-right-color: var(--ux-surface);
+    }
+
+    /* Primary variant */
+    .ux-tooltip--primary .ux-tooltip__content {
+      background-color: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+    }
+
+    .ux-tooltip--primary .ux-tooltip__content::before,
+    .ux-tooltip--primary.ux-tooltip--top .ux-tooltip__content::before {
+      border-top-color: var(--ux-primary);
+    }
+
+    .ux-tooltip--primary.ux-tooltip--bottom .ux-tooltip__content::before {
+      border-top-color: transparent;
+      border-bottom-color: var(--ux-primary);
+    }
+
+    .ux-tooltip--primary.ux-tooltip--left .ux-tooltip__content::before {
+      border-top-color: transparent;
+      border-left-color: var(--ux-primary);
+    }
+
+    .ux-tooltip--primary.ux-tooltip--right .ux-tooltip__content::before {
+      border-top-color: transparent;
+      border-right-color: var(--ux-primary);
+    }
+
+    /* ========================================
+       Sizes
+    ======================================== */
+
+    .ux-tooltip--sm .ux-tooltip__content {
+      padding: 4px 8px;
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-tooltip--lg .ux-tooltip__content {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      font-size: var(--ux-font-size-md);
+    }
+
+    /* ========================================
+       Multi-line / Rich Content
+    ======================================== */
+
+    .ux-tooltip--multiline .ux-tooltip__content {
+      white-space: normal;
+      max-width: 250px;
+      text-align: center;
+    }
+
+    .ux-tooltip--rich .ux-tooltip__content {
+      white-space: normal;
+      max-width: 300px;
+      text-align: left;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+    }
+
+    .ux-tooltip__title {
+      font-weight: 600;
+      margin-bottom: var(--ux-space-xs);
+    }
+
+    .ux-tooltip__description {
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    /* ========================================
+       Delay Variants
+    ======================================== */
+
+    .ux-tooltip--delay-short:hover .ux-tooltip__content {
+      transition-delay: 200ms;
+    }
+
+    .ux-tooltip--delay:hover .ux-tooltip__content {
+      transition-delay: 500ms;
+    }
+
+    .ux-tooltip--delay-long:hover .ux-tooltip__content {
+      transition-delay: 1000ms;
+    }
+
+    /* ========================================
+       Glass Variant
+    ======================================== */
+
+    .ux-tooltip--glass .ux-tooltip__content {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      color: var(--ux-text);
+    }
+
+    .ux-tooltip--glass .ux-tooltip__content::before {
+      display: none;
+    }
+
+    /* ========================================
+       Touch Device Handling
+    ======================================== */
+
+    @media (hover: none) {
+      /* On touch devices, show tooltip only when .ux-tooltip--open is added */
+      .ux-tooltip:hover .ux-tooltip__content {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .ux-tooltip--open .ux-tooltip__content {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-tooltip__content {
+        transition: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-tooltip-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-tooltip-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for programmatic tooltip control
+  const tooltipComponent = (config = {}) => ({
+    isOpen: config.open || false,
+    delay: config.delay || 0,
+    _timeout: null,
+
+    show() {
+      if (this.delay > 0) {
+        this._timeout = setTimeout(() => {
+          this.isOpen = true;
+        }, this.delay);
+      } else {
+        this.isOpen = true;
+      }
+    },
+
+    hide() {
+      if (this._timeout) {
+        clearTimeout(this._timeout);
+        this._timeout = null;
+      }
+      this.isOpen = false;
+    },
+
+    toggle() {
+      if (this.isOpen) {
+        this.hide();
+      } else {
+        this.show();
+      }
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxTooltip', tooltipComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxTooltip', tooltipComponent);
+    });
+  }
+})();
+/**
  * UX Upload Component
  * File upload con drag & drop, preview y progress
  * @requires ux-core.js
@@ -27815,372 +28240,6 @@
   } else {
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxUpload', uploadComponent);
-    });
-  }
-})();
-/**
- * UX Tooltip Component
- * Tooltips estilo iOS/macOS para hints en hover
- * @requires ux-core.js
- */
-(function() {
-  'use strict';
-
-  const styles = `
-    /* ========================================
-       UX Tooltip
-    ======================================== */
-
-    .ux-tooltip {
-      position: relative;
-      display: inline-flex;
-    }
-
-    .ux-tooltip__content {
-      position: absolute;
-      z-index: var(--ux-z-tooltip);
-      padding: var(--ux-space-xs) var(--ux-space-sm);
-      background-color: var(--ux-dark);
-      color: white;
-      font-size: var(--ux-font-size-sm);
-      font-weight: 500;
-      line-height: 1.4;
-      border-radius: var(--ux-border-radius-sm);
-      white-space: nowrap;
-      pointer-events: none;
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity var(--ux-transition-fast) var(--ux-ease),
-        visibility var(--ux-transition-fast) var(--ux-ease),
-        transform var(--ux-transition-fast) var(--ux-ease);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    /* Arrow */
-    .ux-tooltip__content::before {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 0;
-      border: 6px solid transparent;
-    }
-
-    /* Show on hover/focus */
-    .ux-tooltip:hover .ux-tooltip__content,
-    .ux-tooltip:focus-within .ux-tooltip__content,
-    .ux-tooltip--open .ux-tooltip__content {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    /* ========================================
-       Positions
-    ======================================== */
-
-    /* Top (default) */
-    .ux-tooltip__content,
-    .ux-tooltip--top .ux-tooltip__content {
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%) translateY(-8px);
-    }
-
-    .ux-tooltip:hover .ux-tooltip__content,
-    .ux-tooltip:focus-within .ux-tooltip__content,
-    .ux-tooltip--open .ux-tooltip__content,
-    .ux-tooltip--top:hover .ux-tooltip__content,
-    .ux-tooltip--top:focus-within .ux-tooltip__content,
-    .ux-tooltip--top.ux-tooltip--open .ux-tooltip__content {
-      transform: translateX(-50%) translateY(-4px);
-    }
-
-    .ux-tooltip__content::before,
-    .ux-tooltip--top .ux-tooltip__content::before {
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border-top-color: var(--ux-dark);
-    }
-
-    /* Bottom */
-    .ux-tooltip--bottom .ux-tooltip__content {
-      top: 100%;
-      bottom: auto;
-      left: 50%;
-      transform: translateX(-50%) translateY(8px);
-    }
-
-    .ux-tooltip--bottom:hover .ux-tooltip__content,
-    .ux-tooltip--bottom:focus-within .ux-tooltip__content,
-    .ux-tooltip--bottom.ux-tooltip--open .ux-tooltip__content {
-      transform: translateX(-50%) translateY(4px);
-    }
-
-    .ux-tooltip--bottom .ux-tooltip__content::before {
-      top: auto;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border-top-color: transparent;
-      border-bottom-color: var(--ux-dark);
-    }
-
-    /* Left */
-    .ux-tooltip--left .ux-tooltip__content {
-      top: 50%;
-      right: 100%;
-      bottom: auto;
-      left: auto;
-      transform: translateY(-50%) translateX(-8px);
-    }
-
-    .ux-tooltip--left:hover .ux-tooltip__content,
-    .ux-tooltip--left:focus-within .ux-tooltip__content,
-    .ux-tooltip--left.ux-tooltip--open .ux-tooltip__content {
-      transform: translateY(-50%) translateX(-4px);
-    }
-
-    .ux-tooltip--left .ux-tooltip__content::before {
-      top: 50%;
-      right: auto;
-      left: 100%;
-      transform: translateY(-50%);
-      border-top-color: transparent;
-      border-left-color: var(--ux-dark);
-    }
-
-    /* Right */
-    .ux-tooltip--right .ux-tooltip__content {
-      top: 50%;
-      left: 100%;
-      bottom: auto;
-      right: auto;
-      transform: translateY(-50%) translateX(8px);
-    }
-
-    .ux-tooltip--right:hover .ux-tooltip__content,
-    .ux-tooltip--right:focus-within .ux-tooltip__content,
-    .ux-tooltip--right.ux-tooltip--open .ux-tooltip__content {
-      transform: translateY(-50%) translateX(4px);
-    }
-
-    .ux-tooltip--right .ux-tooltip__content::before {
-      top: 50%;
-      left: auto;
-      right: 100%;
-      transform: translateY(-50%);
-      border-top-color: transparent;
-      border-right-color: var(--ux-dark);
-    }
-
-    /* ========================================
-       Variants
-    ======================================== */
-
-    /* Light variant */
-    .ux-tooltip--light .ux-tooltip__content {
-      background-color: var(--ux-surface);
-      color: var(--ux-text);
-      border: 1px solid var(--ux-border-color);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .ux-tooltip--light .ux-tooltip__content::before,
-    .ux-tooltip--light.ux-tooltip--top .ux-tooltip__content::before {
-      border-top-color: var(--ux-surface);
-    }
-
-    .ux-tooltip--light.ux-tooltip--bottom .ux-tooltip__content::before {
-      border-top-color: transparent;
-      border-bottom-color: var(--ux-surface);
-    }
-
-    .ux-tooltip--light.ux-tooltip--left .ux-tooltip__content::before {
-      border-top-color: transparent;
-      border-left-color: var(--ux-surface);
-    }
-
-    .ux-tooltip--light.ux-tooltip--right .ux-tooltip__content::before {
-      border-top-color: transparent;
-      border-right-color: var(--ux-surface);
-    }
-
-    /* Primary variant */
-    .ux-tooltip--primary .ux-tooltip__content {
-      background-color: var(--ux-primary);
-      color: var(--ux-primary-contrast);
-    }
-
-    .ux-tooltip--primary .ux-tooltip__content::before,
-    .ux-tooltip--primary.ux-tooltip--top .ux-tooltip__content::before {
-      border-top-color: var(--ux-primary);
-    }
-
-    .ux-tooltip--primary.ux-tooltip--bottom .ux-tooltip__content::before {
-      border-top-color: transparent;
-      border-bottom-color: var(--ux-primary);
-    }
-
-    .ux-tooltip--primary.ux-tooltip--left .ux-tooltip__content::before {
-      border-top-color: transparent;
-      border-left-color: var(--ux-primary);
-    }
-
-    .ux-tooltip--primary.ux-tooltip--right .ux-tooltip__content::before {
-      border-top-color: transparent;
-      border-right-color: var(--ux-primary);
-    }
-
-    /* ========================================
-       Sizes
-    ======================================== */
-
-    .ux-tooltip--sm .ux-tooltip__content {
-      padding: 4px 8px;
-      font-size: var(--ux-font-size-xs);
-    }
-
-    .ux-tooltip--lg .ux-tooltip__content {
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      font-size: var(--ux-font-size-md);
-    }
-
-    /* ========================================
-       Multi-line / Rich Content
-    ======================================== */
-
-    .ux-tooltip--multiline .ux-tooltip__content {
-      white-space: normal;
-      max-width: 250px;
-      text-align: center;
-    }
-
-    .ux-tooltip--rich .ux-tooltip__content {
-      white-space: normal;
-      max-width: 300px;
-      text-align: left;
-      padding: var(--ux-space-sm) var(--ux-space-md);
-    }
-
-    .ux-tooltip__title {
-      font-weight: 600;
-      margin-bottom: var(--ux-space-xs);
-    }
-
-    .ux-tooltip__description {
-      font-weight: 400;
-      opacity: 0.9;
-    }
-
-    /* ========================================
-       Delay Variants
-    ======================================== */
-
-    .ux-tooltip--delay-short:hover .ux-tooltip__content {
-      transition-delay: 200ms;
-    }
-
-    .ux-tooltip--delay:hover .ux-tooltip__content {
-      transition-delay: 500ms;
-    }
-
-    .ux-tooltip--delay-long:hover .ux-tooltip__content {
-      transition-delay: 1000ms;
-    }
-
-    /* ========================================
-       Glass Variant
-    ======================================== */
-
-    .ux-tooltip--glass .ux-tooltip__content {
-      background: var(--ux-glass-bg);
-      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
-      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
-      border: 0.5px solid var(--ux-glass-border);
-      color: var(--ux-text);
-    }
-
-    .ux-tooltip--glass .ux-tooltip__content::before {
-      display: none;
-    }
-
-    /* ========================================
-       Touch Device Handling
-    ======================================== */
-
-    @media (hover: none) {
-      /* On touch devices, show tooltip only when .ux-tooltip--open is added */
-      .ux-tooltip:hover .ux-tooltip__content {
-        opacity: 0;
-        visibility: hidden;
-      }
-
-      .ux-tooltip--open .ux-tooltip__content {
-        opacity: 1;
-        visibility: visible;
-      }
-    }
-
-    /* ========================================
-       Reduced Motion
-    ======================================== */
-
-    @media (prefers-reduced-motion: reduce) {
-      .ux-tooltip__content {
-        transition: none;
-      }
-    }
-  `;
-
-  // Inject styles
-  if (window.UX) {
-    window.UX.injectStyles('ux-tooltip-styles', styles);
-  } else {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'ux-tooltip-styles';
-    styleEl.textContent = styles;
-    document.head.appendChild(styleEl);
-  }
-
-  // Alpine component for programmatic tooltip control
-  const tooltipComponent = (config = {}) => ({
-    isOpen: config.open || false,
-    delay: config.delay || 0,
-    _timeout: null,
-
-    show() {
-      if (this.delay > 0) {
-        this._timeout = setTimeout(() => {
-          this.isOpen = true;
-        }, this.delay);
-      } else {
-        this.isOpen = true;
-      }
-    },
-
-    hide() {
-      if (this._timeout) {
-        clearTimeout(this._timeout);
-        this._timeout = null;
-      }
-      this.isOpen = false;
-    },
-
-    toggle() {
-      if (this.isOpen) {
-        this.hide();
-      } else {
-        this.show();
-      }
-    }
-  });
-
-  if (window.UX) {
-    window.UX.registerComponent('uxTooltip', tooltipComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxTooltip', tooltipComponent);
     });
   }
 })();
