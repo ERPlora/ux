@@ -3,7 +3,7 @@
  * Contenedor principal de contenido estilo Ionic
  * @requires ux-core.js
  */
-(function() {
+(function () {
   'use strict';
 
   const styles = `
@@ -222,6 +222,7 @@
       transform: translateX(-100%);
       transition: transform var(--ux-transition-normal) var(--ux-ease-spring);
       will-change: transform;
+      min-height: 100vh;
     }
 
     /* Open state for mobile (overlay) */
@@ -257,6 +258,7 @@
       flex-direction: column;
       min-width: 0;
       width: 100%;
+      min-height: 100vh;
       transition: margin-left var(--ux-transition-normal) var(--ux-ease);
     }
 
