@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>UX - Universal eXtensions</title>
+  <!-- Bootstrap Grid -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
+  <!-- Alpine.js -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- UX Components -->
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-content.js"></script>
   <script src="../components/ux-button.js"></script>
@@ -13,129 +17,30 @@
   <script src="../components/ux-badge.js"></script>
   <script src="../components/ux-searchbar.js"></script>
   <script src="../components/ux-menu.js"></script>
-  <!-- Bootstrap Grid -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
+  <script src="../components/ux-card.js"></script>
   <link rel="stylesheet" href="../css/themes.css">
-
-  <style>
-    /* Docs-specific sidebar header */
-    .docs-sidebar-header {
-      flex-shrink: 0;
-      padding: var(--ux-space-lg);
-      border-bottom: 1px solid var(--ux-border-color);
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-    }
-
-    .docs-sidebar-search {
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      border-bottom: 1px solid var(--ux-border-color);
-    }
-
-    .docs-sidebar-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: var(--ux-space-sm);
-    }
-
-    /* Navbar area */
-    .docs-navbar {
-      flex-shrink: 0;
-      position: sticky;
-      top: 0;
-      z-index: var(--ux-z-sticky);
-    }
-
-    /* Menu item styles */
-    .menu-section {
-      padding: var(--ux-space-xs) var(--ux-space-md);
-      font-size: var(--ux-font-size-md);
-      font-weight: 600;
-      color: var(--ux-text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-top: var(--ux-space-md);
-    }
-
-    .menu-section:first-child {
-      margin-top: 0;
-    }
-
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      color: var(--ux-text);
-      text-decoration: none;
-      border-radius: var(--ux-border-radius);
-      cursor: pointer;
-      transition: background-color var(--ux-transition-fast);
-    }
-
-    .menu-item:hover {
-      background: var(--ux-surface-secondary);
-    }
-
-    .menu-item.active {
-      background: rgba(var(--ux-primary-rgb), 0.12);
-      color: var(--ux-primary);
-    }
-
-    .menu-item__icon {
-      width: 20px;
-      height: 20px;
-      opacity: 0.7;
-    }
-
-    .menu-item.active .menu-item__icon {
-      opacity: 1;
-    }
-
-    /* Loading state */
-    .content-loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 200px;
-      color: var(--ux-text-secondary);
-    }
-
-    /* Content frame */
-    .content-frame {
-      width: 100%;
-      height: 100%;
-      border: none;
-      min-height: calc(100vh - 56px);
-    }
-  </style>
 </head>
 <body class="ux-app" x-data="docsApp()">
-  <div class="ux-split-pane" :class="{ 'ux-split-pane--open': sidebarOpen }">
+  <div class="ux-split-pane" :class="{ 'ux-split-pane--open': sidebarOpen, 'ux-split-pane--collapsed': sidebarCollapsed }">
     <!-- Backdrop (mobile) -->
     <div class="ux-split-pane__backdrop" @click="sidebarOpen = false"></div>
 
     <!-- Sidebar -->
     <aside class="ux-split-pane__side" aria-label="Menu de navegacion">
-      <div class="docs-sidebar-header">
-        <a href="index.html" style="font-size: var(--ux-font-size-xl); font-weight: 700; color: var(--ux-text); text-decoration: none; display: flex; align-items: center; gap: var(--ux-space-sm);">
-          UX - Universal eXtensions
-          <span class="ux-badge ux-color-primary">v1.0</span>
-        </a>
-
-        <!-- Close button (mobile) -->
-        <button class="ux-button ux-button--clear ux-button--sm d-lg-none"
-                style="margin-left: auto;"
-                @click="sidebarOpen = false">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button>
+      <!-- Sidebar Header -->
+      <div class="ux-navbar">
+        <div class="ux-navbar__content">
+          <div class="ux-navbar__center">
+            <a href="index.html" class="ux-navbar__title">
+              UX
+              <span class="ux-badge ux-color-primary ux-ml-sm">v1.0</span>
+            </a>
+          </div>
+        </div>
       </div>
 
       <!-- Search -->
-      <div class="docs-sidebar-search">
+      <div class="ux-p-sm">
         <div class="ux-searchbar ux-searchbar--sm">
           <span class="ux-searchbar__icon">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,53 +55,68 @@
         </div>
       </div>
 
-      <nav class="docs-sidebar-content" aria-label="Componentes">
-        <!-- Getting Started -->
-        <div class="menu-section" x-show="!searchQuery || 'getting started inicio'.includes(searchQuery.toLowerCase())">Getting Started</div>
-        <a class="menu-item"
-           :class="{ 'active': currentPage === 'home' }"
-           @click="loadPage('home', 'Home')">
-          <svg class="menu-item__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-          </svg>
-          Home
-        </a>
+      <!-- Navigation Menu -->
+      <nav class="ux-scroll" aria-label="Componentes">
+        <ul class="ux-menu__list">
+          <!-- Getting Started -->
+          <li class="ux-menu__header" x-show="!searchQuery || 'getting started inicio'.includes(searchQuery.toLowerCase())">Getting Started</li>
+          <li>
+            <a class="ux-menu__item"
+               :class="{ 'ux-menu__item--selected': currentPage === 'home' }"
+               @click="loadPage('home', 'Home')">
+              <span class="ux-menu__item-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+              </span>
+              <span class="ux-menu__item-label">Home</span>
+            </a>
+          </li>
 
-        <!-- Basic Components -->
-        <template x-for="section in filteredMenu" :key="section.name">
-          <div>
-            <div class="menu-section" x-text="section.name"></div>
-            <template x-for="item in section.items" :key="item.page">
-              <a class="menu-item"
-                 :class="{ 'active': currentPage === item.page }"
-                 @click="loadPage(item.page, item.name)">
-                <svg class="menu-item__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-html="item.icon"></svg>
-                <span x-text="item.name"></span>
-              </a>
-            </template>
-          </div>
-        </template>
+          <!-- Dynamic Sections -->
+          <template x-for="section in filteredMenu" :key="section.name">
+            <li>
+              <div class="ux-menu__header" x-text="section.name"></div>
+              <ul class="ux-menu__list">
+                <template x-for="item in section.items" :key="item.page">
+                  <li>
+                    <a class="ux-menu__item"
+                       :class="{ 'ux-menu__item--selected': currentPage === item.page }"
+                       @click="loadPage(item.page, item.name)">
+                      <span class="ux-menu__item-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" x-html="item.icon"></svg>
+                      </span>
+                      <span class="ux-menu__item-label" x-text="item.name"></span>
+                    </a>
+                  </li>
+                </template>
+              </ul>
+            </li>
+          </template>
+        </ul>
       </nav>
     </aside>
 
-    <!-- Main -->
+    <!-- Main Content -->
     <main class="ux-split-pane__main">
-      <!-- Navbar -->
-      <nav class="docs-navbar ux-navbar ux-navbar--glass" aria-label="Barra de navegacion">
+      <!-- Top Navbar -->
+      <nav class="ux-navbar ux-navbar--sticky" aria-label="Barra de navegacion">
         <div class="ux-navbar__content">
           <div class="ux-navbar__start">
-            <!-- Toggle sidebar (mobile) -->
-            <button class="ux-navbar__button d-lg-none" @click="sidebarOpen = true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 12h18M3 6h18M3 18h18"/>
-              </svg>
+            <button class="ux-navbar__button" @click="window.innerWidth >= 992 ? toggleSidebar() : sidebarOpen = true">
+              <span class="ux-navbar__back">
+                <span class="ux-navbar__back-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                  </svg>
+                </span>
+              </span>
             </button>
           </div>
           <div class="ux-navbar__center">
             <span class="ux-navbar__title" x-text="pageTitle"></span>
           </div>
           <div class="ux-navbar__end">
-            <!-- Dark/Light Toggle -->
             <button class="ux-navbar__button" @click="toggleDarkMode()">
               <svg x-show="darkMode" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -209,23 +129,26 @@
         </div>
       </nav>
 
-      <!-- Content -->
+      <!-- Page Content -->
       <div class="ux-content">
-        <!-- Home content -->
-        <div x-show="currentPage === 'home'" style="padding: var(--ux-space-xl);">
-          <div style="max-width: 800px; margin: 0 auto;">
-            <h1 class="ux-text-2xl ux-font-bold ux-mb-md">UX - Universal eXtensions</h1>
-            <p class="ux-text-lg ux-text-secondary ux-mb-xl">
-              Componentes iOS-style para web, optimizados para HTMX y Alpine.js. Zero-build, touch-first, y completamente autocontenidos.
-            </p>
+        <!-- Home Page -->
+        <div x-show="currentPage === 'home'" class="ux-p-xl">
+          <div class="container-fluid">
+            <div class="row justify-content-center">
+              <div class="col-12 col-lg-10 col-xl-8">
+                <!-- Header -->
+                <h1 class="ux-text-2xl ux-font-bold ux-mb-md">UX - Universal eXtensions</h1>
+                <p class="ux-text-lg ux-text-secondary ux-mb-xl">
+                  Componentes iOS-style para web, optimizados para HTMX y Alpine.js. Zero-build, touch-first, y completamente autocontenidos.
+                </p>
 
-            <!-- Quick Start -->
-            <div class="ux-card ux-mb-xl">
-              <div class="ux-card__header">
-                <h2 class="ux-card__title">Quick Start</h2>
-              </div>
-              <div class="ux-card__content">
-                <pre style="background: var(--ux-surface-secondary); padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-size: var(--ux-font-size-md);"><code>&lt;!-- Core (requerido) --&gt;
+                <!-- Quick Start Card -->
+                <div class="ux-card ux-mb-xl">
+                  <div class="ux-card__header">
+                    <h2 class="ux-card__title">Quick Start</h2>
+                  </div>
+                  <div class="ux-card__content">
+                    <pre class="ux-code"><code>&lt;!-- Core (requerido) --&gt;
 &lt;script src="components/ux-core.js"&gt;&lt;/script&gt;
 
 &lt;!-- Componentes individuales --&gt;
@@ -237,40 +160,40 @@
 
 &lt;!-- Dependencias opcionales --&gt;
 &lt;script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"&gt;&lt;/script&gt;</code></pre>
-              </div>
-            </div>
+                  </div>
+                </div>
 
-            <!-- Bootstrap Grid -->
-            <div class="ux-card ux-mb-xl">
-              <div class="ux-card__header">
-                <h2 class="ux-card__title">Bootstrap Grid</h2>
-              </div>
-              <div class="ux-card__content">
-                <p class="ux-text-secondary ux-mb-md">UX usa Bootstrap Grid 5.3 para el sistema de layout. Cargar antes de ux-core.js:</p>
-                <pre style="background: var(--ux-surface-secondary); padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-size: var(--ux-font-size-md);"><code>&lt;!-- Bootstrap Grid (solo grid, sin componentes) --&gt;
+                <!-- Bootstrap Grid Card -->
+                <div class="ux-card ux-mb-xl">
+                  <div class="ux-card__header">
+                    <h2 class="ux-card__title">Bootstrap Grid</h2>
+                  </div>
+                  <div class="ux-card__content">
+                    <p class="ux-text-secondary ux-mb-md">UX usa Bootstrap Grid 5.3 para el sistema de layout. Cargar antes de ux-core.js:</p>
+                    <pre class="ux-code"><code>&lt;!-- Bootstrap Grid (solo grid, sin componentes) --&gt;
 &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet"&gt;
 
 &lt;!-- Luego cargar UX --&gt;
 &lt;script src="dist/ux.min.js"&gt;&lt;/script&gt;</code></pre>
-                <p class="ux-text-secondary ux-mt-md">Uso del grid:</p>
-                <pre style="background: var(--ux-surface-secondary); padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-size: var(--ux-font-size-md);"><code>&lt;div class="container"&gt;
+                    <p class="ux-text-secondary ux-mt-md">Uso del grid:</p>
+                    <pre class="ux-code"><code>&lt;div class="container"&gt;
   &lt;div class="row"&gt;
     &lt;div class="col-12 col-md-6 col-lg-4"&gt;Columna 1&lt;/div&gt;
     &lt;div class="col-12 col-md-6 col-lg-4"&gt;Columna 2&lt;/div&gt;
     &lt;div class="col-12 col-md-12 col-lg-4"&gt;Columna 3&lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;</code></pre>
-              </div>
-            </div>
+                  </div>
+                </div>
 
-            <!-- Custom Themes -->
-            <div class="ux-card ux-mb-xl">
-              <div class="ux-card__header">
-                <h2 class="ux-card__title">Crear Tema de Colores</h2>
-              </div>
-              <div class="ux-card__content">
-                <p class="ux-text-secondary ux-mb-md">Crea tu propio tema sobrescribiendo las variables CSS del primary color:</p>
-                <pre style="background: var(--ux-surface-secondary); padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-size: var(--ux-font-size-md);"><code>/* Mi tema personalizado */
+                <!-- Custom Themes Card -->
+                <div class="ux-card ux-mb-xl">
+                  <div class="ux-card__header">
+                    <h2 class="ux-card__title">Crear Tema de Colores</h2>
+                  </div>
+                  <div class="ux-card__content">
+                    <p class="ux-text-secondary ux-mb-md">Crea tu propio tema sobrescribiendo las variables CSS del primary color:</p>
+                    <pre class="ux-code"><code>/* Mi tema personalizado */
 .ux-theme-custom {
   /* Color primario - usar tonos de tu marca */
   --ux-primary: #8B5CF6;           /* Violeta */
@@ -282,102 +205,104 @@
 
 /* Aplicar a todo el documento */
 &lt;body class="ux-theme-custom"&gt;</code></pre>
-                <p class="ux-text-secondary ux-mt-md ux-mb-md">Temas incluidos:</p>
-                <div class="row" style="gap: var(--ux-space-sm);">
-                  <div class="col-auto"><span class="ux-badge ux-color-primary">ocean (default)</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #059669; color: white;">emerald</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #7c3aed; color: white;">purple</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #ea580c; color: white;">sunset</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #db2777; color: white;">rose</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #0d9488; color: white;">teal</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #d97706; color: white;">amber</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #475569; color: white;">slate</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #4f46e5; color: white;">indigo</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #0891b2; color: white;">cyan</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #b91c1c; color: white;">crimson</span></div>
-                  <div class="col-auto"><span class="ux-badge" style="background: #15803d; color: white;">forest</span></div>
-                </div>
-                <pre style="background: var(--ux-surface-secondary); padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-size: var(--ux-font-size-md); margin-top: var(--ux-space-md);"><code>&lt;!-- Usar tema incluido --&gt;
+                    <p class="ux-text-secondary ux-mt-md ux-mb-md">Temas incluidos:</p>
+                    <div class="row g-2">
+                      <div class="col-auto"><span class="ux-badge ux-color-primary">ocean (default)</span></div>
+                      <div class="col-auto"><span class="ux-badge ux-color-success">emerald</span></div>
+                      <div class="col-auto"><span class="ux-badge" style="background: var(--ux-purple-500); color: white;">purple</span></div>
+                      <div class="col-auto"><span class="ux-badge ux-color-warning">sunset</span></div>
+                      <div class="col-auto"><span class="ux-badge ux-color-danger">rose</span></div>
+                      <div class="col-auto"><span class="ux-badge" style="background: var(--ux-teal-500); color: white;">teal</span></div>
+                      <div class="col-auto"><span class="ux-badge" style="background: var(--ux-amber-500); color: white;">amber</span></div>
+                      <div class="col-auto"><span class="ux-badge ux-color-dark">slate</span></div>
+                      <div class="col-auto"><span class="ux-badge" style="background: var(--ux-indigo-500); color: white;">indigo</span></div>
+                      <div class="col-auto"><span class="ux-badge" style="background: var(--ux-cyan-500); color: white;">cyan</span></div>
+                      <div class="col-auto"><span class="ux-badge" style="background: var(--ux-red-700); color: white;">crimson</span></div>
+                      <div class="col-auto"><span class="ux-badge" style="background: var(--ux-green-700); color: white;">forest</span></div>
+                    </div>
+                    <pre class="ux-code ux-mt-md"><code>&lt;!-- Usar tema incluido --&gt;
 &lt;body class="ux-theme-emerald"&gt;
 
 &lt;!-- Dark mode --&gt;
 &lt;body class="ux-theme-purple ux-dark"&gt;</code></pre>
-              </div>
-            </div>
+                  </div>
+                </div>
 
-            <!-- Features -->
-            <h2 class="ux-text-lg ux-font-semibold ux-mb-md">Caracteristicas</h2>
-            <div class="row ux-gap-md ux-mb-xl">
-              <div class="col-6 col-md-4">
-                <div class="ux-card">
-                  <div class="ux-card__content ux-text-center">
-                    <div class="ux-text-2xl ux-mb-sm">&#9889;</div>
-                    <div class="ux-font-semibold">Zero Build</div>
-                    <div class="ux-text-sm ux-text-secondary">Sin compilacion</div>
+                <!-- Features Grid -->
+                <h2 class="ux-text-lg ux-font-semibold ux-mb-md">Caracteristicas</h2>
+                <div class="row g-3 ux-mb-xl">
+                  <div class="col-6 col-md-4">
+                    <div class="ux-card">
+                      <div class="ux-card__content ux-text-center">
+                        <div class="ux-text-2xl ux-mb-sm">&#9889;</div>
+                        <div class="ux-font-semibold">Zero Build</div>
+                        <div class="ux-text-sm ux-text-secondary">Sin compilacion</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-4">
+                    <div class="ux-card">
+                      <div class="ux-card__content ux-text-center">
+                        <div class="ux-text-2xl ux-mb-sm">&#128230;</div>
+                        <div class="ux-font-semibold">Autocontenido</div>
+                        <div class="ux-text-sm ux-text-secondary">CSS + JS en uno</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-4">
+                    <div class="ux-card">
+                      <div class="ux-card__content ux-text-center">
+                        <div class="ux-text-2xl ux-mb-sm">&#128241;</div>
+                        <div class="ux-font-semibold">Touch-First</div>
+                        <div class="ux-text-sm ux-text-secondary">Optimizado mobile</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-4">
+                    <div class="ux-card">
+                      <div class="ux-card__content ux-text-center">
+                        <div class="ux-text-2xl ux-mb-sm">&#127822;</div>
+                        <div class="ux-font-semibold">iOS Style</div>
+                        <div class="ux-text-sm ux-text-secondary">Pixel-perfect</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-4">
+                    <div class="ux-card">
+                      <div class="ux-card__content ux-text-center">
+                        <div class="ux-text-2xl ux-mb-sm">&#127769;</div>
+                        <div class="ux-font-semibold">Dark Mode</div>
+                        <div class="ux-text-sm ux-text-secondary">Claro y oscuro</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-4">
+                    <div class="ux-card">
+                      <div class="ux-card__content ux-text-center">
+                        <div class="ux-text-2xl ux-mb-sm">&#128736;</div>
+                        <div class="ux-font-semibold">HTMX Ready</div>
+                        <div class="ux-text-sm ux-text-secondary">Compatible</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="col-6 col-md-4">
-                <div class="ux-card">
-                  <div class="ux-card__content ux-text-center">
-                    <div class="ux-text-2xl ux-mb-sm">&#128230;</div>
-                    <div class="ux-font-semibold">Autocontenido</div>
-                    <div class="ux-text-sm ux-text-secondary">CSS + JS en uno</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-md-4">
-                <div class="ux-card">
-                  <div class="ux-card__content ux-text-center">
-                    <div class="ux-text-2xl ux-mb-sm">&#128241;</div>
-                    <div class="ux-font-semibold">Touch-First</div>
-                    <div class="ux-text-sm ux-text-secondary">Optimizado mobile</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-md-4">
-                <div class="ux-card">
-                  <div class="ux-card__content ux-text-center">
-                    <div class="ux-text-2xl ux-mb-sm">&#127822;</div>
-                    <div class="ux-font-semibold">iOS Style</div>
-                    <div class="ux-text-sm ux-text-secondary">Pixel-perfect</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-md-4">
-                <div class="ux-card">
-                  <div class="ux-card__content ux-text-center">
-                    <div class="ux-text-2xl ux-mb-sm">&#127769;</div>
-                    <div class="ux-font-semibold">Dark Mode</div>
-                    <div class="ux-text-sm ux-text-secondary">Claro y oscuro</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-md-4">
-                <div class="ux-card">
-                  <div class="ux-card__content ux-text-center">
-                    <div class="ux-text-2xl ux-mb-sm">&#128736;</div>
-                    <div class="ux-font-semibold">HTMX Ready</div>
-                    <div class="ux-text-sm ux-text-secondary">Compatible</div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <!-- Component count -->
-            <div class="ux-card" style="background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-primary-shade) 100%); color: white;">
-              <div class="ux-card__content ux-text-center">
-                <div class="ux-text-3xl ux-font-bold ux-mb-sm">40+</div>
-                <div>Componentes disponibles</div>
+                <!-- Component Count Card -->
+                <div class="ux-card" style="background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-primary-shade) 100%); color: white;">
+                  <div class="ux-card__content ux-text-center">
+                    <div class="ux-text-3xl ux-font-bold ux-mb-sm">40+</div>
+                    <div>Componentes disponibles</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- iframe for component pages -->
+        <!-- Component Pages (iframe) -->
         <iframe x-show="currentPage !== 'home'"
                 :src="currentPage !== 'home' ? currentPage + '.html' : ''"
-                class="content-frame"
+                class="ux-frame"
                 title="Component documentation"
                 @load="loading = false; syncThemeToIframe()"></iframe>
       </div>
@@ -388,6 +313,7 @@
     function docsApp() {
       return {
         sidebarOpen: false,
+        sidebarCollapsed: localStorage.getItem('ux-sidebar-collapsed') === 'true',
         darkMode: false,
         currentPage: 'home',
         pageTitle: 'Home',
@@ -548,7 +474,7 @@
         },
 
         syncThemeToIframe() {
-          const iframe = document.querySelector('.content-frame');
+          const iframe = document.querySelector('.ux-frame');
           if (iframe && iframe.contentWindow) {
             iframe.contentWindow.postMessage({ type: 'ux-theme', darkMode: this.darkMode }, '*');
           }
@@ -564,8 +490,12 @@
             document.documentElement.classList.remove('ux-dark');
           }
 
-          // Sync with iframe
           this.syncThemeToIframe();
+        },
+
+        toggleSidebar() {
+          this.sidebarCollapsed = !this.sidebarCollapsed;
+          localStorage.setItem('ux-sidebar-collapsed', this.sidebarCollapsed);
         }
       };
     }

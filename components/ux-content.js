@@ -248,9 +248,14 @@
         flex-shrink: 0;
       }
 
-      /* Hidden on large screens with --collapsed */
+      /* Collapsed state - slide out with animation */
       .ux-split-pane--collapsed .ux-split-pane__side {
-        display: none;
+        transform: translateX(-100%);
+        position: absolute;
+      }
+
+      .ux-split-pane--collapsed.ux-split-pane--end .ux-split-pane__side {
+        transform: translateX(100%);
       }
     }
 
@@ -385,6 +390,86 @@
     @media (min-width: 992px) {
       .ux-split-pane:not(.ux-split-pane--drawer) .ux-split-pane__toggle {
         display: none;
+      }
+    }
+
+    /* Collapse button for desktop - sits on sidebar edge */
+    .ux-split-pane__collapse {
+      display: none;
+      position: absolute;
+      top: 50%;
+      right: -12px;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: 50%;
+      color: var(--ux-text-secondary);
+      cursor: pointer;
+      box-shadow: var(--ux-shadow-sm);
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-split-pane__collapse:hover {
+      background: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+
+    .ux-split-pane__collapse svg {
+      width: 14px;
+      height: 14px;
+      transition: transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    /* Rotate icon when collapsed */
+    .ux-split-pane--collapsed .ux-split-pane__collapse svg {
+      transform: rotate(180deg);
+    }
+
+    /* Show collapse button only on large screens */
+    @media (min-width: 992px) {
+      .ux-split-pane__collapse {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* When collapsed, position button at left edge of viewport */
+      .ux-split-pane--collapsed .ux-split-pane__collapse {
+        position: fixed;
+        left: 0;
+        right: auto;
+        top: 50%;
+        border-radius: 0 50% 50% 0;
+        border-left: none;
+      }
+    }
+
+    /* End position adjustments */
+    .ux-split-pane--end .ux-split-pane__collapse {
+      right: auto;
+      left: -12px;
+    }
+
+    .ux-split-pane--end .ux-split-pane__collapse svg {
+      transform: rotate(180deg);
+    }
+
+    .ux-split-pane--end.ux-split-pane--collapsed .ux-split-pane__collapse svg {
+      transform: rotate(0deg);
+    }
+
+    @media (min-width: 992px) {
+      .ux-split-pane--end.ux-split-pane--collapsed .ux-split-pane__collapse {
+        left: auto;
+        right: 0;
+        border-radius: 50% 0 0 50%;
+        border-left: 1px solid var(--ux-border-color);
+        border-right: none;
       }
     }
 
