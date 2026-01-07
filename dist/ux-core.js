@@ -1417,6 +1417,35 @@
     .ux-m-lg { margin: var(--ux-space-lg); }
     .ux-m-xl { margin: var(--ux-space-xl); }
 
+    /* Margin directional */
+    .ux-mt-0 { margin-top: 0; }
+    .ux-mt-xs { margin-top: var(--ux-space-xs); }
+    .ux-mt-sm { margin-top: var(--ux-space-sm); }
+    .ux-mt-md { margin-top: var(--ux-space-md); }
+    .ux-mt-lg { margin-top: var(--ux-space-lg); }
+    .ux-mt-xl { margin-top: var(--ux-space-xl); }
+
+    .ux-mb-0 { margin-bottom: 0; }
+    .ux-mb-xs { margin-bottom: var(--ux-space-xs); }
+    .ux-mb-sm { margin-bottom: var(--ux-space-sm); }
+    .ux-mb-md { margin-bottom: var(--ux-space-md); }
+    .ux-mb-lg { margin-bottom: var(--ux-space-lg); }
+    .ux-mb-xl { margin-bottom: var(--ux-space-xl); }
+
+    .ux-ml-0 { margin-left: 0; }
+    .ux-ml-xs { margin-left: var(--ux-space-xs); }
+    .ux-ml-sm { margin-left: var(--ux-space-sm); }
+    .ux-ml-md { margin-left: var(--ux-space-md); }
+    .ux-ml-lg { margin-left: var(--ux-space-lg); }
+    .ux-ml-xl { margin-left: var(--ux-space-xl); }
+
+    .ux-mr-0 { margin-right: 0; }
+    .ux-mr-xs { margin-right: var(--ux-space-xs); }
+    .ux-mr-sm { margin-right: var(--ux-space-sm); }
+    .ux-mr-md { margin-right: var(--ux-space-md); }
+    .ux-mr-lg { margin-right: var(--ux-space-lg); }
+    .ux-mr-xl { margin-right: var(--ux-space-xl); }
+
     /* Text */
     .ux-text-xs { font-size: var(--ux-font-size-xs); }
     .ux-text-sm { font-size: var(--ux-font-size-sm); }
@@ -1619,6 +1648,33 @@
       clip: rect(0, 0, 0, 0);
       white-space: nowrap;
       border: 0;
+    }
+
+    /* Code Block */
+    .ux-code {
+      display: block;
+      background: var(--ux-surface-secondary);
+      padding: var(--ux-space-md);
+      border-radius: var(--ux-border-radius);
+      overflow-x: auto;
+      font-size: var(--ux-font-size-sm);
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+      white-space: pre;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .ux-code code {
+      background: none;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* Iframe Frame */
+    .ux-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      min-height: calc(100vh - 56px);
     }
 
     /* Ripple Effect Base */

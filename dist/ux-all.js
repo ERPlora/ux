@@ -5217,7 +5217,8 @@
       position: relative;
       display: flex;
       width: 100%;
-      height: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
       overflow: hidden;
     }
 
@@ -5258,14 +5259,14 @@
       flex-direction: column;
       width: var(--ux-split-pane-side-width);
       max-width: 85vw;
-      background-color: var(--ux-surface);
-      border-right: 1px solid var(--ux-border-color);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      background-color: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-right: 0.5px solid var(--ux-glass-border);
+      overflow: hidden;
       transform: translateX(-100%);
       transition: transform var(--ux-transition-normal) var(--ux-ease-spring);
       will-change: transform;
-      min-height: 100vh;
     }
 
     /* Open state for mobile (overlay) */
@@ -5284,25 +5285,47 @@
           350px
         );
         max-width: none;
+        height: 100dvh;
+        max-height: 100dvh;
         transform: translateX(0);
         flex-shrink: 0;
       }
 
-      /* Hidden on large screens with --collapsed */
+      /* Collapsed state - slide out with animation */
       .ux-split-pane--collapsed .ux-split-pane__side {
-        display: none;
+        transform: translateX(-100%);
+        position: absolute;
+      }
+
+      .ux-split-pane--collapsed.ux-split-pane--end .ux-split-pane__side {
+        transform: translateX(100%);
       }
     }
 
     /* Main Content */
     .ux-split-pane__main {
       flex: 1;
-      display: flex;
-      flex-direction: column;
       min-width: 0;
       width: 100%;
-      min-height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
       transition: margin-left var(--ux-transition-normal) var(--ux-ease);
+    }
+
+    /* Navbar inside main is sticky */
+    .ux-split-pane__main > .ux-navbar {
+      position: sticky;
+      top: 0;
+      z-index: var(--ux-z-sticky);
+    }
+
+    /* Navbar inside sidebar inherits glass effect */
+    .ux-split-pane__side > .ux-navbar {
+      background: transparent;
+      border-bottom: 0.5px solid var(--ux-glass-border);
     }
 
     /* When sidebar visible on large screens, no margin needed (flexbox handles it) */
@@ -5321,7 +5344,7 @@
       left: auto;
       right: 0;
       border-right: none;
-      border-left: 1px solid var(--ux-border-color);
+      border-left: 0.5px solid var(--ux-glass-border);
       transform: translateX(100%);
     }
 
@@ -5413,11 +5436,93 @@
       }
     }
 
+    /* Collapse button for desktop - sits on sidebar edge */
+    .ux-split-pane__collapse {
+      display: none;
+      position: absolute;
+      top: 50%;
+      right: -12px;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: 50%;
+      color: var(--ux-text-secondary);
+      cursor: pointer;
+      box-shadow: var(--ux-shadow-sm);
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-split-pane__collapse:hover {
+      background: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+
+    .ux-split-pane__collapse svg {
+      width: 14px;
+      height: 14px;
+      transition: transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    /* Rotate icon when collapsed */
+    .ux-split-pane--collapsed .ux-split-pane__collapse svg {
+      transform: rotate(180deg);
+    }
+
+    /* Show collapse button only on large screens */
+    @media (min-width: 992px) {
+      .ux-split-pane__collapse {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* When collapsed, position button at left edge of viewport */
+      .ux-split-pane--collapsed .ux-split-pane__collapse {
+        position: fixed;
+        left: 0;
+        right: auto;
+        top: 50%;
+        border-radius: 0 50% 50% 0;
+        border-left: none;
+      }
+    }
+
+    /* End position adjustments */
+    .ux-split-pane--end .ux-split-pane__collapse {
+      right: auto;
+      left: -12px;
+    }
+
+    .ux-split-pane--end .ux-split-pane__collapse svg {
+      transform: rotate(180deg);
+    }
+
+    .ux-split-pane--end.ux-split-pane--collapsed .ux-split-pane__collapse svg {
+      transform: rotate(0deg);
+    }
+
+    @media (min-width: 992px) {
+      .ux-split-pane--end.ux-split-pane--collapsed .ux-split-pane__collapse {
+        left: auto;
+        right: 0;
+        border-radius: 50% 0 0 50%;
+        border-left: 1px solid var(--ux-border-color);
+        border-right: none;
+      }
+    }
+
     /* ========================================
        Scroll Utilities
     ======================================== */
 
     .ux-scroll {
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
