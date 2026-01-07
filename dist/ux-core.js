@@ -298,12 +298,12 @@
       --ux-button-bg: var(--ux-primary);
       --ux-button-text: var(--ux-primary-contrast);
       --ux-button-bg-hover: var(--ux-primary-shade);
-      --ux-button-border-radius: var(--ux-border-radius);
+      --ux-button-border-radius: var(--ux-border-radius-ios);
 
       /* Card */
       --ux-card-bg: var(--ux-surface);
       --ux-card-border: var(--ux-border-color);
-      --ux-card-shadow: var(--ux-shadow-md);
+      --ux-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
       /* Input */
       --ux-input-bg: var(--ux-surface);
@@ -315,6 +315,13 @@
       /* Modal */
       --ux-modal-bg: var(--ux-surface);
       --ux-modal-backdrop: rgba(0, 0, 0, 0.5);
+      --ux-modal-border-radius: var(--ux-border-radius-ios-lg);
+
+      /* Handle (drag indicator for modals/sheets) */
+      --ux-handle-width: 36px;
+      --ux-handle-height: 5px;
+      --ux-handle-radius: 2.5px;
+      --ux-handle-color: var(--ux-gray-300);
 
       /* List */
       --ux-list-bg: var(--ux-surface);
@@ -333,11 +340,18 @@
       /* Borders */
       --ux-border-radius: 0.5rem;
       --ux-border-radius-sm: 0.25rem;
+      --ux-border-radius-md: 0.625rem;
       --ux-border-radius-lg: 0.75rem;
       --ux-border-radius-xl: 1rem;
+      --ux-border-radius-ios: 0.875rem;      /* 14px - iOS native button radius */
+      --ux-border-radius-ios-lg: 1rem;       /* 16px - iOS large elements */
 
       /* Typography */
-      --ux-font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Roboto", sans-serif;
+      --ux-font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Roboto", sans-serif;
+      --ux-font-weight-regular: 400;
+      --ux-font-weight-medium: 500;
+      --ux-font-weight-semibold: 600;
+      --ux-font-weight-bold: 700;
       --ux-font-size-xs: 0.625rem;
       --ux-font-size-sm: 0.75rem;
       --ux-font-size-base: 0.875rem;
@@ -361,13 +375,181 @@
       --ux-touch-target: 2.75rem;
       --ux-touch-target-sm: 2.25rem;
 
+      /* ========================================
+         Component Sizing System (Ionic-based)
+         All sizes use CSS variables for theming
+         Override these via theme classes or custom CSS
+      ======================================== */
+
+      /* Button Sizes - Based on Ionic iOS */
+      --ux-button-height: 3.1em;           /* ~50px at 16px base */
+      --ux-button-height-sm: 2.1em;        /* ~34px at 16px base */
+      --ux-button-height-lg: 3.1em;        /* Same height, more padding */
+      --ux-button-min-height: 36px;
+      --ux-button-min-height-sm: 28px;
+      --ux-button-min-height-lg: 46px;
+      --ux-button-max-height: none;
+      --ux-button-padding-y: 13px;
+      --ux-button-padding-x: 1em;
+      --ux-button-padding-y-sm: 4px;
+      --ux-button-padding-x-sm: 0.9em;
+      --ux-button-padding-y-lg: 17px;
+      --ux-button-padding-x-lg: 1em;
+      --ux-button-border-radius: var(--ux-border-radius-ios);
+      --ux-button-border-radius-sm: var(--ux-border-radius-sm);
+      --ux-button-border-radius-lg: var(--ux-border-radius-ios-lg);
+      --ux-button-font-size: 1rem;
+      --ux-button-font-size-sm: 0.8125rem;  /* 13px */
+      --ux-button-font-size-lg: 1.125rem;   /* 18px */
+      --ux-button-font-weight: 500;
+      --ux-button-icon-size: 1.25em;
+      --ux-button-icon-only-size: clamp(30px, 2.125em, 60px);
+      --ux-button-icon-only-size-sm: clamp(23px, 2.16em, 54px);
+      --ux-button-icon-only-size-lg: clamp(46px, 2.5em, 78px);
+
+      /* Input Sizes - Based on Ionic iOS */
+      --ux-input-height: 44px;
+      --ux-input-height-sm: 36px;
+      --ux-input-height-lg: 52px;
+      --ux-input-min-height: 44px;
+      --ux-input-min-height-sm: 36px;
+      --ux-input-min-height-lg: 52px;
+      --ux-input-max-height: none;
+      --ux-input-padding-y: 10px;
+      --ux-input-padding-x: 16px;
+      --ux-input-padding-y-sm: 8px;
+      --ux-input-padding-x-sm: 12px;
+      --ux-input-padding-y-lg: 14px;
+      --ux-input-padding-x-lg: 20px;
+      --ux-input-font-size: 16px;          /* Prevents zoom on iOS */
+      --ux-input-font-size-sm: 14px;
+      --ux-input-font-size-lg: 18px;
+
+      /* Item/List Sizes - Based on Ionic iOS */
+      --ux-item-min-height: 44px;
+      --ux-item-min-height-sm: 36px;
+      --ux-item-min-height-lg: 56px;
+      --ux-item-padding-y: 10px;
+      --ux-item-padding-x: 16px;
+      --ux-item-font-size: 16px;
+
+      /* Card Sizes - Based on Ionic iOS */
+      --ux-card-margin-y: 24px;
+      --ux-card-margin-x: 16px;
+      --ux-card-padding: 16px;
+      --ux-card-border-radius: 8px;
+      --ux-card-min-height: none;
+      --ux-card-max-height: none;
+
+      /* Toolbar/Navbar - Based on Ionic iOS */
+      --ux-toolbar-height: 44px;
+      --ux-toolbar-height-sm: 36px;
+      --ux-toolbar-height-lg: 56px;
+      --ux-toolbar-min-height: 44px;
+      --ux-toolbar-padding-y: 8px;
+      --ux-toolbar-padding-x: 16px;
+
+      /* Avatar Sizes - Based on Ionic iOS */
+      --ux-avatar-size: 48px;
+      --ux-avatar-size-xs: 24px;
+      --ux-avatar-size-sm: 36px;
+      --ux-avatar-size-lg: 64px;
+      --ux-avatar-size-xl: 96px;
+
+      /* Toggle/Switch - Based on Ionic iOS */
+      --ux-toggle-width: 51px;
+      --ux-toggle-height: 31px;
+      --ux-toggle-handle-size: 27px;
+      --ux-toggle-border-radius: 15.5px;
+
+      /* Checkbox - Based on Ionic iOS */
+      --ux-checkbox-size: 22px;
+      --ux-checkbox-size-sm: 18px;
+      --ux-checkbox-size-lg: 26px;
+      --ux-checkbox-border-radius: 50%;
+
+      /* Radio - Based on Ionic iOS */
+      --ux-radio-size: 20px;
+      --ux-radio-size-sm: 16px;
+      --ux-radio-size-lg: 24px;
+
+      /* Segment - Based on Ionic iOS */
+      --ux-segment-bg: rgba(118, 118, 128, 0.12);
+      --ux-segment-min-width: 70px;
+      --ux-segment-min-height: 28px;
+      --ux-segment-padding: 2px;
+      --ux-segment-border-radius: 8px;
+      --ux-segment-font-size: 13px;
+
+      /* FAB - Based on Ionic iOS */
+      --ux-fab-size: 56px;
+      --ux-fab-size-sm: 40px;
+      --ux-fab-size-lg: 72px;
+      --ux-fab-icon-size: 28px;
+      --ux-fab-icon-size-sm: 18px;
+      --ux-fab-icon-size-lg: 36px;
+
+      /* Chip/Badge - Based on Ionic iOS */
+      --ux-chip-height: 32px;
+      --ux-chip-height-sm: 24px;
+      --ux-chip-height-lg: 40px;
+      --ux-chip-padding-x: 12px;
+      --ux-chip-border-radius: 16px;
+      --ux-chip-font-size: 14px;
+      --ux-badge-min-height: 20px;
+      --ux-badge-padding-x: 8px;
+      --ux-badge-border-radius: 10px;
+      --ux-badge-font-size: 12px;
+
+      /* Modal/Sheet - Based on Ionic iOS */
+      --ux-modal-max-width: 500px;
+      --ux-modal-max-height: 90vh;
+      --ux-modal-border-radius: 14px;
+      --ux-modal-padding: 16px;
+      --ux-sheet-border-radius: 14px;
+      --ux-sheet-handle-width: 36px;
+      --ux-sheet-handle-height: 5px;
+
+      /* Toast - Based on Ionic iOS */
+      --ux-toast-min-height: 44px;
+      --ux-toast-max-width: 400px;
+      --ux-toast-padding: 14px 16px;
+      --ux-toast-border-radius: 14px;
+      --ux-toast-icon-size: 22px;
+
+      /* Tabs - Based on Ionic iOS */
+      --ux-tabs-height: 50px;
+      --ux-tabs-height-compact: 44px;
+      --ux-tab-min-width: 64px;
+      --ux-tab-font-size: 10px;
+      --ux-tab-icon-size: 24px;
+      --ux-tab-indicator-height: 3px;
+      --ux-tab-indicator-radius: 1.5px;
+
+      /* Searchbar - Based on Ionic iOS */
+      --ux-searchbar-height: 36px;
+      --ux-searchbar-border-radius: 10px;
+      --ux-searchbar-padding-x: 12px;
+
+      /* Progress/Spinner */
+      --ux-progress-height: 4px;
+      --ux-progress-border-radius: 2px;
+      --ux-spinner-size: 28px;
+      --ux-spinner-size-sm: 20px;
+      --ux-spinner-size-lg: 40px;
+
       /* Transitions */
+      --ux-transition-instant: 50ms;
       --ux-transition-fast: 150ms;
       --ux-transition-base: 200ms;
       --ux-transition-slow: 300ms;
       --ux-transition-slower: 400ms;
       --ux-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
       --ux-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      /* Disabled State */
+      --ux-disabled-opacity: 0.5;
+      --ux-disabled-cursor: not-allowed;
 
       /* Reduced motion - used as multiplier */
       --ux-motion-reduce: 1;
@@ -389,11 +571,74 @@
       --ux-z-tooltip: 700;
       --ux-z-toast: 800;
 
+      /* ========================================
+         Liquid Glass - iOS 26 Style (WWDC 2025)
+         Semi-transparent materials with blur
+      ======================================== */
+
+      /* Glass Materials */
+      --ux-glass-blur: 20px;
+      --ux-glass-blur-heavy: 40px;
+      --ux-glass-saturation: 180%;
+      --ux-glass-bg: rgba(255, 255, 255, 0.45);
+      --ux-glass-bg-thick: rgba(255, 255, 255, 0.65);
+      --ux-glass-bg-thin: rgba(255, 255, 255, 0.25);
+      --ux-glass-border: rgba(255, 255, 255, 0.18);
+      --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+      /* Glass Border Radii (iOS 26 style) */
+      --ux-glass-radius-xs: 6px;
+      --ux-glass-radius-sm: 10px;
+      --ux-glass-radius-md: 16px;
+      --ux-glass-radius-lg: 22px;
+      --ux-glass-radius-xl: 28px;
+
+      /* Spring Animations */
+      --ux-spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ux-spring-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --ux-spring-snappy: cubic-bezier(0.22, 0.68, 0, 1.71);
+
       /* Safe Areas (iOS notch) */
       --ux-safe-top: env(safe-area-inset-top, 0px);
       --ux-safe-right: env(safe-area-inset-right, 0px);
       --ux-safe-bottom: env(safe-area-inset-bottom, 0px);
       --ux-safe-left: env(safe-area-inset-left, 0px);
+
+      /* ========================================
+         Utility System - Composition Variables
+         Used by utility classes for composition
+      ======================================== */
+
+      /* Opacity States */
+      --ux-opacity-hidden: 0;
+      --ux-opacity-muted: 0.5;
+      --ux-opacity-visible: 1;
+
+      /* Backdrop/Overlay */
+      --ux-backdrop-color: rgba(0, 0, 0, 0.4);
+      --ux-backdrop-color-light: rgba(0, 0, 0, 0.2);
+      --ux-backdrop-color-heavy: rgba(0, 0, 0, 0.6);
+
+      /* Transition Presets */
+      --ux-transition-fade: opacity var(--ux-transition-base) var(--ux-ease),
+                            visibility var(--ux-transition-base) var(--ux-ease);
+      --ux-transition-transform: transform var(--ux-transition-base) var(--ux-ease-spring);
+      --ux-transition-colors: background-color var(--ux-transition-fast) var(--ux-ease),
+                              color var(--ux-transition-fast) var(--ux-ease),
+                              border-color var(--ux-transition-fast) var(--ux-ease);
+
+      /* Focus Ring */
+      --ux-focus-ring-color: var(--ux-primary);
+      --ux-focus-ring-width: 2px;
+      --ux-focus-ring-offset: 2px;
+
+      /* Color Variant System (Composition) */
+      --ux-variant-bg: transparent;
+      --ux-variant-color: inherit;
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: transparent;
+      --ux-variant-soft-opacity: 0.15;
     }
 
     /* ========================================
@@ -444,6 +689,19 @@
         --ux-list-bg: var(--ux-surface);
         --ux-navbar-bg: var(--ux-surface);
         --ux-toast-bg: var(--ux-gray-700);
+
+        /* Liquid Glass - Dark mode */
+        --ux-glass-bg: rgba(28, 28, 30, 0.45);
+        --ux-glass-bg-thick: rgba(28, 28, 30, 0.65);
+        --ux-glass-bg-thin: rgba(28, 28, 30, 0.25);
+        --ux-glass-border: rgba(255, 255, 255, 0.08);
+        --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+        --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+        /* Backdrop - Dark mode */
+        --ux-backdrop-color: rgba(0, 0, 0, 0.6);
+        --ux-backdrop-color-light: rgba(0, 0, 0, 0.4);
+        --ux-backdrop-color-heavy: rgba(0, 0, 0, 0.8);
       }
     }
 
@@ -525,6 +783,19 @@
       --ux-list-bg: var(--ux-surface);
       --ux-navbar-bg: var(--ux-surface);
       --ux-toast-bg: var(--ux-gray-700);
+
+      /* Liquid Glass - Dark mode */
+      --ux-glass-bg: rgba(28, 28, 30, 0.45);
+      --ux-glass-bg-thick: rgba(28, 28, 30, 0.65);
+      --ux-glass-bg-thin: rgba(28, 28, 30, 0.25);
+      --ux-glass-border: rgba(255, 255, 255, 0.08);
+      --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+
+      /* Backdrop - Dark mode */
+      --ux-backdrop-color: rgba(0, 0, 0, 0.6);
+      --ux-backdrop-color-light: rgba(0, 0, 0, 0.4);
+      --ux-backdrop-color-heavy: rgba(0, 0, 0, 0.8);
+      --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     /* ========================================
@@ -1092,10 +1363,23 @@
       text-decoration: underline;
     }
 
-    /* Disabled state */
-    [disabled] {
-      opacity: 0.5;
-      cursor: not-allowed;
+    /* Disabled state - Standardized across all components */
+    [disabled],
+    .ux-disabled {
+      opacity: var(--ux-disabled-opacity) !important;
+      cursor: var(--ux-disabled-cursor) !important;
+      pointer-events: none !important;
+    }
+
+    /* Disabled interactive elements */
+    button[disabled],
+    input[disabled],
+    select[disabled],
+    textarea[disabled],
+    .ux-button[disabled],
+    .ux-input[disabled] {
+      opacity: var(--ux-disabled-opacity);
+      cursor: var(--ux-disabled-cursor);
       pointer-events: none;
     }
 
@@ -1219,6 +1503,40 @@
     .ux-block { display: block; }
     .ux-inline { display: inline; }
     .ux-inline-block { display: inline-block; }
+
+    /* ========================================
+       State Utilities (Animated)
+       Hidden/visible with transitions
+    ======================================== */
+
+    .ux-state-hidden {
+      opacity: var(--ux-opacity-hidden);
+      visibility: hidden;
+      pointer-events: none;
+      transition: var(--ux-transition-fade);
+    }
+
+    .ux-state-visible {
+      opacity: var(--ux-opacity-visible);
+      visibility: visible;
+      pointer-events: auto;
+      transition: var(--ux-transition-fade);
+    }
+
+    .ux-state-hidden--fast,
+    .ux-state-visible--fast {
+      transition-duration: var(--ux-transition-fast);
+    }
+
+    .ux-state-hidden--slow,
+    .ux-state-visible--slow {
+      transition-duration: var(--ux-transition-slow);
+    }
+
+    .ux-invisible {
+      opacity: var(--ux-opacity-hidden);
+      visibility: hidden;
+    }
 
     /* Width */
     .ux-w-full { width: 100%; }
@@ -1345,95 +1663,56 @@
     /* ========================================
        Ionic-style Padding/Margin Classes
        Similar to ion-padding, ion-margin
+       Uses CSS custom property for responsive scaling
     ======================================== */
 
-    /* Padding - all sides */
-    .ux-padding {
-      padding: 1rem;
+    :root {
+      /* Responsive spacing - scales with viewport */
+      --ux-responsive-space: var(--ux-space-lg); /* 1rem base */
     }
 
-    .ux-padding-top {
-      padding-top: 1rem;
+    @media (min-width: 768px) {
+      :root { --ux-responsive-space: var(--ux-space-xl); } /* 1.5rem */
     }
 
-    .ux-padding-bottom {
-      padding-bottom: 1rem;
+    @media (min-width: 992px) {
+      :root { --ux-responsive-space: var(--ux-space-2xl); } /* 2rem */
     }
 
-    .ux-padding-start,
-    .ux-padding-left {
-      padding-left: 1rem;
-    }
+    /* Padding - uses responsive variable */
+    .ux-padding { padding: var(--ux-responsive-space); }
+    .ux-padding-top { padding-top: var(--ux-responsive-space); }
+    .ux-padding-bottom { padding-bottom: var(--ux-responsive-space); }
+    .ux-padding-start, .ux-padding-left { padding-left: var(--ux-responsive-space); }
+    .ux-padding-end, .ux-padding-right { padding-right: var(--ux-responsive-space); }
+    .ux-padding-horizontal { padding-left: var(--ux-responsive-space); padding-right: var(--ux-responsive-space); }
+    .ux-padding-vertical { padding-top: var(--ux-responsive-space); padding-bottom: var(--ux-responsive-space); }
+    .ux-no-padding { padding: 0 !important; }
 
-    .ux-padding-end,
-    .ux-padding-right {
-      padding-right: 1rem;
-    }
-
-    .ux-padding-horizontal {
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-
-    .ux-padding-vertical {
-      padding-top: 1rem;
-      padding-bottom: 1rem;
-    }
-
-    .ux-no-padding {
-      padding: 0 !important;
-    }
-
-    /* Margin - all sides */
-    .ux-margin {
-      margin: 1rem;
-    }
-
-    .ux-margin-top {
-      margin-top: 1rem;
-    }
-
-    .ux-margin-bottom {
-      margin-bottom: 1rem;
-    }
-
-    .ux-margin-start,
-    .ux-margin-left {
-      margin-left: 1rem;
-    }
-
-    .ux-margin-end,
-    .ux-margin-right {
-      margin-right: 1rem;
-    }
-
-    .ux-margin-horizontal {
-      margin-left: 1rem;
-      margin-right: 1rem;
-    }
-
-    .ux-margin-vertical {
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .ux-no-margin {
-      margin: 0 !important;
-    }
+    /* Margin - uses responsive variable */
+    .ux-margin { margin: var(--ux-responsive-space); }
+    .ux-margin-top { margin-top: var(--ux-responsive-space); }
+    .ux-margin-bottom { margin-bottom: var(--ux-responsive-space); }
+    .ux-margin-start, .ux-margin-left { margin-left: var(--ux-responsive-space); }
+    .ux-margin-end, .ux-margin-right { margin-right: var(--ux-responsive-space); }
+    .ux-margin-horizontal { margin-left: var(--ux-responsive-space); margin-right: var(--ux-responsive-space); }
+    .ux-margin-vertical { margin-top: var(--ux-responsive-space); margin-bottom: var(--ux-responsive-space); }
+    .ux-no-margin { margin: 0 !important; }
 
     /* ========================================
        Responsive Breakpoints
        sm: 576px, md: 768px, lg: 992px, xl: 1200px
+       Note: Base .ux-padding/.ux-margin classes are responsive via --ux-responsive-space
     ======================================== */
 
     /* Small screens and up (576px+) */
     @media (min-width: 576px) {
-      .ux-padding-sm { padding: 1rem; }
-      .ux-padding-horizontal-sm { padding-left: 1rem; padding-right: 1rem; }
-      .ux-padding-vertical-sm { padding-top: 1rem; padding-bottom: 1rem; }
-      .ux-margin-sm { margin: 1rem; }
-      .ux-margin-horizontal-sm { margin-left: 1rem; margin-right: 1rem; }
-      .ux-margin-vertical-sm { margin-top: 1rem; margin-bottom: 1rem; }
+      .ux-padding-sm { padding: var(--ux-space-lg); }
+      .ux-padding-horizontal-sm { padding-left: var(--ux-space-lg); padding-right: var(--ux-space-lg); }
+      .ux-padding-vertical-sm { padding-top: var(--ux-space-lg); padding-bottom: var(--ux-space-lg); }
+      .ux-margin-sm { margin: var(--ux-space-lg); }
+      .ux-margin-horizontal-sm { margin-left: var(--ux-space-lg); margin-right: var(--ux-space-lg); }
+      .ux-margin-vertical-sm { margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-lg); }
       .ux-hidden-sm { display: none; }
       .ux-block-sm { display: block; }
       .ux-flex-sm { display: flex; }
@@ -1441,28 +1720,12 @@
 
     /* Medium screens and up (768px+) */
     @media (min-width: 768px) {
-      .ux-padding { padding: 1.5rem; }
-      .ux-padding-horizontal { padding-left: 1.5rem; padding-right: 1.5rem; }
-      .ux-padding-vertical { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-      .ux-padding-top { padding-top: 1.5rem; }
-      .ux-padding-bottom { padding-bottom: 1.5rem; }
-      .ux-padding-start, .ux-padding-left { padding-left: 1.5rem; }
-      .ux-padding-end, .ux-padding-right { padding-right: 1.5rem; }
-
-      .ux-margin { margin: 1.5rem; }
-      .ux-margin-horizontal { margin-left: 1.5rem; margin-right: 1.5rem; }
-      .ux-margin-vertical { margin-top: 1.5rem; margin-bottom: 1.5rem; }
-      .ux-margin-top { margin-top: 1.5rem; }
-      .ux-margin-bottom { margin-bottom: 1.5rem; }
-      .ux-margin-start, .ux-margin-left { margin-left: 1.5rem; }
-      .ux-margin-end, .ux-margin-right { margin-right: 1.5rem; }
-
-      .ux-padding-md { padding: 1.5rem; }
-      .ux-padding-horizontal-md { padding-left: 1.5rem; padding-right: 1.5rem; }
-      .ux-padding-vertical-md { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-      .ux-margin-md { margin: 1.5rem; }
-      .ux-margin-horizontal-md { margin-left: 1.5rem; margin-right: 1.5rem; }
-      .ux-margin-vertical-md { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+      .ux-padding-md { padding: var(--ux-space-xl); }
+      .ux-padding-horizontal-md { padding-left: var(--ux-space-xl); padding-right: var(--ux-space-xl); }
+      .ux-padding-vertical-md { padding-top: var(--ux-space-xl); padding-bottom: var(--ux-space-xl); }
+      .ux-margin-md { margin: var(--ux-space-xl); }
+      .ux-margin-horizontal-md { margin-left: var(--ux-space-xl); margin-right: var(--ux-space-xl); }
+      .ux-margin-vertical-md { margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-xl); }
       .ux-hidden-md { display: none; }
       .ux-block-md { display: block; }
       .ux-flex-md { display: flex; }
@@ -1470,28 +1733,12 @@
 
     /* Large screens and up (992px+) */
     @media (min-width: 992px) {
-      .ux-padding { padding: 2rem; }
-      .ux-padding-horizontal { padding-left: 2rem; padding-right: 2rem; }
-      .ux-padding-vertical { padding-top: 2rem; padding-bottom: 2rem; }
-      .ux-padding-top { padding-top: 2rem; }
-      .ux-padding-bottom { padding-bottom: 2rem; }
-      .ux-padding-start, .ux-padding-left { padding-left: 2rem; }
-      .ux-padding-end, .ux-padding-right { padding-right: 2rem; }
-
-      .ux-margin { margin: 2rem; }
-      .ux-margin-horizontal { margin-left: 2rem; margin-right: 2rem; }
-      .ux-margin-vertical { margin-top: 2rem; margin-bottom: 2rem; }
-      .ux-margin-top { margin-top: 2rem; }
-      .ux-margin-bottom { margin-bottom: 2rem; }
-      .ux-margin-start, .ux-margin-left { margin-left: 2rem; }
-      .ux-margin-end, .ux-margin-right { margin-right: 2rem; }
-
-      .ux-padding-lg { padding: 2rem; }
-      .ux-padding-horizontal-lg { padding-left: 2rem; padding-right: 2rem; }
-      .ux-padding-vertical-lg { padding-top: 2rem; padding-bottom: 2rem; }
-      .ux-margin-lg { margin: 2rem; }
-      .ux-margin-horizontal-lg { margin-left: 2rem; margin-right: 2rem; }
-      .ux-margin-vertical-lg { margin-top: 2rem; margin-bottom: 2rem; }
+      .ux-padding-lg { padding: var(--ux-space-2xl); }
+      .ux-padding-horizontal-lg { padding-left: var(--ux-space-2xl); padding-right: var(--ux-space-2xl); }
+      .ux-padding-vertical-lg { padding-top: var(--ux-space-2xl); padding-bottom: var(--ux-space-2xl); }
+      .ux-margin-lg { margin: var(--ux-space-2xl); }
+      .ux-margin-horizontal-lg { margin-left: var(--ux-space-2xl); margin-right: var(--ux-space-2xl); }
+      .ux-margin-vertical-lg { margin-top: var(--ux-space-2xl); margin-bottom: var(--ux-space-2xl); }
       .ux-hidden-lg { display: none; }
       .ux-block-lg { display: block; }
       .ux-flex-lg { display: flex; }
@@ -1499,12 +1746,12 @@
 
     /* Extra large screens (1200px+) */
     @media (min-width: 1200px) {
-      .ux-padding-xl { padding: 3rem; }
-      .ux-padding-horizontal-xl { padding-left: 3rem; padding-right: 3rem; }
-      .ux-padding-vertical-xl { padding-top: 3rem; padding-bottom: 3rem; }
-      .ux-margin-xl { margin: 3rem; }
-      .ux-margin-horizontal-xl { margin-left: 3rem; margin-right: 3rem; }
-      .ux-margin-vertical-xl { margin-top: 3rem; margin-bottom: 3rem; }
+      .ux-padding-xl { padding: var(--ux-space-3xl); }
+      .ux-padding-horizontal-xl { padding-left: var(--ux-space-3xl); padding-right: var(--ux-space-3xl); }
+      .ux-padding-vertical-xl { padding-top: var(--ux-space-3xl); padding-bottom: var(--ux-space-3xl); }
+      .ux-margin-xl { margin: var(--ux-space-3xl); }
+      .ux-margin-horizontal-xl { margin-left: var(--ux-space-3xl); margin-right: var(--ux-space-3xl); }
+      .ux-margin-vertical-xl { margin-top: var(--ux-space-3xl); margin-bottom: var(--ux-space-3xl); }
       .ux-hidden-xl { display: none; }
       .ux-block-xl { display: block; }
       .ux-flex-xl { display: flex; }
@@ -1529,23 +1776,73 @@
       max-width: 75rem;
       margin-left: auto;
       margin-right: auto;
-      padding-left: 1rem;
-      padding-right: 1rem;
+      padding-left: var(--ux-responsive-space);
+      padding-right: var(--ux-responsive-space);
     }
 
-    @media (min-width: 768px) {
-      .ux-container {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-      }
+    /* ========================================
+       Bootstrap Grid Compatibility
+       Overrides Bootstrap's gutter to match Ionic spacing
+       Load order: Bootstrap Grid CSS → ux-core.js
+    ======================================== */
+
+    :root {
+      --bs-gutter-x: var(--ux-space-md); /* 0.75rem vs Bootstrap 1.5rem */
+      --bs-gutter-y: var(--ux-space-md);
     }
 
-    @media (min-width: 992px) {
-      .ux-container {
-        padding-left: 2rem;
-        padding-right: 2rem;
-      }
+    .container,
+    .container-fluid,
+    .container-sm,
+    .container-md,
+    .container-lg,
+    .container-xl,
+    .container-xxl {
+      --bs-gutter-x: var(--ux-responsive-space);
     }
+
+    /* ========================================
+       CSS Grid Utilities
+       Native CSS Grid (not available in Bootstrap)
+    ======================================== */
+
+    .ux-css-grid {
+      display: grid;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-css-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    .ux-css-grid--3 { grid-template-columns: repeat(3, 1fr); }
+    .ux-css-grid--4 { grid-template-columns: repeat(4, 1fr); }
+    .ux-css-grid--6 { grid-template-columns: repeat(6, 1fr); }
+    .ux-css-grid--12 { grid-template-columns: repeat(12, 1fr); }
+
+    .ux-css-grid--auto-fit {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .ux-css-grid--auto-fill {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    /* Gap utilities with UX variables */
+    .ux-gap-0 { gap: 0; }
+    .ux-gap-xs { gap: var(--ux-space-xs); }
+    .ux-gap-sm { gap: var(--ux-space-sm); }
+    .ux-gap-md { gap: var(--ux-space-md); }
+    .ux-gap-lg { gap: var(--ux-space-lg); }
+    .ux-gap-xl { gap: var(--ux-space-xl); }
+    .ux-gap-2xl { gap: var(--ux-space-2xl); }
+
+    .ux-row-gap-0 { row-gap: 0; }
+    .ux-row-gap-sm { row-gap: var(--ux-space-sm); }
+    .ux-row-gap-md { row-gap: var(--ux-space-md); }
+    .ux-row-gap-lg { row-gap: var(--ux-space-lg); }
+
+    .ux-col-gap-0 { column-gap: 0; }
+    .ux-col-gap-sm { column-gap: var(--ux-space-sm); }
+    .ux-col-gap-md { column-gap: var(--ux-space-md); }
+    .ux-col-gap-lg { column-gap: var(--ux-space-lg); }
 
     /* ========================================
        Flex Utilities Extended
@@ -1633,6 +1930,300 @@
     .ux-py-md { padding-top: var(--ux-space-md); padding-bottom: var(--ux-space-md); }
     .ux-py-lg { padding-top: var(--ux-space-lg); padding-bottom: var(--ux-space-lg); }
     .ux-py-xl { padding-top: var(--ux-space-xl); padding-bottom: var(--ux-space-xl); }
+
+    /* ========================================
+       Icon Utilities
+       Responsive icon sizes with display block and margin auto
+    ======================================== */
+
+    .ux-icon {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      flex-shrink: 0;
+    }
+
+    .ux-icon--xs { width: 1rem; height: 1rem; }       /* 16px */
+    .ux-icon--sm { width: 1.5rem; height: 1.5rem; }   /* 24px */
+    .ux-icon--md { width: 2rem; height: 2rem; }       /* 32px */
+    .ux-icon--lg { width: 3rem; height: 3rem; }       /* 48px */
+    .ux-icon--xl { width: 4rem; height: 4rem; }       /* 64px */
+    .ux-icon--2xl { width: 5rem; height: 5rem; }      /* 80px */
+
+    /* Inline icon (no margin auto, inline-flex) */
+    .ux-icon--inline {
+      display: inline-flex;
+      margin-left: 0;
+      margin-right: 0;
+      vertical-align: middle;
+    }
+
+    /* ========================================
+       Liquid Glass Utilities
+       iOS 26 style glass effects
+    ======================================== */
+
+    .ux-glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-glass--thick {
+      background: var(--ux-glass-bg-thick);
+    }
+
+    .ux-glass--thin {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-glass--heavy {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+    }
+
+    /* Glass border radii */
+    .ux-glass-radius-xs { border-radius: var(--ux-glass-radius-xs); }
+    .ux-glass-radius-sm { border-radius: var(--ux-glass-radius-sm); }
+    .ux-glass-radius-md { border-radius: var(--ux-glass-radius-md); }
+    .ux-glass-radius-lg { border-radius: var(--ux-glass-radius-lg); }
+    .ux-glass-radius-xl { border-radius: var(--ux-glass-radius-xl); }
+
+    /* Glass with highlight (premium iOS 26 feel) */
+    .ux-glass--highlight {
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+    }
+
+    /* Universal glass selector for --glass variants */
+    [class*="--glass"] {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+    }
+
+    [class*="--glass-heavy"] {
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(10px)) {
+      .ux-glass,
+      [class*="--glass"] {
+        background: var(--ux-glass-bg-thick);
+      }
+    }
+
+    /* ========================================
+       Focus Ring Utilities
+       Standardized focus indicators
+    ======================================== */
+
+    .ux-focus-ring:focus-visible {
+      outline: var(--ux-focus-ring-width) solid var(--ux-focus-ring-color);
+      outline-offset: var(--ux-focus-ring-offset);
+    }
+
+    .ux-focus-ring--inset:focus-visible {
+      outline-offset: calc(-1 * var(--ux-focus-ring-offset));
+    }
+
+    .ux-focus-ring--none:focus-visible {
+      outline: none;
+    }
+
+    /* ========================================
+       Backdrop/Overlay Utilities
+       For modals, sheets, dialogs
+    ======================================== */
+
+    .ux-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: var(--ux-backdrop-color);
+      z-index: var(--ux-z-modal-backdrop);
+    }
+
+    .ux-backdrop--light {
+      background-color: var(--ux-backdrop-color-light);
+    }
+
+    .ux-backdrop--heavy {
+      background-color: var(--ux-backdrop-color-heavy);
+    }
+
+    .ux-backdrop--blur {
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    /* ========================================
+       Color Variant Utilities (Composition)
+       Use with components: .ux-button .ux-color-primary
+    ======================================== */
+
+    /* Filled variants */
+    .ux-color-primary {
+      --ux-variant-bg: var(--ux-primary);
+      --ux-variant-bg-rgb: var(--ux-primary-rgb);
+      --ux-variant-color: var(--ux-primary-contrast);
+      --ux-variant-border: var(--ux-primary);
+      --ux-variant-bg-hover: var(--ux-primary-shade);
+    }
+
+    .ux-color-secondary {
+      --ux-variant-bg: var(--ux-secondary);
+      --ux-variant-bg-rgb: var(--ux-secondary-rgb);
+      --ux-variant-color: var(--ux-secondary-contrast);
+      --ux-variant-border: var(--ux-secondary);
+      --ux-variant-bg-hover: var(--ux-secondary-shade);
+    }
+
+    .ux-color-tertiary {
+      --ux-variant-bg: var(--ux-tertiary);
+      --ux-variant-bg-rgb: var(--ux-tertiary-rgb);
+      --ux-variant-color: var(--ux-tertiary-contrast);
+      --ux-variant-border: var(--ux-tertiary);
+      --ux-variant-bg-hover: var(--ux-tertiary-shade);
+    }
+
+    .ux-color-success {
+      --ux-variant-bg: var(--ux-success);
+      --ux-variant-bg-rgb: var(--ux-success-rgb);
+      --ux-variant-color: var(--ux-success-contrast);
+      --ux-variant-border: var(--ux-success);
+      --ux-variant-bg-hover: var(--ux-success-shade);
+    }
+
+    .ux-color-warning {
+      --ux-variant-bg: var(--ux-warning);
+      --ux-variant-bg-rgb: var(--ux-warning-rgb);
+      --ux-variant-color: var(--ux-warning-contrast);
+      --ux-variant-border: var(--ux-warning);
+      --ux-variant-bg-hover: var(--ux-warning-shade);
+    }
+
+    .ux-color-danger {
+      --ux-variant-bg: var(--ux-danger);
+      --ux-variant-bg-rgb: var(--ux-danger-rgb);
+      --ux-variant-color: var(--ux-danger-contrast);
+      --ux-variant-border: var(--ux-danger);
+      --ux-variant-bg-hover: var(--ux-danger-shade);
+    }
+
+    .ux-color-dark {
+      --ux-variant-bg: var(--ux-dark);
+      --ux-variant-bg-rgb: var(--ux-dark-rgb);
+      --ux-variant-color: var(--ux-dark-contrast);
+      --ux-variant-border: var(--ux-dark);
+      --ux-variant-bg-hover: var(--ux-dark-shade);
+    }
+
+    .ux-color-light {
+      --ux-variant-bg: var(--ux-light);
+      --ux-variant-bg-rgb: var(--ux-light-rgb);
+      --ux-variant-color: var(--ux-light-contrast);
+      --ux-variant-border: var(--ux-light);
+      --ux-variant-bg-hover: var(--ux-light-shade);
+    }
+
+    .ux-color-medium {
+      --ux-variant-bg: var(--ux-medium);
+      --ux-variant-bg-rgb: var(--ux-medium-rgb);
+      --ux-variant-color: var(--ux-medium-contrast);
+      --ux-variant-border: var(--ux-medium);
+      --ux-variant-bg-hover: var(--ux-medium-shade);
+    }
+
+    /* Soft variants (tinted background) */
+    .ux-color-primary--soft {
+      --ux-variant-bg: rgba(var(--ux-primary-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-primary-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-primary-rgb), 0.25);
+    }
+
+    .ux-color-secondary--soft {
+      --ux-variant-bg: rgba(var(--ux-secondary-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-secondary-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-secondary-rgb), 0.25);
+    }
+
+    .ux-color-success--soft {
+      --ux-variant-bg: rgba(var(--ux-success-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-success-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-success-rgb), 0.25);
+    }
+
+    .ux-color-warning--soft {
+      --ux-variant-bg: rgba(var(--ux-warning-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-warning-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-warning-rgb), 0.25);
+    }
+
+    .ux-color-danger--soft {
+      --ux-variant-bg: rgba(var(--ux-danger-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-danger-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-danger-rgb), 0.25);
+    }
+
+    /* Outline variants */
+    .ux-color-primary--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-primary);
+      --ux-variant-border: var(--ux-primary);
+      --ux-variant-bg-hover: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    .ux-color-secondary--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-secondary);
+      --ux-variant-border: var(--ux-secondary);
+      --ux-variant-bg-hover: rgba(var(--ux-secondary-rgb), 0.1);
+    }
+
+    .ux-color-success--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-success);
+      --ux-variant-border: var(--ux-success);
+      --ux-variant-bg-hover: rgba(var(--ux-success-rgb), 0.1);
+    }
+
+    .ux-color-warning--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-warning);
+      --ux-variant-border: var(--ux-warning);
+      --ux-variant-bg-hover: rgba(var(--ux-warning-rgb), 0.1);
+    }
+
+    .ux-color-danger--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-danger);
+      --ux-variant-border: var(--ux-danger);
+      --ux-variant-bg-hover: rgba(var(--ux-danger-rgb), 0.1);
+    }
+
+    .ux-color-dark--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-dark);
+      --ux-variant-border: var(--ux-dark);
+      --ux-variant-bg-hover: rgba(var(--ux-dark-rgb), 0.1);
+    }
+
+    .ux-color-light--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-light-contrast);
+      --ux-variant-border: var(--ux-light);
+      --ux-variant-bg-hover: rgba(var(--ux-light-rgb), 0.3);
+    }
+
   `;
 
   // Inject styles
@@ -1648,6 +2239,8 @@
     version: '1.0.0',
     components: {},
     _alpineReady: false,
+    _scrollLockCount: 0,
+    _scrollPosition: 0,
 
     // Helper to inject component styles
     injectStyles: function(id, css) {
@@ -1694,6 +2287,99 @@
           Alpine.directive(name, directive);
         });
       }
+    },
+
+    // Scroll Lock - prevents body scroll when modals are open
+    // Supports nested modals with reference counting
+    lockScroll: function() {
+      this._scrollLockCount++;
+      if (this._scrollLockCount === 1) {
+        this._scrollPosition = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${this._scrollPosition}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.overflow = 'hidden';
+      }
+    },
+
+    unlockScroll: function() {
+      this._scrollLockCount = Math.max(0, this._scrollLockCount - 1);
+      if (this._scrollLockCount === 0) {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, this._scrollPosition);
+      }
+    },
+
+    // Focus Trap - keeps focus within a container (for modals, dialogs)
+    // Returns a cleanup function to remove the trap
+    trapFocus: function(container) {
+      const focusableSelector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])';
+
+      const getFocusableElements = () => {
+        return Array.from(container.querySelectorAll(focusableSelector))
+          .filter(el => el.offsetParent !== null); // Only visible elements
+      };
+
+      const handleKeydown = (event) => {
+        if (event.key !== 'Tab') return;
+
+        const focusable = getFocusableElements();
+        if (focusable.length === 0) return;
+
+        const firstElement = focusable[0];
+        const lastElement = focusable[focusable.length - 1];
+
+        if (event.shiftKey) {
+          // Shift+Tab: if on first element, go to last
+          if (document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          // Tab: if on last element, go to first
+          if (document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+          }
+        }
+      };
+
+      container.addEventListener('keydown', handleKeydown);
+
+      // Focus first element
+      const focusable = getFocusableElements();
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+
+      // Return cleanup function
+      return () => {
+        container.removeEventListener('keydown', handleKeydown);
+      };
+    },
+
+    // Announce to screen readers via live region
+    announce: function(message, priority = 'polite') {
+      let announcer = document.getElementById('ux-announcer');
+      if (!announcer) {
+        announcer = document.createElement('div');
+        announcer.id = 'ux-announcer';
+        announcer.setAttribute('aria-live', priority);
+        announcer.setAttribute('aria-atomic', 'true');
+        announcer.className = 'ux-sr-only';
+        document.body.appendChild(announcer);
+      }
+      announcer.setAttribute('aria-live', priority);
+      announcer.textContent = '';
+      // Small delay ensures screen reader picks up the change
+      setTimeout(() => {
+        announcer.textContent = message;
+      }, 100);
     }
   };
 
@@ -1715,11 +2401,33 @@
       initialDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 
+    const savedColorTheme = localStorage.getItem('ux-color-theme') || 'ux-theme-ocean';
+
     return {
       darkMode: initialDarkMode,
-      colorTheme: localStorage.getItem('ux-color-theme') || 'ux-theme-ocean',
+      colorTheme: savedColorTheme,
+      tempColorTheme: savedColorTheme,
       menuOpen: false,
       themeSheetOpen: false,
+      themeSelectOpen: false,
+
+      // Theme options for select interface
+      themeOptions: [
+        { value: 'ux-theme-ocean', label: 'Ocean Blue', color: '#0ea5e9' },
+        { value: 'ux-theme-blue', label: 'Blue', color: '#3b82f6' },
+        { value: 'ux-theme-emerald', label: 'Emerald', color: '#10b981' },
+        { value: 'ux-theme-purple', label: 'Purple', color: '#a855f7' },
+        { value: 'ux-theme-violet', label: 'Violet', color: '#8b5cf6' },
+        { value: 'ux-theme-sunset', label: 'Sunset', color: '#f97316' },
+        { value: 'ux-theme-rose', label: 'Rose', color: '#f43f5e' },
+        { value: 'ux-theme-teal', label: 'Teal', color: '#14b8a6' },
+        { value: 'ux-theme-amber', label: 'Amber', color: '#f59e0b' },
+        { value: 'ux-theme-slate', label: 'Slate', color: '#64748b' },
+        { value: 'ux-theme-indigo', label: 'Indigo', color: '#6366f1' },
+        { value: 'ux-theme-cyan', label: 'Cyan', color: '#06b6d4' },
+        { value: 'ux-theme-red', label: 'Red', color: '#ef4444' },
+        { value: 'ux-theme-green', label: 'Green', color: '#16a34a' }
+      ],
 
       init() {
         // Apply initial theme to body
@@ -1748,10 +2456,10 @@
 
         // Remove all theme classes and apply current one
         root.classList.remove(
-          'ux-theme-ocean', 'ux-theme-emerald', 'ux-theme-purple',
-          'ux-theme-sunset', 'ux-theme-rose', 'ux-theme-teal',
-          'ux-theme-amber', 'ux-theme-slate', 'ux-theme-indigo',
-          'ux-theme-cyan', 'ux-theme-crimson', 'ux-theme-forest'
+          'ux-theme-ocean', 'ux-theme-blue', 'ux-theme-emerald', 'ux-theme-purple',
+          'ux-theme-violet', 'ux-theme-sunset', 'ux-theme-orange', 'ux-theme-rose',
+          'ux-theme-teal', 'ux-theme-amber', 'ux-theme-slate', 'ux-theme-indigo',
+          'ux-theme-cyan', 'ux-theme-red', 'ux-theme-crimson', 'ux-theme-green', 'ux-theme-forest'
         );
         root.classList.add(this.colorTheme);
       },
@@ -1764,9 +2472,16 @@
 
       setColorTheme(theme) {
         this.colorTheme = theme;
+        this.tempColorTheme = theme;
         localStorage.setItem('ux-color-theme', theme);
         this.menuOpen = false;
+        this.themeSelectOpen = false;
         this.applyTheme();
+      },
+
+      openThemeSelect() {
+        this.tempColorTheme = this.colorTheme;
+        this.themeSelectOpen = true;
       },
 
       // Reset to system preference
@@ -1804,6 +2519,19 @@
 
   // Apply immediately - documentElement is always available
   applyTheme();
+
+  // Listen for theme changes from parent (when in iframe)
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'ux-theme') {
+      const root = document.documentElement;
+      root.classList.remove('ux-dark', 'ux-light');
+      if (event.data.darkMode) {
+        root.classList.add('ux-dark');
+      } else {
+        root.classList.add('ux-light');
+      }
+    }
+  });
 
   console.log('UX Core loaded v1.0.0');
 })();
