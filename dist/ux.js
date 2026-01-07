@@ -11134,36 +11134,211 @@
     }
 
     /* ========================================
-       UX Split Pane (iPad layout)
+       UX Split Pane (iPad/Tablet layout)
+       Like Ionic: responsive sidebar with
+       push/overlay modes
     ======================================== */
 
     .ux-split-pane {
+      --ux-split-pane-side-width: 270px;
+      --ux-split-pane-side-min-width: 270px;
+      --ux-split-pane-side-max-width: 28%;
+      --ux-split-pane-breakpoint: 992px;
+
+      position: relative;
       display: flex;
       width: 100%;
       height: 100%;
+      overflow: hidden;
     }
 
+    /* Backdrop for overlay mode (mobile) */
+    .ux-split-pane__backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: var(--ux-z-modal-backdrop);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity var(--ux-transition-normal) var(--ux-ease),
+        visibility var(--ux-transition-normal) var(--ux-ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-split-pane--open .ux-split-pane__backdrop {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Hide backdrop on large screens (push mode) */
+    @media (min-width: 992px) {
+      .ux-split-pane__backdrop {
+        display: none;
+      }
+    }
+
+    /* Side Panel */
     .ux-split-pane__side {
-      display: none;
-      flex-shrink: 0;
-      width: var(--ux-split-pane-width, 270px);
-      border-right: 1px solid var(--ux-border-color);
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: var(--ux-z-modal);
+      display: flex;
+      flex-direction: column;
+      width: var(--ux-split-pane-side-width);
+      max-width: 85vw;
       background-color: var(--ux-surface);
+      border-right: 1px solid var(--ux-border-color);
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      transform: translateX(-100%);
+      transition: transform var(--ux-transition-normal) var(--ux-ease-spring);
+      will-change: transform;
     }
 
+    /* Open state for mobile (overlay) */
+    .ux-split-pane--open .ux-split-pane__side {
+      transform: translateX(0);
+    }
+
+    /* Large screens: always visible, push mode */
+    @media (min-width: 992px) {
+      .ux-split-pane__side {
+        position: relative;
+        z-index: auto;
+        width: clamp(
+          var(--ux-split-pane-side-min-width),
+          var(--ux-split-pane-side-max-width),
+          350px
+        );
+        max-width: none;
+        transform: translateX(0);
+        flex-shrink: 0;
+      }
+
+      /* Hidden on large screens with --collapsed */
+      .ux-split-pane--collapsed .ux-split-pane__side {
+        display: none;
+      }
+    }
+
+    /* Main Content */
     .ux-split-pane__main {
       flex: 1;
       display: flex;
       flex-direction: column;
       min-width: 0;
+      width: 100%;
+      transition: margin-left var(--ux-transition-normal) var(--ux-ease);
+    }
+
+    /* When sidebar visible on large screens, no margin needed (flexbox handles it) */
+    @media (min-width: 992px) {
+      .ux-split-pane__main {
+        /* Push mode: content automatically adjusts via flex */
+      }
+    }
+
+    /* ========================================
+       Split Pane Variants
+    ======================================== */
+
+    /* Right side panel */
+    .ux-split-pane--end .ux-split-pane__side {
+      left: auto;
+      right: 0;
+      border-right: none;
+      border-left: 1px solid var(--ux-border-color);
+      transform: translateX(100%);
+    }
+
+    .ux-split-pane--end.ux-split-pane--open .ux-split-pane__side {
+      transform: translateX(0);
     }
 
     @media (min-width: 992px) {
-      .ux-split-pane__side {
-        display: flex;
-        flex-direction: column;
+      .ux-split-pane--end {
+        flex-direction: row-reverse;
+      }
+
+      .ux-split-pane--end .ux-split-pane__side {
+        transform: translateX(0);
+      }
+    }
+
+    /* Always visible (no toggle needed) */
+    .ux-split-pane--visible .ux-split-pane__side {
+      transform: translateX(0);
+    }
+
+    .ux-split-pane--visible .ux-split-pane__backdrop {
+      display: none;
+    }
+
+    @media (max-width: 991px) {
+      .ux-split-pane--visible .ux-split-pane__side {
+        position: relative;
+        max-width: 50%;
+      }
+    }
+
+    /* Always hidden (use as drawer only) */
+    @media (min-width: 992px) {
+      .ux-split-pane--drawer .ux-split-pane__side {
+        position: fixed;
+        transform: translateX(-100%);
+      }
+
+      .ux-split-pane--drawer.ux-split-pane--open .ux-split-pane__side {
+        transform: translateX(0);
+      }
+
+      .ux-split-pane--drawer .ux-split-pane__backdrop {
+        display: block;
+      }
+    }
+
+    /* Glass variant */
+    .ux-split-pane__side--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-right-color: var(--ux-glass-border);
+    }
+
+    /* ========================================
+       Split Pane Menu Button
+    ======================================== */
+
+    .ux-split-pane__toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      background: none;
+      border: none;
+      color: var(--ux-primary);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-split-pane__toggle:hover {
+      opacity: 0.7;
+    }
+
+    .ux-split-pane__toggle svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Hide toggle on large screens when not in drawer mode */
+    @media (min-width: 992px) {
+      .ux-split-pane:not(.ux-split-pane--drawer) .ux-split-pane__toggle {
+        display: none;
       }
     }
 
@@ -11897,6 +12072,152 @@
       Alpine.data('uxCollapsibleHeader', collapsibleHeaderComponent);
     });
   }
+
+  // Alpine component for Split Pane (Ionic-style)
+  // Handles responsive sidebar with push/overlay modes
+  const splitPaneComponent = (config = {}) => ({
+    isOpen: false,
+    isCollapsed: config.collapsed || false,
+    mode: config.mode || 'auto', // 'auto', 'push', 'overlay', 'visible'
+    side: config.side || 'start', // 'start' or 'end'
+    breakpoint: config.breakpoint || 992,
+    closeOnBackdrop: config.closeOnBackdrop !== false,
+    closeOnEscape: config.closeOnEscape !== false,
+    _mediaQuery: null,
+    _isLargeScreen: false,
+
+    init() {
+      // Setup media query listener
+      this._mediaQuery = window.matchMedia(`(min-width: ${this.breakpoint}px)`);
+      this._isLargeScreen = this._mediaQuery.matches;
+
+      const handleChange = (e) => {
+        this._isLargeScreen = e.matches;
+        // Auto-close on resize to large screen (push mode takes over)
+        if (e.matches && this.mode !== 'overlay') {
+          this.isOpen = false;
+        }
+        this.$dispatch('splitpane-breakpoint', { isLargeScreen: e.matches });
+      };
+
+      this._mediaQuery.addEventListener('change', handleChange);
+
+      // Escape key handler
+      if (this.closeOnEscape) {
+        this._escapeHandler = (e) => {
+          if (e.key === 'Escape' && this.isOpen) {
+            this.close();
+          }
+        };
+        document.addEventListener('keydown', this._escapeHandler);
+      }
+    },
+
+    destroy() {
+      if (this._escapeHandler) {
+        document.removeEventListener('keydown', this._escapeHandler);
+      }
+    },
+
+    // Open the sidebar (for mobile/overlay mode)
+    open() {
+      this.isOpen = true;
+      if (!this._isLargeScreen || this.mode === 'overlay') {
+        if (window.UX?.lockScroll) {
+          window.UX.lockScroll();
+        } else {
+          document.body.style.overflow = 'hidden';
+        }
+      }
+      this.$dispatch('splitpane-open');
+    },
+
+    // Close the sidebar
+    close() {
+      this.isOpen = false;
+      if (window.UX?.unlockScroll) {
+        window.UX.unlockScroll();
+      } else {
+        document.body.style.overflow = '';
+      }
+      this.$dispatch('splitpane-close');
+    },
+
+    // Toggle the sidebar
+    toggle() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    },
+
+    // Handle backdrop click
+    handleBackdropClick() {
+      if (this.closeOnBackdrop) {
+        this.close();
+      }
+    },
+
+    // Collapse/expand on large screens
+    collapse() {
+      this.isCollapsed = true;
+      this.$dispatch('splitpane-collapse');
+    },
+
+    expand() {
+      this.isCollapsed = false;
+      this.$dispatch('splitpane-expand');
+    },
+
+    toggleCollapse() {
+      if (this.isCollapsed) {
+        this.expand();
+      } else {
+        this.collapse();
+      }
+    },
+
+    // Check if sidebar is visible (either open or on large screen)
+    get isVisible() {
+      if (this.mode === 'visible') return true;
+      if (this._isLargeScreen && this.mode !== 'overlay' && !this.isCollapsed) {
+        return true;
+      }
+      return this.isOpen;
+    },
+
+    // Check if we're in overlay mode (mobile or forced overlay)
+    get isOverlay() {
+      return !this._isLargeScreen || this.mode === 'overlay';
+    },
+
+    // Get container classes
+    get containerClasses() {
+      return {
+        'ux-split-pane--open': this.isOpen,
+        'ux-split-pane--collapsed': this.isCollapsed,
+        'ux-split-pane--end': this.side === 'end',
+        'ux-split-pane--visible': this.mode === 'visible',
+        'ux-split-pane--drawer': this.mode === 'overlay'
+      };
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxSplitPane', splitPaneComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxSplitPane', splitPaneComponent);
+    });
+  }
+
+  // Menu icon SVG for split pane toggle button
+  const menuIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
+
+  // Export for use in templates
+  window.UX = window.UX || {};
+  window.UX.menuIconSvg = menuIconSvg;
 })();
 /**
  * UX Navbar Component

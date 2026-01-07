@@ -212,28 +212,178 @@
 
     <!-- Split Pane -->
     <div class="demo-section">
-      <h3>Split Pane (iPad Layout)</h3>
-      <p>Layout de dos columnas para tablets. El sidebar se muestra automaticamente en pantallas >= 992px.</p>
+      <h3>Split Pane (iPad/Tablet Layout)</h3>
+      <p>Layout de dos columnas estilo Ionic. En pantallas pequenas funciona como overlay (drawer), en pantallas grandes >= 992px se muestra como push (redimensiona el contenido).</p>
 
-      <div class="demo-frame" style="height: 200px;">
-        <div style="display: flex; height: 100%;">
-          <div style="width: 200px; background: var(--ux-surface); border-right: 1px solid var(--ux-border-color); display: flex; align-items: center; justify-content: center; color: var(--ux-text-secondary); font-size: var(--ux-font-size-md);">
-            .ux-split-pane__side<br>(visible >= 992px)
-          </div>
-          <div style="flex: 1; display: flex; align-items: center; justify-content: center; background: var(--ux-surface-secondary); color: var(--ux-text-secondary); font-size: var(--ux-font-size-md);">
-            .ux-split-pane__main
-          </div>
+      <div class="demo-frame" style="height: 250px;" x-data="uxSplitPane()">
+        <div class="ux-split-pane" :class="containerClasses" style="height: 100%;">
+          <!-- Backdrop for mobile -->
+          <div class="ux-split-pane__backdrop" @click="close()"></div>
+
+          <!-- Sidebar -->
+          <aside class="ux-split-pane__side" style="padding: var(--ux-space-md);">
+            <div style="font-weight: 600; margin-bottom: var(--ux-space-md);">Menu</div>
+            <div style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">
+              <div style="padding: var(--ux-space-sm) 0;">Item 1</div>
+              <div style="padding: var(--ux-space-sm) 0;">Item 2</div>
+              <div style="padding: var(--ux-space-sm) 0;">Item 3</div>
+            </div>
+            <button class="ux-button ux-button--sm ux-button--outline" style="margin-top: auto;" @click="close()">Cerrar</button>
+          </aside>
+
+          <!-- Main content -->
+          <main class="ux-split-pane__main" style="background: var(--ux-surface-secondary);">
+            <div style="padding: var(--ux-space-md); display: flex; align-items: center; gap: var(--ux-space-sm);">
+              <button class="ux-split-pane__toggle" @click="toggle()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+              </button>
+              <span style="font-weight: 500;">Main Content</span>
+            </div>
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: var(--ux-text-secondary);">
+              <span x-text="isVisible ? 'Sidebar visible' : 'Click menu para abrir sidebar'"></span>
+            </div>
+          </main>
         </div>
       </div>
 
-      <pre class="code-block"><code>&lt;div class="ux-split-pane"&gt;
+      <h4>Uso Basico</h4>
+      <pre class="code-block"><code>&lt;!-- Split Pane con Alpine.js --&gt;
+&lt;div class="ux-split-pane" x-data="uxSplitPane()" :class="containerClasses"&gt;
+  &lt;!-- Backdrop (cierra al click en mobile) --&gt;
+  &lt;div class="ux-split-pane__backdrop" @click="close()"&gt;&lt;/div&gt;
+
+  &lt;!-- Sidebar --&gt;
   &lt;aside class="ux-split-pane__side"&gt;
-    &lt;!-- Sidebar / Menu --&gt;
+    &lt;nav class="ux-menu"&gt;...&lt;/nav&gt;
   &lt;/aside&gt;
+
+  &lt;!-- Main content --&gt;
   &lt;main class="ux-split-pane__main"&gt;
-    &lt;!-- Main content --&gt;
+    &lt;!-- Toggle button (solo visible en mobile) --&gt;
+    &lt;button class="ux-split-pane__toggle" @click="toggle()"&gt;
+      &lt;svg&gt;...&lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;!-- Contenido --&gt;
   &lt;/main&gt;
 &lt;/div&gt;</code></pre>
+
+      <h4>Modos de Funcionamiento</h4>
+      <div class="demo-box">
+        <code>mode: 'auto'</code> - (Default) Overlay en mobile, push en desktop<br>
+        <code>mode: 'push'</code> - Siempre push (redimensiona contenido)<br>
+        <code>mode: 'overlay'</code> - Siempre overlay (drawer sobre contenido)<br>
+        <code>mode: 'visible'</code> - Siempre visible en ambos tamanos
+      </div>
+
+      <pre class="code-block"><code>&lt;!-- Siempre como drawer (overlay) --&gt;
+&lt;div x-data="uxSplitPane({ mode: 'overlay' })" :class="containerClasses"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- Siempre visible (sin toggle) --&gt;
+&lt;div x-data="uxSplitPane({ mode: 'visible' })" :class="containerClasses"&gt;
+  ...
+&lt;/div&gt;</code></pre>
+
+      <h4>Sidebar a la Derecha</h4>
+      <pre class="code-block"><code>&lt;div x-data="uxSplitPane({ side: 'end' })" :class="containerClasses"&gt;
+  &lt;aside class="ux-split-pane__side"&gt;...&lt;/aside&gt;
+  &lt;main class="ux-split-pane__main"&gt;...&lt;/main&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4>Variantes CSS</h4>
+      <div class="demo-box">
+        <code>.ux-split-pane--open</code> - Estado abierto (mobile)<br>
+        <code>.ux-split-pane--collapsed</code> - Colapsado en desktop<br>
+        <code>.ux-split-pane--end</code> - Sidebar a la derecha<br>
+        <code>.ux-split-pane--visible</code> - Siempre visible<br>
+        <code>.ux-split-pane--drawer</code> - Siempre overlay<br>
+        <code>.ux-split-pane__side--glass</code> - Sidebar con efecto glass
+      </div>
+
+      <h4>Alpine.js API: uxSplitPane(config)</h4>
+      <pre class="code-block"><code>x-data="uxSplitPane({
+  mode: 'auto',        // 'auto' | 'push' | 'overlay' | 'visible'
+  side: 'start',       // 'start' | 'end'
+  collapsed: false,    // Iniciar colapsado en desktop
+  breakpoint: 992,     // Breakpoint para push mode
+  closeOnBackdrop: true,
+  closeOnEscape: true
+})"
+
+// Propiedades
+isOpen       // Boolean - si esta abierto (overlay mode)
+isCollapsed  // Boolean - si esta colapsado (desktop)
+isVisible    // Boolean - si el sidebar es visible
+isOverlay    // Boolean - si esta en modo overlay
+
+// Metodos
+open()           // Abrir sidebar
+close()          // Cerrar sidebar
+toggle()         // Alternar open/close
+collapse()       // Colapsar en desktop
+expand()         // Expandir en desktop
+toggleCollapse() // Alternar collapse
+
+// Computed
+containerClasses  // Objeto de clases para :class
+
+// Eventos
+@splitpane-open      // Al abrir
+@splitpane-close     // Al cerrar
+@splitpane-collapse  // Al colapsar
+@splitpane-expand    // Al expandir
+@splitpane-breakpoint="e => e.detail.isLargeScreen" // Al cambiar de breakpoint</code></pre>
+
+      <h4>CSS Variables</h4>
+      <pre class="code-block"><code>:root {
+  --ux-split-pane-side-width: 270px;     /* Ancho del sidebar */
+  --ux-split-pane-side-min-width: 270px; /* Minimo en desktop */
+  --ux-split-pane-side-max-width: 28%;   /* Maximo en desktop */
+  --ux-split-pane-breakpoint: 992px;     /* Breakpoint push/overlay */
+}</code></pre>
+
+      <h4>Ejemplo Completo: App con Split Pane</h4>
+      <pre class="code-block"><code>&lt;body class="ux-app"&gt;
+  &lt;div class="ux-split-pane" x-data="uxSplitPane()" :class="containerClasses" style="height: 100vh;"&gt;
+    &lt;div class="ux-split-pane__backdrop" @click="close()"&gt;&lt;/div&gt;
+
+    &lt;aside class="ux-split-pane__side"&gt;
+      &lt;nav class="ux-navbar"&gt;
+        &lt;div class="ux-navbar__content"&gt;
+          &lt;span class="ux-navbar__title"&gt;Menu&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/nav&gt;
+      &lt;div class="ux-content"&gt;
+        &lt;ul class="ux-list"&gt;
+          &lt;li class="ux-list__item"&gt;Dashboard&lt;/li&gt;
+          &lt;li class="ux-list__item"&gt;Settings&lt;/li&gt;
+          &lt;li class="ux-list__item"&gt;Profile&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    &lt;/aside&gt;
+
+    &lt;main class="ux-split-pane__main"&gt;
+      &lt;nav class="ux-navbar"&gt;
+        &lt;div class="ux-navbar__content"&gt;
+          &lt;div class="ux-navbar__start"&gt;
+            &lt;button class="ux-split-pane__toggle" @click="toggle()"&gt;
+              &lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+                &lt;line x1="3" y1="12" x2="21" y2="12"&gt;&lt;/line&gt;
+                &lt;line x1="3" y1="6" x2="21" y2="6"&gt;&lt;/line&gt;
+                &lt;line x1="3" y1="18" x2="21" y2="18"&gt;&lt;/line&gt;
+              &lt;/svg&gt;
+            &lt;/button&gt;
+          &lt;/div&gt;
+          &lt;span class="ux-navbar__title"&gt;Dashboard&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/nav&gt;
+      &lt;div class="ux-content ux-p-lg"&gt;
+        &lt;!-- Page content --&gt;
+      &lt;/div&gt;
+    &lt;/main&gt;
+  &lt;/div&gt;
+&lt;/body&gt;</code></pre>
     </div>
 
     <!-- Container -->
@@ -710,9 +860,17 @@ handleScroll(scrollTop)  // Manejar evento de scroll</code></pre>
             <tr><td><code>.ux-footer</code></td><td>Footer container</td></tr>
             <tr><td><code>.ux-footer--fixed</code></td><td>Footer fijo en bottom</td></tr>
             <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Split Pane</td></tr>
-            <tr><td><code>.ux-split-pane</code></td><td>Layout de dos columnas</td></tr>
-            <tr><td><code>.ux-split-pane__side</code></td><td>Sidebar (visible >= 992px)</td></tr>
-            <tr><td><code>.ux-split-pane__main</code></td><td>Main content area</td></tr>
+            <tr><td><code>.ux-split-pane</code></td><td>Container de dos columnas</td></tr>
+            <tr><td><code>.ux-split-pane__backdrop</code></td><td>Overlay oscuro (mobile)</td></tr>
+            <tr><td><code>.ux-split-pane__side</code></td><td>Sidebar/drawer</td></tr>
+            <tr><td><code>.ux-split-pane__main</code></td><td>Contenido principal</td></tr>
+            <tr><td><code>.ux-split-pane__toggle</code></td><td>Boton de menu</td></tr>
+            <tr><td><code>.ux-split-pane--open</code></td><td>Estado abierto (mobile)</td></tr>
+            <tr><td><code>.ux-split-pane--collapsed</code></td><td>Colapsado en desktop</td></tr>
+            <tr><td><code>.ux-split-pane--end</code></td><td>Sidebar a la derecha</td></tr>
+            <tr><td><code>.ux-split-pane--visible</code></td><td>Siempre visible</td></tr>
+            <tr><td><code>.ux-split-pane--drawer</code></td><td>Siempre overlay</td></tr>
+            <tr><td><code>.ux-split-pane__side--glass</code></td><td>Sidebar con efecto glass</td></tr>
             <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Container</td></tr>
             <tr><td><code>.ux-container</code></td><td>Max-width 1200px centrado</td></tr>
             <tr><td><code>.ux-container--fluid</code></td><td>Sin max-width</td></tr>
