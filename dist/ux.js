@@ -1205,25 +1205,25 @@
       --ux-scrollbar-size: 8px;
       --ux-scrollbar-size-sm: 6px;
       --ux-scrollbar-track: transparent;
-      --ux-scrollbar-thumb: rgba(0, 0, 0, 0.2);
-      --ux-scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
-      --ux-scrollbar-thumb-active: rgba(0, 0, 0, 0.5);
+      --ux-scrollbar-thumb: var(--ux-gray-400);
+      --ux-scrollbar-thumb-hover: var(--ux-gray-500);
+      --ux-scrollbar-thumb-active: var(--ux-gray-600);
       --ux-scrollbar-radius: 100px;
     }
 
     /* Dark mode scrollbar colors */
     @media (prefers-color-scheme: dark) {
       :root {
-        --ux-scrollbar-thumb: rgba(255, 255, 255, 0.2);
-        --ux-scrollbar-thumb-hover: rgba(255, 255, 255, 0.35);
-        --ux-scrollbar-thumb-active: rgba(255, 255, 255, 0.5);
+        --ux-scrollbar-thumb: var(--ux-gray-600);
+        --ux-scrollbar-thumb-hover: var(--ux-gray-500);
+        --ux-scrollbar-thumb-active: var(--ux-gray-400);
       }
     }
 
     .ux-dark {
-      --ux-scrollbar-thumb: rgba(255, 255, 255, 0.2);
-      --ux-scrollbar-thumb-hover: rgba(255, 255, 255, 0.35);
-      --ux-scrollbar-thumb-active: rgba(255, 255, 255, 0.5);
+      --ux-scrollbar-thumb: var(--ux-gray-600);
+      --ux-scrollbar-thumb-hover: var(--ux-gray-500);
+      --ux-scrollbar-thumb-active: var(--ux-gray-400);
     }
 
     /* Webkit Scrollbar (Chrome, Safari, Edge) */
