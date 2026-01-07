@@ -1,6 +1,6 @@
-# UX Library - Guia Completa de Componentes
+# UX - Universal eXtensions - Guia Completa de Componentes
 
-Guia de referencia para implementar todos los componentes de UX Library. Optimizado para HTMX + Alpine.js.
+Guia de referencia para implementar todos los componentes de UX. Optimizado para HTMX + Alpine.js.
 
 ---
 
@@ -751,6 +751,44 @@ Usar con clases `ux-color-*`:
 <!-- Full height -->
 <div class="ux-content ux-content--fullscreen">...</div>
 ```
+
+## Split Pane
+
+```html
+<!-- Layout con sidebar responsive -->
+<div class="ux-split-pane" x-data="{ menuOpen: false }">
+  <!-- Sidebar/Menu -->
+  <aside class="ux-split-pane__side" :class="{ 'ux-split-pane__side--visible': menuOpen }">
+    <div class="ux-menu">
+      <!-- Menu content -->
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="ux-split-pane__main">
+    <div class="ux-content">
+      <!-- Page content -->
+    </div>
+  </main>
+
+  <!-- Backdrop for mobile -->
+  <div class="ux-split-pane__backdrop"
+       x-show="menuOpen"
+       @click="menuOpen = false">
+  </div>
+</div>
+
+<!-- Modes -->
+<div class="ux-split-pane ux-split-pane--overlay">...</div>  <!-- Sidebar overlays content (mobile) -->
+<div class="ux-split-pane ux-split-pane--push">...</div>     <!-- Sidebar pushes content -->
+
+<!-- Custom width -->
+<style>
+  .ux-split-pane__side { --ux-split-pane-width: 280px; }
+</style>
+```
+
+> **Nota**: El CSS de split-pane y scroll está en `ux-content.js`. El archivo `ux-scroll.js` solo contiene componentes Alpine.js.
 
 ---
 
@@ -2034,7 +2072,7 @@ uxTheme()           // Theme manager
 |-----------|-------------|
 | **Basicos** | button, badge, chip, spinner, progress, avatar, img |
 | **Formularios** | input, textarea, checkbox, radio, toggle, range, select, searchbar |
-| **Layout** | card, list, content |
+| **Layout** | card, list, content, split-pane |
 | **Navegacion** | navbar, toolbar, tabs, segment, menu, breadcrumbs, back-button |
 | **Overlays** | modal, sheet, alert, toast, popover, loading, picker, tooltip |
 | **Feedback** | skeleton, fab, rating |
@@ -2044,7 +2082,7 @@ uxTheme()           // Theme manager
 
 ---
 
-**Total: 49 componentes**
+**Total: 50 componentes**
 
 Todos soportan:
 - Dark mode automatico
