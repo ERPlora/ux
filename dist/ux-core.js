@@ -44,6 +44,18 @@
       --ux-blue-800: #1e40af;
       --ux-blue-900: #1e3a8a;
 
+      /* Sky / Primary */
+      --ux-sky-50: #f0f9ff;
+      --ux-sky-100: #e0f2fe;
+      --ux-sky-200: #bae6fd;
+      --ux-sky-300: #7dd3fc;
+      --ux-sky-400: #38bdf8;
+      --ux-sky-500: #0ea5e9;
+      --ux-sky-600: #0284c7;
+      --ux-sky-700: #0369a1;
+      --ux-sky-800: #075985;
+      --ux-sky-900: #0c4a6e;
+
       /* Cyan / Secondary */
       --ux-cyan-50: #ecfeff;
       --ux-cyan-100: #cffafe;
@@ -206,12 +218,12 @@
          They reference the primitives above.
       ======================================== */
 
-      /* Primary - Shoelace Sky Blue */
-      --ux-primary: #0ea5e9;
+      /* Primary - Sky Blue */
+      --ux-primary: var(--ux-sky-500);
       --ux-primary-rgb: 14, 165, 233;
       --ux-primary-contrast: #ffffff;
-      --ux-primary-shade: #0284c7;
-      --ux-primary-tint: #38bdf8;
+      --ux-primary-shade: var(--ux-sky-600);
+      --ux-primary-tint: var(--ux-sky-400);
 
       /* Secondary - Cyan */
       --ux-secondary: var(--ux-cyan-400);
@@ -247,6 +259,13 @@
       --ux-danger-contrast: #ffffff;
       --ux-danger-shade: var(--ux-red-600);
       --ux-danger-tint: var(--ux-red-400);
+
+      /* Info - Blue */
+      --ux-info: var(--ux-blue-500);
+      --ux-info-rgb: 59, 130, 246;
+      --ux-info-contrast: #ffffff;
+      --ux-info-shade: var(--ux-blue-600);
+      --ux-info-tint: var(--ux-blue-400);
 
       /* Dark */
       --ux-dark: var(--ux-gray-900);
@@ -691,12 +710,12 @@
         --ux-toast-bg: var(--ux-gray-700);
 
         /* Liquid Glass - Dark mode */
-        --ux-glass-bg: rgba(28, 28, 30, 0.45);
-        --ux-glass-bg-thick: rgba(28, 28, 30, 0.65);
-        --ux-glass-bg-thin: rgba(28, 28, 30, 0.25);
-        --ux-glass-border: rgba(255, 255, 255, 0.08);
-        --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
-        --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        --ux-glass-bg: rgba(28, 28, 30, 0.55);
+        --ux-glass-bg-thick: rgba(28, 28, 30, 0.72);
+        --ux-glass-bg-thin: rgba(28, 28, 30, 0.35);
+        --ux-glass-border: rgba(255, 255, 255, 0.12);
+        --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.32);
+        --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 
         /* Backdrop - Dark mode */
         --ux-backdrop-color: rgba(0, 0, 0, 0.6);
@@ -785,11 +804,12 @@
       --ux-toast-bg: var(--ux-gray-700);
 
       /* Liquid Glass - Dark mode */
-      --ux-glass-bg: rgba(28, 28, 30, 0.45);
-      --ux-glass-bg-thick: rgba(28, 28, 30, 0.65);
-      --ux-glass-bg-thin: rgba(28, 28, 30, 0.25);
-      --ux-glass-border: rgba(255, 255, 255, 0.08);
-      --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+      --ux-glass-bg: rgba(28, 28, 30, 0.55);
+      --ux-glass-bg-thick: rgba(28, 28, 30, 0.72);
+      --ux-glass-bg-thin: rgba(28, 28, 30, 0.35);
+      --ux-glass-border: rgba(255, 255, 255, 0.12);
+      --ux-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.32);
+      --ux-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 
       /* Backdrop - Dark mode */
       --ux-backdrop-color: rgba(0, 0, 0, 0.6);
@@ -2170,6 +2190,22 @@
       --ux-variant-bg-hover: var(--ux-danger-shade);
     }
 
+    .ux-color-info {
+      --ux-variant-bg: var(--ux-info);
+      --ux-variant-bg-rgb: var(--ux-info-rgb);
+      --ux-variant-color: var(--ux-info-contrast);
+      --ux-variant-border: var(--ux-info);
+      --ux-variant-bg-hover: var(--ux-info-shade);
+    }
+
+    .ux-color-tertiary {
+      --ux-variant-bg: var(--ux-tertiary);
+      --ux-variant-bg-rgb: var(--ux-tertiary-rgb);
+      --ux-variant-color: var(--ux-tertiary-contrast);
+      --ux-variant-border: var(--ux-tertiary);
+      --ux-variant-bg-hover: var(--ux-tertiary-shade);
+    }
+
     .ux-color-dark {
       --ux-variant-bg: var(--ux-dark);
       --ux-variant-bg-rgb: var(--ux-dark-rgb);
@@ -2230,6 +2266,20 @@
       --ux-variant-bg-hover: rgba(var(--ux-danger-rgb), 0.25);
     }
 
+    .ux-color-info--soft {
+      --ux-variant-bg: rgba(var(--ux-info-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-info-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-info-rgb), 0.25);
+    }
+
+    .ux-color-tertiary--soft {
+      --ux-variant-bg: rgba(var(--ux-tertiary-rgb), var(--ux-variant-soft-opacity));
+      --ux-variant-color: var(--ux-tertiary-shade);
+      --ux-variant-border: transparent;
+      --ux-variant-bg-hover: rgba(var(--ux-tertiary-rgb), 0.25);
+    }
+
     /* Outline variants */
     .ux-color-primary--outline {
       --ux-variant-bg: transparent;
@@ -2264,6 +2314,20 @@
       --ux-variant-color: var(--ux-danger);
       --ux-variant-border: var(--ux-danger);
       --ux-variant-bg-hover: rgba(var(--ux-danger-rgb), 0.1);
+    }
+
+    .ux-color-info--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-info);
+      --ux-variant-border: var(--ux-info);
+      --ux-variant-bg-hover: rgba(var(--ux-info-rgb), 0.1);
+    }
+
+    .ux-color-tertiary--outline {
+      --ux-variant-bg: transparent;
+      --ux-variant-color: var(--ux-tertiary);
+      --ux-variant-border: var(--ux-tertiary);
+      --ux-variant-bg-hover: rgba(var(--ux-tertiary-rgb), 0.1);
     }
 
     .ux-color-dark--outline {
