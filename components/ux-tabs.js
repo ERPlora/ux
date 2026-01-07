@@ -210,8 +210,9 @@
     .ux-tab-bar__indicator {
       position: absolute;
       bottom: 0;
-      height: 2px;
+      height: var(--ux-tab-indicator-height, 3px);
       background-color: var(--ux-primary);
+      border-radius: var(--ux-tab-indicator-radius, 1.5px) var(--ux-tab-indicator-radius, 1.5px) 0 0;
       transition:
         left var(--ux-transition-base) var(--ux-ease),
         width var(--ux-transition-base) var(--ux-ease);

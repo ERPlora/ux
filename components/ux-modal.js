@@ -309,23 +309,30 @@
     }
 
     /* ========================================
-       Modal Handle (mobile drag indicator)
+       Modal Handle (iOS drag indicator)
     ======================================== */
 
     .ux-modal__handle {
       display: none;
-      width: 36px;
-      height: 4px;
-      margin: var(--ux-space-sm) auto;
-      background-color: var(--ux-light-shade);
-      border-radius: 2px;
+      width: var(--ux-handle-width, 36px);
+      height: var(--ux-handle-height, 5px);
+      margin: var(--ux-space-sm) auto var(--ux-space-xs);
+      background-color: var(--ux-handle-color, var(--ux-gray-300));
+      border-radius: var(--ux-handle-radius, 2.5px);
       flex-shrink: 0;
+      opacity: 0.6;
     }
 
+    /* Show handle on mobile for sheet-style modals */
     @media (max-width: 767px) {
       .ux-modal__handle {
         display: block;
       }
+    }
+
+    /* Force show handle with modifier */
+    .ux-modal--with-handle .ux-modal__handle {
+      display: block;
     }
 
     /* ========================================

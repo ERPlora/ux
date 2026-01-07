@@ -103,13 +103,15 @@
 
     .ux-alert__title {
       font-size: var(--ux-font-size-lg);
-      font-weight: 600;
+      font-weight: var(--ux-font-weight-semibold);
       color: var(--ux-text);
       margin: 0 0 var(--ux-space-xs);
+      letter-spacing: -0.01em;
     }
 
     .ux-alert__message {
-      font-size: var(--ux-font-size-sm);
+      font-size: var(--ux-font-size-base);
+      font-weight: var(--ux-font-weight-regular);
       color: var(--ux-text-secondary);
       margin: 0;
       line-height: 1.4;
@@ -168,7 +170,7 @@
       color: var(--ux-primary);
       font-family: var(--ux-font-family);
       font-size: var(--ux-font-size-lg);
-      font-weight: 400;
+      font-weight: var(--ux-font-weight-regular);
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: background-color var(--ux-transition-fast) var(--ux-ease);
@@ -192,7 +194,7 @@
     }
 
     .ux-alert__button--primary {
-      font-weight: 600;
+      font-weight: var(--ux-font-weight-semibold);
     }
 
     .ux-alert__button--destructive {
@@ -208,7 +210,7 @@
     }
 
     .ux-alert__button--cancel {
-      font-weight: 600;
+      font-weight: var(--ux-font-weight-semibold);
     }
 
     /* ========================================

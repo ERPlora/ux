@@ -298,12 +298,12 @@
       --ux-button-bg: var(--ux-primary);
       --ux-button-text: var(--ux-primary-contrast);
       --ux-button-bg-hover: var(--ux-primary-shade);
-      --ux-button-border-radius: var(--ux-border-radius);
+      --ux-button-border-radius: var(--ux-border-radius-ios);
 
       /* Card */
       --ux-card-bg: var(--ux-surface);
       --ux-card-border: var(--ux-border-color);
-      --ux-card-shadow: var(--ux-shadow-md);
+      --ux-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
       /* Input */
       --ux-input-bg: var(--ux-surface);
@@ -315,6 +315,13 @@
       /* Modal */
       --ux-modal-bg: var(--ux-surface);
       --ux-modal-backdrop: rgba(0, 0, 0, 0.5);
+      --ux-modal-border-radius: var(--ux-border-radius-ios-lg);
+
+      /* Handle (drag indicator for modals/sheets) */
+      --ux-handle-width: 36px;
+      --ux-handle-height: 5px;
+      --ux-handle-radius: 2.5px;
+      --ux-handle-color: var(--ux-gray-300);
 
       /* List */
       --ux-list-bg: var(--ux-surface);
@@ -333,11 +340,18 @@
       /* Borders */
       --ux-border-radius: 0.5rem;
       --ux-border-radius-sm: 0.25rem;
+      --ux-border-radius-md: 0.625rem;
       --ux-border-radius-lg: 0.75rem;
       --ux-border-radius-xl: 1rem;
+      --ux-border-radius-ios: 0.875rem;      /* 14px - iOS native button radius */
+      --ux-border-radius-ios-lg: 1rem;       /* 16px - iOS large elements */
 
       /* Typography */
-      --ux-font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Roboto", sans-serif;
+      --ux-font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Roboto", sans-serif;
+      --ux-font-weight-regular: 400;
+      --ux-font-weight-medium: 500;
+      --ux-font-weight-semibold: 600;
+      --ux-font-weight-bold: 700;
       --ux-font-size-xs: 0.625rem;
       --ux-font-size-sm: 0.75rem;
       --ux-font-size-base: 0.875rem;
@@ -381,9 +395,9 @@
       --ux-button-padding-x-sm: 0.9em;
       --ux-button-padding-y-lg: 17px;
       --ux-button-padding-x-lg: 1em;
-      --ux-button-border-radius: 14px;
-      --ux-button-border-radius-sm: 6px;
-      --ux-button-border-radius-lg: 16px;
+      --ux-button-border-radius: var(--ux-border-radius-ios);
+      --ux-button-border-radius-sm: var(--ux-border-radius-sm);
+      --ux-button-border-radius-lg: var(--ux-border-radius-ios-lg);
       --ux-button-font-size: 1rem;
       --ux-button-font-size-sm: 0.8125rem;  /* 13px */
       --ux-button-font-size-lg: 1.125rem;   /* 18px */
@@ -460,10 +474,11 @@
       --ux-radio-size-lg: 24px;
 
       /* Segment - Based on Ionic iOS */
+      --ux-segment-bg: rgba(118, 118, 128, 0.12);
       --ux-segment-min-width: 70px;
       --ux-segment-min-height: 28px;
       --ux-segment-padding: 2px;
-      --ux-segment-border-radius: 7px;
+      --ux-segment-border-radius: 8px;
       --ux-segment-font-size: 13px;
 
       /* FAB - Based on Ionic iOS */
@@ -500,6 +515,7 @@
       --ux-toast-max-width: 400px;
       --ux-toast-padding: 14px 16px;
       --ux-toast-border-radius: 14px;
+      --ux-toast-icon-size: 22px;
 
       /* Tabs - Based on Ionic iOS */
       --ux-tabs-height: 50px;
@@ -507,6 +523,8 @@
       --ux-tab-min-width: 64px;
       --ux-tab-font-size: 10px;
       --ux-tab-icon-size: 24px;
+      --ux-tab-indicator-height: 3px;
+      --ux-tab-indicator-radius: 1.5px;
 
       /* Searchbar - Based on Ionic iOS */
       --ux-searchbar-height: 36px;
@@ -3565,26 +3583,58 @@
     }
 
     /* ========================================
-       Circular Progress (iOS style)
+       iOS Native Style Spinner (12 lines)
     ======================================== */
 
     .ux-spinner--ios {
-      width: 20px;
-      height: 20px;
+      position: relative;
+      width: var(--ux-spinner-ios-size, 20px);
+      height: var(--ux-spinner-ios-size, 20px);
       border: none;
-      animation: none;
-    }
-
-    .ux-spinner--ios svg {
-      width: 100%;
-      height: 100%;
       animation: ux-spinner-ios 1s steps(12) infinite;
     }
+
+    .ux-spinner--ios::before,
+    .ux-spinner--ios::after,
+    .ux-spinner--ios span {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: calc(50% - var(--ux-spinner-ios-line-width, 1.5px));
+      width: var(--ux-spinner-ios-line-width, 1.5px);
+      height: var(--ux-spinner-ios-line-height, 25%);
+      background-color: var(--_spinner-color);
+      border-radius: var(--ux-spinner-ios-line-radius, 1px);
+      transform-origin: center calc(var(--ux-spinner-ios-size, 20px) / 2);
+    }
+
+    .ux-spinner--ios::before { opacity: 1; transform: rotate(0deg); }
+    .ux-spinner--ios::after { opacity: 0.916; transform: rotate(30deg); }
+    .ux-spinner--ios span:nth-child(1) { opacity: 0.833; transform: rotate(60deg); }
+    .ux-spinner--ios span:nth-child(2) { opacity: 0.75; transform: rotate(90deg); }
+    .ux-spinner--ios span:nth-child(3) { opacity: 0.666; transform: rotate(120deg); }
+    .ux-spinner--ios span:nth-child(4) { opacity: 0.583; transform: rotate(150deg); }
+    .ux-spinner--ios span:nth-child(5) { opacity: 0.5; transform: rotate(180deg); }
+    .ux-spinner--ios span:nth-child(6) { opacity: 0.416; transform: rotate(210deg); }
+    .ux-spinner--ios span:nth-child(7) { opacity: 0.333; transform: rotate(240deg); }
+    .ux-spinner--ios span:nth-child(8) { opacity: 0.25; transform: rotate(270deg); }
+    .ux-spinner--ios span:nth-child(9) { opacity: 0.166; transform: rotate(300deg); }
+    .ux-spinner--ios span:nth-child(10) { opacity: 0.083; transform: rotate(330deg); }
 
     @keyframes ux-spinner-ios {
       to {
         transform: rotate(360deg);
       }
+    }
+
+    .ux-spinner--ios.ux-spinner--sm {
+      --ux-spinner-ios-size: 16px;
+      --ux-spinner-ios-line-width: 1.2px;
+    }
+
+    .ux-spinner--ios.ux-spinner--lg {
+      --ux-spinner-ios-size: 28px;
+      --ux-spinner-ios-line-width: 2px;
     }
 
     /* ========================================
@@ -3660,7 +3710,7 @@
         transform: scaleY(0.7);
       }
 
-      .ux-spinner--ios svg {
+      .ux-spinner--ios {
         animation: none;
       }
     }
@@ -12952,8 +13002,9 @@
     .ux-tab-bar__indicator {
       position: absolute;
       bottom: 0;
-      height: 2px;
+      height: var(--ux-tab-indicator-height, 3px);
       background-color: var(--ux-primary);
+      border-radius: var(--ux-tab-indicator-radius, 1.5px) var(--ux-tab-indicator-radius, 1.5px) 0 0;
       transition:
         left var(--ux-transition-base) var(--ux-ease),
         width var(--ux-transition-base) var(--ux-ease);
@@ -13237,7 +13288,7 @@
     .ux-segment {
       display: inline-flex;
       align-items: stretch;
-      background-color: var(--ux-surface-secondary);
+      background-color: var(--ux-segment-bg, rgba(118, 118, 128, 0.12));
       border-radius: var(--ux-segment-border-radius);
       padding: var(--ux-segment-padding);
       position: relative;
@@ -14882,23 +14933,30 @@
     }
 
     /* ========================================
-       Modal Handle (mobile drag indicator)
+       Modal Handle (iOS drag indicator)
     ======================================== */
 
     .ux-modal__handle {
       display: none;
-      width: 36px;
-      height: 4px;
-      margin: var(--ux-space-sm) auto;
-      background-color: var(--ux-light-shade);
-      border-radius: 2px;
+      width: var(--ux-handle-width, 36px);
+      height: var(--ux-handle-height, 5px);
+      margin: var(--ux-space-sm) auto var(--ux-space-xs);
+      background-color: var(--ux-handle-color, var(--ux-gray-300));
+      border-radius: var(--ux-handle-radius, 2.5px);
       flex-shrink: 0;
+      opacity: 0.6;
     }
 
+    /* Show handle on mobile for sheet-style modals */
     @media (max-width: 767px) {
       .ux-modal__handle {
         display: block;
       }
+    }
+
+    /* Force show handle with modifier */
+    .ux-modal--with-handle .ux-modal__handle {
+      display: block;
     }
 
     /* ========================================
@@ -16191,13 +16249,15 @@
 
     .ux-alert__title {
       font-size: var(--ux-font-size-lg);
-      font-weight: 600;
+      font-weight: var(--ux-font-weight-semibold);
       color: var(--ux-text);
       margin: 0 0 var(--ux-space-xs);
+      letter-spacing: -0.01em;
     }
 
     .ux-alert__message {
-      font-size: var(--ux-font-size-sm);
+      font-size: var(--ux-font-size-base);
+      font-weight: var(--ux-font-weight-regular);
       color: var(--ux-text-secondary);
       margin: 0;
       line-height: 1.4;
@@ -16256,7 +16316,7 @@
       color: var(--ux-primary);
       font-family: var(--ux-font-family);
       font-size: var(--ux-font-size-lg);
-      font-weight: 400;
+      font-weight: var(--ux-font-weight-regular);
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: background-color var(--ux-transition-fast) var(--ux-ease);
@@ -16280,7 +16340,7 @@
     }
 
     .ux-alert__button--primary {
-      font-weight: 600;
+      font-weight: var(--ux-font-weight-semibold);
     }
 
     .ux-alert__button--destructive {
@@ -16296,7 +16356,7 @@
     }
 
     .ux-alert__button--cancel {
-      font-weight: 600;
+      font-weight: var(--ux-font-weight-semibold);
     }
 
     /* ========================================
@@ -16736,14 +16796,59 @@
     ======================================== */
 
     .ux-toast__icon {
-      width: 20px;
-      height: 20px;
+      width: var(--ux-toast-icon-size, 22px);
+      height: var(--ux-toast-icon-size, 22px);
       flex-shrink: 0;
     }
 
     .ux-toast__icon svg {
       width: 100%;
       height: 100%;
+    }
+
+    /* Icon colors for semantic toasts */
+    .ux-toast--success .ux-toast__icon {
+      color: var(--ux-success-contrast);
+    }
+
+    .ux-toast--warning .ux-toast__icon {
+      color: var(--ux-warning-contrast);
+    }
+
+    .ux-toast--danger .ux-toast__icon {
+      color: var(--ux-danger-contrast);
+    }
+
+    .ux-toast--light .ux-toast__icon--success {
+      color: var(--ux-success);
+    }
+
+    .ux-toast--light .ux-toast__icon--warning {
+      color: var(--ux-warning);
+    }
+
+    .ux-toast--light .ux-toast__icon--danger {
+      color: var(--ux-danger);
+    }
+
+    .ux-toast--light .ux-toast__icon--info {
+      color: var(--ux-primary);
+    }
+
+    .ux-toast--glass .ux-toast__icon--success {
+      color: var(--ux-success);
+    }
+
+    .ux-toast--glass .ux-toast__icon--warning {
+      color: var(--ux-warning);
+    }
+
+    .ux-toast--glass .ux-toast__icon--danger {
+      color: var(--ux-danger);
+    }
+
+    .ux-toast--glass .ux-toast__icon--info {
+      color: var(--ux-primary);
     }
 
     .ux-toast__content {
@@ -25980,8 +26085,8 @@
     }
   `;
 
-  // Default back arrow SVG
-  const backArrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`;
+  // Default back arrow SVG (iOS SF Symbols style - thin chevron)
+  const backArrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`;
 
   // Inject styles
   if (window.UX) {

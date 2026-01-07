@@ -157,26 +157,58 @@
     }
 
     /* ========================================
-       Circular Progress (iOS style)
+       iOS Native Style Spinner (12 lines)
     ======================================== */
 
     .ux-spinner--ios {
-      width: 20px;
-      height: 20px;
+      position: relative;
+      width: var(--ux-spinner-ios-size, 20px);
+      height: var(--ux-spinner-ios-size, 20px);
       border: none;
-      animation: none;
-    }
-
-    .ux-spinner--ios svg {
-      width: 100%;
-      height: 100%;
       animation: ux-spinner-ios 1s steps(12) infinite;
     }
+
+    .ux-spinner--ios::before,
+    .ux-spinner--ios::after,
+    .ux-spinner--ios span {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: calc(50% - var(--ux-spinner-ios-line-width, 1.5px));
+      width: var(--ux-spinner-ios-line-width, 1.5px);
+      height: var(--ux-spinner-ios-line-height, 25%);
+      background-color: var(--_spinner-color);
+      border-radius: var(--ux-spinner-ios-line-radius, 1px);
+      transform-origin: center calc(var(--ux-spinner-ios-size, 20px) / 2);
+    }
+
+    .ux-spinner--ios::before { opacity: 1; transform: rotate(0deg); }
+    .ux-spinner--ios::after { opacity: 0.916; transform: rotate(30deg); }
+    .ux-spinner--ios span:nth-child(1) { opacity: 0.833; transform: rotate(60deg); }
+    .ux-spinner--ios span:nth-child(2) { opacity: 0.75; transform: rotate(90deg); }
+    .ux-spinner--ios span:nth-child(3) { opacity: 0.666; transform: rotate(120deg); }
+    .ux-spinner--ios span:nth-child(4) { opacity: 0.583; transform: rotate(150deg); }
+    .ux-spinner--ios span:nth-child(5) { opacity: 0.5; transform: rotate(180deg); }
+    .ux-spinner--ios span:nth-child(6) { opacity: 0.416; transform: rotate(210deg); }
+    .ux-spinner--ios span:nth-child(7) { opacity: 0.333; transform: rotate(240deg); }
+    .ux-spinner--ios span:nth-child(8) { opacity: 0.25; transform: rotate(270deg); }
+    .ux-spinner--ios span:nth-child(9) { opacity: 0.166; transform: rotate(300deg); }
+    .ux-spinner--ios span:nth-child(10) { opacity: 0.083; transform: rotate(330deg); }
 
     @keyframes ux-spinner-ios {
       to {
         transform: rotate(360deg);
       }
+    }
+
+    .ux-spinner--ios.ux-spinner--sm {
+      --ux-spinner-ios-size: 16px;
+      --ux-spinner-ios-line-width: 1.2px;
+    }
+
+    .ux-spinner--ios.ux-spinner--lg {
+      --ux-spinner-ios-size: 28px;
+      --ux-spinner-ios-line-width: 2px;
     }
 
     /* ========================================
@@ -252,7 +284,7 @@
         transform: scaleY(0.7);
       }
 
-      .ux-spinner--ios svg {
+      .ux-spinner--ios {
         animation: none;
       }
     }
