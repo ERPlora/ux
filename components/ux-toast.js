@@ -133,14 +133,59 @@
     ======================================== */
 
     .ux-toast__icon {
-      width: 20px;
-      height: 20px;
+      width: var(--ux-toast-icon-size, 22px);
+      height: var(--ux-toast-icon-size, 22px);
       flex-shrink: 0;
     }
 
     .ux-toast__icon svg {
       width: 100%;
       height: 100%;
+    }
+
+    /* Icon colors for semantic toasts */
+    .ux-toast--success .ux-toast__icon {
+      color: var(--ux-success-contrast);
+    }
+
+    .ux-toast--warning .ux-toast__icon {
+      color: var(--ux-warning-contrast);
+    }
+
+    .ux-toast--danger .ux-toast__icon {
+      color: var(--ux-danger-contrast);
+    }
+
+    .ux-toast--light .ux-toast__icon--success {
+      color: var(--ux-success);
+    }
+
+    .ux-toast--light .ux-toast__icon--warning {
+      color: var(--ux-warning);
+    }
+
+    .ux-toast--light .ux-toast__icon--danger {
+      color: var(--ux-danger);
+    }
+
+    .ux-toast--light .ux-toast__icon--info {
+      color: var(--ux-primary);
+    }
+
+    .ux-toast--glass .ux-toast__icon--success {
+      color: var(--ux-success);
+    }
+
+    .ux-toast--glass .ux-toast__icon--warning {
+      color: var(--ux-warning);
+    }
+
+    .ux-toast--glass .ux-toast__icon--danger {
+      color: var(--ux-danger);
+    }
+
+    .ux-toast--glass .ux-toast__icon--info {
+      color: var(--ux-primary);
     }
 
     .ux-toast__content {

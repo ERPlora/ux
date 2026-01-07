@@ -14,7 +14,7 @@
     .ux-segment {
       display: inline-flex;
       align-items: stretch;
-      background-color: var(--ux-surface-secondary);
+      background-color: var(--ux-segment-bg, rgba(118, 118, 128, 0.12));
       border-radius: var(--ux-segment-border-radius);
       padding: var(--ux-segment-padding);
       position: relative;

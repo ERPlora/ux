@@ -298,12 +298,12 @@
       --ux-button-bg: var(--ux-primary);
       --ux-button-text: var(--ux-primary-contrast);
       --ux-button-bg-hover: var(--ux-primary-shade);
-      --ux-button-border-radius: var(--ux-border-radius);
+      --ux-button-border-radius: var(--ux-border-radius-ios);
 
       /* Card */
       --ux-card-bg: var(--ux-surface);
       --ux-card-border: var(--ux-border-color);
-      --ux-card-shadow: var(--ux-shadow-md);
+      --ux-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
       /* Input */
       --ux-input-bg: var(--ux-surface);
@@ -315,6 +315,13 @@
       /* Modal */
       --ux-modal-bg: var(--ux-surface);
       --ux-modal-backdrop: rgba(0, 0, 0, 0.5);
+      --ux-modal-border-radius: var(--ux-border-radius-ios-lg);
+
+      /* Handle (drag indicator for modals/sheets) */
+      --ux-handle-width: 36px;
+      --ux-handle-height: 5px;
+      --ux-handle-radius: 2.5px;
+      --ux-handle-color: var(--ux-gray-300);
 
       /* List */
       --ux-list-bg: var(--ux-surface);
@@ -333,11 +340,18 @@
       /* Borders */
       --ux-border-radius: 0.5rem;
       --ux-border-radius-sm: 0.25rem;
+      --ux-border-radius-md: 0.625rem;
       --ux-border-radius-lg: 0.75rem;
       --ux-border-radius-xl: 1rem;
+      --ux-border-radius-ios: 0.875rem;      /* 14px - iOS native button radius */
+      --ux-border-radius-ios-lg: 1rem;       /* 16px - iOS large elements */
 
       /* Typography */
-      --ux-font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Roboto", sans-serif;
+      --ux-font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Roboto", sans-serif;
+      --ux-font-weight-regular: 400;
+      --ux-font-weight-medium: 500;
+      --ux-font-weight-semibold: 600;
+      --ux-font-weight-bold: 700;
       --ux-font-size-xs: 0.625rem;
       --ux-font-size-sm: 0.75rem;
       --ux-font-size-base: 0.875rem;
@@ -381,9 +395,9 @@
       --ux-button-padding-x-sm: 0.9em;
       --ux-button-padding-y-lg: 17px;
       --ux-button-padding-x-lg: 1em;
-      --ux-button-border-radius: 14px;
-      --ux-button-border-radius-sm: 6px;
-      --ux-button-border-radius-lg: 16px;
+      --ux-button-border-radius: var(--ux-border-radius-ios);
+      --ux-button-border-radius-sm: var(--ux-border-radius-sm);
+      --ux-button-border-radius-lg: var(--ux-border-radius-ios-lg);
       --ux-button-font-size: 1rem;
       --ux-button-font-size-sm: 0.8125rem;  /* 13px */
       --ux-button-font-size-lg: 1.125rem;   /* 18px */
@@ -460,10 +474,11 @@
       --ux-radio-size-lg: 24px;
 
       /* Segment - Based on Ionic iOS */
+      --ux-segment-bg: rgba(118, 118, 128, 0.12);
       --ux-segment-min-width: 70px;
       --ux-segment-min-height: 28px;
       --ux-segment-padding: 2px;
-      --ux-segment-border-radius: 7px;
+      --ux-segment-border-radius: 8px;
       --ux-segment-font-size: 13px;
 
       /* FAB - Based on Ionic iOS */
@@ -500,6 +515,7 @@
       --ux-toast-max-width: 400px;
       --ux-toast-padding: 14px 16px;
       --ux-toast-border-radius: 14px;
+      --ux-toast-icon-size: 22px;
 
       /* Tabs - Based on Ionic iOS */
       --ux-tabs-height: 50px;
@@ -507,6 +523,8 @@
       --ux-tab-min-width: 64px;
       --ux-tab-font-size: 10px;
       --ux-tab-icon-size: 24px;
+      --ux-tab-indicator-height: 3px;
+      --ux-tab-indicator-radius: 1.5px;
 
       /* Searchbar - Based on Ionic iOS */
       --ux-searchbar-height: 36px;
