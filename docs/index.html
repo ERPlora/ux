@@ -6,40 +6,20 @@
   <title>UX - Universal eXtensions</title>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-content.js"></script>
   <script src="../components/ux-button.js"></script>
   <script src="../components/ux-list.js"></script>
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-badge.js"></script>
   <script src="../components/ux-searchbar.js"></script>
+  <script src="../components/ux-menu.js"></script>
   <!-- Bootstrap Grid -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../css/themes.css">
 
   <style>
-    /* Split Layout */
-    .ux-split {
-      display: flex;
-      min-height: 100vh;
-      min-height: 100dvh;
-    }
-
-    /* Sidebar */
-    .ux-split__sidebar {
-      width: 280px;
-      flex-shrink: 0;
-      background: var(--ux-surface);
-      border-right: 1px solid var(--ux-border-color);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      z-index: var(--ux-z-fixed);
-      transition: transform var(--ux-transition-base) var(--ux-ease);
-    }
-
-    .ux-split__sidebar-header {
+    /* Docs-specific sidebar header */
+    .docs-sidebar-header {
       flex-shrink: 0;
       padding: var(--ux-space-lg);
       border-bottom: 1px solid var(--ux-border-color);
@@ -48,42 +28,23 @@
       gap: var(--ux-space-sm);
     }
 
-    .ux-split__sidebar-search {
+    .docs-sidebar-search {
       padding: var(--ux-space-sm) var(--ux-space-md);
       border-bottom: 1px solid var(--ux-border-color);
     }
 
-    .ux-split__sidebar-content {
+    .docs-sidebar-content {
       flex: 1;
       overflow-y: auto;
       padding: var(--ux-space-sm);
     }
 
-    /* Main area */
-    .ux-split__main {
-      flex: 1;
-      margin-left: 280px;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      min-height: 100dvh;
-    }
-
-    .ux-split__navbar {
+    /* Navbar area */
+    .docs-navbar {
       flex-shrink: 0;
       position: sticky;
       top: 0;
       z-index: var(--ux-z-sticky);
-    }
-
-    .ux-split__content {
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    /* Backdrop for mobile */
-    .ux-split__backdrop {
-      display: none;
     }
 
     /* Menu item styles */
@@ -148,49 +109,16 @@
       border: none;
       min-height: calc(100vh - 56px);
     }
-
-    /* Mobile */
-    @media (max-width: 991px) {
-      .ux-split__sidebar {
-        transform: translateX(-100%);
-      }
-
-      .ux-split__sidebar.is-open {
-        transform: translateX(0);
-      }
-
-      .ux-split__main {
-        margin-left: 0;
-      }
-
-      .ux-split__backdrop {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        z-index: calc(var(--ux-z-fixed) - 1);
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity var(--ux-transition-base), visibility var(--ux-transition-base);
-      }
-
-      .ux-split__backdrop.is-open {
-        opacity: 1;
-        visibility: visible;
-      }
-    }
   </style>
 </head>
 <body class="ux-app" x-data="docsApp()">
-  <div class="ux-split">
+  <div class="ux-split-pane" :class="{ 'ux-split-pane--open': sidebarOpen }">
     <!-- Backdrop (mobile) -->
-    <div class="ux-split__backdrop"
-         :class="{ 'is-open': sidebarOpen }"
-         @click="sidebarOpen = false"></div>
+    <div class="ux-split-pane__backdrop" @click="sidebarOpen = false"></div>
 
     <!-- Sidebar -->
-    <aside class="ux-split__sidebar" :class="{ 'is-open': sidebarOpen }">
-      <div class="ux-split__sidebar-header">
+    <aside class="ux-split-pane__side" aria-label="Menu de navegacion">
+      <div class="docs-sidebar-header">
         <a href="index.html" style="font-size: var(--ux-font-size-xl); font-weight: 700; color: var(--ux-text); text-decoration: none; display: flex; align-items: center; gap: var(--ux-space-sm);">
           UX - Universal eXtensions
           <span class="ux-badge ux-color-primary">v1.0</span>
@@ -207,7 +135,7 @@
       </div>
 
       <!-- Search -->
-      <div class="ux-split__sidebar-search">
+      <div class="docs-sidebar-search">
         <div class="ux-searchbar ux-searchbar--sm">
           <span class="ux-searchbar__icon">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,7 +150,7 @@
         </div>
       </div>
 
-      <nav class="ux-split__sidebar-content">
+      <nav class="docs-sidebar-content" aria-label="Componentes">
         <!-- Getting Started -->
         <div class="menu-section" x-show="!searchQuery || 'getting started inicio'.includes(searchQuery.toLowerCase())">Getting Started</div>
         <a class="menu-item"
@@ -252,9 +180,9 @@
     </aside>
 
     <!-- Main -->
-    <main class="ux-split__main">
+    <main class="ux-split-pane__main">
       <!-- Navbar -->
-      <nav class="ux-split__navbar ux-navbar ux-navbar--glass">
+      <nav class="docs-navbar ux-navbar ux-navbar--glass" aria-label="Barra de navegacion">
         <div class="ux-navbar__content">
           <div class="ux-navbar__start">
             <!-- Toggle sidebar (mobile) -->
@@ -282,7 +210,7 @@
       </nav>
 
       <!-- Content -->
-      <div class="ux-split__content">
+      <div class="ux-content">
         <!-- Home content -->
         <div x-show="currentPage === 'home'" style="padding: var(--ux-space-xl);">
           <div style="max-width: 800px; margin: 0 auto;">
@@ -554,7 +482,6 @@
             name: 'Otros',
             items: [
               { name: 'PWA', page: 'pwa', icon: '<rect x="5" y="2" width="14" height="20" rx="2" stroke-width="2"/><path d="M12 18h.01" stroke-width="2"/>' },
-              { name: 'Scroll', page: 'scroll', icon: '<rect x="4" y="2" width="16" height="20" rx="2" stroke-width="2"/><path d="M8 6h8M8 10h8M8 14h4" stroke-width="2"/>' },
             ]
           },
         ],
