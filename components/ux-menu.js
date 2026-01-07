@@ -3,7 +3,7 @@
  * Menús desplegables y contextuales
  * @requires ux-core.js
  */
-(function() {
+(function () {
   'use strict';
 
   const styles = `
@@ -23,8 +23,8 @@
     .ux-menu__content {
       position: absolute;
       min-width: 180px;
-      max-width: 320px;
-      max-height: 400px;
+      width: 100%;
+      height: 100%;
       background-color: var(--ux-surface);
       border: 1px solid var(--ux-border-color);
       border-radius: var(--ux-border-radius-lg);

@@ -11036,7 +11036,7 @@
  * Contenedor principal de contenido estilo Ionic
  * @requires ux-core.js
  */
-(function() {
+(function () {
   'use strict';
 
   const styles = `
@@ -11255,6 +11255,7 @@
       transform: translateX(-100%);
       transition: transform var(--ux-transition-normal) var(--ux-ease-spring);
       will-change: transform;
+      min-height: 100vh;
     }
 
     /* Open state for mobile (overlay) */
@@ -11290,6 +11291,7 @@
       flex-direction: column;
       min-width: 0;
       width: 100%;
+      min-height: 100vh;
       transition: margin-left var(--ux-transition-normal) var(--ux-ease);
     }
 
@@ -14406,7 +14408,7 @@
  * Menús desplegables y contextuales
  * @requires ux-core.js
  */
-(function() {
+(function () {
   'use strict';
 
   const styles = `
@@ -14426,8 +14428,8 @@
     .ux-menu__content {
       position: absolute;
       min-width: 180px;
-      max-width: 320px;
-      max-height: 400px;
+      width: 100%;
+      height: 100%;
       background-color: var(--ux-surface);
       border: 1px solid var(--ux-border-color);
       border-radius: var(--ux-border-radius-lg);
