@@ -21730,6 +21730,297 @@
     .ux-item .ux-select--open .ux-select__trigger {
       box-shadow: none;
     }
+
+    /* ========================================
+       Search Select (Autocomplete)
+    ======================================== */
+
+    .ux-search-select {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .ux-search-select__label {
+      display: block;
+      margin-bottom: var(--ux-space-xs);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-search-select__label--required::after {
+      content: ' *';
+      color: var(--ux-danger);
+    }
+
+    .ux-search-select__wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .ux-search-select__input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .ux-search-select__icon {
+      position: absolute;
+      left: var(--ux-space-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      color: var(--ux-text-tertiary);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .ux-search-select__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-search-select__input {
+      width: 100%;
+      min-height: var(--ux-touch-target);
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      padding-left: calc(var(--ux-space-md) + 20px + var(--ux-space-sm));
+      padding-right: calc(var(--ux-space-md) + 20px + var(--ux-space-sm));
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text);
+      background-color: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      transition:
+        border-color var(--ux-transition-fast) var(--ux-ease),
+        box-shadow var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-search-select__input::placeholder {
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-search-select__input:hover {
+      border-color: var(--ux-medium);
+    }
+
+    .ux-search-select__input:focus {
+      outline: none;
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
+    }
+
+    .ux-search-select__clear {
+      position: absolute;
+      right: var(--ux-space-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      border: none;
+      background: var(--ux-light);
+      border-radius: 50%;
+      color: var(--ux-text-secondary);
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-search-select--has-value .ux-search-select__clear {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .ux-search-select__clear:hover {
+      background: var(--ux-medium);
+      color: var(--ux-text);
+    }
+
+    .ux-search-select__clear svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .ux-search-select__dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      max-height: 300px;
+      background-color: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      box-shadow: var(--ux-shadow-lg);
+      overflow-y: auto;
+      z-index: var(--ux-z-dropdown);
+      -webkit-overflow-scrolling: touch;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-search-select--open .ux-search-select__dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .ux-search-select__option {
+      display: flex;
+      align-items: center;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text);
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-search-select__option:hover,
+    .ux-search-select__option--focused {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-search-select__option--selected {
+      color: var(--ux-primary);
+      font-weight: 500;
+      background-color: rgba(var(--ux-primary-rgb), 0.08);
+    }
+
+    .ux-search-select__option--disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ux-search-select__option-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ux-search-select__option-label {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ux-search-select__option-description {
+      display: block;
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ux-search-select__option-check {
+      width: 20px;
+      height: 20px;
+      margin-left: auto;
+      color: var(--ux-primary);
+      flex-shrink: 0;
+    }
+
+    .ux-search-select__option-check svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-search-select__empty {
+      padding: var(--ux-space-lg);
+      text-align: center;
+      color: var(--ux-text-secondary);
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-search-select__loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-lg);
+      gap: var(--ux-space-sm);
+      color: var(--ux-text-secondary);
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-search-select__group {
+      padding: var(--ux-space-sm) var(--ux-space-lg);
+      font-size: var(--ux-font-size-xs);
+      font-weight: 600;
+      color: var(--ux-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background-color: var(--ux-surface-secondary);
+      position: sticky;
+      top: 0;
+    }
+
+    .ux-search-select__helper {
+      margin-top: var(--ux-space-xs);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-search-select__error {
+      margin-top: var(--ux-space-xs);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-danger);
+    }
+
+    .ux-search-select--error .ux-search-select__input {
+      border-color: var(--ux-danger);
+    }
+
+    .ux-search-select--disabled .ux-search-select__input {
+      background-color: var(--ux-light);
+      color: var(--ux-text-tertiary);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    /* Highlight matched text */
+    .ux-search-select__highlight {
+      background-color: rgba(var(--ux-warning-rgb), 0.3);
+      border-radius: 2px;
+    }
+
+    /* Glass variant */
+    .ux-search-select--glass .ux-search-select__input {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-search-select--glass .ux-search-select__input:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-search-select--glass .ux-search-select__input:focus {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    .ux-search-select--glass .ux-search-select__dropdown {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-search-select--glass .ux-search-select__option:hover,
+    .ux-search-select--glass .ux-search-select__option--focused {
+      background-color: var(--ux-glass-bg-thick);
+    }
   `;
 
   // Inject styles
@@ -22039,6 +22330,230 @@
   } else {
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxMultiSelect', multiSelectComponent);
+    });
+  }
+
+  // Alpine component for search select (autocomplete)
+  // Opens dropdown after minChars (default 2) characters typed
+  const searchSelectComponent = (config = {}) => ({
+    isOpen: false,
+    query: '',
+    value: config.value || null,
+    options: config.options || [],
+    placeholder: config.placeholder || 'Search...',
+    disabled: config.disabled || false,
+    minChars: config.minChars ?? 2,
+    maxResults: config.maxResults || 50,
+    emptyText: config.emptyText || 'No results found',
+    loadingText: config.loadingText || 'Searching...',
+    loading: false,
+    error: '',
+    focusedIndex: -1,
+    searchSelectId: config.id || 'ux-search-select-' + Math.random().toString(36).substr(2, 9),
+
+    // Display field for selected value
+    get displayValue() {
+      const selected = this.options.find(opt => opt.value === this.value);
+      return selected ? selected.label : '';
+    },
+
+    get hasValue() {
+      return this.value !== null && this.value !== undefined && this.value !== '';
+    },
+
+    // Filter options based on query
+    get filteredOptions() {
+      if (!this.query || this.query.length < this.minChars) {
+        return [];
+      }
+
+      const q = this.query.toLowerCase().trim();
+      const filtered = this.options.filter(opt => {
+        if (opt.disabled) return false;
+        const label = (opt.label || '').toLowerCase();
+        const description = (opt.description || '').toLowerCase();
+        const searchText = (opt.searchText || '').toLowerCase();
+        return label.includes(q) || description.includes(q) || searchText.includes(q);
+      });
+
+      return filtered.slice(0, this.maxResults);
+    },
+
+    get shouldShowDropdown() {
+      return this.isOpen && this.query.length >= this.minChars;
+    },
+
+    init() {
+      // If value is set, populate query with display value
+      if (this.value) {
+        this.query = this.displayValue;
+      }
+    },
+
+    handleInput() {
+      this.error = '';
+
+      if (this.query.length >= this.minChars) {
+        this.isOpen = true;
+        this.focusedIndex = 0;
+      } else {
+        this.isOpen = false;
+        this.focusedIndex = -1;
+      }
+
+      // Clear value if query changed from selected value
+      if (this.value && this.query !== this.displayValue) {
+        this.value = null;
+      }
+    },
+
+    handleFocus() {
+      if (this.query.length >= this.minChars) {
+        this.isOpen = true;
+      }
+    },
+
+    handleBlur() {
+      // Delay close to allow click on option
+      setTimeout(() => {
+        this.isOpen = false;
+        // Reset query to selected value if exists
+        if (this.value) {
+          this.query = this.displayValue;
+        }
+      }, 200);
+    },
+
+    selectOption(option) {
+      if (option.disabled) return;
+
+      this.value = option.value;
+      this.query = option.label;
+      this.error = '';
+      this.isOpen = false;
+      this.focusedIndex = -1;
+
+      this.$dispatch('ux-search-select:change', {
+        value: option.value,
+        option: option
+      });
+    },
+
+    clear() {
+      this.value = null;
+      this.query = '';
+      this.error = '';
+      this.isOpen = false;
+      this.focusedIndex = -1;
+      this.$refs.input?.focus();
+
+      this.$dispatch('ux-search-select:clear');
+    },
+
+    isSelected(option) {
+      return this.value === option.value;
+    },
+
+    handleKeydown(event) {
+      const options = this.filteredOptions;
+
+      switch (event.key) {
+        case 'Escape':
+          this.isOpen = false;
+          this.focusedIndex = -1;
+          break;
+
+        case 'Enter':
+          event.preventDefault();
+          if (this.isOpen && this.focusedIndex >= 0 && this.focusedIndex < options.length) {
+            this.selectOption(options[this.focusedIndex]);
+          }
+          break;
+
+        case 'ArrowDown':
+          event.preventDefault();
+          if (!this.isOpen && this.query.length >= this.minChars) {
+            this.isOpen = true;
+          }
+          if (this.isOpen && options.length > 0) {
+            this.focusedIndex = Math.min(this.focusedIndex + 1, options.length - 1);
+            this.scrollToFocused();
+          }
+          break;
+
+        case 'ArrowUp':
+          event.preventDefault();
+          if (this.isOpen && options.length > 0) {
+            this.focusedIndex = Math.max(this.focusedIndex - 1, 0);
+            this.scrollToFocused();
+          }
+          break;
+
+        case 'Tab':
+          // Select focused option on tab if dropdown is open
+          if (this.isOpen && this.focusedIndex >= 0 && this.focusedIndex < options.length) {
+            this.selectOption(options[this.focusedIndex]);
+          }
+          break;
+      }
+    },
+
+    scrollToFocused() {
+      this.$nextTick(() => {
+        const dropdown = this.$refs.dropdown;
+        const focused = dropdown?.querySelector('.ux-search-select__option--focused');
+        if (focused && dropdown) {
+          focused.scrollIntoView({ block: 'nearest' });
+        }
+      });
+    },
+
+    isFocused(index) {
+      return this.focusedIndex === index;
+    },
+
+    // Highlight matching text in label
+    highlightMatch(text) {
+      if (!this.query || this.query.length < this.minChars) return text;
+
+      const q = this.query.trim();
+      const regex = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return text.replace(regex, '<span class="ux-search-select__highlight">$1</span>');
+    },
+
+    validate(required = false, message = 'Please select an option') {
+      if (required && !this.value) {
+        this.error = message;
+        return false;
+      }
+      this.error = '';
+      return true;
+    },
+
+    reset() {
+      this.value = null;
+      this.query = '';
+      this.error = '';
+      this.isOpen = false;
+      this.focusedIndex = -1;
+    },
+
+    // For async loading (can be called externally)
+    setOptions(options) {
+      this.options = options;
+      this.loading = false;
+    },
+
+    setLoading(loading) {
+      this.loading = loading;
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxSearchSelect', searchSelectComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxSearchSelect', searchSelectComponent);
     });
   }
 })();
