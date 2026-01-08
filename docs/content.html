@@ -8,6 +8,7 @@
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-toggle.js"></script>
   <script src="../components/ux-content.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-2xl); }
@@ -75,19 +76,68 @@
 
     <!-- App Structure -->
     <div class="demo-section">
-      <h3>Estructura de App</h3>
-      <p>Estructura basica de una aplicacion con header, content y footer.</p>
+      <h3>Estructura de App (CSS Grid)</h3>
+      <p>Estructura basica con header sticky, content scrollable y footer sticky. Usa CSS Grid con <code>grid-template-rows: auto 1fr auto</code> para calcular automaticamente el espacio.</p>
 
-      <div class="demo-frame demo-frame--tall" style="display: flex; flex-direction: column;">
-        <div style="background: var(--ux-primary); color: white; padding: var(--ux-space-md); text-align: center; font-weight: 500;">
-          .ux-header
+      <h4>Demo Interactivo</h4>
+      <p>Activa/desactiva header y footer para ver como el content se adapta automaticamente.</p>
+
+      <div class="demo-box" x-data="{ showHeader: true, showFooter: true }">
+        <div style="display: flex; gap: var(--ux-space-xl); margin-bottom: var(--ux-space-md); align-items: center;">
+          <label class="ux-toggle">
+            <input type="checkbox" x-model="showHeader" checked>
+            <span class="ux-toggle__track">
+              <span class="ux-toggle__thumb"></span>
+            </span>
+          </label>
+          <span>Header</span>
+
+          <label class="ux-toggle">
+            <input type="checkbox" x-model="showFooter" checked>
+            <span class="ux-toggle__track">
+              <span class="ux-toggle__thumb"></span>
+            </span>
+          </label>
+          <span>Footer</span>
         </div>
-        <div style="flex: 1; display: flex; align-items: center; justify-content: center; background: var(--ux-surface-secondary);">
-          <span style="color: var(--ux-text-secondary);">.ux-content</span>
+
+        <div class="demo-frame" style="height: 350px;">
+          <div class="ux-page" style="height: 100%;">
+            <header class="ux-header" x-show="showHeader" style="background: var(--ux-primary); color: white;">
+              <nav class="ux-navbar">
+                <div class="ux-navbar__content">
+                  <span class="ux-navbar__title" style="color: white;">.ux-header (sticky top)</span>
+                </div>
+              </nav>
+            </header>
+
+            <main class="ux-content" style="background: var(--ux-surface-secondary);">
+              <div class="ux-content__inner">
+                <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md);">.ux-content - Ocupa todo el espacio disponible</p>
+                <div style="height: 400px; background: rgba(var(--ux-primary-rgb), 0.05); border: 1px dashed var(--ux-border-color); border-radius: var(--ux-border-radius); padding: var(--ux-space-md);">
+                  <p>Contenido largo para probar scroll...</p>
+                  <p style="margin-top: 300px;">Final del contenido</p>
+                </div>
+              </div>
+            </main>
+
+            <footer class="ux-footer" x-show="showFooter">
+              <div style="padding: var(--ux-space-md); text-align: center; font-weight: 500;">
+                .ux-footer (sticky bottom)
+              </div>
+            </footer>
+          </div>
         </div>
-        <div style="background: var(--ux-surface); border-top: 1px solid var(--ux-border-color); padding: var(--ux-space-md); text-align: center; font-weight: 500;">
-          .ux-footer
-        </div>
+      </div>
+
+      <h4>Como Funciona</h4>
+      <div class="demo-box">
+        <code>.ux-page</code> usa CSS Grid:<br>
+        <code>display: grid;</code><br>
+        <code>grid-template-rows: auto 1fr auto;</code><br><br>
+        <strong>auto</strong> = tamaño natural del elemento (0 si no existe)<br>
+        <strong>1fr</strong> = todo el espacio restante<br><br>
+        <code>.ux-header</code> y <code>.ux-footer</code> son <strong>sticky</strong> por defecto.
       </div>
 
       <pre class="code-block"><code>&lt;body class="ux-app"&gt;
@@ -97,7 +147,7 @@
     &lt;/header&gt;
 
     &lt;main class="ux-content"&gt;
-      &lt;!-- Contenido principal --&gt;
+      &lt;!-- Contenido scrollable --&gt;
     &lt;/main&gt;
 
     &lt;footer class="ux-footer"&gt;
@@ -105,6 +155,78 @@
     &lt;/footer&gt;
   &lt;/div&gt;
 &lt;/body&gt;</code></pre>
+
+      <h4>Dentro de Split Pane</h4>
+      <p>El mismo layout funciona dentro de un panel del split-pane.</p>
+
+      <div class="demo-frame" style="height: 350px;" x-data="uxSplitPane()">
+        <div class="ux-split-pane" :class="containerClasses" style="height: 100%;">
+          <div class="ux-split-pane__backdrop" @click="close()"></div>
+
+          <aside class="ux-split-pane__side">
+            <div class="ux-page" style="height: 100%;">
+              <header class="ux-header" style="background: var(--ux-surface);">
+                <nav class="ux-navbar">
+                  <div class="ux-navbar__content">
+                    <span class="ux-navbar__title">Menu</span>
+                  </div>
+                </nav>
+              </header>
+              <main class="ux-content">
+                <div style="padding: var(--ux-space-md);">
+                  <div style="padding: var(--ux-space-sm) 0; color: var(--ux-text-secondary);">Item 1</div>
+                  <div style="padding: var(--ux-space-sm) 0; color: var(--ux-text-secondary);">Item 2</div>
+                  <div style="padding: var(--ux-space-sm) 0; color: var(--ux-text-secondary);">Item 3</div>
+                </div>
+              </main>
+            </div>
+          </aside>
+
+          <main class="ux-split-pane__main">
+            <div class="ux-page" style="height: 100%;">
+              <header class="ux-header" style="background: var(--ux-primary); color: white;">
+                <nav class="ux-navbar">
+                  <div class="ux-navbar__content">
+                    <div class="ux-navbar__start">
+                      <button class="ux-split-pane__toggle" @click="toggle()" style="color: white;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                      </button>
+                    </div>
+                    <span class="ux-navbar__title" style="color: white;">Main Content</span>
+                  </div>
+                </nav>
+              </header>
+              <main class="ux-content" style="background: var(--ux-surface-secondary);">
+                <div style="height: 400px; padding: var(--ux-space-lg);">
+                  <p>Contenido del panel principal con su propio header sticky.</p>
+                  <p style="margin-top: 300px;">Final del contenido</p>
+                </div>
+              </main>
+              <footer class="ux-footer">
+                <div style="padding: var(--ux-space-md); text-align: center;">Footer del panel</div>
+              </footer>
+            </div>
+          </main>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;!-- Split Pane con ux-page en cada panel --&gt;
+&lt;div class="ux-split-pane" x-data="uxSplitPane()"&gt;
+  &lt;aside class="ux-split-pane__side"&gt;
+    &lt;div class="ux-page"&gt;
+      &lt;header class="ux-header"&gt;...&lt;/header&gt;
+      &lt;main class="ux-content"&gt;...&lt;/main&gt;
+    &lt;/div&gt;
+  &lt;/aside&gt;
+
+  &lt;main class="ux-split-pane__main"&gt;
+    &lt;div class="ux-page"&gt;
+      &lt;header class="ux-header"&gt;...&lt;/header&gt;
+      &lt;main class="ux-content"&gt;...&lt;/main&gt;
+      &lt;footer class="ux-footer"&gt;...&lt;/footer&gt;
+    &lt;/div&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</code></pre>
     </div>
 
     <!-- Header Variants -->
