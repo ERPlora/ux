@@ -1043,6 +1043,173 @@
 }</pre>
     </section>
 
+    <!-- Async Loading -->
+    <section class="demo-section">
+      <h3>Carga Async (API/Backend)</h3>
+      <p>Cargar opciones desde un endpoint. Ideal para timezones, ciudades, o listas grandes traducidas por el backend.</p>
+      <div class="demo-box">
+        <div class="ux-search-select"
+             x-data="uxSearchSelect({
+               options: [],
+               placeholder: 'Buscar zona horaria...',
+               minChars: 1,
+               emptyText: 'Cargando...'
+             })"
+             x-init="
+               setLoading(true);
+               setTimeout(() => {
+                 setOptions([
+                   { value: 'Europe/Madrid', label: '(UTC+01:00) Madrid', description: 'Hora de Europa Central' },
+                   { value: 'Europe/Bucharest', label: '(UTC+02:00) Bucarest', description: 'Hora de Europa del Este' },
+                   { value: 'America/New_York', label: '(UTC-05:00) Nueva York', description: 'Hora del Este' },
+                   { value: 'America/Los_Angeles', label: '(UTC-08:00) Los Angeles', description: 'Hora del Pacifico' },
+                   { value: 'Asia/Tokyo', label: '(UTC+09:00) Tokio', description: 'Hora de Japon' },
+                   { value: 'Australia/Sydney', label: '(UTC+10:00) Sidney', description: 'Hora de Australia del Este' }
+                 ]);
+                 setLoading(false);
+               }, 1000);
+             "
+             :class="{
+               'ux-search-select--open': shouldShowDropdown,
+               'ux-search-select--has-value': hasValue
+             }">
+          <label class="ux-search-select__label">Zona Horaria</label>
+          <div class="ux-search-select__wrapper">
+            <div class="ux-search-select__input-wrapper">
+              <span class="ux-search-select__icon">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </span>
+              <input type="text"
+                     class="ux-search-select__input"
+                     x-ref="input"
+                     x-model="query"
+                     @input="handleInput()"
+                     @focus="handleFocus()"
+                     @blur="handleBlur()"
+                     @keydown="handleKeydown($event)"
+                     :placeholder="placeholder"
+                     autocomplete="off">
+              <button type="button"
+                      class="ux-search-select__clear"
+                      @click="clear()"
+                      x-show="hasValue || query"
+                      aria-label="Clear">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div class="ux-search-select__dropdown" x-ref="dropdown" x-show="shouldShowDropdown">
+              <template x-if="loading">
+                <div class="ux-search-select__loading">
+                  <span class="ux-spinner ux-spinner--sm"></span>
+                  <span x-text="loadingText"></span>
+                </div>
+              </template>
+              <template x-if="!loading && filteredOptions.length === 0">
+                <div class="ux-search-select__empty" x-text="emptyText"></div>
+              </template>
+              <template x-for="(option, index) in filteredOptions" :key="option.value">
+                <div class="ux-search-select__option"
+                     :class="{
+                       'ux-search-select__option--selected': isSelected(option),
+                       'ux-search-select__option--focused': isFocused(index)
+                     }"
+                     @click="selectOption(option)"
+                     @mouseenter="focusedIndex = index">
+                  <div class="ux-search-select__option-content">
+                    <span class="ux-search-select__option-label" x-html="highlightMatch(option.label)"></span>
+                    <span class="ux-search-select__option-description" x-text="option.description" x-show="option.description"></span>
+                  </div>
+                  <span class="ux-search-select__option-check" x-show="isSelected(option)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span style="color: #8b949e;">// Cargar desde API</span>
+<span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxSearchSelect({ options: [], placeholder: 'Buscar...' })"</span>
+     <span class="attr">x-init</span>=<span class="string">"
+       setLoading(true);
+       fetch('/api/timezones?lang=es')
+         .then(r => r.json())
+         .then(data => {
+           setOptions(data);
+           setLoading(false);
+         });
+     "</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span>
+
+<span style="color: #8b949e;">// Respuesta del backend (traducida)</span>
+[
+  { "value": "Europe/Madrid", "label": "(UTC+01:00) Madrid" },
+  { "value": "Europe/Bucharest", "label": "(UTC+02:00) Bucarest" },
+  { "value": "America/New_York", "label": "(UTC-05:00) Nueva York" }
+]
+
+<span style="color: #8b949e;">// Metodos para carga async</span>
+setOptions(options)  <span style="color: #8b949e;">// Establece las opciones</span>
+setLoading(bool)     <span style="color: #8b949e;">// Muestra/oculta spinner</span></pre>
+    </section>
+
+    <!-- HTMX Loading -->
+    <section class="demo-section">
+      <h3>Carga con HTMX</h3>
+      <p>Cargar opciones usando HTMX. El backend devuelve HTML con las opciones directamente.</p>
+      <pre class="code-block"><span style="color: #8b949e;">// Opcion 1: Cargar opciones al iniciar</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-search-select"</span>
+     <span class="attr">x-data</span>=<span class="string">"uxSearchSelect({ options: [] })"</span>
+     <span class="attr">hx-get</span>=<span class="string">"/api/timezones"</span>
+     <span class="attr">hx-trigger</span>=<span class="string">"load"</span>
+     <span class="attr">hx-swap</span>=<span class="string">"none"</span>
+     <span class="attr">@htmx:after-request</span>=<span class="string">"setOptions(JSON.parse($event.detail.xhr.response))"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span>
+
+<span style="color: #8b949e;">// Opcion 2: Busqueda en servidor (para listas muy grandes)</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-search-select"</span>
+     <span class="attr">x-data</span>=<span class="string">"uxSearchSelect({ options: [] })"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span>
+         <span class="attr">class</span>=<span class="string">"ux-search-select__input"</span>
+         <span class="attr">x-model</span>=<span class="string">"query"</span>
+         <span class="attr">hx-get</span>=<span class="string">"/api/timezones/search"</span>
+         <span class="attr">hx-trigger</span>=<span class="string">"input changed delay:300ms"</span>
+         <span class="attr">hx-vals</span>=<span class="string">"js:{q: query}"</span>
+         <span class="attr">hx-swap</span>=<span class="string">"none"</span>
+         <span class="attr">@htmx:before-request</span>=<span class="string">"setLoading(true)"</span>
+         <span class="attr">@htmx:after-request</span>=<span class="string">"setOptions(JSON.parse($event.detail.xhr.response)); setLoading(false)"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span style="color: #8b949e;">// Opcion 3: Reemplazar dropdown completo con HTML del servidor</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-search-select"</span> <span class="attr">x-data</span>=<span class="string">"{ query: '', value: null }"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span>
+         <span class="attr">x-model</span>=<span class="string">"query"</span>
+         <span class="attr">hx-get</span>=<span class="string">"/api/timezones/options"</span>
+         <span class="attr">hx-trigger</span>=<span class="string">"input changed delay:300ms"</span>
+         <span class="attr">hx-target</span>=<span class="string">"#dropdown"</span>
+         <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"dropdown"</span> <span class="attr">class</span>=<span class="string">"ux-search-select__dropdown"</span><span class="tag">&gt;</span>
+    <span style="color: #8b949e;">&lt;!-- El servidor devuelve las opciones como HTML --&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span style="color: #8b949e;">// Respuesta HTML del servidor (Opcion 3)</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-search-select__option"</span> <span class="attr">@click</span>=<span class="string">"value='Europe/Madrid'; query='Madrid'"</span><span class="tag">&gt;</span>
+  (UTC+01:00) Madrid
+<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-search-select__option"</span> <span class="attr">@click</span>=<span class="string">"value='Europe/Bucharest'; query='Bucarest'"</span><span class="tag">&gt;</span>
+  (UTC+02:00) Bucarest
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
     <!-- API Methods -->
     <section class="demo-section">
       <h3>API Alpine</h3>
