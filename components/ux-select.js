@@ -314,7 +314,7 @@
       position: relative;
       width: 100%;
       max-width: 320px;
-      max-height: 80vh;
+      max-height: 80dvh;
       background-color: var(--ux-surface);
       border-radius: var(--ux-border-radius-xl);
       box-shadow: var(--ux-shadow-xl);
@@ -519,7 +519,7 @@
       position: relative;
       background-color: var(--ux-surface);
       border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
-      max-height: 60vh;
+      max-height: 60dvh;
       display: flex;
       flex-direction: column;
       padding-bottom: env(safe-area-inset-bottom);

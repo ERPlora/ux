@@ -14,7 +14,6 @@
     .ux-app {
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
       min-height: 100dvh;
       background-color: var(--ux-background);
     }
@@ -212,8 +211,8 @@
       opacity: 0;
       visibility: hidden;
       transition:
-        opacity var(--ux-transition-normal) var(--ux-ease),
-        visibility var(--ux-transition-normal) var(--ux-ease);
+        opacity 350ms var(--ux-ease-ios),
+        visibility 350ms var(--ux-ease-ios);
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -239,14 +238,15 @@
       display: flex;
       flex-direction: column;
       width: var(--ux-split-pane-side-width);
-      max-width: 85vw;
+      max-width: 85dvw;
       background-color: var(--ux-glass-bg);
       backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
       -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
       border-right: 0.5px solid var(--ux-glass-border);
       overflow: hidden;
       transform: translateX(-100%);
-      transition: transform var(--ux-transition-normal) var(--ux-ease-spring);
+      /* iOS-style smooth transition */
+      transition: transform 350ms var(--ux-ease-ios);
       will-change: transform;
     }
 
@@ -293,7 +293,8 @@
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      transition: margin-left var(--ux-transition-normal) var(--ux-ease);
+      /* iOS-style smooth transition for layout changes */
+      transition: margin-left 350ms var(--ux-ease-ios);
     }
 
     /* Navbar inside main is sticky */
@@ -434,7 +435,7 @@
       color: var(--ux-text-secondary);
       cursor: pointer;
       box-shadow: var(--ux-shadow-sm);
-      transition: all var(--ux-transition-fast) var(--ux-ease);
+      transition: all 250ms var(--ux-ease-ios);
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -446,7 +447,7 @@
     .ux-split-pane__collapse svg {
       width: 14px;
       height: 14px;
-      transition: transform var(--ux-transition-fast) var(--ux-ease);
+      transition: transform 250ms var(--ux-ease-ios);
     }
 
     /* Rotate icon when collapsed */

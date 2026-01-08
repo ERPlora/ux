@@ -522,7 +522,7 @@
 
       /* Modal/Sheet - Based on Ionic iOS */
       --ux-modal-max-width: 500px;
-      --ux-modal-max-height: 90vh;
+      --ux-modal-max-height: 90dvh;
       --ux-modal-border-radius: 14px;
       --ux-modal-padding: 16px;
       --ux-sheet-border-radius: 14px;
@@ -561,10 +561,14 @@
       --ux-transition-instant: 50ms;
       --ux-transition-fast: 150ms;
       --ux-transition-base: 200ms;
+      --ux-transition-normal: 300ms;
       --ux-transition-slow: 300ms;
       --ux-transition-slower: 400ms;
       --ux-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
       --ux-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      /* iOS-style easing - smooth deceleration like UIKit */
+      --ux-ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+      --ux-ease-ios-spring: cubic-bezier(0.28, 0.84, 0.42, 1);
 
       /* Disabled State */
       --ux-disabled-opacity: 0.5;
@@ -1016,7 +1020,6 @@
       line-height: 1.5;
       color: var(--ux-text);
       background-color: var(--ux-background);
-      min-height: 100vh;
       min-height: 100dvh;
     }
 
@@ -1694,7 +1697,7 @@
       width: 100%;
       height: 100%;
       border: none;
-      min-height: calc(100vh - 56px);
+      min-height: calc(100dvh - 56px);
     }
 
     /* Ripple Effect Base */

@@ -102,8 +102,8 @@
     ======================================== */
 
     .ux-modal--full-height {
-      height: 100vh;
-      max-height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
       border-radius: 0;
     }
 
@@ -135,8 +135,8 @@
     /* Side modal base */
     .ux-modal--side {
       position: relative;
-      height: 100vh;
-      max-height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
       border-radius: 0;
       flex-shrink: 0;
     }
