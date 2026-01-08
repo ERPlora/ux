@@ -25,11 +25,30 @@
 
     .ux-page {
       position: relative;
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas:
+        "header"
+        "content"
+        "footer";
       flex: 1;
       width: 100%;
-      contain: layout size style;
+      height: 100%;
+      min-height: 0;
+      contain: layout style;
+    }
+
+    .ux-page > .ux-header {
+      grid-area: header;
+    }
+
+    .ux-page > .ux-content {
+      grid-area: content;
+      min-height: 0;
+    }
+
+    .ux-page > .ux-footer {
+      grid-area: footer;
     }
 
     /* ========================================
@@ -37,11 +56,13 @@
     ======================================== */
 
     .ux-header {
-      position: relative;
+      position: sticky;
+      top: 0;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      z-index: 10;
+      z-index: var(--ux-z-sticky);
+      background-color: var(--ux-surface);
     }
 
     .ux-header--fixed {
@@ -49,6 +70,7 @@
       top: 0;
       left: 0;
       right: 0;
+      z-index: var(--ux-z-fixed);
     }
 
     .ux-header--translucent {
@@ -132,11 +154,12 @@
     ======================================== */
 
     .ux-footer {
-      position: relative;
+      position: sticky;
+      bottom: 0;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      z-index: 10;
+      z-index: var(--ux-z-sticky);
       background-color: var(--ux-surface);
       border-top: 1px solid var(--ux-border-color);
     }
@@ -144,6 +167,7 @@
     .ux-footer--fixed {
       position: fixed;
       bottom: 0;
+      z-index: var(--ux-z-fixed);
       left: 0;
       right: 0;
     }
