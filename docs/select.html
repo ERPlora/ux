@@ -811,6 +811,238 @@
 <span class="tag">&lt;/select&gt;</span></pre>
     </section>
 
+    <!-- Search Select (Autocomplete) -->
+    <section class="demo-section">
+      <h3>Search Select (Autocomplete)</h3>
+      <p>Select con busqueda integrada. Ideal para listas largas como paises, ciudades o timezones. El dropdown aparece al escribir 2+ caracteres.</p>
+      <div class="demo-box">
+        <div class="ux-search-select"
+             x-data="uxSearchSelect({
+               options: [
+                 { value: 'Pacific/Midway', label: '(UTC-11:00) Midway Island', description: 'Samoa Standard Time' },
+                 { value: 'Pacific/Honolulu', label: '(UTC-10:00) Hawaii', description: 'Hawaii-Aleutian Standard Time' },
+                 { value: 'America/Anchorage', label: '(UTC-09:00) Alaska', description: 'Alaska Standard Time' },
+                 { value: 'America/Los_Angeles', label: '(UTC-08:00) Los Angeles', description: 'Pacific Standard Time' },
+                 { value: 'America/Denver', label: '(UTC-07:00) Denver', description: 'Mountain Standard Time' },
+                 { value: 'America/Chicago', label: '(UTC-06:00) Chicago', description: 'Central Standard Time' },
+                 { value: 'America/New_York', label: '(UTC-05:00) New York', description: 'Eastern Standard Time' },
+                 { value: 'America/Caracas', label: '(UTC-04:00) Caracas', description: 'Venezuela Time' },
+                 { value: 'America/Sao_Paulo', label: '(UTC-03:00) Sao Paulo', description: 'Brasilia Time' },
+                 { value: 'Atlantic/South_Georgia', label: '(UTC-02:00) South Georgia', description: 'South Georgia Time' },
+                 { value: 'Atlantic/Azores', label: '(UTC-01:00) Azores', description: 'Azores Standard Time' },
+                 { value: 'Europe/London', label: '(UTC+00:00) London', description: 'Greenwich Mean Time' },
+                 { value: 'Europe/Paris', label: '(UTC+01:00) Paris', description: 'Central European Time' },
+                 { value: 'Europe/Madrid', label: '(UTC+01:00) Madrid', description: 'Central European Time' },
+                 { value: 'Europe/Berlin', label: '(UTC+01:00) Berlin', description: 'Central European Time' },
+                 { value: 'Europe/Athens', label: '(UTC+02:00) Athens', description: 'Eastern European Time' },
+                 { value: 'Europe/Moscow', label: '(UTC+03:00) Moscow', description: 'Moscow Standard Time' },
+                 { value: 'Asia/Dubai', label: '(UTC+04:00) Dubai', description: 'Gulf Standard Time' },
+                 { value: 'Asia/Karachi', label: '(UTC+05:00) Karachi', description: 'Pakistan Standard Time' },
+                 { value: 'Asia/Kolkata', label: '(UTC+05:30) Mumbai', description: 'India Standard Time' },
+                 { value: 'Asia/Dhaka', label: '(UTC+06:00) Dhaka', description: 'Bangladesh Standard Time' },
+                 { value: 'Asia/Bangkok', label: '(UTC+07:00) Bangkok', description: 'Indochina Time' },
+                 { value: 'Asia/Shanghai', label: '(UTC+08:00) Shanghai', description: 'China Standard Time' },
+                 { value: 'Asia/Tokyo', label: '(UTC+09:00) Tokyo', description: 'Japan Standard Time' },
+                 { value: 'Australia/Sydney', label: '(UTC+10:00) Sydney', description: 'Australian Eastern Time' },
+                 { value: 'Pacific/Auckland', label: '(UTC+12:00) Auckland', description: 'New Zealand Standard Time' }
+               ],
+               placeholder: 'Escribe para buscar timezone...',
+               minChars: 2
+             })"
+             :class="{
+               'ux-search-select--open': shouldShowDropdown,
+               'ux-search-select--has-value': hasValue
+             }">
+          <label class="ux-search-select__label">Timezone</label>
+          <div class="ux-search-select__wrapper">
+            <div class="ux-search-select__input-wrapper">
+              <span class="ux-search-select__icon">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </span>
+              <input type="text"
+                     class="ux-search-select__input"
+                     x-ref="input"
+                     x-model="query"
+                     @input="handleInput()"
+                     @focus="handleFocus()"
+                     @blur="handleBlur()"
+                     @keydown="handleKeydown($event)"
+                     :placeholder="placeholder"
+                     autocomplete="off">
+              <button type="button"
+                      class="ux-search-select__clear"
+                      @click="clear()"
+                      x-show="hasValue || query"
+                      aria-label="Clear">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div class="ux-search-select__dropdown" x-ref="dropdown" x-show="shouldShowDropdown">
+              <template x-if="filteredOptions.length === 0 && !loading">
+                <div class="ux-search-select__empty" x-text="emptyText"></div>
+              </template>
+              <template x-if="loading">
+                <div class="ux-search-select__loading">
+                  <span class="ux-spinner ux-spinner--sm"></span>
+                  <span x-text="loadingText"></span>
+                </div>
+              </template>
+              <template x-for="(option, index) in filteredOptions" :key="option.value">
+                <div class="ux-search-select__option"
+                     :class="{
+                       'ux-search-select__option--selected': isSelected(option),
+                       'ux-search-select__option--focused': isFocused(index)
+                     }"
+                     @click="selectOption(option)"
+                     @mouseenter="focusedIndex = index">
+                  <div class="ux-search-select__option-content">
+                    <span class="ux-search-select__option-label" x-html="highlightMatch(option.label)"></span>
+                    <span class="ux-search-select__option-description" x-text="option.description" x-show="option.description"></span>
+                  </div>
+                  <span class="ux-search-select__option-check" x-show="isSelected(option)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </span>
+                </div>
+              </template>
+            </div>
+          </div>
+          <span class="ux-search-select__helper">Escribe al menos 2 caracteres para buscar</span>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-search-select"</span>
+     <span class="attr">x-data</span>=<span class="string">"uxSearchSelect({
+       options: [
+         { value: 'Europe/Madrid', label: '(UTC+01:00) Madrid', description: 'Central European Time' },
+         { value: 'America/New_York', label: '(UTC-05:00) New York', description: 'Eastern Standard Time' },
+         // ... mas opciones
+       ],
+       placeholder: 'Escribe para buscar...',
+       minChars: 2
+     })"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;label</span> <span class="attr">class</span>=<span class="string">"ux-search-select__label"</span><span class="tag">&gt;</span>Timezone<span class="tag">&lt;/label&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-search-select__wrapper"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-search-select__input-wrapper"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-search-select__icon"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/span&gt;</span>
+      <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span>
+             <span class="attr">class</span>=<span class="string">"ux-search-select__input"</span>
+             <span class="attr">x-model</span>=<span class="string">"query"</span>
+             <span class="attr">@input</span>=<span class="string">"handleInput()"</span>
+             <span class="attr">@keydown</span>=<span class="string">"handleKeydown($event)"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-search-select__clear"</span> <span class="attr">@click</span>=<span class="string">"clear()"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-search-select__dropdown"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;template</span> <span class="attr">x-for</span>=<span class="string">"option in filteredOptions"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-search-select__option"</span> <span class="attr">@click</span>=<span class="string">"selectOption(option)"</span><span class="tag">&gt;</span>
+          <span class="tag">&lt;span</span> <span class="attr">x-html</span>=<span class="string">"highlightMatch(option.label)"</span><span class="tag">&gt;&lt;/span&gt;</span>
+        <span class="tag">&lt;/div&gt;</span>
+      <span class="tag">&lt;/template&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- Search Select Countries -->
+    <section class="demo-section">
+      <h3>Search Select - Paises</h3>
+      <p>Ejemplo con lista de paises.</p>
+      <div class="demo-box">
+        <div class="ux-search-select"
+             x-data="uxSearchSelect({
+               options: [
+                 { value: 'AR', label: 'Argentina', searchText: 'buenos aires latinoamerica' },
+                 { value: 'AU', label: 'Australia', searchText: 'oceania sydney' },
+                 { value: 'BR', label: 'Brasil', searchText: 'brazil sao paulo latinoamerica' },
+                 { value: 'CA', label: 'Canada', searchText: 'toronto america norte' },
+                 { value: 'CL', label: 'Chile', searchText: 'santiago latinoamerica' },
+                 { value: 'CN', label: 'China', searchText: 'beijing asia' },
+                 { value: 'CO', label: 'Colombia', searchText: 'bogota latinoamerica' },
+                 { value: 'DE', label: 'Alemania', searchText: 'germany berlin europa' },
+                 { value: 'ES', label: 'Espana', searchText: 'spain madrid europa' },
+                 { value: 'FR', label: 'Francia', searchText: 'france paris europa' },
+                 { value: 'GB', label: 'Reino Unido', searchText: 'uk united kingdom london europa' },
+                 { value: 'IT', label: 'Italia', searchText: 'italy roma europa' },
+                 { value: 'JP', label: 'Japon', searchText: 'japan tokyo asia' },
+                 { value: 'MX', label: 'Mexico', searchText: 'cdmx latinoamerica' },
+                 { value: 'NL', label: 'Paises Bajos', searchText: 'netherlands amsterdam holanda europa' },
+                 { value: 'PE', label: 'Peru', searchText: 'lima latinoamerica' },
+                 { value: 'PT', label: 'Portugal', searchText: 'lisboa europa' },
+                 { value: 'US', label: 'Estados Unidos', searchText: 'usa america washington' },
+                 { value: 'UY', label: 'Uruguay', searchText: 'montevideo latinoamerica' },
+                 { value: 'VE', label: 'Venezuela', searchText: 'caracas latinoamerica' }
+               ],
+               placeholder: 'Buscar pais...',
+               minChars: 1
+             })"
+             :class="{
+               'ux-search-select--open': shouldShowDropdown,
+               'ux-search-select--has-value': hasValue
+             }">
+          <label class="ux-search-select__label">Pais</label>
+          <div class="ux-search-select__wrapper">
+            <div class="ux-search-select__input-wrapper">
+              <span class="ux-search-select__icon">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </span>
+              <input type="text"
+                     class="ux-search-select__input"
+                     x-ref="input"
+                     x-model="query"
+                     @input="handleInput()"
+                     @focus="handleFocus()"
+                     @blur="handleBlur()"
+                     @keydown="handleKeydown($event)"
+                     :placeholder="placeholder"
+                     autocomplete="off">
+              <button type="button"
+                      class="ux-search-select__clear"
+                      @click="clear()"
+                      x-show="hasValue || query"
+                      aria-label="Clear">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div class="ux-search-select__dropdown" x-ref="dropdown" x-show="shouldShowDropdown">
+              <template x-if="filteredOptions.length === 0">
+                <div class="ux-search-select__empty" x-text="emptyText"></div>
+              </template>
+              <template x-for="(option, index) in filteredOptions" :key="option.value">
+                <div class="ux-search-select__option"
+                     :class="{
+                       'ux-search-select__option--selected': isSelected(option),
+                       'ux-search-select__option--focused': isFocused(index)
+                     }"
+                     @click="selectOption(option)"
+                     @mouseenter="focusedIndex = index">
+                  <span class="ux-search-select__option-label" x-html="highlightMatch(option.label)"></span>
+                  <span class="ux-search-select__option-check" x-show="isSelected(option)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span style="color: #8b949e;">// Usa searchText para buscar por terminos adicionales</span>
+{
+  value: 'ES',
+  label: 'Espana',
+  searchText: 'spain madrid europa'  <span style="color: #8b949e;">// Busca por cualquiera de estas palabras</span>
+}</pre>
+    </section>
+
     <!-- API Methods -->
     <section class="demo-section">
       <h3>API Alpine</h3>
@@ -833,8 +1065,22 @@ error           <span style="color: #8b949e;">// Mensaje de error</span>
 values          <span style="color: #8b949e;">// Array de valores seleccionados</span>
 toggleOption()  <span style="color: #8b949e;">// Toggle una opcion</span>
 removeValue()   <span style="color: #8b949e;">// Elimina un valor</span>
-selectAll()     <span style="color: #8b949e;">// Selecciona todas</span>
-clearAll()      <span style="color: #8b949e;">// Limpia seleccion</span></pre>
+
+<span style="color: #8b949e;">// uxSearchSelect (autocomplete)</span>
+query           <span style="color: #8b949e;">// Texto de busqueda actual</span>
+value           <span style="color: #8b949e;">// Valor seleccionado</span>
+filteredOptions <span style="color: #8b949e;">// Opciones filtradas por query</span>
+handleInput()   <span style="color: #8b949e;">// Maneja cambios en el input</span>
+selectOption()  <span style="color: #8b949e;">// Selecciona una opcion</span>
+clear()         <span style="color: #8b949e;">// Limpia seleccion y query</span>
+highlightMatch()<span style="color: #8b949e;">// Resalta texto coincidente</span>
+validate()      <span style="color: #8b949e;">// Valida el campo</span>
+reset()         <span style="color: #8b949e;">// Resetea todo</span>
+
+<span style="color: #8b949e;">// Config uxSearchSelect</span>
+minChars: 2     <span style="color: #8b949e;">// Caracteres minimos para buscar</span>
+maxResults: 50  <span style="color: #8b949e;">// Maximo resultados mostrados</span>
+emptyText       <span style="color: #8b949e;">// Texto cuando no hay resultados</span></pre>
     </section>
   </div>
 </body>
