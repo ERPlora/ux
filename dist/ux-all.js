@@ -19714,6 +19714,75 @@
       transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
     }
 
+    /* ========================================
+       Side Sheet with Bootstrap Grid
+       Use Bootstrap columns for responsive width:
+       col-10 col-md-6 col-lg-4 etc.
+    ======================================== */
+
+    .ux-side-sheet-container {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: var(--ux-z-modal);
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .ux-side-sheet-container > .row {
+      height: 100%;
+      margin: 0;
+    }
+
+    .ux-side-sheet-container [class*="col"] {
+      padding: 0;
+      height: 100%;
+      pointer-events: auto;
+    }
+
+    /* Left side sheet (default) */
+    .ux-side-sheet-container--left [class*="col"] {
+      transform: translateX(-100%);
+      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    /* Right side sheet */
+    .ux-side-sheet-container--right > .row {
+      justify-content: flex-end;
+    }
+
+    .ux-side-sheet-container--right [class*="col"] {
+      transform: translateX(100%);
+      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    /* Open state */
+    .ux-sheet-backdrop--open .ux-side-sheet-container [class*="col"] {
+      transform: translateX(0);
+      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    /* Side sheet inside grid column */
+    .ux-side-sheet--grid {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      border-radius: 0;
+      transform: none;
+    }
+
+    /* Border radius for grid side sheets */
+    .ux-side-sheet-container--left .ux-side-sheet--grid {
+      border-radius: 0 var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0;
+    }
+
+    .ux-side-sheet-container--right .ux-side-sheet--grid {
+      border-radius: var(--ux-border-radius-xl) 0 0 var(--ux-border-radius-xl);
+    }
+
     /* Side Sheet Header */
     .ux-side-sheet__header {
       display: flex;
