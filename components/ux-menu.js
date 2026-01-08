@@ -314,7 +314,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        max-height: 60vh;
+        max-height: 60dvh;
         min-width: auto;
         max-width: none;
         border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;

@@ -19,16 +19,16 @@
       opacity: 0;
       visibility: hidden;
       transition:
-        opacity 350ms cubic-bezier(0.32, 0.72, 0, 1),
-        visibility 350ms cubic-bezier(0.32, 0.72, 0, 1);
+        opacity 350ms var(--ux-ease-ios),
+        visibility 350ms var(--ux-ease-ios);
     }
 
     .ux-sheet-backdrop--open {
       opacity: 1;
       visibility: visible;
       transition:
-        opacity 300ms cubic-bezier(0.32, 0.72, 0, 1),
-        visibility 300ms cubic-bezier(0.32, 0.72, 0, 1);
+        opacity 300ms var(--ux-ease-ios),
+        visibility 300ms var(--ux-ease-ios);
     }
 
     /* ========================================
@@ -52,8 +52,8 @@
       flex-direction: column;
       z-index: var(--ux-z-modal);
       transform: translateY(100%);
-      /* iOS-style smooth spring transition for closing */
-      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+      /* iOS-style smooth transition for closing */
+      transition: transform 350ms var(--ux-ease-ios);
       padding-bottom: env(safe-area-inset-bottom);
       will-change: transform;
     }
@@ -67,8 +67,8 @@
 
     .ux-sheet-backdrop--open .ux-sheet {
       transform: translateY(0);
-      /* Faster, snappier spring for opening */
-      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+      /* Slightly slower for opening - feels more natural */
+      transition: transform 400ms var(--ux-ease-ios);
     }
 
     /* ========================================
@@ -200,30 +200,30 @@
     ======================================== */
 
     .ux-sheet--sm {
-      height: 40vh;
-      max-height: 40vh;
+      height: 40dvh;
+      max-height: 40dvh;
     }
 
     .ux-sheet--md {
-      height: 60vh;
-      max-height: 60vh;
+      height: 60dvh;
+      max-height: 60dvh;
     }
 
     .ux-sheet--lg {
-      height: 80vh;
-      max-height: 80vh;
+      height: 80dvh;
+      max-height: 80dvh;
     }
 
     .ux-sheet--full {
-      height: 100vh;
-      max-height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
       border-radius: 0;
     }
 
     /* Auto height based on content */
     .ux-sheet--auto {
       height: auto;
-      max-height: 90vh;
+      max-height: 90dvh;
     }
 
     /* ========================================
@@ -231,15 +231,15 @@
     ======================================== */
 
     .ux-sheet--detent-small {
-      max-height: 25vh;
+      max-height: 25dvh;
     }
 
     .ux-sheet--detent-medium {
-      max-height: 50vh;
+      max-height: 50dvh;
     }
 
     .ux-sheet--detent-large {
-      max-height: 90vh;
+      max-height: 90dvh;
     }
 
     /* ========================================
@@ -287,7 +287,7 @@
       top: 0;
       bottom: 0;
       width: 320px;
-      max-width: 85vw;
+      max-width: 85dvw;
       /* Glass by default (iOS style) */
       background-color: var(--ux-glass-bg);
       backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
@@ -297,7 +297,7 @@
       flex-direction: column;
       z-index: var(--ux-z-modal);
       /* iOS-style smooth transition for closing */
-      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 350ms var(--ux-ease-ios);
       will-change: transform;
     }
 
@@ -323,8 +323,8 @@
     .ux-sheet-backdrop--open .ux-side-sheet--left,
     .ux-sheet-backdrop--open .ux-side-sheet--right {
       transform: translateX(0);
-      /* Smooth spring for opening */
-      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+      /* Slightly slower for opening */
+      transition: transform 400ms var(--ux-ease-ios);
     }
 
     /* ========================================
@@ -358,7 +358,7 @@
     /* Left side sheet (default) */
     .ux-side-sheet-container--left [class*="col"] {
       transform: translateX(-100%);
-      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 350ms var(--ux-ease-ios);
     }
 
     /* Right side sheet */
@@ -368,13 +368,13 @@
 
     .ux-side-sheet-container--right [class*="col"] {
       transform: translateX(100%);
-      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 350ms var(--ux-ease-ios);
     }
 
     /* Open state */
     .ux-sheet-backdrop--open .ux-side-sheet-container [class*="col"] {
       transform: translateX(0);
-      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 400ms var(--ux-ease-ios);
     }
 
     /* Side sheet inside grid column */
@@ -436,15 +436,15 @@
       z-index: var(--ux-z-modal);
       transform: translateY(calc(100% + var(--ux-space-lg)));
       /* iOS-style smooth transition for closing */
-      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 350ms var(--ux-ease-ios);
       padding-bottom: env(safe-area-inset-bottom);
       will-change: transform;
     }
 
     .ux-sheet-backdrop--open .ux-action-sheet {
       transform: translateY(0);
-      /* Smooth spring for opening */
-      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+      /* Slightly slower for opening */
+      transition: transform 400ms var(--ux-ease-ios);
     }
 
     .ux-action-sheet__group {

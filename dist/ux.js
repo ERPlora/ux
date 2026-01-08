@@ -522,7 +522,7 @@
 
       /* Modal/Sheet - Based on Ionic iOS */
       --ux-modal-max-width: 500px;
-      --ux-modal-max-height: 90vh;
+      --ux-modal-max-height: 90dvh;
       --ux-modal-border-radius: 14px;
       --ux-modal-padding: 16px;
       --ux-sheet-border-radius: 14px;
@@ -561,10 +561,14 @@
       --ux-transition-instant: 50ms;
       --ux-transition-fast: 150ms;
       --ux-transition-base: 200ms;
+      --ux-transition-normal: 300ms;
       --ux-transition-slow: 300ms;
       --ux-transition-slower: 400ms;
       --ux-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
       --ux-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      /* iOS-style easing - smooth deceleration like UIKit */
+      --ux-ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+      --ux-ease-ios-spring: cubic-bezier(0.28, 0.84, 0.42, 1);
 
       /* Disabled State */
       --ux-disabled-opacity: 0.5;
@@ -1016,7 +1020,6 @@
       line-height: 1.5;
       color: var(--ux-text);
       background-color: var(--ux-background);
-      min-height: 100vh;
       min-height: 100dvh;
     }
 
@@ -1694,7 +1697,7 @@
       width: 100%;
       height: 100%;
       border: none;
-      min-height: calc(100vh - 56px);
+      min-height: calc(100dvh - 56px);
     }
 
     /* Ripple Effect Base */
@@ -7715,7 +7718,6 @@
     .ux-app {
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
       min-height: 100dvh;
       background-color: var(--ux-background);
     }
@@ -7913,8 +7915,8 @@
       opacity: 0;
       visibility: hidden;
       transition:
-        opacity var(--ux-transition-normal) var(--ux-ease),
-        visibility var(--ux-transition-normal) var(--ux-ease);
+        opacity 350ms var(--ux-ease-ios),
+        visibility 350ms var(--ux-ease-ios);
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -7940,14 +7942,15 @@
       display: flex;
       flex-direction: column;
       width: var(--ux-split-pane-side-width);
-      max-width: 85vw;
+      max-width: 85dvw;
       background-color: var(--ux-glass-bg);
       backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
       -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
       border-right: 0.5px solid var(--ux-glass-border);
       overflow: hidden;
       transform: translateX(-100%);
-      transition: transform var(--ux-transition-normal) var(--ux-ease-spring);
+      /* iOS-style smooth transition */
+      transition: transform 350ms var(--ux-ease-ios);
       will-change: transform;
     }
 
@@ -7994,7 +7997,8 @@
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      transition: margin-left var(--ux-transition-normal) var(--ux-ease);
+      /* iOS-style smooth transition for layout changes */
+      transition: margin-left 350ms var(--ux-ease-ios);
     }
 
     /* Navbar inside main is sticky */
@@ -8135,7 +8139,7 @@
       color: var(--ux-text-secondary);
       cursor: pointer;
       box-shadow: var(--ux-shadow-sm);
-      transition: all var(--ux-transition-fast) var(--ux-ease);
+      transition: all 250ms var(--ux-ease-ios);
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -8147,7 +8151,7 @@
     .ux-split-pane__collapse svg {
       width: 14px;
       height: 14px;
-      transition: transform var(--ux-transition-fast) var(--ux-ease);
+      transition: transform 250ms var(--ux-ease-ios);
     }
 
     /* Rotate icon when collapsed */
@@ -14174,7 +14178,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        max-height: 60vh;
+        max-height: 60dvh;
         min-width: auto;
         max-width: none;
         border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
@@ -14564,8 +14568,8 @@
     ======================================== */
 
     .ux-modal--full-height {
-      height: 100vh;
-      max-height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
       border-radius: 0;
     }
 
@@ -14597,8 +14601,8 @@
     /* Side modal base */
     .ux-modal--side {
       position: relative;
-      height: 100vh;
-      max-height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
       border-radius: 0;
       flex-shrink: 0;
     }
@@ -21225,7 +21229,7 @@
       position: relative;
       width: 100%;
       max-width: 320px;
-      max-height: 80vh;
+      max-height: 80dvh;
       background-color: var(--ux-surface);
       border-radius: var(--ux-border-radius-xl);
       box-shadow: var(--ux-shadow-xl);
@@ -21430,7 +21434,7 @@
       position: relative;
       background-color: var(--ux-surface);
       border-radius: var(--ux-border-radius-xl) var(--ux-border-radius-xl) 0 0;
-      max-height: 60vh;
+      max-height: 60dvh;
       display: flex;
       flex-direction: column;
       padding-bottom: env(safe-area-inset-bottom);
@@ -22603,16 +22607,16 @@
       opacity: 0;
       visibility: hidden;
       transition:
-        opacity 350ms cubic-bezier(0.32, 0.72, 0, 1),
-        visibility 350ms cubic-bezier(0.32, 0.72, 0, 1);
+        opacity 350ms var(--ux-ease-ios),
+        visibility 350ms var(--ux-ease-ios);
     }
 
     .ux-sheet-backdrop--open {
       opacity: 1;
       visibility: visible;
       transition:
-        opacity 300ms cubic-bezier(0.32, 0.72, 0, 1),
-        visibility 300ms cubic-bezier(0.32, 0.72, 0, 1);
+        opacity 300ms var(--ux-ease-ios),
+        visibility 300ms var(--ux-ease-ios);
     }
 
     /* ========================================
@@ -22636,8 +22640,8 @@
       flex-direction: column;
       z-index: var(--ux-z-modal);
       transform: translateY(100%);
-      /* iOS-style smooth spring transition for closing */
-      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+      /* iOS-style smooth transition for closing */
+      transition: transform 350ms var(--ux-ease-ios);
       padding-bottom: env(safe-area-inset-bottom);
       will-change: transform;
     }
@@ -22651,8 +22655,8 @@
 
     .ux-sheet-backdrop--open .ux-sheet {
       transform: translateY(0);
-      /* Faster, snappier spring for opening */
-      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+      /* Slightly slower for opening - feels more natural */
+      transition: transform 400ms var(--ux-ease-ios);
     }
 
     /* ========================================
@@ -22784,30 +22788,30 @@
     ======================================== */
 
     .ux-sheet--sm {
-      height: 40vh;
-      max-height: 40vh;
+      height: 40dvh;
+      max-height: 40dvh;
     }
 
     .ux-sheet--md {
-      height: 60vh;
-      max-height: 60vh;
+      height: 60dvh;
+      max-height: 60dvh;
     }
 
     .ux-sheet--lg {
-      height: 80vh;
-      max-height: 80vh;
+      height: 80dvh;
+      max-height: 80dvh;
     }
 
     .ux-sheet--full {
-      height: 100vh;
-      max-height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
       border-radius: 0;
     }
 
     /* Auto height based on content */
     .ux-sheet--auto {
       height: auto;
-      max-height: 90vh;
+      max-height: 90dvh;
     }
 
     /* ========================================
@@ -22815,15 +22819,15 @@
     ======================================== */
 
     .ux-sheet--detent-small {
-      max-height: 25vh;
+      max-height: 25dvh;
     }
 
     .ux-sheet--detent-medium {
-      max-height: 50vh;
+      max-height: 50dvh;
     }
 
     .ux-sheet--detent-large {
-      max-height: 90vh;
+      max-height: 90dvh;
     }
 
     /* ========================================
@@ -22871,7 +22875,7 @@
       top: 0;
       bottom: 0;
       width: 320px;
-      max-width: 85vw;
+      max-width: 85dvw;
       /* Glass by default (iOS style) */
       background-color: var(--ux-glass-bg);
       backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
@@ -22881,7 +22885,7 @@
       flex-direction: column;
       z-index: var(--ux-z-modal);
       /* iOS-style smooth transition for closing */
-      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 350ms var(--ux-ease-ios);
       will-change: transform;
     }
 
@@ -22907,8 +22911,8 @@
     .ux-sheet-backdrop--open .ux-side-sheet--left,
     .ux-sheet-backdrop--open .ux-side-sheet--right {
       transform: translateX(0);
-      /* Smooth spring for opening */
-      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+      /* Slightly slower for opening */
+      transition: transform 400ms var(--ux-ease-ios);
     }
 
     /* ========================================
@@ -22942,7 +22946,7 @@
     /* Left side sheet (default) */
     .ux-side-sheet-container--left [class*="col"] {
       transform: translateX(-100%);
-      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 350ms var(--ux-ease-ios);
     }
 
     /* Right side sheet */
@@ -22952,13 +22956,13 @@
 
     .ux-side-sheet-container--right [class*="col"] {
       transform: translateX(100%);
-      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 350ms var(--ux-ease-ios);
     }
 
     /* Open state */
     .ux-sheet-backdrop--open .ux-side-sheet-container [class*="col"] {
       transform: translateX(0);
-      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 400ms var(--ux-ease-ios);
     }
 
     /* Side sheet inside grid column */
@@ -23020,15 +23024,15 @@
       z-index: var(--ux-z-modal);
       transform: translateY(calc(100% + var(--ux-space-lg)));
       /* iOS-style smooth transition for closing */
-      transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 350ms var(--ux-ease-ios);
       padding-bottom: env(safe-area-inset-bottom);
       will-change: transform;
     }
 
     .ux-sheet-backdrop--open .ux-action-sheet {
       transform: translateY(0);
-      /* Smooth spring for opening */
-      transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+      /* Slightly slower for opening */
+      transition: transform 400ms var(--ux-ease-ios);
     }
 
     .ux-action-sheet__group {
