@@ -26505,9 +26505,10 @@
       justify-content: center;
       background-color: var(--ux-surface-secondary);
       border: 1px solid var(--ux-border-color);
-      border-radius: var(--ux-border-radius-md);
+      border-radius: var(--ux-glass-radius-sm);
       overflow: hidden;
       flex-shrink: 0;
+      transition: border-color 200ms var(--ux-ease-ios);
     }
 
     .ux-upload-image__preview--rounded {
@@ -26562,6 +26563,7 @@
     ======================================== */
 
     .ux-upload-area {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -26570,12 +26572,12 @@
       padding: var(--ux-space-xl);
       background-color: var(--ux-surface);
       border: 2px dashed var(--ux-border-color);
-      border-radius: var(--ux-border-radius-lg);
+      border-radius: var(--ux-glass-radius-md);
       cursor: pointer;
       text-align: center;
       transition:
-        border-color var(--ux-transition-fast) var(--ux-ease),
-        background-color var(--ux-transition-fast) var(--ux-ease);
+        border-color 200ms var(--ux-ease-ios),
+        background-color 200ms var(--ux-ease-ios);
     }
 
     .ux-upload-area:hover {
@@ -26604,7 +26606,7 @@
       height: 48px;
       margin-bottom: var(--ux-space-md);
       color: var(--ux-text-tertiary);
-      transition: color var(--ux-transition-fast) var(--ux-ease);
+      transition: color 200ms var(--ux-ease-ios);
     }
 
     .ux-upload-area:hover .ux-upload-area__icon,
