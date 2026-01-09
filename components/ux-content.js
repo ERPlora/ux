@@ -367,6 +367,10 @@
         transform: translateX(-100%);
       }
 
+      .ux-split-pane--drawer.ux-split-pane--end .ux-split-pane__side {
+        transform: translateX(100%);
+      }
+
       .ux-split-pane--drawer.ux-split-pane--open .ux-split-pane__side {
         transform: translateX(0);
       }
