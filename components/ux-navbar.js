@@ -408,6 +408,28 @@
     .ux-navbar--lg .ux-navbar__title {
       font-size: var(--ux-font-size-xl);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-navbar__button {
+        transition: none;
+      }
+
+      .ux-navbar--collapsible .ux-navbar__large-title {
+        transition: none;
+      }
+
+      .ux-navbar--collapsible .ux-navbar__center {
+        transition: none;
+      }
+
+      .ux-navbar__progress-bar {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles

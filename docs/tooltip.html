@@ -2,37 +2,33 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Tooltip - UX Library</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-tooltip.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
-    .demo-section { margin-bottom: var(--ux-space-2xl); }
-    .demo-box {
-      padding: var(--ux-space-xl);
-      background: var(--ux-surface);
-      border-radius: var(--ux-border-radius-lg);
-      border: 1px solid var(--ux-border-color);
-    }
-    .code-block {
-      background: var(--ux-surface-secondary);
-      padding: var(--ux-space-md);
-      border-radius: var(--ux-border-radius-md);
-      font-size: var(--ux-font-size-md);
-      overflow-x: auto;
-      margin-top: var(--ux-space-md);
-    }
-    .demo-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--ux-space-xl);
-      align-items: center;
-    }
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { padding: var(--ux-space-xl); background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); border: 1px solid var(--ux-border-color); margin-bottom: var(--ux-space-md); }
+    .demo-row { display: flex; flex-wrap: wrap; gap: var(--ux-space-xl); align-items: center; }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-sm); overflow-x: auto; white-space: pre; }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+    .ux-table { width: 100%; border-collapse: collapse; margin-bottom: var(--ux-space-lg); }
+    .ux-table th, .ux-table td { padding: var(--ux-space-sm) var(--ux-space-md); text-align: left; border-bottom: 1px solid var(--ux-border-color); }
+    .ux-table th { font-weight: 600; color: var(--ux-text); background: var(--ux-surface-secondary); }
+    .ux-table td { color: var(--ux-text-secondary); }
+    .ux-table code { background: var(--ux-surface-secondary); padding: 2px 6px; border-radius: 4px; font-size: var(--ux-font-size-sm); }
   </style>
 </head>
-<body class="ux-body ux-theme-ocean">
+<body class="ux-app">
   <nav class="ux-navbar">
     <div class="ux-navbar__content">
       <div class="ux-navbar__start">
@@ -332,65 +328,298 @@ hide()    // Ocultar tooltip
 toggle()  // Alternar</pre>
     </div>
 
+    <!-- HTMX Integration -->
+    <div class="demo-section">
+      <h3>Integracion con HTMX</h3>
+      <p>Los tooltips pueden cargar contenido dinamicamente del servidor usando HTMX.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Tooltip con Contenido Dinamico</h4>
+      <p>Cargar contenido del tooltip desde el servidor al hacer hover.</p>
+
+      <div class="demo-box">
+        <div class="demo-row" style="justify-content: center;">
+          <span class="ux-tooltip ux-tooltip--rich ux-tooltip--light">
+            <button class="ux-button"
+                    hx-get="/api/users/1/tooltip"
+                    hx-target="next .ux-tooltip__content"
+                    hx-trigger="mouseenter"
+                    hx-swap="innerHTML">
+              Ver usuario
+            </button>
+            <span class="ux-tooltip__content" style="min-width: 200px;">
+              <span class="ux-spinner ux-spinner--sm"></span> Cargando...
+            </span>
+          </span>
+
+          <span class="ux-tooltip ux-tooltip--multiline">
+            <button class="ux-button ux-button--outline"
+                    hx-get="/api/products/123/info"
+                    hx-target="next .ux-tooltip__content"
+                    hx-trigger="mouseenter once"
+                    hx-swap="innerHTML">
+              Info Producto
+            </button>
+            <span class="ux-tooltip__content">Cargando info...</span>
+          </span>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Tooltip que carga contenido al hover --&gt;</span>
+<span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tooltip ux-tooltip--rich"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">hx-get</span>=<span class="string">"/api/user/1/tooltip"</span>
+          <span class="attr">hx-target</span>=<span class="string">"next .ux-tooltip__content"</span>
+          <span class="attr">hx-trigger</span>=<span class="string">"mouseenter"</span>
+          <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+    Ver usuario
+  <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tooltip__content"</span><span class="tag">&gt;</span>
+    Cargando...
+  <span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/span&gt;</span>
+
+<span class="comment">&lt;!-- Cargar solo una vez con "once" --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">hx-get</span>=<span class="string">"/api/product/info"</span>
+        <span class="attr">hx-trigger</span>=<span class="string">"mouseenter once"</span><span class="tag">&gt;</span>
+  Info
+<span class="tag">&lt;/button&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Preview de Datos</h4>
+      <p>Mostrar preview de datos al hacer hover sobre enlaces o items de lista.</p>
+
+      <div class="demo-box">
+        <div style="display: flex; flex-direction: column; gap: var(--ux-space-sm); max-width: 300px;">
+          <div style="display: flex; justify-content: space-between; padding: var(--ux-space-sm); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius);">
+            <span>Pedido #1234</span>
+            <span class="ux-tooltip ux-tooltip--left ux-tooltip--rich ux-tooltip--light">
+              <button class="ux-button ux-button--clear ux-button--sm"
+                      style="padding: 4px;"
+                      hx-get="/api/orders/1234/preview"
+                      hx-target="next .ux-tooltip__content"
+                      hx-trigger="mouseenter"
+                      hx-swap="innerHTML">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </button>
+              <span class="ux-tooltip__content" style="min-width: 180px;">
+                <div class="ux-tooltip__title">Pedido #1234</div>
+                <div class="ux-tooltip__description">3 items - $45.00</div>
+              </span>
+            </span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; padding: var(--ux-space-sm); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius);">
+            <span>Pedido #1235</span>
+            <span class="ux-tooltip ux-tooltip--left ux-tooltip--rich ux-tooltip--light">
+              <button class="ux-button ux-button--clear ux-button--sm"
+                      style="padding: 4px;"
+                      hx-get="/api/orders/1235/preview"
+                      hx-target="next .ux-tooltip__content"
+                      hx-trigger="mouseenter"
+                      hx-swap="innerHTML">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </button>
+              <span class="ux-tooltip__content" style="min-width: 180px;">
+                <div class="ux-tooltip__title">Pedido #1235</div>
+                <div class="ux-tooltip__description">1 item - $12.50</div>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Preview de pedido en tooltip --&gt;</span>
+<span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tooltip ux-tooltip--rich"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">hx-get</span>=<span class="string">"/api/orders/1234/preview"</span>
+          <span class="attr">hx-target</span>=<span class="string">"next .ux-tooltip__content"</span>
+          <span class="attr">hx-trigger</span>=<span class="string">"mouseenter"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;svg&gt;</span>...<span class="tag">&lt;/svg&gt;</span>
+  <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tooltip__content"</span><span class="tag">&gt;</span>
+    <span class="comment">&lt;!-- El servidor devuelve el preview --&gt;</span>
+  <span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/span&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Tooltip de Ayuda Contextual</h4>
+      <p>Cargar texto de ayuda segun el contexto del formulario.</p>
+
+      <div class="demo-box">
+        <form style="max-width: 400px;">
+          <div class="ux-input" style="margin-bottom: var(--ux-space-md);">
+            <div style="display: flex; align-items: center; gap: var(--ux-space-sm);">
+              <label class="ux-input__label" for="sku-input">SKU</label>
+              <span class="ux-tooltip ux-tooltip--sm">
+                <span hx-get="/api/help/sku-format"
+                      hx-target="next .ux-tooltip__content"
+                      hx-trigger="mouseenter once"
+                      hx-swap="innerHTML"
+                      style="cursor: help; color: var(--ux-text-secondary);">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </span>
+                <span class="ux-tooltip__content">Formato: ABC-123</span>
+              </span>
+            </div>
+            <input type="text" id="sku-input" class="ux-input__field" placeholder="ABC-123">
+          </div>
+
+          <div class="ux-input">
+            <div style="display: flex; align-items: center; gap: var(--ux-space-sm);">
+              <label class="ux-input__label" for="price-input">Precio</label>
+              <span class="ux-tooltip ux-tooltip--sm">
+                <span hx-get="/api/help/price-format"
+                      hx-target="next .ux-tooltip__content"
+                      hx-trigger="mouseenter once"
+                      hx-swap="innerHTML"
+                      style="cursor: help; color: var(--ux-text-secondary);">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </span>
+                <span class="ux-tooltip__content">Sin simbolo de moneda</span>
+              </span>
+            </div>
+            <input type="text" id="price-input" class="ux-input__field" placeholder="99.99">
+          </div>
+        </form>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Tooltip de ayuda que carga del servidor --&gt;</span>
+<span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tooltip"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">hx-get</span>=<span class="string">"/api/help/field-name"</span>
+        <span class="attr">hx-target</span>=<span class="string">"next .ux-tooltip__content"</span>
+        <span class="attr">hx-trigger</span>=<span class="string">"mouseenter once"</span>
+        <span class="attr">style</span>=<span class="string">"cursor: help"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;svg&gt;</span>?<span class="tag">&lt;/svg&gt;</span>
+  <span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tooltip__content"</span><span class="tag">&gt;</span>
+    Cargando ayuda...
+  <span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/span&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Tooltip con Estado en Tiempo Real</h4>
+      <p>Mostrar estado de un proceso que se actualiza periodicamente.</p>
+
+      <div class="demo-box">
+        <div class="demo-row" style="justify-content: center;">
+          <span class="ux-tooltip ux-tooltip--rich ux-tooltip--light">
+            <button class="ux-button ux-color-success"
+                    hx-get="/api/server/status"
+                    hx-target="next .ux-tooltip__content"
+                    hx-trigger="mouseenter, every 10s[this.matches(':hover')]"
+                    hx-swap="innerHTML">
+              <span style="width: 8px; height: 8px; background: currentColor; border-radius: 50%; display: inline-block;"></span>
+              Servidor Online
+            </button>
+            <span class="ux-tooltip__content" style="min-width: 200px;">
+              <div class="ux-tooltip__title">Estado del Servidor</div>
+              <div class="ux-tooltip__description">
+                CPU: 45%<br>
+                RAM: 2.1GB / 4GB<br>
+                Uptime: 5d 12h
+              </div>
+            </span>
+          </span>
+
+          <span class="ux-tooltip ux-tooltip--bottom ux-tooltip--multiline">
+            <span style="padding: var(--ux-space-sm) var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius); display: inline-flex; align-items: center; gap: var(--ux-space-sm);"
+                  hx-get="/api/sync/status"
+                  hx-target="next .ux-tooltip__content"
+                  hx-trigger="mouseenter, every 5s[this.matches(':hover')]"
+                  hx-swap="innerHTML">
+              <span class="ux-spinner ux-spinner--sm"></span>
+              Sincronizando...
+            </span>
+            <span class="ux-tooltip__content">12 de 50 items sincronizados</span>
+          </span>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Tooltip que se actualiza mientras esta visible --&gt;</span>
+<span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tooltip"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">hx-get</span>=<span class="string">"/api/server/status"</span>
+          <span class="attr">hx-target</span>=<span class="string">"next .ux-tooltip__content"</span>
+          <span class="attr">hx-trigger</span>=<span class="string">"mouseenter, every 10s[this.matches(':hover')]"</span>
+          <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+    Status
+  <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tooltip__content"</span><span class="tag">&gt;</span>
+    <span class="comment">&lt;!-- Estado actualizado cada 10s mientras hover --&gt;</span>
+  <span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/span&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Tooltip con Accion</h4>
+      <p>Tooltip que incluye acciones que hacen requests HTMX.</p>
+
+      <div class="demo-box">
+        <div class="demo-row" style="justify-content: center;">
+          <span class="ux-tooltip ux-tooltip--rich ux-tooltip--light ux-tooltip--delay">
+            <button class="ux-button">Item con acciones</button>
+            <span class="ux-tooltip__content" style="min-width: 150px; padding: var(--ux-space-sm);">
+              <button class="ux-button ux-button--sm ux-button--clear" style="width: 100%; justify-content: flex-start;"
+                      hx-post="/api/items/1/edit"
+                      hx-target="#action-result"
+                      hx-swap="innerHTML">
+                Editar
+              </button>
+              <button class="ux-button ux-button--sm ux-button--clear" style="width: 100%; justify-content: flex-start;"
+                      hx-post="/api/items/1/duplicate"
+                      hx-target="#action-result"
+                      hx-swap="innerHTML">
+                Duplicar
+              </button>
+              <button class="ux-button ux-button--sm ux-button--clear" style="width: 100%; justify-content: flex-start; color: var(--ux-danger);"
+                      hx-delete="/api/items/1"
+                      hx-target="#action-result"
+                      hx-swap="innerHTML"
+                      hx-confirm="Eliminar este item?">
+                Eliminar
+              </button>
+            </span>
+          </span>
+        </div>
+        <div id="action-result" style="margin-top: var(--ux-space-md); text-align: center;"></div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Tooltip con acciones HTMX --&gt;</span>
+<span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tooltip ux-tooltip--rich"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button&gt;</span>Item<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tooltip__content"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">hx-post</span>=<span class="string">"/api/items/1/edit"</span>
+            <span class="attr">hx-target</span>=<span class="string">"#result"</span><span class="tag">&gt;</span>Editar<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">hx-delete</span>=<span class="string">"/api/items/1"</span>
+            <span class="attr">hx-confirm</span>=<span class="string">"Eliminar?"</span><span class="tag">&gt;</span>Eliminar<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/span&gt;</span></pre>
+    </div>
+
     <!-- Referencia -->
     <div class="demo-section">
       <h3>Referencia de Clases</h3>
-      <div class="demo-box" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="border-bottom: 2px solid var(--ux-border-color);">
-              <th style="text-align: left; padding: var(--ux-space-sm);">Clase</th>
-              <th style="text-align: left; padding: var(--ux-space-sm);">Descripción</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip</code></td>
-              <td style="padding: var(--ux-space-sm);">Contenedor del tooltip</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip__content</code></td>
-              <td style="padding: var(--ux-space-sm);">Contenido del tooltip</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip--top/bottom/left/right</code></td>
-              <td style="padding: var(--ux-space-sm);">Posición del tooltip</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip--light</code></td>
-              <td style="padding: var(--ux-space-sm);">Estilo claro</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip--primary</code></td>
-              <td style="padding: var(--ux-space-sm);">Estilo primary</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip--glass</code></td>
-              <td style="padding: var(--ux-space-sm);">Estilo glass</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip--sm/lg</code></td>
-              <td style="padding: var(--ux-space-sm);">Tamaños</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip--multiline</code></td>
-              <td style="padding: var(--ux-space-sm);">Texto multilinea</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip--rich</code></td>
-              <td style="padding: var(--ux-space-sm);">Contenido enriquecido</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip--delay-short/delay/delay-long</code></td>
-              <td style="padding: var(--ux-space-sm);">Delay de aparición</td>
-            </tr>
-            <tr>
-              <td style="padding: var(--ux-space-sm);"><code>.ux-tooltip--open</code></td>
-              <td style="padding: var(--ux-space-sm);">Forzar tooltip visible</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <table class="ux-table">
+        <thead>
+          <tr>
+            <th>Clase</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.ux-tooltip</code></td><td>Contenedor del tooltip</td></tr>
+          <tr><td><code>.ux-tooltip__content</code></td><td>Contenido del tooltip</td></tr>
+          <tr><td><code>.ux-tooltip--top/bottom/left/right</code></td><td>Posición del tooltip</td></tr>
+          <tr><td><code>.ux-tooltip--light</code></td><td>Estilo claro</td></tr>
+          <tr><td><code>.ux-tooltip--primary</code></td><td>Estilo primary</td></tr>
+          <tr><td><code>.ux-tooltip--glass</code></td><td>Estilo glass</td></tr>
+          <tr><td><code>.ux-tooltip--sm/lg</code></td><td>Tamaños</td></tr>
+          <tr><td><code>.ux-tooltip--multiline</code></td><td>Texto multilinea</td></tr>
+          <tr><td><code>.ux-tooltip--rich</code></td><td>Contenido enriquecido</td></tr>
+          <tr><td><code>.ux-tooltip--delay-short/delay/delay-long</code></td><td>Delay de aparición</td></tr>
+          <tr><td><code>.ux-tooltip--open</code></td><td>Forzar tooltip visible</td></tr>
+        </tbody>
+      </table>
     </div>
 
   </main>

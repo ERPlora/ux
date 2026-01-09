@@ -304,7 +304,27 @@
     }
 
     /* ========================================
-       Color Variants
+       Color Variants (Composition System)
+       Use: .ux-card.ux-color-primary, .ux-card.ux-color-success, etc.
+    ======================================== */
+
+    .ux-card[class*="ux-color-"] {
+      background-color: var(--ux-variant-bg);
+      color: var(--ux-variant-color);
+    }
+
+    .ux-card[class*="ux-color-"] .ux-card__title,
+    .ux-card[class*="ux-color-"] .ux-card__content {
+      color: var(--ux-variant-color);
+    }
+
+    .ux-card[class*="ux-color-"] .ux-card__subtitle {
+      color: var(--ux-variant-color);
+      opacity: 0.8;
+    }
+
+    /* ========================================
+       Legacy Color Variants (deprecated, use composition)
     ======================================== */
 
     .ux-card--primary {
@@ -940,6 +960,44 @@
     .ux-theme-dark .ux-card--app .ux-card__icon {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-card--clickable {
+        transition: none;
+      }
+
+      .ux-card--clickable:active {
+        transform: none;
+      }
+
+      .ux-card--icon {
+        transition: none;
+      }
+
+      .ux-card--icon:hover {
+        transform: none;
+      }
+
+      .ux-card--icon:active {
+        transform: none;
+      }
+
+      .ux-card--app {
+        transition: none;
+      }
+
+      .ux-card--app:hover {
+        transform: none;
+      }
+
+      .ux-card--app:active {
+        transform: none;
+      }
     }
   `;
 

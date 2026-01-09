@@ -1,0 +1,438 @@
+/**
+ * UX Drawer Component
+ * Panel lateral deslizable (sidebar modal)
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Drawer Backdrop
+    ======================================== */
+
+    .ux-drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: var(--ux-z-modal-backdrop);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 350ms var(--ux-ease-ios),
+        visibility 350ms var(--ux-ease-ios);
+    }
+
+    .ux-drawer-backdrop--open {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 300ms var(--ux-ease-ios),
+        visibility 300ms var(--ux-ease-ios);
+    }
+
+    /* ========================================
+       UX Drawer
+    ======================================== */
+
+    .ux-drawer {
+      --ux-drawer-width: 320px;
+
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: var(--ux-drawer-width);
+      max-width: calc(100vw - 56px);
+      background-color: var(--ux-surface);
+      display: flex;
+      flex-direction: column;
+      z-index: var(--ux-z-modal);
+      transform: translateX(-100%);
+      transition: transform 350ms var(--ux-ease-ios);
+      will-change: transform;
+      box-shadow: var(--ux-shadow-xl);
+    }
+
+    .ux-drawer-backdrop--open .ux-drawer {
+      transform: translateX(0);
+      transition: transform 400ms var(--ux-ease-ios);
+    }
+
+    /* ========================================
+       Right Position
+    ======================================== */
+
+    .ux-drawer--right {
+      left: auto;
+      right: 0;
+      transform: translateX(100%);
+    }
+
+    .ux-drawer-backdrop--open .ux-drawer--right {
+      transform: translateX(0);
+    }
+
+    /* ========================================
+       Drawer Header
+    ======================================== */
+
+    .ux-drawer__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      border-bottom: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+      min-height: 56px;
+      padding-top: calc(var(--ux-space-md) + env(safe-area-inset-top));
+    }
+
+    .ux-drawer__header--no-border {
+      border-bottom: none;
+    }
+
+    .ux-drawer__title {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0;
+    }
+
+    .ux-drawer__subtitle {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin: 0;
+      margin-top: 2px;
+    }
+
+    .ux-drawer__close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      background-color: transparent;
+      border: none;
+      border-radius: 50%;
+      color: var(--ux-text-secondary);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-drawer__close:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-drawer__close:active {
+      background-color: var(--ux-surface-tertiary);
+    }
+
+    .ux-drawer__close-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* ========================================
+       Drawer Content
+    ======================================== */
+
+    .ux-drawer__content {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+
+    .ux-drawer__content--padded {
+      padding: var(--ux-space-lg);
+    }
+
+    /* ========================================
+       Drawer Footer
+    ======================================== */
+
+    .ux-drawer__footer {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      border-top: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+      padding-bottom: calc(var(--ux-space-md) + env(safe-area-inset-bottom));
+    }
+
+    .ux-drawer__footer--no-border {
+      border-top: none;
+    }
+
+    .ux-drawer__footer--sticky {
+      position: sticky;
+      bottom: 0;
+      background-color: var(--ux-surface);
+    }
+
+    /* ========================================
+       Width Variants
+    ======================================== */
+
+    .ux-drawer--sm {
+      --ux-drawer-width: 280px;
+    }
+
+    .ux-drawer--lg {
+      --ux-drawer-width: 400px;
+    }
+
+    .ux-drawer--xl {
+      --ux-drawer-width: 500px;
+    }
+
+    .ux-drawer--full {
+      --ux-drawer-width: 100vw;
+      max-width: 100vw;
+    }
+
+    /* ========================================
+       Glass Variant
+    ======================================== */
+
+    .ux-drawer--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border-right: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-drawer--glass.ux-drawer--right {
+      border-right: none;
+      border-left: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-drawer--glass .ux-drawer__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-drawer--glass .ux-drawer__footer {
+      border-top-color: var(--ux-glass-border);
+      background: transparent;
+    }
+
+    /* ========================================
+       Push Mode (content shifts)
+    ======================================== */
+
+    .ux-drawer--push {
+      box-shadow: none;
+    }
+
+    /* ========================================
+       Persistent (no backdrop, stays open)
+    ======================================== */
+
+    .ux-drawer--persistent {
+      position: relative;
+      transform: translateX(0);
+      box-shadow: none;
+      z-index: auto;
+    }
+
+    .ux-drawer--persistent.ux-drawer--collapsed {
+      transform: translateX(-100%);
+      margin-left: calc(var(--ux-drawer-width) * -1);
+    }
+
+    .ux-drawer--persistent.ux-drawer--right.ux-drawer--collapsed {
+      transform: translateX(100%);
+      margin-right: calc(var(--ux-drawer-width) * -1);
+      margin-left: 0;
+    }
+
+    /* ========================================
+       Mini Variant (collapsed to icons)
+    ======================================== */
+
+    .ux-drawer--mini {
+      --ux-drawer-mini-width: 64px;
+    }
+
+    .ux-drawer--mini.ux-drawer--collapsed {
+      width: var(--ux-drawer-mini-width);
+      transform: translateX(0);
+      margin-left: 0;
+    }
+
+    .ux-drawer--mini.ux-drawer--collapsed .ux-drawer__header {
+      padding: var(--ux-space-md) var(--ux-space-sm);
+      justify-content: center;
+    }
+
+    .ux-drawer--mini.ux-drawer--collapsed .ux-drawer__title,
+    .ux-drawer--mini.ux-drawer--collapsed .ux-drawer__subtitle {
+      display: none;
+    }
+
+    /* ========================================
+       Responsive
+    ======================================== */
+
+    @media (max-width: 767px) {
+      .ux-drawer {
+        max-width: calc(100vw - 48px);
+      }
+
+      .ux-drawer--lg,
+      .ux-drawer--xl {
+        --ux-drawer-width: calc(100vw - 48px);
+      }
+    }
+
+    /* ========================================
+       Dark Mode
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-drawer {
+        background-color: var(--ux-surface);
+      }
+
+      .ux-drawer--glass {
+        background: var(--ux-glass-bg);
+      }
+    }
+
+    .ux-dark .ux-drawer {
+      background-color: var(--ux-surface);
+    }
+
+    .ux-dark .ux-drawer--glass {
+      background: var(--ux-glass-bg);
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-drawer,
+      .ux-drawer-backdrop {
+        transition: none;
+      }
+
+      .ux-drawer-backdrop--open .ux-drawer {
+        transition: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-drawer-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-drawer-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const drawerData = (options = {}) => ({
+    isOpen: options.isOpen ?? false,
+    closeOnBackdrop: options.closeOnBackdrop ?? true,
+    closeOnEscape: options.closeOnEscape ?? true,
+    lockScroll: options.lockScroll ?? true,
+    position: options.position ?? 'left', // 'left' | 'right'
+
+    init() {
+      // Escape key handler
+      if (this.closeOnEscape) {
+        this._escapeHandler = (e) => {
+          if (e.key === 'Escape' && this.isOpen) {
+            this.close();
+          }
+        };
+        document.addEventListener('keydown', this._escapeHandler);
+      }
+
+      // Watch isOpen changes
+      this.$watch('isOpen', (value) => {
+        if (value) {
+          this._onOpen();
+        } else {
+          this._onClose();
+        }
+      });
+
+      // Initial state
+      if (this.isOpen) {
+        this._onOpen();
+      }
+    },
+
+    destroy() {
+      if (this._escapeHandler) {
+        document.removeEventListener('keydown', this._escapeHandler);
+      }
+      this._onClose();
+    },
+
+    _onOpen() {
+      if (this.lockScroll && window.UX) {
+        window.UX.lockScroll();
+      }
+
+      // Focus trap
+      this.$nextTick(() => {
+        if (window.UX) {
+          window.UX.trapFocus(this.$el.querySelector('.ux-drawer'));
+        }
+      });
+
+      this.$dispatch('drawer:open');
+    },
+
+    _onClose() {
+      if (this.lockScroll && window.UX) {
+        window.UX.unlockScroll();
+      }
+      this.$dispatch('drawer:close');
+    },
+
+    open() {
+      this.isOpen = true;
+    },
+
+    close() {
+      this.isOpen = false;
+    },
+
+    toggle() {
+      this.isOpen = !this.isOpen;
+    },
+
+    onBackdropClick() {
+      if (this.closeOnBackdrop) {
+        this.close();
+      }
+    },
+
+    get backdropClasses() {
+      return {
+        'ux-drawer-backdrop--open': this.isOpen
+      };
+    },
+
+    get drawerClasses() {
+      return {
+        'ux-drawer--right': this.position === 'right'
+      };
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxDrawer', drawerData);
+  }
+
+})();

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>OTP Input - UX Library</title>
+  <link rel="stylesheet" href="../bootstrap-grid.min.css">
+  <script src="../dist/ux.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--ux-surface-secondary);
+      padding: 2rem;
+      padding-bottom: 4rem;
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--ux-text);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .demo-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+    pre {
+      background: var(--ux-gray-900);
+      color: var(--ux-gray-100);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+    .result-display {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--ux-surface-secondary);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .demo-glass-bg {
+      background: linear-gradient(135deg, var(--ux-indigo-500), var(--ux-purple-500));
+      padding: 2rem;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .demo-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <h1 style="margin-bottom: 0.5rem;">OTP Input</h1>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+    Entrada de código de verificación con campos individuales para cada dígito, navegación automática y validación.
+  </p>
+
+  <!-- Basic OTP -->
+  <section class="demo-section">
+    <h2>OTP Básico</h2>
+
+    <div class="demo-grid">
+      <div>
+        <div class="demo-box demo-center">
+          <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Introduce el código de 6 dígitos</p>
+
+          <div x-data="uxOtpInput({ length: 6, type: 'number' })"
+               @otp:complete="result = $event.detail.value"
+               @otp:change="current = $event.detail.value">
+            <div class="ux-otp">
+              <template x-for="(_, index) in length" :key="index">
+                <input type="tel"
+                       inputmode="numeric"
+                       maxlength="1"
+                       class="ux-otp__field"
+                       :class="{ 'ux-otp__field--filled': values[index] }"
+                       :value="values[index]"
+                       :disabled="disabled"
+                       @input="onInput(index, $event)"
+                       @keydown="onKeyDown(index, $event)"
+                       @paste="onPaste(index, $event)"
+                       @focus="onFocus(index)"
+                       @blur="onBlur()">
+              </template>
+            </div>
+
+            <div class="result-display" x-show="current">
+              Código: <strong x-text="current"></strong>
+              <span x-show="isComplete" style="color: var(--ux-success);">✓ Completo</span>
+            </div>
+          </div>
+        </div>
+
+        <pre>&lt;div x-data="uxOtpInput({ length: 6, type: 'number' })"&gt;
+  &lt;div class="ux-otp"&gt;
+    &lt;template x-for="(_, index) in length"&gt;
+      &lt;input type="tel"
+             class="ux-otp__field"
+             :class="{ 'ux-otp__field--filled': values[index] }"
+             :value="values[index]"
+             @input="onInput(index, $event)"
+             @keydown="onKeyDown(index, $event)"
+             @paste="onPaste(index, $event)"&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      </div>
+
+      <div>
+        <div class="demo-box demo-center">
+          <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Código de 4 dígitos</p>
+
+          <div x-data="uxOtpInput({ length: 4, type: 'number' })">
+            <div class="ux-otp">
+              <template x-for="(_, index) in length" :key="index">
+                <input type="tel"
+                       inputmode="numeric"
+                       maxlength="1"
+                       class="ux-otp__field"
+                       :class="{ 'ux-otp__field--filled': values[index] }"
+                       :value="values[index]"
+                       @input="onInput(index, $event)"
+                       @keydown="onKeyDown(index, $event)"
+                       @paste="onPaste(index, $event)"
+                       @focus="onFocus(index)"
+                       @blur="onBlur()">
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- With Separator -->
+  <section class="demo-section">
+    <h2>Con Separador</h2>
+
+    <div class="demo-box demo-center">
+      <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Código con separador en el medio</p>
+
+      <div x-data="uxOtpInput({ length: 6, type: 'number', separator: 3 })">
+        <div class="ux-otp">
+          <template x-for="(_, index) in length" :key="index">
+            <template x-if="hasSeparator(index - 1) && index > 0">
+              <span class="ux-otp__separator">-</span>
+            </template>
+            <input type="tel"
+                   inputmode="numeric"
+                   maxlength="1"
+                   class="ux-otp__field"
+                   :class="{ 'ux-otp__field--filled': values[index] }"
+                   :value="values[index]"
+                   @input="onInput(index, $event)"
+                   @keydown="onKeyDown(index, $event)"
+                   @paste="onPaste(index, $event)"
+                   @focus="onFocus(index)"
+                   @blur="onBlur()">
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sizes -->
+  <section class="demo-section">
+    <h2>Tamaños</h2>
+
+    <div class="demo-box">
+      <div class="demo-flex" style="justify-content: center;">
+        <div class="demo-center">
+          <div x-data="uxOtpInput({ length: 4, type: 'number' })">
+            <div class="ux-otp ux-otp--sm">
+              <template x-for="(_, index) in length" :key="index">
+                <input type="tel"
+                       inputmode="numeric"
+                       maxlength="1"
+                       class="ux-otp__field"
+                       :class="{ 'ux-otp__field--filled': values[index] }"
+                       :value="values[index]"
+                       @input="onInput(index, $event)"
+                       @keydown="onKeyDown(index, $event)"
+                       @paste="onPaste(index, $event)">
+              </template>
+            </div>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--ux-text-secondary); margin-top: 0.5rem;">Small</p>
+        </div>
+
+        <div class="demo-center">
+          <div x-data="uxOtpInput({ length: 4, type: 'number' })">
+            <div class="ux-otp">
+              <template x-for="(_, index) in length" :key="index">
+                <input type="tel"
+                       inputmode="numeric"
+                       maxlength="1"
+                       class="ux-otp__field"
+                       :class="{ 'ux-otp__field--filled': values[index] }"
+                       :value="values[index]"
+                       @input="onInput(index, $event)"
+                       @keydown="onKeyDown(index, $event)"
+                       @paste="onPaste(index, $event)">
+              </template>
+            </div>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--ux-text-secondary); margin-top: 0.5rem;">Default</p>
+        </div>
+
+        <div class="demo-center">
+          <div x-data="uxOtpInput({ length: 4, type: 'number' })">
+            <div class="ux-otp ux-otp--lg">
+              <template x-for="(_, index) in length" :key="index">
+                <input type="tel"
+                       inputmode="numeric"
+                       maxlength="1"
+                       class="ux-otp__field"
+                       :class="{ 'ux-otp__field--filled': values[index] }"
+                       :value="values[index]"
+                       @input="onInput(index, $event)"
+                       @keydown="onKeyDown(index, $event)"
+                       @paste="onPaste(index, $event)">
+              </template>
+            </div>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--ux-text-secondary); margin-top: 0.5rem;">Large</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Variants -->
+  <section class="demo-section">
+    <h2>Variantes</h2>
+
+    <div class="demo-grid">
+      <div class="demo-box demo-center">
+        <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Underline</p>
+
+        <div x-data="uxOtpInput({ length: 4, type: 'number' })">
+          <div class="ux-otp ux-otp--underline">
+            <template x-for="(_, index) in length" :key="index">
+              <input type="tel"
+                     inputmode="numeric"
+                     maxlength="1"
+                     class="ux-otp__field"
+                     :class="{ 'ux-otp__field--filled': values[index] }"
+                     :value="values[index]"
+                     @input="onInput(index, $event)"
+                     @keydown="onKeyDown(index, $event)"
+                     @paste="onPaste(index, $event)">
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-box demo-center">
+        <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Rounded</p>
+
+        <div x-data="uxOtpInput({ length: 4, type: 'number' })">
+          <div class="ux-otp ux-otp--rounded">
+            <template x-for="(_, index) in length" :key="index">
+              <input type="tel"
+                     inputmode="numeric"
+                     maxlength="1"
+                     class="ux-otp__field"
+                     :class="{ 'ux-otp__field--filled': values[index] }"
+                     :value="values[index]"
+                     @input="onInput(index, $event)"
+                     @keydown="onKeyDown(index, $event)"
+                     @paste="onPaste(index, $event)">
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- States -->
+  <section class="demo-section">
+    <h2>Estados</h2>
+
+    <div class="demo-grid">
+      <div class="demo-box demo-center">
+        <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Success</p>
+
+        <div x-data="{ values: ['1', '2', '3', '4'] }">
+          <div class="ux-otp ux-otp--success">
+            <template x-for="(val, index) in values" :key="index">
+              <input type="tel"
+                     class="ux-otp__field ux-otp__field--filled"
+                     :value="val"
+                     readonly>
+            </template>
+          </div>
+          <p class="ux-otp__helper ux-otp__helper--success" style="margin-top: 0.5rem;">
+            ✓ Código verificado correctamente
+          </p>
+        </div>
+      </div>
+
+      <div class="demo-box demo-center">
+        <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Error</p>
+
+        <div x-data="{ values: ['5', '5', '5', '5'] }">
+          <div class="ux-otp ux-otp--error">
+            <template x-for="(val, index) in values" :key="index">
+              <input type="tel"
+                     class="ux-otp__field ux-otp__field--filled"
+                     :value="val"
+                     readonly>
+            </template>
+          </div>
+          <p class="ux-otp__helper ux-otp__helper--error" style="margin-top: 0.5rem;">
+            ✕ Código incorrecto. Intenta de nuevo.
+          </p>
+        </div>
+      </div>
+
+      <div class="demo-box demo-center">
+        <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Disabled</p>
+
+        <div x-data="{ values: ['', '', '', ''] }">
+          <div class="ux-otp ux-otp--disabled">
+            <template x-for="(val, index) in values" :key="index">
+              <input type="tel"
+                     class="ux-otp__field"
+                     :value="val"
+                     disabled>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-box demo-center">
+        <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Loading</p>
+
+        <div x-data="{ values: ['1', '2', '3', '4'] }">
+          <div class="ux-otp ux-otp--loading">
+            <template x-for="(val, index) in values" :key="index">
+              <input type="tel"
+                     class="ux-otp__field ux-otp__field--filled"
+                     :value="val"
+                     readonly>
+            </template>
+          </div>
+          <p class="ux-otp__helper" style="margin-top: 0.5rem;">
+            <span class="ux-spinner ux-spinner--sm" style="margin-right: 0.5rem;"></span>
+            Verificando...
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- With Resend -->
+  <section class="demo-section">
+    <h2>Con Reenvío de Código</h2>
+
+    <div class="demo-box demo-center" style="max-width: 400px; margin: 0 auto;">
+      <h3 style="font-size: 1.125rem; margin-bottom: 0.5rem;">Verificación SMS</h3>
+      <p style="margin-bottom: 1.5rem; color: var(--ux-text-secondary); font-size: 0.875rem;">
+        Enviamos un código de 6 dígitos a tu teléfono
+      </p>
+
+      <div x-data="uxOtpInput({
+        length: 6,
+        type: 'number',
+        resendEnabled: true,
+        resendCooldown: 30
+      })"
+           @otp:complete="alert('Código: ' + $event.detail.value)"
+           @otp:resend="alert('Reenviando código...')">
+
+        <div class="ux-otp">
+          <template x-for="(_, index) in length" :key="index">
+            <input type="tel"
+                   inputmode="numeric"
+                   maxlength="1"
+                   class="ux-otp__field"
+                   :class="{ 'ux-otp__field--filled': values[index] }"
+                   :value="values[index]"
+                   @input="onInput(index, $event)"
+                   @keydown="onKeyDown(index, $event)"
+                   @paste="onPaste(index, $event)"
+                   @focus="onFocus(index)"
+                   @blur="onBlur()">
+          </template>
+        </div>
+
+        <div class="ux-otp__resend" style="margin-top: 1.5rem;">
+          <span>¿No recibiste el código?</span>
+          <button class="ux-otp__resend-btn"
+                  :disabled="!canResend()"
+                  @click="resend()">
+            <span x-show="canResend()">Reenviar</span>
+            <span x-show="!canResend()" x-text="'Reenviar en ' + formatTime(resendTimer)"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Glass Variant -->
+  <section class="demo-section">
+    <h2>Variante Glass</h2>
+
+    <div class="demo-glass-bg">
+      <p style="color: white; margin-bottom: 1rem;">Introduce tu código</p>
+
+      <div x-data="uxOtpInput({ length: 6, type: 'number' })">
+        <div class="ux-otp ux-otp--glass">
+          <template x-for="(_, index) in length" :key="index">
+            <input type="tel"
+                   inputmode="numeric"
+                   maxlength="1"
+                   class="ux-otp__field"
+                   :class="{ 'ux-otp__field--filled': values[index] }"
+                   :value="values[index]"
+                   @input="onInput(index, $event)"
+                   @keydown="onKeyDown(index, $event)"
+                   @paste="onPaste(index, $event)"
+                   @focus="onFocus(index)"
+                   @blur="onBlur()">
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Alphanumeric -->
+  <section class="demo-section">
+    <h2>Alfanumérico</h2>
+
+    <div class="demo-box demo-center">
+      <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Código promocional (letras y números)</p>
+
+      <div x-data="uxOtpInput({ length: 6, type: 'text', separator: 3 })"
+           @otp:complete="result = $event.detail.value">
+        <div class="ux-otp">
+          <template x-for="(_, index) in length" :key="index">
+            <template x-if="hasSeparator(index - 1) && index > 0">
+              <span class="ux-otp__separator">-</span>
+            </template>
+            <input type="text"
+                   maxlength="1"
+                   class="ux-otp__field"
+                   :class="{ 'ux-otp__field--filled': values[index] }"
+                   :value="values[index]"
+                   style="text-transform: uppercase;"
+                   @input="onInput(index, $event)"
+                   @keydown="onKeyDown(index, $event)"
+                   @paste="onPaste(index, $event)"
+                   @focus="onFocus(index)"
+                   @blur="onBlur()">
+          </template>
+        </div>
+
+        <div class="result-display" x-show="isComplete">
+          Código: <strong x-text="getValue().toUpperCase()"></strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CSS Classes Reference -->
+  <section class="demo-section">
+    <h2>Referencia de Clases CSS</h2>
+
+    <div class="demo-box">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: 0.75rem;">Clase</th>
+            <th style="text-align: left; padding: 0.75rem;">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp</code></td>
+            <td style="padding: 0.75rem;">Contenedor principal</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp--sm</code></td>
+            <td style="padding: 0.75rem;">Tamaño pequeño</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp--lg</code></td>
+            <td style="padding: 0.75rem;">Tamaño grande</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp--underline</code></td>
+            <td style="padding: 0.75rem;">Variante con solo línea inferior</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp--rounded</code></td>
+            <td style="padding: 0.75rem;">Campos circulares</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp--glass</code></td>
+            <td style="padding: 0.75rem;">Variante glass morphism</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp--success</code></td>
+            <td style="padding: 0.75rem;">Estado de éxito</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp--error</code></td>
+            <td style="padding: 0.75rem;">Estado de error (con animación shake)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp--disabled</code></td>
+            <td style="padding: 0.75rem;">Estado deshabilitado</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp__field</code></td>
+            <td style="padding: 0.75rem;">Campo individual de entrada</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-otp__field--filled</code></td>
+            <td style="padding: 0.75rem;">Campo con valor</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem;"><code>.ux-otp__separator</code></td>
+            <td style="padding: 0.75rem;">Separador entre campos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Alpine.js Options -->
+  <section class="demo-section">
+    <h2>Opciones Alpine.js</h2>
+
+    <div class="demo-box">
+      <pre>uxOtpInput({
+  length: 6,              // Número de campos
+  type: 'number',         // 'text', 'number', 'password'
+  autoFocus: true,        // Auto-focus primer campo
+  autoSubmit: true,       // Dispara otp:complete automáticamente
+  separator: 3,           // Posición del separador (o array)
+  placeholder: '',        // Placeholder de los campos
+  disabled: false,        // Deshabilitar inputs
+  resendEnabled: false,   // Habilitar botón de reenvío
+  resendCooldown: 60      // Segundos de espera para reenviar
+})
+
+// Métodos
+getValue()                // Obtener código completo
+setValue(value)           // Establecer código programáticamente
+clear()                   // Limpiar todos los campos
+setState(state)           // Establecer estado: 'success', 'error', 'loading'
+focusField(index)         // Enfocar campo específico
+resend()                  // Disparar reenvío de código
+
+// Eventos
+@otp:complete             // Se dispara cuando el código está completo
+@otp:change               // Se dispara al cambiar cualquier valor
+@otp:resend               // Se dispara al solicitar reenvío</pre>
+    </div>
+  </section>
+
+</body>
+</html>

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Phone Input - UX Library</title>
+  <link rel="stylesheet" href="../bootstrap-grid.min.css">
+  <script src="../dist/ux.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--ux-surface-secondary);
+      padding: 2rem;
+      padding-bottom: 4rem;
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--ux-text);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    pre {
+      background: var(--ux-gray-900);
+      color: var(--ux-gray-100);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+    .result-display {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--ux-surface-secondary);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .demo-glass-bg {
+      background: linear-gradient(135deg, var(--ux-green-500), var(--ux-teal-600));
+      padding: 2rem;
+      border-radius: 16px;
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <h1 style="margin-bottom: 0.5rem;">Phone Input</h1>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+    Campo de entrada de teléfono con selector de código de país, banderas y búsqueda.
+  </p>
+
+  <!-- Basic Phone Input -->
+  <section class="demo-section">
+    <h2>Phone Input Básico</h2>
+
+    <div class="demo-grid">
+      <div>
+        <div class="demo-box">
+          <div class="ux-phone-field">
+            <label class="ux-phone-field__label">Número de teléfono</label>
+
+            <div x-data="uxPhoneInput({ defaultCountry: 'ES' })"
+                 @phone:change="result = $event.detail"
+                 class="ux-phone"
+                 :class="{ 'ux-phone--open': isOpen }">
+
+              <!-- Country Selector -->
+              <button type="button" class="ux-phone__country" @click="toggle()">
+                <span class="ux-phone__flag" x-text="selectedCountry.flag" x-show="showFlags"></span>
+                <span class="ux-phone__code" x-text="selectedCountry.dial" x-show="showDialCode"></span>
+                <span class="ux-phone__arrow" x-html="arrowIcon"></span>
+              </button>
+
+              <!-- Input -->
+              <input type="tel"
+                     x-ref="phoneInput"
+                     class="ux-input"
+                     :placeholder="placeholder"
+                     :value="phoneNumber"
+                     :disabled="disabled"
+                     @input="onPhoneInput($event)"
+                     @keydown="onKeyDown($event)">
+
+              <!-- Dropdown -->
+              <div class="ux-phone__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+                <div class="ux-phone__search" x-show="searchable">
+                  <input type="text"
+                         x-ref="searchInput"
+                         class="ux-phone__search-input"
+                         placeholder="Buscar país..."
+                         x-model="searchQuery">
+                </div>
+                <div class="ux-phone__list">
+                  <template x-for="country in filteredCountries" :key="country.code">
+                    <div class="ux-phone__option"
+                         :class="{ 'ux-phone__option--selected': selectedCountry.code === country.code }"
+                         @click="selectCountry(country)">
+                      <span class="ux-phone__option-flag" x-text="country.flag"></span>
+                      <span class="ux-phone__option-name" x-text="country.name"></span>
+                      <span class="ux-phone__option-code" x-text="country.dial"></span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-display" x-data="{ result: null }">
+              <template x-if="result">
+                <div>
+                  <p>Número completo: <strong x-text="result.fullNumber || '-'"></strong></p>
+                  <p>País: <strong x-text="result.country?.name || '-'"></strong></p>
+                  <p>Válido: <strong x-text="result.isValid ? 'Sí' : 'No'"></strong></p>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <pre>&lt;div x-data="uxPhoneInput({ defaultCountry: 'ES' })"
+     class="ux-phone"&gt;
+  &lt;button class="ux-phone__country" @click="toggle()"&gt;
+    &lt;span class="ux-phone__flag" x-text="selectedCountry.flag"&gt;&lt;/span&gt;
+    &lt;span class="ux-phone__code" x-text="selectedCountry.dial"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;input type="tel" class="ux-input"
+         :value="phoneNumber"
+         @input="onPhoneInput($event)"&gt;
+  &lt;div class="ux-phone__dropdown" x-show="isOpen"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
+      </div>
+
+      <div>
+        <div class="demo-box">
+          <div class="ux-phone-field">
+            <label class="ux-phone-field__label">País por defecto: México</label>
+
+            <div x-data="uxPhoneInput({ defaultCountry: 'MX', preferredCountries: ['MX', 'US', 'ES'] })"
+                 class="ux-phone"
+                 :class="{ 'ux-phone--open': isOpen }">
+              <button type="button" class="ux-phone__country" @click="toggle()">
+                <span class="ux-phone__flag" x-text="selectedCountry.flag"></span>
+                <span class="ux-phone__code" x-text="selectedCountry.dial"></span>
+                <span class="ux-phone__arrow" x-html="arrowIcon"></span>
+              </button>
+              <input type="tel"
+                     x-ref="phoneInput"
+                     class="ux-input"
+                     :placeholder="placeholder"
+                     :value="phoneNumber"
+                     @input="onPhoneInput($event)">
+              <div class="ux-phone__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+                <div class="ux-phone__search">
+                  <input type="text" x-ref="searchInput" class="ux-phone__search-input"
+                         placeholder="Buscar país..." x-model="searchQuery">
+                </div>
+                <div class="ux-phone__list">
+                  <template x-for="country in filteredCountries" :key="country.code">
+                    <div class="ux-phone__option"
+                         :class="{ 'ux-phone__option--selected': selectedCountry.code === country.code }"
+                         @click="selectCountry(country)">
+                      <span class="ux-phone__option-flag" x-text="country.flag"></span>
+                      <span class="ux-phone__option-name" x-text="country.name"></span>
+                      <span class="ux-phone__option-code" x-text="country.dial"></span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-box">
+          <div class="ux-phone-field">
+            <label class="ux-phone-field__label">País por defecto: USA</label>
+
+            <div x-data="uxPhoneInput({ defaultCountry: 'US', placeholder: '(555) 000-0000' })"
+                 class="ux-phone"
+                 :class="{ 'ux-phone--open': isOpen }">
+              <button type="button" class="ux-phone__country" @click="toggle()">
+                <span class="ux-phone__flag" x-text="selectedCountry.flag"></span>
+                <span class="ux-phone__code" x-text="selectedCountry.dial"></span>
+                <span class="ux-phone__arrow" x-html="arrowIcon"></span>
+              </button>
+              <input type="tel"
+                     x-ref="phoneInput"
+                     class="ux-input"
+                     :placeholder="placeholder"
+                     :value="phoneNumber"
+                     @input="onPhoneInput($event)">
+              <div class="ux-phone__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+                <div class="ux-phone__search">
+                  <input type="text" x-ref="searchInput" class="ux-phone__search-input"
+                         placeholder="Search country..." x-model="searchQuery">
+                </div>
+                <div class="ux-phone__list">
+                  <template x-for="country in filteredCountries" :key="country.code">
+                    <div class="ux-phone__option"
+                         :class="{ 'ux-phone__option--selected': selectedCountry.code === country.code }"
+                         @click="selectCountry(country)">
+                      <span class="ux-phone__option-flag" x-text="country.flag"></span>
+                      <span class="ux-phone__option-name" x-text="country.name"></span>
+                      <span class="ux-phone__option-code" x-text="country.dial"></span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sizes -->
+  <section class="demo-section">
+    <h2>Tamaños</h2>
+
+    <div class="demo-box">
+      <div style="display: flex; flex-direction: column; gap: 1rem; max-width: 400px;">
+        <div class="ux-phone-field">
+          <label class="ux-phone-field__label">Pequeño</label>
+          <div x-data="uxPhoneInput()" class="ux-phone ux-phone--sm" :class="{ 'ux-phone--open': isOpen }">
+            <button type="button" class="ux-phone__country" @click="toggle()">
+              <span class="ux-phone__flag" x-text="selectedCountry.flag"></span>
+              <span class="ux-phone__code" x-text="selectedCountry.dial"></span>
+              <span class="ux-phone__arrow" x-html="arrowIcon"></span>
+            </button>
+            <input type="tel" x-ref="phoneInput" class="ux-input" :placeholder="placeholder" :value="phoneNumber" @input="onPhoneInput($event)">
+            <div class="ux-phone__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+              <div class="ux-phone__search">
+                <input type="text" x-ref="searchInput" class="ux-phone__search-input" placeholder="Buscar..." x-model="searchQuery">
+              </div>
+              <div class="ux-phone__list">
+                <template x-for="country in filteredCountries" :key="country.code">
+                  <div class="ux-phone__option" :class="{ 'ux-phone__option--selected': selectedCountry.code === country.code }" @click="selectCountry(country)">
+                    <span class="ux-phone__option-flag" x-text="country.flag"></span>
+                    <span class="ux-phone__option-name" x-text="country.name"></span>
+                    <span class="ux-phone__option-code" x-text="country.dial"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-phone-field">
+          <label class="ux-phone-field__label">Normal</label>
+          <div x-data="uxPhoneInput()" class="ux-phone" :class="{ 'ux-phone--open': isOpen }">
+            <button type="button" class="ux-phone__country" @click="toggle()">
+              <span class="ux-phone__flag" x-text="selectedCountry.flag"></span>
+              <span class="ux-phone__code" x-text="selectedCountry.dial"></span>
+              <span class="ux-phone__arrow" x-html="arrowIcon"></span>
+            </button>
+            <input type="tel" x-ref="phoneInput" class="ux-input" :placeholder="placeholder" :value="phoneNumber" @input="onPhoneInput($event)">
+            <div class="ux-phone__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+              <div class="ux-phone__search">
+                <input type="text" x-ref="searchInput" class="ux-phone__search-input" placeholder="Buscar..." x-model="searchQuery">
+              </div>
+              <div class="ux-phone__list">
+                <template x-for="country in filteredCountries" :key="country.code">
+                  <div class="ux-phone__option" :class="{ 'ux-phone__option--selected': selectedCountry.code === country.code }" @click="selectCountry(country)">
+                    <span class="ux-phone__option-flag" x-text="country.flag"></span>
+                    <span class="ux-phone__option-name" x-text="country.name"></span>
+                    <span class="ux-phone__option-code" x-text="country.dial"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-phone-field">
+          <label class="ux-phone-field__label">Grande</label>
+          <div x-data="uxPhoneInput()" class="ux-phone ux-phone--lg" :class="{ 'ux-phone--open': isOpen }">
+            <button type="button" class="ux-phone__country" @click="toggle()">
+              <span class="ux-phone__flag" x-text="selectedCountry.flag"></span>
+              <span class="ux-phone__code" x-text="selectedCountry.dial"></span>
+              <span class="ux-phone__arrow" x-html="arrowIcon"></span>
+            </button>
+            <input type="tel" x-ref="phoneInput" class="ux-input" :placeholder="placeholder" :value="phoneNumber" @input="onPhoneInput($event)">
+            <div class="ux-phone__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+              <div class="ux-phone__search">
+                <input type="text" x-ref="searchInput" class="ux-phone__search-input" placeholder="Buscar..." x-model="searchQuery">
+              </div>
+              <div class="ux-phone__list">
+                <template x-for="country in filteredCountries" :key="country.code">
+                  <div class="ux-phone__option" :class="{ 'ux-phone__option--selected': selectedCountry.code === country.code }" @click="selectCountry(country)">
+                    <span class="ux-phone__option-flag" x-text="country.flag"></span>
+                    <span class="ux-phone__option-name" x-text="country.name"></span>
+                    <span class="ux-phone__option-code" x-text="country.dial"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- States -->
+  <section class="demo-section">
+    <h2>Estados</h2>
+
+    <div class="demo-grid">
+      <div class="demo-box">
+        <div class="ux-phone-field">
+          <label class="ux-phone-field__label">Error</label>
+          <div x-data="uxPhoneInput({ value: '123' })" class="ux-phone ux-phone--error" :class="{ 'ux-phone--open': isOpen }">
+            <button type="button" class="ux-phone__country" @click="toggle()">
+              <span class="ux-phone__flag" x-text="selectedCountry.flag"></span>
+              <span class="ux-phone__code" x-text="selectedCountry.dial"></span>
+              <span class="ux-phone__arrow" x-html="arrowIcon"></span>
+            </button>
+            <input type="tel" x-ref="phoneInput" class="ux-input" :placeholder="placeholder" :value="phoneNumber" @input="onPhoneInput($event)">
+            <div class="ux-phone__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+              <div class="ux-phone__search">
+                <input type="text" x-ref="searchInput" class="ux-phone__search-input" placeholder="Buscar..." x-model="searchQuery">
+              </div>
+              <div class="ux-phone__list">
+                <template x-for="country in filteredCountries" :key="country.code">
+                  <div class="ux-phone__option" @click="selectCountry(country)">
+                    <span class="ux-phone__option-flag" x-text="country.flag"></span>
+                    <span class="ux-phone__option-name" x-text="country.name"></span>
+                    <span class="ux-phone__option-code" x-text="country.dial"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+          <span class="ux-phone-field__helper ux-phone-field__helper--error">El número de teléfono no es válido</span>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="ux-phone-field">
+          <label class="ux-phone-field__label">Success</label>
+          <div x-data="uxPhoneInput({ value: '612345678' })" class="ux-phone ux-phone--success" :class="{ 'ux-phone--open': isOpen }">
+            <button type="button" class="ux-phone__country" @click="toggle()">
+              <span class="ux-phone__flag" x-text="selectedCountry.flag"></span>
+              <span class="ux-phone__code" x-text="selectedCountry.dial"></span>
+              <span class="ux-phone__arrow" x-html="arrowIcon"></span>
+            </button>
+            <input type="tel" x-ref="phoneInput" class="ux-input" :placeholder="placeholder" :value="phoneNumber" @input="onPhoneInput($event)">
+            <div class="ux-phone__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+              <div class="ux-phone__search">
+                <input type="text" x-ref="searchInput" class="ux-phone__search-input" placeholder="Buscar..." x-model="searchQuery">
+              </div>
+              <div class="ux-phone__list">
+                <template x-for="country in filteredCountries" :key="country.code">
+                  <div class="ux-phone__option" @click="selectCountry(country)">
+                    <span class="ux-phone__option-flag" x-text="country.flag"></span>
+                    <span class="ux-phone__option-name" x-text="country.name"></span>
+                    <span class="ux-phone__option-code" x-text="country.dial"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+          <span class="ux-phone-field__helper" style="color: var(--ux-success);">✓ Número válido</span>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="ux-phone-field">
+          <label class="ux-phone-field__label">Deshabilitado</label>
+          <div x-data="uxPhoneInput({ disabled: true, value: '612345678' })" class="ux-phone ux-phone--disabled">
+            <button type="button" class="ux-phone__country" disabled>
+              <span class="ux-phone__flag" x-text="selectedCountry.flag"></span>
+              <span class="ux-phone__code" x-text="selectedCountry.dial"></span>
+              <span class="ux-phone__arrow" x-html="arrowIcon"></span>
+            </button>
+            <input type="tel" class="ux-input" :value="phoneNumber" disabled>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Glass Variant -->
+  <section class="demo-section">
+    <h2>Variante Glass</h2>
+
+    <div class="demo-glass-bg">
+      <div class="ux-phone-field" style="max-width: 350px;">
+        <label class="ux-phone-field__label" style="color: white;">Teléfono de contacto</label>
+        <div x-data="uxPhoneInput()" class="ux-phone ux-phone--glass" :class="{ 'ux-phone--open': isOpen }">
+          <button type="button" class="ux-phone__country" @click="toggle()">
+            <span class="ux-phone__flag" x-text="selectedCountry.flag"></span>
+            <span class="ux-phone__code" x-text="selectedCountry.dial"></span>
+            <span class="ux-phone__arrow" x-html="arrowIcon"></span>
+          </button>
+          <input type="tel" x-ref="phoneInput" class="ux-input" :placeholder="placeholder" :value="phoneNumber" @input="onPhoneInput($event)">
+          <div class="ux-phone__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+            <div class="ux-phone__search">
+              <input type="text" x-ref="searchInput" class="ux-phone__search-input" placeholder="Buscar..." x-model="searchQuery">
+            </div>
+            <div class="ux-phone__list">
+              <template x-for="country in filteredCountries" :key="country.code">
+                <div class="ux-phone__option" :class="{ 'ux-phone__option--selected': selectedCountry.code === country.code }" @click="selectCountry(country)">
+                  <span class="ux-phone__option-flag" x-text="country.flag"></span>
+                  <span class="ux-phone__option-name" x-text="country.name"></span>
+                  <span class="ux-phone__option-code" x-text="country.dial"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CSS Classes Reference -->
+  <section class="demo-section">
+    <h2>Referencia de Clases CSS</h2>
+
+    <div class="demo-box">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: 0.75rem;">Clase</th>
+            <th style="text-align: left; padding: 0.75rem;">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-phone</code></td>
+            <td style="padding: 0.75rem;">Contenedor principal (wrapper)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-input</code></td>
+            <td style="padding: 0.75rem;">Clase del input (usa estilos estándar de ux-input)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-phone--sm</code></td>
+            <td style="padding: 0.75rem;">Tamaño pequeño</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-phone--lg</code></td>
+            <td style="padding: 0.75rem;">Tamaño grande</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-phone--error</code></td>
+            <td style="padding: 0.75rem;">Estado de error</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-phone--success</code></td>
+            <td style="padding: 0.75rem;">Estado de éxito</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-phone--disabled</code></td>
+            <td style="padding: 0.75rem;">Estado deshabilitado</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-phone--glass</code></td>
+            <td style="padding: 0.75rem;">Variante glass morphism</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-phone--open</code></td>
+            <td style="padding: 0.75rem;">Dropdown abierto (auto-aplicada)</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem;"><code>.ux-phone-field</code></td>
+            <td style="padding: 0.75rem;">Wrapper con label y helper</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Alpine.js Options -->
+  <section class="demo-section">
+    <h2>Opciones Alpine.js</h2>
+
+    <div class="demo-box">
+      <pre>uxPhoneInput({
+  defaultCountry: 'ES',           // Código ISO del país por defecto
+  preferredCountries: ['ES', 'US', 'MX'], // Países preferidos al inicio
+  placeholder: '600 000 000',     // Placeholder del input
+  searchable: true,               // Permitir búsqueda de países
+  showFlags: true,                // Mostrar banderas
+  showDialCode: true,             // Mostrar código de marcado
+  value: '',                      // Valor inicial
+  disabled: false                 // Deshabilitar
+})
+
+// Métodos
+toggle()                          // Alternar dropdown
+open()                            // Abrir dropdown
+close()                           // Cerrar dropdown
+selectCountry(country)            // Seleccionar país
+getFullNumber()                   // Obtener número completo (+34612345678)
+getFormattedNumber()              // Obtener formateado (+34 612 345 678)
+isValid()                         // Validar formato básico
+clear()                           // Limpiar número
+setValue(value, countryCode)      // Establecer valor
+
+// Propiedades
+selectedCountry                   // País seleccionado { code, name, dial, flag }
+phoneNumber                       // Número sin código de país
+isOpen                            // Estado del dropdown
+
+// Eventos
+@phone:change                     // Al cambiar el número
+                                  // detail: { number, fullNumber, country, isValid }
+@phone:countrychange              // Al cambiar el país
+                                  // detail: { country }
+
+// Países disponibles (50+)
+// ES, US, MX, AR, CO, CL, PE, VE, EC, BO, UY, PY, BR, PT, FR, DE, IT, GB...
+// Acceder via: window.UX.phoneCountries</pre>
+    </div>
+  </section>
+
+</body>
+</html>

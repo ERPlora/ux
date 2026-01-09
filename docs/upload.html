@@ -2,32 +2,32 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Upload - UX Library</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-upload.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
-    .demo-section { margin-bottom: var(--ux-space-2xl); }
-    .demo-box {
-      padding: var(--ux-space-xl);
-      background: var(--ux-surface);
-      border-radius: var(--ux-border-radius-lg);
-      border: 1px solid var(--ux-border-color);
-    }
-    .code-block {
-      background: var(--ux-surface-secondary);
-      padding: var(--ux-space-md);
-      border-radius: var(--ux-border-radius-md);
-      font-size: var(--ux-font-size-md);
-      overflow-x: auto;
-      margin-top: var(--ux-space-md);
-    }
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { padding: var(--ux-space-xl); background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); border: 1px solid var(--ux-border-color); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-sm); overflow-x: auto; white-space: pre; }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+    .ux-table { width: 100%; border-collapse: collapse; margin-bottom: var(--ux-space-lg); }
+    .ux-table th, .ux-table td { padding: var(--ux-space-sm) var(--ux-space-md); text-align: left; border-bottom: 1px solid var(--ux-border-color); }
+    .ux-table th { font-weight: 600; color: var(--ux-text); background: var(--ux-surface-secondary); }
+    .ux-table td { color: var(--ux-text-secondary); }
+    .ux-table code { background: var(--ux-surface-secondary); padding: 2px 6px; border-radius: 4px; font-size: var(--ux-font-size-sm); }
   </style>
 </head>
-<body class="ux-body ux-theme-ocean">
+<body class="ux-app">
   <nav class="ux-navbar">
     <div class="ux-navbar__content">
       <div class="ux-navbar__start">
@@ -537,143 +537,389 @@ onDrop(event)</pre>
       </div>
     </div>
 
+    <!-- HTMX Integration -->
+    <div class="demo-section">
+      <h3>Integracion con HTMX</h3>
+      <p>El componente upload funciona perfectamente con HTMX para enviar archivos al servidor sin JavaScript adicional.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Upload Simple con HTMX</h4>
+      <p>Formulario de upload que envia archivos directamente al servidor.</p>
+
+      <div class="demo-box">
+        <form hx-post="/api/upload"
+              hx-encoding="multipart/form-data"
+              hx-target="#upload-result-1"
+              hx-swap="innerHTML"
+              hx-indicator="#upload-spinner-1">
+          <div class="ux-upload ux-upload--compact">
+            <input type="file" name="files" class="ux-upload__input" id="htmx-upload-1" multiple>
+            <label for="htmx-upload-1" class="ux-upload__dropzone" style="cursor: pointer;">
+              <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <div class="ux-upload__content">
+                <p class="ux-upload__text">Selecciona archivos</p>
+              </div>
+            </label>
+          </div>
+          <button type="submit" class="ux-button ux-color-primary" style="margin-top: var(--ux-space-md);">
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" id="upload-spinner-1"></span>
+            Subir Archivos
+          </button>
+        </form>
+        <div id="upload-result-1" style="margin-top: var(--ux-space-md);"></div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Upload simple con HTMX --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/upload"</span>
+      <span class="attr">hx-encoding</span>=<span class="string">"multipart/form-data"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#result"</span>
+      <span class="attr">hx-indicator</span>=<span class="string">"#spinner"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"files"</span> <span class="attr">multiple</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-spinner htmx-indicator"</span><span class="tag">&gt;&lt;/span&gt;</span>
+    Subir
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Upload Automatico al Seleccionar</h4>
+      <p>Subir archivo automaticamente cuando el usuario lo selecciona.</p>
+
+      <div class="demo-box">
+        <div class="ux-upload ux-upload--button">
+          <input type="file"
+                 name="avatar"
+                 class="ux-upload__input"
+                 id="auto-upload"
+                 accept="image/*"
+                 hx-post="/api/upload/avatar"
+                 hx-encoding="multipart/form-data"
+                 hx-trigger="change"
+                 hx-target="#auto-upload-result"
+                 hx-swap="innerHTML"
+                 hx-indicator="#auto-upload-spinner">
+          <label for="auto-upload" class="ux-button ux-color-primary" style="cursor: pointer;">
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" id="auto-upload-spinner"></span>
+            Cambiar Avatar
+          </label>
+        </div>
+        <div id="auto-upload-result" style="margin-top: var(--ux-space-md);"></div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Upload automatico al seleccionar --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"file"</span>
+       <span class="attr">name</span>=<span class="string">"avatar"</span>
+       <span class="attr">accept</span>=<span class="string">"image/*"</span>
+       <span class="attr">hx-post</span>=<span class="string">"/api/upload/avatar"</span>
+       <span class="attr">hx-encoding</span>=<span class="string">"multipart/form-data"</span>
+       <span class="attr">hx-trigger</span>=<span class="string">"change"</span>
+       <span class="attr">hx-target</span>=<span class="string">"#result"</span><span class="tag">&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Upload con Preview y Confirmacion</h4>
+      <p>Mostrar preview antes de subir, luego confirmar con HTMX.</p>
+
+      <div class="demo-box" x-data="{ previewUrl: null, fileName: null }">
+        <div class="ux-upload ux-upload--compact" style="max-width: 400px;">
+          <input type="file"
+                 name="document"
+                 class="ux-upload__input"
+                 id="preview-upload"
+                 accept="image/*"
+                 @change="
+                   const file = $event.target.files[0];
+                   if (file) {
+                     fileName = file.name;
+                     previewUrl = URL.createObjectURL(file);
+                   }
+                 ">
+          <label for="preview-upload" class="ux-upload__dropzone" style="cursor: pointer;">
+            <template x-if="!previewUrl">
+              <div style="text-align: center;">
+                <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p class="ux-upload__text">Selecciona una imagen</p>
+              </div>
+            </template>
+            <template x-if="previewUrl">
+              <div style="display: flex; align-items: center; gap: var(--ux-space-md);">
+                <img :src="previewUrl" style="width: 60px; height: 60px; object-fit: cover; border-radius: var(--ux-border-radius);" alt="Preview">
+                <div>
+                  <p style="font-weight: 500;" x-text="fileName"></p>
+                  <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">Click para cambiar</p>
+                </div>
+              </div>
+            </template>
+          </label>
+        </div>
+
+        <div x-show="previewUrl" style="margin-top: var(--ux-space-md); display: flex; gap: var(--ux-space-sm);">
+          <button type="button"
+                  class="ux-button ux-color-primary"
+                  hx-post="/api/upload/document"
+                  hx-encoding="multipart/form-data"
+                  hx-include="#preview-upload"
+                  hx-target="#preview-upload-result"
+                  hx-indicator="#preview-spinner">
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" id="preview-spinner"></span>
+            Confirmar Upload
+          </button>
+          <button type="button"
+                  class="ux-button ux-button--outline"
+                  @click="previewUrl = null; fileName = null; document.getElementById('preview-upload').value = ''">
+            Cancelar
+          </button>
+        </div>
+        <div id="preview-upload-result" style="margin-top: var(--ux-space-md);"></div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Preview local + upload con HTMX --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"{ previewUrl: null }"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">id</span>=<span class="string">"file"</span>
+         <span class="attr">@change</span>=<span class="string">"previewUrl = URL.createObjectURL($event.target.files[0])"</span><span class="tag">&gt;</span>
+
+  <span class="tag">&lt;img</span> <span class="attr">:src</span>=<span class="string">"previewUrl"</span> <span class="attr">x-show</span>=<span class="string">"previewUrl"</span><span class="tag">&gt;</span>
+
+  <span class="tag">&lt;button</span> <span class="attr">hx-post</span>=<span class="string">"/api/upload"</span>
+          <span class="attr">hx-encoding</span>=<span class="string">"multipart/form-data"</span>
+          <span class="attr">hx-include</span>=<span class="string">"#file"</span>
+          <span class="attr">x-show</span>=<span class="string">"previewUrl"</span><span class="tag">&gt;</span>
+    Confirmar
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Upload de Producto con Formulario</h4>
+      <p>Formulario completo con imagen y datos del producto.</p>
+
+      <div class="demo-box">
+        <form hx-post="/api/products"
+              hx-encoding="multipart/form-data"
+              hx-target="#product-result"
+              hx-swap="innerHTML"
+              hx-indicator="#product-spinner"
+              style="max-width: 500px;">
+
+          <div class="ux-upload ux-upload--compact" style="margin-bottom: var(--ux-space-md);">
+            <input type="file" name="image" class="ux-upload__input" id="product-image" accept="image/*">
+            <label for="product-image" class="ux-upload__dropzone" style="cursor: pointer;">
+              <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <div class="ux-upload__content">
+                <p class="ux-upload__text">Imagen del producto</p>
+              </div>
+            </label>
+          </div>
+
+          <div class="ux-input" style="margin-bottom: var(--ux-space-md);">
+            <label class="ux-input__label" for="product-name">Nombre</label>
+            <input type="text" id="product-name" name="name" class="ux-input__field" placeholder="Cafe Americano" required>
+          </div>
+
+          <div class="ux-input" style="margin-bottom: var(--ux-space-md);">
+            <label class="ux-input__label" for="product-price">Precio</label>
+            <input type="number" id="product-price" name="price" class="ux-input__field" placeholder="9.99" step="0.01" required>
+          </div>
+
+          <div class="ux-input" style="margin-bottom: var(--ux-space-lg);">
+            <label class="ux-input__label" for="product-desc">Descripcion</label>
+            <textarea id="product-desc" name="description" class="ux-input__field" placeholder="Descripcion del producto" rows="3"></textarea>
+          </div>
+
+          <button type="submit" class="ux-button ux-color-primary">
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" id="product-spinner"></span>
+            Crear Producto
+          </button>
+        </form>
+        <div id="product-result" style="margin-top: var(--ux-space-md);"></div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Formulario con imagen y datos --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/products"</span>
+      <span class="attr">hx-encoding</span>=<span class="string">"multipart/form-data"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#result"</span><span class="tag">&gt;</span>
+
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"image"</span> <span class="attr">accept</span>=<span class="string">"image/*"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"name"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"number"</span> <span class="attr">name</span>=<span class="string">"price"</span><span class="tag">&gt;</span>
+
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span><span class="tag">&gt;</span>Crear Producto<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Galeria con Upload Multiple</h4>
+      <p>Subir multiples imagenes y mostrar galeria actualizada.</p>
+
+      <div class="demo-box">
+        <div id="gallery"
+             style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--ux-space-sm); margin-bottom: var(--ux-space-md);">
+          <div style="aspect-ratio: 1; background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius); display: flex; align-items: center; justify-content: center; color: var(--ux-text-secondary);">
+            1
+          </div>
+          <div style="aspect-ratio: 1; background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius); display: flex; align-items: center; justify-content: center; color: var(--ux-text-secondary);">
+            2
+          </div>
+          <div style="aspect-ratio: 1; background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius); display: flex; align-items: center; justify-content: center; color: var(--ux-text-secondary);">
+            3
+          </div>
+        </div>
+
+        <form hx-post="/api/gallery/upload"
+              hx-encoding="multipart/form-data"
+              hx-target="#gallery"
+              hx-swap="innerHTML"
+              hx-indicator="#gallery-spinner">
+          <div class="ux-upload ux-upload--compact">
+            <input type="file" name="images" class="ux-upload__input" id="gallery-upload" accept="image/*" multiple>
+            <label for="gallery-upload" class="ux-upload__dropzone" style="cursor: pointer;">
+              <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <div class="ux-upload__content">
+                <p class="ux-upload__text">Agregar imagenes</p>
+              </div>
+            </label>
+          </div>
+          <button type="submit" class="ux-button ux-button--outline" style="margin-top: var(--ux-space-sm);">
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" id="gallery-spinner"></span>
+            Subir a Galeria
+          </button>
+        </form>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Galeria que se actualiza con nuevas imagenes --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"gallery"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- imagenes existentes --&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/gallery/upload"</span>
+      <span class="attr">hx-encoding</span>=<span class="string">"multipart/form-data"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#gallery"</span>
+      <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"images"</span> <span class="attr">multiple</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span><span class="tag">&gt;</span>Subir<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span>
+
+<span class="comment">&lt;!-- El servidor devuelve la galeria completa actualizada --&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Eliminar Archivo del Servidor</h4>
+      <p>Lista de archivos con opcion de eliminar via HTMX.</p>
+
+      <div class="demo-box">
+        <div id="file-list" style="display: flex; flex-direction: column; gap: var(--ux-space-sm);">
+          <div class="ux-upload__file" style="display: flex; align-items: center; padding: var(--ux-space-sm); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius);">
+            <div style="flex: 1;">
+              <p style="font-weight: 500;">documento.pdf</p>
+              <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">2.4 MB</p>
+            </div>
+            <button class="ux-button ux-button--sm ux-button--clear"
+                    style="color: var(--ux-danger);"
+                    hx-delete="/api/files/123"
+                    hx-target="closest .ux-upload__file"
+                    hx-swap="outerHTML"
+                    hx-confirm="Eliminar este archivo?">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="ux-upload__file" style="display: flex; align-items: center; padding: var(--ux-space-sm); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius);">
+            <div style="flex: 1;">
+              <p style="font-weight: 500;">imagen.jpg</p>
+              <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">1.1 MB</p>
+            </div>
+            <button class="ux-button ux-button--sm ux-button--clear"
+                    style="color: var(--ux-danger);"
+                    hx-delete="/api/files/124"
+                    hx-target="closest .ux-upload__file"
+                    hx-swap="outerHTML"
+                    hx-confirm="Eliminar este archivo?">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Eliminar archivo con HTMX --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-upload__file"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;span&gt;</span>documento.pdf<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">hx-delete</span>=<span class="string">"/api/files/123"</span>
+          <span class="attr">hx-target</span>=<span class="string">"closest .ux-upload__file"</span>
+          <span class="attr">hx-swap</span>=<span class="string">"outerHTML"</span>
+          <span class="attr">hx-confirm</span>=<span class="string">"Eliminar?"</span><span class="tag">&gt;</span>
+    Eliminar
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </div>
+
     <!-- Referencia de Clases -->
     <div class="demo-section">
       <h3>Referencia de Clases</h3>
-      <div class="demo-box" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="border-bottom: 2px solid var(--ux-border-color);">
-              <th style="text-align: left; padding: var(--ux-space-sm);">Clase</th>
-              <th style="text-align: left; padding: var(--ux-space-sm);">Descripción</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload</code></td>
-              <td style="padding: var(--ux-space-sm);">Contenedor principal</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload--compact</code></td>
-              <td style="padding: var(--ux-space-sm);">Versión compacta horizontal</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload--button</code></td>
-              <td style="padding: var(--ux-space-sm);">Estilo botón</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload--avatar</code></td>
-              <td style="padding: var(--ux-space-sm);">Circular para avatar</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload--grid</code></td>
-              <td style="padding: var(--ux-space-sm);">Preview en grid</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload--dragover</code></td>
-              <td style="padding: var(--ux-space-sm);">Estado drag over</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__dropzone</code></td>
-              <td style="padding: var(--ux-space-sm);">Zona de drop</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__files</code></td>
-              <td style="padding: var(--ux-space-sm);">Lista de archivos</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__file</code></td>
-              <td style="padding: var(--ux-space-sm);">Item de archivo</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__file--error</code></td>
-              <td style="padding: var(--ux-space-sm);">Archivo con error</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__file--success</code></td>
-              <td style="padding: var(--ux-space-sm);">Archivo subido exitosamente</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__preview</code></td>
-              <td style="padding: var(--ux-space-sm);">Preview del archivo</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload__progress</code></td>
-              <td style="padding: var(--ux-space-sm);">Barra de progreso</td>
-            </tr>
-            <tr style="border-bottom: 2px solid var(--ux-border-color); background: var(--ux-surface-secondary);">
-              <td colspan="2" style="padding: var(--ux-space-sm); font-weight: 600;">Image Upload Button (CSS-only)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-image</code></td>
-              <td style="padding: var(--ux-space-sm);">Contenedor botón + preview</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-image__preview</code></td>
-              <td style="padding: var(--ux-space-sm);">Caja de preview (64px)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-image__preview--sm</code></td>
-              <td style="padding: var(--ux-space-sm);">Preview pequeño (48px)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-image__preview--lg</code></td>
-              <td style="padding: var(--ux-space-sm);">Preview grande (80px)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-image__preview--rounded</code></td>
-              <td style="padding: var(--ux-space-sm);">Preview circular</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-image__button</code></td>
-              <td style="padding: var(--ux-space-sm);">Label que oculta el input</td>
-            </tr>
-            <tr style="border-bottom: 2px solid var(--ux-border-color); background: var(--ux-surface-secondary);">
-              <td colspan="2" style="padding: var(--ux-space-sm); font-weight: 600;">Upload Area (CSS-only)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-area</code></td>
-              <td style="padding: var(--ux-space-sm);">Zona de drop (label)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-area--sm</code></td>
-              <td style="padding: var(--ux-space-sm);">Área pequeña (120px)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-area--lg</code></td>
-              <td style="padding: var(--ux-space-sm);">Área grande (240px)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-area--dragover</code></td>
-              <td style="padding: var(--ux-space-sm);">Estado drag over</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-area--disabled</code></td>
-              <td style="padding: var(--ux-space-sm);">Estado deshabilitado</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-area--error</code></td>
-              <td style="padding: var(--ux-space-sm);">Estado error</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-area__icon</code></td>
-              <td style="padding: var(--ux-space-sm);">Icono central</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-area__text</code></td>
-              <td style="padding: var(--ux-space-sm);">Texto principal</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-area__hint</code></td>
-              <td style="padding: var(--ux-space-sm);">Texto secundario (formatos)</td>
-            </tr>
-            <tr>
-              <td style="padding: var(--ux-space-sm);"><code>.ux-upload-area__link</code></td>
-              <td style="padding: var(--ux-space-sm);">Enlace "browse" destacado</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <table class="ux-table">
+        <thead>
+          <tr>
+            <th>Clase</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.ux-upload</code></td><td>Contenedor principal</td></tr>
+          <tr><td><code>.ux-upload--compact</code></td><td>Versión compacta horizontal</td></tr>
+          <tr><td><code>.ux-upload--button</code></td><td>Estilo botón</td></tr>
+          <tr><td><code>.ux-upload--avatar</code></td><td>Circular para avatar</td></tr>
+          <tr><td><code>.ux-upload--grid</code></td><td>Preview en grid</td></tr>
+          <tr><td><code>.ux-upload--dragover</code></td><td>Estado drag over</td></tr>
+          <tr><td><code>.ux-upload__dropzone</code></td><td>Zona de drop</td></tr>
+          <tr><td><code>.ux-upload__files</code></td><td>Lista de archivos</td></tr>
+          <tr><td><code>.ux-upload__file</code></td><td>Item de archivo</td></tr>
+          <tr><td><code>.ux-upload__file--error</code></td><td>Archivo con error</td></tr>
+          <tr><td><code>.ux-upload__file--success</code></td><td>Archivo subido exitosamente</td></tr>
+          <tr><td><code>.ux-upload__preview</code></td><td>Preview del archivo</td></tr>
+          <tr><td><code>.ux-upload__progress</code></td><td>Barra de progreso</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Image Upload Button (CSS-only)</h4>
+      <table class="ux-table">
+        <thead>
+          <tr><th>Clase</th><th>Descripción</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.ux-upload-image</code></td><td>Contenedor botón + preview</td></tr>
+          <tr><td><code>.ux-upload-image__preview</code></td><td>Caja de preview (64px)</td></tr>
+          <tr><td><code>.ux-upload-image__preview--sm</code></td><td>Preview pequeño (48px)</td></tr>
+          <tr><td><code>.ux-upload-image__preview--lg</code></td><td>Preview grande (80px)</td></tr>
+          <tr><td><code>.ux-upload-image__preview--rounded</code></td><td>Preview circular</td></tr>
+          <tr><td><code>.ux-upload-image__button</code></td><td>Label que oculta el input</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Upload Area (CSS-only)</h4>
+      <table class="ux-table">
+        <thead>
+          <tr><th>Clase</th><th>Descripción</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.ux-upload-area</code></td><td>Zona de drop (label)</td></tr>
+          <tr><td><code>.ux-upload-area--sm</code></td><td>Área pequeña (120px)</td></tr>
+          <tr><td><code>.ux-upload-area--lg</code></td><td>Área grande (240px)</td></tr>
+          <tr><td><code>.ux-upload-area--dragover</code></td><td>Estado drag over</td></tr>
+          <tr><td><code>.ux-upload-area--disabled</code></td><td>Estado deshabilitado</td></tr>
+          <tr><td><code>.ux-upload-area--error</code></td><td>Estado error</td></tr>
+          <tr><td><code>.ux-upload-area__icon</code></td><td>Icono central</td></tr>
+          <tr><td><code>.ux-upload-area__text</code></td><td>Texto principal</td></tr>
+          <tr><td><code>.ux-upload-area__hint</code></td><td>Texto secundario (formatos)</td></tr>
+          <tr><td><code>.ux-upload-area__link</code></td><td>Enlace "browse" destacado</td></tr>
+        </tbody>
+      </table>
     </div>
 
   </main>

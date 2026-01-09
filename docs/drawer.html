@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Drawer - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-list.js"></script>
+  <script src="../components/ux-drawer.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .menu-icon { width: 20px; height: 20px; opacity: 0.7; }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+    <h2 style="margin-bottom: var(--ux-space-lg);">Drawer</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xl);">Panel lateral deslizable (sidebar modal). Ideal para navegacion, filtros y paneles de configuracion.</p>
+
+    <section class="demo-section">
+      <h3>Basico (Left)</h3>
+      <p>Drawer desde la izquierda con backdrop.</p>
+      <div class="demo-box">
+        <div x-data="uxDrawer()">
+          <button class="ux-button ux-color-primary" @click="open()">Open Left Drawer</button>
+
+          <template x-teleport="body">
+            <div class="ux-drawer-backdrop"
+                 :class="backdropClasses"
+                 @click.self="onBackdropClick()">
+              <div class="ux-drawer" :class="drawerClasses">
+                <div class="ux-drawer__header">
+                  <div>
+                    <h3 class="ux-drawer__title">Menu</h3>
+                    <p class="ux-drawer__subtitle">Navigation</p>
+                  </div>
+                  <button class="ux-drawer__close" @click="close()" aria-label="Close">
+                    <svg class="ux-drawer__close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="ux-drawer__content">
+                  <ul class="ux-list">
+                    <li class="ux-list__item">
+                      <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                      <span class="ux-list__text">Home</span>
+                    </li>
+                    <li class="ux-list__item">
+                      <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      <span class="ux-list__text">Profile</span>
+                    </li>
+                    <li class="ux-list__item">
+                      <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                      <span class="ux-list__text">Settings</span>
+                    </li>
+                    <li class="ux-list__item">
+                      <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      <span class="ux-list__text">Help</span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="ux-drawer__footer">
+                  <button class="ux-button ux-button--block" @click="close()">Close</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxDrawer()"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"open()"</span><span class="tag">&gt;</span>Open<span class="tag">&lt;/button&gt;</span>
+
+  <span class="tag">&lt;template</span> <span class="attr">x-teleport</span>=<span class="string">"body"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-drawer-backdrop"</span> <span class="attr">:class</span>=<span class="string">"backdropClasses"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-drawer"</span><span class="tag">&gt;</span>
+        ...content...
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/template&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Right Position</h3>
+      <p>Drawer desde la derecha.</p>
+      <div class="demo-box">
+        <div x-data="uxDrawer({ position: 'right' })">
+          <button class="ux-button" @click="open()">Open Right Drawer</button>
+
+          <template x-teleport="body">
+            <div class="ux-drawer-backdrop"
+                 :class="backdropClasses"
+                 @click.self="onBackdropClick()">
+              <div class="ux-drawer" :class="drawerClasses">
+                <div class="ux-drawer__header">
+                  <h3 class="ux-drawer__title">Filters</h3>
+                  <button class="ux-drawer__close" @click="close()" aria-label="Close">
+                    <svg class="ux-drawer__close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="ux-drawer__content ux-drawer__content--padded">
+                  <p style="color: var(--ux-text-secondary);">Filter options would go here.</p>
+                </div>
+                <div class="ux-drawer__footer">
+                  <button class="ux-button" @click="close()">Cancel</button>
+                  <button class="ux-button ux-color-primary" @click="close()">Apply Filters</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Width Sizes</h3>
+      <div class="demo-box">
+        <div x-data="uxDrawer()">
+          <button class="ux-button ux-button--sm" @click="open()">Small (280px)</button>
+          <template x-teleport="body">
+            <div class="ux-drawer-backdrop" :class="backdropClasses" @click.self="onBackdropClick()">
+              <div class="ux-drawer ux-drawer--sm">
+                <div class="ux-drawer__header">
+                  <h3 class="ux-drawer__title">Small Drawer</h3>
+                  <button class="ux-drawer__close" @click="close()">
+                    <svg class="ux-drawer__close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+                <div class="ux-drawer__content ux-drawer__content--padded">
+                  <p>280px width</p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div x-data="uxDrawer()">
+          <button class="ux-button ux-button--sm" @click="open()">Default (320px)</button>
+          <template x-teleport="body">
+            <div class="ux-drawer-backdrop" :class="backdropClasses" @click.self="onBackdropClick()">
+              <div class="ux-drawer">
+                <div class="ux-drawer__header">
+                  <h3 class="ux-drawer__title">Default Drawer</h3>
+                  <button class="ux-drawer__close" @click="close()">
+                    <svg class="ux-drawer__close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+                <div class="ux-drawer__content ux-drawer__content--padded">
+                  <p>320px width</p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div x-data="uxDrawer()">
+          <button class="ux-button ux-button--sm" @click="open()">Large (400px)</button>
+          <template x-teleport="body">
+            <div class="ux-drawer-backdrop" :class="backdropClasses" @click.self="onBackdropClick()">
+              <div class="ux-drawer ux-drawer--lg">
+                <div class="ux-drawer__header">
+                  <h3 class="ux-drawer__title">Large Drawer</h3>
+                  <button class="ux-drawer__close" @click="close()">
+                    <svg class="ux-drawer__close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+                <div class="ux-drawer__content ux-drawer__content--padded">
+                  <p>400px width</p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div x-data="uxDrawer()">
+          <button class="ux-button ux-button--sm" @click="open()">XL (500px)</button>
+          <template x-teleport="body">
+            <div class="ux-drawer-backdrop" :class="backdropClasses" @click.self="onBackdropClick()">
+              <div class="ux-drawer ux-drawer--xl">
+                <div class="ux-drawer__header">
+                  <h3 class="ux-drawer__title">Extra Large Drawer</h3>
+                  <button class="ux-drawer__close" @click="close()">
+                    <svg class="ux-drawer__close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+                <div class="ux-drawer__content ux-drawer__content--padded">
+                  <p>500px width</p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Glass Variant</h3>
+      <div class="demo-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 200px;">
+        <div x-data="uxDrawer({ position: 'right' })">
+          <button class="ux-button" @click="open()">Open Glass Drawer</button>
+
+          <template x-teleport="body">
+            <div class="ux-drawer-backdrop"
+                 :class="backdropClasses"
+                 @click.self="onBackdropClick()">
+              <div class="ux-drawer ux-drawer--glass" :class="drawerClasses">
+                <div class="ux-drawer__header">
+                  <h3 class="ux-drawer__title">Glass Drawer</h3>
+                  <button class="ux-drawer__close" @click="close()" aria-label="Close">
+                    <svg class="ux-drawer__close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="ux-drawer__content ux-drawer__content--padded">
+                  <p style="color: var(--ux-text-secondary);">iOS 26 Liquid Glass effect with backdrop blur.</p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Without Close on Backdrop</h3>
+      <p>El drawer no se cierra al hacer click en el backdrop.</p>
+      <div class="demo-box">
+        <div x-data="uxDrawer({ closeOnBackdrop: false })">
+          <button class="ux-button" @click="open()">Open (Must Use Button)</button>
+
+          <template x-teleport="body">
+            <div class="ux-drawer-backdrop"
+                 :class="backdropClasses"
+                 @click.self="onBackdropClick()">
+              <div class="ux-drawer">
+                <div class="ux-drawer__header">
+                  <h3 class="ux-drawer__title">Modal Drawer</h3>
+                </div>
+                <div class="ux-drawer__content ux-drawer__content--padded">
+                  <p style="color: var(--ux-text-secondary);">This drawer can only be closed with the button below.</p>
+                </div>
+                <div class="ux-drawer__footer">
+                  <button class="ux-button ux-button--block ux-color-primary" @click="close()">Close Drawer</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>API</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Clase</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody style="font-size: var(--ux-font-size-sm);">
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-drawer-backdrop</code></td>
+            <td style="padding: var(--ux-space-sm);">Contenedor con backdrop</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-drawer</code></td>
+            <td style="padding: var(--ux-space-sm);">Panel lateral</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-drawer--right</code></td>
+            <td style="padding: var(--ux-space-sm);">Posicion derecha</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-drawer--sm/lg/xl/full</code></td>
+            <td style="padding: var(--ux-space-sm);">Anchos</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-drawer--glass</code></td>
+            <td style="padding: var(--ux-space-sm);">Efecto glass morphism</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-drawer__header</code></td>
+            <td style="padding: var(--ux-space-sm);">Cabecera con titulo</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-drawer__content</code></td>
+            <td style="padding: var(--ux-space-sm);">Area de contenido scrollable</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>.ux-drawer__footer</code></td>
+            <td style="padding: var(--ux-space-sm);">Pie con acciones</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="demo-section">
+      <h3>Alpine.js API</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Opcion/Metodo</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody style="font-size: var(--ux-font-size-sm);">
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>position</code></td>
+            <td style="padding: var(--ux-space-sm);">'left' | 'right' (default: 'left')</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>closeOnBackdrop</code></td>
+            <td style="padding: var(--ux-space-sm);">Cerrar al click en backdrop (default: true)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>closeOnEscape</code></td>
+            <td style="padding: var(--ux-space-sm);">Cerrar con tecla Escape (default: true)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>lockScroll</code></td>
+            <td style="padding: var(--ux-space-sm);">Bloquear scroll del body (default: true)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>open()</code></td>
+            <td style="padding: var(--ux-space-sm);">Abrir drawer</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>close()</code></td>
+            <td style="padding: var(--ux-space-sm);">Cerrar drawer</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>toggle()</code></td>
+            <td style="padding: var(--ux-space-sm);">Alternar estado</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>isOpen</code></td>
+            <td style="padding: var(--ux-space-sm);">Estado actual</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="demo-section">
+      <h3>Events</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Evento</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody style="font-size: var(--ux-font-size-sm);">
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>drawer:open</code></td>
+            <td style="padding: var(--ux-space-sm);">Drawer abierto</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>drawer:close</code></td>
+            <td style="padding: var(--ux-space-sm);">Drawer cerrado</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

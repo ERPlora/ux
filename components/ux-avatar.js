@@ -187,12 +187,14 @@
     .ux-avatar-group {
       display: inline-flex;
       flex-direction: row-reverse;
+      align-items: center;
     }
 
     .ux-avatar-group .ux-avatar {
       margin-left: -12px;
       border: 2px solid var(--ux-background);
       transition: transform var(--ux-transition-fast) var(--ux-ease);
+      box-sizing: content-box;
     }
 
     .ux-avatar-group .ux-avatar:last-child {
@@ -201,7 +203,13 @@
 
     .ux-avatar-group .ux-avatar:hover {
       transform: translateY(-4px);
-      z-index: 1;
+      z-index: 10;
+    }
+
+    /* Group Sizes */
+    .ux-avatar-group--xs .ux-avatar {
+      margin-left: -6px;
+      border-width: 1px;
     }
 
     .ux-avatar-group--sm .ux-avatar {
@@ -210,6 +218,31 @@
 
     .ux-avatar-group--lg .ux-avatar {
       margin-left: -16px;
+      border-width: 3px;
+    }
+
+    .ux-avatar-group--xl .ux-avatar {
+      margin-left: -20px;
+      border-width: 3px;
+    }
+
+    /* Group Stacking (left-to-right) */
+    .ux-avatar-group--stack-left {
+      flex-direction: row;
+    }
+
+    .ux-avatar-group--stack-left .ux-avatar {
+      margin-left: 0;
+      margin-right: -12px;
+    }
+
+    .ux-avatar-group--stack-left .ux-avatar:last-child {
+      margin-right: 0;
+    }
+
+    /* Group - No Hover Effect */
+    .ux-avatar-group--static .ux-avatar:hover {
+      transform: none;
     }
 
     /* Avatar Group Counter */
@@ -217,15 +250,111 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
+      width: var(--ux-avatar-size);
+      height: var(--ux-avatar-size);
       margin-left: -12px;
       border-radius: 50%;
-      background-color: var(--ux-light);
+      background-color: var(--ux-surface-secondary);
       color: var(--ux-text);
       font-size: var(--ux-font-size-sm);
       font-weight: 600;
       border: 2px solid var(--ux-background);
+      cursor: default;
+      box-sizing: content-box;
+    }
+
+    .ux-avatar-group--xs .ux-avatar-group__more {
+      width: var(--ux-avatar-size-xs);
+      height: var(--ux-avatar-size-xs);
+      margin-left: -6px;
+      font-size: 9px;
+      border-width: 1px;
+    }
+
+    .ux-avatar-group--sm .ux-avatar-group__more {
+      width: var(--ux-avatar-size-sm);
+      height: var(--ux-avatar-size-sm);
+      margin-left: -8px;
+      font-size: 10px;
+    }
+
+    .ux-avatar-group--lg .ux-avatar-group__more {
+      width: var(--ux-avatar-size-lg);
+      height: var(--ux-avatar-size-lg);
+      margin-left: -16px;
+      font-size: var(--ux-font-size-md);
+      border-width: 3px;
+    }
+
+    .ux-avatar-group--xl .ux-avatar-group__more {
+      width: var(--ux-avatar-size-xl);
+      height: var(--ux-avatar-size-xl);
+      margin-left: -20px;
+      font-size: var(--ux-font-size-lg);
+      border-width: 3px;
+    }
+
+    .ux-avatar-group--stack-left .ux-avatar-group__more {
+      margin-left: 0;
+      margin-right: -12px;
+    }
+
+    .ux-avatar-group__more:hover {
+      background-color: var(--ux-surface-tertiary);
+    }
+
+    .ux-avatar-group__more--clickable {
+      cursor: pointer;
+    }
+
+    /* Avatar Group Tooltip Container */
+    .ux-avatar-group-wrapper {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .ux-avatar-group__tooltip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: var(--ux-z-tooltip);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      background: var(--ux-gray-900);
+      color: white;
+      font-size: 0.75rem;
+      border-radius: var(--ux-radius-md);
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-avatar-group__tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: var(--ux-gray-900);
+    }
+
+    .ux-avatar-group-wrapper:hover .ux-avatar-group__tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Glass variant for group */
+    .ux-avatar-group--glass .ux-avatar {
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-avatar-group--glass .ux-avatar-group__more {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
     }
 
     /* ========================================

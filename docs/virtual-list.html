@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Virtual List - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-badge.js"></script>
+  <script src="../components/ux-avatar.js"></script>
+  <script src="../components/ux-virtual-list.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border: 1px solid var(--ux-border-color); border-radius: var(--ux-border-radius-lg); margin-bottom: var(--ux-space-md); overflow: hidden; }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: var(--ux-font-size-sm); overflow-x: auto; white-space: pre; }
+
+    /* Demo item styles */
+    .virtual-item {
+      display: flex;
+      align-items: center;
+      padding: var(--ux-space-md);
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+    .virtual-item__avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--ux-surface-secondary);
+      margin-right: var(--ux-space-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: var(--ux-text-secondary);
+    }
+    .virtual-item__content {
+      flex: 1;
+      min-width: 0;
+    }
+    .virtual-item__title {
+      font-weight: 500;
+      color: var(--ux-text);
+      margin-bottom: 2px;
+    }
+    .virtual-item__subtitle {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+    .virtual-item__end {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <!-- Basic Virtual List -->
+  <div class="demo-section">
+    <h3>Virtual List Basico</h3>
+    <p>Lista virtualizada con 10,000 elementos. Solo se renderizan los elementos visibles en pantalla para mantener un rendimiento optimo.</p>
+
+    <div class="demo-box" x-data="{
+      virtualList: null,
+      // Generate 10,000 items
+      items: Array.from({ length: 10000 }, (_, i) => ({
+        id: i + 1,
+        name: 'Usuario ' + (i + 1),
+        email: 'usuario' + (i + 1) + '@example.com',
+        avatar: String.fromCharCode(65 + (i % 26))
+      }))
+    }">
+      <div class="ux-virtual-list"
+           x-data="uxVirtualList({ items: $data.items, itemHeight: 72 })"
+           style="height: 400px;">
+
+        <!-- Virtual container -->
+        <div class="ux-virtual-list__container" :style="containerStyle">
+          <div class="ux-virtual-list__content" :style="contentStyle">
+            <template x-for="item in visibleItems" :key="item.id">
+              <div class="virtual-item ux-virtual-list__item" :style="{ height: itemHeight + 'px' }">
+                <div class="virtual-item__avatar" x-text="item.avatar"></div>
+                <div class="virtual-item__content">
+                  <div class="virtual-item__title" x-text="item.name"></div>
+                  <div class="virtual-item__subtitle" x-text="item.email"></div>
+                </div>
+                <div class="virtual-item__end" x-text="'#' + item.id"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Scroll to top button -->
+        <button class="ux-virtual-list__scroll-top"
+                :class="{ 'ux-virtual-list__scroll-top--visible': showScrollTopButton }"
+                @click="scrollToTop()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 15l-6-6-6 6"/>
+          </svg>
+        </button>
+      </div>
+
+      <div style="padding: var(--ux-space-md); background: var(--ux-surface-secondary); font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">
+        10,000 elementos - Solo se renderizan los visibles
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div class="ux-virtual-list"
+     x-data="uxVirtualList({
+       items: myItems,      // Array de 10,000 items
+       itemHeight: 72       // Altura fija de cada item
+     })"
+     style="height: 400px;"&gt;
+
+  &lt;div class="ux-virtual-list__container" :style="containerStyle"&gt;
+    &lt;div class="ux-virtual-list__content" :style="contentStyle"&gt;
+      &lt;template x-for="item in visibleItems" :key="item.id"&gt;
+        &lt;div class="ux-virtual-list__item" :style="{ height: itemHeight + 'px' }"&gt;
+          &lt;!-- Item content --&gt;
+        &lt;/div&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- With Infinite Scroll -->
+  <div class="demo-section">
+    <h3>Con Scroll Infinito</h3>
+    <p>Carga mas elementos automaticamente cuando el usuario llega al final de la lista.</p>
+
+    <div class="demo-box" x-data="{
+      items: Array.from({ length: 50 }, (_, i) => ({
+        id: i + 1,
+        title: 'Articulo ' + (i + 1),
+        excerpt: 'Este es el contenido del articulo numero ' + (i + 1)
+      })),
+      hasMore: true,
+      nextId: 51,
+      async loadMore() {
+        // Simulate API delay
+        await new Promise(r => setTimeout(r, 1000));
+        const newItems = Array.from({ length: 20 }, (_, i) => ({
+          id: this.nextId + i,
+          title: 'Articulo ' + (this.nextId + i),
+          excerpt: 'Este es el contenido del articulo numero ' + (this.nextId + i)
+        }));
+        this.items = [...this.items, ...newItems];
+        this.nextId += 20;
+        if (this.items.length >= 200) {
+          this.hasMore = false;
+        }
+      }
+    }">
+      <div class="ux-virtual-list ux-virtual-list--bordered"
+           x-data="uxVirtualList({
+             items: $data.items,
+             itemHeight: 80,
+             hasMore: $data.hasMore,
+             loadMore: () => $data.loadMore()
+           })"
+           x-effect="setItems($data.items); hasMore = $data.hasMore"
+           style="height: 350px;">
+
+        <div class="ux-virtual-list__container" :style="containerStyle">
+          <div class="ux-virtual-list__content" :style="contentStyle">
+            <template x-for="item in visibleItems" :key="item.id">
+              <div class="ux-virtual-list__item" :style="{ height: itemHeight + 'px', padding: 'var(--ux-space-md)' }">
+                <div style="font-weight: 500; margin-bottom: 4px;" x-text="item.title"></div>
+                <div style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);" x-text="item.excerpt"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div class="ux-virtual-list__loader" x-show="loadingMore">
+          <div class="ux-virtual-list__spinner"></div>
+          <span class="ux-virtual-list__loader-text">Cargando mas...</span>
+        </div>
+      </div>
+
+      <div style="padding: var(--ux-space-md); background: var(--ux-surface-secondary); font-size: var(--ux-font-size-sm); display: flex; justify-content: space-between;">
+        <span x-text="items.length + ' elementos cargados'"></span>
+        <span x-show="!hasMore" style="color: var(--ux-success);">Todos los elementos cargados</span>
+      </div>
+    </div>
+
+    <pre class="code-block">x-data="uxVirtualList({
+  items: myItems,
+  itemHeight: 80,
+  hasMore: true,                    // Hay mas elementos?
+  loadMore: () => loadMoreItems(),  // Funcion async para cargar mas
+  infiniteScrollThreshold: 200      // Pixeles antes del final
+})"
+
+// loadMore se llama automaticamente cuando el scroll
+// llega a 200px del final</pre>
+  </div>
+
+  <!-- With Scroll to Index -->
+  <div class="demo-section">
+    <h3>Navegacion por Indice</h3>
+    <p>Navega directamente a un elemento especifico por su indice.</p>
+
+    <div class="demo-box" x-data="{
+      items: Array.from({ length: 1000 }, (_, i) => ({
+        id: i,
+        label: 'Item ' + i
+      })),
+      targetIndex: 500
+    }">
+      <div style="padding: var(--ux-space-md); display: flex; gap: var(--ux-space-sm); align-items: center; border-bottom: 1px solid var(--ux-border-color);">
+        <input type="number" class="ux-input" style="width: 100px;" x-model.number="targetIndex" min="0" max="999" placeholder="Indice">
+        <button class="ux-button ux-button--primary ux-button--sm" @click="$refs.virtualList.scrollToIndex(targetIndex)">
+          Ir al indice
+        </button>
+        <button class="ux-button ux-button--outline ux-button--sm" @click="$refs.virtualList.scrollToIndex(0)">
+          Ir al inicio
+        </button>
+        <button class="ux-button ux-button--outline ux-button--sm" @click="$refs.virtualList.scrollToIndex(999)">
+          Ir al final
+        </button>
+      </div>
+
+      <div class="ux-virtual-list"
+           x-ref="virtualList"
+           x-data="uxVirtualList({ items: $data.items, itemHeight: 50 })"
+           style="height: 300px;">
+
+        <div class="ux-virtual-list__container" :style="containerStyle">
+          <div class="ux-virtual-list__content" :style="contentStyle">
+            <template x-for="item in visibleItems" :key="item.id">
+              <div class="ux-virtual-list__item"
+                   :style="{ height: itemHeight + 'px', display: 'flex', alignItems: 'center', padding: '0 var(--ux-space-md)', borderBottom: '1px solid var(--ux-border-color)' }">
+                <span class="ux-badge ux-color-primary" style="margin-right: var(--ux-space-sm);" x-text="item.id"></span>
+                <span x-text="item.label"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: var(--ux-space-sm) var(--ux-space-md); background: var(--ux-surface-secondary); font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary);">
+        1,000 elementos - Renderizando solo los visibles
+      </div>
+    </div>
+
+    <pre class="code-block">// Metodos de navegacion
+scrollToIndex(index, behavior)  // Ir a un indice especifico
+scrollToTop(behavior)           // Ir al inicio
+
+// behavior: 'smooth' (default) o 'instant'</pre>
+  </div>
+
+  <!-- Performance Stats -->
+  <div class="demo-section">
+    <h3>Estadisticas de Rendimiento</h3>
+    <p>Informacion en tiempo real sobre la virtualizacion.</p>
+
+    <div class="demo-box" x-data="{
+      items: Array.from({ length: 5000 }, (_, i) => ({
+        id: i,
+        value: Math.round(Math.random() * 100)
+      }))
+    }">
+      <div class="ux-virtual-list"
+           x-data="uxVirtualList({ items: $data.items, itemHeight: 44, buffer: 3 })"
+           @virtuallist:scroll.window="$dispatch('stats-update', getVisibleRange())"
+           style="height: 300px;">
+
+        <div class="ux-virtual-list__container" :style="containerStyle">
+          <div class="ux-virtual-list__content" :style="contentStyle">
+            <template x-for="item in visibleItems" :key="item.id">
+              <div class="ux-virtual-list__item"
+                   :style="{ height: itemHeight + 'px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 var(--ux-space-md)', borderBottom: '1px solid var(--ux-border-color)' }">
+                <span>Fila <span x-text="item.id"></span></span>
+                <div style="width: 100px; height: 8px; background: var(--ux-surface-secondary); border-radius: 4px; overflow: hidden;">
+                  <div :style="{ width: item.value + '%', height: '100%', background: 'var(--ux-primary)' }"></div>
+                </div>
+                <span style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);" x-text="item.value + '%'"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Stats panel -->
+        <div style="position: absolute; bottom: var(--ux-space-sm); left: var(--ux-space-sm); right: var(--ux-space-sm); padding: var(--ux-space-sm); background: rgba(0,0,0,0.8); color: white; border-radius: var(--ux-radius-md); font-size: var(--ux-font-size-xs); display: flex; gap: var(--ux-space-md);">
+          <span>Total: <strong x-text="items.length"></strong></span>
+          <span>Visible: <strong x-text="visibleItems.length"></strong></span>
+          <span>Rango: <strong x-text="startIndex + '-' + endIndex"></strong></span>
+          <span>Scroll: <strong x-text="scrollPercentage + '%'"></strong></span>
+        </div>
+
+        <!-- Scroll to top -->
+        <button class="ux-virtual-list__scroll-top"
+                :class="{ 'ux-virtual-list__scroll-top--visible': showScrollTopButton }"
+                @click="scrollToTop()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 15l-6-6-6 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="demo-section">
+    <h3>Estado Vacio</h3>
+    <p>Cuando no hay elementos para mostrar.</p>
+
+    <div class="demo-box">
+      <div class="ux-virtual-list"
+           x-data="uxVirtualList({
+             items: [],
+             itemHeight: 50,
+             emptyTitle: 'Lista vacia',
+             emptyText: 'No hay elementos que mostrar en esta lista.'
+           })"
+           style="height: 200px;">
+
+        <template x-if="items.length === 0 && !loading">
+          <div class="ux-virtual-list__empty">
+            <svg class="ux-virtual-list__empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 6h18M3 12h18M3 18h18"/>
+            </svg>
+            <h4 class="ux-virtual-list__empty-title" x-text="emptyTitle"></h4>
+            <p class="ux-virtual-list__empty-text" x-text="emptyText"></p>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSS Classes -->
+  <div class="demo-section">
+    <h3>Clases CSS</h3>
+    <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="code-block">/* Container */
+.ux-virtual-list              // Contenedor principal (debe tener altura fija)
+.ux-virtual-list--striped     // Filas alternadas
+.ux-virtual-list--bordered    // Con bordes entre items
+.ux-virtual-list--glass       // Glass morphism
+
+/* Structure */
+.ux-virtual-list__container   // Contenedor total height
+.ux-virtual-list__content     // Contenedor items visibles
+.ux-virtual-list__item        // Item individual
+
+/* States */
+.ux-virtual-list__loader      // Indicador de carga
+.ux-virtual-list__spinner     // Spinner animado
+.ux-virtual-list__empty       // Estado vacio
+.ux-virtual-list__empty-icon  // Icono estado vacio
+.ux-virtual-list__empty-title // Titulo estado vacio
+.ux-virtual-list__empty-text  // Texto estado vacio
+
+/* Scroll */
+.ux-virtual-list__scroll-top  // Boton scroll to top
+.ux-virtual-list__scroll-top--visible // Visible</pre>
+    </div>
+  </div>
+
+  <!-- Alpine Component -->
+  <div class="demo-section">
+    <h3>Componente Alpine.js</h3>
+    <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="code-block">// Configuracion
+uxVirtualList({
+  items: [],                 // Array de elementos
+  itemHeight: 50,            // Altura fija de cada item (px)
+  buffer: 5,                 // Items extra arriba/abajo del viewport
+
+  // Loading states
+  loading: false,            // Cargando inicial
+  loadingText: 'Cargando...', // Texto de carga
+
+  // Empty state
+  emptyTitle: 'Sin elementos',
+  emptyText: 'No hay elementos para mostrar.',
+
+  // Scroll to top
+  showScrollTop: true,       // Mostrar boton scroll top
+  scrollTopThreshold: 300,   // Pixeles para mostrar boton
+
+  // Infinite scroll
+  hasMore: false,            // Hay mas elementos?
+  loadMore: null,            // Funcion async para cargar mas
+  infiniteScrollThreshold: 200 // Pixeles antes del final
+})
+
+// Propiedades reactivas
+visibleItems     // Items actualmente visibles
+startIndex       // Indice del primer item visible
+endIndex         // Indice del ultimo item visible
+scrollTop        // Posicion de scroll actual
+totalHeight      // Altura total del contenedor
+scrollPercentage // Porcentaje de scroll (0-100)
+showScrollTopButton // Mostrar boton scroll top
+
+// Metodos
+setItems(items)           // Reemplazar todos los items
+addItems(items)           // Agregar items al final
+prependItems(items)       // Agregar items al inicio
+removeItem(index)         // Eliminar item por indice
+updateItem(index, data)   // Actualizar item
+getItem(index)            // Obtener item por indice
+scrollToIndex(i, behavior) // Scroll a indice
+scrollToTop(behavior)     // Scroll al inicio
+getVisibleRange()         // { start, end, count }
+isItemVisible(index)      // Check si item es visible
+
+// Eventos
+@virtuallist:scroll       // { scrollTop, startIndex, endIndex }
+@virtuallist:loadmore     // Cuando se activa infinite scroll</pre>
+    </div>
+  </div>
+
+</body>
+</html>

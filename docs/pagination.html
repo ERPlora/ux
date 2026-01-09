@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Pagination - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-pagination.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+    <h2 style="margin-bottom: var(--ux-space-lg);">Pagination</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xl);">Control de paginacion con navegacion, selector de items por pagina e informacion de resultados.</p>
+
+    <section class="demo-section">
+      <h3>Completo</h3>
+      <p>Paginacion con info, controles y selector per-page.</p>
+      <div class="demo-box">
+        <div x-data="uxPagination({ currentPage: 1, totalPages: 10, totalItems: 100, perPage: 10 })"
+             @page-change="console.log('Page:', $event.detail)"
+             @per-page-change="console.log('Per page:', $event.detail)">
+          <div class="ux-pagination ux-pagination--bordered">
+            <div class="ux-pagination__info">
+              <span x-text="`Showing ${showingInfo.start} to ${showingInfo.end} of ${showingInfo.total} items`"></span>
+            </div>
+
+            <div class="ux-pagination__controls">
+              <button class="ux-pagination__btn ux-pagination__prev" :disabled="!canGoPrevious" @click="prevPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+
+              <template x-for="page in visiblePages" :key="page">
+                <template x-if="page === '...'">
+                  <span class="ux-pagination__ellipsis">...</span>
+                </template>
+                <template x-if="page !== '...'">
+                  <button class="ux-pagination__btn"
+                          :class="{ 'ux-pagination__btn--active': isActive(page) }"
+                          @click="goToPage(page)"
+                          x-text="page"></button>
+                </template>
+              </template>
+
+              <button class="ux-pagination__btn ux-pagination__next" :disabled="!canGoNext" @click="nextPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+
+            <div class="ux-pagination__per-page">
+              <span>Show</span>
+              <select @change="changePerPage($event.target.value)">
+                <template x-for="opt in perPageOptions" :key="opt">
+                  <option :value="opt" :selected="perPage === opt" x-text="opt"></option>
+                </template>
+              </select>
+              <span>per page</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxPagination({ currentPage: 1, totalPages: 10, totalItems: 100 })"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-pagination"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-pagination__info"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-pagination__controls"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-pagination__per-page"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Simple (Prev/Next)</h3>
+      <div class="demo-box">
+        <div x-data="uxPagination({ currentPage: 3, totalPages: 8 })">
+          <div class="ux-pagination ux-pagination--simple ux-pagination--bordered">
+            <div class="ux-pagination__controls">
+              <button class="ux-pagination__btn ux-pagination__prev" :disabled="!canGoPrevious" @click="prevPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <span class="ux-pagination__current">
+                <span x-text="currentPage"></span>
+                <span class="ux-pagination__current-separator">/</span>
+                <span x-text="totalPages"></span>
+              </span>
+              <button class="ux-pagination__btn ux-pagination__next" :disabled="!canGoNext" @click="nextPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Compact</h3>
+      <div class="demo-box">
+        <div x-data="uxPagination({ currentPage: 1, totalPages: 5 })">
+          <div class="ux-pagination ux-pagination--compact ux-pagination--bordered">
+            <div class="ux-pagination__controls">
+              <button class="ux-pagination__btn ux-pagination__prev" :disabled="!canGoPrevious" @click="prevPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <template x-for="page in visiblePages" :key="page">
+                <button class="ux-pagination__btn"
+                        :class="{ 'ux-pagination__btn--active': isActive(page) }"
+                        @click="goToPage(page)"
+                        x-text="page"></button>
+              </template>
+              <button class="ux-pagination__btn ux-pagination__next" :disabled="!canGoNext" @click="nextPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Sizes</h3>
+      <div class="demo-box" style="display: flex; flex-direction: column; gap: var(--ux-space-lg);">
+        <div x-data="uxPagination({ currentPage: 1, totalPages: 5 })">
+          <p style="margin-bottom: var(--ux-space-sm); color: var(--ux-text-secondary);">Small</p>
+          <div class="ux-pagination ux-pagination--sm ux-pagination--bordered">
+            <div class="ux-pagination__controls">
+              <button class="ux-pagination__btn ux-pagination__prev" :disabled="!canGoPrevious" @click="prevPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <template x-for="page in visiblePages" :key="page">
+                <button class="ux-pagination__btn" :class="{ 'ux-pagination__btn--active': isActive(page) }" @click="goToPage(page)" x-text="page"></button>
+              </template>
+              <button class="ux-pagination__btn ux-pagination__next" :disabled="!canGoNext" @click="nextPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div x-data="uxPagination({ currentPage: 1, totalPages: 5 })">
+          <p style="margin-bottom: var(--ux-space-sm); color: var(--ux-text-secondary);">Large</p>
+          <div class="ux-pagination ux-pagination--lg ux-pagination--bordered">
+            <div class="ux-pagination__controls">
+              <button class="ux-pagination__btn ux-pagination__prev" :disabled="!canGoPrevious" @click="prevPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <template x-for="page in visiblePages" :key="page">
+                <button class="ux-pagination__btn" :class="{ 'ux-pagination__btn--active': isActive(page) }" @click="goToPage(page)" x-text="page"></button>
+              </template>
+              <button class="ux-pagination__btn ux-pagination__next" :disabled="!canGoNext" @click="nextPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Glass Variant</h3>
+      <div class="demo-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: var(--ux-space-xl);">
+        <div x-data="uxPagination({ currentPage: 3, totalPages: 10 })">
+          <div class="ux-pagination ux-pagination--glass">
+            <div class="ux-pagination__controls">
+              <button class="ux-pagination__btn ux-pagination__prev" :disabled="!canGoPrevious" @click="prevPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <template x-for="page in visiblePages" :key="page">
+                <template x-if="page === '...'">
+                  <span class="ux-pagination__ellipsis">...</span>
+                </template>
+                <template x-if="page !== '...'">
+                  <button class="ux-pagination__btn" :class="{ 'ux-pagination__btn--active': isActive(page) }" @click="goToPage(page)" x-text="page"></button>
+                </template>
+              </template>
+              <button class="ux-pagination__btn ux-pagination__next" :disabled="!canGoNext" @click="nextPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>API</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Propiedad</th>
+            <th style="padding: var(--ux-space-sm);">Tipo</th>
+            <th style="padding: var(--ux-space-sm);">Default</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody style="font-size: var(--ux-font-size-sm);">
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>currentPage</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">1</td>
+            <td style="padding: var(--ux-space-sm);">Pagina actual</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>totalPages</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">1</td>
+            <td style="padding: var(--ux-space-sm);">Total de paginas</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>totalItems</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">0</td>
+            <td style="padding: var(--ux-space-sm);">Total de items</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>perPage</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">10</td>
+            <td style="padding: var(--ux-space-sm);">Items por pagina</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>perPageOptions</code></td>
+            <td style="padding: var(--ux-space-sm);">Array</td>
+            <td style="padding: var(--ux-space-sm);">[10,25,50,100]</td>
+            <td style="padding: var(--ux-space-sm);">Opciones de selector</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

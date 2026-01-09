@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Form Validation - UX Library</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-input.js"></script>
+  <script src="../components/ux-form.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-2xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section h4 { font-size: var(--ux-font-size-md); font-weight: 500; margin: var(--ux-space-lg) 0 var(--ux-space-sm); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: var(--ux-font-size-sm); overflow-x: auto; margin-top: var(--ux-space-md); white-space: pre; }
+    .demo-box {
+      background: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+      border: 1px solid var(--ux-border-color);
+    }
+    .demo-frame {
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+    }
+    .class-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--ux-font-size-sm);
+    }
+    .class-table th, .class-table td {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      text-align: left;
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+    .class-table th {
+      background: var(--ux-surface-secondary);
+      font-weight: 600;
+    }
+    .class-table code {
+      background: var(--ux-surface-secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: var(--ux-font-size-sm);
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content ux-padding">
+    <!-- Intro -->
+    <div class="demo-section">
+      <h3>Form Validation</h3>
+      <p>Sistema de validacion de formularios con estados visuales estilo iOS. Incluye grupos de formulario, mensajes de error/exito, y validacion en tiempo real.</p>
+      <pre class="code-block"><code>&lt;script src="components/ux-form.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+
+    <!-- Basic Form Group -->
+    <div class="demo-section">
+      <h3>Form Group Basico</h3>
+      <p>Estructura basica: label + input + helper text.</p>
+
+      <div class="demo-frame">
+        <div class="ux-form-group">
+          <label class="ux-form-group__label">Email</label>
+          <div class="ux-form-group__control">
+            <div class="ux-form-group__input-wrapper">
+              <input type="email" class="ux-input" placeholder="tu@email.com">
+            </div>
+            <span class="ux-form-group__helper">Usaremos tu email para enviarte actualizaciones</span>
+          </div>
+        </div>
+
+        <div class="ux-form-group">
+          <label class="ux-form-group__label ux-form-group__label--required">Nombre completo</label>
+          <div class="ux-form-group__control">
+            <div class="ux-form-group__input-wrapper">
+              <input type="text" class="ux-input" placeholder="Juan Perez">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-form-group"&gt;
+  &lt;label class="ux-form-group__label"&gt;Email&lt;/label&gt;
+  &lt;div class="ux-form-group__control"&gt;
+    &lt;div class="ux-form-group__input-wrapper"&gt;
+      &lt;input type="email" class="ux-input" placeholder="tu@email.com"&gt;
+    &lt;/div&gt;
+    &lt;span class="ux-form-group__helper"&gt;Texto de ayuda&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Campo requerido --&gt;
+&lt;label class="ux-form-group__label ux-form-group__label--required"&gt;
+  Campo requerido
+&lt;/label&gt;</code></pre>
+    </div>
+
+    <!-- Validation States -->
+    <div class="demo-section">
+      <h3>Estados de Validacion</h3>
+      <p>Estados visuales para error, exito y advertencia.</p>
+
+      <div class="demo-frame">
+        <!-- Error State -->
+        <div class="ux-form-group ux-form-group--error">
+          <label class="ux-form-group__label">Email</label>
+          <div class="ux-form-group__control">
+            <div class="ux-form-group__input-wrapper">
+              <input type="email" class="ux-input" value="email-invalido">
+              <span class="ux-form-group__icon ux-form-group__icon--error">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="15" y1="9" x2="9" y2="15"/>
+                  <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+              </span>
+            </div>
+            <span class="ux-form-group__helper">Ingresa tu email corporativo</span>
+            <span class="ux-form-group__error">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              Por favor ingresa un email valido
+            </span>
+          </div>
+        </div>
+
+        <!-- Success State -->
+        <div class="ux-form-group ux-form-group--success">
+          <label class="ux-form-group__label">Username</label>
+          <div class="ux-form-group__control">
+            <div class="ux-form-group__input-wrapper">
+              <input type="text" class="ux-input" value="juan_perez">
+              <span class="ux-form-group__icon ux-form-group__icon--success">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </span>
+            </div>
+            <span class="ux-form-group__success">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              Username disponible
+            </span>
+          </div>
+        </div>
+
+        <!-- Warning State -->
+        <div class="ux-form-group ux-form-group--warning">
+          <label class="ux-form-group__label">Password</label>
+          <div class="ux-form-group__control">
+            <div class="ux-form-group__input-wrapper">
+              <input type="password" class="ux-input" value="123456">
+              <span class="ux-form-group__icon ux-form-group__icon--warning">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </span>
+            </div>
+            <span class="ux-form-group__helper">Password debil. Considera usar mas caracteres.</span>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;!-- Estado Error --&gt;
+&lt;div class="ux-form-group ux-form-group--error"&gt;
+  &lt;label class="ux-form-group__label"&gt;Email&lt;/label&gt;
+  &lt;div class="ux-form-group__control"&gt;
+    &lt;div class="ux-form-group__input-wrapper"&gt;
+      &lt;input type="email" class="ux-input"&gt;
+      &lt;span class="ux-form-group__icon ux-form-group__icon--error"&gt;
+        &lt;svg&gt;...&lt;/svg&gt;
+      &lt;/span&gt;
+    &lt;/div&gt;
+    &lt;span class="ux-form-group__error"&gt;Mensaje de error&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Estado Success --&gt;
+&lt;div class="ux-form-group ux-form-group--success"&gt;...&lt;/div&gt;
+
+&lt;!-- Estado Warning --&gt;
+&lt;div class="ux-form-group ux-form-group--warning"&gt;...&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Interactive Validation -->
+    <div class="demo-section">
+      <h3>Validacion Interactiva (Alpine.js)</h3>
+      <p>Validacion en tiempo real usando el componente Alpine.js.</p>
+
+      <div class="demo-frame" x-data="{
+        email: '',
+        emailError: '',
+        emailSuccess: '',
+        validateEmail() {
+          this.emailSuccess = '';
+          if (!this.email) {
+            this.emailError = 'El email es requerido';
+            return;
+          }
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) {
+            this.emailError = 'Por favor ingresa un email valido';
+            return;
+          }
+          this.emailError = '';
+          this.emailSuccess = 'Email valido';
+        }
+      }">
+        <div class="ux-form-group" :class="{
+          'ux-form-group--error': emailError,
+          'ux-form-group--success': emailSuccess && !emailError
+        }">
+          <label class="ux-form-group__label ux-form-group__label--required">Email</label>
+          <div class="ux-form-group__control">
+            <div class="ux-form-group__input-wrapper">
+              <input
+                type="email"
+                class="ux-input"
+                x-model="email"
+                @blur="validateEmail()"
+                @input="emailError = ''; emailSuccess = ''"
+                placeholder="tu@email.com"
+              >
+              <span class="ux-form-group__icon ux-form-group__icon--error" x-show="emailError">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="15" y1="9" x2="9" y2="15"/>
+                  <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+              </span>
+              <span class="ux-form-group__icon ux-form-group__icon--success" x-show="emailSuccess && !emailError">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </span>
+            </div>
+            <span class="ux-form-group__helper" x-show="!emailError && !emailSuccess">Usaremos tu email para notificaciones</span>
+            <span class="ux-form-group__error" x-show="emailError" x-text="emailError" style="opacity: 1; max-height: 100px;"></span>
+            <span class="ux-form-group__success" x-show="emailSuccess && !emailError" x-text="emailSuccess" style="opacity: 1; max-height: 100px;"></span>
+          </div>
+        </div>
+
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-tertiary); margin-top: var(--ux-space-md);">
+          Escribe un email y haz blur para validar
+        </p>
+      </div>
+
+      <pre class="code-block"><code>&lt;div x-data="{
+  email: '',
+  emailError: '',
+  validateEmail() {
+    if (!this.email) {
+      this.emailError = 'El email es requerido';
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) {
+      this.emailError = 'Email invalido';
+      return;
+    }
+    this.emailError = '';
+  }
+}"&gt;
+  &lt;div class="ux-form-group" :class="{ 'ux-form-group--error': emailError }"&gt;
+    &lt;input x-model="email" @blur="validateEmail()"&gt;
+    &lt;span class="ux-form-group__error" x-text="emailError"&gt;&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Form Section -->
+    <div class="demo-section">
+      <h3>Form Section (Fieldset)</h3>
+      <p>Agrupa campos relacionados con un titulo y descripcion.</p>
+
+      <div class="demo-frame">
+        <fieldset class="ux-form-section">
+          <div class="ux-form-section__header">
+            <h4 class="ux-form-section__title">Informacion Personal</h4>
+            <p class="ux-form-section__description">Estos datos seran visibles en tu perfil publico</p>
+          </div>
+          <div class="ux-form-section__content">
+            <div class="ux-form-group">
+              <label class="ux-form-group__label">Nombre</label>
+              <div class="ux-form-group__control">
+                <input type="text" class="ux-input" placeholder="Juan">
+              </div>
+            </div>
+            <div class="ux-form-group">
+              <label class="ux-form-group__label">Apellido</label>
+              <div class="ux-form-group__control">
+                <input type="text" class="ux-input" placeholder="Perez">
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="ux-form-section">
+          <div class="ux-form-section__header">
+            <h4 class="ux-form-section__title">Contacto</h4>
+          </div>
+          <div class="ux-form-section__content">
+            <div class="ux-form-group">
+              <label class="ux-form-group__label">Telefono</label>
+              <div class="ux-form-group__control">
+                <input type="tel" class="ux-input" placeholder="+34 600 000 000">
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <pre class="code-block"><code>&lt;fieldset class="ux-form-section"&gt;
+  &lt;div class="ux-form-section__header"&gt;
+    &lt;h4 class="ux-form-section__title"&gt;Informacion Personal&lt;/h4&gt;
+    &lt;p class="ux-form-section__description"&gt;Descripcion opcional&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-form-section__content"&gt;
+    &lt;!-- Form groups aqui --&gt;
+  &lt;/div&gt;
+&lt;/fieldset&gt;</code></pre>
+    </div>
+
+    <!-- Form Row -->
+    <div class="demo-section">
+      <h3>Form Row (Campos en Linea)</h3>
+      <p>Multiples campos en la misma linea. Se apilan en movil.</p>
+
+      <div class="demo-frame">
+        <div class="ux-form-row">
+          <div class="ux-form-group">
+            <label class="ux-form-group__label">Nombre</label>
+            <div class="ux-form-group__control">
+              <input type="text" class="ux-input" placeholder="Juan">
+            </div>
+          </div>
+          <div class="ux-form-group">
+            <label class="ux-form-group__label">Apellido</label>
+            <div class="ux-form-group__control">
+              <input type="text" class="ux-input" placeholder="Perez">
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-form-row">
+          <div class="ux-form-group" style="flex: 2;">
+            <label class="ux-form-group__label">Ciudad</label>
+            <div class="ux-form-group__control">
+              <input type="text" class="ux-input" placeholder="Madrid">
+            </div>
+          </div>
+          <div class="ux-form-group" style="flex: 1;">
+            <label class="ux-form-group__label">CP</label>
+            <div class="ux-form-group__control">
+              <input type="text" class="ux-input" placeholder="28001">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-form-row"&gt;
+  &lt;div class="ux-form-group"&gt;
+    &lt;!-- Nombre --&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-form-group"&gt;
+    &lt;!-- Apellido --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Columnas con diferentes anchos --&gt;
+&lt;div class="ux-form-row"&gt;
+  &lt;div class="ux-form-group" style="flex: 2;"&gt;Ciudad&lt;/div&gt;
+  &lt;div class="ux-form-group" style="flex: 1;"&gt;CP&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="demo-section">
+      <h3>Form Actions</h3>
+      <p>Contenedor para botones de accion del formulario.</p>
+
+      <div class="demo-frame">
+        <div class="ux-form-group">
+          <label class="ux-form-group__label">Descripcion</label>
+          <div class="ux-form-group__control">
+            <textarea class="ux-input" rows="3" placeholder="Escribe algo..."></textarea>
+          </div>
+        </div>
+
+        <div class="ux-form-actions">
+          <button class="ux-button ux-button--outline">Cancelar</button>
+          <button class="ux-button ux-color-primary">Guardar</button>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-form-actions"&gt;
+  &lt;button class="ux-button ux-button--outline"&gt;Cancelar&lt;/button&gt;
+  &lt;button class="ux-button ux-color-primary"&gt;Guardar&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Variantes de alineacion --&gt;
+&lt;div class="ux-form-actions ux-form-actions--start"&gt;...&lt;/div&gt;
+&lt;div class="ux-form-actions ux-form-actions--center"&gt;...&lt;/div&gt;
+&lt;div class="ux-form-actions ux-form-actions--between"&gt;...&lt;/div&gt;
+
+&lt;!-- Sticky (fixed en bottom) --&gt;
+&lt;div class="ux-form-actions ux-form-actions--sticky"&gt;...&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Character Counter -->
+    <div class="demo-section">
+      <h3>Contador de Caracteres</h3>
+      <p>Muestra el conteo de caracteres con limite.</p>
+
+      <div class="demo-frame" x-data="{ bio: '', maxLength: 150 }">
+        <div class="ux-form-group" :class="{
+          'ux-form-group--warning': bio.length >= maxLength * 0.9 && bio.length < maxLength,
+          'ux-form-group--error': bio.length >= maxLength
+        }">
+          <label class="ux-form-group__label">Bio</label>
+          <div class="ux-form-group__control">
+            <textarea
+              class="ux-input"
+              rows="3"
+              x-model="bio"
+              :maxlength="maxLength"
+              placeholder="Cuentanos sobre ti..."
+            ></textarea>
+            <div class="ux-form-group__footer">
+              <span class="ux-form-group__helper" x-show="bio.length < maxLength * 0.9">Maximo 150 caracteres</span>
+              <span class="ux-form-group__counter" :class="{
+                'ux-form-group__counter--warning': bio.length >= maxLength * 0.9 && bio.length < maxLength,
+                'ux-form-group__counter--error': bio.length >= maxLength
+              }" x-text="bio.length + '/' + maxLength"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-form-group__footer"&gt;
+  &lt;span class="ux-form-group__helper"&gt;Texto de ayuda&lt;/span&gt;
+  &lt;span class="ux-form-group__counter"&gt;45/150&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- Estados del contador --&gt;
+&lt;span class="ux-form-group__counter ux-form-group__counter--warning"&gt;135/150&lt;/span&gt;
+&lt;span class="ux-form-group__counter ux-form-group__counter--error"&gt;150/150&lt;/span&gt;</code></pre>
+    </div>
+
+    <!-- Input Addons -->
+    <div class="demo-section">
+      <h3>Input con Prefijo/Sufijo</h3>
+      <p>Agrega texto o iconos antes o despues del input.</p>
+
+      <div class="demo-frame">
+        <div class="ux-form-group">
+          <label class="ux-form-group__label">Precio</label>
+          <div class="ux-form-group__control">
+            <div class="ux-form-group__input-wrapper" style="display: flex;">
+              <span class="ux-form-group__addon ux-form-group__addon--start">$</span>
+              <input type="number" class="ux-input" placeholder="0.00" style="border-radius: 0;">
+              <span class="ux-form-group__addon ux-form-group__addon--end">USD</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-form-group">
+          <label class="ux-form-group__label">Website</label>
+          <div class="ux-form-group__control">
+            <div class="ux-form-group__input-wrapper" style="display: flex;">
+              <span class="ux-form-group__addon ux-form-group__addon--start">https://</span>
+              <input type="text" class="ux-input" placeholder="ejemplo.com" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-form-group__input-wrapper" style="display: flex;"&gt;
+  &lt;span class="ux-form-group__addon ux-form-group__addon--start"&gt;$&lt;/span&gt;
+  &lt;input type="number" class="ux-input"&gt;
+  &lt;span class="ux-form-group__addon ux-form-group__addon--end"&gt;USD&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Glass Variant -->
+    <div class="demo-section">
+      <h3>Glass Variant</h3>
+      <p>Version glass para fondos con imagen o color.</p>
+
+      <div class="demo-frame" style="background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-secondary) 100%); padding: var(--ux-space-xl);">
+        <div class="ux-form-group ux-form-group--glass">
+          <label class="ux-form-group__label" style="color: white;">Email</label>
+          <div class="ux-form-group__control">
+            <input type="email" class="ux-input" placeholder="tu@email.com">
+          </div>
+        </div>
+
+        <div class="ux-form-group ux-form-group--glass">
+          <label class="ux-form-group__label" style="color: white;">Password</label>
+          <div class="ux-form-group__control">
+            <input type="password" class="ux-input" placeholder="********">
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-form-group ux-form-group--glass"&gt;
+  &lt;!-- Inputs con efecto glass --&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- HTMX Integration -->
+    <div class="demo-section">
+      <h3>Integracion con HTMX</h3>
+      <p>Formularios con validacion y envio usando HTMX como tecnologia principal.</p>
+
+      <h4>Formulario basico con HTMX</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Envio de formulario sin recargar la pagina.</p>
+      </div>
+      <pre class="code-block"><code>&lt;form hx-post="/api/contacts"
+      hx-target="#result"
+      hx-swap="innerHTML"
+      hx-indicator="#submit-spinner"&gt;
+
+  &lt;div class="ux-form-group"&gt;
+    &lt;label class="ux-form-group__label ux-form-group__label--required"&gt;Nombre&lt;/label&gt;
+    &lt;div class="ux-form-group__control"&gt;
+      &lt;input type="text" name="name" class="ux-input" required&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-form-group"&gt;
+    &lt;label class="ux-form-group__label ux-form-group__label--required"&gt;Email&lt;/label&gt;
+    &lt;div class="ux-form-group__control"&gt;
+      &lt;input type="email" name="email" class="ux-input" required&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-form-actions"&gt;
+    &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+      &lt;span id="submit-spinner" class="htmx-indicator ux-spinner ux-spinner--sm"&gt;&lt;/span&gt;
+      Enviar
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;
+
+&lt;div id="result"&gt;&lt;/div&gt;</code></pre>
+
+      <h4>Validacion en tiempo real con HTMX</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Validar campos mientras el usuario escribe usando el servidor.</p>
+      </div>
+      <pre class="code-block"><code>&lt;!-- Validacion de email unico --&gt;
+&lt;div class="ux-form-group" id="email-group"&gt;
+  &lt;label class="ux-form-group__label"&gt;Email&lt;/label&gt;
+  &lt;div class="ux-form-group__control"&gt;
+    &lt;div class="ux-form-group__input-wrapper"&gt;
+      &lt;input type="email" name="email" class="ux-input"
+             hx-post="/api/validate/email"
+             hx-trigger="blur changed delay:300ms"
+             hx-target="#email-group"
+             hx-swap="outerHTML"&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Respuesta del servidor: exito --&gt;
+&lt;div class="ux-form-group ux-form-group--success" id="email-group"&gt;
+  &lt;label class="ux-form-group__label"&gt;Email&lt;/label&gt;
+  &lt;div class="ux-form-group__control"&gt;
+    &lt;div class="ux-form-group__input-wrapper"&gt;
+      &lt;input type="email" name="email" class="ux-input" value="user@example.com"
+             hx-post="/api/validate/email" hx-trigger="blur changed delay:300ms"
+             hx-target="#email-group" hx-swap="outerHTML"&gt;
+      &lt;span class="ux-form-group__icon ux-form-group__icon--success"&gt;...&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;span class="ux-form-group__success"&gt;Email disponible&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Respuesta del servidor: error --&gt;
+&lt;div class="ux-form-group ux-form-group--error" id="email-group"&gt;
+  ...
+  &lt;span class="ux-form-group__error"&gt;Este email ya esta registrado&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4>Validacion de username en tiempo real</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Verificar disponibilidad de username al escribir.</p>
+      </div>
+      <pre class="code-block"><code>&lt;div class="ux-form-group" id="username-group"&gt;
+  &lt;label class="ux-form-group__label"&gt;Username&lt;/label&gt;
+  &lt;div class="ux-form-group__control"&gt;
+    &lt;div class="ux-form-group__input-wrapper"&gt;
+      &lt;input type="text" name="username" class="ux-input"
+             hx-get="/api/validate/username"
+             hx-trigger="keyup changed delay:500ms"
+             hx-target="#username-feedback"
+             hx-indicator="#username-check"&gt;
+      &lt;span id="username-check" class="htmx-indicator ux-spinner ux-spinner--sm"
+            style="position: absolute; right: 12px;"&gt;&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;span id="username-feedback" class="ux-form-group__helper"&gt;
+      Elige un username unico
+    &lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Respuesta del servidor --&gt;
+&lt;span class="ux-form-group__success"&gt;
+  &lt;svg&gt;...&lt;/svg&gt; @juanperez esta disponible
+&lt;/span&gt;</code></pre>
+
+      <h4>Formulario multi-seccion con guardado parcial</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Guardar cada seccion independientemente.</p>
+      </div>
+      <pre class="code-block"><code>&lt;!-- Seccion 1: Datos personales --&gt;
+&lt;fieldset class="ux-form-section"
+          hx-post="/api/profile/personal"
+          hx-trigger="change delay:1000ms"
+          hx-indicator="#personal-saving"
+          hx-swap="none"&gt;
+  &lt;div class="ux-form-section__header"&gt;
+    &lt;h4 class="ux-form-section__title"&gt;
+      Informacion Personal
+      &lt;span id="personal-saving" class="htmx-indicator ux-spinner ux-spinner--sm"&gt;&lt;/span&gt;
+    &lt;/h4&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-form-section__content"&gt;
+    &lt;div class="ux-form-row"&gt;
+      &lt;div class="ux-form-group"&gt;
+        &lt;label class="ux-form-group__label"&gt;Nombre&lt;/label&gt;
+        &lt;div class="ux-form-group__control"&gt;
+          &lt;input type="text" name="first_name" class="ux-input"&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-form-group"&gt;
+        &lt;label class="ux-form-group__label"&gt;Apellido&lt;/label&gt;
+        &lt;div class="ux-form-group__control"&gt;
+          &lt;input type="text" name="last_name" class="ux-input"&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/fieldset&gt;
+
+&lt;!-- Seccion 2: Contacto --&gt;
+&lt;fieldset class="ux-form-section"
+          hx-post="/api/profile/contact"
+          hx-trigger="change delay:1000ms"
+          hx-swap="none"&gt;
+  ...
+&lt;/fieldset&gt;</code></pre>
+
+      <h4>Validacion de password con requisitos</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Mostrar requisitos cumplidos al escribir.</p>
+      </div>
+      <pre class="code-block"><code>&lt;div class="ux-form-group"&gt;
+  &lt;label class="ux-form-group__label"&gt;Password&lt;/label&gt;
+  &lt;div class="ux-form-group__control"&gt;
+    &lt;input type="password" name="password" class="ux-input"
+           hx-post="/api/validate/password"
+           hx-trigger="input changed delay:200ms"
+           hx-target="#password-requirements"&gt;
+    &lt;div id="password-requirements"&gt;
+      &lt;!-- Servidor devuelve lista de requisitos --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Respuesta del servidor --&gt;
+&lt;ul class="ux-list ux-list--sm"&gt;
+  &lt;li class="ux-list__item" style="color: var(--ux-success);"&gt;
+    ✓ Minimo 8 caracteres
+  &lt;/li&gt;
+  &lt;li class="ux-list__item" style="color: var(--ux-danger);"&gt;
+    ✗ Al menos una mayuscula
+  &lt;/li&gt;
+  &lt;li class="ux-list__item" style="color: var(--ux-danger);"&gt;
+    ✗ Al menos un numero
+  &lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+
+      <h4>Formulario con respuesta en Toast</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Mostrar notificacion toast despues de enviar.</p>
+      </div>
+      <pre class="code-block"><code>&lt;form hx-post="/api/settings"
+      hx-swap="none"
+      hx-on::after-request="showToast(event)"&gt;
+  &lt;!-- campos del formulario --&gt;
+  &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+    Guardar Configuracion
+  &lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+function showToast(event) {
+  if (event.detail.successful) {
+    // Usar ux-toast para mostrar mensaje
+    document.dispatchEvent(new CustomEvent('toast', {
+      detail: { message: 'Configuracion guardada', type: 'success' }
+    }));
+  }
+}
+&lt;/script&gt;</code></pre>
+
+      <h4>Formulario con preview de datos</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Actualizar preview en tiempo real desde el servidor.</p>
+      </div>
+      <pre class="code-block"><code>&lt;div class="row"&gt;
+  &lt;div class="col-md-6"&gt;
+    &lt;form hx-post="/api/preview"
+          hx-target="#preview-panel"
+          hx-trigger="input changed delay:500ms from:find input"&gt;
+
+      &lt;div class="ux-form-group"&gt;
+        &lt;label class="ux-form-group__label"&gt;Titulo&lt;/label&gt;
+        &lt;div class="ux-form-group__control"&gt;
+          &lt;input type="text" name="title" class="ux-input"&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div class="ux-form-group"&gt;
+        &lt;label class="ux-form-group__label"&gt;Contenido&lt;/label&gt;
+        &lt;div class="ux-form-group__control"&gt;
+          &lt;textarea name="content" class="ux-input" rows="5"&gt;&lt;/textarea&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/form&gt;
+  &lt;/div&gt;
+
+  &lt;div class="col-md-6"&gt;
+    &lt;div id="preview-panel" class="ux-card"&gt;
+      &lt;!-- Preview generado por el servidor --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- CSS Reference -->
+    <div class="demo-section">
+      <h3>Referencia de Clases CSS</h3>
+
+      <div style="overflow-x: auto;">
+        <table class="class-table">
+          <thead>
+            <tr>
+              <th>Clase</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Form Group</td></tr>
+            <tr><td><code>.ux-form-group</code></td><td>Contenedor principal</td></tr>
+            <tr><td><code>.ux-form-group--error</code></td><td>Estado de error</td></tr>
+            <tr><td><code>.ux-form-group--success</code></td><td>Estado de exito</td></tr>
+            <tr><td><code>.ux-form-group--warning</code></td><td>Estado de advertencia</td></tr>
+            <tr><td><code>.ux-form-group--disabled</code></td><td>Estado deshabilitado</td></tr>
+            <tr><td><code>.ux-form-group--horizontal</code></td><td>Layout horizontal</td></tr>
+            <tr><td><code>.ux-form-group--glass</code></td><td>Variante glass</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Elementos</td></tr>
+            <tr><td><code>.ux-form-group__label</code></td><td>Label del campo</td></tr>
+            <tr><td><code>.ux-form-group__label--required</code></td><td>Marca de campo requerido (*)</td></tr>
+            <tr><td><code>.ux-form-group__control</code></td><td>Contenedor del input</td></tr>
+            <tr><td><code>.ux-form-group__input-wrapper</code></td><td>Wrapper para input + icon</td></tr>
+            <tr><td><code>.ux-form-group__helper</code></td><td>Texto de ayuda</td></tr>
+            <tr><td><code>.ux-form-group__error</code></td><td>Mensaje de error</td></tr>
+            <tr><td><code>.ux-form-group__success</code></td><td>Mensaje de exito</td></tr>
+            <tr><td><code>.ux-form-group__icon</code></td><td>Icono de validacion</td></tr>
+            <tr><td><code>.ux-form-group__counter</code></td><td>Contador de caracteres</td></tr>
+            <tr><td><code>.ux-form-group__addon</code></td><td>Prefijo/sufijo</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Form Section</td></tr>
+            <tr><td><code>.ux-form-section</code></td><td>Fieldset agrupador</td></tr>
+            <tr><td><code>.ux-form-section__header</code></td><td>Header de seccion</td></tr>
+            <tr><td><code>.ux-form-section__title</code></td><td>Titulo de seccion</td></tr>
+            <tr><td><code>.ux-form-section__description</code></td><td>Descripcion de seccion</td></tr>
+            <tr><td><code>.ux-form-section__content</code></td><td>Contenido de seccion</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Layout</td></tr>
+            <tr><td><code>.ux-form-row</code></td><td>Fila de campos inline</td></tr>
+            <tr><td><code>.ux-form-actions</code></td><td>Contenedor de botones</td></tr>
+            <tr><td><code>.ux-form-actions--start</code></td><td>Alineacion izquierda</td></tr>
+            <tr><td><code>.ux-form-actions--center</code></td><td>Alineacion centro</td></tr>
+            <tr><td><code>.ux-form-actions--between</code></td><td>Space-between</td></tr>
+            <tr><td><code>.ux-form-actions--sticky</code></td><td>Fijo en bottom</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="ux-padding" style="text-align: center; background: var(--ux-surface-secondary); color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">
+    <p>UX Library - Form Validation Component</p>
+  </footer>
+</body>
+</html>

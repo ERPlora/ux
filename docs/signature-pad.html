@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Signature Pad - UX Library</title>
+  <link rel="stylesheet" href="../bootstrap-grid.min.css">
+  <script src="../dist/ux.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--ux-surface-secondary);
+      padding: 2rem;
+      padding-bottom: 4rem;
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--ux-text);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+    pre {
+      background: var(--ux-gray-900);
+      color: var(--ux-gray-100);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+    .result-display {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--ux-surface-secondary);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .demo-glass-bg {
+      background: linear-gradient(135deg, var(--ux-blue-500), var(--ux-indigo-600));
+      padding: 2rem;
+      border-radius: 16px;
+    }
+    .signature-preview {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: white;
+      border: 1px solid var(--ux-border-color);
+      border-radius: 8px;
+      text-align: center;
+    }
+    .signature-preview img {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <h1 style="margin-bottom: 0.5rem;">Signature Pad</h1>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+    Captura de firma digital con soporte táctil, exportación de imagen y deshacer.
+  </p>
+
+  <!-- Basic Signature Pad -->
+  <section class="demo-section">
+    <h2>Signature Pad Básico</h2>
+
+    <div class="demo-grid">
+      <div>
+        <div class="demo-box">
+          <div x-data="uxSignaturePad()"
+               class="ux-signature-pad"
+               :class="{ 'ux-signature-pad--has-signature': hasSignature }">
+            <label class="ux-signature-pad__label">Firma del cliente</label>
+
+            <div class="ux-signature-pad__container">
+              <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+
+              <div class="ux-signature-pad__guide" x-show="showGuide"></div>
+
+              <div class="ux-signature-pad__placeholder" x-show="showPlaceholder && !hasSignature">
+                <span x-html="icons.pen"></span>
+                <span x-text="placeholderText"></span>
+              </div>
+            </div>
+
+            <div class="ux-signature-pad__actions">
+              <button type="button" class="ux-signature-pad__btn" @click="undo()" :disabled="history.length <= 1">
+                <span x-html="icons.undo"></span>
+                Deshacer
+              </button>
+              <button type="button" class="ux-signature-pad__btn" @click="clear()" :disabled="!hasSignature">
+                <span x-html="icons.clear"></span>
+                Limpiar
+              </button>
+            </div>
+
+            <span class="ux-signature-pad__helper">Firme con el dedo o el ratón</span>
+          </div>
+        </div>
+
+        <pre>&lt;div x-data="uxSignaturePad()"
+     class="ux-signature-pad"&gt;
+  &lt;label class="ux-signature-pad__label"&gt;Firma&lt;/label&gt;
+  &lt;div class="ux-signature-pad__container"&gt;
+    &lt;canvas x-ref="canvas"&gt;&lt;/canvas&gt;
+    &lt;div class="ux-signature-pad__guide"&gt;&lt;/div&gt;
+    &lt;div class="ux-signature-pad__placeholder"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-signature-pad__actions"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
+      </div>
+
+      <div>
+        <div class="demo-box">
+          <div x-data="{ ...uxSignaturePad(), signatureData: null }"
+               @signature:change="signatureData = hasSignature ? getSignature() : null"
+               class="ux-signature-pad"
+               :class="{ 'ux-signature-pad--has-signature': hasSignature }">
+            <label class="ux-signature-pad__label">Firma con preview</label>
+
+            <div class="ux-signature-pad__container">
+              <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+              <div class="ux-signature-pad__guide"></div>
+              <div class="ux-signature-pad__placeholder" x-show="!hasSignature">
+                <span x-html="icons.pen"></span>
+                <span>Firme aquí</span>
+              </div>
+            </div>
+
+            <div class="ux-signature-pad__actions">
+              <button type="button" class="ux-signature-pad__btn" @click="clear()" :disabled="!hasSignature">
+                <span x-html="icons.clear"></span>
+                Limpiar
+              </button>
+              <button type="button" class="ux-signature-pad__btn ux-signature-pad__btn--primary"
+                      @click="download('mi-firma.png')" :disabled="!hasSignature">
+                <span x-html="icons.download"></span>
+                Descargar
+              </button>
+            </div>
+
+            <div class="signature-preview" x-show="signatureData">
+              <p style="font-size: 0.75rem; color: var(--ux-text-secondary); margin-bottom: 0.5rem;">Preview:</p>
+              <img :src="signatureData" alt="Firma" style="max-height: 100px;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sizes -->
+  <section class="demo-section">
+    <h2>Tamaños</h2>
+
+    <div class="demo-grid">
+      <div class="demo-box">
+        <div x-data="uxSignaturePad({ height: 150 })"
+             class="ux-signature-pad ux-signature-pad--sm"
+             :class="{ 'ux-signature-pad--has-signature': hasSignature }">
+          <label class="ux-signature-pad__label">Pequeño (150px)</label>
+          <div class="ux-signature-pad__container">
+            <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+            <div class="ux-signature-pad__guide"></div>
+            <div class="ux-signature-pad__placeholder" x-show="!hasSignature">
+              <span x-html="icons.pen"></span>
+            </div>
+          </div>
+          <div class="ux-signature-pad__actions">
+            <button type="button" class="ux-signature-pad__btn" @click="clear()" :disabled="!hasSignature">Limpiar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div x-data="uxSignaturePad({ height: 300 })"
+             class="ux-signature-pad ux-signature-pad--lg"
+             :class="{ 'ux-signature-pad--has-signature': hasSignature }">
+          <label class="ux-signature-pad__label">Grande (300px)</label>
+          <div class="ux-signature-pad__container">
+            <canvas x-ref="canvas" class="ux-signature-pad__canvas" style="height: 300px;"></canvas>
+            <div class="ux-signature-pad__guide"></div>
+            <div class="ux-signature-pad__placeholder" x-show="!hasSignature">
+              <span x-html="icons.pen"></span>
+              <span>Firme aquí</span>
+            </div>
+          </div>
+          <div class="ux-signature-pad__actions">
+            <button type="button" class="ux-signature-pad__btn" @click="clear()" :disabled="!hasSignature">Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Custom Styling -->
+  <section class="demo-section">
+    <h2>Estilos Personalizados</h2>
+
+    <div class="demo-grid">
+      <div class="demo-box">
+        <div x-data="uxSignaturePad({ lineColor: '#3b82f6', lineWidth: 3 })"
+             class="ux-signature-pad"
+             :class="{ 'ux-signature-pad--has-signature': hasSignature }">
+          <label class="ux-signature-pad__label">Línea azul gruesa</label>
+          <div class="ux-signature-pad__container">
+            <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+            <div class="ux-signature-pad__guide"></div>
+            <div class="ux-signature-pad__placeholder" x-show="!hasSignature">
+              <span x-html="icons.pen"></span>
+            </div>
+          </div>
+          <div class="ux-signature-pad__actions">
+            <button type="button" class="ux-signature-pad__btn" @click="clear()">Limpiar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div x-data="uxSignaturePad({ lineColor: '#ef4444', lineWidth: 1 })"
+             class="ux-signature-pad"
+             :class="{ 'ux-signature-pad--has-signature': hasSignature }">
+          <label class="ux-signature-pad__label">Línea roja fina</label>
+          <div class="ux-signature-pad__container">
+            <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+            <div class="ux-signature-pad__guide"></div>
+            <div class="ux-signature-pad__placeholder" x-show="!hasSignature">
+              <span x-html="icons.pen"></span>
+            </div>
+          </div>
+          <div class="ux-signature-pad__actions">
+            <button type="button" class="ux-signature-pad__btn" @click="clear()">Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Without Guide Line -->
+  <section class="demo-section">
+    <h2>Sin Línea Guía</h2>
+
+    <div class="demo-box" style="max-width: 500px;">
+      <div x-data="uxSignaturePad({ showGuide: false })"
+           class="ux-signature-pad"
+           :class="{ 'ux-signature-pad--has-signature': hasSignature }">
+        <label class="ux-signature-pad__label">Firma</label>
+        <div class="ux-signature-pad__container">
+          <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+          <div class="ux-signature-pad__placeholder" x-show="!hasSignature">
+            <span x-html="icons.pen"></span>
+            <span>Firme aquí</span>
+          </div>
+        </div>
+        <div class="ux-signature-pad__actions">
+          <button type="button" class="ux-signature-pad__btn" @click="undo()" :disabled="history.length <= 1">Deshacer</button>
+          <button type="button" class="ux-signature-pad__btn" @click="clear()" :disabled="!hasSignature">Limpiar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- States -->
+  <section class="demo-section">
+    <h2>Estados</h2>
+
+    <div class="demo-grid">
+      <div class="demo-box">
+        <div x-data="uxSignaturePad({ disabled: true })"
+             class="ux-signature-pad ux-signature-pad--disabled">
+          <label class="ux-signature-pad__label">Deshabilitado</label>
+          <div class="ux-signature-pad__container">
+            <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+            <div class="ux-signature-pad__guide"></div>
+            <div class="ux-signature-pad__placeholder">
+              <span x-html="icons.pen"></span>
+              <span>No disponible</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="ux-signature-pad ux-signature-pad--error">
+          <label class="ux-signature-pad__label">Con error</label>
+          <div x-data="uxSignaturePad()"
+               :class="{ 'ux-signature-pad--has-signature': hasSignature }">
+            <div class="ux-signature-pad__container">
+              <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+              <div class="ux-signature-pad__guide"></div>
+              <div class="ux-signature-pad__placeholder" x-show="!hasSignature">
+                <span x-html="icons.pen"></span>
+              </div>
+            </div>
+            <div class="ux-signature-pad__actions">
+              <button type="button" class="ux-signature-pad__btn" @click="clear()">Limpiar</button>
+            </div>
+          </div>
+          <span class="ux-signature-pad__helper ux-signature-pad__helper--error">La firma es requerida</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form Integration -->
+  <section class="demo-section">
+    <h2>Integración en Formulario</h2>
+
+    <div class="demo-box" style="max-width: 600px;">
+      <form x-data="{
+        formData: {
+          name: '',
+          date: new Date().toISOString().split('T')[0],
+          signature: null
+        },
+        signaturePad: null,
+        submit() {
+          if (!this.formData.signature) {
+            alert('Por favor, firme el documento');
+            return;
+          }
+          console.log('Form submitted:', this.formData);
+          alert('Formulario enviado correctamente');
+        }
+      }" @submit.prevent="submit()">
+        <div style="margin-bottom: 1rem;">
+          <label class="ux-signature-pad__label">Nombre completo</label>
+          <input type="text" class="ux-input__field" x-model="formData.name" placeholder="Escriba su nombre" style="width: 100%;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label class="ux-signature-pad__label">Fecha</label>
+          <input type="date" class="ux-input__field" x-model="formData.date" style="width: 100%;">
+        </div>
+
+        <div x-data="uxSignaturePad()"
+             x-init="$watch('hasSignature', () => formData.signature = hasSignature ? getSignature() : null)"
+             class="ux-signature-pad"
+             :class="{ 'ux-signature-pad--has-signature': hasSignature }"
+             style="margin-bottom: 1rem;">
+          <label class="ux-signature-pad__label">Firma *</label>
+          <div class="ux-signature-pad__container">
+            <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+            <div class="ux-signature-pad__guide"></div>
+            <div class="ux-signature-pad__placeholder" x-show="!hasSignature">
+              <span x-html="icons.pen"></span>
+              <span>Firme aquí</span>
+            </div>
+          </div>
+          <div class="ux-signature-pad__actions">
+            <button type="button" class="ux-signature-pad__btn" @click="clear()" :disabled="!hasSignature">
+              <span x-html="icons.clear"></span>
+              Limpiar
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+          <button type="button" class="ux-button ux-button--outline">Cancelar</button>
+          <button type="submit" class="ux-button ux-color-primary">Enviar documento</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Glass Variant -->
+  <section class="demo-section">
+    <h2>Variante Glass</h2>
+
+    <div class="demo-glass-bg">
+      <div x-data="uxSignaturePad({ lineColor: '#ffffff' })"
+           class="ux-signature-pad ux-signature-pad--glass"
+           :class="{ 'ux-signature-pad--has-signature': hasSignature }"
+           style="max-width: 450px;">
+        <label class="ux-signature-pad__label" style="color: white;">Firma digital</label>
+        <div class="ux-signature-pad__container">
+          <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+          <div class="ux-signature-pad__guide" style="background: rgba(255,255,255,0.3);"></div>
+          <div class="ux-signature-pad__placeholder" x-show="!hasSignature" style="color: rgba(255,255,255,0.6);">
+            <span x-html="icons.pen"></span>
+            <span>Firme aquí</span>
+          </div>
+        </div>
+        <div class="ux-signature-pad__actions">
+          <button type="button" class="ux-signature-pad__btn" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;" @click="clear()" :disabled="!hasSignature">Limpiar</button>
+          <button type="button" class="ux-signature-pad__btn" style="background: white; color: var(--ux-primary);" @click="download()" :disabled="!hasSignature">Descargar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CSS Classes Reference -->
+  <section class="demo-section">
+    <h2>Referencia de Clases CSS</h2>
+
+    <div class="demo-box">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: 0.75rem;">Clase</th>
+            <th style="text-align: left; padding: 0.75rem;">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-signature-pad</code></td>
+            <td style="padding: 0.75rem;">Contenedor principal</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-signature-pad--sm</code></td>
+            <td style="padding: 0.75rem;">Tamaño pequeño (150px)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-signature-pad--lg</code></td>
+            <td style="padding: 0.75rem;">Tamaño grande (300px)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-signature-pad--disabled</code></td>
+            <td style="padding: 0.75rem;">Estado deshabilitado</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-signature-pad--readonly</code></td>
+            <td style="padding: 0.75rem;">Solo lectura</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-signature-pad--error</code></td>
+            <td style="padding: 0.75rem;">Estado de error</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-signature-pad--glass</code></td>
+            <td style="padding: 0.75rem;">Variante glass morphism</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-signature-pad--has-signature</code></td>
+            <td style="padding: 0.75rem;">Tiene firma (auto-aplicada)</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem;"><code>.ux-signature-pad__guide</code></td>
+            <td style="padding: 0.75rem;">Línea guía para firmar</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Alpine.js Options -->
+  <section class="demo-section">
+    <h2>Opciones Alpine.js</h2>
+
+    <div class="demo-box">
+      <pre>uxSignaturePad({
+  width: null,              // Ancho (auto si null)
+  height: 200,              // Alto en píxeles
+  lineWidth: 2,             // Grosor de línea
+  lineColor: '#000000',     // Color de línea
+  backgroundColor: 'transparent', // Fondo
+  showGuide: true,          // Mostrar línea guía
+  showPlaceholder: true,    // Mostrar placeholder
+  placeholderText: 'Firme aquí',
+  exportFormat: 'png',      // 'png' o 'jpeg'
+  exportQuality: 0.92,      // Calidad (0-1)
+  disabled: false,          // Deshabilitar
+  readonly: false,          // Solo lectura
+  maxHistory: 20            // Historial para undo
+})
+
+// Métodos
+clear()                     // Limpiar canvas
+undo()                      // Deshacer último trazo
+getSignature(format)        // Obtener como data URL
+getSignatureBlob(format)    // Obtener como Blob
+download(filename)          // Descargar imagen
+loadSignature(dataUrl)      // Cargar firma existente
+isEmpty()                   // Verificar si está vacío
+setLineColor(color)         // Cambiar color
+setLineWidth(width)         // Cambiar grosor
+
+// Propiedades
+hasSignature                // Boolean si tiene firma
+isDrawing                   // Boolean si está dibujando
+
+// Eventos
+@signature:change           // Al cambiar estado de firma
+@signature:clear            // Al limpiar
+@signature:download         // Al descargar</pre>
+    </div>
+  </section>
+
+</body>
+</html>

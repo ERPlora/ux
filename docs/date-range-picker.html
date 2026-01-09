@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Date Range Picker - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-date-range-picker.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text);
+    }
+    .demo-section p {
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--ux-space-lg);
+      align-items: flex-start;
+    }
+    .code-block {
+      background: #1a1a2e;
+      color: #e5e5e5;
+      padding: var(--ux-space-md);
+      border-radius: var(--ux-border-radius);
+      overflow-x: auto;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: var(--ux-font-size-md);
+      line-height: 1.6;
+    }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: var(--ux-space-md);
+    }
+    th, td {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      text-align: left;
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+    th {
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+    td {
+      color: var(--ux-text-secondary);
+    }
+    td code {
+      background: var(--ux-gray-100);
+      padding: 2px 6px;
+      border-radius: var(--ux-border-radius-sm);
+      font-size: var(--ux-font-size-sm);
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content" style="padding: var(--ux-space-lg); max-width: 1200px; margin: 0 auto;">
+    <h1 style="margin-bottom: var(--ux-space-sm);">Date Range Picker</h1>
+    <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xl);">Selector de rangos de fechas con presets y calendario dual.</p>
+
+    <!-- Basic Date Range Picker -->
+    <section class="demo-section">
+      <h3>Selector Basico</h3>
+      <p>Usa el componente <code>uxDateRangePicker</code> para seleccionar rangos de fechas.</p>
+      <div class="demo-box">
+        <div class="ux-date-range"
+             :class="{ 'ux-date-range--open': isOpen }"
+             x-data="uxDateRangePicker({
+               placeholder: 'Seleccionar fechas'
+             })">
+          <button class="ux-date-range__trigger" @click="toggle()">
+            <span x-html="icons.calendar" class="ux-date-range__trigger-icon"></span>
+            <span class="ux-date-range__trigger-text"
+                  :class="{ 'ux-date-range__trigger-text--placeholder': !displayText }"
+                  x-text="displayText || placeholder"></span>
+            <span x-html="icons.chevronDown" class="ux-date-range__trigger-arrow"></span>
+          </button>
+
+          <div class="ux-date-range__panel">
+            <div class="ux-date-range__presets" x-show="showPresets">
+              <template x-for="preset in presets" :key="preset.label">
+                <button class="ux-date-range__preset"
+                        :class="{ 'ux-date-range__preset--active': selectedPreset === preset.label }"
+                        @click="selectPreset(preset)"
+                        x-text="preset.label"></button>
+              </template>
+            </div>
+
+            <div class="ux-date-range__calendars">
+              <div class="ux-date-range__calendar">
+                <div class="ux-date-range__calendar-header">
+                  <button class="ux-date-range__nav-btn" @click="prevMonth('left')">
+                    <span x-html="icons.chevronLeft"></span>
+                  </button>
+                  <span class="ux-date-range__calendar-title" x-text="getMonthTitle(leftMonth)"></span>
+                  <button class="ux-date-range__nav-btn" @click="nextMonth('left')">
+                    <span x-html="icons.chevronRight"></span>
+                  </button>
+                </div>
+                <div class="ux-date-range__weekdays">
+                  <template x-for="day in weekdays" :key="day">
+                    <span class="ux-date-range__weekday" x-text="day"></span>
+                  </template>
+                </div>
+                <div class="ux-date-range__days">
+                  <template x-for="(day, idx) in getDays(leftMonth)" :key="'left-' + idx">
+                    <button class="ux-date-range__day"
+                            :class="getDayClasses(day)"
+                            @click="selectDay(day.date)"
+                            @mouseenter="hoverDay(day.date)"
+                            :disabled="isDisabled(day.date)"
+                            x-text="day.date.getDate()"></button>
+                  </template>
+                </div>
+              </div>
+
+              <div class="ux-date-range__calendar" x-show="!singleCalendar">
+                <div class="ux-date-range__calendar-header">
+                  <button class="ux-date-range__nav-btn" @click="prevMonth('right')">
+                    <span x-html="icons.chevronLeft"></span>
+                  </button>
+                  <span class="ux-date-range__calendar-title" x-text="getMonthTitle(rightMonth)"></span>
+                  <button class="ux-date-range__nav-btn" @click="nextMonth('right')">
+                    <span x-html="icons.chevronRight"></span>
+                  </button>
+                </div>
+                <div class="ux-date-range__weekdays">
+                  <template x-for="day in weekdays" :key="day">
+                    <span class="ux-date-range__weekday" x-text="day"></span>
+                  </template>
+                </div>
+                <div class="ux-date-range__days">
+                  <template x-for="(day, idx) in getDays(rightMonth)" :key="'right-' + idx">
+                    <button class="ux-date-range__day"
+                            :class="getDayClasses(day)"
+                            @click="selectDay(day.date)"
+                            @mouseenter="hoverDay(day.date)"
+                            :disabled="isDisabled(day.date)"
+                            x-text="day.date.getDate()"></button>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <div class="ux-date-range__footer">
+              <span class="ux-date-range__selected" x-text="selectedText"></span>
+              <div class="ux-date-range__actions">
+                <button class="ux-date-range__btn ux-date-range__btn--cancel" @click="cancel()">Cancelar</button>
+                <button class="ux-date-range__btn ux-date-range__btn--apply" @click="apply()" :disabled="!canApply">Aplicar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-date-range"</span>
+     <span class="attr">:class</span>=<span class="string">"{ 'ux-date-range--open': isOpen }"</span>
+     <span class="attr">x-data</span>=<span class="string">"uxDateRangePicker({
+       placeholder: 'Seleccionar fechas'
+     })"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-date-range__trigger"</span> <span class="attr">@click</span>=<span class="string">"toggle()"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;span</span> <span class="attr">x-html</span>=<span class="string">"icons.calendar"</span><span class="tag">&gt;&lt;/span&gt;</span>
+    <span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"displayText || placeholder"</span><span class="tag">&gt;&lt;/span&gt;</span>
+  <span class="tag">&lt;/button&gt;</span>
+  <span class="comment">&lt;!-- Panel content... --&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- With Initial Dates -->
+    <section class="demo-section">
+      <h3>Con Fechas Iniciales</h3>
+      <p>Configura fechas iniciales con <code>startDate</code> y <code>endDate</code>.</p>
+      <div class="demo-box">
+        <div class="ux-date-range"
+             :class="{ 'ux-date-range--open': isOpen }"
+             x-data="uxDateRangePicker({
+               startDate: new Date(2026, 0, 1),
+               endDate: new Date(2026, 0, 15)
+             })">
+          <button class="ux-date-range__trigger" @click="toggle()">
+            <span x-html="icons.calendar" class="ux-date-range__trigger-icon"></span>
+            <span class="ux-date-range__trigger-text" x-text="displayText || placeholder"></span>
+            <span x-html="icons.chevronDown" class="ux-date-range__trigger-arrow"></span>
+          </button>
+
+          <div class="ux-date-range__panel">
+            <div class="ux-date-range__presets">
+              <template x-for="preset in presets" :key="preset.label">
+                <button class="ux-date-range__preset"
+                        :class="{ 'ux-date-range__preset--active': selectedPreset === preset.label }"
+                        @click="selectPreset(preset)"
+                        x-text="preset.label"></button>
+              </template>
+            </div>
+            <div class="ux-date-range__calendars">
+              <div class="ux-date-range__calendar">
+                <div class="ux-date-range__calendar-header">
+                  <button class="ux-date-range__nav-btn" @click="prevMonth('left')">
+                    <span x-html="icons.chevronLeft"></span>
+                  </button>
+                  <span class="ux-date-range__calendar-title" x-text="getMonthTitle(leftMonth)"></span>
+                  <button class="ux-date-range__nav-btn" @click="nextMonth('left')">
+                    <span x-html="icons.chevronRight"></span>
+                  </button>
+                </div>
+                <div class="ux-date-range__weekdays">
+                  <template x-for="day in weekdays" :key="day">
+                    <span class="ux-date-range__weekday" x-text="day"></span>
+                  </template>
+                </div>
+                <div class="ux-date-range__days">
+                  <template x-for="(day, idx) in getDays(leftMonth)" :key="'left-' + idx">
+                    <button class="ux-date-range__day"
+                            :class="getDayClasses(day)"
+                            @click="selectDay(day.date)"
+                            @mouseenter="hoverDay(day.date)"
+                            x-text="day.date.getDate()"></button>
+                  </template>
+                </div>
+              </div>
+              <div class="ux-date-range__calendar">
+                <div class="ux-date-range__calendar-header">
+                  <button class="ux-date-range__nav-btn" @click="prevMonth('right')">
+                    <span x-html="icons.chevronLeft"></span>
+                  </button>
+                  <span class="ux-date-range__calendar-title" x-text="getMonthTitle(rightMonth)"></span>
+                  <button class="ux-date-range__nav-btn" @click="nextMonth('right')">
+                    <span x-html="icons.chevronRight"></span>
+                  </button>
+                </div>
+                <div class="ux-date-range__weekdays">
+                  <template x-for="day in weekdays" :key="day">
+                    <span class="ux-date-range__weekday" x-text="day"></span>
+                  </template>
+                </div>
+                <div class="ux-date-range__days">
+                  <template x-for="(day, idx) in getDays(rightMonth)" :key="'right-' + idx">
+                    <button class="ux-date-range__day"
+                            :class="getDayClasses(day)"
+                            @click="selectDay(day.date)"
+                            @mouseenter="hoverDay(day.date)"
+                            x-text="day.date.getDate()"></button>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="ux-date-range__footer">
+              <span class="ux-date-range__selected" x-text="selectedText"></span>
+              <div class="ux-date-range__actions">
+                <button class="ux-date-range__btn ux-date-range__btn--cancel" @click="cancel()">Cancelar</button>
+                <button class="ux-date-range__btn ux-date-range__btn--apply" @click="apply()" :disabled="!canApply">Aplicar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Single Calendar -->
+    <section class="demo-section">
+      <h3>Calendario Unico</h3>
+      <p>Usa <code>singleCalendar: true</code> para mostrar solo un calendario.</p>
+      <div class="demo-box">
+        <div class="ux-date-range ux-date-range--single"
+             :class="{ 'ux-date-range--open': isOpen }"
+             x-data="uxDateRangePicker({
+               singleCalendar: true,
+               showPresets: false
+             })">
+          <button class="ux-date-range__trigger" @click="toggle()">
+            <span x-html="icons.calendar" class="ux-date-range__trigger-icon"></span>
+            <span class="ux-date-range__trigger-text"
+                  :class="{ 'ux-date-range__trigger-text--placeholder': !displayText }"
+                  x-text="displayText || 'Seleccionar rango'"></span>
+            <span x-html="icons.chevronDown" class="ux-date-range__trigger-arrow"></span>
+          </button>
+
+          <div class="ux-date-range__panel">
+            <div class="ux-date-range__calendars">
+              <div class="ux-date-range__calendar">
+                <div class="ux-date-range__calendar-header">
+                  <button class="ux-date-range__nav-btn" @click="prevMonth('left')">
+                    <span x-html="icons.chevronLeft"></span>
+                  </button>
+                  <span class="ux-date-range__calendar-title" x-text="getMonthTitle(leftMonth)"></span>
+                  <button class="ux-date-range__nav-btn" @click="nextMonth('left')">
+                    <span x-html="icons.chevronRight"></span>
+                  </button>
+                </div>
+                <div class="ux-date-range__weekdays">
+                  <template x-for="day in weekdays" :key="day">
+                    <span class="ux-date-range__weekday" x-text="day"></span>
+                  </template>
+                </div>
+                <div class="ux-date-range__days">
+                  <template x-for="(day, idx) in getDays(leftMonth)" :key="'single-' + idx">
+                    <button class="ux-date-range__day"
+                            :class="getDayClasses(day)"
+                            @click="selectDay(day.date)"
+                            @mouseenter="hoverDay(day.date)"
+                            x-text="day.date.getDate()"></button>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="ux-date-range__footer">
+              <span class="ux-date-range__selected" x-text="selectedText"></span>
+              <div class="ux-date-range__actions">
+                <button class="ux-date-range__btn ux-date-range__btn--cancel" @click="cancel()">Cancelar</button>
+                <button class="ux-date-range__btn ux-date-range__btn--apply" @click="apply()" :disabled="!canApply">Aplicar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sizes -->
+    <section class="demo-section">
+      <h3>Tamanos</h3>
+      <p>Usa las clases <code>.ux-date-range--sm</code> y <code>.ux-date-range--lg</code> para tamanos diferentes.</p>
+      <div class="demo-box">
+        <div class="ux-date-range ux-date-range--sm"
+             :class="{ 'ux-date-range--open': isOpen }"
+             x-data="uxDateRangePicker({ showPresets: false })">
+          <button class="ux-date-range__trigger" @click="toggle()">
+            <span x-html="icons.calendar" class="ux-date-range__trigger-icon"></span>
+            <span class="ux-date-range__trigger-text" x-text="displayText || 'Small'"></span>
+          </button>
+        </div>
+
+        <div class="ux-date-range"
+             :class="{ 'ux-date-range--open': isOpen }"
+             x-data="uxDateRangePicker({ showPresets: false })">
+          <button class="ux-date-range__trigger" @click="toggle()">
+            <span x-html="icons.calendar" class="ux-date-range__trigger-icon"></span>
+            <span class="ux-date-range__trigger-text" x-text="displayText || 'Default'"></span>
+          </button>
+        </div>
+
+        <div class="ux-date-range ux-date-range--lg"
+             :class="{ 'ux-date-range--open': isOpen }"
+             x-data="uxDateRangePicker({ showPresets: false })">
+          <button class="ux-date-range__trigger" @click="toggle()">
+            <span x-html="icons.calendar" class="ux-date-range__trigger-icon"></span>
+            <span class="ux-date-range__trigger-text" x-text="displayText || 'Large'"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Options -->
+    <section class="demo-section">
+      <h3>Opciones</h3>
+      <div style="background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); overflow: hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Opcion</th>
+              <th>Tipo</th>
+              <th>Default</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>placeholder</code></td><td>String</td><td>'Seleccionar fechas'</td><td>Texto placeholder</td></tr>
+            <tr><td><code>format</code></td><td>String</td><td>'DD/MM/YYYY'</td><td>Formato de fecha</td></tr>
+            <tr><td><code>startDate</code></td><td>Date</td><td>null</td><td>Fecha inicial de inicio</td></tr>
+            <tr><td><code>endDate</code></td><td>Date</td><td>null</td><td>Fecha inicial de fin</td></tr>
+            <tr><td><code>minDate</code></td><td>Date</td><td>null</td><td>Fecha minima seleccionable</td></tr>
+            <tr><td><code>maxDate</code></td><td>Date</td><td>null</td><td>Fecha maxima seleccionable</td></tr>
+            <tr><td><code>showPresets</code></td><td>Boolean</td><td>true</td><td>Mostrar presets laterales</td></tr>
+            <tr><td><code>presets</code></td><td>Array</td><td>[...]</td><td>Array de presets personalizados</td></tr>
+            <tr><td><code>singleCalendar</code></td><td>Boolean</td><td>false</td><td>Mostrar solo un calendario</td></tr>
+            <tr><td><code>autoApply</code></td><td>Boolean</td><td>false</td><td>Aplicar automaticamente al seleccionar</td></tr>
+            <tr><td><code>locale</code></td><td>String</td><td>'es'</td><td>Idioma del calendario</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Presets Format -->
+    <section class="demo-section">
+      <h3>Formato de Presets</h3>
+      <p>Personaliza los presets con un array de objetos.</p>
+      <pre class="code-block"><span class="attr">const</span> presets = [
+  {
+    <span class="attr">label</span>: <span class="string">'Hoy'</span>,
+    <span class="attr">getValue</span>: () => {
+      <span class="attr">const</span> d = <span class="attr">new</span> Date();
+      <span class="attr">return</span> [d, d]; <span class="comment">// [startDate, endDate]</span>
+    }
+  },
+  {
+    <span class="attr">label</span>: <span class="string">'Ultimos 7 dias'</span>,
+    <span class="attr">getValue</span>: () => {
+      <span class="attr">const</span> end = <span class="attr">new</span> Date();
+      <span class="attr">const</span> start = <span class="attr">new</span> Date();
+      start.setDate(start.getDate() - 6);
+      <span class="attr">return</span> [start, end];
+    }
+  }
+];</pre>
+    </section>
+
+    <!-- Events -->
+    <section class="demo-section">
+      <h3>Eventos</h3>
+      <div style="background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); overflow: hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Evento</th>
+              <th>Detalle</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>daterange:open</code></td><td>-</td><td>Panel abierto</td></tr>
+            <tr><td><code>daterange:close</code></td><td>-</td><td>Panel cerrado</td></tr>
+            <tr><td><code>daterange:change</code></td><td>{ startDate, endDate }</td><td>Rango seleccionado</td></tr>
+            <tr><td><code>daterange:clear</code></td><td>-</td><td>Seleccion limpiada</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Methods -->
+    <section class="demo-section">
+      <h3>Metodos</h3>
+      <div style="background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); overflow: hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Metodo</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>open()</code></td><td>Abre el panel</td></tr>
+            <tr><td><code>close()</code></td><td>Cierra el panel</td></tr>
+            <tr><td><code>toggle()</code></td><td>Alterna el panel</td></tr>
+            <tr><td><code>apply()</code></td><td>Aplica la seleccion actual</td></tr>
+            <tr><td><code>cancel()</code></td><td>Cancela y cierra</td></tr>
+            <tr><td><code>clear()</code></td><td>Limpia la seleccion</td></tr>
+            <tr><td><code>setDates(start, end)</code></td><td>Establece las fechas programaticamente</td></tr>
+            <tr><td><code>getDates()</code></td><td>Obtiene { startDate, endDate }</td></tr>
+            <tr><td><code>selectPreset(preset)</code></td><td>Aplica un preset</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

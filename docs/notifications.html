@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Notification Center - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-notifications.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: 0.8125rem; overflow-x: auto; white-space: pre; }
+    .demo-controls { display: flex; gap: var(--ux-space-sm); margin-bottom: var(--ux-space-md); flex-wrap: wrap; }
+    .demo-output { padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-radius-md); font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-top: var(--ux-space-md); }
+  </style>
+</head>
+<body class="ux-app">
+  <div class="demo-section">
+    <h3>Notification Center - Panel</h3>
+    <p>Panel lateral para gestionar notificaciones.</p>
+
+    <div class="demo-box" x-data="uxNotificationCenter({
+      notifications: [
+        { id: '1', title: 'Nuevo pedido recibido', message: 'Pedido #1234 de Juan Garcia por 150.00', type: 'success', timestamp: new Date().toISOString(), read: false },
+        { id: '2', title: 'Stock bajo', message: 'El producto \"Cafe Americano\" tiene menos de 10 unidades', type: 'warning', timestamp: new Date(Date.now() - 3600000).toISOString(), read: false },
+        { id: '3', title: 'Error de sincronizacion', message: 'No se pudo sincronizar con el servidor. Reintentando...', type: 'error', timestamp: new Date(Date.now() - 7200000).toISOString(), read: true },
+        { id: '4', title: 'Actualizacion disponible', message: 'Nueva version 2.1.0 disponible para instalar', type: 'info', timestamp: new Date(Date.now() - 86400000).toISOString(), read: true },
+        { id: '5', title: 'Pago completado', message: 'Se proceso el pago de la factura #567', type: 'success', timestamp: new Date(Date.now() - 86400000 * 2).toISOString(), read: true }
+      ]
+    })" @notification:click.window="console.log('Clicked:', $event.detail)">
+      <!-- Trigger Button -->
+      <button class="ux-notification-trigger" @click="toggle()">
+        <span x-html="icons.bell"></span>
+        <span x-show="unreadCount > 0" class="ux-notification-trigger__badge" x-text="unreadCount > 99 ? '99+' : unreadCount"></span>
+      </button>
+
+      <!-- Backdrop -->
+      <div class="ux-notification-panel__backdrop"
+           :class="{ 'ux-notification-panel__backdrop--open': isOpen }"
+           @click="close()"></div>
+
+      <!-- Panel -->
+      <div class="ux-notification-panel" :class="{ 'ux-notification-panel--open': isOpen }">
+        <!-- Header -->
+        <div class="ux-notification-panel__header">
+          <h2 class="ux-notification-panel__title">Notificaciones</h2>
+          <div class="ux-notification-panel__actions">
+            <button class="ux-notification-panel__action" title="Marcar todo como leido" @click="markAllAsRead()">
+              <span x-html="icons.checkAll"></span>
+            </button>
+            <button class="ux-notification-panel__action" title="Cerrar" @click="close()">
+              <span x-html="icons.close"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div x-show="showFilters" class="ux-notification-panel__filters">
+          <template x-for="filter in filters" :key="filter">
+            <button class="ux-notification-panel__filter"
+                    :class="{ 'ux-notification-panel__filter--active': activeFilter === filter }"
+                    @click="activeFilter = filter">
+              <span x-text="filterLabels[filter]"></span>
+              <span class="ux-notification-panel__filter-count" x-text="getFilterCount(filter)"></span>
+            </button>
+          </template>
+        </div>
+
+        <!-- Content -->
+        <div class="ux-notification-panel__content">
+          <!-- Empty State -->
+          <div x-show="filteredNotifications.length === 0 || (filteredNotifications.length === 1 && filteredNotifications[0].items.length === 0)"
+               class="ux-notification-panel__empty">
+            <div class="ux-notification-panel__empty-icon" x-html="icons.empty"></div>
+            <div class="ux-notification-panel__empty-title">No hay notificaciones</div>
+            <div class="ux-notification-panel__empty-description">Las nuevas notificaciones apareceran aqui</div>
+          </div>
+
+          <!-- Notifications List -->
+          <template x-for="group in filteredNotifications" :key="group.group">
+            <div>
+              <div x-show="group.group" class="ux-notification-panel__group" x-text="group.group"></div>
+              <ul class="ux-notification-panel__list">
+                <template x-for="notification in group.items" :key="notification.id">
+                  <li class="ux-notification-item"
+                      :class="{ 'ux-notification-item--unread': !notification.read }"
+                      @click="handleClick(notification)">
+                    <div class="ux-notification-item__icon"
+                         :class="'ux-notification-item__icon--' + notification.type"
+                         x-html="getTypeIcon(notification.type)"></div>
+                    <div class="ux-notification-item__content">
+                      <div class="ux-notification-item__header">
+                        <span class="ux-notification-item__title" x-text="notification.title"></span>
+                        <span class="ux-notification-item__time" x-text="formatTime(notification.timestamp)"></span>
+                      </div>
+                      <p class="ux-notification-item__message" x-text="notification.message"></p>
+                    </div>
+                    <div x-show="!notification.read" class="ux-notification-item__dot"></div>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </template>
+        </div>
+
+        <!-- Footer -->
+        <div x-show="showFooter && notifications.length > 0" class="ux-notification-panel__footer">
+          <a class="ux-notification-panel__footer-link" @click="clearAll()">Borrar todas</a>
+        </div>
+      </div>
+
+      <div class="demo-output">
+        No leidas: <strong x-text="unreadCount"></strong> |
+        Total: <strong x-text="notifications.length"></strong>
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div x-data="uxNotificationCenter({
+  notifications: [
+    { id: '1', title: 'Titulo', message: 'Mensaje', type: 'success', timestamp: '...', read: false }
+  ]
+})"&gt;
+  &lt;button class="ux-notification-trigger" @click="toggle()"&gt;
+    &lt;span x-html="icons.bell"&gt;&lt;/span&gt;
+    &lt;span class="ux-notification-trigger__badge" x-text="unreadCount"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+
+  &lt;div class="ux-notification-panel" :class="{ 'ux-notification-panel--open': isOpen }"&gt;
+    &lt;!-- Panel content --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Variante Dropdown</h3>
+    <p>Menu desplegable para espacios mas reducidos.</p>
+
+    <div class="demo-box" style="position: relative;">
+      <div x-data="uxNotificationCenter({
+        variant: 'dropdown',
+        showFilters: false,
+        groupByDate: false,
+        notifications: [
+          { id: 'd1', title: 'Mensaje nuevo', message: 'Tienes un mensaje de Maria', type: 'info', timestamp: new Date().toISOString(), read: false },
+          { id: 'd2', title: 'Tarea completada', message: 'La tarea \"Revisar inventario\" fue completada', type: 'success', timestamp: new Date(Date.now() - 1800000).toISOString(), read: false },
+          { id: 'd3', title: 'Recordatorio', message: 'Reunion en 30 minutos', type: 'warning', timestamp: new Date(Date.now() - 3600000).toISOString(), read: true }
+        ]
+      })">
+        <div style="position: relative; display: inline-block;">
+          <button class="ux-notification-trigger" @click="toggle()">
+            <span x-html="icons.bell"></span>
+            <span x-show="unreadCount > 0" class="ux-notification-trigger__badge" x-text="unreadCount"></span>
+          </button>
+
+          <!-- Dropdown -->
+          <div class="ux-notification-dropdown" :class="{ 'ux-notification-dropdown--open': isOpen }">
+            <div class="ux-notification-panel__header">
+              <h2 class="ux-notification-panel__title">Notificaciones</h2>
+              <button class="ux-notification-panel__action" @click="markAllAsRead()">
+                <span x-html="icons.checkAll"></span>
+              </button>
+            </div>
+            <div class="ux-notification-panel__content">
+              <ul class="ux-notification-panel__list">
+                <template x-for="notification in notifications" :key="notification.id">
+                  <li class="ux-notification-item"
+                      :class="{ 'ux-notification-item--unread': !notification.read }"
+                      @click="handleClick(notification)">
+                    <div class="ux-notification-item__icon"
+                         :class="'ux-notification-item__icon--' + notification.type"
+                         x-html="getTypeIcon(notification.type)"></div>
+                    <div class="ux-notification-item__content">
+                      <div class="ux-notification-item__header">
+                        <span class="ux-notification-item__title" x-text="notification.title"></span>
+                        <span class="ux-notification-item__time" x-text="formatTime(notification.timestamp)"></span>
+                      </div>
+                      <p class="ux-notification-item__message" x-text="notification.message"></p>
+                    </div>
+                    <div x-show="!notification.read" class="ux-notification-item__dot"></div>
+                  </li>
+                </template>
+              </ul>
+            </div>
+            <div class="ux-notification-panel__footer">
+              <a class="ux-notification-panel__footer-link">Ver todas</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Click outside to close -->
+        <div x-show="isOpen" @click="close()" style="position: fixed; inset: 0; z-index: 99;"></div>
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div x-data="uxNotificationCenter({ variant: 'dropdown' })"&gt;
+  &lt;button @click="toggle()"&gt;...&lt;/button&gt;
+  &lt;div class="ux-notification-dropdown" :class="{ 'ux-notification-dropdown--open': isOpen }"&gt;
+    ...
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Con Acciones en Notificaciones</h3>
+    <p>Botones de accion dentro de las notificaciones.</p>
+
+    <div class="demo-box" x-data="uxNotificationCenter({
+      showFilters: false,
+      groupByDate: false,
+      notifications: [
+        {
+          id: 'a1',
+          title: 'Solicitud de amistad',
+          message: 'Carlos Lopez quiere conectar contigo',
+          type: 'info',
+          timestamp: new Date().toISOString(),
+          read: false,
+          actions: [
+            { id: 'accept', label: 'Aceptar', primary: true },
+            { id: 'decline', label: 'Rechazar' }
+          ]
+        },
+        {
+          id: 'a2',
+          title: 'Nuevo comentario',
+          message: 'Ana Garcia comento en tu publicacion',
+          type: 'info',
+          timestamp: new Date(Date.now() - 600000).toISOString(),
+          read: false,
+          actions: [
+            { id: 'view', label: 'Ver comentario', primary: true }
+          ]
+        }
+      ]
+    })" @notification:action.window="alert('Accion: ' + $event.detail.action.label)">
+      <div style="max-width: 400px; border: 1px solid var(--ux-border-color); border-radius: var(--ux-radius-lg); overflow: hidden;">
+        <div class="ux-notification-panel__header">
+          <h2 class="ux-notification-panel__title">Notificaciones</h2>
+        </div>
+        <div class="ux-notification-panel__content" style="max-height: 400px;">
+          <ul class="ux-notification-panel__list">
+            <template x-for="notification in notifications" :key="notification.id">
+              <li class="ux-notification-item" :class="{ 'ux-notification-item--unread': !notification.read }">
+                <div class="ux-notification-item__icon"
+                     :class="'ux-notification-item__icon--' + notification.type"
+                     x-html="getTypeIcon(notification.type)"></div>
+                <div class="ux-notification-item__content">
+                  <div class="ux-notification-item__header">
+                    <span class="ux-notification-item__title" x-text="notification.title"></span>
+                    <span class="ux-notification-item__time" x-text="formatTime(notification.timestamp)"></span>
+                  </div>
+                  <p class="ux-notification-item__message" x-text="notification.message"></p>
+                  <div x-show="notification.actions && notification.actions.length > 0" class="ux-notification-item__actions">
+                    <template x-for="action in notification.actions" :key="action.id">
+                      <button class="ux-notification-item__action-btn"
+                              :class="{ 'ux-notification-item__action-btn--primary': action.primary }"
+                              @click.stop="handleAction(notification, action)"
+                              x-text="action.label"></button>
+                    </template>
+                  </div>
+                </div>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block">// Notificacion con acciones
+{
+  id: 'a1',
+  title: 'Solicitud de amistad',
+  message: 'Carlos quiere conectar',
+  actions: [
+    { id: 'accept', label: 'Aceptar', primary: true },
+    { id: 'decline', label: 'Rechazar' }
+  ]
+}
+
+// Escuchar evento
+@notification:action="handleAction($event.detail)"</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Agregar Notificaciones Dinamicamente</h3>
+    <p>Agregar nuevas notificaciones en tiempo real.</p>
+
+    <div class="demo-box" x-data="{
+      ...uxNotificationCenter({
+        showFilters: false,
+        groupByDate: false,
+        notifications: []
+      }),
+      notifCount: 0,
+
+      addTestNotification() {
+        this.notifCount++;
+        const types = ['info', 'success', 'warning', 'error'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const titles = {
+          info: 'Nueva informacion',
+          success: 'Operacion exitosa',
+          warning: 'Atencion requerida',
+          error: 'Error detectado'
+        };
+
+        this.addNotification({
+          title: titles[type] + ' #' + this.notifCount,
+          message: 'Esta es una notificacion de prueba generada dinamicamente.',
+          type: type
+        });
+      }
+    }">
+      <div class="demo-controls">
+        <button class="ux-button ux-color-primary" @click="addTestNotification()">
+          Agregar Notificacion
+        </button>
+        <button class="ux-button ux-button--outline" @click="markAllAsRead()">
+          Marcar todo leido
+        </button>
+        <button class="ux-button ux-button--outline ux-color-danger--outline" @click="clearAll()">
+          Borrar todas
+        </button>
+      </div>
+
+      <div style="max-width: 400px; border: 1px solid var(--ux-border-color); border-radius: var(--ux-radius-lg); overflow: hidden;">
+        <div class="ux-notification-panel__header">
+          <h2 class="ux-notification-panel__title">Notificaciones</h2>
+          <span style="font-size: var(--ux-font-size-sm); color: var(--ux-text-tertiary);" x-text="unreadCount + ' no leidas'"></span>
+        </div>
+        <div class="ux-notification-panel__content" style="max-height: 300px;">
+          <div x-show="notifications.length === 0" class="ux-notification-panel__empty">
+            <div class="ux-notification-panel__empty-icon" x-html="icons.empty"></div>
+            <div class="ux-notification-panel__empty-title">Sin notificaciones</div>
+            <div class="ux-notification-panel__empty-description">Haz click en "Agregar" para probar</div>
+          </div>
+          <ul class="ux-notification-panel__list">
+            <template x-for="notification in notifications" :key="notification.id">
+              <li class="ux-notification-item"
+                  :class="{ 'ux-notification-item--unread': !notification.read }"
+                  @click="handleClick(notification)">
+                <div class="ux-notification-item__icon"
+                     :class="'ux-notification-item__icon--' + notification.type"
+                     x-html="getTypeIcon(notification.type)"></div>
+                <div class="ux-notification-item__content">
+                  <div class="ux-notification-item__header">
+                    <span class="ux-notification-item__title" x-text="notification.title"></span>
+                    <span class="ux-notification-item__time" x-text="formatTime(notification.timestamp)"></span>
+                  </div>
+                  <p class="ux-notification-item__message" x-text="notification.message"></p>
+                </div>
+                <div x-show="!notification.read" class="ux-notification-item__dot"></div>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block">// Agregar notificacion
+addNotification({
+  title: 'Titulo',
+  message: 'Mensaje de la notificacion',
+  type: 'success' // info, success, warning, error
+});
+
+// Marcar todas como leidas
+markAllAsRead();
+
+// Borrar todas
+clearAll();</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Variante Glass</h3>
+    <p>Panel con efecto glass morphism.</p>
+
+    <div class="demo-box" style="background: linear-gradient(135deg, var(--ux-primary-tint) 0%, var(--ux-tertiary-tint) 100%); padding: var(--ux-space-xl); min-height: 300px;">
+      <div x-data="uxNotificationCenter({
+        showFilters: false,
+        groupByDate: false,
+        notifications: [
+          { id: 'g1', title: 'Bienvenido', message: 'Panel de notificaciones glass', type: 'info', timestamp: new Date().toISOString(), read: false }
+        ]
+      })">
+        <button class="ux-notification-trigger" style="background: var(--ux-glass-bg);" @click="toggle()">
+          <span x-html="icons.bell"></span>
+          <span x-show="unreadCount > 0" class="ux-notification-trigger__badge" x-text="unreadCount"></span>
+        </button>
+
+        <div class="ux-notification-panel__backdrop"
+             :class="{ 'ux-notification-panel__backdrop--open': isOpen }"
+             @click="close()"></div>
+
+        <div class="ux-notification-panel ux-notification-panel--glass" :class="{ 'ux-notification-panel--open': isOpen }">
+          <div class="ux-notification-panel__header">
+            <h2 class="ux-notification-panel__title">Notificaciones</h2>
+            <button class="ux-notification-panel__action" @click="close()">
+              <span x-html="icons.close"></span>
+            </button>
+          </div>
+          <div class="ux-notification-panel__content">
+            <ul class="ux-notification-panel__list">
+              <template x-for="notification in notifications" :key="notification.id">
+                <li class="ux-notification-item"
+                    :class="{ 'ux-notification-item--unread': !notification.read }"
+                    @click="handleClick(notification)">
+                  <div class="ux-notification-item__icon"
+                       :class="'ux-notification-item__icon--' + notification.type"
+                       x-html="getTypeIcon(notification.type)"></div>
+                  <div class="ux-notification-item__content">
+                    <div class="ux-notification-item__header">
+                      <span class="ux-notification-item__title" x-text="notification.title"></span>
+                      <span class="ux-notification-item__time" x-text="formatTime(notification.timestamp)"></span>
+                    </div>
+                    <p class="ux-notification-item__message" x-text="notification.message"></p>
+                  </div>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div class="ux-notification-panel ux-notification-panel--glass"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>API y Eventos</h3>
+    <div class="demo-box">
+      <pre class="code-block">// Opciones de configuracion
+uxNotificationCenter({
+  notifications: [],           // Array de notificaciones
+  filters: ['all', 'unread'],  // Filtros disponibles
+  filterLabels: {},            // Etiquetas para filtros
+  showFilters: true,           // Mostrar barra de filtros
+  showFooter: true,            // Mostrar footer
+  groupByDate: true,           // Agrupar por fecha
+  maxVisible: 50,              // Maximo de notificaciones visibles
+  variant: 'panel'             // 'panel' o 'dropdown'
+})
+
+// Estructura de notificacion
+{
+  id: 'unique-id',             // ID unico (requerido)
+  title: 'Titulo',             // Titulo (requerido)
+  message: 'Mensaje',          // Mensaje (requerido)
+  type: 'info',                // 'info', 'success', 'warning', 'error'
+  timestamp: '2024-01-15...',  // ISO date string
+  read: false,                 // Estado de lectura
+  actions: [                   // Acciones opcionales
+    { id: 'action1', label: 'Aceptar', primary: true }
+  ],
+  data: {}                     // Datos adicionales
+}
+
+// Propiedades computadas
+unreadCount                    // Cantidad de no leidas
+filteredNotifications          // Notificaciones filtradas
+
+// Metodos
+open()                         // Abrir panel
+close()                        // Cerrar panel
+toggle()                       // Alternar estado
+markAsRead(id)                 // Marcar como leida
+markAllAsRead()                // Marcar todas como leidas
+deleteNotification(id)         // Eliminar notificacion
+clearAll()                     // Borrar todas
+addNotification(notif)         // Agregar nueva
+getFilterCount(filter)         // Contar por filtro
+formatTime(timestamp)          // Formatear tiempo relativo
+
+// Eventos
+@notifications:open            // Panel abierto
+@notifications:close           // Panel cerrado
+@notification:read             // Notificacion leida
+@notification:click            // Click en notificacion
+@notification:action           // Click en accion
+@notification:delete           // Notificacion eliminada
+@notification:add              // Notificacion agregada
+@notifications:all-read        // Todas marcadas como leidas
+@notifications:clear           // Todas borradas</pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>Integracion con HTMX</h3>
+    <p>Cargar notificaciones desde el servidor.</p>
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Cargar notificaciones al abrir --&gt;
+&lt;div x-data="uxNotificationCenter()"
+     @notifications:open="htmx.ajax('GET', '/api/notifications', { target: '#notif-list' })"&gt;
+  &lt;div class="ux-notification-panel__content"&gt;
+    &lt;ul id="notif-list" class="ux-notification-panel__list"&gt;
+      &lt;!-- Notificaciones cargadas via HTMX --&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Polling para nuevas notificaciones --&gt;
+&lt;div hx-get="/api/notifications/count"
+     hx-trigger="every 30s"
+     hx-swap="innerHTML"&gt;
+  &lt;span class="ux-notification-trigger__badge"&gt;0&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- Marcar como leida en servidor --&gt;
+&lt;li class="ux-notification-item"
+    hx-post="/api/notifications/123/read"
+    hx-trigger="click"
+    hx-swap="none"&gt;
+  ...
+&lt;/li&gt;
+
+&lt;!-- Respuesta del servidor --&gt;
+&lt;li class="ux-notification-item ux-notification-item--unread"&gt;
+  &lt;div class="ux-notification-item__icon ux-notification-item__icon--success"&gt;
+    &lt;svg&gt;...&lt;/svg&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-notification-item__content"&gt;
+    &lt;div class="ux-notification-item__header"&gt;
+      &lt;span class="ux-notification-item__title"&gt;Nuevo pedido&lt;/span&gt;
+      &lt;span class="ux-notification-item__time"&gt;5m&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;p class="ux-notification-item__message"&gt;Pedido #1234 recibido&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/li&gt;</pre>
+    </div>
+  </div>
+</body>
+</html>

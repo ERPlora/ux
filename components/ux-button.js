@@ -290,6 +290,28 @@
       width: calc(var(--ux-button-icon-size) * 1.2);
       height: calc(var(--ux-button-icon-size) * 1.2);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-button {
+        transition: none;
+      }
+
+      .ux-button::before {
+        transition: none;
+      }
+
+      .ux-button:active {
+        transform: none;
+      }
+
+      .ux-button--loading::after {
+        animation: none;
+      }
+    }
   `;
 
   // Inject styles
