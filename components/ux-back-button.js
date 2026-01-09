@@ -330,6 +330,40 @@
         background: rgba(120, 120, 128, 0.5);
       }
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-back-button {
+        transition: none;
+      }
+
+      .ux-back-button__icon {
+        transition: none;
+      }
+
+      .ux-back-button:hover .ux-back-button__icon {
+        transform: none;
+      }
+
+      .ux-back-button:active {
+        transform: none;
+      }
+
+      .ux-back-button--animate-in {
+        animation: none;
+      }
+
+      .ux-back-button--collapsible .ux-back-button__text {
+        transition: none;
+      }
+
+      .ux-back-button--glass {
+        transition: none;
+      }
+    }
   `;
 
   // Default back arrow SVG (iOS SF Symbols style - thin chevron)

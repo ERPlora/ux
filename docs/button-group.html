@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Button Group - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-button-group.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-lg); align-items: flex-start; }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+    <h2 style="margin-bottom: var(--ux-space-lg);">Button Group</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xl);">Agrupacion de botones con bordes conectados y variantes de seleccion.</p>
+
+    <section class="demo-section">
+      <h3>Basico</h3>
+      <p>Botones agrupados horizontalmente.</p>
+      <div class="demo-box">
+        <div class="ux-button-group">
+          <button class="ux-button">Left</button>
+          <button class="ux-button">Center</button>
+          <button class="ux-button">Right</button>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-button-group"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button"</span><span class="tag">&gt;</span>Left<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button"</span><span class="tag">&gt;</span>Center<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button"</span><span class="tag">&gt;</span>Right<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Outline Variant</h3>
+      <div class="demo-box">
+        <div class="ux-button-group ux-button-group--outline">
+          <button class="ux-button">Day</button>
+          <button class="ux-button ux-button--active">Week</button>
+          <button class="ux-button">Month</button>
+        </div>
+
+        <div class="ux-button-group ux-button-group--outline ux-color-success--outline">
+          <button class="ux-button">On</button>
+          <button class="ux-button">Off</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Toggle Group</h3>
+      <p>Seleccion unica con Alpine.js.</p>
+      <div class="demo-box">
+        <div class="ux-button-group ux-button-group--toggle"
+             x-data="uxButtonGroup({ selected: 'week' })"
+             @buttongroup:change="console.log('Selected:', $event.detail)">
+          <button class="ux-button"
+                  data-value="day"
+                  :class="getButtonClasses('day')"
+                  @click="select('day')">Day</button>
+          <button class="ux-button"
+                  data-value="week"
+                  :class="getButtonClasses('week')"
+                  @click="select('week')">Week</button>
+          <button class="ux-button"
+                  data-value="month"
+                  :class="getButtonClasses('month')"
+                  @click="select('month')">Month</button>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-button-group ux-button-group--toggle"</span>
+     <span class="attr">x-data</span>=<span class="string">"uxButtonGroup({ selected: 'week' })"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button"</span>
+          <span class="attr">:class</span>=<span class="string">"getButtonClasses('day')"</span>
+          <span class="attr">@click</span>=<span class="string">"select('day')"</span><span class="tag">&gt;</span>Day<span class="tag">&lt;/button&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Multiple Selection</h3>
+      <p>Permite seleccionar multiples opciones.</p>
+      <div class="demo-box">
+        <div class="ux-button-group ux-button-group--toggle"
+             x-data="uxButtonGroup({ multiple: true, selectedItems: ['bold'] })">
+          <button class="ux-button"
+                  :class="getButtonClasses('bold')"
+                  @click="select('bold')">
+            <strong>B</strong>
+          </button>
+          <button class="ux-button"
+                  :class="getButtonClasses('italic')"
+                  @click="select('italic')">
+            <em>I</em>
+          </button>
+          <button class="ux-button"
+                  :class="getButtonClasses('underline')"
+                  @click="select('underline')">
+            <u>U</u>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Sizes</h3>
+      <div class="demo-box" style="flex-direction: column; align-items: flex-start;">
+        <div>
+          <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xs);">Small</p>
+          <div class="ux-button-group ux-button-group--sm">
+            <button class="ux-button">A</button>
+            <button class="ux-button">B</button>
+            <button class="ux-button">C</button>
+          </div>
+        </div>
+        <div>
+          <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xs);">Default</p>
+          <div class="ux-button-group">
+            <button class="ux-button">A</button>
+            <button class="ux-button">B</button>
+            <button class="ux-button">C</button>
+          </div>
+        </div>
+        <div>
+          <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xs);">Large</p>
+          <div class="ux-button-group ux-button-group--lg">
+            <button class="ux-button">A</button>
+            <button class="ux-button">B</button>
+            <button class="ux-button">C</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Vertical</h3>
+      <div class="demo-box">
+        <div class="ux-button-group ux-button-group--vertical">
+          <button class="ux-button">Top</button>
+          <button class="ux-button">Middle</button>
+          <button class="ux-button">Bottom</button>
+        </div>
+
+        <div class="ux-button-group ux-button-group--vertical ux-button-group--outline">
+          <button class="ux-button">Option 1</button>
+          <button class="ux-button ux-button--active">Option 2</button>
+          <button class="ux-button">Option 3</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Full Width (Block)</h3>
+      <div class="demo-box" style="flex-direction: column;">
+        <div class="ux-button-group ux-button-group--block ux-button-group--toggle"
+             x-data="uxButtonGroup({ selected: 'all' })">
+          <button class="ux-button" :class="getButtonClasses('all')" @click="select('all')">All</button>
+          <button class="ux-button" :class="getButtonClasses('active')" @click="select('active')">Active</button>
+          <button class="ux-button" :class="getButtonClasses('completed')" @click="select('completed')">Completed</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Separated</h3>
+      <p>Botones con separacion entre ellos.</p>
+      <div class="demo-box">
+        <div class="ux-button-group ux-button-group--separated">
+          <button class="ux-button">Edit</button>
+          <button class="ux-button">Copy</button>
+          <button class="ux-button ux-color-danger">Delete</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Glass Variant</h3>
+      <div class="demo-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: var(--ux-space-xl);">
+        <div class="ux-button-group ux-button-group--glass"
+             x-data="uxButtonGroup({ selected: 'photos' })">
+          <button class="ux-button" :class="getButtonClasses('photos')" @click="select('photos')">Photos</button>
+          <button class="ux-button" :class="getButtonClasses('videos')" @click="select('videos')">Videos</button>
+          <button class="ux-button" :class="getButtonClasses('albums')" @click="select('albums')">Albums</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Con Iconos</h3>
+      <div class="demo-box">
+        <div class="ux-button-group ux-button-group--toggle"
+             x-data="uxButtonGroup({ selected: 'grid' })">
+          <button class="ux-button" :class="getButtonClasses('list')" @click="select('list')" aria-label="List view">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+          </button>
+          <button class="ux-button" :class="getButtonClasses('grid')" @click="select('grid')" aria-label="Grid view">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="ux-button-group ux-button-group--outline">
+          <button class="ux-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Prev
+          </button>
+          <button class="ux-button">
+            Next
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>API</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Clase</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody style="font-size: var(--ux-font-size-sm);">
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-button-group</code></td>
+            <td style="padding: var(--ux-space-sm);">Contenedor del grupo</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-button-group--outline</code></td>
+            <td style="padding: var(--ux-space-sm);">Estilo outline</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-button-group--toggle</code></td>
+            <td style="padding: var(--ux-space-sm);">Estilo toggle con seleccion</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-button-group--vertical</code></td>
+            <td style="padding: var(--ux-space-sm);">Orientacion vertical</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-button-group--block</code></td>
+            <td style="padding: var(--ux-space-sm);">Ancho completo</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-button-group--separated</code></td>
+            <td style="padding: var(--ux-space-sm);">Con gap entre botones</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>.ux-button-group--sm/lg</code></td>
+            <td style="padding: var(--ux-space-sm);">Tamanos</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>.ux-button-group--glass</code></td>
+            <td style="padding: var(--ux-space-sm);">Efecto glass morphism</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="demo-section">
+      <h3>Alpine.js API</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Propiedad/Metodo</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody style="font-size: var(--ux-font-size-sm);">
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>selected</code></td>
+            <td style="padding: var(--ux-space-sm);">Valor seleccionado (single)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>multiple</code></td>
+            <td style="padding: var(--ux-space-sm);">Permitir seleccion multiple</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>selectedItems</code></td>
+            <td style="padding: var(--ux-space-sm);">Array de valores (multiple)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>select(value)</code></td>
+            <td style="padding: var(--ux-space-sm);">Seleccionar/toggle valor</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>isSelected(value)</code></td>
+            <td style="padding: var(--ux-space-sm);">Verificar si esta seleccionado</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>getButtonClasses(value)</code></td>
+            <td style="padding: var(--ux-space-sm);">Clases para el boton</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

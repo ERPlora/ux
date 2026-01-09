@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>State Components - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-state.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-2xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section h4 { font-size: var(--ux-font-size-md); font-weight: 500; margin: var(--ux-space-lg) 0 var(--ux-space-sm); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: var(--ux-font-size-sm); overflow-x: auto; margin-top: var(--ux-space-md); white-space: pre; }
+    .demo-box {
+      background: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+      border: 1px solid var(--ux-border-color);
+    }
+    .demo-frame {
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--ux-space-md);
+    }
+    .class-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--ux-font-size-sm);
+    }
+    .class-table th, .class-table td {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      text-align: left;
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+    .class-table th {
+      background: var(--ux-surface-secondary);
+      font-weight: 600;
+    }
+    .class-table code {
+      background: var(--ux-surface-secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: var(--ux-font-size-sm);
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content ux-padding">
+    <!-- Intro -->
+    <div class="demo-section">
+      <h3>State Components</h3>
+      <p>Componentes para estados de UI: empty, error, success, warning, offline. Estilo iOS minimalista con iconos SVG y animaciones sutiles.</p>
+      <pre class="code-block"><code>&lt;script src="components/ux-state.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+
+    <!-- Empty State -->
+    <div class="demo-section">
+      <h3>Empty State</h3>
+      <p>Cuando no hay datos para mostrar.</p>
+
+      <div class="demo-frame">
+        <div class="ux-state ux-empty-state">
+          <div class="ux-state__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 7.5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9"/>
+              <path d="M16.5 2H7.5a2 2 0 0 0-2 2v1.5h13V4a2 2 0 0 0-2-2z"/>
+              <path d="M12 11v4"/>
+              <path d="M12 18.5v.5"/>
+            </svg>
+          </div>
+          <div class="ux-state__content">
+            <h4 class="ux-state__title">No hay elementos</h4>
+            <p class="ux-state__description">Aun no tienes ningun elemento guardado. Comienza agregando uno nuevo.</p>
+          </div>
+          <div class="ux-state__actions">
+            <button class="ux-button ux-color-primary">Agregar elemento</button>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-state ux-empty-state"&gt;
+  &lt;div class="ux-state__icon"&gt;
+    &lt;svg&gt;...&lt;/svg&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-state__content"&gt;
+    &lt;h4 class="ux-state__title"&gt;No hay elementos&lt;/h4&gt;
+    &lt;p class="ux-state__description"&gt;Descripcion del estado vacio&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-state__actions"&gt;
+    &lt;button class="ux-button ux-color-primary"&gt;Accion&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Error State -->
+    <div class="demo-section">
+      <h3>Error State</h3>
+      <p>Cuando ocurre un error.</p>
+
+      <div class="demo-frame">
+        <div class="ux-state ux-error-state">
+          <div class="ux-state__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <div class="ux-state__content">
+            <h4 class="ux-state__title">Error al cargar</h4>
+            <p class="ux-state__description">No pudimos cargar los datos. Por favor verifica tu conexion e intenta de nuevo.</p>
+          </div>
+          <div class="ux-state__actions">
+            <button class="ux-button ux-color-primary">Reintentar</button>
+            <button class="ux-button ux-button--outline">Contactar soporte</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success State -->
+    <div class="demo-section">
+      <h3>Success State</h3>
+      <p>Cuando una accion se completa exitosamente.</p>
+
+      <div class="demo-frame">
+        <div class="ux-state ux-success-state">
+          <div class="ux-state__icon ux-state__icon--animated">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="16 10 11 15 8 12"/>
+            </svg>
+          </div>
+          <div class="ux-state__content">
+            <h4 class="ux-state__title">Pago completado</h4>
+            <p class="ux-state__description">Tu pedido ha sido procesado correctamente. Recibiras un email de confirmacion.</p>
+          </div>
+          <div class="ux-state__actions">
+            <button class="ux-button ux-color-success">Ver pedido</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warning State -->
+    <div class="demo-section">
+      <h3>Warning State</h3>
+      <p>Para advertencias o situaciones que requieren atencion.</p>
+
+      <div class="demo-frame">
+        <div class="ux-state ux-warning-state">
+          <div class="ux-state__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="ux-state__content">
+            <h4 class="ux-state__title">Stock bajo</h4>
+            <p class="ux-state__description">Algunos productos de tu carrito tienen stock limitado. Completa tu compra pronto.</p>
+          </div>
+          <div class="ux-state__actions ux-state__actions--row">
+            <button class="ux-button ux-button--outline">Ver carrito</button>
+            <button class="ux-button ux-color-warning">Continuar compra</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Offline State -->
+    <div class="demo-section">
+      <h3>Offline State</h3>
+      <p>Cuando el usuario pierde conexion.</p>
+
+      <div class="demo-frame">
+        <div class="ux-state ux-offline-state">
+          <div class="ux-state__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="1" y1="1" x2="23" y2="23"/>
+              <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+              <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+              <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+              <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+              <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+              <line x1="12" y1="20" x2="12.01" y2="20"/>
+            </svg>
+          </div>
+          <div class="ux-state__content">
+            <h4 class="ux-state__title">Sin conexion</h4>
+            <p class="ux-state__description">Parece que no tienes conexion a internet. Algunas funciones no estaran disponibles.</p>
+          </div>
+          <div class="ux-state__actions">
+            <button class="ux-button ux-button--outline">Reintentar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Empty -->
+    <div class="demo-section">
+      <h3>Search Empty State</h3>
+      <p>Cuando una busqueda no tiene resultados.</p>
+
+      <div class="demo-frame">
+        <div class="ux-state ux-search-empty-state">
+          <div class="ux-state__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+          </div>
+          <div class="ux-state__content">
+            <h4 class="ux-state__title">Sin resultados</h4>
+            <p class="ux-state__description">No encontramos resultados para <span class="ux-state__highlight">"zapatos rojos"</span>. Intenta con otros terminos.</p>
+          </div>
+          <div class="ux-state__actions">
+            <button class="ux-button ux-button--outline">Limpiar busqueda</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Size Variants -->
+    <div class="demo-section">
+      <h3>Variantes de Tamano</h3>
+      <p>Estados en diferentes tamanos.</p>
+
+      <div class="demo-grid">
+        <div class="demo-frame">
+          <div class="ux-state ux-empty-state ux-state--sm">
+            <div class="ux-state__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+              </svg>
+            </div>
+            <div class="ux-state__content">
+              <h4 class="ux-state__title">Bandeja vacia</h4>
+              <p class="ux-state__description">No hay mensajes</p>
+            </div>
+          </div>
+          <p style="text-align: center; font-size: var(--ux-font-size-sm); color: var(--ux-text-tertiary); padding: var(--ux-space-sm);">.ux-state--sm</p>
+        </div>
+
+        <div class="demo-frame">
+          <div class="ux-state ux-empty-state ux-state--lg">
+            <div class="ux-state__icon ux-state__icon--circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <div class="ux-state__content">
+              <h4 class="ux-state__title">Sin eventos</h4>
+              <p class="ux-state__description">No tienes eventos programados para hoy</p>
+            </div>
+            <div class="ux-state__actions">
+              <button class="ux-button ux-color-primary">Crear evento</button>
+            </div>
+          </div>
+          <p style="text-align: center; font-size: var(--ux-font-size-sm); color: var(--ux-text-tertiary); padding: var(--ux-space-sm);">.ux-state--lg</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inline State -->
+    <div class="demo-section">
+      <h3>Inline State</h3>
+      <p>Version compacta para listas o cards.</p>
+
+      <div class="demo-frame" style="padding: var(--ux-space-md);">
+        <div class="ux-state ux-empty-state ux-state--inline">
+          <div class="ux-state__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+          </div>
+          <div class="ux-state__content">
+            <h4 class="ux-state__title">Carrito vacio</h4>
+            <p class="ux-state__description">Agrega productos para comenzar</p>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-state ux-empty-state ux-state--inline"&gt;
+  &lt;!-- Compacto, horizontal --&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Card State -->
+    <div class="demo-section">
+      <h3>Card State</h3>
+      <p>Estado con borde y fondo, ideal para secciones.</p>
+
+      <div class="demo-grid">
+        <div class="ux-state ux-error-state ux-state--card ux-state--sm">
+          <div class="ux-state__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <div class="ux-state__content">
+            <h4 class="ux-state__title">Error de sincronizacion</h4>
+            <p class="ux-state__description">No se pudo sincronizar</p>
+          </div>
+          <div class="ux-state__actions">
+            <button class="ux-button ux-button--sm ux-color-danger--outline">Reintentar</button>
+          </div>
+        </div>
+
+        <div class="ux-state ux-success-state ux-state--card ux-state--sm">
+          <div class="ux-state__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="16 10 11 15 8 12"/>
+            </svg>
+          </div>
+          <div class="ux-state__content">
+            <h4 class="ux-state__title">Sincronizado</h4>
+            <p class="ux-state__description">Todos los cambios guardados</p>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-state ux-error-state ux-state--card"&gt;
+  &lt;!-- Estado con borde y fondo de color --&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Glass State -->
+    <div class="demo-section">
+      <h3>Glass State</h3>
+      <p>Version glass para fondos con imagen.</p>
+
+      <div class="demo-frame" style="background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-secondary) 100%); padding: var(--ux-space-xl);">
+        <div class="ux-state ux-empty-state ux-state--glass">
+          <div class="ux-state__icon ux-state__icon--circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="ux-state__content" style="color: white;">
+            <h4 class="ux-state__title" style="color: white;">Sin contactos</h4>
+            <p class="ux-state__description" style="color: rgba(255,255,255,0.8);">Agrega contactos para comenzar</p>
+          </div>
+          <div class="ux-state__actions">
+            <button class="ux-button" style="background: white; color: var(--ux-primary);">Agregar contacto</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="demo-section">
+      <h3>Connection Status</h3>
+      <p>Banner de estado de conexion.</p>
+
+      <div style="display: flex; flex-direction: column; gap: var(--ux-space-sm);">
+        <div class="ux-connection-status ux-connection-status--online">
+          <span class="ux-connection-status__dot"></span>
+          <span>Conectado</span>
+        </div>
+
+        <div class="ux-connection-status ux-connection-status--offline">
+          <span class="ux-connection-status__dot"></span>
+          <span>Sin conexion</span>
+        </div>
+
+        <div class="ux-connection-status ux-connection-status--reconnecting">
+          <span class="ux-connection-status__dot"></span>
+          <span>Reconectando...</span>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-connection-status ux-connection-status--online"&gt;
+  &lt;span class="ux-connection-status__dot"&gt;&lt;/span&gt;
+  &lt;span&gt;Conectado&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div class="ux-connection-status ux-connection-status--offline"&gt;...&lt;/div&gt;
+&lt;div class="ux-connection-status ux-connection-status--reconnecting"&gt;...&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Icon with Circle -->
+    <div class="demo-section">
+      <h3>Icono con Circulo</h3>
+      <p>Icono sobre fondo circular para mayor enfasis.</p>
+
+      <div class="demo-frame">
+        <div class="ux-state ux-empty-state">
+          <div class="ux-state__icon ux-state__icon--circle ux-state__icon--animated">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="12" x2="12" y2="18"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <div class="ux-state__content">
+            <h4 class="ux-state__title">Sin archivos</h4>
+            <p class="ux-state__description">Arrastra archivos aqui o haz clic para seleccionar</p>
+          </div>
+          <div class="ux-state__actions">
+            <button class="ux-button ux-color-primary">Seleccionar archivos</button>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code>&lt;div class="ux-state__icon ux-state__icon--circle ux-state__icon--animated"&gt;
+  &lt;svg&gt;...&lt;/svg&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- CSS Reference -->
+    <div class="demo-section">
+      <h3>Referencia de Clases CSS</h3>
+
+      <div style="overflow-x: auto;">
+        <table class="class-table">
+          <thead>
+            <tr>
+              <th>Clase</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Tipos de Estado</td></tr>
+            <tr><td><code>.ux-state</code></td><td>Contenedor base</td></tr>
+            <tr><td><code>.ux-empty-state</code></td><td>Estado vacio</td></tr>
+            <tr><td><code>.ux-error-state</code></td><td>Estado de error</td></tr>
+            <tr><td><code>.ux-success-state</code></td><td>Estado de exito</td></tr>
+            <tr><td><code>.ux-warning-state</code></td><td>Estado de advertencia</td></tr>
+            <tr><td><code>.ux-info-state</code></td><td>Estado informativo</td></tr>
+            <tr><td><code>.ux-offline-state</code></td><td>Estado sin conexion</td></tr>
+            <tr><td><code>.ux-loading-state</code></td><td>Estado de carga</td></tr>
+            <tr><td><code>.ux-search-empty-state</code></td><td>Busqueda sin resultados</td></tr>
+            <tr><td><code>.ux-no-permission-state</code></td><td>Sin permisos</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Tamanos</td></tr>
+            <tr><td><code>.ux-state--sm</code></td><td>Tamano pequeno</td></tr>
+            <tr><td><code>.ux-state--lg</code></td><td>Tamano grande</td></tr>
+            <tr><td><code>.ux-state--full</code></td><td>Altura completa</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Variantes</td></tr>
+            <tr><td><code>.ux-state--inline</code></td><td>Layout horizontal compacto</td></tr>
+            <tr><td><code>.ux-state--card</code></td><td>Con borde y fondo</td></tr>
+            <tr><td><code>.ux-state--glass</code></td><td>Efecto glass</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Elementos</td></tr>
+            <tr><td><code>.ux-state__icon</code></td><td>Icono del estado</td></tr>
+            <tr><td><code>.ux-state__icon--circle</code></td><td>Icono con fondo circular</td></tr>
+            <tr><td><code>.ux-state__icon--animated</code></td><td>Icono con animacion</td></tr>
+            <tr><td><code>.ux-state__content</code></td><td>Contenedor de texto</td></tr>
+            <tr><td><code>.ux-state__title</code></td><td>Titulo</td></tr>
+            <tr><td><code>.ux-state__description</code></td><td>Descripcion</td></tr>
+            <tr><td><code>.ux-state__actions</code></td><td>Contenedor de acciones</td></tr>
+            <tr><td><code>.ux-state__actions--row</code></td><td>Acciones en fila</td></tr>
+            <tr><td><code>.ux-state__highlight</code></td><td>Texto destacado</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Connection Status</td></tr>
+            <tr><td><code>.ux-connection-status</code></td><td>Banner de conexion</td></tr>
+            <tr><td><code>.ux-connection-status--online</code></td><td>Estado conectado</td></tr>
+            <tr><td><code>.ux-connection-status--offline</code></td><td>Estado desconectado</td></tr>
+            <tr><td><code>.ux-connection-status--reconnecting</code></td><td>Reconectando</td></tr>
+            <tr><td><code>.ux-connection-status__dot</code></td><td>Indicador de punto</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="ux-padding" style="text-align: center; background: var(--ux-surface-secondary); color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">
+    <p>UX Library - State Components</p>
+  </footer>
+</body>
+</html>

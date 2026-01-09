@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Numpad - UX Library</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-numpad.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { display: flex; flex-wrap: wrap; gap: var(--ux-space-lg); align-items: flex-start; margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-sm); overflow-x: auto; white-space: pre; }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+    .ux-table { width: 100%; border-collapse: collapse; margin-bottom: var(--ux-space-lg); }
+    .ux-table th, .ux-table td { padding: var(--ux-space-sm) var(--ux-space-md); text-align: left; border-bottom: 1px solid var(--ux-border-color); }
+    .ux-table th { font-weight: 600; color: var(--ux-text); background: var(--ux-surface-secondary); }
+    .ux-table td { color: var(--ux-text-secondary); }
+    .ux-table code { background: var(--ux-surface-secondary); padding: 2px 6px; border-radius: 4px; font-size: var(--ux-font-size-sm); }
+    .demo-grid { display: flex; flex-wrap: wrap; gap: var(--ux-space-lg); }
+    .action-row { display: flex; gap: var(--ux-space-sm); }
+    .action-row > * { flex: 1; }
+  </style>
+</head>
+<body class="ux-app">
+
+  <!-- Basic Numpad -->
+  <div class="demo-section">
+    <h3>Numpad Basico</h3>
+    <p>Teclado numerico para entrada de cantidades. Incluye display, teclas numericas, borrar y confirmar.</p>
+
+    <div class="demo-box">
+      <div x-data="uxNumpad({ allowDecimal: true, decimals: 2 })"
+           class="ux-numpad"
+           @numpad-submit.window="alert('Valor: ' + $event.detail.numericValue)">
+
+        <!-- Display -->
+        <div class="ux-numpad__display">
+          <span class="ux-numpad__display-currency">$</span>
+          <span class="ux-numpad__display-value" x-text="displayValue"></span>
+        </div>
+
+        <!-- Grid -->
+        <div class="ux-numpad__grid">
+          <button type="button" class="ux-numpad__key" @click="appendDigit('7')">7</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('8')">8</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('9')">9</button>
+
+          <button type="button" class="ux-numpad__key" @click="appendDigit('4')">4</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('5')">5</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('6')">6</button>
+
+          <button type="button" class="ux-numpad__key" @click="appendDigit('1')">1</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('2')">2</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('3')">3</button>
+
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="appendDecimal()">.</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('0')">0</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="backspace()">
+            <span x-html="getIcon('backspace')"></span>
+          </button>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-row">
+          <button type="button" class="ux-button ux-button--outline" @click="clear()">Limpiar</button>
+          <button type="button" class="ux-button ux-color-primary" @click="submit()">Confirmar</button>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxNumpad({ allowDecimal: true })"</span> <span class="attr">class</span>=<span class="string">"ux-numpad"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-numpad__display"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"displayValue"</span><span class="tag">&gt;&lt;/span&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-numpad__grid"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-numpad__key"</span> <span class="attr">@click</span>=<span class="string">"appendDigit('7')"</span><span class="tag">&gt;</span>7<span class="tag">&lt;/button&gt;</span>
+    <span class="comment">&lt;!-- ... mas teclas --&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-numpad__key ux-numpad__key--action"</span> <span class="attr">@click</span>=<span class="string">"backspace()"</span><span class="tag">&gt;</span>⌫<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+  </div>
+
+  <!-- POS Numpad with Quick Amounts -->
+  <div class="demo-section">
+    <h3>Numpad POS con Montos Rapidos</h3>
+    <p>Para punto de venta con botones de montos rapidos predefinidos.</p>
+
+    <div class="demo-box">
+      <div x-data="uxNumpad({
+        allowDecimal: true,
+        currency: '€',
+        quickAmounts: [5, 10, 20, 50, 100]
+      })" class="ux-numpad" @numpad-change="console.log('Valor:', $event.detail.numericValue)">
+
+        <!-- Display -->
+        <div class="ux-numpad__display ux-numpad__display--lg">
+          <span class="ux-numpad__display-label">Efectivo recibido</span>
+          <span class="ux-numpad__display-currency">€</span>
+          <span class="ux-numpad__display-value" x-text="displayValue"></span>
+        </div>
+
+        <!-- Quick Amounts -->
+        <div class="ux-numpad__quick-amounts">
+          <template x-for="amount in quickAmounts" :key="amount">
+            <button type="button" class="ux-numpad__quick-btn" @click="setQuickAmount(amount)">
+              €<span x-text="amount"></span>
+            </button>
+          </template>
+        </div>
+
+        <!-- Grid -->
+        <div class="ux-numpad__grid">
+          <button type="button" class="ux-numpad__key" @click="appendDigit('7')">7</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('8')">8</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('9')">9</button>
+
+          <button type="button" class="ux-numpad__key" @click="appendDigit('4')">4</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('5')">5</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('6')">6</button>
+
+          <button type="button" class="ux-numpad__key" @click="appendDigit('1')">1</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('2')">2</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('3')">3</button>
+
+          <button type="button" class="ux-numpad__key ux-numpad__key--danger" @click="clear()">C</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('0')">0</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="appendDecimal()">.</button>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="button" class="ux-numpad__key ux-numpad__key--primary ux-numpad__key--wide" style="width: 100%;" @click="submit()">
+          <span x-html="getIcon('check')"></span>
+          Confirmar Pago
+        </button>
+      </div>
+    </div>
+
+    <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxNumpad({
+  allowDecimal: true,
+  currency: '€',
+  quickAmounts: [5, 10, 20, 50, 100]
+})"</span> <span class="attr">class</span>=<span class="string">"ux-numpad"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- Quick Amounts --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-numpad__quick-amounts"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;template</span> <span class="attr">x-for</span>=<span class="string">"amount in quickAmounts"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-numpad__quick-btn"</span> <span class="attr">@click</span>=<span class="string">"setQuickAmount(amount)"</span><span class="tag">&gt;</span>
+        €<span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"amount"</span><span class="tag">&gt;&lt;/span&gt;</span>
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/template&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span></pre>
+  </div>
+
+  <!-- PIN Entry -->
+  <div class="demo-section">
+    <h3>Entrada de PIN</h3>
+    <p>Modo PIN con puntos de mascara y autosubmit cuando se completa.</p>
+
+    <div class="demo-box">
+      <div x-data="uxNumpad({
+        pinMode: true,
+        pinLength: 4,
+        pinMask: true
+      })" class="ux-numpad ux-numpad--pin"
+         @numpad-submit="alert('PIN ingresado: ' + $event.detail.value)">
+
+        <!-- PIN Dots -->
+        <div class="ux-numpad__pin-dots">
+          <template x-for="(filled, index) in getPinDots()" :key="index">
+            <div class="ux-numpad__pin-dot" :class="{ 'ux-numpad__pin-dot--filled': filled }"></div>
+          </template>
+        </div>
+
+        <!-- Grid -->
+        <div class="ux-numpad__grid">
+          <button type="button" class="ux-numpad__key" @click="appendDigit('1')">1</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('2')">2</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('3')">3</button>
+
+          <button type="button" class="ux-numpad__key" @click="appendDigit('4')">4</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('5')">5</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('6')">6</button>
+
+          <button type="button" class="ux-numpad__key" @click="appendDigit('7')">7</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('8')">8</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('9')">9</button>
+
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="clear()">
+            <span x-html="getIcon('clear')"></span>
+          </button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('0')">0</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="backspace()">
+            <span x-html="getIcon('backspace')"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxNumpad({
+  pinMode: true,
+  pinLength: 4,
+  pinMask: true
+})"</span> <span class="attr">class</span>=<span class="string">"ux-numpad ux-numpad--pin"</span>
+   <span class="attr">@numpad-submit</span>=<span class="string">"validatePin($event.detail.value)"</span><span class="tag">&gt;</span>
+
+  <span class="comment">&lt;!-- PIN Dots --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-numpad__pin-dots"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;template</span> <span class="attr">x-for</span>=<span class="string">"(filled, index) in getPinDots()"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-numpad__pin-dot"</span>
+           <span class="attr">:class</span>=<span class="string">"{ 'ux-numpad__pin-dot--filled': filled }"</span><span class="tag">&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;/template&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span></pre>
+  </div>
+
+  <!-- Glass Variant -->
+  <div class="demo-section">
+    <h3>Variante Glass</h3>
+    <p>Numpad con efecto glass morphism estilo iOS 26.</p>
+
+    <div class="demo-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: var(--ux-border-radius-lg);">
+      <div x-data="uxNumpad({ allowDecimal: true })" class="ux-numpad ux-numpad--glass">
+
+        <div class="ux-numpad__display">
+          <span class="ux-numpad__display-value" x-text="displayValue"></span>
+        </div>
+
+        <div class="ux-numpad__grid">
+          <button type="button" class="ux-numpad__key" @click="appendDigit('7')">7</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('8')">8</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('9')">9</button>
+
+          <button type="button" class="ux-numpad__key" @click="appendDigit('4')">4</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('5')">5</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('6')">6</button>
+
+          <button type="button" class="ux-numpad__key" @click="appendDigit('1')">1</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('2')">2</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('3')">3</button>
+
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="clear()">C</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('0')">0</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="backspace()">
+            <span x-html="getIcon('backspace')"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-numpad ux-numpad--glass"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+  </div>
+
+  <!-- Small Size -->
+  <div class="demo-section">
+    <h3>Tamanos</h3>
+    <p>Variantes de tamano: pequeno (.ux-numpad--sm) y grande (.ux-numpad--lg).</p>
+
+    <div class="demo-box">
+      <!-- Small -->
+      <div x-data="uxNumpad()" class="ux-numpad ux-numpad--sm ux-numpad--compact">
+        <div class="ux-numpad__display ux-numpad__display--sm">
+          <span class="ux-numpad__display-value" x-text="displayValue"></span>
+        </div>
+        <div class="ux-numpad__grid">
+          <button type="button" class="ux-numpad__key" @click="appendDigit('7')">7</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('8')">8</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('9')">9</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('4')">4</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('5')">5</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('6')">6</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('1')">1</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('2')">2</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('3')">3</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="clear()">C</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('0')">0</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="backspace()">⌫</button>
+        </div>
+      </div>
+
+      <!-- Large -->
+      <div x-data="uxNumpad()" class="ux-numpad ux-numpad--lg">
+        <div class="ux-numpad__display ux-numpad__display--lg">
+          <span class="ux-numpad__display-value" x-text="displayValue"></span>
+        </div>
+        <div class="ux-numpad__grid">
+          <button type="button" class="ux-numpad__key" @click="appendDigit('7')">7</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('8')">8</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('9')">9</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('4')">4</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('5')">5</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('6')">6</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('1')">1</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('2')">2</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('3')">3</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="clear()">C</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('0')">0</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="backspace()">⌫</button>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block"><span class="comment">&lt;!-- Pequeno --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-numpad ux-numpad--sm ux-numpad--compact"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Grande --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-numpad ux-numpad--lg"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+  </div>
+
+  <!-- HTMX Integration -->
+  <div class="demo-section">
+    <h3>Integracion con HTMX</h3>
+    <p>El numpad funciona perfectamente con HTMX. El valor se almacena en un input hidden que HTMX puede enviar al servidor.</p>
+
+    <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Pago con HTMX</h4>
+    <p>Enviar monto de pago al servidor cuando el usuario confirma.</p>
+
+    <div class="demo-box">
+      <form hx-post="/api/payments"
+            hx-trigger="submit"
+            hx-target="#payment-result"
+            hx-swap="innerHTML"
+            hx-indicator="#payment-spinner"
+            style="width: 320px;">
+        <div x-data="uxNumpad({ allowDecimal: true, decimals: 2 })"
+             class="ux-numpad"
+             @numpad-change="$refs.amountInput.value = $event.detail.numericValue">
+
+          <div class="ux-numpad__display">
+            <span class="ux-numpad__display-currency">$</span>
+            <span class="ux-numpad__display-value" x-text="displayValue"></span>
+          </div>
+
+          <input type="hidden" name="amount" x-ref="amountInput" value="0">
+
+          <div class="ux-numpad__grid">
+            <button type="button" class="ux-numpad__key" @click="appendDigit('7')">7</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('8')">8</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('9')">9</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('4')">4</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('5')">5</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('6')">6</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('1')">1</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('2')">2</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('3')">3</button>
+            <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="appendDecimal()">.</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('0')">0</button>
+            <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="backspace()">⌫</button>
+          </div>
+
+          <button type="submit" class="ux-button ux-color-primary" style="width: 100%; margin-top: var(--ux-space-sm);">
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" id="payment-spinner"></span>
+            Procesar Pago
+          </button>
+        </div>
+      </form>
+      <div id="payment-result" style="padding: var(--ux-space-md);"></div>
+    </div>
+
+    <pre class="code-block"><span class="comment">&lt;!-- Pago con HTMX --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/payments"</span>
+      <span class="attr">hx-trigger</span>=<span class="string">"submit"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#payment-result"</span>
+      <span class="attr">hx-indicator</span>=<span class="string">"#spinner"</span><span class="tag">&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxNumpad({ allowDecimal: true })"</span>
+       <span class="attr">class</span>=<span class="string">"ux-numpad"</span>
+       <span class="attr">@numpad-change</span>=<span class="string">"$refs.amountInput.value = $event.detail.numericValue"</span><span class="tag">&gt;</span>
+
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"hidden"</span> <span class="attr">name</span>=<span class="string">"amount"</span> <span class="attr">x-ref</span>=<span class="string">"amountInput"</span><span class="tag">&gt;</span>
+    <span class="comment">&lt;!-- numpad keys... --&gt;</span>
+
+    <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-primary"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-spinner htmx-indicator"</span> <span class="attr">id</span>=<span class="string">"spinner"</span><span class="tag">&gt;&lt;/span&gt;</span>
+      Procesar Pago
+    <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/form&gt;</span></pre>
+
+    <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">PIN con Validacion HTMX</h4>
+    <p>Validar PIN en el servidor automaticamente cuando se completan los 4 digitos.</p>
+
+    <div class="demo-box">
+      <div x-data="uxNumpad({ pinMode: true, pinLength: 4, pinMask: true })"
+           class="ux-numpad ux-numpad--pin"
+           @numpad-submit="htmx.ajax('POST', '/api/validate-pin', { values: { pin: $event.detail.value }, target: '#pin-result', swap: 'innerHTML' })">
+
+        <div class="ux-numpad__pin-dots">
+          <template x-for="(filled, index) in getPinDots()" :key="index">
+            <div class="ux-numpad__pin-dot" :class="{ 'ux-numpad__pin-dot--filled': filled }"></div>
+          </template>
+        </div>
+
+        <div class="ux-numpad__grid">
+          <button type="button" class="ux-numpad__key" @click="appendDigit('1')">1</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('2')">2</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('3')">3</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('4')">4</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('5')">5</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('6')">6</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('7')">7</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('8')">8</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('9')">9</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="clear()">C</button>
+          <button type="button" class="ux-numpad__key" @click="appendDigit('0')">0</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="backspace()">⌫</button>
+        </div>
+      </div>
+      <div id="pin-result" style="padding: var(--ux-space-md); text-align: center;"></div>
+    </div>
+
+    <pre class="code-block"><span class="comment">&lt;!-- PIN con validacion HTMX automatica --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxNumpad({ pinMode: true, pinLength: 4 })"</span>
+     <span class="attr">class</span>=<span class="string">"ux-numpad ux-numpad--pin"</span>
+     <span class="attr">@numpad-submit</span>=<span class="string">"htmx.ajax('POST', '/api/validate-pin', {
+       values: { pin: $event.detail.value },
+       target: '#pin-result'
+     })"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- PIN dots y teclas --&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"pin-result"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
+
+    <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Cantidad con Actualizacion en Tiempo Real</h4>
+    <p>Actualizar precio total conforme cambia la cantidad.</p>
+
+    <div class="demo-box">
+      <div style="display: flex; gap: var(--ux-space-lg); align-items: flex-start;">
+        <div x-data="uxNumpad({ maxLength: 4 })"
+             class="ux-numpad ux-numpad--sm ux-numpad--compact"
+             hx-trigger="numpad-change from:body"
+             hx-get="/api/calculate-total"
+             hx-vals="js:{quantity: document.querySelector('#qty-input').value, product_id: 123}"
+             hx-target="#total-display"
+             @numpad-change="$refs.qtyInput.value = $event.detail.value; htmx.trigger(document.body, 'numpad-change')">
+
+          <div class="ux-numpad__display ux-numpad__display--sm">
+            <span class="ux-numpad__display-label">Cantidad</span>
+            <span class="ux-numpad__display-value" x-text="displayValue || '0'"></span>
+          </div>
+          <input type="hidden" id="qty-input" x-ref="qtyInput" value="0">
+
+          <div class="ux-numpad__grid">
+            <button type="button" class="ux-numpad__key" @click="appendDigit('7')">7</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('8')">8</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('9')">9</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('4')">4</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('5')">5</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('6')">6</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('1')">1</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('2')">2</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('3')">3</button>
+            <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="clear()">C</button>
+            <button type="button" class="ux-numpad__key" @click="appendDigit('0')">0</button>
+            <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="backspace()">⌫</button>
+          </div>
+        </div>
+
+        <div id="total-display" style="padding: var(--ux-space-lg); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius); min-width: 150px;">
+          <div style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">Total</div>
+          <div style="font-size: var(--ux-font-size-2xl); font-weight: 700; color: var(--ux-text);">$0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="code-block"><span class="comment">&lt;!-- Cantidad con calculo en tiempo real --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxNumpad({ maxLength: 4 })"</span>
+     <span class="attr">class</span>=<span class="string">"ux-numpad ux-numpad--sm"</span>
+     <span class="attr">hx-trigger</span>=<span class="string">"numpad-change from:body"</span>
+     <span class="attr">hx-get</span>=<span class="string">"/api/calculate-total"</span>
+     <span class="attr">hx-vals</span>=<span class="string">"js:{quantity: document.querySelector('#qty').value}"</span>
+     <span class="attr">hx-target</span>=<span class="string">"#total"</span>
+     <span class="attr">@numpad-change</span>=<span class="string">"$refs.qty.value = $event.detail.value;
+                     htmx.trigger(document.body, 'numpad-change')"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"hidden"</span> <span class="attr">id</span>=<span class="string">"qty"</span> <span class="attr">x-ref</span>=<span class="string">"qty"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- numpad --&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"total"</span><span class="tag">&gt;</span>$0.00<span class="tag">&lt;/div&gt;</span></pre>
+
+    <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Cambio POS (Efectivo)</h4>
+    <p>Calcular cambio automaticamente en punto de venta.</p>
+
+    <div class="demo-box">
+      <form class="ux-numpad" style="width: 320px;"
+            x-data="{ cashReceived: 0, total: 25.50 }"
+            hx-post="/api/pos/calculate-change"
+            hx-trigger="input from:#cash-received"
+            hx-target="#change-display"
+            hx-swap="innerHTML">
+
+        <input type="hidden" name="total" :value="total">
+
+        <div style="display: flex; justify-content: space-between; padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius); margin-bottom: var(--ux-space-md);">
+          <span>Total a pagar:</span>
+          <strong x-text="'$' + total.toFixed(2)"></strong>
+        </div>
+
+        <div class="ux-numpad__display">
+          <span class="ux-numpad__display-label">Efectivo recibido</span>
+          <span class="ux-numpad__display-currency">$</span>
+          <input type="text"
+                 id="cash-received"
+                 name="cash_received"
+                 class="ux-numpad__display-value"
+                 x-model="cashReceived"
+                 readonly
+                 style="background: transparent; border: none; font: inherit; color: inherit; text-align: right; width: 100%;">
+        </div>
+
+        <div class="ux-numpad__quick-amounts">
+          <button type="button" class="ux-numpad__quick-btn" @click="cashReceived = 30">$30</button>
+          <button type="button" class="ux-numpad__quick-btn" @click="cashReceived = 50">$50</button>
+          <button type="button" class="ux-numpad__quick-btn" @click="cashReceived = 100">$100</button>
+        </div>
+
+        <div class="ux-numpad__grid">
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived) + '7'">7</button>
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived) + '8'">8</button>
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived) + '9'">9</button>
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived) + '4'">4</button>
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived) + '5'">5</button>
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived) + '6'">6</button>
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived) + '1'">1</button>
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived) + '2'">2</button>
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived) + '3'">3</button>
+          <button type="button" class="ux-numpad__key ux-numpad__key--danger" @click="cashReceived = 0">C</button>
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived) + '0'">0</button>
+          <button type="button" class="ux-numpad__key" @click="cashReceived = String(cashReceived).slice(0, -1) || 0">⌫</button>
+        </div>
+
+        <div id="change-display" style="text-align: center; padding: var(--ux-space-md); font-size: var(--ux-font-size-xl); font-weight: 700;">
+          <template x-if="Number(cashReceived) >= total">
+            <span style="color: var(--ux-success);">Cambio: $<span x-text="(Number(cashReceived) - total).toFixed(2)"></span></span>
+          </template>
+          <template x-if="Number(cashReceived) < total && Number(cashReceived) > 0">
+            <span style="color: var(--ux-danger);">Falta: $<span x-text="(total - Number(cashReceived)).toFixed(2)"></span></span>
+          </template>
+        </div>
+
+        <button type="submit"
+                class="ux-button ux-color-success"
+                style="width: 100%;"
+                :disabled="Number(cashReceived) < total"
+                hx-post="/api/pos/complete-sale"
+                hx-target="#sale-result">
+          Completar Venta
+        </button>
+      </form>
+      <div id="sale-result"></div>
+    </div>
+
+    <pre class="code-block"><span class="comment">&lt;!-- POS con calculo de cambio --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">x-data</span>=<span class="string">"{ cashReceived: 0, total: 25.50 }"</span>
+      <span class="attr">hx-post</span>=<span class="string">"/api/pos/calculate-change"</span>
+      <span class="attr">hx-trigger</span>=<span class="string">"input from:#cash-received"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#change-display"</span><span class="tag">&gt;</span>
+
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"hidden"</span> <span class="attr">name</span>=<span class="string">"total"</span> <span class="attr">:value</span>=<span class="string">"total"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">id</span>=<span class="string">"cash-received"</span> <span class="attr">name</span>=<span class="string">"cash_received"</span> <span class="attr">x-model</span>=<span class="string">"cashReceived"</span><span class="tag">&gt;</span>
+
+  <span class="comment">&lt;!-- Quick amounts --&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"button"</span> <span class="attr">@click</span>=<span class="string">"cashReceived = 50"</span><span class="tag">&gt;</span>$50<span class="tag">&lt;/button&gt;</span>
+
+  <span class="comment">&lt;!-- Numpad keys --&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"cashReceived = String(cashReceived) + '5'"</span><span class="tag">&gt;</span>5<span class="tag">&lt;/button&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"change-display"</span><span class="tag">&gt;</span>
+    Cambio: $<span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"(cashReceived - total).toFixed(2)"</span><span class="tag">&gt;&lt;/span&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span>
+          <span class="attr">hx-post</span>=<span class="string">"/api/pos/complete-sale"</span>
+          <span class="attr">:disabled</span>=<span class="string">"cashReceived &lt; total"</span><span class="tag">&gt;</span>
+    Completar Venta
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span></pre>
+  </div>
+
+  <!-- API Reference -->
+  <div class="demo-section">
+    <h3>Componente Alpine.js</h3>
+    <div style="background: var(--ux-surface); padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg);">
+      <pre class="code-block">// Configuracion del componente uxNumpad
+uxNumpad({
+  // Valor inicial
+  initialValue: '',
+
+  // Limites
+  maxLength: 12,          // Maximo de digitos
+  decimals: 2,            // Decimales permitidos
+  allowNegative: false,   // Permitir negativos
+  allowDecimal: true,     // Permitir decimales
+
+  // Moneda
+  currency: '',           // Simbolo de moneda ('$', '€')
+  currencyPosition: 'prefix', // 'prefix' o 'suffix'
+
+  // Modo PIN
+  pinMode: false,         // Activar modo PIN
+  pinLength: 4,           // Longitud del PIN
+  pinMask: true,          // Ocultar digitos con puntos
+
+  // Montos rapidos (para POS)
+  quickAmounts: [],       // [5, 10, 20, 50, 100]
+
+  // Labels
+  labels: {
+    clear: 'C',
+    backspace: '⌫',
+    enter: 'Enter',
+    decimal: '.'
+  }
+})
+
+// Propiedades reactivas:
+value           // Valor actual como string
+displayValue    // Valor formateado para display
+hasDecimal      // Si tiene punto decimal
+isNegative      // Si es negativo
+
+// Metodos:
+appendDigit(digit)    // Agregar digito (0-9)
+appendDecimal()       // Agregar punto decimal
+backspace()           // Borrar ultimo caracter
+clear()               // Limpiar todo
+toggleNegative()      // Cambiar signo +/-
+setQuickAmount(n)     // Establecer monto rapido
+getNumericValue()     // Obtener valor numerico
+submit()              // Emitir evento submit
+getIcon(name)         // Obtener icono SVG
+getPinDots()          // Array de estados de PIN dots
+
+// Eventos emitidos:
+@numpad-change        // { value, numericValue, displayValue }
+@numpad-submit        // { value, numericValue, displayValue, isNegative }
+
+// Soporte de teclado (automatico):
+0-9       Agregar digito
+. ,       Agregar decimal
+Backspace Borrar ultimo
+Delete    Limpiar todo
+Enter     Submit
+-         Toggle negativo</pre>
+    </div>
+  </div>
+
+  <!-- CSS Classes -->
+  <div class="demo-section">
+    <h3>Clases CSS</h3>
+    <div style="background: var(--ux-surface); padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg);">
+      <pre class="code-block">/* Contenedor */
+.ux-numpad                    // Contenedor principal
+.ux-numpad--sm                // Tamano pequeno
+.ux-numpad--lg                // Tamano grande
+.ux-numpad--compact           // Padding reducido
+.ux-numpad--full-width        // Ancho completo
+.ux-numpad--glass             // Variante glass
+.ux-numpad--pin               // Modo PIN
+.ux-numpad--calculator        // Layout calculadora
+
+/* Display */
+.ux-numpad__display           // Display de valor
+.ux-numpad__display--sm       // Display pequeno
+.ux-numpad__display--lg       // Display grande
+.ux-numpad__display-value     // Valor
+.ux-numpad__display-currency  // Simbolo moneda
+.ux-numpad__display-label     // Etiqueta
+
+/* Grid */
+.ux-numpad__grid              // Grid de teclas
+.ux-numpad__grid--4cols       // Grid de 4 columnas
+
+/* Teclas */
+.ux-numpad__key               // Tecla base
+.ux-numpad__key--wide         // Tecla doble ancho
+.ux-numpad__key--tall         // Tecla doble alto
+.ux-numpad__key--action       // Tecla de accion
+.ux-numpad__key--primary      // Tecla primaria
+.ux-numpad__key--success      // Tecla success
+.ux-numpad__key--danger       // Tecla danger
+.ux-numpad__key--disabled     // Tecla deshabilitada
+
+/* Montos rapidos */
+.ux-numpad__quick-amounts     // Contenedor montos
+.ux-numpad__quick-btn         // Boton de monto
+
+/* PIN */
+.ux-numpad__pin-dots          // Contenedor dots
+.ux-numpad__pin-dot           // Dot individual
+.ux-numpad__pin-dot--filled   // Dot relleno</pre>
+    </div>
+  </div>
+
+</body>
+</html>

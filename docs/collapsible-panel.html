@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collapsible Panel - UX Library</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    body {
+      padding: 2rem;
+      background: var(--ux-surface);
+      color: var(--ux-text);
+      font-family: var(--ux-font-family);
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+    .demo-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .demo-item {
+      flex: 1;
+      min-width: 300px;
+      max-width: 400px;
+    }
+    .code-block {
+      background: var(--ux-gray-100);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+    }
+    .ux-dark .code-block {
+      background: var(--ux-gray-800);
+    }
+    .glass-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 2rem;
+      border-radius: 16px;
+    }
+  </style>
+</head>
+<body class="ux-app">
+  <header style="margin-bottom: 2rem;">
+    <h1>Collapsible Panel</h1>
+    <p style="color: var(--ux-text-secondary);">Expandable/collapsible panel with header and content. Great for organizing content in sections, FAQs, and settings.</p>
+  </header>
+
+  <!-- Basic Panel -->
+  <section class="demo-section">
+    <h2>Basic Panel</h2>
+    <div class="demo-grid">
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()" aria-expanded="isOpen">
+            <div class="ux-panel__header-content">
+              <h3 class="ux-panel__title">Panel Title</h3>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>This is the panel content. It can contain any HTML elements, forms, tables, or other components.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-item" x-data="uxPanel()">
+        <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()" aria-expanded="isOpen">
+            <div class="ux-panel__header-content">
+              <h3 class="ux-panel__title">Collapsed by Default</h3>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>Click the header to expand this panel.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+&lt;div x-data="uxPanel({ open: true })"&gt;
+  &lt;div class="ux-panel" :class="{ 'ux-panel--open': isOpen }"&gt;
+    &lt;button class="ux-panel__header" @click="toggle()"&gt;
+      &lt;div class="ux-panel__header-content"&gt;
+        &lt;h3 class="ux-panel__title"&gt;Panel Title&lt;/h3&gt;
+      &lt;/div&gt;
+      &lt;svg class="ux-panel__toggle"&gt;...&lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;div class="ux-panel__body"&gt;
+      &lt;div class="ux-panel__content"&gt;
+        &lt;div class="ux-panel__content-inner"&gt;
+          Content here
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+    </div>
+  </section>
+
+  <!-- With Icon and Subtitle -->
+  <section class="demo-section">
+    <h2>With Icon and Subtitle</h2>
+    <div class="demo-grid">
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()">
+            <div class="ux-panel__header-content">
+              <svg class="ux-panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+              </svg>
+              <div>
+                <h3 class="ux-panel__title">Information</h3>
+                <p class="ux-panel__subtitle">Click to expand details</p>
+              </div>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>Panel with an icon and subtitle in the header for additional context.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()">
+            <div class="ux-panel__header-content">
+              <svg class="ux-panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <div>
+                <h3 class="ux-panel__title">Security Settings</h3>
+                <p class="ux-panel__subtitle">Manage your security preferences</p>
+              </div>
+            </div>
+            <div class="ux-panel__actions">
+              <span class="ux-badge ux-color-success--soft" style="font-size: 0.75rem;">Active</span>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>Panel with actions (badge) in the header area.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sizes -->
+  <section class="demo-section">
+    <h2>Sizes</h2>
+    <div class="demo-grid">
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel ux-panel--sm" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()">
+            <div class="ux-panel__header-content">
+              <h3 class="ux-panel__title">Small Panel</h3>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>Compact panel for tight spaces.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()">
+            <div class="ux-panel__header-content">
+              <h3 class="ux-panel__title">Default Panel</h3>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>Standard panel size.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel ux-panel--lg" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()">
+            <div class="ux-panel__header-content">
+              <h3 class="ux-panel__title">Large Panel</h3>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>Larger panel for prominent content.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+&lt;div class="ux-panel ux-panel--sm"&gt;...&lt;/div&gt;
+&lt;div class="ux-panel"&gt;...&lt;/div&gt;
+&lt;div class="ux-panel ux-panel--lg"&gt;...&lt;/div&gt;
+    </div>
+  </section>
+
+  <!-- Style Variants -->
+  <section class="demo-section">
+    <h2>Style Variants</h2>
+    <div class="demo-grid">
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel ux-panel--outline" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()">
+            <div class="ux-panel__header-content">
+              <h3 class="ux-panel__title">Outline</h3>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>Outline variant with transparent backgrounds.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel ux-panel--filled" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()">
+            <div class="ux-panel__header-content">
+              <h3 class="ux-panel__title">Filled</h3>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>Filled variant without border.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel ux-panel--flush" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()">
+            <div class="ux-panel__header-content">
+              <h3 class="ux-panel__title">Flush</h3>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>Flush variant with minimal header styling.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Color Variants -->
+  <section class="demo-section">
+    <h2>Color Variants</h2>
+    <div class="demo-grid">
+      <div class="demo-row">
+        <div class="demo-item" x-data="uxPanel({ open: true })">
+          <div class="ux-panel ux-panel--primary" :class="{ 'ux-panel--open': isOpen }">
+            <button class="ux-panel__header" @click="toggle()">
+              <div class="ux-panel__header-content">
+                <h3 class="ux-panel__title">Primary Panel</h3>
+              </div>
+              <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6,9 12,15 18,9"></polyline>
+              </svg>
+            </button>
+            <div class="ux-panel__body">
+              <div class="ux-panel__content">
+                <div class="ux-panel__content-inner">
+                  <p>Primary colored panel header.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-item" x-data="uxPanel({ open: true })">
+          <div class="ux-panel ux-panel--success" :class="{ 'ux-panel--open': isOpen }">
+            <button class="ux-panel__header" @click="toggle()">
+              <div class="ux-panel__header-content">
+                <h3 class="ux-panel__title">Success Panel</h3>
+              </div>
+              <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6,9 12,15 18,9"></polyline>
+              </svg>
+            </button>
+            <div class="ux-panel__body">
+              <div class="ux-panel__content">
+                <div class="ux-panel__content-inner">
+                  <p>Success colored panel header.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-row">
+        <div class="demo-item" x-data="uxPanel({ open: true })">
+          <div class="ux-panel ux-panel--warning" :class="{ 'ux-panel--open': isOpen }">
+            <button class="ux-panel__header" @click="toggle()">
+              <div class="ux-panel__header-content">
+                <h3 class="ux-panel__title">Warning Panel</h3>
+              </div>
+              <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6,9 12,15 18,9"></polyline>
+              </svg>
+            </button>
+            <div class="ux-panel__body">
+              <div class="ux-panel__content">
+                <div class="ux-panel__content-inner">
+                  <p>Warning colored panel header.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-item" x-data="uxPanel({ open: true })">
+          <div class="ux-panel ux-panel--danger" :class="{ 'ux-panel--open': isOpen }">
+            <button class="ux-panel__header" @click="toggle()">
+              <div class="ux-panel__header-content">
+                <h3 class="ux-panel__title">Danger Panel</h3>
+              </div>
+              <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6,9 12,15 18,9"></polyline>
+              </svg>
+            </button>
+            <div class="ux-panel__body">
+              <div class="ux-panel__content">
+                <div class="ux-panel__content-inner">
+                  <p>Danger colored panel header.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+&lt;div class="ux-panel ux-panel--primary"&gt;...&lt;/div&gt;
+&lt;div class="ux-panel ux-panel--success"&gt;...&lt;/div&gt;
+&lt;div class="ux-panel ux-panel--warning"&gt;...&lt;/div&gt;
+&lt;div class="ux-panel ux-panel--danger"&gt;...&lt;/div&gt;
+    </div>
+  </section>
+
+  <!-- Panel with Footer -->
+  <section class="demo-section">
+    <h2>With Footer</h2>
+    <div class="demo-grid">
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()">
+            <div class="ux-panel__header-content">
+              <h3 class="ux-panel__title">Panel with Footer</h3>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p>Content with a footer containing action buttons.</p>
+              </div>
+            </div>
+          </div>
+          <div class="ux-panel__footer">
+            <button class="ux-button ux-button--sm ux-button--outline">Cancel</button>
+            <button class="ux-button ux-button--sm ux-color-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel Group -->
+  <section class="demo-section">
+    <h2>Panel Group</h2>
+    <div class="demo-grid">
+      <div class="demo-item">
+        <div class="ux-panel-group">
+          <div x-data="uxPanel({ open: true })">
+            <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+              <button class="ux-panel__header" @click="toggle()">
+                <div class="ux-panel__header-content">
+                  <h3 class="ux-panel__title">First Panel</h3>
+                </div>
+                <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+              </button>
+              <div class="ux-panel__body">
+                <div class="ux-panel__content">
+                  <div class="ux-panel__content-inner">
+                    <p>Content of the first panel.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div x-data="uxPanel()">
+            <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+              <button class="ux-panel__header" @click="toggle()">
+                <div class="ux-panel__header-content">
+                  <h3 class="ux-panel__title">Second Panel</h3>
+                </div>
+                <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+              </button>
+              <div class="ux-panel__body">
+                <div class="ux-panel__content">
+                  <div class="ux-panel__content-inner">
+                    <p>Content of the second panel.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div x-data="uxPanel()">
+            <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+              <button class="ux-panel__header" @click="toggle()">
+                <div class="ux-panel__header-content">
+                  <h3 class="ux-panel__title">Third Panel</h3>
+                </div>
+                <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+              </button>
+              <div class="ux-panel__body">
+                <div class="ux-panel__content">
+                  <div class="ux-panel__content-inner">
+                    <p>Content of the third panel.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+&lt;div class="ux-panel-group"&gt;
+  &lt;div x-data="uxPanel({ open: true })"&gt;...&lt;/div&gt;
+  &lt;div x-data="uxPanel()"&gt;...&lt;/div&gt;
+  &lt;div x-data="uxPanel()"&gt;...&lt;/div&gt;
+&lt;/div&gt;
+    </div>
+  </section>
+
+  <!-- Accordion Style -->
+  <section class="demo-section">
+    <h2>Accordion Style (Connected)</h2>
+    <div class="demo-grid">
+      <div class="demo-item">
+        <div class="ux-panel-group ux-panel-group--accordion" x-data="uxPanelGroup({ accordion: true })">
+          <div x-data="uxPanel({ open: true })">
+            <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+              <button class="ux-panel__header" @click="toggle()">
+                <div class="ux-panel__header-content">
+                  <h3 class="ux-panel__title">What is UX Library?</h3>
+                </div>
+                <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+              </button>
+              <div class="ux-panel__body">
+                <div class="ux-panel__content">
+                  <div class="ux-panel__content-inner">
+                    <p>UX Library is a zero-build, touch-first UI component library with iOS-style design.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div x-data="uxPanel()">
+            <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+              <button class="ux-panel__header" @click="toggle()">
+                <div class="ux-panel__header-content">
+                  <h3 class="ux-panel__title">How do I install it?</h3>
+                </div>
+                <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+              </button>
+              <div class="ux-panel__body">
+                <div class="ux-panel__content">
+                  <div class="ux-panel__content-inner">
+                    <p>Simply include the CSS and JS files. No build step required!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div x-data="uxPanel()">
+            <div class="ux-panel" :class="{ 'ux-panel--open': isOpen }">
+              <button class="ux-panel__header" @click="toggle()">
+                <div class="ux-panel__header-content">
+                  <h3 class="ux-panel__title">Is it mobile-friendly?</h3>
+                </div>
+                <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+              </button>
+              <div class="ux-panel__body">
+                <div class="ux-panel__content">
+                  <div class="ux-panel__content-inner">
+                    <p>Yes! It's built mobile-first with touch-friendly interactions.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+&lt;div class="ux-panel-group ux-panel-group--accordion" x-data="uxPanelGroup({ accordion: true })"&gt;
+  &lt;!-- Only one panel open at a time --&gt;
+  ...
+&lt;/div&gt;
+    </div>
+  </section>
+
+  <!-- Glass Variant -->
+  <section class="demo-section">
+    <h2>Glass Variant</h2>
+    <div class="glass-bg">
+      <div class="demo-item" x-data="uxPanel({ open: true })">
+        <div class="ux-panel ux-panel--glass" :class="{ 'ux-panel--open': isOpen }">
+          <button class="ux-panel__header" @click="toggle()">
+            <div class="ux-panel__header-content">
+              <h3 class="ux-panel__title">Glass Panel</h3>
+            </div>
+            <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <div class="ux-panel__body">
+            <div class="ux-panel__content">
+              <div class="ux-panel__content-inner">
+                <p style="color: white;">Beautiful glass morphism effect for modern interfaces.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- States -->
+  <section class="demo-section">
+    <h2>States</h2>
+    <div class="demo-grid">
+      <div class="demo-row">
+        <div class="demo-item" x-data="uxPanel({ disabled: true })">
+          <div class="ux-panel ux-panel--disabled" :class="{ 'ux-panel--open': isOpen }">
+            <button class="ux-panel__header" @click="toggle()">
+              <div class="ux-panel__header-content">
+                <h3 class="ux-panel__title">Disabled Panel</h3>
+              </div>
+              <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6,9 12,15 18,9"></polyline>
+              </svg>
+            </button>
+            <div class="ux-panel__body">
+              <div class="ux-panel__content">
+                <div class="ux-panel__content-inner">
+                  <p>This panel cannot be toggled.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-item" x-data="uxPanel({ open: true })">
+          <div class="ux-panel ux-panel--loading" :class="{ 'ux-panel--open': isOpen }">
+            <button class="ux-panel__header" @click="toggle()">
+              <div class="ux-panel__header-content">
+                <h3 class="ux-panel__title">Loading Panel</h3>
+              </div>
+              <svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6,9 12,15 18,9"></polyline>
+              </svg>
+            </button>
+            <div class="ux-panel__body">
+              <div class="ux-panel__content">
+                <div class="ux-panel__content-inner">
+                  <!-- Loading spinner appears automatically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- API Reference -->
+  <section class="demo-section">
+    <h2>API Reference</h2>
+    <div class="ux-card">
+      <div class="ux-card__content">
+        <h3>CSS Classes</h3>
+        <table class="ux-table" style="width: 100%;">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>.ux-panel</code></td><td>Base panel container</td></tr>
+            <tr><td><code>.ux-panel--open</code></td><td>Open state (shows content)</td></tr>
+            <tr><td><code>.ux-panel--sm</code></td><td>Small size</td></tr>
+            <tr><td><code>.ux-panel--lg</code></td><td>Large size</td></tr>
+            <tr><td><code>.ux-panel--outline</code></td><td>Outline variant</td></tr>
+            <tr><td><code>.ux-panel--filled</code></td><td>Filled variant (no border)</td></tr>
+            <tr><td><code>.ux-panel--flush</code></td><td>Flush variant</td></tr>
+            <tr><td><code>.ux-panel--borderless</code></td><td>No border or radius</td></tr>
+            <tr><td><code>.ux-panel--primary</code></td><td>Primary color header</td></tr>
+            <tr><td><code>.ux-panel--success</code></td><td>Success color header</td></tr>
+            <tr><td><code>.ux-panel--warning</code></td><td>Warning color header</td></tr>
+            <tr><td><code>.ux-panel--danger</code></td><td>Danger color header</td></tr>
+            <tr><td><code>.ux-panel--glass</code></td><td>Glass morphism effect</td></tr>
+            <tr><td><code>.ux-panel--disabled</code></td><td>Disabled state</td></tr>
+            <tr><td><code>.ux-panel--loading</code></td><td>Loading state</td></tr>
+            <tr><td><code>.ux-panel-group</code></td><td>Group container</td></tr>
+            <tr><td><code>.ux-panel-group--accordion</code></td><td>Connected panels (accordion)</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top: 1.5rem;">Alpine.js Component</h3>
+        <table class="ux-table" style="width: 100%;">
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>open</code></td><td>boolean</td><td>false</td><td>Initial open state</td></tr>
+            <tr><td><code>disabled</code></td><td>boolean</td><td>false</td><td>Disable toggling</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top: 1.5rem;">Methods</h3>
+        <table class="ux-table" style="width: 100%;">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>toggle()</code></td><td>Toggle panel open/close</td></tr>
+            <tr><td><code>open()</code></td><td>Open the panel</td></tr>
+            <tr><td><code>close()</code></td><td>Close the panel</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top: 1.5rem;">Events</h3>
+        <table class="ux-table" style="width: 100%;">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Detail</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>panel:open</code></td><td>-</td><td>Panel was opened</td></tr>
+            <tr><td><code>panel:close</code></td><td>-</td><td>Panel was closed</td></tr>
+            <tr><td><code>panel:toggle</code></td><td>{ open: boolean }</td><td>Panel state changed</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-badge.js"></script>
+  <script src="../components/ux-card.js"></script>
+  <script src="../components/ux-panel.js"></script>
+</body>
+</html>

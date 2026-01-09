@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Split Pane Right - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-split-pane-right.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section > h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section > p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); margin-bottom: var(--ux-space-md); overflow: hidden; height: 400px; }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .side-content { padding: var(--ux-space-lg); }
+    .main-content { padding: var(--ux-space-lg); display: flex; flex-direction: column; gap: var(--ux-space-md); }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+    <h2 style="margin-bottom: var(--ux-space-lg);">Split Pane Right</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xl);">Panel lateral derecho con toggle. En desktop el panel es visible y puede colapsarse. En mobile aparece como overlay desde la derecha.</p>
+
+    <section class="demo-section">
+      <h3>Comportamiento</h3>
+      <ul style="color: var(--ux-text-secondary); margin-left: var(--ux-space-lg); margin-bottom: var(--ux-space-lg);">
+        <li><strong>Desktop (>= 992px):</strong> Panel visible, puede ocultarse con toggle</li>
+        <li><strong>Mobile (&lt; 992px):</strong> Panel como overlay desde la derecha con backdrop</li>
+      </ul>
+
+      <div class="demo-box">
+        <div class="ux-split-pane-right"
+             x-data="uxSplitPaneRight({ collapsed: false })"
+             :class="containerClasses">
+
+          <div class="ux-split-pane-right__backdrop" @click="close()"></div>
+
+          <div class="ux-split-pane-right__main">
+            <nav class="ux-navbar ux-navbar--bordered">
+              <div class="ux-navbar__start">
+                <span class="ux-navbar__title">Main Content</span>
+              </div>
+              <div class="ux-navbar__end">
+                <button class="ux-split-pane-right__toggle" @click="toggle()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="15" y1="3" x2="15" y2="21"/>
+                  </svg>
+                </button>
+              </div>
+            </nav>
+            <div class="main-content">
+              <p>Este es el contenido principal. El panel lateral puede mostrarse u ocultarse con el boton de la barra de navegacion.</p>
+              <p style="color: var(--ux-text-secondary);">En pantallas pequeñas, el panel aparece como overlay. En desktop, el espacio se redistribuye.</p>
+              <div style="display: flex; gap: var(--ux-space-sm);">
+                <button class="ux-button ux-color-primary" @click="open()">Open Panel</button>
+                <button class="ux-button" @click="hide()">Hide Panel (Desktop)</button>
+                <button class="ux-button" @click="show()">Show Panel (Desktop)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ux-split-pane-right__side">
+            <nav class="ux-navbar ux-navbar--bordered">
+              <div class="ux-navbar__start">
+                <span class="ux-navbar__title">Details</span>
+              </div>
+              <div class="ux-navbar__end">
+                <button class="ux-split-pane-right__toggle" @click="close()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+            </nav>
+            <div class="side-content">
+              <h4 style="margin-bottom: var(--ux-space-md);">Panel Content</h4>
+              <p style="color: var(--ux-text-secondary);">Este es el contenido del panel lateral. Puede contener formularios, detalles, o cualquier informacion secundaria.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-split-pane-right"</span>
+     <span class="attr">x-data</span>=<span class="string">"uxSplitPaneRight()"</span>
+     <span class="attr">:class</span>=<span class="string">"containerClasses"</span><span class="tag">&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-split-pane-right__backdrop"</span> <span class="attr">@click</span>=<span class="string">"close()"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-split-pane-right__main"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"toggle()"</span><span class="tag">&gt;</span>Toggle<span class="tag">&lt;/button&gt;</span>
+    ...main content...
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-split-pane-right__side"</span><span class="tag">&gt;</span>
+    ...panel content...
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Glass Variant</h3>
+      <div class="demo-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="ux-split-pane-right"
+             x-data="uxSplitPaneRight({ collapsed: false })"
+             :class="containerClasses">
+
+          <div class="ux-split-pane-right__backdrop" @click="close()"></div>
+
+          <div class="ux-split-pane-right__main">
+            <div class="main-content" style="color: white;">
+              <h4>Glass Side Panel</h4>
+              <p>El panel lateral puede tener efecto glass.</p>
+              <button class="ux-button" @click="toggle()">Toggle Panel</button>
+            </div>
+          </div>
+
+          <div class="ux-split-pane-right__side ux-split-pane-right__side--glass">
+            <div class="side-content">
+              <h4 style="margin-bottom: var(--ux-space-md);">Glass Panel</h4>
+              <p style="color: var(--ux-text-secondary);">Con efecto iOS 26 Liquid Glass y backdrop blur.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Custom Width</h3>
+      <p>Usa CSS custom properties para ajustar el ancho.</p>
+      <div class="demo-box">
+        <div class="ux-split-pane-right"
+             style="--ux-split-pane-right-width: 400px;"
+             x-data="uxSplitPaneRight({ collapsed: false })"
+             :class="containerClasses">
+
+          <div class="ux-split-pane-right__backdrop" @click="close()"></div>
+
+          <div class="ux-split-pane-right__main">
+            <div class="main-content">
+              <p>Panel con ancho personalizado de 400px.</p>
+              <button class="ux-button ux-color-primary" @click="toggle()">Toggle</button>
+            </div>
+          </div>
+
+          <div class="ux-split-pane-right__side">
+            <div class="side-content">
+              <h4 style="margin-bottom: var(--ux-space-md);">Wide Panel (400px)</h4>
+              <p style="color: var(--ux-text-secondary);">Este panel tiene un ancho mayor al default (320px).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-split-pane-right"</span>
+     <span class="attr">style</span>=<span class="string">"--ux-split-pane-right-width: 400px;"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>API</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Metodo/Prop</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody style="font-size: var(--ux-font-size-sm);">
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>toggle()</code></td>
+            <td style="padding: var(--ux-space-sm);">Toggle panel (desktop: collapse, mobile: overlay)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>open()</code></td>
+            <td style="padding: var(--ux-space-sm);">Abrir overlay (mobile)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>close()</code></td>
+            <td style="padding: var(--ux-space-sm);">Cerrar overlay (mobile)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>show()</code></td>
+            <td style="padding: var(--ux-space-sm);">Mostrar panel (desktop)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>hide()</code></td>
+            <td style="padding: var(--ux-space-sm);">Ocultar panel (desktop)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>isOpen</code></td>
+            <td style="padding: var(--ux-space-sm);">Estado del overlay (mobile)</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>isCollapsed</code></td>
+            <td style="padding: var(--ux-space-sm);">Estado colapsado (desktop)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="demo-section">
+      <h3>Events</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Evento</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody style="font-size: var(--ux-font-size-sm);">
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>splitpaneright:open</code></td>
+            <td style="padding: var(--ux-space-sm);">Overlay abierto</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>splitpaneright:close</code></td>
+            <td style="padding: var(--ux-space-sm);">Overlay cerrado</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>splitpaneright:toggle</code></td>
+            <td style="padding: var(--ux-space-sm);">Toggle ejecutado (incluye collapsed state)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>splitpaneright:show</code></td>
+            <td style="padding: var(--ux-space-sm);">Panel mostrado (desktop)</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>splitpaneright:hide</code></td>
+            <td style="padding: var(--ux-space-sm);">Panel ocultado (desktop)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Calculator - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-calculator.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-lg); justify-content: center; }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+    <h2 style="margin-bottom: var(--ux-space-lg);">Calculator</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xl);">Calculadora con estilo iOS, ideal para sistemas POS y aplicaciones financieras.</p>
+
+    <section class="demo-section">
+      <h3>Calculadora Completa</h3>
+      <p>Calculadora interactiva con soporte de teclado.</p>
+      <div class="demo-box">
+        <div class="ux-calculator" x-data="uxCalculator()" @calculator-result="console.log('Result:', $event.detail)">
+          <div class="ux-calculator__display">
+            <div class="ux-calculator__expression" x-text="expression">&nbsp;</div>
+            <div class="ux-calculator__result" :class="{ 'ux-calculator__result--small': needsSmallFont(), 'ux-calculator__result--error': hasError }" x-text="display">0</div>
+          </div>
+          <div class="ux-calculator__keypad">
+            <!-- Row 1: Functions -->
+            <button class="ux-calculator__btn ux-calculator__btn--function" @click="clear()">AC</button>
+            <button class="ux-calculator__btn ux-calculator__btn--function" @click="toggleSign()">+/-</button>
+            <button class="ux-calculator__btn ux-calculator__btn--function" @click="inputPercent()">%</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" :class="{ 'is-active': isOperatorActive('/') }" @click="inputOperator('/')">÷</button>
+            <!-- Row 2 -->
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('7')">7</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('8')">8</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('9')">9</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" :class="{ 'is-active': isOperatorActive('*') }" @click="inputOperator('*')">×</button>
+            <!-- Row 3 -->
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('4')">4</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('5')">5</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('6')">6</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" :class="{ 'is-active': isOperatorActive('-') }" @click="inputOperator('-')">−</button>
+            <!-- Row 4 -->
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('1')">1</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('2')">2</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('3')">3</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" :class="{ 'is-active': isOperatorActive('+') }" @click="inputOperator('+')">+</button>
+            <!-- Row 5 -->
+            <button class="ux-calculator__btn ux-calculator__btn--number ux-calculator__btn--wide" @click="inputDigit('0')">0</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDecimal()">.</button>
+            <button class="ux-calculator__btn ux-calculator__btn--equals" @click="calculate()">=</button>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calculator"</span> <span class="attr">x-data</span>=<span class="string">"uxCalculator()"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calculator__display"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calculator__expression"</span> <span class="attr">x-text</span>=<span class="string">"expression"</span><span class="tag">&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calculator__result"</span> <span class="attr">x-text</span>=<span class="string">"display"</span><span class="tag">&gt;</span>0<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calculator__keypad"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-calculator__btn ux-calculator__btn--function"</span> <span class="attr">@click</span>=<span class="string">"clear()"</span><span class="tag">&gt;</span>AC<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-calculator__btn ux-calculator__btn--number"</span> <span class="attr">@click</span>=<span class="string">"inputDigit('7')"</span><span class="tag">&gt;</span>7<span class="tag">&lt;/button&gt;</span>
+    ...
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Compact Variant</h3>
+      <div class="demo-box">
+        <div class="ux-calculator ux-calculator--compact" x-data="uxCalculator()">
+          <div class="ux-calculator__display">
+            <div class="ux-calculator__expression" x-text="expression">&nbsp;</div>
+            <div class="ux-calculator__result" :class="{ 'ux-calculator__result--small': needsSmallFont() }" x-text="display">0</div>
+          </div>
+          <div class="ux-calculator__keypad">
+            <button class="ux-calculator__btn ux-calculator__btn--function" @click="clear()">AC</button>
+            <button class="ux-calculator__btn ux-calculator__btn--function" @click="toggleSign()">+/-</button>
+            <button class="ux-calculator__btn ux-calculator__btn--function" @click="inputPercent()">%</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" @click="inputOperator('/')">÷</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('7')">7</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('8')">8</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('9')">9</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" @click="inputOperator('*')">×</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('4')">4</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('5')">5</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('6')">6</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" @click="inputOperator('-')">−</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('1')">1</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('2')">2</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('3')">3</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" @click="inputOperator('+')">+</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number ux-calculator__btn--wide" @click="inputDigit('0')">0</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDecimal()">.</button>
+            <button class="ux-calculator__btn ux-calculator__btn--equals" @click="calculate()">=</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Glass Variant</h3>
+      <div class="demo-box" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: var(--ux-space-xl);">
+        <div class="ux-calculator ux-calculator--glass" x-data="uxCalculator()">
+          <div class="ux-calculator__display">
+            <div class="ux-calculator__expression" x-text="expression">&nbsp;</div>
+            <div class="ux-calculator__result" :class="{ 'ux-calculator__result--small': needsSmallFont() }" x-text="display">0</div>
+          </div>
+          <div class="ux-calculator__keypad">
+            <button class="ux-calculator__btn ux-calculator__btn--function" @click="clear()">AC</button>
+            <button class="ux-calculator__btn ux-calculator__btn--function" @click="toggleSign()">+/-</button>
+            <button class="ux-calculator__btn ux-calculator__btn--function" @click="inputPercent()">%</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" @click="inputOperator('/')">÷</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('7')">7</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('8')">8</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('9')">9</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" @click="inputOperator('*')">×</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('4')">4</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('5')">5</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('6')">6</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" @click="inputOperator('-')">−</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('1')">1</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('2')">2</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('3')">3</button>
+            <button class="ux-calculator__btn ux-calculator__btn--operator" @click="inputOperator('+')">+</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number ux-calculator__btn--wide" @click="inputDigit('0')">0</button>
+            <button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDecimal()">.</button>
+            <button class="ux-calculator__btn ux-calculator__btn--equals" @click="calculate()">=</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Keyboard Support</h3>
+      <p>La calculadora soporta entrada por teclado:</p>
+      <ul style="color: var(--ux-text-secondary); margin-left: var(--ux-space-lg);">
+        <li><strong>0-9</strong> - Digitos</li>
+        <li><strong>.</strong> - Decimal</li>
+        <li><strong>+ - * /</strong> - Operadores</li>
+        <li><strong>Enter o =</strong> - Calcular</li>
+        <li><strong>Escape</strong> - Limpiar</li>
+        <li><strong>Backspace</strong> - Borrar ultimo digito</li>
+        <li><strong>%</strong> - Porcentaje</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>

@@ -2,33 +2,33 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Stepper - UX Library</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-button.js"></script>
   <script src="../components/ux-input.js"></script>
+  <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-stepper.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
-    .demo-section { margin-bottom: var(--ux-space-2xl); }
-    .demo-box {
-      padding: var(--ux-space-xl);
-      background: var(--ux-surface);
-      border-radius: var(--ux-border-radius-lg);
-      border: 1px solid var(--ux-border-color);
-    }
-    .code-block {
-      background: var(--ux-surface-secondary);
-      padding: var(--ux-space-md);
-      border-radius: var(--ux-border-radius-md);
-      font-size: var(--ux-font-size-md);
-      overflow-x: auto;
-      margin-top: var(--ux-space-md);
-    }
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { padding: var(--ux-space-xl); background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); border: 1px solid var(--ux-border-color); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-sm); overflow-x: auto; white-space: pre; }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+    .ux-table { width: 100%; border-collapse: collapse; margin-bottom: var(--ux-space-lg); }
+    .ux-table th, .ux-table td { padding: var(--ux-space-sm) var(--ux-space-md); text-align: left; border-bottom: 1px solid var(--ux-border-color); }
+    .ux-table th { font-weight: 600; color: var(--ux-text); background: var(--ux-surface-secondary); }
+    .ux-table td { color: var(--ux-text-secondary); }
+    .ux-table code { background: var(--ux-surface-secondary); padding: 2px 6px; border-radius: 4px; font-size: var(--ux-font-size-sm); }
   </style>
 </head>
-<body class="ux-body ux-theme-ocean">
+<body class="ux-app">
   <nav class="ux-navbar">
     <div class="ux-navbar__content">
       <div class="ux-navbar__start">
@@ -347,6 +347,368 @@
 &lt;/div&gt;</pre>
     </div>
 
+    <!-- HTMX Integration -->
+    <div class="demo-section">
+      <h3>Integracion con HTMX</h3>
+      <p>El stepper funciona perfectamente con HTMX para cargar contenido de pasos dinamicamente y guardar progreso en el servidor.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Formulario Multi-paso con HTMX</h4>
+      <p>Cada paso carga su contenido del servidor y guarda los datos al avanzar.</p>
+
+      <div class="demo-box" x-data="uxStepper({ totalSteps: 3 })">
+        <div class="ux-stepper">
+          <div class="ux-stepper__header">
+            <div class="ux-stepper__progress" :style="{ width: progressWidth }"></div>
+            <template x-for="(label, index) in ['Datos', 'Direccion', 'Confirmar']" :key="index">
+              <div class="ux-stepper__step"
+                   :class="getStepClasses(index)"
+                   @click="goTo(index)">
+                <div class="ux-stepper__circle">
+                  <template x-if="isCompleted(index)">
+                    <svg class="ux-stepper__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </template>
+                  <template x-if="!isCompleted(index)">
+                    <span x-text="index + 1"></span>
+                  </template>
+                </div>
+                <span class="ux-stepper__label" x-text="label"></span>
+              </div>
+            </template>
+          </div>
+
+          <div class="ux-stepper__content">
+            <!-- Step 1: Personal Data -->
+            <div class="ux-stepper__panel" :class="{ 'ux-stepper__panel--active': currentStep === 0 }">
+              <form id="step1-form"
+                    hx-post="/api/checkout/step1"
+                    hx-target="#step1-result"
+                    hx-swap="innerHTML"
+                    hx-indicator="#step1-spinner">
+                <h4 style="margin-bottom: var(--ux-space-md);">Datos Personales</h4>
+                <div class="ux-input" style="margin-bottom: var(--ux-space-md);">
+                  <label class="ux-input__label">Nombre</label>
+                  <input type="text" name="name" class="ux-input__field" placeholder="Juan Perez" required>
+                </div>
+                <div class="ux-input">
+                  <label class="ux-input__label">Email</label>
+                  <input type="email" name="email" class="ux-input__field" placeholder="juan@email.com" required>
+                </div>
+                <div id="step1-result" style="margin-top: var(--ux-space-sm);"></div>
+              </form>
+            </div>
+
+            <!-- Step 2: Address -->
+            <div class="ux-stepper__panel" :class="{ 'ux-stepper__panel--active': currentStep === 1 }">
+              <form id="step2-form"
+                    hx-post="/api/checkout/step2"
+                    hx-target="#step2-result"
+                    hx-swap="innerHTML">
+                <h4 style="margin-bottom: var(--ux-space-md);">Direccion de Envio</h4>
+                <div class="ux-input" style="margin-bottom: var(--ux-space-md);">
+                  <label class="ux-input__label">Direccion</label>
+                  <input type="text" name="address" class="ux-input__field" placeholder="Calle 123">
+                </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--ux-space-md);">
+                  <div class="ux-input">
+                    <label class="ux-input__label">Ciudad</label>
+                    <input type="text" name="city" class="ux-input__field" placeholder="Ciudad">
+                  </div>
+                  <div class="ux-input">
+                    <label class="ux-input__label">CP</label>
+                    <input type="text" name="zip" class="ux-input__field" placeholder="12345">
+                  </div>
+                </div>
+                <div id="step2-result" style="margin-top: var(--ux-space-sm);"></div>
+              </form>
+            </div>
+
+            <!-- Step 3: Confirmation -->
+            <div class="ux-stepper__panel" :class="{ 'ux-stepper__panel--active': currentStep === 2 }">
+              <h4 style="margin-bottom: var(--ux-space-md);">Confirmar Pedido</h4>
+              <div id="order-summary"
+                   hx-get="/api/checkout/summary"
+                   hx-trigger="revealed"
+                   hx-swap="innerHTML"
+                   style="padding: var(--ux-space-lg); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-md);">
+                <span class="ux-spinner"></span> Cargando resumen...
+              </div>
+            </div>
+          </div>
+
+          <div class="ux-stepper__actions">
+            <div class="ux-stepper__actions-start">
+              <button class="ux-button ux-button--outline"
+                      @click="prev()"
+                      :disabled="isFirst">
+                Anterior
+              </button>
+            </div>
+            <div class="ux-stepper__actions-end">
+              <template x-if="currentStep === 0">
+                <button type="submit"
+                        form="step1-form"
+                        class="ux-button ux-button--primary"
+                        @click="complete(0); next()">
+                  <span class="ux-spinner ux-spinner--sm htmx-indicator" id="step1-spinner"></span>
+                  Siguiente
+                </button>
+              </template>
+              <template x-if="currentStep === 1">
+                <button type="submit"
+                        form="step2-form"
+                        class="ux-button ux-button--primary"
+                        @click="complete(1); next()">
+                  Siguiente
+                </button>
+              </template>
+              <template x-if="currentStep === 2">
+                <button class="ux-button ux-button--primary"
+                        hx-post="/api/checkout/complete"
+                        hx-target="#order-result"
+                        hx-swap="innerHTML"
+                        hx-indicator="#complete-spinner">
+                  <span class="ux-spinner ux-spinner--sm htmx-indicator" id="complete-spinner"></span>
+                  Completar Pedido
+                </button>
+              </template>
+            </div>
+          </div>
+          <div id="order-result" style="margin-top: var(--ux-space-md);"></div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Stepper con formularios HTMX --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxStepper({ totalSteps: 3 })"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- Step 1 Form --&gt;</span>
+  <span class="tag">&lt;form</span> <span class="attr">id</span>=<span class="string">"step1"</span>
+        <span class="attr">hx-post</span>=<span class="string">"/api/checkout/step1"</span>
+        <span class="attr">hx-target</span>=<span class="string">"#step1-result"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">name</span>=<span class="string">"email"</span> <span class="attr">required</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;/form&gt;</span>
+
+  <span class="comment">&lt;!-- Boton que envia form y avanza --&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span>
+          <span class="attr">form</span>=<span class="string">"step1"</span>
+          <span class="attr">@click</span>=<span class="string">"complete(0); next()"</span><span class="tag">&gt;</span>
+    Siguiente
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Carga Dinamica de Pasos</h4>
+      <p>Cargar contenido de cada paso del servidor cuando se activa.</p>
+
+      <div class="demo-box" x-data="uxStepper({ totalSteps: 3, linear: false })">
+        <div class="ux-stepper">
+          <div class="ux-stepper__header">
+            <div class="ux-stepper__progress" :style="{ width: progressWidth }"></div>
+            <template x-for="(label, index) in ['Productos', 'Envio', 'Pago']" :key="index">
+              <div class="ux-stepper__step"
+                   :class="getStepClasses(index)"
+                   @click="goTo(index)"
+                   :hx-get="'/api/wizard/step/' + (index + 1)"
+                   hx-target="#dynamic-step-content"
+                   hx-swap="innerHTML"
+                   hx-trigger="click">
+                <div class="ux-stepper__circle">
+                  <span x-text="index + 1"></span>
+                </div>
+                <span class="ux-stepper__label" x-text="label"></span>
+              </div>
+            </template>
+          </div>
+
+          <div class="ux-stepper__content">
+            <div id="dynamic-step-content"
+                 hx-get="/api/wizard/step/1"
+                 hx-trigger="load"
+                 hx-swap="innerHTML"
+                 style="min-height: 150px; padding: var(--ux-space-lg);">
+              <span class="ux-spinner"></span> Cargando paso...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Pasos que cargan contenido dinamicamente --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-stepper__step"</span>
+     <span class="attr">hx-get</span>=<span class="string">"/api/wizard/step/1"</span>
+     <span class="attr">hx-target</span>=<span class="string">"#step-content"</span>
+     <span class="attr">hx-trigger</span>=<span class="string">"click"</span>
+     <span class="attr">@click</span>=<span class="string">"goTo(0)"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"step-content"</span>
+     <span class="attr">hx-get</span>=<span class="string">"/api/wizard/step/1"</span>
+     <span class="attr">hx-trigger</span>=<span class="string">"load"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- Contenido cargado del servidor --&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Validacion de Pasos en Servidor</h4>
+      <p>Validar cada paso en el servidor antes de permitir avanzar.</p>
+
+      <div class="demo-box">
+        <form x-data="{ currentStep: 0, canProceed: false }"
+              hx-post="/api/wizard/validate"
+              hx-trigger="change from:find input"
+              hx-target="#validation-result"
+              hx-swap="innerHTML"
+              @htmx:after-request="canProceed = event.detail.xhr.status === 200">
+
+          <div class="ux-stepper">
+            <div class="ux-stepper__header" style="margin-bottom: var(--ux-space-lg);">
+              <div class="ux-stepper__step" :class="{ 'ux-stepper__step--active': currentStep === 0 }">
+                <div class="ux-stepper__circle">1</div>
+                <span class="ux-stepper__label">Validar Email</span>
+              </div>
+              <div class="ux-stepper__step" :class="{ 'ux-stepper__step--active': currentStep === 1 }">
+                <div class="ux-stepper__circle">2</div>
+                <span class="ux-stepper__label">Completar</span>
+              </div>
+            </div>
+
+            <div x-show="currentStep === 0">
+              <input type="hidden" name="step" value="1">
+              <div class="ux-input">
+                <label class="ux-input__label" for="validate-email">Email (escribe para validar)</label>
+                <input type="email"
+                       id="validate-email"
+                       name="email"
+                       class="ux-input__field"
+                       placeholder="tu@email.com"
+                       hx-post="/api/wizard/validate-email"
+                       hx-trigger="input changed delay:500ms"
+                       hx-target="#email-validation"
+                       hx-swap="innerHTML">
+              </div>
+              <div id="email-validation" style="margin-top: var(--ux-space-sm); font-size: var(--ux-font-size-sm);"></div>
+            </div>
+
+            <div x-show="currentStep === 1" style="padding: var(--ux-space-lg); text-align: center;">
+              <div style="color: var(--ux-success); font-size: var(--ux-font-size-2xl); margin-bottom: var(--ux-space-md);">✓</div>
+              <p>Email validado correctamente</p>
+            </div>
+
+            <div id="validation-result" style="margin-top: var(--ux-space-md);"></div>
+
+            <div style="margin-top: var(--ux-space-lg); display: flex; gap: var(--ux-space-sm);">
+              <button type="button"
+                      class="ux-button ux-button--outline"
+                      @click="currentStep = Math.max(0, currentStep - 1)"
+                      :disabled="currentStep === 0">
+                Anterior
+              </button>
+              <button type="button"
+                      class="ux-button ux-button--primary"
+                      @click="currentStep++"
+                      :disabled="!canProceed"
+                      x-show="currentStep === 0">
+                Siguiente
+              </button>
+              <button type="submit"
+                      class="ux-button ux-button--primary"
+                      x-show="currentStep === 1"
+                      hx-post="/api/wizard/complete">
+                Finalizar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Validacion en tiempo real --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"email"</span>
+       <span class="attr">name</span>=<span class="string">"email"</span>
+       <span class="attr">hx-post</span>=<span class="string">"/api/validate-email"</span>
+       <span class="attr">hx-trigger</span>=<span class="string">"input changed delay:500ms"</span>
+       <span class="attr">hx-target</span>=<span class="string">"#validation"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"validation"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Habilitar boton segun validacion --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">:disabled</span>=<span class="string">"!canProceed"</span>
+        <span class="attr">@htmx:after-request</span>=<span class="string">"canProceed = $event.detail.xhr.status === 200"</span><span class="tag">&gt;</span>
+  Siguiente
+<span class="tag">&lt;/button&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Guardar Progreso Automaticamente</h4>
+      <p>Guardar progreso en el servidor cada vez que el usuario avanza.</p>
+
+      <div class="demo-box" x-data="uxStepper({ totalSteps: 4 })"
+           @stepper:change.window="htmx.ajax('POST', '/api/wizard/save-progress', { values: { step: $event.detail.step } })">
+        <div class="ux-stepper ux-stepper--compact">
+          <div class="ux-stepper__header">
+            <div class="ux-stepper__progress" :style="{ width: progressWidth }"></div>
+            <template x-for="i in totalSteps" :key="i">
+              <div class="ux-stepper__step" :class="getStepClasses(i-1)" @click="goTo(i-1)">
+                <div class="ux-stepper__circle">
+                  <template x-if="isCompleted(i-1)">
+                    <svg class="ux-stepper__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </template>
+                  <template x-if="!isCompleted(i-1)"><span x-text="i"></span></template>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <div style="text-align: center; padding: var(--ux-space-xl);">
+            <p>Paso <span x-text="currentStep + 1"></span> de <span x-text="totalSteps"></span></p>
+            <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm); margin-top: var(--ux-space-sm);">
+              El progreso se guarda automaticamente
+            </p>
+          </div>
+
+          <div style="display: flex; justify-content: center; gap: var(--ux-space-sm);">
+            <button class="ux-button ux-button--outline" @click="prev()" :disabled="isFirst">Anterior</button>
+            <button class="ux-button ux-button--primary" @click="complete(currentStep); next()" :disabled="isLast">Siguiente</button>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Auto-guardar progreso al cambiar de paso --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxStepper({ totalSteps: 4 })"</span>
+     <span class="attr">@stepper:change.window</span>=<span class="string">"htmx.ajax('POST', '/api/save-progress', {
+       values: { step: $event.detail.step }
+     })"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- stepper content --&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Restaurar Progreso al Cargar</h4>
+      <p>Cargar el estado del stepper desde el servidor al iniciar.</p>
+
+      <div class="demo-box"
+           id="restore-stepper"
+           hx-get="/api/wizard/get-progress"
+           hx-trigger="load"
+           hx-swap="innerHTML">
+        <div class="ux-stepper ux-stepper--compact">
+          <p style="text-align: center; padding: var(--ux-space-lg); color: var(--ux-text-secondary);">
+            <span class="ux-spinner"></span> Cargando progreso guardado...
+          </p>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Cargar estado del stepper al inicio --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"stepper-container"</span>
+     <span class="attr">hx-get</span>=<span class="string">"/api/wizard/get-progress"</span>
+     <span class="attr">hx-trigger</span>=<span class="string">"load"</span>
+     <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+  Cargando...
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- El servidor devuelve el stepper con el estado correcto --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxStepper({
+  totalSteps: 4,
+  initialStep: 2,
+  completedSteps: [0, 1]
+})"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- Stepper restaurado en paso 3 con pasos 1 y 2 completados --&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </div>
+
     <!-- API Reference -->
     <div class="demo-section">
       <h3>API Alpine.js</h3>
@@ -393,74 +755,30 @@ getStepClasses(step) // Retorna objeto de clases para x-bind:class</pre>
     <!-- Referencia de Clases -->
     <div class="demo-section">
       <h3>Referencia de Clases</h3>
-      <div class="demo-box" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="border-bottom: 2px solid var(--ux-border-color);">
-              <th style="text-align: left; padding: var(--ux-space-sm);">Clase</th>
-              <th style="text-align: left; padding: var(--ux-space-sm);">Descripción</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper</code></td>
-              <td style="padding: var(--ux-space-sm);">Contenedor principal</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper--vertical</code></td>
-              <td style="padding: var(--ux-space-sm);">Layout vertical</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper--compact</code></td>
-              <td style="padding: var(--ux-space-sm);">Versión compacta</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper--dots</code></td>
-              <td style="padding: var(--ux-space-sm);">Solo indicadores de punto</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper__header</code></td>
-              <td style="padding: var(--ux-space-sm);">Contenedor de indicadores</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper__step</code></td>
-              <td style="padding: var(--ux-space-sm);">Cada paso individual</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper__step--active</code></td>
-              <td style="padding: var(--ux-space-sm);">Paso activo</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper__step--completed</code></td>
-              <td style="padding: var(--ux-space-sm);">Paso completado</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper__step--error</code></td>
-              <td style="padding: var(--ux-space-sm);">Paso con error</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper__circle</code></td>
-              <td style="padding: var(--ux-space-sm);">Círculo indicador</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper__label</code></td>
-              <td style="padding: var(--ux-space-sm);">Etiqueta del paso</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper__content</code></td>
-              <td style="padding: var(--ux-space-sm);">Área de contenido</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--ux-border-color);">
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper__panel</code></td>
-              <td style="padding: var(--ux-space-sm);">Panel de cada paso</td>
-            </tr>
-            <tr>
-              <td style="padding: var(--ux-space-sm);"><code>.ux-stepper__actions</code></td>
-              <td style="padding: var(--ux-space-sm);">Área de botones</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <table class="ux-table">
+        <thead>
+          <tr>
+            <th>Clase</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.ux-stepper</code></td><td>Contenedor principal</td></tr>
+          <tr><td><code>.ux-stepper--vertical</code></td><td>Layout vertical</td></tr>
+          <tr><td><code>.ux-stepper--compact</code></td><td>Versión compacta</td></tr>
+          <tr><td><code>.ux-stepper--dots</code></td><td>Solo indicadores de punto</td></tr>
+          <tr><td><code>.ux-stepper__header</code></td><td>Contenedor de indicadores</td></tr>
+          <tr><td><code>.ux-stepper__step</code></td><td>Cada paso individual</td></tr>
+          <tr><td><code>.ux-stepper__step--active</code></td><td>Paso activo</td></tr>
+          <tr><td><code>.ux-stepper__step--completed</code></td><td>Paso completado</td></tr>
+          <tr><td><code>.ux-stepper__step--error</code></td><td>Paso con error</td></tr>
+          <tr><td><code>.ux-stepper__circle</code></td><td>Círculo indicador</td></tr>
+          <tr><td><code>.ux-stepper__label</code></td><td>Etiqueta del paso</td></tr>
+          <tr><td><code>.ux-stepper__content</code></td><td>Área de contenido</td></tr>
+          <tr><td><code>.ux-stepper__panel</code></td><td>Panel de cada paso</td></tr>
+          <tr><td><code>.ux-stepper__actions</code></td><td>Área de botones</td></tr>
+        </tbody>
+      </table>
     </div>
 
   </main>

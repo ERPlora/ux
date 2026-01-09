@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Modal - UX Library</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-button.js"></script>
@@ -487,6 +488,234 @@
 <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal-backdrop"</span><span class="tag">&gt;</span>
   <span class="comment">&lt;!-- Usa label for="modal-1" para cerrar --&gt;</span>
 <span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- HTMX Integration -->
+    <section class="demo-section">
+      <h3>Integracion con HTMX</h3>
+      <p>Ejemplos de como usar modales con HTMX para cargar contenido dinamico desde el servidor.</p>
+
+      <!-- Load content into modal -->
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Cargar contenido en modal</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Click en el boton para cargar detalles del usuario desde el servidor.</p>
+      </div>
+      <pre class="code-block"><span class="comment">&lt;!-- Boton que abre modal y carga contenido --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-primary"</span>
+        <span class="attr">hx-get</span>=<span class="string">"/api/users/123"</span>
+        <span class="attr">hx-target</span>=<span class="string">"#modal-content"</span>
+        <span class="attr">hx-trigger</span>=<span class="string">"click"</span>
+        <span class="attr">onclick</span>=<span class="string">"document.getElementById('user-modal').checked = true"</span><span class="tag">&gt;</span>
+  Ver Usuario
+<span class="tag">&lt;/button&gt;</span>
+
+<span class="comment">&lt;!-- Modal CSS-only con contenido dinamico --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"checkbox"</span> <span class="attr">id</span>=<span class="string">"user-modal"</span> <span class="attr">class</span>=<span class="string">"ux-modal-toggle"</span> <span class="attr">hidden</span><span class="tag">&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal-backdrop"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__header"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;h2</span> <span class="attr">class</span>=<span class="string">"ux-modal__title"</span><span class="tag">&gt;</span>Detalles de Usuario<span class="tag">&lt;/h2&gt;</span>
+      <span class="tag">&lt;label</span> <span class="attr">for</span>=<span class="string">"user-modal"</span> <span class="attr">class</span>=<span class="string">"ux-modal__close"</span><span class="tag">&gt;</span>&times;<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"modal-content"</span> <span class="attr">class</span>=<span class="string">"ux-modal__content"</span><span class="tag">&gt;</span>
+      <span class="comment">&lt;!-- Contenido cargado via HTMX --&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-skeleton"</span><span class="tag">&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <!-- Form in modal -->
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Formulario en modal con HTMX</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Formulario que envia datos sin recargar y cierra el modal al exito.</p>
+      </div>
+      <pre class="code-block"><span class="comment">&lt;!-- Formulario con HTMX en modal --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/contacts"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#contacts-list"</span>
+      <span class="attr">hx-swap</span>=<span class="string">"beforeend"</span>
+      <span class="attr">hx-on::after-request</span>=<span class="string">"if(event.detail.successful) document.getElementById('contact-modal').checked = false"</span><span class="tag">&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-input-group"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;label</span> <span class="attr">class</span>=<span class="string">"ux-input__label"</span><span class="tag">&gt;</span>Nombre<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"name"</span> <span class="attr">class</span>=<span class="string">"ux-input"</span> <span class="attr">required</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-input-group"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;label</span> <span class="attr">class</span>=<span class="string">"ux-input__label"</span><span class="tag">&gt;</span>Email<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"email"</span> <span class="attr">name</span>=<span class="string">"email"</span> <span class="attr">class</span>=<span class="string">"ux-input"</span> <span class="attr">required</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__footer"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;label</span> <span class="attr">for</span>=<span class="string">"contact-modal"</span> <span class="attr">class</span>=<span class="string">"ux-button"</span><span class="tag">&gt;</span>Cancelar<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-primary"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"htmx-indicator ux-spinner ux-spinner--sm"</span><span class="tag">&gt;&lt;/span&gt;</span>
+      Guardar
+    <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/form&gt;</span></pre>
+
+      <!-- Delete confirmation -->
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Confirmacion de eliminacion</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Modal de confirmacion antes de eliminar un elemento.</p>
+      </div>
+      <pre class="code-block"><span class="comment">&lt;!-- Boton que abre modal de confirmacion --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-danger--outline"</span>
+        <span class="attr">onclick</span>=<span class="string">"document.getElementById('delete-modal').checked = true;
+                 document.getElementById('delete-id').value = 123"</span><span class="tag">&gt;</span>
+  Eliminar
+<span class="tag">&lt;/button&gt;</span>
+
+<span class="comment">&lt;!-- Modal de confirmacion --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"checkbox"</span> <span class="attr">id</span>=<span class="string">"delete-modal"</span> <span class="attr">class</span>=<span class="string">"ux-modal-toggle"</span> <span class="attr">hidden</span><span class="tag">&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal-backdrop"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__content ux-modal__content--centered"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;h3</span><span class="tag">&gt;</span>Confirmar eliminacion<span class="tag">&lt;/h3&gt;</span>
+      <span class="tag">&lt;p</span><span class="tag">&gt;</span>Esta accion no se puede deshacer.<span class="tag">&lt;/p&gt;</span>
+
+      <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"hidden"</span> <span class="attr">id</span>=<span class="string">"delete-id"</span> <span class="attr">name</span>=<span class="string">"id"</span><span class="tag">&gt;</span>
+
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__footer"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;label</span> <span class="attr">for</span>=<span class="string">"delete-modal"</span> <span class="attr">class</span>=<span class="string">"ux-button"</span><span class="tag">&gt;</span>Cancelar<span class="tag">&lt;/label&gt;</span>
+        <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-danger"</span>
+                <span class="attr">hx-delete</span>=<span class="string">"/api/items"</span>
+                <span class="attr">hx-include</span>=<span class="string">"#delete-id"</span>
+                <span class="attr">hx-target</span>=<span class="string">"closest .item-row"</span>
+                <span class="attr">hx-swap</span>=<span class="string">"outerHTML"</span>
+                <span class="attr">hx-on::after-request</span>=<span class="string">"document.getElementById('delete-modal').checked = false"</span><span class="tag">&gt;</span>
+          Eliminar
+        <span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <!-- Side panel with data -->
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Panel lateral con detalles</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Panel lateral que carga detalles al seleccionar un item de la lista.</p>
+      </div>
+      <pre class="code-block"><span class="comment">&lt;!-- Lista de items --&gt;</span>
+<span class="tag">&lt;ul</span> <span class="attr">class</span>=<span class="string">"ux-list"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;li</span> <span class="attr">class</span>=<span class="string">"ux-list__item"</span>
+      <span class="attr">hx-get</span>=<span class="string">"/api/orders/1"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#detail-panel"</span>
+      <span class="attr">hx-trigger</span>=<span class="string">"click"</span>
+      <span class="attr">onclick</span>=<span class="string">"document.getElementById('detail-modal').checked = true"</span><span class="tag">&gt;</span>
+    Pedido #001
+  <span class="tag">&lt;/li&gt;</span>
+  <span class="tag">&lt;li</span> <span class="attr">class</span>=<span class="string">"ux-list__item"</span>
+      <span class="attr">hx-get</span>=<span class="string">"/api/orders/2"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#detail-panel"</span>
+      <span class="attr">hx-trigger</span>=<span class="string">"click"</span>
+      <span class="attr">onclick</span>=<span class="string">"document.getElementById('detail-modal').checked = true"</span><span class="tag">&gt;</span>
+    Pedido #002
+  <span class="tag">&lt;/li&gt;</span>
+<span class="tag">&lt;/ul&gt;</span>
+
+<span class="comment">&lt;!-- Panel lateral derecho --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"checkbox"</span> <span class="attr">id</span>=<span class="string">"detail-modal"</span> <span class="attr">class</span>=<span class="string">"ux-modal-toggle"</span> <span class="attr">hidden</span><span class="tag">&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal-backdrop ux-modal-backdrop--side ux-modal-backdrop--right"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal ux-modal--right"</span> <span class="attr">style</span>=<span class="string">"width: 400px;"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__header"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;h2</span> <span class="attr">class</span>=<span class="string">"ux-modal__title"</span><span class="tag">&gt;</span>Detalle del Pedido<span class="tag">&lt;/h2&gt;</span>
+      <span class="tag">&lt;label</span> <span class="attr">for</span>=<span class="string">"detail-modal"</span> <span class="attr">class</span>=<span class="string">"ux-modal__close"</span><span class="tag">&gt;</span>&times;<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"detail-panel"</span> <span class="attr">class</span>=<span class="string">"ux-modal__content"</span><span class="tag">&gt;</span>
+      <span class="comment">&lt;!-- Cargado via HTMX --&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <!-- Edit in modal -->
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Editar en modal</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Cargar formulario de edicion y actualizar la fila al guardar.</p>
+      </div>
+      <pre class="code-block"><span class="comment">&lt;!-- Fila de tabla con boton editar --&gt;</span>
+<span class="tag">&lt;tr</span> <span class="attr">id</span>=<span class="string">"product-row-123"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;td&gt;</span>Producto A<span class="tag">&lt;/td&gt;</span>
+  <span class="tag">&lt;td&gt;</span>$99.00<span class="tag">&lt;/td&gt;</span>
+  <span class="tag">&lt;td&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button ux-button--sm"</span>
+            <span class="attr">hx-get</span>=<span class="string">"/api/products/123/edit"</span>
+            <span class="attr">hx-target</span>=<span class="string">"#edit-form-container"</span>
+            <span class="attr">onclick</span>=<span class="string">"document.getElementById('edit-modal').checked = true"</span><span class="tag">&gt;</span>
+      Editar
+    <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/td&gt;</span>
+<span class="tag">&lt;/tr&gt;</span>
+
+<span class="comment">&lt;!-- Modal de edicion --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"checkbox"</span> <span class="attr">id</span>=<span class="string">"edit-modal"</span> <span class="attr">class</span>=<span class="string">"ux-modal-toggle"</span> <span class="attr">hidden</span><span class="tag">&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal-backdrop"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__header"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;h2</span> <span class="attr">class</span>=<span class="string">"ux-modal__title"</span><span class="tag">&gt;</span>Editar Producto<span class="tag">&lt;/h2&gt;</span>
+      <span class="tag">&lt;label</span> <span class="attr">for</span>=<span class="string">"edit-modal"</span> <span class="attr">class</span>=<span class="string">"ux-modal__close"</span><span class="tag">&gt;</span>&times;<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"edit-form-container"</span> <span class="attr">class</span>=<span class="string">"ux-modal__content"</span><span class="tag">&gt;</span>
+      <span class="comment">&lt;!-- Servidor devuelve formulario pre-llenado --&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Respuesta del servidor: formulario de edicion --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">hx-put</span>=<span class="string">"/api/products/123"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#product-row-123"</span>
+      <span class="attr">hx-swap</span>=<span class="string">"outerHTML"</span>
+      <span class="attr">hx-on::after-request</span>=<span class="string">"document.getElementById('edit-modal').checked = false"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-input-group"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;label</span> <span class="attr">class</span>=<span class="string">"ux-input__label"</span><span class="tag">&gt;</span>Nombre<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"name"</span> <span class="attr">value</span>=<span class="string">"Producto A"</span> <span class="attr">class</span>=<span class="string">"ux-input"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-input-group"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;label</span> <span class="attr">class</span>=<span class="string">"ux-input__label"</span><span class="tag">&gt;</span>Precio<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"number"</span> <span class="attr">name</span>=<span class="string">"price"</span> <span class="attr">value</span>=<span class="string">"99"</span> <span class="attr">class</span>=<span class="string">"ux-input"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-primary"</span><span class="tag">&gt;</span>Guardar<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span></pre>
+
+      <!-- Wizard/Steps in modal -->
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Wizard multi-paso en modal</h4>
+      <div class="demo-box">
+        <p style="color: var(--ux-text-secondary); margin: 0;">Modal con pasos que se cargan dinamicamente desde el servidor.</p>
+      </div>
+      <pre class="code-block"><span class="comment">&lt;!-- Modal wizard --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-modal__header"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h2</span> <span class="attr">class</span>=<span class="string">"ux-modal__title"</span><span class="tag">&gt;</span>Crear Cuenta<span class="tag">&lt;/h2&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"wizard-step"</span> <span class="attr">class</span>=<span class="string">"ux-modal__content"</span><span class="tag">&gt;</span>
+    <span class="comment">&lt;!-- Paso 1: Datos basicos --&gt;</span>
+    <span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/signup/step1"</span>
+          <span class="attr">hx-target</span>=<span class="string">"#wizard-step"</span>
+          <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-input-group"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;label&gt;</span>Email<span class="tag">&lt;/label&gt;</span>
+        <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"email"</span> <span class="attr">name</span>=<span class="string">"email"</span> <span class="attr">class</span>=<span class="string">"ux-input"</span> <span class="attr">required</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-primary"</span><span class="tag">&gt;</span>
+        Siguiente
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/form&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Servidor devuelve Paso 2 --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/signup/step2"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#wizard-step"</span>
+      <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-input-group"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;label&gt;</span>Password<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"password"</span> <span class="attr">name</span>=<span class="string">"password"</span> <span class="attr">class</span>=<span class="string">"ux-input"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-primary"</span><span class="tag">&gt;</span>
+    Crear Cuenta
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span></pre>
     </section>
 
     <!-- API -->

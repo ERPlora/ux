@@ -3496,6 +3496,33 @@
       -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
       border: 0.5px solid var(--ux-glass-border);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-alert-backdrop {
+        transition: opacity 0.1s ease, visibility 0.1s ease;
+      }
+
+      .ux-alert {
+        transition: opacity 0.1s ease;
+        transform: none;
+      }
+
+      .ux-alert-backdrop--open .ux-alert {
+        transform: none;
+      }
+
+      .ux-alert__button {
+        transition: none;
+      }
+
+      .ux-alert__input {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -3635,6 +3662,782 @@
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxAlertBanner', alertBannerComponent);
     });
+  }
+})();
+
+/**
+ * UX Autocomplete Component
+ * Search input with suggestions dropdown and highlighting
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Autocomplete Container
+       ========================================================================== */
+
+    :root {
+      --ux-autocomplete-min-width: 200px;
+      --ux-autocomplete-max-height: 300px;
+      --ux-autocomplete-item-height: 44px;
+      --ux-autocomplete-radius: var(--ux-radius-lg);
+    }
+
+    .ux-autocomplete {
+      position: relative;
+      width: 100%;
+      min-width: var(--ux-autocomplete-min-width);
+    }
+
+    /* ==========================================================================
+       Input
+       ========================================================================== */
+
+    .ux-autocomplete__input {
+      width: 100%;
+      height: var(--ux-input-height);
+      padding: 0 var(--ux-space-md);
+      padding-right: 2.5rem;
+      font-size: 1rem;
+      color: var(--ux-text);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-autocomplete-radius);
+      outline: none;
+      transition: border-color var(--ux-transition-fast), box-shadow var(--ux-transition-fast);
+    }
+
+    .ux-autocomplete__input:focus {
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
+    }
+
+    .ux-autocomplete__input::placeholder {
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-autocomplete__input--loading {
+      background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E.spinner{transform-origin:center;animation:rotate 1s linear infinite}@keyframes rotate{100%{transform:rotate(360deg)}}%3C/style%3E%3Cg class='spinner'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-dasharray='30 60'/%3E%3C/g%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 20px;
+    }
+
+    /* ==========================================================================
+       Clear Button
+       ========================================================================== */
+
+    .ux-autocomplete__clear {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--ux-surface-tertiary);
+      border: none;
+      border-radius: 50%;
+      color: var(--ux-text-secondary);
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity var(--ux-transition-fast), background var(--ux-transition-fast);
+    }
+
+    .ux-autocomplete__clear:hover {
+      background: var(--ux-gray-300);
+    }
+
+    .ux-autocomplete:focus-within .ux-autocomplete__clear,
+    .ux-autocomplete__input:not(:placeholder-shown) ~ .ux-autocomplete__clear {
+      opacity: 1;
+    }
+
+    .ux-autocomplete__clear--hidden {
+      display: none;
+    }
+
+    /* ==========================================================================
+       Dropdown
+       ========================================================================== */
+
+    .ux-autocomplete__dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: var(--ux-z-dropdown);
+      max-height: var(--ux-autocomplete-max-height);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-autocomplete-radius);
+      box-shadow: var(--ux-shadow-lg);
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all var(--ux-transition-fast) var(--ux-ease-out);
+    }
+
+    .ux-autocomplete__dropdown--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .ux-autocomplete__dropdown--above {
+      top: auto;
+      bottom: calc(100% + 4px);
+      transform: translateY(8px);
+    }
+
+    .ux-autocomplete__dropdown--above.ux-autocomplete__dropdown--open {
+      transform: translateY(0);
+    }
+
+    /* ==========================================================================
+       List
+       ========================================================================== */
+
+    .ux-autocomplete__list {
+      max-height: var(--ux-autocomplete-max-height);
+      margin: 0;
+      padding: var(--ux-space-xs);
+      list-style: none;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .ux-autocomplete__item {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      min-height: var(--ux-autocomplete-item-height);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      font-size: 0.9375rem;
+      color: var(--ux-text);
+      border-radius: var(--ux-radius-md);
+      cursor: pointer;
+      transition: background var(--ux-transition-fast);
+    }
+
+    .ux-autocomplete__item:hover,
+    .ux-autocomplete__item--active {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-autocomplete__item--selected {
+      background: var(--ux-primary-tint);
+      color: var(--ux-primary);
+    }
+
+    .ux-autocomplete__item--disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .ux-autocomplete__item-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-autocomplete__item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ux-autocomplete__item-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ux-autocomplete__item-description {
+      font-size: 0.8125rem;
+      color: var(--ux-text-tertiary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Highlight match */
+    .ux-autocomplete__highlight {
+      background: var(--ux-warning-tint);
+      color: inherit;
+      font-weight: 600;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
+    /* ==========================================================================
+       Groups
+       ========================================================================== */
+
+    .ux-autocomplete__group {
+      padding-top: var(--ux-space-sm);
+    }
+
+    .ux-autocomplete__group:first-child {
+      padding-top: 0;
+    }
+
+    .ux-autocomplete__group-label {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: var(--ux-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ==========================================================================
+       Empty State
+       ========================================================================== */
+
+    .ux-autocomplete__empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-xl);
+      text-align: center;
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-autocomplete__empty-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: var(--ux-space-sm);
+      color: var(--ux-text-tertiary);
+      opacity: 0.5;
+    }
+
+    .ux-autocomplete__empty-text {
+      font-size: 0.9375rem;
+    }
+
+    /* ==========================================================================
+       Loading State
+       ========================================================================== */
+
+    .ux-autocomplete__loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-lg);
+    }
+
+    .ux-autocomplete__loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--ux-border-color);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-autocomplete-spin 0.8s linear infinite;
+    }
+
+    @keyframes ux-autocomplete-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ==========================================================================
+       Footer
+       ========================================================================== */
+
+    .ux-autocomplete__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      font-size: 0.75rem;
+      color: var(--ux-text-tertiary);
+      background: var(--ux-surface-secondary);
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    .ux-autocomplete__footer-hint {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-autocomplete__footer-hint kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 18px;
+      padding: 0 4px;
+      font-size: 0.6875rem;
+      font-family: inherit;
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: 4px;
+      box-shadow: 0 1px 0 var(--ux-border-color);
+    }
+
+    /* ==========================================================================
+       Variants
+       ========================================================================== */
+
+    /* Small */
+    .ux-autocomplete--sm .ux-autocomplete__input {
+      height: 36px;
+      font-size: 0.875rem;
+    }
+
+    .ux-autocomplete--sm .ux-autocomplete__item {
+      min-height: 36px;
+      font-size: 0.875rem;
+    }
+
+    /* Large */
+    .ux-autocomplete--lg .ux-autocomplete__input {
+      height: 52px;
+      font-size: 1.0625rem;
+    }
+
+    .ux-autocomplete--lg .ux-autocomplete__item {
+      min-height: 52px;
+      font-size: 1rem;
+    }
+
+    /* Glass */
+    .ux-autocomplete--glass .ux-autocomplete__input {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-autocomplete--glass .ux-autocomplete__dropdown {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    /* Inline (no border) */
+    .ux-autocomplete--inline .ux-autocomplete__input {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .ux-autocomplete--inline .ux-autocomplete__input:focus {
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    /* ==========================================================================
+       Multi-select Tags
+       ========================================================================== */
+
+    .ux-autocomplete__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-xs);
+      min-height: var(--ux-input-height);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-autocomplete-radius);
+      cursor: text;
+      transition: border-color var(--ux-transition-fast);
+    }
+
+    .ux-autocomplete__tags:focus-within {
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
+    }
+
+    .ux-autocomplete__tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      font-size: 0.8125rem;
+      background: var(--ux-primary-tint);
+      color: var(--ux-primary);
+      border-radius: var(--ux-radius-full);
+    }
+
+    .ux-autocomplete__tag-remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: inherit;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity var(--ux-transition-fast);
+    }
+
+    .ux-autocomplete__tag-remove:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .ux-autocomplete__tags-input {
+      flex: 1;
+      min-width: 80px;
+      height: 28px;
+      padding: 0 var(--ux-space-xs);
+      font-size: 0.9375rem;
+      color: var(--ux-text);
+      background: transparent;
+      border: none;
+      outline: none;
+    }
+
+    .ux-autocomplete__tags-input::placeholder {
+      color: var(--ux-text-tertiary);
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-autocomplete__highlight {
+        background: rgba(var(--ux-warning-rgb), 0.3);
+      }
+    }
+
+    .ux-dark .ux-autocomplete__highlight {
+      background: rgba(var(--ux-warning-rgb), 0.3);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-autocomplete__dropdown {
+        transition: opacity var(--ux-transition-fast);
+        transform: none;
+      }
+
+      .ux-autocomplete__loading-spinner {
+        animation: none;
+      }
+    }
+  `;
+
+  // Icons
+  const icons = {
+    search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="M21 21l-4.35-4.35"/>
+    </svg>`,
+    close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6L6 18M6 6l12 12"/>
+    </svg>`,
+    empty: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="M21 21l-4.35-4.35"/>
+      <path d="M8 8l6 6M14 8l-6 6"/>
+    </svg>`
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-autocomplete-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-autocomplete-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const autocompleteData = (options = {}) => ({
+    // Configuration
+    items: options.items || [],
+    placeholder: options.placeholder || 'Search...',
+    minChars: options.minChars ?? 1,
+    debounce: options.debounce ?? 300,
+    maxItems: options.maxItems || 10,
+    highlightMatches: options.highlightMatches ?? true,
+    closeOnSelect: options.closeOnSelect ?? true,
+    clearOnSelect: options.clearOnSelect ?? false,
+    showEmpty: options.showEmpty ?? true,
+    emptyText: options.emptyText || 'No results found',
+    labelKey: options.labelKey || 'label',
+    valueKey: options.valueKey || 'value',
+    descriptionKey: options.descriptionKey || 'description',
+    groupKey: options.groupKey || 'group',
+    filterFn: options.filterFn || null,
+    fetchFn: options.fetchFn || null,
+    multiple: options.multiple ?? false,
+
+    // State
+    query: '',
+    isOpen: false,
+    isLoading: false,
+    activeIndex: -1,
+    filteredItems: [],
+    selectedItems: [],
+    selectedValue: options.value || null,
+    debounceTimer: null,
+    icons: icons,
+
+    // Lifecycle
+    init() {
+      // Set initial value if provided
+      if (this.selectedValue && !this.multiple) {
+        const item = this.items.find(i => this.getValue(i) === this.selectedValue);
+        if (item) {
+          this.query = this.getLabel(item);
+        }
+      }
+
+      // Keyboard navigation
+      this.$watch('isOpen', (open) => {
+        if (open) {
+          this.activeIndex = -1;
+        }
+      });
+    },
+
+    destroy() {
+      if (this.debounceTimer) {
+        clearTimeout(this.debounceTimer);
+      }
+    },
+
+    // Getters
+    getLabel(item) {
+      if (typeof item === 'string') return item;
+      return item[this.labelKey] || item.label || item.name || '';
+    },
+
+    getValue(item) {
+      if (typeof item === 'string') return item;
+      return item[this.valueKey] || item.value || item.id || this.getLabel(item);
+    },
+
+    getDescription(item) {
+      if (typeof item === 'string') return '';
+      return item[this.descriptionKey] || item.description || '';
+    },
+
+    getGroup(item) {
+      if (typeof item === 'string') return null;
+      return item[this.groupKey] || item.group || null;
+    },
+
+    // Filter and search
+    async search() {
+      if (this.query.length < this.minChars) {
+        this.filteredItems = [];
+        this.isOpen = false;
+        return;
+      }
+
+      this.isLoading = true;
+
+      // Debounce
+      if (this.debounceTimer) {
+        clearTimeout(this.debounceTimer);
+      }
+
+      this.debounceTimer = setTimeout(async () => {
+        try {
+          let results;
+
+          // Custom fetch function for remote data
+          if (this.fetchFn) {
+            results = await this.fetchFn(this.query);
+          }
+          // Custom filter function
+          else if (this.filterFn) {
+            results = this.filterFn(this.query, this.items);
+          }
+          // Default filter
+          else {
+            const queryLower = this.query.toLowerCase();
+            results = this.items.filter(item => {
+              const label = this.getLabel(item).toLowerCase();
+              const description = this.getDescription(item).toLowerCase();
+              return label.includes(queryLower) || description.includes(queryLower);
+            });
+          }
+
+          // Limit results
+          this.filteredItems = results.slice(0, this.maxItems);
+
+          // Filter out already selected items in multiple mode
+          if (this.multiple) {
+            const selectedValues = this.selectedItems.map(i => this.getValue(i));
+            this.filteredItems = this.filteredItems.filter(
+              item => !selectedValues.includes(this.getValue(item))
+            );
+          }
+
+          this.isOpen = this.filteredItems.length > 0 || this.showEmpty;
+          this.activeIndex = -1;
+        } catch (error) {
+          console.error('Autocomplete search error:', error);
+          this.filteredItems = [];
+        } finally {
+          this.isLoading = false;
+        }
+      }, this.debounce);
+    },
+
+    // Highlight matching text
+    highlight(text) {
+      if (!this.highlightMatches || !this.query) return text;
+
+      const regex = new RegExp(`(${this.escapeRegex(this.query)})`, 'gi');
+      return text.replace(regex, '<mark class="ux-autocomplete__highlight">$1</mark>');
+    },
+
+    escapeRegex(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    },
+
+    // Selection
+    select(item) {
+      if (this.multiple) {
+        this.selectedItems.push(item);
+        this.query = '';
+        this.filteredItems = [];
+        this.$dispatch('autocomplete:select', {
+          item: item,
+          value: this.getValue(item),
+          items: this.selectedItems,
+          values: this.selectedItems.map(i => this.getValue(i))
+        });
+      } else {
+        this.selectedValue = this.getValue(item);
+        this.query = this.clearOnSelect ? '' : this.getLabel(item);
+        this.$dispatch('autocomplete:select', {
+          item: item,
+          value: this.selectedValue
+        });
+      }
+
+      if (this.closeOnSelect) {
+        this.isOpen = false;
+      }
+
+      this.$refs.input?.focus();
+    },
+
+    removeSelected(index) {
+      const removed = this.selectedItems.splice(index, 1)[0];
+      this.$dispatch('autocomplete:remove', {
+        item: removed,
+        value: this.getValue(removed),
+        items: this.selectedItems
+      });
+    },
+
+    clear() {
+      this.query = '';
+      this.selectedValue = null;
+      this.selectedItems = [];
+      this.filteredItems = [];
+      this.isOpen = false;
+      this.$dispatch('autocomplete:clear');
+      this.$refs.input?.focus();
+    },
+
+    // Keyboard navigation
+    onKeydown(event) {
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          if (!this.isOpen && this.query.length >= this.minChars) {
+            this.search();
+          } else {
+            this.activeIndex = Math.min(this.activeIndex + 1, this.filteredItems.length - 1);
+          }
+          break;
+
+        case 'ArrowUp':
+          event.preventDefault();
+          this.activeIndex = Math.max(this.activeIndex - 1, -1);
+          break;
+
+        case 'Enter':
+          event.preventDefault();
+          if (this.activeIndex >= 0 && this.filteredItems[this.activeIndex]) {
+            this.select(this.filteredItems[this.activeIndex]);
+          }
+          break;
+
+        case 'Escape':
+          this.isOpen = false;
+          this.activeIndex = -1;
+          break;
+
+        case 'Backspace':
+          if (this.multiple && !this.query && this.selectedItems.length > 0) {
+            this.removeSelected(this.selectedItems.length - 1);
+          }
+          break;
+
+        case 'Tab':
+          this.isOpen = false;
+          break;
+      }
+    },
+
+    onInput() {
+      this.search();
+      this.$dispatch('autocomplete:input', { query: this.query });
+    },
+
+    onFocus() {
+      if (this.query.length >= this.minChars) {
+        this.search();
+      }
+      this.$dispatch('autocomplete:focus');
+    },
+
+    onBlur() {
+      // Delay to allow click on dropdown items
+      setTimeout(() => {
+        this.isOpen = false;
+        this.$dispatch('autocomplete:blur');
+      }, 200);
+    },
+
+    // Grouped items
+    get groupedItems() {
+      const groups = new Map();
+
+      this.filteredItems.forEach(item => {
+        const group = this.getGroup(item) || '__ungrouped__';
+        if (!groups.has(group)) {
+          groups.set(group, []);
+        }
+        groups.get(group).push(item);
+      });
+
+      return groups;
+    },
+
+    get hasGroups() {
+      return this.filteredItems.some(item => this.getGroup(item));
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxAutocomplete', autocompleteData);
   }
 })();
 
@@ -3827,12 +4630,14 @@
     .ux-avatar-group {
       display: inline-flex;
       flex-direction: row-reverse;
+      align-items: center;
     }
 
     .ux-avatar-group .ux-avatar {
       margin-left: -12px;
       border: 2px solid var(--ux-background);
       transition: transform var(--ux-transition-fast) var(--ux-ease);
+      box-sizing: content-box;
     }
 
     .ux-avatar-group .ux-avatar:last-child {
@@ -3841,7 +4646,13 @@
 
     .ux-avatar-group .ux-avatar:hover {
       transform: translateY(-4px);
-      z-index: 1;
+      z-index: 10;
+    }
+
+    /* Group Sizes */
+    .ux-avatar-group--xs .ux-avatar {
+      margin-left: -6px;
+      border-width: 1px;
     }
 
     .ux-avatar-group--sm .ux-avatar {
@@ -3850,6 +4661,31 @@
 
     .ux-avatar-group--lg .ux-avatar {
       margin-left: -16px;
+      border-width: 3px;
+    }
+
+    .ux-avatar-group--xl .ux-avatar {
+      margin-left: -20px;
+      border-width: 3px;
+    }
+
+    /* Group Stacking (left-to-right) */
+    .ux-avatar-group--stack-left {
+      flex-direction: row;
+    }
+
+    .ux-avatar-group--stack-left .ux-avatar {
+      margin-left: 0;
+      margin-right: -12px;
+    }
+
+    .ux-avatar-group--stack-left .ux-avatar:last-child {
+      margin-right: 0;
+    }
+
+    /* Group - No Hover Effect */
+    .ux-avatar-group--static .ux-avatar:hover {
+      transform: none;
     }
 
     /* Avatar Group Counter */
@@ -3857,15 +4693,111 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
+      width: var(--ux-avatar-size);
+      height: var(--ux-avatar-size);
       margin-left: -12px;
       border-radius: 50%;
-      background-color: var(--ux-light);
+      background-color: var(--ux-surface-secondary);
       color: var(--ux-text);
       font-size: var(--ux-font-size-sm);
       font-weight: 600;
       border: 2px solid var(--ux-background);
+      cursor: default;
+      box-sizing: content-box;
+    }
+
+    .ux-avatar-group--xs .ux-avatar-group__more {
+      width: var(--ux-avatar-size-xs);
+      height: var(--ux-avatar-size-xs);
+      margin-left: -6px;
+      font-size: 9px;
+      border-width: 1px;
+    }
+
+    .ux-avatar-group--sm .ux-avatar-group__more {
+      width: var(--ux-avatar-size-sm);
+      height: var(--ux-avatar-size-sm);
+      margin-left: -8px;
+      font-size: 10px;
+    }
+
+    .ux-avatar-group--lg .ux-avatar-group__more {
+      width: var(--ux-avatar-size-lg);
+      height: var(--ux-avatar-size-lg);
+      margin-left: -16px;
+      font-size: var(--ux-font-size-md);
+      border-width: 3px;
+    }
+
+    .ux-avatar-group--xl .ux-avatar-group__more {
+      width: var(--ux-avatar-size-xl);
+      height: var(--ux-avatar-size-xl);
+      margin-left: -20px;
+      font-size: var(--ux-font-size-lg);
+      border-width: 3px;
+    }
+
+    .ux-avatar-group--stack-left .ux-avatar-group__more {
+      margin-left: 0;
+      margin-right: -12px;
+    }
+
+    .ux-avatar-group__more:hover {
+      background-color: var(--ux-surface-tertiary);
+    }
+
+    .ux-avatar-group__more--clickable {
+      cursor: pointer;
+    }
+
+    /* Avatar Group Tooltip Container */
+    .ux-avatar-group-wrapper {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .ux-avatar-group__tooltip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: var(--ux-z-tooltip);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      background: var(--ux-gray-900);
+      color: white;
+      font-size: 0.75rem;
+      border-radius: var(--ux-radius-md);
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-avatar-group__tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: var(--ux-gray-900);
+    }
+
+    .ux-avatar-group-wrapper:hover .ux-avatar-group__tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Glass variant for group */
+    .ux-avatar-group--glass .ux-avatar {
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-avatar-group--glass .ux-avatar-group__more {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
     }
 
     /* ========================================
@@ -4319,6 +5251,40 @@
         background: rgba(120, 120, 128, 0.5);
       }
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-back-button {
+        transition: none;
+      }
+
+      .ux-back-button__icon {
+        transition: none;
+      }
+
+      .ux-back-button:hover .ux-back-button__icon {
+        transform: none;
+      }
+
+      .ux-back-button:active {
+        transform: none;
+      }
+
+      .ux-back-button--animate-in {
+        animation: none;
+      }
+
+      .ux-back-button--collapsible .ux-back-button__text {
+        transition: none;
+      }
+
+      .ux-back-button--glass {
+        transition: none;
+      }
+    }
   `;
 
   // Default back arrow SVG (iOS SF Symbols style - thin chevron)
@@ -4631,6 +5597,623 @@
     styleEl.id = 'ux-badge-styles';
     styleEl.textContent = styles;
     document.head.appendChild(styleEl);
+  }
+})();
+
+/**
+ * UX Banner Component
+ * Dismissable notification bar estilo iOS
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Banner - CSS Variables
+    ======================================== */
+
+    :root {
+      --ux-banner-min-height: 48px;
+      --ux-banner-padding-x: var(--ux-space-lg);
+      --ux-banner-padding-y: var(--ux-space-md);
+      --ux-banner-gap: var(--ux-space-md);
+      --ux-banner-icon-size: 20px;
+      --ux-banner-border-radius: 0;
+      --ux-banner-font-size: var(--ux-font-size-sm);
+    }
+
+    /* ========================================
+       UX Banner Base
+    ======================================== */
+
+    .ux-banner {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-banner-gap);
+      min-height: var(--ux-banner-min-height);
+      padding: var(--ux-banner-padding-y) var(--ux-banner-padding-x);
+      background-color: var(--ux-surface);
+      border-bottom: 1px solid var(--ux-border-color);
+      font-size: var(--ux-banner-font-size);
+      line-height: 1.4;
+      width: 100%;
+      box-sizing: border-box;
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 200px;
+      overflow: hidden;
+      transition:
+        opacity var(--ux-transition-normal) var(--ux-ease),
+        transform var(--ux-transition-normal) var(--ux-ease),
+        max-height var(--ux-transition-normal) var(--ux-ease),
+        padding var(--ux-transition-normal) var(--ux-ease);
+    }
+
+    /* Hidden state for dismiss animation */
+    .ux-banner--hidden {
+      opacity: 0;
+      transform: translateY(-100%);
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-bottom-width: 0;
+    }
+
+    /* Sticky positioning */
+    .ux-banner--sticky {
+      position: sticky;
+      top: 0;
+      z-index: var(--ux-z-sticky);
+    }
+
+    /* Fixed positioning (full width at top) */
+    .ux-banner--fixed {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: var(--ux-z-fixed);
+    }
+
+    /* Safe area support for fixed banner */
+    .ux-banner--fixed.ux-banner--safe-area {
+      padding-top: calc(var(--ux-banner-padding-y) + env(safe-area-inset-top));
+    }
+
+    /* ========================================
+       Banner Icon
+    ======================================== */
+
+    .ux-banner__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--ux-banner-icon-size);
+      height: var(--ux-banner-icon-size);
+      flex-shrink: 0;
+    }
+
+    .ux-banner__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ========================================
+       Banner Content
+    ======================================== */
+
+    .ux-banner__content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .ux-banner__title {
+      font-weight: var(--ux-font-weight-semibold);
+      color: var(--ux-text);
+      margin: 0;
+    }
+
+    .ux-banner__message {
+      color: var(--ux-text-secondary);
+      margin: 0;
+    }
+
+    /* Single line content (no title, just message) */
+    .ux-banner__content--inline {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    /* ========================================
+       Banner Actions
+    ======================================== */
+
+    .ux-banner__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      flex-shrink: 0;
+    }
+
+    .ux-banner__action {
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      background: none;
+      border: none;
+      color: var(--ux-primary);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-sm);
+      font-weight: var(--ux-font-weight-semibold);
+      cursor: pointer;
+      border-radius: var(--ux-border-radius-sm);
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-banner__action:hover {
+      background-color: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    .ux-banner__action:active {
+      background-color: rgba(var(--ux-primary-rgb), 0.15);
+    }
+
+    /* ========================================
+       Banner Close Button
+    ======================================== */
+
+    .ux-banner__close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      background: none;
+      border: none;
+      color: var(--ux-text-tertiary);
+      cursor: pointer;
+      flex-shrink: 0;
+      border-radius: var(--ux-border-radius-sm);
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        color var(--ux-transition-fast) var(--ux-ease),
+        background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-banner__close:hover {
+      color: var(--ux-text);
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .ux-banner__close:active {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .ux-banner__close svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ========================================
+       Banner Color Variants
+    ======================================== */
+
+    /* Info (default blue) */
+    .ux-banner--info {
+      background-color: rgba(var(--ux-info-rgb), 0.1);
+      border-bottom-color: rgba(var(--ux-info-rgb), 0.2);
+    }
+
+    .ux-banner--info .ux-banner__icon {
+      color: var(--ux-info);
+    }
+
+    .ux-banner--info .ux-banner__action {
+      color: var(--ux-info);
+    }
+
+    .ux-banner--info .ux-banner__action:hover {
+      background-color: rgba(var(--ux-info-rgb), 0.15);
+    }
+
+    /* Success (green) */
+    .ux-banner--success {
+      background-color: rgba(var(--ux-success-rgb), 0.1);
+      border-bottom-color: rgba(var(--ux-success-rgb), 0.2);
+    }
+
+    .ux-banner--success .ux-banner__icon {
+      color: var(--ux-success);
+    }
+
+    .ux-banner--success .ux-banner__action {
+      color: var(--ux-success);
+    }
+
+    .ux-banner--success .ux-banner__action:hover {
+      background-color: rgba(var(--ux-success-rgb), 0.15);
+    }
+
+    /* Warning (amber) */
+    .ux-banner--warning {
+      background-color: rgba(var(--ux-warning-rgb), 0.1);
+      border-bottom-color: rgba(var(--ux-warning-rgb), 0.2);
+    }
+
+    .ux-banner--warning .ux-banner__icon {
+      color: var(--ux-warning);
+    }
+
+    .ux-banner--warning .ux-banner__action {
+      color: var(--ux-warning-shade);
+    }
+
+    .ux-banner--warning .ux-banner__action:hover {
+      background-color: rgba(var(--ux-warning-rgb), 0.15);
+    }
+
+    /* Danger (red) */
+    .ux-banner--danger {
+      background-color: rgba(var(--ux-danger-rgb), 0.1);
+      border-bottom-color: rgba(var(--ux-danger-rgb), 0.2);
+    }
+
+    .ux-banner--danger .ux-banner__icon {
+      color: var(--ux-danger);
+    }
+
+    .ux-banner--danger .ux-banner__action {
+      color: var(--ux-danger);
+    }
+
+    .ux-banner--danger .ux-banner__action:hover {
+      background-color: rgba(var(--ux-danger-rgb), 0.15);
+    }
+
+    /* ========================================
+       Banner Filled Variants (solid background)
+    ======================================== */
+
+    .ux-banner--info-filled {
+      background-color: var(--ux-info);
+      color: var(--ux-info-contrast);
+      border-bottom-color: var(--ux-info-shade);
+    }
+
+    .ux-banner--info-filled .ux-banner__icon,
+    .ux-banner--info-filled .ux-banner__title,
+    .ux-banner--info-filled .ux-banner__message {
+      color: var(--ux-info-contrast);
+    }
+
+    .ux-banner--info-filled .ux-banner__action {
+      color: var(--ux-info-contrast);
+    }
+
+    .ux-banner--info-filled .ux-banner__action:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .ux-banner--info-filled .ux-banner__close {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .ux-banner--info-filled .ux-banner__close:hover {
+      color: var(--ux-info-contrast);
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .ux-banner--success-filled {
+      background-color: var(--ux-success);
+      color: var(--ux-success-contrast);
+      border-bottom-color: var(--ux-success-shade);
+    }
+
+    .ux-banner--success-filled .ux-banner__icon,
+    .ux-banner--success-filled .ux-banner__title,
+    .ux-banner--success-filled .ux-banner__message {
+      color: var(--ux-success-contrast);
+    }
+
+    .ux-banner--success-filled .ux-banner__action {
+      color: var(--ux-success-contrast);
+    }
+
+    .ux-banner--success-filled .ux-banner__action:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .ux-banner--success-filled .ux-banner__close {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .ux-banner--success-filled .ux-banner__close:hover {
+      color: var(--ux-success-contrast);
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .ux-banner--warning-filled {
+      background-color: var(--ux-warning);
+      color: var(--ux-warning-contrast);
+      border-bottom-color: var(--ux-warning-shade);
+    }
+
+    .ux-banner--warning-filled .ux-banner__icon,
+    .ux-banner--warning-filled .ux-banner__title,
+    .ux-banner--warning-filled .ux-banner__message {
+      color: var(--ux-warning-contrast);
+    }
+
+    .ux-banner--warning-filled .ux-banner__action {
+      color: var(--ux-warning-contrast);
+    }
+
+    .ux-banner--warning-filled .ux-banner__action:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .ux-banner--warning-filled .ux-banner__close {
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    .ux-banner--warning-filled .ux-banner__close:hover {
+      color: var(--ux-warning-contrast);
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .ux-banner--danger-filled {
+      background-color: var(--ux-danger);
+      color: var(--ux-danger-contrast);
+      border-bottom-color: var(--ux-danger-shade);
+    }
+
+    .ux-banner--danger-filled .ux-banner__icon,
+    .ux-banner--danger-filled .ux-banner__title,
+    .ux-banner--danger-filled .ux-banner__message {
+      color: var(--ux-danger-contrast);
+    }
+
+    .ux-banner--danger-filled .ux-banner__action {
+      color: var(--ux-danger-contrast);
+    }
+
+    .ux-banner--danger-filled .ux-banner__action:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .ux-banner--danger-filled .ux-banner__close {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .ux-banner--danger-filled .ux-banner__close:hover {
+      color: var(--ux-danger-contrast);
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter comes from universal selector [class*="--glass"] in ux-core.js */
+    .ux-banner--glass {
+      border-bottom: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    .ux-banner--glass .ux-banner__action:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .ux-banner--glass .ux-banner__close:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-banner--glass {
+        background-color: var(--ux-surface);
+      }
+    }
+
+    /* ========================================
+       Inline/Card Variant (with border radius)
+    ======================================== */
+
+    .ux-banner--inline {
+      border-radius: var(--ux-border-radius-lg);
+      border: 1px solid var(--ux-border-color);
+      margin: var(--ux-space-md);
+      width: auto;
+    }
+
+    .ux-banner--inline.ux-banner--info {
+      border-color: rgba(var(--ux-info-rgb), 0.3);
+    }
+
+    .ux-banner--inline.ux-banner--success {
+      border-color: rgba(var(--ux-success-rgb), 0.3);
+    }
+
+    .ux-banner--inline.ux-banner--warning {
+      border-color: rgba(var(--ux-warning-rgb), 0.3);
+    }
+
+    .ux-banner--inline.ux-banner--danger {
+      border-color: rgba(var(--ux-danger-rgb), 0.3);
+    }
+
+    /* ========================================
+       Dark Mode Support
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-banner {
+        background-color: var(--ux-surface);
+      }
+
+      .ux-banner__close:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .ux-banner--glass .ux-banner__action:hover,
+      .ux-banner--glass .ux-banner__close:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .ux-dark .ux-banner {
+      background-color: var(--ux-surface);
+    }
+
+    .ux-dark .ux-banner__close:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .ux-dark .ux-banner--glass .ux-banner__action:hover,
+    .ux-dark .ux-banner--glass .ux-banner__close:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ========================================
+       Responsive Adjustments
+    ======================================== */
+
+    @media (max-width: 767px) {
+      .ux-banner {
+        --ux-banner-padding-x: var(--ux-space-md);
+        --ux-banner-gap: var(--ux-space-sm);
+      }
+
+      .ux-banner__actions {
+        flex-direction: column;
+        align-items: flex-end;
+      }
+    }
+
+    /* ========================================
+       Reduced Motion Support
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-banner {
+        transition: opacity 0.1s ease;
+        transform: none !important;
+      }
+
+      .ux-banner--hidden {
+        transform: none;
+      }
+
+      .ux-banner__action,
+      .ux-banner__close {
+        transition: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-banner-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-banner-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for banner
+  // ARIA: role="alert" or role="status" for announcements
+  const bannerComponent = (config = {}) => ({
+    visible: config.visible !== false,
+    autoDismiss: config.autoDismiss || 0,
+    _timer: null,
+    bannerId: config.id || 'ux-banner-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for banner
+    get ariaAttrs() {
+      const isUrgent = config.type === 'danger' || config.type === 'warning';
+      return {
+        'role': isUrgent ? 'alert' : 'status',
+        'aria-live': isUrgent ? 'assertive' : 'polite',
+        'aria-atomic': 'true'
+      };
+    },
+
+    init() {
+      // Auto dismiss if configured
+      if (this.autoDismiss > 0 && this.visible) {
+        this._startAutoDismiss();
+      }
+    },
+
+    destroy() {
+      if (this._timer) {
+        clearTimeout(this._timer);
+        this._timer = null;
+      }
+    },
+
+    _startAutoDismiss() {
+      if (this._timer) {
+        clearTimeout(this._timer);
+      }
+      this._timer = setTimeout(() => {
+        this.dismiss();
+      }, this.autoDismiss);
+    },
+
+    show(options = {}) {
+      if (options.autoDismiss !== undefined) {
+        this.autoDismiss = options.autoDismiss;
+      }
+
+      this.visible = true;
+      this.$dispatch('banner:show', { id: this.bannerId });
+
+      // Announce to screen readers
+      if (window.UX && window.UX.announce) {
+        const message = this.$el.querySelector('.ux-banner__message')?.textContent || '';
+        const isUrgent = this.$el.classList.contains('ux-banner--danger') ||
+                         this.$el.classList.contains('ux-banner--warning');
+        window.UX.announce(message, isUrgent ? 'assertive' : 'polite');
+      }
+
+      // Start auto dismiss timer
+      if (this.autoDismiss > 0) {
+        this._startAutoDismiss();
+      }
+    },
+
+    dismiss() {
+      if (this._timer) {
+        clearTimeout(this._timer);
+        this._timer = null;
+      }
+
+      this.visible = false;
+      this.$dispatch('banner:dismiss', { id: this.bannerId });
+    },
+
+    toggle() {
+      if (this.visible) {
+        this.dismiss();
+      } else {
+        this.show();
+      }
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxBanner', bannerComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxBanner', bannerComponent);
+    });
   }
 })();
 
@@ -5255,6 +6838,28 @@
       width: calc(var(--ux-button-icon-size) * 1.2);
       height: calc(var(--ux-button-icon-size) * 1.2);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-button {
+        transition: none;
+      }
+
+      .ux-button::before {
+        transition: none;
+      }
+
+      .ux-button:active {
+        transform: none;
+      }
+
+      .ux-button--loading::after {
+        animation: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -5291,6 +6896,2066 @@
   } else {
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxButton', buttonComponent);
+    });
+  }
+})();
+
+/**
+ * UX Calculator Component
+ * Scientific calculator with iOS-style design
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Calculator Variables
+    ======================================== */
+
+    :root {
+      --ux-calculator-width: 320px;
+      --ux-calculator-btn-size: 64px;
+      --ux-calculator-btn-size-sm: 52px;
+      --ux-calculator-btn-gap: 12px;
+      --ux-calculator-btn-gap-sm: 8px;
+      --ux-calculator-border-radius: var(--ux-border-radius-xl);
+      --ux-calculator-display-font-size: 3rem;
+      --ux-calculator-display-font-size-sm: 2rem;
+      --ux-calculator-expression-font-size: 1rem;
+      --ux-calculator-btn-font-size: 1.5rem;
+      --ux-calculator-btn-font-size-sm: 1.25rem;
+    }
+
+    /* ========================================
+       UX Calculator Container
+    ======================================== */
+
+    .ux-calculator {
+      display: flex;
+      flex-direction: column;
+      width: var(--ux-calculator-width);
+      max-width: 100%;
+      padding: var(--ux-space-lg);
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-calculator-border-radius);
+      box-shadow: var(--ux-shadow-lg);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .ux-calculator--full-width {
+      width: 100%;
+    }
+
+    /* ========================================
+       Compact Variant
+    ======================================== */
+
+    .ux-calculator--compact {
+      --ux-calculator-btn-size: var(--ux-calculator-btn-size-sm);
+      --ux-calculator-btn-gap: var(--ux-calculator-btn-gap-sm);
+      --ux-calculator-display-font-size: var(--ux-calculator-display-font-size-sm);
+      --ux-calculator-btn-font-size: var(--ux-calculator-btn-font-size-sm);
+      padding: var(--ux-space-md);
+    }
+
+    .ux-calculator--compact .ux-calculator__display {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      min-height: 80px;
+    }
+
+    /* ========================================
+       Calculator Display
+    ======================================== */
+
+    .ux-calculator__display {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+      min-height: 120px;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+      background-color: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+    }
+
+    .ux-calculator__expression {
+      width: 100%;
+      text-align: right;
+      font-size: var(--ux-calculator-expression-font-size);
+      font-weight: 400;
+      color: var(--ux-text-secondary);
+      min-height: 1.5em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ux-calculator__result {
+      width: 100%;
+      text-align: right;
+      font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+      font-size: var(--ux-calculator-display-font-size);
+      font-weight: 300;
+      font-variant-numeric: tabular-nums;
+      color: var(--ux-text);
+      line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: font-size var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-calculator__result--small {
+      font-size: calc(var(--ux-calculator-display-font-size) * 0.7);
+    }
+
+    .ux-calculator__result--error {
+      color: var(--ux-danger);
+    }
+
+    /* ========================================
+       Calculator Keypad
+    ======================================== */
+
+    .ux-calculator__keypad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--ux-calculator-btn-gap);
+    }
+
+    /* ========================================
+       Calculator Buttons
+    ======================================== */
+
+    .ux-calculator__btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: var(--ux-calculator-btn-size);
+      min-height: var(--ux-calculator-btn-size);
+      padding: var(--ux-space-sm);
+      background-color: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-calculator-btn-font-size);
+      font-weight: 500;
+      color: var(--ux-text);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        transform 100ms var(--ux-ease),
+        box-shadow var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-calculator__btn:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-calculator__btn:active {
+      transform: scale(0.95);
+      background-color: var(--ux-surface-tertiary);
+    }
+
+    .ux-calculator__btn:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: 2px;
+    }
+
+    /* Number buttons */
+    .ux-calculator__btn--number {
+      background-color: var(--ux-surface);
+      font-weight: 400;
+    }
+
+    .ux-calculator__btn--number:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    /* Operator buttons */
+    .ux-calculator__btn--operator {
+      background-color: var(--ux-warning);
+      border-color: var(--ux-warning);
+      color: white;
+    }
+
+    .ux-calculator__btn--operator:hover {
+      background-color: var(--ux-warning-shade, #e89806);
+    }
+
+    .ux-calculator__btn--operator:active {
+      background-color: var(--ux-warning-shade, #e89806);
+    }
+
+    .ux-calculator__btn--operator.is-active {
+      background-color: white;
+      color: var(--ux-warning);
+    }
+
+    /* Function buttons (C, +/-, %) */
+    .ux-calculator__btn--function {
+      background-color: var(--ux-surface-secondary);
+      border-color: var(--ux-border-color);
+      color: var(--ux-text);
+    }
+
+    .ux-calculator__btn--function:hover {
+      background-color: var(--ux-surface-tertiary);
+    }
+
+    /* Equals button */
+    .ux-calculator__btn--equals {
+      background-color: var(--ux-primary);
+      border-color: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+    }
+
+    .ux-calculator__btn--equals:hover {
+      background-color: var(--ux-primary-shade);
+    }
+
+    .ux-calculator__btn--equals:active {
+      background-color: var(--ux-primary-shade);
+    }
+
+    /* Zero button spans 2 columns */
+    .ux-calculator__btn--wide {
+      grid-column: span 2;
+    }
+
+    /* Button icon */
+    .ux-calculator__btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    .ux-calculator--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-calculator--glass .ux-calculator__display {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-calculator--glass .ux-calculator__btn {
+      background: var(--ux-glass-bg-thin);
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-calculator--glass .ux-calculator__btn:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-calculator--glass .ux-calculator__btn--number {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-calculator--glass .ux-calculator__btn--function {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-calculator--glass .ux-calculator__btn--operator {
+      background: rgba(var(--ux-warning-rgb, 234, 179, 8), 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .ux-calculator--glass .ux-calculator__btn--equals {
+      background: rgba(var(--ux-primary-rgb, 59, 130, 246), 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    /* ========================================
+       Responsive
+    ======================================== */
+
+    @media (max-width: 767px) {
+      .ux-calculator {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .ux-calculator__btn {
+        min-height: 56px;
+      }
+    }
+
+    /* ========================================
+       Dark Mode
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-calculator {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .ux-calculator__btn--number {
+        background-color: var(--ux-gray-800);
+        border-color: var(--ux-gray-700);
+      }
+
+      .ux-calculator__btn--number:hover {
+        background-color: var(--ux-gray-700);
+      }
+
+      .ux-calculator__btn--function {
+        background-color: var(--ux-gray-700);
+        border-color: var(--ux-gray-600);
+      }
+
+      .ux-calculator__btn--function:hover {
+        background-color: var(--ux-gray-600);
+      }
+    }
+
+    .ux-dark .ux-calculator {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .ux-dark .ux-calculator__btn--number {
+      background-color: var(--ux-gray-800);
+      border-color: var(--ux-gray-700);
+    }
+
+    .ux-dark .ux-calculator__btn--number:hover {
+      background-color: var(--ux-gray-700);
+    }
+
+    .ux-dark .ux-calculator__btn--function {
+      background-color: var(--ux-gray-700);
+      border-color: var(--ux-gray-600);
+    }
+
+    .ux-dark .ux-calculator__btn--function:hover {
+      background-color: var(--ux-gray-600);
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-calculator__btn {
+        transition: none;
+      }
+
+      .ux-calculator__btn:active {
+        transform: none;
+      }
+
+      .ux-calculator__result {
+        transition: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-calculator-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-calculator-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for calculator
+  const calculatorComponent = (config = {}) => ({
+    // State
+    display: '0',
+    expression: '',
+    currentOperand: '',
+    previousOperand: '',
+    operator: null,
+    waitingForOperand: false,
+    hasError: false,
+    lastResult: null,
+
+    // Configuration
+    maxDigits: config.maxDigits || 12,
+    precision: config.precision || 10,
+
+    // Initialize
+    init() {
+      // Keyboard support
+      this._keyHandler = (e) => {
+        // Only respond if calculator or body is focused
+        if (!this.$el.contains(document.activeElement) && document.activeElement !== document.body) return;
+
+        // Prevent default for calculator keys
+        const calculatorKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '+', '-', '*', '/', 'Enter', 'Escape', 'Backspace', '%'];
+        if (calculatorKeys.includes(e.key)) {
+          e.preventDefault();
+        }
+
+        // Handle keys
+        if (e.key >= '0' && e.key <= '9') {
+          this.inputDigit(e.key);
+        } else if (e.key === '.') {
+          this.inputDecimal();
+        } else if (e.key === '+') {
+          this.inputOperator('+');
+        } else if (e.key === '-') {
+          this.inputOperator('-');
+        } else if (e.key === '*') {
+          this.inputOperator('*');
+        } else if (e.key === '/') {
+          this.inputOperator('/');
+        } else if (e.key === '%') {
+          this.inputPercent();
+        } else if (e.key === 'Enter' || e.key === '=') {
+          this.calculate();
+        } else if (e.key === 'Escape') {
+          this.clear();
+        } else if (e.key === 'Backspace') {
+          this.backspace();
+        }
+      };
+
+      document.addEventListener('keydown', this._keyHandler);
+    },
+
+    destroy() {
+      if (this._keyHandler) {
+        document.removeEventListener('keydown', this._keyHandler);
+      }
+    },
+
+    // Input a digit (0-9)
+    inputDigit(digit) {
+      if (this.hasError) {
+        this.clear();
+      }
+
+      if (this.waitingForOperand) {
+        this.currentOperand = digit;
+        this.waitingForOperand = false;
+      } else {
+        // Prevent multiple leading zeros
+        if (this.currentOperand === '0' && digit === '0') return;
+
+        // Replace leading zero unless it's followed by decimal
+        if (this.currentOperand === '0' && digit !== '0') {
+          this.currentOperand = digit;
+        } else {
+          // Check max digits
+          const digitsOnly = this.currentOperand.replace(/[^0-9]/g, '');
+          if (digitsOnly.length >= this.maxDigits) return;
+
+          this.currentOperand += digit;
+        }
+      }
+
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Input decimal point
+    inputDecimal() {
+      if (this.hasError) {
+        this.clear();
+      }
+
+      if (this.waitingForOperand) {
+        this.currentOperand = '0.';
+        this.waitingForOperand = false;
+      } else if (!this.currentOperand.includes('.')) {
+        this.currentOperand = this.currentOperand === '' ? '0.' : this.currentOperand + '.';
+      }
+
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Input operator (+, -, *, /)
+    inputOperator(op) {
+      if (this.hasError) {
+        this.clear();
+      }
+
+      const inputValue = parseFloat(this.currentOperand) || 0;
+
+      // If we have a previous operand and an operator, calculate first
+      if (this.previousOperand !== '' && this.operator && !this.waitingForOperand) {
+        const result = this.performCalculation();
+        if (result === null) return; // Error occurred
+
+        this.currentOperand = String(result);
+        this.previousOperand = String(result);
+      } else {
+        this.previousOperand = this.currentOperand || '0';
+      }
+
+      this.operator = op;
+      this.waitingForOperand = true;
+      this.updateExpression();
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Perform the calculation
+    performCalculation() {
+      const prev = parseFloat(this.previousOperand);
+      const current = parseFloat(this.currentOperand);
+
+      if (isNaN(prev) || isNaN(current)) return null;
+
+      let result;
+      switch (this.operator) {
+        case '+':
+          result = prev + current;
+          break;
+        case '-':
+          result = prev - current;
+          break;
+        case '*':
+          result = prev * current;
+          break;
+        case '/':
+          if (current === 0) {
+            this.showError('Error');
+            return null;
+          }
+          result = prev / current;
+          break;
+        default:
+          return current;
+      }
+
+      // Round to avoid floating point errors
+      result = parseFloat(result.toPrecision(this.precision));
+
+      return result;
+    },
+
+    // Calculate result (equals)
+    calculate() {
+      if (this.hasError) {
+        this.clear();
+        return;
+      }
+
+      if (this.operator && this.previousOperand !== '') {
+        const result = this.performCalculation();
+        if (result === null) return; // Error occurred
+
+        // Store expression before clearing
+        const prevOp = this.operator;
+        const prevOperand = this.previousOperand;
+        const currOperand = this.currentOperand;
+
+        this.expression = `${this.formatNumber(prevOperand)} ${this.getOperatorSymbol(prevOp)} ${this.formatNumber(currOperand)} =`;
+        this.currentOperand = String(result);
+        this.lastResult = result;
+        this.previousOperand = '';
+        this.operator = null;
+        this.waitingForOperand = true;
+
+        this.updateDisplay();
+        this.emitResult(result);
+      }
+    },
+
+    // Clear all
+    clear() {
+      this.display = '0';
+      this.expression = '';
+      this.currentOperand = '';
+      this.previousOperand = '';
+      this.operator = null;
+      this.waitingForOperand = false;
+      this.hasError = false;
+      this.lastResult = null;
+      this.emitChange();
+    },
+
+    // Clear entry (CE) - clear current operand only
+    clearEntry() {
+      if (this.hasError) {
+        this.clear();
+        return;
+      }
+
+      this.currentOperand = '';
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Backspace - delete last digit
+    backspace() {
+      if (this.hasError || this.waitingForOperand) {
+        this.clear();
+        return;
+      }
+
+      if (this.currentOperand.length > 0) {
+        this.currentOperand = this.currentOperand.slice(0, -1);
+        if (this.currentOperand === '' || this.currentOperand === '-') {
+          this.currentOperand = '';
+        }
+        this.updateDisplay();
+        this.emitChange();
+      }
+    },
+
+    // Toggle sign (+/-)
+    toggleSign() {
+      if (this.hasError) {
+        this.clear();
+        return;
+      }
+
+      if (this.currentOperand === '' || this.currentOperand === '0') return;
+
+      if (this.currentOperand.startsWith('-')) {
+        this.currentOperand = this.currentOperand.slice(1);
+      } else {
+        this.currentOperand = '-' + this.currentOperand;
+      }
+
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Input percent
+    inputPercent() {
+      if (this.hasError) {
+        this.clear();
+        return;
+      }
+
+      const value = parseFloat(this.currentOperand) || 0;
+      const result = value / 100;
+      this.currentOperand = String(result);
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Show error
+    showError(message) {
+      this.display = message;
+      this.hasError = true;
+      this.currentOperand = '';
+      this.previousOperand = '';
+      this.operator = null;
+      this.waitingForOperand = false;
+    },
+
+    // Update the expression display
+    updateExpression() {
+      if (this.operator && this.previousOperand !== '') {
+        this.expression = `${this.formatNumber(this.previousOperand)} ${this.getOperatorSymbol(this.operator)}`;
+      } else {
+        this.expression = '';
+      }
+    },
+
+    // Update the main display
+    updateDisplay() {
+      if (this.hasError) return;
+
+      const value = this.currentOperand || '0';
+      this.display = this.formatNumber(value);
+    },
+
+    // Format number for display
+    formatNumber(numStr) {
+      if (numStr === '' || numStr === '-') return '0';
+
+      const num = parseFloat(numStr);
+      if (isNaN(num)) return numStr;
+
+      // Check if it's a decimal that ends with .
+      if (numStr.endsWith('.')) {
+        const parts = numStr.split('.');
+        const intPart = parseFloat(parts[0]) || 0;
+        return intPart.toLocaleString('en-US') + '.';
+      }
+
+      // Check if it has decimal places
+      if (numStr.includes('.')) {
+        const parts = numStr.split('.');
+        const intPart = parseFloat(parts[0]) || 0;
+        return intPart.toLocaleString('en-US') + '.' + parts[1];
+      }
+
+      return num.toLocaleString('en-US');
+    },
+
+    // Get operator symbol for display
+    getOperatorSymbol(op) {
+      const symbols = {
+        '+': '+',
+        '-': '-',
+        '*': '\u00D7',
+        '/': '\u00F7'
+      };
+      return symbols[op] || op;
+    },
+
+    // Check if display needs smaller font
+    needsSmallFont() {
+      return this.display.length > 10;
+    },
+
+    // Check if operator is active
+    isOperatorActive(op) {
+      return this.operator === op && this.waitingForOperand;
+    },
+
+    // Emit change event
+    emitChange() {
+      this.$dispatch('calculator-change', {
+        display: this.display,
+        expression: this.expression,
+        currentOperand: this.currentOperand,
+        operator: this.operator
+      });
+    },
+
+    // Emit result event
+    emitResult(result) {
+      this.$dispatch('calculator-result', {
+        result: result,
+        display: this.display,
+        expression: this.expression
+      });
+    },
+
+    // Get numeric value
+    getValue() {
+      return parseFloat(this.currentOperand) || 0;
+    },
+
+    // Set value programmatically
+    setValue(value) {
+      this.clear();
+      this.currentOperand = String(value);
+      this.updateDisplay();
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxCalculator', calculatorComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxCalculator', calculatorComponent);
+    });
+  }
+})();
+
+/**
+ * UX Calendar Component
+ * Monthly calendar view with date selection, range selection, and events
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Calendar Container
+       ========================================================================== */
+
+    :root {
+      --ux-calendar-width: 320px;
+      --ux-calendar-cell-size: 40px;
+      --ux-calendar-gap: 2px;
+      --ux-calendar-radius: var(--ux-radius-xl);
+      --ux-calendar-padding: var(--ux-space-md);
+    }
+
+    .ux-calendar {
+      width: var(--ux-calendar-width);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-calendar-radius);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ==========================================================================
+       Header
+       ========================================================================== */
+
+    .ux-calendar__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-calendar-padding);
+      background: var(--ux-surface);
+    }
+
+    .ux-calendar__title {
+      font-size: 1.0625rem;
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+
+    .ux-calendar__nav {
+      display: flex;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-calendar__nav-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--ux-surface-secondary);
+      border: none;
+      border-radius: var(--ux-radius-md);
+      color: var(--ux-text);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-calendar__nav-btn:hover {
+      background: var(--ux-surface-tertiary);
+    }
+
+    .ux-calendar__nav-btn:active {
+      transform: scale(0.95);
+    }
+
+    .ux-calendar__nav-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ==========================================================================
+       Weekdays
+       ========================================================================== */
+
+    .ux-calendar__weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: var(--ux-calendar-gap);
+      padding: 0 var(--ux-calendar-padding);
+      padding-bottom: var(--ux-space-xs);
+    }
+
+    .ux-calendar__weekday {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ux-text-tertiary);
+      text-transform: uppercase;
+    }
+
+    /* ==========================================================================
+       Days Grid
+       ========================================================================== */
+
+    .ux-calendar__days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: var(--ux-calendar-gap);
+      padding: 0 var(--ux-calendar-padding);
+      padding-bottom: var(--ux-calendar-padding);
+    }
+
+    .ux-calendar__day {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--ux-calendar-cell-size);
+      height: var(--ux-calendar-cell-size);
+      font-size: 0.9375rem;
+      color: var(--ux-text);
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-calendar__day:hover:not(.ux-calendar__day--disabled):not(.ux-calendar__day--selected) {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-calendar__day:active:not(.ux-calendar__day--disabled) {
+      transform: scale(0.9);
+    }
+
+    /* Day States */
+    .ux-calendar__day--other-month {
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-calendar__day--today {
+      font-weight: 600;
+      color: var(--ux-primary);
+    }
+
+    .ux-calendar__day--today::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: var(--ux-primary);
+      border-radius: 50%;
+    }
+
+    .ux-calendar__day--selected {
+      background: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+      font-weight: 500;
+    }
+
+    .ux-calendar__day--selected::after {
+      display: none;
+    }
+
+    .ux-calendar__day--disabled {
+      color: var(--ux-text-tertiary);
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ux-calendar__day--weekend {
+      color: var(--ux-danger);
+    }
+
+    .ux-calendar__day--weekend.ux-calendar__day--other-month {
+      color: var(--ux-text-tertiary);
+    }
+
+    /* ==========================================================================
+       Range Selection
+       ========================================================================== */
+
+    .ux-calendar__day--range-start {
+      background: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+      border-radius: 50% 0 0 50%;
+    }
+
+    .ux-calendar__day--range-end {
+      background: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+      border-radius: 0 50% 50% 0;
+    }
+
+    .ux-calendar__day--range-start.ux-calendar__day--range-end {
+      border-radius: 50%;
+    }
+
+    .ux-calendar__day--in-range {
+      background: var(--ux-primary-tint);
+      border-radius: 0;
+    }
+
+    .ux-calendar__day--range-hover {
+      background: var(--ux-primary-tint);
+    }
+
+    /* ==========================================================================
+       Event Indicators
+       ========================================================================== */
+
+    .ux-calendar__day-events {
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 2px;
+    }
+
+    .ux-calendar__day-event {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--ux-primary);
+    }
+
+    .ux-calendar__day-event--success { background: var(--ux-success); }
+    .ux-calendar__day-event--warning { background: var(--ux-warning); }
+    .ux-calendar__day-event--danger { background: var(--ux-danger); }
+
+    .ux-calendar__day--selected .ux-calendar__day-event {
+      background: var(--ux-primary-contrast);
+    }
+
+    /* ==========================================================================
+       Footer
+       ========================================================================== */
+
+    .ux-calendar__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-sm) var(--ux-calendar-padding);
+      background: var(--ux-surface-secondary);
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    .ux-calendar__today-btn {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--ux-primary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      border-radius: var(--ux-radius-md);
+      transition: background var(--ux-transition-fast);
+    }
+
+    .ux-calendar__today-btn:hover {
+      background: var(--ux-primary-tint);
+    }
+
+    .ux-calendar__clear-btn {
+      font-size: 0.875rem;
+      color: var(--ux-text-secondary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      border-radius: var(--ux-radius-md);
+      transition: background var(--ux-transition-fast);
+    }
+
+    .ux-calendar__clear-btn:hover {
+      background: var(--ux-surface-tertiary);
+    }
+
+    /* ==========================================================================
+       Month/Year Picker
+       ========================================================================== */
+
+    .ux-calendar__picker {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--ux-space-sm);
+      padding: var(--ux-calendar-padding);
+    }
+
+    .ux-calendar__picker-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 44px;
+      font-size: 0.9375rem;
+      color: var(--ux-text);
+      background: transparent;
+      border: none;
+      border-radius: var(--ux-radius-md);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-calendar__picker-item:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-calendar__picker-item--selected {
+      background: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+    }
+
+    .ux-calendar__picker-item--current {
+      font-weight: 600;
+      color: var(--ux-primary);
+    }
+
+    /* ==========================================================================
+       Size Variants
+       ========================================================================== */
+
+    .ux-calendar--sm {
+      --ux-calendar-width: 280px;
+      --ux-calendar-cell-size: 32px;
+    }
+
+    .ux-calendar--lg {
+      --ux-calendar-width: 380px;
+      --ux-calendar-cell-size: 48px;
+    }
+
+    .ux-calendar--full {
+      --ux-calendar-width: 100%;
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-calendar--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-calendar--glass .ux-calendar__header,
+    .ux-calendar--glass .ux-calendar__footer {
+      background: transparent;
+    }
+
+    .ux-calendar--glass .ux-calendar__nav-btn {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .ux-calendar--glass .ux-calendar__nav-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ==========================================================================
+       Inline Variant (no border/shadow)
+       ========================================================================== */
+
+    .ux-calendar--inline {
+      border: none;
+      box-shadow: none;
+      background: transparent;
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-calendar--glass .ux-calendar__nav-btn {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .ux-calendar--glass .ux-calendar__nav-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+    }
+
+    .ux-dark .ux-calendar--glass .ux-calendar__nav-btn {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .ux-dark .ux-calendar--glass .ux-calendar__nav-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-calendar__day,
+      .ux-calendar__nav-btn,
+      .ux-calendar__picker-item {
+        transition: none;
+      }
+    }
+  `;
+
+  // Navigation icons
+  const icons = {
+    prev: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 18l-6-6 6-6"/>
+    </svg>`,
+    next: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 18l6-6-6-6"/>
+    </svg>`
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-calendar-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-calendar-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const calendarData = (options = {}) => ({
+    // Configuration
+    locale: options.locale || 'es',
+    firstDayOfWeek: options.firstDayOfWeek ?? 1, // 0 = Sunday, 1 = Monday
+    minDate: options.minDate ? new Date(options.minDate) : null,
+    maxDate: options.maxDate ? new Date(options.maxDate) : null,
+    disabledDates: options.disabledDates || [],
+    disabledDays: options.disabledDays || [], // 0-6 (Sunday-Saturday)
+    events: options.events || [],
+    range: options.range ?? false,
+    showFooter: options.showFooter ?? true,
+    showOtherMonths: options.showOtherMonths ?? true,
+    highlightWeekends: options.highlightWeekends ?? false,
+
+    // State
+    currentDate: new Date(),
+    selectedDate: options.value ? new Date(options.value) : null,
+    rangeStart: options.rangeStart ? new Date(options.rangeStart) : null,
+    rangeEnd: options.rangeEnd ? new Date(options.rangeEnd) : null,
+    hoverDate: null,
+    view: 'days', // 'days', 'months', 'years'
+    icons: icons,
+
+    // Weekday names
+    get weekdays() {
+      const days = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+      const reordered = [];
+      for (let i = 0; i < 7; i++) {
+        reordered.push(days[(this.firstDayOfWeek + i) % 7]);
+      }
+      return reordered;
+    },
+
+    // Month names
+    get monthNames() {
+      return ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+              'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    },
+
+    get shortMonthNames() {
+      return ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+              'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    },
+
+    // Current month/year display
+    get currentMonthYear() {
+      return `${this.monthNames[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}`;
+    },
+
+    // Generate calendar days
+    get calendarDays() {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+
+      const days = [];
+
+      // Days from previous month
+      let startDay = firstDay.getDay() - this.firstDayOfWeek;
+      if (startDay < 0) startDay += 7;
+
+      for (let i = startDay - 1; i >= 0; i--) {
+        const date = new Date(year, month, -i);
+        days.push(this.createDayObject(date, true));
+      }
+
+      // Days of current month
+      for (let i = 1; i <= lastDay.getDate(); i++) {
+        const date = new Date(year, month, i);
+        days.push(this.createDayObject(date, false));
+      }
+
+      // Days from next month
+      const remaining = 42 - days.length; // 6 rows × 7 days
+      for (let i = 1; i <= remaining; i++) {
+        const date = new Date(year, month + 1, i);
+        days.push(this.createDayObject(date, true));
+      }
+
+      return days;
+    },
+
+    // Create day object with all states
+    createDayObject(date, isOtherMonth) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      date.setHours(0, 0, 0, 0);
+
+      const dayOfWeek = date.getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+      return {
+        date: new Date(date),
+        day: date.getDate(),
+        isOtherMonth,
+        isToday: date.getTime() === today.getTime(),
+        isSelected: this.isDateSelected(date),
+        isDisabled: this.isDateDisabled(date),
+        isWeekend,
+        isRangeStart: this.isRangeStart(date),
+        isRangeEnd: this.isRangeEnd(date),
+        isInRange: this.isInRange(date),
+        isRangeHover: this.isInRangeHover(date),
+        events: this.getEventsForDate(date)
+      };
+    },
+
+    // Check if date is selected
+    isDateSelected(date) {
+      if (this.range) {
+        return this.isRangeStart(date) || this.isRangeEnd(date);
+      }
+      if (!this.selectedDate) return false;
+      return date.getTime() === this.selectedDate.getTime();
+    },
+
+    // Check if date is disabled
+    isDateDisabled(date) {
+      // Check min/max
+      if (this.minDate && date < this.minDate) return true;
+      if (this.maxDate && date > this.maxDate) return true;
+
+      // Check disabled days of week
+      if (this.disabledDays.includes(date.getDay())) return true;
+
+      // Check disabled specific dates
+      const dateStr = this.formatDate(date);
+      return this.disabledDates.some(d => {
+        if (typeof d === 'string') return d === dateStr;
+        if (d instanceof Date) return d.getTime() === date.getTime();
+        return false;
+      });
+    },
+
+    // Range helpers
+    isRangeStart(date) {
+      if (!this.range || !this.rangeStart) return false;
+      return date.getTime() === this.rangeStart.getTime();
+    },
+
+    isRangeEnd(date) {
+      if (!this.range || !this.rangeEnd) return false;
+      return date.getTime() === this.rangeEnd.getTime();
+    },
+
+    isInRange(date) {
+      if (!this.range || !this.rangeStart || !this.rangeEnd) return false;
+      return date > this.rangeStart && date < this.rangeEnd;
+    },
+
+    isInRangeHover(date) {
+      if (!this.range || !this.rangeStart || this.rangeEnd || !this.hoverDate) return false;
+      const start = this.rangeStart;
+      const end = this.hoverDate;
+      if (start < end) {
+        return date > start && date <= end;
+      } else {
+        return date >= end && date < start;
+      }
+    },
+
+    // Get events for a date
+    getEventsForDate(date) {
+      const dateStr = this.formatDate(date);
+      return this.events.filter(event => {
+        const eventDate = typeof event.date === 'string' ? event.date : this.formatDate(event.date);
+        return eventDate === dateStr;
+      });
+    },
+
+    // Format date as YYYY-MM-DD
+    formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    },
+
+    // Navigation
+    prevMonth() {
+      this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1);
+      this.$dispatch('calendar:navigate', { date: new Date(this.currentDate), direction: 'prev' });
+    },
+
+    nextMonth() {
+      this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1);
+      this.$dispatch('calendar:navigate', { date: new Date(this.currentDate), direction: 'next' });
+    },
+
+    goToToday() {
+      this.currentDate = new Date();
+      this.currentDate.setHours(0, 0, 0, 0);
+      this.$dispatch('calendar:today');
+    },
+
+    goToDate(date) {
+      this.currentDate = new Date(date);
+      this.currentDate.setHours(0, 0, 0, 0);
+    },
+
+    // Selection
+    selectDate(dayObj) {
+      if (dayObj.isDisabled) return;
+
+      const date = new Date(dayObj.date);
+      date.setHours(0, 0, 0, 0);
+
+      if (this.range) {
+        this.selectRange(date);
+      } else {
+        this.selectedDate = date;
+        this.$dispatch('calendar:select', {
+          date: new Date(date),
+          formatted: this.formatDate(date)
+        });
+      }
+
+      // Navigate to month if clicking other month day
+      if (dayObj.isOtherMonth) {
+        this.goToDate(date);
+      }
+    },
+
+    selectRange(date) {
+      if (!this.rangeStart || (this.rangeStart && this.rangeEnd)) {
+        // Start new range
+        this.rangeStart = date;
+        this.rangeEnd = null;
+        this.$dispatch('calendar:range-start', {
+          start: new Date(date),
+          formatted: this.formatDate(date)
+        });
+      } else {
+        // Complete range
+        if (date < this.rangeStart) {
+          this.rangeEnd = this.rangeStart;
+          this.rangeStart = date;
+        } else {
+          this.rangeEnd = date;
+        }
+        this.$dispatch('calendar:range-select', {
+          start: new Date(this.rangeStart),
+          end: new Date(this.rangeEnd),
+          startFormatted: this.formatDate(this.rangeStart),
+          endFormatted: this.formatDate(this.rangeEnd)
+        });
+      }
+    },
+
+    clearSelection() {
+      this.selectedDate = null;
+      this.rangeStart = null;
+      this.rangeEnd = null;
+      this.hoverDate = null;
+      this.$dispatch('calendar:clear');
+    },
+
+    // Hover for range preview
+    onDayHover(dayObj) {
+      if (this.range && this.rangeStart && !this.rangeEnd) {
+        this.hoverDate = dayObj.date;
+      }
+    },
+
+    onDayLeave() {
+      this.hoverDate = null;
+    },
+
+    // View switching
+    showMonthPicker() {
+      this.view = 'months';
+    },
+
+    showYearPicker() {
+      this.view = 'years';
+    },
+
+    selectMonth(month) {
+      this.currentDate = new Date(this.currentDate.getFullYear(), month, 1);
+      this.view = 'days';
+    },
+
+    selectYear(year) {
+      this.currentDate = new Date(year, this.currentDate.getMonth(), 1);
+      this.view = 'months';
+    },
+
+    get years() {
+      const currentYear = this.currentDate.getFullYear();
+      const startYear = currentYear - 6;
+      const years = [];
+      for (let i = 0; i < 12; i++) {
+        years.push(startYear + i);
+      }
+      return years;
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxCalendar', calendarData);
+  }
+})();
+
+/**
+ * UX Callout Component
+ * Info boxes and callouts for documentation and alerts
+ * Similar to GitHub/documentation callouts with iOS 26 Liquid Glass design
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Callout - Info Box Component
+    ======================================== */
+
+    .ux-callout {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-lg);
+      background-color: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-lg);
+      border: 1px solid var(--ux-border-color);
+      border-left-width: 4px;
+      border-left-color: var(--ux-primary);
+      margin: var(--ux-space-lg) 0;
+      transition:
+        opacity var(--ux-transition-normal) var(--ux-ease-default),
+        transform var(--ux-transition-normal) var(--ux-ease-default);
+    }
+
+    /* ========================================
+       Callout Icon
+    ======================================== */
+
+    .ux-callout__icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      color: var(--ux-primary);
+    }
+
+    .ux-callout__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ========================================
+       Callout Content
+    ======================================== */
+
+    .ux-callout__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ux-callout__title {
+      font-size: var(--ux-font-size-md);
+      font-weight: var(--ux-font-weight-semibold);
+      color: var(--ux-text);
+      margin: 0 0 var(--ux-space-xs);
+      line-height: 1.4;
+    }
+
+    .ux-callout__text {
+      font-size: var(--ux-font-size-base);
+      color: var(--ux-text-secondary);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .ux-callout__text p {
+      margin: 0 0 var(--ux-space-sm);
+    }
+
+    .ux-callout__text p:last-child {
+      margin-bottom: 0;
+    }
+
+    .ux-callout__text a {
+      color: var(--ux-primary);
+      text-decoration: underline;
+    }
+
+    .ux-callout__text a:hover {
+      text-decoration: none;
+    }
+
+    .ux-callout__text code {
+      padding: 2px 6px;
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: var(--ux-border-radius-sm);
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    /* When no title, remove extra spacing */
+    .ux-callout__content > .ux-callout__text:first-child {
+      margin-top: 0;
+    }
+
+    /* ========================================
+       Close Button
+    ======================================== */
+
+    .ux-callout__close {
+      position: absolute;
+      top: var(--ux-space-sm);
+      right: var(--ux-space-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: var(--ux-border-radius-sm);
+      color: var(--ux-text-tertiary);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease-default),
+        color var(--ux-transition-fast) var(--ux-ease-default);
+    }
+
+    .ux-callout__close:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--ux-text);
+    }
+
+    .ux-callout__close:active {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .ux-callout__close svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Add padding-right when close button is present */
+    .ux-callout--dismissible {
+      padding-right: calc(var(--ux-space-lg) + 32px);
+    }
+
+    /* ========================================
+       Color Variants
+    ======================================== */
+
+    /* Info (default - uses primary color) */
+    .ux-callout--info {
+      background-color: rgba(var(--ux-info-rgb), 0.08);
+      border-color: rgba(var(--ux-info-rgb), 0.2);
+      border-left-color: var(--ux-info);
+    }
+
+    .ux-callout--info .ux-callout__icon {
+      color: var(--ux-info);
+    }
+
+    .ux-callout--info .ux-callout__title {
+      color: var(--ux-info-shade);
+    }
+
+    /* Success */
+    .ux-callout--success {
+      background-color: rgba(var(--ux-success-rgb), 0.08);
+      border-color: rgba(var(--ux-success-rgb), 0.2);
+      border-left-color: var(--ux-success);
+    }
+
+    .ux-callout--success .ux-callout__icon {
+      color: var(--ux-success);
+    }
+
+    .ux-callout--success .ux-callout__title {
+      color: var(--ux-success-shade);
+    }
+
+    /* Warning */
+    .ux-callout--warning {
+      background-color: rgba(var(--ux-warning-rgb), 0.08);
+      border-color: rgba(var(--ux-warning-rgb), 0.2);
+      border-left-color: var(--ux-warning);
+    }
+
+    .ux-callout--warning .ux-callout__icon {
+      color: var(--ux-warning);
+    }
+
+    .ux-callout--warning .ux-callout__title {
+      color: var(--ux-warning-shade);
+    }
+
+    /* Danger */
+    .ux-callout--danger {
+      background-color: rgba(var(--ux-danger-rgb), 0.08);
+      border-color: rgba(var(--ux-danger-rgb), 0.2);
+      border-left-color: var(--ux-danger);
+    }
+
+    .ux-callout--danger .ux-callout__icon {
+      color: var(--ux-danger);
+    }
+
+    .ux-callout--danger .ux-callout__title {
+      color: var(--ux-danger-shade);
+    }
+
+    /* Neutral */
+    .ux-callout--neutral {
+      background-color: var(--ux-surface-secondary);
+      border-color: var(--ux-border-color);
+      border-left-color: var(--ux-medium);
+    }
+
+    .ux-callout--neutral .ux-callout__icon {
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-callout--neutral .ux-callout__title {
+      color: var(--ux-text);
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    .ux-callout--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+      border-left-width: 4px;
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+    }
+
+    .ux-callout--glass.ux-callout--info {
+      border-left-color: var(--ux-info);
+    }
+
+    .ux-callout--glass.ux-callout--success {
+      border-left-color: var(--ux-success);
+    }
+
+    .ux-callout--glass.ux-callout--warning {
+      border-left-color: var(--ux-warning);
+    }
+
+    .ux-callout--glass.ux-callout--danger {
+      border-left-color: var(--ux-danger);
+    }
+
+    .ux-callout--glass.ux-callout--neutral {
+      border-left-color: var(--ux-medium);
+    }
+
+    .ux-callout--glass .ux-callout__close:hover {
+      background-color: rgba(var(--ux-text-rgb, 0, 0, 0), 0.05);
+    }
+
+    /* Fallback for browsers without backdrop-filter */
+    @supports not (backdrop-filter: blur(1px)) {
+      .ux-callout--glass {
+        background-color: var(--ux-surface);
+      }
+    }
+
+    /* ========================================
+       Bordered Variant (full border, no left accent)
+    ======================================== */
+
+    .ux-callout--bordered {
+      border-left-width: 1px;
+    }
+
+    /* ========================================
+       Sizes
+    ======================================== */
+
+    .ux-callout--sm {
+      padding: var(--ux-space-md);
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-callout--sm .ux-callout__icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ux-callout--sm .ux-callout__title {
+      font-size: var(--ux-font-size-base);
+    }
+
+    .ux-callout--sm .ux-callout__text {
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-callout--sm.ux-callout--dismissible {
+      padding-right: calc(var(--ux-space-md) + 28px);
+    }
+
+    .ux-callout--lg {
+      padding: var(--ux-space-xl);
+      gap: var(--ux-space-lg);
+    }
+
+    .ux-callout--lg .ux-callout__icon {
+      width: 28px;
+      height: 28px;
+    }
+
+    .ux-callout--lg .ux-callout__title {
+      font-size: var(--ux-font-size-lg);
+      margin-bottom: var(--ux-space-sm);
+    }
+
+    .ux-callout--lg .ux-callout__text {
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-callout--lg.ux-callout--dismissible {
+      padding-right: calc(var(--ux-space-xl) + 36px);
+    }
+
+    /* ========================================
+       Inline Variant (compact, no margin)
+    ======================================== */
+
+    .ux-callout--inline {
+      margin: 0;
+      display: inline-flex;
+    }
+
+    /* ========================================
+       Dismissed State
+    ======================================== */
+
+    .ux-callout--dismissed {
+      opacity: 0;
+      transform: translateX(-10px);
+      pointer-events: none;
+    }
+
+    .ux-callout--hidden {
+      display: none;
+    }
+
+    /* ========================================
+       Dark Mode
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout--info {
+        background-color: rgba(var(--ux-info-rgb), 0.12);
+        border-color: rgba(var(--ux-info-rgb), 0.25);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout--info .ux-callout__title {
+        color: var(--ux-info-tint);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout--success {
+        background-color: rgba(var(--ux-success-rgb), 0.12);
+        border-color: rgba(var(--ux-success-rgb), 0.25);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout--success .ux-callout__title {
+        color: var(--ux-success-tint);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout--warning {
+        background-color: rgba(var(--ux-warning-rgb), 0.12);
+        border-color: rgba(var(--ux-warning-rgb), 0.25);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout--warning .ux-callout__title {
+        color: var(--ux-warning-tint);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout--danger {
+        background-color: rgba(var(--ux-danger-rgb), 0.12);
+        border-color: rgba(var(--ux-danger-rgb), 0.25);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout--danger .ux-callout__title {
+        color: var(--ux-danger-tint);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout__text code {
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout__close:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-callout--glass .ux-callout__close:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    /* Manual dark mode class */
+    .ux-dark .ux-callout--info,
+    .ux-theme-dark .ux-callout--info {
+      background-color: rgba(var(--ux-info-rgb), 0.12);
+      border-color: rgba(var(--ux-info-rgb), 0.25);
+    }
+
+    .ux-dark .ux-callout--info .ux-callout__title,
+    .ux-theme-dark .ux-callout--info .ux-callout__title {
+      color: var(--ux-info-tint);
+    }
+
+    .ux-dark .ux-callout--success,
+    .ux-theme-dark .ux-callout--success {
+      background-color: rgba(var(--ux-success-rgb), 0.12);
+      border-color: rgba(var(--ux-success-rgb), 0.25);
+    }
+
+    .ux-dark .ux-callout--success .ux-callout__title,
+    .ux-theme-dark .ux-callout--success .ux-callout__title {
+      color: var(--ux-success-tint);
+    }
+
+    .ux-dark .ux-callout--warning,
+    .ux-theme-dark .ux-callout--warning {
+      background-color: rgba(var(--ux-warning-rgb), 0.12);
+      border-color: rgba(var(--ux-warning-rgb), 0.25);
+    }
+
+    .ux-dark .ux-callout--warning .ux-callout__title,
+    .ux-theme-dark .ux-callout--warning .ux-callout__title {
+      color: var(--ux-warning-tint);
+    }
+
+    .ux-dark .ux-callout--danger,
+    .ux-theme-dark .ux-callout--danger {
+      background-color: rgba(var(--ux-danger-rgb), 0.12);
+      border-color: rgba(var(--ux-danger-rgb), 0.25);
+    }
+
+    .ux-dark .ux-callout--danger .ux-callout__title,
+    .ux-theme-dark .ux-callout--danger .ux-callout__title {
+      color: var(--ux-danger-tint);
+    }
+
+    .ux-dark .ux-callout__text code,
+    .ux-theme-dark .ux-callout__text code {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .ux-dark .ux-callout__close:hover,
+    .ux-theme-dark .ux-callout__close:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .ux-dark .ux-callout--glass .ux-callout__close:hover,
+    .ux-theme-dark .ux-callout--glass .ux-callout__close:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-callout {
+        transition: opacity 0.1s ease;
+      }
+
+      .ux-callout--dismissed {
+        transform: none;
+      }
+
+      .ux-callout__close {
+        transition: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-callout-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-callout-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for callout with dismiss functionality
+  // ARIA: role="note" for informational callouts, "alert" for warnings/errors
+  const calloutComponent = (config = {}) => ({
+    visible: config.visible !== false,
+    dismissible: config.dismissible !== false,
+    dismissed: false,
+    type: config.type || 'info',
+
+    // ARIA attributes based on callout type
+    get ariaAttrs() {
+      const isUrgent = this.type === 'danger' || this.type === 'warning';
+      return {
+        'role': isUrgent ? 'alert' : 'note',
+        'aria-live': isUrgent ? 'assertive' : 'polite'
+      };
+    },
+
+    init() {
+      // Listen for escape key if dismissible
+      if (this.dismissible) {
+        this._keyHandler = (e) => {
+          if (e.key === 'Escape' && document.activeElement === this.$el) {
+            this.dismiss();
+          }
+        };
+        this.$el.addEventListener('keydown', this._keyHandler);
+      }
+    },
+
+    destroy() {
+      if (this._keyHandler) {
+        this.$el.removeEventListener('keydown', this._keyHandler);
+      }
+    },
+
+    dismiss() {
+      if (!this.dismissible) return;
+
+      this.dismissed = true;
+      this.$dispatch('callout:dismiss');
+
+      // Remove from DOM after animation
+      setTimeout(() => {
+        this.visible = false;
+        this.$dispatch('callout:dismissed');
+      }, 200);
+    },
+
+    show() {
+      this.visible = true;
+      this.dismissed = false;
+      this.$dispatch('callout:show');
+    },
+
+    hide() {
+      this.visible = false;
+      this.$dispatch('callout:hide');
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxCallout', calloutComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxCallout', calloutComponent);
     });
   }
 })();
@@ -5601,7 +9266,27 @@
     }
 
     /* ========================================
-       Color Variants
+       Color Variants (Composition System)
+       Use: .ux-card.ux-color-primary, .ux-card.ux-color-success, etc.
+    ======================================== */
+
+    .ux-card[class*="ux-color-"] {
+      background-color: var(--ux-variant-bg);
+      color: var(--ux-variant-color);
+    }
+
+    .ux-card[class*="ux-color-"] .ux-card__title,
+    .ux-card[class*="ux-color-"] .ux-card__content {
+      color: var(--ux-variant-color);
+    }
+
+    .ux-card[class*="ux-color-"] .ux-card__subtitle {
+      color: var(--ux-variant-color);
+      opacity: 0.8;
+    }
+
+    /* ========================================
+       Legacy Color Variants (deprecated, use composition)
     ======================================== */
 
     .ux-card--primary {
@@ -6237,6 +9922,44 @@
     .ux-theme-dark .ux-card--app .ux-card__icon {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
                   inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-card--clickable {
+        transition: none;
+      }
+
+      .ux-card--clickable:active {
+        transform: none;
+      }
+
+      .ux-card--icon {
+        transition: none;
+      }
+
+      .ux-card--icon:hover {
+        transform: none;
+      }
+
+      .ux-card--icon:active {
+        transform: none;
+      }
+
+      .ux-card--app {
+        transition: none;
+      }
+
+      .ux-card--app:hover {
+        transform: none;
+      }
+
+      .ux-card--app:active {
+        transform: none;
+      }
     }
   `;
 
@@ -6979,6 +10702,1177 @@
 })();
 
 /**
+ * UX Cart Components
+ * Shopping cart components for POS and e-commerce
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Cart Container
+    ======================================== */
+
+    :root {
+      --ux-cart-item-height: auto;
+      --ux-cart-item-padding: var(--ux-space-md);
+      --ux-cart-border-radius: var(--ux-border-radius-lg);
+    }
+
+    .ux-cart {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-cart-border-radius);
+      overflow: hidden;
+    }
+
+    .ux-cart--bordered {
+      border: 1px solid var(--ux-border-color);
+    }
+
+    /* ========================================
+       Cart Header
+    ======================================== */
+
+    .ux-cart__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      background-color: var(--ux-surface);
+      border-bottom: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+    }
+
+    .ux-cart__title {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0;
+    }
+
+    .ux-cart__count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 var(--ux-space-xs);
+      background-color: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+      border-radius: 12px;
+      font-size: var(--ux-font-size-sm);
+      font-weight: 600;
+    }
+
+    .ux-cart__clear {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      background: none;
+      border: none;
+      border-radius: var(--ux-border-radius);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-danger);
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-cart__clear:hover {
+      background-color: rgba(var(--ux-danger-rgb, 255, 59, 48), 0.1);
+    }
+
+    .ux-cart__clear svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ========================================
+       Cart Items List
+    ======================================== */
+
+    .ux-cart__items {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .ux-cart__items-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ========================================
+       Cart Item
+    ======================================== */
+
+    .ux-cart-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--ux-space-md);
+      padding: var(--ux-cart-item-padding);
+      border-bottom: 1px solid var(--ux-border-color);
+      background-color: var(--ux-surface);
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-cart-item:last-child {
+      border-bottom: none;
+    }
+
+    .ux-cart-item:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    /* Item image */
+    .ux-cart-item__image {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--ux-border-radius);
+      object-fit: cover;
+      background-color: var(--ux-surface-secondary);
+      flex-shrink: 0;
+    }
+
+    .ux-cart-item__image-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: var(--ux-border-radius);
+      background-color: var(--ux-surface-secondary);
+      color: var(--ux-text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .ux-cart-item__image-placeholder svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Item content */
+    .ux-cart-item__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ux-cart-item__name {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-text);
+      margin: 0 0 var(--ux-space-xs);
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .ux-cart-item__meta {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-xs);
+    }
+
+    .ux-cart-item__unit-price {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+    }
+
+    /* Item price */
+    .ux-cart-item__price {
+      font-size: var(--ux-font-size-md);
+      font-weight: 600;
+      color: var(--ux-text);
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Item quantity controls */
+    .ux-cart-item__qty {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      margin-top: var(--ux-space-xs);
+    }
+
+    .ux-cart-item__qty-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      background-color: var(--ux-surface-secondary);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      color: var(--ux-text);
+      cursor: pointer;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        border-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-cart-item__qty-btn:hover {
+      background-color: var(--ux-surface-tertiary);
+      border-color: var(--ux-primary);
+    }
+
+    .ux-cart-item__qty-btn:active {
+      transform: scale(0.95);
+    }
+
+    .ux-cart-item__qty-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .ux-cart-item__qty-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-cart-item__qty-value {
+      min-width: 32px;
+      text-align: center;
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-text);
+    }
+
+    /* Item remove button */
+    .ux-cart-item__remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: var(--ux-border-radius);
+      color: var(--ux-text-tertiary);
+      cursor: pointer;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        color var(--ux-transition-fast) var(--ux-ease);
+      margin-left: auto;
+    }
+
+    .ux-cart-item__remove:hover {
+      background-color: rgba(var(--ux-danger-rgb, 255, 59, 48), 0.1);
+      color: var(--ux-danger);
+    }
+
+    .ux-cart-item__remove svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ========================================
+       Compact Item Variant
+    ======================================== */
+
+    .ux-cart-item--compact {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-cart-item--compact .ux-cart-item__image,
+    .ux-cart-item--compact .ux-cart-item__image-placeholder {
+      width: 40px;
+      height: 40px;
+    }
+
+    .ux-cart-item--compact .ux-cart-item__name {
+      font-size: var(--ux-font-size-xs);
+      -webkit-line-clamp: 1;
+    }
+
+    /* ========================================
+       Swipe to Delete
+    ======================================== */
+
+    .ux-cart-item--swipeable {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ux-cart-item__swipe-action {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      background-color: var(--ux-danger);
+      color: white;
+      transform: translateX(100%);
+      transition: transform var(--ux-transition-normal) var(--ux-ease);
+    }
+
+    .ux-cart-item--swiped .ux-cart-item__swipe-action {
+      transform: translateX(0);
+    }
+
+    .ux-cart-item__swipe-action svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ========================================
+       Cart Empty State
+    ======================================== */
+
+    .ux-cart__empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-2xl);
+      text-align: center;
+      flex: 1;
+    }
+
+    .ux-cart__empty-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-cart__empty-title {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0 0 var(--ux-space-xs);
+    }
+
+    .ux-cart__empty-text {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin: 0;
+    }
+
+    /* ========================================
+       Cart Summary
+    ======================================== */
+
+    .ux-cart-summary {
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      background-color: var(--ux-surface-secondary);
+      border-top: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+    }
+
+    .ux-cart-summary__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--ux-space-sm);
+    }
+
+    .ux-cart-summary__row:last-child {
+      margin-bottom: 0;
+    }
+
+    .ux-cart-summary__label {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-cart-summary__value {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ux-cart-summary__row--subtotal {
+      padding-top: var(--ux-space-sm);
+      border-top: 1px dashed var(--ux-border-color);
+    }
+
+    .ux-cart-summary__row--total {
+      padding-top: var(--ux-space-md);
+      margin-top: var(--ux-space-sm);
+      border-top: 2px solid var(--ux-border-color);
+    }
+
+    .ux-cart-summary__row--total .ux-cart-summary__label {
+      font-size: var(--ux-font-size-md);
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+
+    .ux-cart-summary__row--total .ux-cart-summary__value {
+      font-size: var(--ux-font-size-xl);
+      font-weight: 700;
+      color: var(--ux-primary);
+    }
+
+    /* Discount row */
+    .ux-cart-summary__row--discount .ux-cart-summary__value {
+      color: var(--ux-success);
+    }
+
+    /* ========================================
+       Cart Actions
+    ======================================== */
+
+    .ux-cart__actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      background-color: var(--ux-surface);
+      border-top: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+    }
+
+    .ux-cart__actions--row {
+      flex-direction: row;
+    }
+
+    .ux-cart__actions--row > * {
+      flex: 1;
+    }
+
+    /* ========================================
+       Glass Variant
+    ======================================== */
+
+    .ux-cart--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-cart--glass .ux-cart__header,
+    .ux-cart--glass .ux-cart-item,
+    .ux-cart--glass .ux-cart-summary,
+    .ux-cart--glass .ux-cart__actions {
+      background: transparent;
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-cart--glass .ux-cart-summary {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    /* ========================================
+       Mini Cart (Dropdown)
+    ======================================== */
+
+    .ux-cart--mini {
+      max-height: 400px;
+      width: 320px;
+    }
+
+    .ux-cart--mini .ux-cart__items {
+      max-height: 240px;
+    }
+
+    /* ========================================
+       Dark Mode
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-cart-item__qty-btn {
+        border-color: var(--ux-border-color);
+      }
+    }
+
+    .ux-dark .ux-cart-item__qty-btn {
+      border-color: var(--ux-border-color);
+    }
+
+    /* ========================================
+       Responsive
+    ======================================== */
+
+    @media (max-width: 767px) {
+      .ux-cart__header {
+        padding: var(--ux-space-sm) var(--ux-space-md);
+      }
+
+      .ux-cart-item {
+        padding: var(--ux-space-sm) var(--ux-space-md);
+      }
+
+      .ux-cart-summary,
+      .ux-cart__actions {
+        padding: var(--ux-space-sm) var(--ux-space-md);
+      }
+    }
+  `;
+
+  // Icons
+  const icons = {
+    plus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    minus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    trash: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+    cart: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>',
+    placeholder: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>'
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-cart-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-cart-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for cart
+  const cartComponent = (config = {}) => ({
+    // Cart items
+    items: config.items || [],
+
+    // Configuration
+    currency: config.currency || '$',
+    locale: config.locale || 'en-US',
+    taxRate: config.taxRate || 0,
+    discountAmount: config.discountAmount || 0,
+    discountPercent: config.discountPercent || 0,
+    shippingCost: config.shippingCost || 0,
+
+    // Labels
+    labels: {
+      title: config.labels?.title || 'Cart',
+      empty: config.labels?.empty || 'Your cart is empty',
+      emptyText: config.labels?.emptyText || 'Add products to get started',
+      subtotal: config.labels?.subtotal || 'Subtotal',
+      tax: config.labels?.tax || 'Tax',
+      discount: config.labels?.discount || 'Discount',
+      shipping: config.labels?.shipping || 'Shipping',
+      total: config.labels?.total || 'Total',
+      clearCart: config.labels?.clearCart || 'Clear',
+      checkout: config.labels?.checkout || 'Checkout',
+      items: config.labels?.items || 'items',
+      ...config.labels
+    },
+
+    // Computed: Total items count
+    get itemCount() {
+      return this.items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    },
+
+    // Computed: Subtotal
+    get subtotal() {
+      return this.items.reduce((sum, item) => {
+        const price = item.price || 0;
+        const qty = item.quantity || 1;
+        return sum + (price * qty);
+      }, 0);
+    },
+
+    // Computed: Discount
+    get discount() {
+      if (this.discountAmount > 0) {
+        return this.discountAmount;
+      }
+      if (this.discountPercent > 0) {
+        return this.subtotal * (this.discountPercent / 100);
+      }
+      return 0;
+    },
+
+    // Computed: Tax
+    get tax() {
+      const taxableAmount = this.subtotal - this.discount;
+      return taxableAmount * (this.taxRate / 100);
+    },
+
+    // Computed: Total
+    get total() {
+      return this.subtotal - this.discount + this.tax + this.shippingCost;
+    },
+
+    // Computed: Is cart empty
+    get isEmpty() {
+      return this.items.length === 0;
+    },
+
+    // Format price
+    formatPrice(price) {
+      return new Intl.NumberFormat(this.locale, {
+        style: 'currency',
+        currency: this.getCurrencyCode()
+      }).format(price);
+    },
+
+    // Get currency code
+    getCurrencyCode() {
+      const map = { '$': 'USD', '€': 'EUR', '£': 'GBP', '¥': 'JPY' };
+      return map[this.currency] || 'USD';
+    },
+
+    // Add item to cart
+    addItem(product, quantity = 1) {
+      const existingIndex = this.items.findIndex(item =>
+        item.id === product.id && JSON.stringify(item.options) === JSON.stringify(product.options)
+      );
+
+      if (existingIndex > -1) {
+        this.items[existingIndex].quantity += quantity;
+      } else {
+        this.items.push({
+          ...product,
+          quantity: quantity
+        });
+      }
+
+      this.$dispatch('cart-update', { items: this.items, total: this.total });
+    },
+
+    // Remove item from cart
+    removeItem(index) {
+      const removed = this.items.splice(index, 1)[0];
+      this.$dispatch('cart-item-removed', { item: removed, items: this.items });
+      this.$dispatch('cart-update', { items: this.items, total: this.total });
+    },
+
+    // Update item quantity
+    updateQuantity(index, quantity) {
+      if (quantity <= 0) {
+        this.removeItem(index);
+        return;
+      }
+
+      this.items[index].quantity = quantity;
+      this.$dispatch('cart-update', { items: this.items, total: this.total });
+    },
+
+    // Increment quantity
+    incrementQuantity(index) {
+      const item = this.items[index];
+      const maxQty = item.maxQuantity || Infinity;
+
+      if (item.quantity < maxQty) {
+        this.updateQuantity(index, item.quantity + 1);
+      }
+    },
+
+    // Decrement quantity
+    decrementQuantity(index) {
+      const item = this.items[index];
+      this.updateQuantity(index, item.quantity - 1);
+    },
+
+    // Clear cart
+    clearCart() {
+      this.items = [];
+      this.$dispatch('cart-cleared');
+      this.$dispatch('cart-update', { items: [], total: 0 });
+    },
+
+    // Checkout
+    checkout() {
+      this.$dispatch('cart-checkout', {
+        items: this.items,
+        subtotal: this.subtotal,
+        discount: this.discount,
+        tax: this.tax,
+        shipping: this.shippingCost,
+        total: this.total
+      });
+    },
+
+    // Apply discount
+    applyDiscount(amount, isPercent = false) {
+      if (isPercent) {
+        this.discountPercent = amount;
+        this.discountAmount = 0;
+      } else {
+        this.discountAmount = amount;
+        this.discountPercent = 0;
+      }
+      this.$dispatch('cart-update', { items: this.items, total: this.total });
+    },
+
+    // Clear discount
+    clearDiscount() {
+      this.discountAmount = 0;
+      this.discountPercent = 0;
+      this.$dispatch('cart-update', { items: this.items, total: this.total });
+    },
+
+    // Get icon
+    getIcon(name) {
+      return icons[name] || '';
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxCart', cartComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxCart', cartComponent);
+    });
+  }
+})();
+
+/**
+ * UX Category Tabs Component
+ * Horizontal scrolling category tabs for POS systems
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Category Tabs
+       Horizontal scrolling tabs for POS product categories
+    ======================================== */
+
+    :root {
+      --ux-category-tabs-height: 48px;
+      --ux-category-tabs-gap: var(--ux-space-sm);
+      --ux-category-tabs-padding: var(--ux-space-sm) var(--ux-space-md);
+      --ux-category-tabs-item-padding: var(--ux-space-sm) var(--ux-space-lg);
+      --ux-category-tabs-font-size: var(--ux-font-size-sm);
+      --ux-category-tabs-border-radius: var(--ux-radius-md, 8px);
+      --ux-category-tabs-indicator-height: 3px;
+    }
+
+    .ux-category-tabs {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-category-tabs-gap);
+      padding: var(--ux-category-tabs-padding);
+      background-color: var(--ux-surface);
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      position: relative;
+    }
+
+    /* Hide scrollbar but allow scroll */
+    .ux-category-tabs {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .ux-category-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* ========================================
+       Category Tab Item
+    ======================================== */
+
+    .ux-category-tabs__item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      min-height: var(--ux-category-tabs-height);
+      padding: var(--ux-category-tabs-item-padding);
+      background: transparent;
+      border: none;
+      color: var(--ux-text-secondary);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-category-tabs-font-size);
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        color var(--ux-transition-fast) var(--ux-ease-default),
+        background-color var(--ux-transition-fast) var(--ux-ease-default),
+        transform 150ms var(--ux-ease-default);
+    }
+
+    .ux-category-tabs__item:hover {
+      color: var(--ux-text);
+    }
+
+    .ux-category-tabs__item:active {
+      transform: scale(0.96);
+    }
+
+    /* Active state */
+    .ux-category-tabs__item--active {
+      color: var(--ux-primary);
+    }
+
+    /* Disabled state */
+    .ux-category-tabs__item--disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* ========================================
+       Tab Item Icon
+    ======================================== */
+
+    .ux-category-tabs__icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      margin-right: var(--ux-space-xs);
+    }
+
+    .ux-category-tabs__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-category-tabs__item--icon-only .ux-category-tabs__icon {
+      margin-right: 0;
+    }
+
+    .ux-category-tabs__item--icon-only .ux-category-tabs__label {
+      display: none;
+    }
+
+    /* ========================================
+       Tab Item Label
+    ======================================== */
+
+    .ux-category-tabs__label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ========================================
+       Sliding Indicator (Underline)
+    ======================================== */
+
+    .ux-category-tabs--indicator {
+      position: relative;
+    }
+
+    .ux-category-tabs__indicator {
+      position: absolute;
+      bottom: 0;
+      height: var(--ux-category-tabs-indicator-height);
+      background-color: var(--ux-primary);
+      border-radius: var(--ux-category-tabs-indicator-height) var(--ux-category-tabs-indicator-height) 0 0;
+      transition:
+        left 300ms cubic-bezier(0.4, 0.0, 0.2, 1),
+        width 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
+      will-change: left, width;
+    }
+
+    /* ========================================
+       Pill Variant (Rounded)
+    ======================================== */
+
+    .ux-category-tabs--pill {
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-xs);
+      background-color: var(--ux-surface-secondary);
+      border-radius: var(--ux-radius-lg, 12px);
+    }
+
+    .ux-category-tabs--pill .ux-category-tabs__item {
+      min-height: 36px;
+      padding: var(--ux-space-xs) var(--ux-space-md);
+      border-radius: 100px;
+    }
+
+    .ux-category-tabs--pill .ux-category-tabs__item--active {
+      background-color: var(--ux-surface);
+      color: var(--ux-text);
+      box-shadow: var(--ux-shadow-sm);
+    }
+
+    .ux-category-tabs--pill .ux-category-tabs__indicator {
+      display: none;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+       Note: backdrop-filter comes from universal selector [class*="--glass"] in ux-core.js
+    ======================================== */
+
+    .ux-category-tabs--glass {
+      background: var(--ux-glass-bg);
+      border-bottom: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    .ux-category-tabs--glass .ux-category-tabs__item--active {
+      color: var(--ux-text);
+    }
+
+    .ux-category-tabs--glass .ux-category-tabs__indicator {
+      background: var(--ux-glass-bg-thick);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    /* Glass + Pill combo */
+    .ux-category-tabs--glass.ux-category-tabs--pill {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-radius-lg, 12px);
+    }
+
+    .ux-category-tabs--glass.ux-category-tabs--pill .ux-category-tabs__item--active {
+      background: var(--ux-glass-bg-thick);
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+    }
+
+    /* ========================================
+       Size Variants
+    ======================================== */
+
+    .ux-category-tabs--sm {
+      --ux-category-tabs-height: 36px;
+      --ux-category-tabs-item-padding: var(--ux-space-xs) var(--ux-space-md);
+      --ux-category-tabs-font-size: var(--ux-font-size-xs);
+      --ux-category-tabs-indicator-height: 2px;
+    }
+
+    .ux-category-tabs--sm .ux-category-tabs__icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-category-tabs--lg {
+      --ux-category-tabs-height: 56px;
+      --ux-category-tabs-item-padding: var(--ux-space-md) var(--ux-space-xl);
+      --ux-category-tabs-font-size: var(--ux-font-size-md);
+      --ux-category-tabs-indicator-height: 4px;
+    }
+
+    .ux-category-tabs--lg .ux-category-tabs__icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ========================================
+       Border Variant (with bottom border)
+    ======================================== */
+
+    .ux-category-tabs--bordered {
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    /* ========================================
+       Color Variants
+    ======================================== */
+
+    .ux-category-tabs--primary .ux-category-tabs__item--active {
+      color: var(--ux-primary);
+    }
+
+    .ux-category-tabs--primary .ux-category-tabs__indicator {
+      background-color: var(--ux-primary);
+    }
+
+    .ux-category-tabs--success .ux-category-tabs__item--active {
+      color: var(--ux-success);
+    }
+
+    .ux-category-tabs--success .ux-category-tabs__indicator {
+      background-color: var(--ux-success);
+    }
+
+    .ux-category-tabs--danger .ux-category-tabs__item--active {
+      color: var(--ux-danger);
+    }
+
+    .ux-category-tabs--danger .ux-category-tabs__indicator {
+      background-color: var(--ux-danger);
+    }
+
+    /* ========================================
+       Dark Mode
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-category-tabs {
+        background-color: var(--ux-surface);
+      }
+
+      .ux-category-tabs--pill {
+        background-color: var(--ux-surface-secondary);
+      }
+
+      .ux-category-tabs--pill .ux-category-tabs__item--active {
+        background-color: var(--ux-surface-tertiary);
+      }
+    }
+
+    .ux-dark .ux-category-tabs {
+      background-color: var(--ux-surface);
+    }
+
+    .ux-dark .ux-category-tabs--pill {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-dark .ux-category-tabs--pill .ux-category-tabs__item--active {
+      background-color: var(--ux-surface-tertiary);
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-category-tabs {
+        scroll-behavior: auto;
+      }
+
+      .ux-category-tabs__item {
+        transition: none;
+      }
+
+      .ux-category-tabs__indicator {
+        transition: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-category-tabs-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-category-tabs-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for category tabs
+  const categoryTabsComponent = (config = {}) => ({
+    activeTab: config.activeTab || config.value || null,
+    categories: config.categories || [],
+    indicatorStyle: {},
+    scrollOnSelect: config.scrollOnSelect !== false,
+
+    init() {
+      // Set first category as default if no active tab
+      if (this.activeTab === null && this.categories.length > 0) {
+        this.activeTab = this.categories[0].value || this.categories[0].id || 0;
+      }
+      this.$nextTick(() => {
+        this.updateIndicator();
+        this.scrollToActiveTab();
+      });
+    },
+
+    selectTab(value) {
+      const category = this.categories.find(c => (c.value || c.id) === value);
+      if (category?.disabled) return;
+      if (this.activeTab === value) return;
+
+      this.activeTab = value;
+      this.updateIndicator();
+
+      if (this.scrollOnSelect) {
+        this.scrollToTab(value);
+      }
+
+      this.$dispatch('category-change', { value, category });
+    },
+
+    scrollToTab(value) {
+      const container = this.$refs.container || this.$el;
+      if (!container) return;
+
+      const index = this.categories.findIndex(c => (c.value || c.id) === value);
+      const buttons = container.querySelectorAll('.ux-category-tabs__item');
+      const targetButton = buttons[index];
+
+      if (targetButton) {
+        const containerRect = container.getBoundingClientRect();
+        const buttonRect = targetButton.getBoundingClientRect();
+
+        // Calculate scroll position to center the tab
+        const scrollLeft = targetButton.offsetLeft - (containerRect.width / 2) + (buttonRect.width / 2);
+
+        container.scrollTo({
+          left: Math.max(0, scrollLeft),
+          behavior: 'smooth'
+        });
+      }
+    },
+
+    scrollToActiveTab() {
+      if (this.activeTab !== null) {
+        this.scrollToTab(this.activeTab);
+      }
+    },
+
+    isActive(value) {
+      return this.activeTab === value;
+    },
+
+    updateIndicator() {
+      const container = this.$refs.container || this.$el;
+      if (!container) return;
+
+      const index = this.categories.findIndex(c => (c.value || c.id) === this.activeTab);
+      const buttons = container.querySelectorAll('.ux-category-tabs__item');
+      const activeButton = buttons[index];
+
+      if (activeButton) {
+        this.indicatorStyle = {
+          left: activeButton.offsetLeft + 'px',
+          width: activeButton.offsetWidth + 'px'
+        };
+      }
+    },
+
+    get activeCategory() {
+      return this.categories.find(c => (c.value || c.id) === this.activeTab);
+    },
+
+    get activeIndex() {
+      return this.categories.findIndex(c => (c.value || c.id) === this.activeTab);
+    },
+
+    // Navigate to next/previous tab
+    next() {
+      const currentIndex = this.activeIndex;
+      if (currentIndex < this.categories.length - 1) {
+        const nextCategory = this.categories[currentIndex + 1];
+        this.selectTab(nextCategory.value || nextCategory.id);
+      }
+    },
+
+    prev() {
+      const currentIndex = this.activeIndex;
+      if (currentIndex > 0) {
+        const prevCategory = this.categories[currentIndex - 1];
+        this.selectTab(prevCategory.value || prevCategory.id);
+      }
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxCategoryTabs', categoryTabsComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxCategoryTabs', categoryTabsComponent);
+    });
+  }
+})();
+
+/**
  * UX Checkbox Component
  * Checkboxes estilo Ionic
  * @requires ux-core.js
@@ -7616,6 +12510,24 @@
     .ux-chip--glass .ux-chip__close:hover {
       background: var(--ux-glass-bg-thick);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-chip {
+        transition: none;
+      }
+
+      .ux-chip--interactive:active {
+        transform: none;
+      }
+
+      .ux-chip__close {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -7700,6 +12612,853 @@
       Alpine.data('uxChipGroup', chipGroupComponent);
     });
   }
+})();
+
+/**
+ * UX Command Palette Component
+ * Command palette (Cmd+K) for quick actions and navigation
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Command Palette Backdrop
+       ========================================================================== */
+
+    .ux-command-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: var(--ux-z-modal-backdrop);
+      background: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--ux-transition-fast) var(--ux-ease-out);
+    }
+
+    .ux-command-backdrop--open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ==========================================================================
+       Command Palette Container
+       ========================================================================== */
+
+    .ux-command {
+      position: fixed;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%) scale(0.95);
+      z-index: var(--ux-z-modal);
+      width: 95%;
+      max-width: 640px;
+      max-height: 70dvh;
+      background: var(--ux-surface);
+      border-radius: var(--ux-radius-xl);
+      box-shadow: var(--ux-shadow-2xl);
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--ux-transition-normal) var(--ux-ease-out);
+    }
+
+    .ux-command--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) scale(1);
+    }
+
+    /* ==========================================================================
+       Search Input
+       ========================================================================== */
+
+    .ux-command__search {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-command__search-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-command__input {
+      flex: 1;
+      min-width: 0;
+      height: 40px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-lg);
+      color: var(--ux-text);
+      outline: none;
+    }
+
+    .ux-command__input::placeholder {
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-command__shortcut {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .ux-command__key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      font-family: var(--ux-font-family);
+      color: var(--ux-text-tertiary);
+      background: var(--ux-surface-secondary);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-radius-sm);
+    }
+
+    /* ==========================================================================
+       Results List
+       ========================================================================== */
+
+    .ux-command__results {
+      max-height: calc(70dvh - 80px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .ux-command__group {
+      padding: var(--ux-space-sm) 0;
+    }
+
+    .ux-command__group-title {
+      padding: var(--ux-space-xs) var(--ux-space-lg);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-command__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ==========================================================================
+       Result Item
+       ========================================================================== */
+
+    .ux-command__item {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-sm) var(--ux-space-lg);
+      cursor: pointer;
+      transition: background var(--ux-transition-fast);
+    }
+
+    .ux-command__item:hover,
+    .ux-command__item--active {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-command__item--active {
+      background: var(--ux-primary-tint);
+    }
+
+    .ux-command__item-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      color: var(--ux-text-secondary);
+      background: var(--ux-surface-tertiary);
+      border-radius: var(--ux-radius-md);
+    }
+
+    .ux-command__item-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .ux-command__item--active .ux-command__item-icon {
+      background: var(--ux-primary);
+      color: white;
+    }
+
+    .ux-command__item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ux-command__item-title {
+      font-size: var(--ux-font-size-md);
+      font-weight: 500;
+      color: var(--ux-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ux-command__item-description {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-tertiary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ux-command__item-shortcut {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       Highlight
+       ========================================================================== */
+
+    .ux-command__highlight {
+      color: var(--ux-primary);
+      font-weight: 600;
+      background: transparent;
+    }
+
+    /* ==========================================================================
+       Footer
+       ========================================================================== */
+
+    .ux-command__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-sm) var(--ux-space-lg);
+      border-top: 1px solid var(--ux-border-color);
+      background: var(--ux-surface-secondary);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-command__footer-hints {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-command__footer-hint {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ux-command__footer-hint .ux-command__key {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 4px;
+      font-size: 0.6875rem;
+    }
+
+    /* ==========================================================================
+       Empty State
+       ========================================================================== */
+
+    .ux-command__empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-2xl);
+      text-align: center;
+    }
+
+    .ux-command__empty-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text-tertiary);
+      opacity: 0.5;
+    }
+
+    .ux-command__empty-title {
+      font-size: var(--ux-font-size-md);
+      font-weight: 500;
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-xs);
+    }
+
+    .ux-command__empty-description {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-tertiary);
+    }
+
+    /* ==========================================================================
+       Loading State
+       ========================================================================== */
+
+    .ux-command__loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-command__loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--ux-border-color);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-command-spin 0.8s linear infinite;
+    }
+
+    @keyframes ux-command-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ==========================================================================
+       Recent Items
+       ========================================================================== */
+
+    .ux-command__recent {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      font-size: 0.6875rem;
+      color: var(--ux-text-tertiary);
+      background: var(--ux-surface-tertiary);
+      border-radius: var(--ux-radius-sm);
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-command--glass {
+      background: var(--ux-glass-bg-thick);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy));
+      border: 1px solid var(--ux-glass-border);
+    }
+
+    .ux-command--glass .ux-command__search {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-command--glass .ux-command__footer {
+      background: rgba(0, 0, 0, 0.05);
+      border-top-color: var(--ux-glass-border);
+    }
+
+    /* ==========================================================================
+       Mobile Adjustments
+       ========================================================================== */
+
+    @media (max-width: 767px) {
+      .ux-command {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: translateY(100%);
+        width: 100%;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+      }
+
+      .ux-command--open {
+        transform: translateY(0);
+      }
+
+      .ux-command__search {
+        padding: var(--ux-space-md);
+        padding-top: calc(var(--ux-safe-top) + var(--ux-space-md));
+      }
+
+      .ux-command__results {
+        max-height: none;
+        height: 100%;
+      }
+
+      .ux-command__footer {
+        padding-bottom: calc(var(--ux-safe-bottom) + var(--ux-space-sm));
+      }
+
+      .ux-command__shortcut {
+        display: none;
+      }
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-command-backdrop {
+        background: rgba(0, 0, 0, 0.7);
+      }
+
+      .ux-command--glass .ux-command__footer {
+        background: rgba(255, 255, 255, 0.03);
+      }
+    }
+
+    .ux-dark .ux-command-backdrop {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    .ux-dark .ux-command--glass .ux-command__footer {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-command,
+      .ux-command-backdrop,
+      .ux-command__item {
+        transition: none;
+      }
+
+      .ux-command__loading-spinner {
+        animation: none;
+      }
+    }
+  `;
+
+  // Icons
+  const icons = {
+    search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>`,
+    arrow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`,
+    enter: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 10l-5 5 5 5"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>`,
+    command: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>`,
+    file: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+    folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
+    settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+    user: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+    clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    empty: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 8l6 6M14 8l-6 6"/></svg>`
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-command-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-command-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const commandData = (options = {}) => ({
+    // Configuration
+    placeholder: options.placeholder || 'Buscar comandos...',
+    commands: options.commands || [],
+    groups: options.groups || [],
+    maxRecent: options.maxRecent ?? 5,
+    closeOnSelect: options.closeOnSelect ?? true,
+    fuzzySearch: options.fuzzySearch ?? true,
+    showShortcuts: options.showShortcuts ?? true,
+    showFooter: options.showFooter ?? true,
+    loading: false,
+    loadResults: options.loadResults || null,
+
+    // State
+    isOpen: false,
+    query: '',
+    activeIndex: 0,
+    recentCommands: [],
+    filteredCommands: [],
+
+    // Icons
+    icons: icons,
+
+    // Lifecycle
+    init() {
+      // Load recent commands from localStorage
+      this.loadRecent();
+
+      // Global keyboard shortcut
+      this._keyHandler = (e) => {
+        // Cmd/Ctrl + K
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          this.toggle();
+        }
+
+        // Escape to close
+        if (e.key === 'Escape' && this.isOpen) {
+          e.preventDefault();
+          this.close();
+        }
+      };
+      document.addEventListener('keydown', this._keyHandler);
+
+      // Initialize filtered results
+      this.filterCommands();
+    },
+
+    destroy() {
+      if (this._keyHandler) {
+        document.removeEventListener('keydown', this._keyHandler);
+      }
+    },
+
+    // Open palette
+    open() {
+      this.isOpen = true;
+      this.query = '';
+      this.activeIndex = 0;
+      this.filterCommands();
+
+      // Lock scroll
+      if (window.UX && window.UX.lockScroll) {
+        window.UX.lockScroll();
+      }
+
+      // Focus input
+      this.$nextTick(() => {
+        const input = this.$el.querySelector('.ux-command__input');
+        if (input) input.focus();
+      });
+
+      this.$dispatch('command:open');
+    },
+
+    // Close palette
+    close() {
+      this.isOpen = false;
+      this.query = '';
+
+      // Unlock scroll
+      if (window.UX && window.UX.unlockScroll) {
+        window.UX.unlockScroll();
+      }
+
+      this.$dispatch('command:close');
+    },
+
+    // Toggle palette
+    toggle() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    },
+
+    // Filter commands based on query
+    async filterCommands() {
+      const query = this.query.toLowerCase().trim();
+
+      // If custom loader provided
+      if (this.loadResults && query.length > 0) {
+        this.loading = true;
+        try {
+          this.filteredCommands = await this.loadResults(query);
+        } catch (error) {
+          console.error('Command search error:', error);
+          this.filteredCommands = [];
+        } finally {
+          this.loading = false;
+        }
+        return;
+      }
+
+      // Get all commands from groups or flat list
+      let allCommands = [...this.commands];
+      this.groups.forEach(group => {
+        if (group.commands) {
+          allCommands = allCommands.concat(group.commands.map(cmd => ({
+            ...cmd,
+            group: group.name
+          })));
+        }
+      });
+
+      // No query - show recent + all
+      if (!query) {
+        this.filteredCommands = this.recentCommands.length > 0
+          ? [
+              { group: 'Recientes', commands: this.recentCommands.slice(0, this.maxRecent) },
+              ...this.groupCommands(allCommands)
+            ]
+          : this.groupCommands(allCommands);
+        return;
+      }
+
+      // Filter by query
+      const results = allCommands.filter(cmd => {
+        const title = (cmd.title || cmd.name || '').toLowerCase();
+        const description = (cmd.description || '').toLowerCase();
+        const keywords = (cmd.keywords || []).join(' ').toLowerCase();
+
+        if (this.fuzzySearch) {
+          return this.fuzzyMatch(query, title) ||
+                 this.fuzzyMatch(query, description) ||
+                 this.fuzzyMatch(query, keywords);
+        } else {
+          return title.includes(query) ||
+                 description.includes(query) ||
+                 keywords.includes(query);
+        }
+      });
+
+      this.filteredCommands = this.groupCommands(results);
+      this.activeIndex = 0;
+    },
+
+    // Group commands by their group property
+    groupCommands(commands) {
+      const grouped = {};
+      commands.forEach(cmd => {
+        const groupName = cmd.group || 'Comandos';
+        if (!grouped[groupName]) {
+          grouped[groupName] = [];
+        }
+        grouped[groupName].push(cmd);
+      });
+
+      return Object.entries(grouped).map(([name, cmds]) => ({
+        group: name,
+        commands: cmds
+      }));
+    },
+
+    // Simple fuzzy matching
+    fuzzyMatch(query, text) {
+      if (!text) return false;
+      let queryIndex = 0;
+      for (let i = 0; i < text.length && queryIndex < query.length; i++) {
+        if (text[i] === query[queryIndex]) {
+          queryIndex++;
+        }
+      }
+      return queryIndex === query.length;
+    },
+
+    // Highlight matching text
+    highlightMatch(text, query) {
+      if (!query || !text) return text;
+
+      const lowerText = text.toLowerCase();
+      const lowerQuery = query.toLowerCase();
+      const index = lowerText.indexOf(lowerQuery);
+
+      if (index === -1) return text;
+
+      const before = text.slice(0, index);
+      const match = text.slice(index, index + query.length);
+      const after = text.slice(index + query.length);
+
+      return `${before}<span class="ux-command__highlight">${match}</span>${after}`;
+    },
+
+    // Get flat list of all visible commands
+    getFlatCommands() {
+      const flat = [];
+      this.filteredCommands.forEach(group => {
+        if (group.commands) {
+          group.commands.forEach(cmd => flat.push(cmd));
+        }
+      });
+      return flat;
+    },
+
+    // Handle keyboard navigation
+    handleKeydown(e) {
+      const flatCommands = this.getFlatCommands();
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          this.activeIndex = Math.min(this.activeIndex + 1, flatCommands.length - 1);
+          this.scrollToActive();
+          break;
+
+        case 'ArrowUp':
+          e.preventDefault();
+          this.activeIndex = Math.max(this.activeIndex - 1, 0);
+          this.scrollToActive();
+          break;
+
+        case 'Enter':
+          e.preventDefault();
+          const activeCommand = flatCommands[this.activeIndex];
+          if (activeCommand) {
+            this.executeCommand(activeCommand);
+          }
+          break;
+
+        case 'Tab':
+          e.preventDefault();
+          if (e.shiftKey) {
+            this.activeIndex = Math.max(this.activeIndex - 1, 0);
+          } else {
+            this.activeIndex = Math.min(this.activeIndex + 1, flatCommands.length - 1);
+          }
+          this.scrollToActive();
+          break;
+      }
+    },
+
+    // Scroll to keep active item visible
+    scrollToActive() {
+      this.$nextTick(() => {
+        const activeEl = this.$el.querySelector('.ux-command__item--active');
+        if (activeEl) {
+          activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+      });
+    },
+
+    // Execute a command
+    executeCommand(command) {
+      // Add to recent
+      this.addToRecent(command);
+
+      // Dispatch event
+      this.$dispatch('command:execute', { command });
+
+      // Run action if provided
+      if (command.action && typeof command.action === 'function') {
+        command.action(command);
+      }
+
+      // Handle URL navigation
+      if (command.url) {
+        window.location.href = command.url;
+      }
+
+      // Close if configured
+      if (this.closeOnSelect) {
+        this.close();
+      }
+    },
+
+    // Add command to recent list
+    addToRecent(command) {
+      // Remove if already exists
+      this.recentCommands = this.recentCommands.filter(c => c.id !== command.id);
+
+      // Add to beginning
+      this.recentCommands.unshift({
+        ...command,
+        recent: true
+      });
+
+      // Limit size
+      if (this.recentCommands.length > this.maxRecent) {
+        this.recentCommands = this.recentCommands.slice(0, this.maxRecent);
+      }
+
+      // Save to localStorage
+      this.saveRecent();
+    },
+
+    // Load recent from localStorage
+    loadRecent() {
+      try {
+        const stored = localStorage.getItem('ux-command-recent');
+        if (stored) {
+          this.recentCommands = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.warn('Could not load recent commands:', e);
+      }
+    },
+
+    // Save recent to localStorage
+    saveRecent() {
+      try {
+        localStorage.setItem('ux-command-recent', JSON.stringify(
+          this.recentCommands.map(({ action, ...cmd }) => cmd)
+        ));
+      } catch (e) {
+        console.warn('Could not save recent commands:', e);
+      }
+    },
+
+    // Clear recent commands
+    clearRecent() {
+      this.recentCommands = [];
+      localStorage.removeItem('ux-command-recent');
+      this.filterCommands();
+    },
+
+    // Check if item is active
+    isActiveItem(groupIndex, itemIndex) {
+      let count = 0;
+      for (let g = 0; g < groupIndex; g++) {
+        if (this.filteredCommands[g] && this.filteredCommands[g].commands) {
+          count += this.filteredCommands[g].commands.length;
+        }
+      }
+      return count + itemIndex === this.activeIndex;
+    },
+
+    // Get default icon for command
+    getIcon(command) {
+      if (command.icon) {
+        // If it's an SVG string, return as-is
+        if (command.icon.includes('<svg')) {
+          return command.icon;
+        }
+        // If it's a key to our icons object
+        if (this.icons[command.icon]) {
+          return this.icons[command.icon];
+        }
+      }
+      // Default icon
+      return this.icons.arrow;
+    },
+
+    // Format shortcut for display
+    formatShortcut(shortcut) {
+      if (!shortcut) return [];
+
+      // Replace common symbols
+      return shortcut
+        .replace('Cmd', '⌘')
+        .replace('Ctrl', 'Ctrl')
+        .replace('Alt', '⌥')
+        .replace('Shift', '⇧')
+        .replace('Enter', '↵')
+        .split('+')
+        .map(key => key.trim());
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxCommand', commandData);
+  }
+
+  // Expose icons for external use
+  window.UX = window.UX || {};
+  window.UX.commandIcons = icons;
 })();
 
 /**
@@ -9087,6 +14846,889 @@
 })();
 
 /**
+ * UX Context Menu Component
+ * Right-click context menus with iOS 26 Liquid Glass design
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       UX Context Menu
+       iOS 26 Style - Liquid Glass Design
+       ========================================================================== */
+
+    :root {
+      /* Context Menu Tokens */
+      --ux-context-menu-min-width: 180px;
+      --ux-context-menu-max-width: 280px;
+      --ux-context-menu-padding: var(--ux-space-xs);
+      --ux-context-menu-border-radius: var(--ux-border-radius-lg);
+      --ux-context-menu-shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 2px 10px rgba(0, 0, 0, 0.12);
+      --ux-context-menu-item-height: 36px;
+      --ux-context-menu-item-padding: 0 var(--ux-space-md);
+      --ux-context-menu-item-gap: var(--ux-space-sm);
+      --ux-context-menu-divider-margin: var(--ux-space-xs);
+      --ux-context-menu-section-padding: var(--ux-space-sm) var(--ux-space-md);
+    }
+
+    /* ==========================================================================
+       Context Menu Container
+       ========================================================================== */
+
+    .ux-context-menu {
+      position: fixed;
+      z-index: var(--ux-z-popover);
+      min-width: var(--ux-context-menu-min-width);
+      max-width: var(--ux-context-menu-max-width);
+      max-height: calc(100dvh - 32px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: var(--ux-context-menu-padding);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-context-menu-border-radius);
+      box-shadow: var(--ux-context-menu-shadow);
+
+      /* Hidden by default */
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.95);
+      transform-origin: top left;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease-ios),
+        transform var(--ux-transition-fast) var(--ux-ease-ios),
+        visibility var(--ux-transition-fast);
+    }
+
+    /* Visible state */
+    .ux-context-menu--open {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+
+    /* Transform origin based on position */
+    .ux-context-menu--origin-top-left {
+      transform-origin: top left;
+    }
+
+    .ux-context-menu--origin-top-right {
+      transform-origin: top right;
+    }
+
+    .ux-context-menu--origin-bottom-left {
+      transform-origin: bottom left;
+    }
+
+    .ux-context-menu--origin-bottom-right {
+      transform-origin: bottom right;
+    }
+
+    /* ==========================================================================
+       Context Menu Item
+       ========================================================================== */
+
+    .ux-context-menu__item {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-context-menu-item-gap);
+      min-height: var(--ux-context-menu-item-height);
+      padding: var(--ux-context-menu-item-padding);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      text-decoration: none;
+      border-radius: var(--ux-border-radius);
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease-ios);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-context-menu__item:hover,
+    .ux-context-menu__item:focus {
+      background: var(--ux-surface-secondary);
+      outline: none;
+    }
+
+    .ux-context-menu__item:active {
+      background: var(--ux-surface-tertiary);
+    }
+
+    .ux-context-menu__item:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: -2px;
+    }
+
+    /* Item icon */
+    .ux-context-menu__item-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    .ux-context-menu__item-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Item text */
+    .ux-context-menu__item-text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Item shortcut */
+    .ux-context-menu__item-shortcut {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      margin-left: auto;
+      padding-left: var(--ux-space-md);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    /* Item arrow for submenus */
+    .ux-context-menu__item-arrow {
+      width: 14px;
+      height: 14px;
+      margin-left: auto;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    .ux-context-menu__item-arrow svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ==========================================================================
+       Item Variants
+       ========================================================================== */
+
+    /* Danger item */
+    .ux-context-menu__item--danger {
+      color: var(--ux-danger);
+    }
+
+    .ux-context-menu__item--danger:hover,
+    .ux-context-menu__item--danger:focus {
+      background: rgba(var(--ux-danger-rgb), 0.1);
+    }
+
+    .ux-context-menu__item--danger .ux-context-menu__item-icon {
+      opacity: 1;
+    }
+
+    /* Disabled item */
+    .ux-context-menu__item--disabled,
+    .ux-context-menu__item:disabled {
+      opacity: 0.4;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    /* Selected/checked item */
+    .ux-context-menu__item--selected {
+      color: var(--ux-primary);
+    }
+
+    .ux-context-menu__item--selected .ux-context-menu__item-icon {
+      opacity: 1;
+    }
+
+    /* Active item (keyboard navigation) */
+    .ux-context-menu__item--active {
+      background: var(--ux-surface-secondary);
+    }
+
+    /* ==========================================================================
+       Context Menu Divider
+       ========================================================================== */
+
+    .ux-context-menu__divider {
+      height: 1px;
+      background: var(--ux-border-color);
+      margin: var(--ux-context-menu-divider-margin) 0;
+    }
+
+    /* ==========================================================================
+       Context Menu Section Label
+       ========================================================================== */
+
+    .ux-context-menu__section {
+      padding: var(--ux-context-menu-section-padding);
+      font-size: var(--ux-font-size-xs);
+      font-weight: 600;
+      color: var(--ux-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      user-select: none;
+    }
+
+    .ux-context-menu__section:not(:first-child) {
+      margin-top: var(--ux-space-xs);
+    }
+
+    /* ==========================================================================
+       Context Menu Submenu
+       ========================================================================== */
+
+    .ux-context-menu__submenu {
+      position: relative;
+    }
+
+    .ux-context-menu__submenu-content {
+      position: absolute;
+      left: 100%;
+      top: 0;
+      margin-left: var(--ux-space-xs);
+      min-width: var(--ux-context-menu-min-width);
+      max-width: var(--ux-context-menu-max-width);
+      padding: var(--ux-context-menu-padding);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-context-menu-border-radius);
+      box-shadow: var(--ux-context-menu-shadow);
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.95) translateX(-8px);
+      transform-origin: left top;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease-ios),
+        transform var(--ux-transition-fast) var(--ux-ease-ios),
+        visibility var(--ux-transition-fast);
+    }
+
+    /* Submenu opens on hover or when active */
+    .ux-context-menu__submenu:hover > .ux-context-menu__submenu-content,
+    .ux-context-menu__submenu--open > .ux-context-menu__submenu-content {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateX(0);
+    }
+
+    /* Submenu opens to the left when near right edge */
+    .ux-context-menu__submenu-content--left {
+      left: auto;
+      right: 100%;
+      margin-left: 0;
+      margin-right: var(--ux-space-xs);
+      transform-origin: right top;
+      transform: scale(0.95) translateX(8px);
+    }
+
+    .ux-context-menu__submenu:hover > .ux-context-menu__submenu-content--left,
+    .ux-context-menu__submenu--open > .ux-context-menu__submenu-content--left {
+      transform: scale(1) translateX(0);
+    }
+
+    /* Submenu item with arrow indicator */
+    .ux-context-menu__submenu > .ux-context-menu__item::after {
+      content: '';
+      width: 14px;
+      height: 14px;
+      margin-left: auto;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       Glass Variant (iOS 26 Liquid Glass)
+       ========================================================================== */
+
+    .ux-context-menu--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-context-menu--glass .ux-context-menu__item:hover,
+    .ux-context-menu--glass .ux-context-menu__item:focus {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .ux-context-menu--glass .ux-context-menu__item:active {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .ux-context-menu--glass .ux-context-menu__divider {
+      background: var(--ux-glass-border);
+    }
+
+    .ux-context-menu--glass .ux-context-menu__submenu-content {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    /* ==========================================================================
+       Compact Variant
+       ========================================================================== */
+
+    .ux-context-menu--compact {
+      --ux-context-menu-item-height: 32px;
+      --ux-context-menu-padding: 4px;
+    }
+
+    .ux-context-menu--compact .ux-context-menu__item {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-context-menu--compact .ux-context-menu__item-icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ==========================================================================
+       Large Variant
+       ========================================================================== */
+
+    .ux-context-menu--lg {
+      --ux-context-menu-item-height: 44px;
+      --ux-context-menu-min-width: 220px;
+    }
+
+    .ux-context-menu--lg .ux-context-menu__item {
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-context-menu--lg .ux-context-menu__item-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      :root:not(.ux-light) {
+        --ux-context-menu-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      :root:not(.ux-light) .ux-context-menu--glass .ux-context-menu__item:hover,
+      :root:not(.ux-light) .ux-context-menu--glass .ux-context-menu__item:focus {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      :root:not(.ux-light) .ux-context-menu--glass .ux-context-menu__item:active {
+        background: rgba(255, 255, 255, 0.15);
+      }
+    }
+
+    .ux-dark {
+      --ux-context-menu-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .ux-dark .ux-context-menu--glass .ux-context-menu__item:hover,
+    .ux-dark .ux-context-menu--glass .ux-context-menu__item:focus {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .ux-dark .ux-context-menu--glass .ux-context-menu__item:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-context-menu {
+        transition: opacity var(--ux-transition-fast), visibility var(--ux-transition-fast);
+        transform: none !important;
+      }
+
+      .ux-context-menu--open {
+        transform: none !important;
+      }
+
+      .ux-context-menu__submenu-content {
+        transition: opacity var(--ux-transition-fast), visibility var(--ux-transition-fast);
+        transform: none !important;
+      }
+
+      .ux-context-menu__submenu:hover > .ux-context-menu__submenu-content,
+      .ux-context-menu__submenu--open > .ux-context-menu__submenu-content {
+        transform: none !important;
+      }
+    }
+
+    /* ==========================================================================
+       Mobile Styles
+       ========================================================================== */
+
+    @media (max-width: 767px) {
+      .ux-context-menu {
+        --ux-context-menu-item-height: 44px;
+        --ux-context-menu-min-width: 200px;
+      }
+
+      .ux-context-menu__item {
+        font-size: var(--ux-font-size-md);
+      }
+
+      /* Submenus appear inline on mobile */
+      .ux-context-menu__submenu-content {
+        position: static;
+        margin-left: 0;
+        margin-top: var(--ux-space-xs);
+        padding-left: var(--ux-space-md);
+        border: none;
+        box-shadow: none;
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+      }
+
+      .ux-context-menu__submenu-content--left {
+        margin-right: 0;
+      }
+
+      .ux-context-menu__submenu-content .ux-context-menu__item {
+        padding-left: var(--ux-space-lg);
+      }
+    }
+
+    /* ==========================================================================
+       Backdrop (optional overlay)
+       ========================================================================== */
+
+    .ux-context-menu-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: calc(var(--ux-z-popover) - 1);
+      background: transparent;
+    }
+
+    .ux-context-menu-backdrop--visible {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-context-menu-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-context-menu-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const contextMenuComponent = (config = {}) => ({
+    isOpen: false,
+    x: 0,
+    y: 0,
+    items: config.items || [],
+    activeIndex: -1,
+    originClass: 'ux-context-menu--origin-top-left',
+    menuId: config.id || 'ux-context-menu-' + Math.random().toString(36).substr(2, 9),
+
+    // Config options
+    closeOnSelect: config.closeOnSelect !== false,
+    closeOnClickOutside: config.closeOnClickOutside !== false,
+    closeOnEscape: config.closeOnEscape !== false,
+    showBackdrop: config.showBackdrop || false,
+
+    // Focusable items cache
+    _items: [],
+
+    init() {
+      // Escape handler
+      if (this.closeOnEscape) {
+        this._escapeHandler = (e) => {
+          if (this.isOpen && e.key === 'Escape') {
+            e.preventDefault();
+            this.close();
+          }
+        };
+        document.addEventListener('keydown', this._escapeHandler);
+      }
+
+      // Click outside handler
+      if (this.closeOnClickOutside) {
+        this._clickOutsideHandler = (e) => {
+          if (this.isOpen) {
+            const menu = this.$refs.menu;
+            if (menu && !menu.contains(e.target)) {
+              this.close();
+            }
+          }
+        };
+        // Use mousedown for quicker response
+        document.addEventListener('mousedown', this._clickOutsideHandler);
+      }
+
+      // Close on scroll
+      this._scrollHandler = () => {
+        if (this.isOpen) {
+          this.close();
+        }
+      };
+      window.addEventListener('scroll', this._scrollHandler, { passive: true });
+
+      // Close on resize
+      this._resizeHandler = () => {
+        if (this.isOpen) {
+          this.close();
+        }
+      };
+      window.addEventListener('resize', this._resizeHandler, { passive: true });
+    },
+
+    destroy() {
+      if (this._escapeHandler) {
+        document.removeEventListener('keydown', this._escapeHandler);
+      }
+      if (this._clickOutsideHandler) {
+        document.removeEventListener('mousedown', this._clickOutsideHandler);
+      }
+      if (this._scrollHandler) {
+        window.removeEventListener('scroll', this._scrollHandler);
+      }
+      if (this._resizeHandler) {
+        window.removeEventListener('resize', this._resizeHandler);
+      }
+    },
+
+    /**
+     * Open the context menu at the specified position
+     * @param {MouseEvent|Object} event - Mouse event or {x, y} coordinates
+     * @param {Array} items - Optional array of menu items to display
+     */
+    open(event, items) {
+      // Update items if provided
+      if (items && Array.isArray(items)) {
+        this.items = items;
+      }
+
+      // Get coordinates from event or object
+      if (event instanceof Event) {
+        event.preventDefault();
+        this.x = event.clientX;
+        this.y = event.clientY;
+      } else if (event && typeof event === 'object') {
+        this.x = event.x || event.clientX || 0;
+        this.y = event.y || event.clientY || 0;
+      }
+
+      this.isOpen = true;
+      this.activeIndex = -1;
+
+      // Position adjustment and focus after render
+      this.$nextTick(() => {
+        this._adjustPosition();
+        this._updateItemsList();
+
+        // Focus first item for keyboard navigation
+        if (this._items.length > 0) {
+          this._items[0].focus();
+          this.activeIndex = 0;
+        }
+      });
+
+      this.$dispatch('contextmenu:open', { x: this.x, y: this.y, items: this.items });
+    },
+
+    /**
+     * Close the context menu
+     */
+    close() {
+      if (!this.isOpen) return;
+
+      this.isOpen = false;
+      this.activeIndex = -1;
+
+      this.$dispatch('contextmenu:close');
+    },
+
+    /**
+     * Toggle the context menu
+     */
+    toggle(event, items) {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open(event, items);
+      }
+    },
+
+    /**
+     * Select an item
+     * @param {Object} item - The menu item object
+     * @param {Event} event - The triggering event
+     */
+    select(item, event) {
+      if (item.disabled) return;
+
+      // Dispatch event with item data
+      this.$dispatch('contextmenu:select', { item, event });
+
+      // Execute action if provided
+      if (item.action && typeof item.action === 'function') {
+        item.action(item, event);
+      }
+
+      // Close menu if configured
+      if (this.closeOnSelect && !item.keepOpen && !item.submenu) {
+        this.close();
+      }
+    },
+
+    /**
+     * Adjust menu position to stay within viewport
+     */
+    _adjustPosition() {
+      const menu = this.$refs.menu;
+      if (!menu) return;
+
+      const rect = menu.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const margin = 8;
+
+      let adjustedX = this.x;
+      let adjustedY = this.y;
+      let originH = 'left';
+      let originV = 'top';
+
+      // Horizontal adjustment
+      if (this.x + rect.width > viewportWidth - margin) {
+        adjustedX = Math.max(margin, viewportWidth - rect.width - margin);
+        // If menu would appear to the left of cursor, adjust origin
+        if (adjustedX < this.x) {
+          originH = 'right';
+        }
+      }
+
+      // Vertical adjustment
+      if (this.y + rect.height > viewportHeight - margin) {
+        adjustedY = Math.max(margin, viewportHeight - rect.height - margin);
+        // If menu would appear above cursor, adjust origin
+        if (adjustedY < this.y) {
+          originV = 'bottom';
+        }
+      }
+
+      // Update position
+      this.x = adjustedX;
+      this.y = adjustedY;
+
+      // Update transform origin for animation
+      this.originClass = `ux-context-menu--origin-${originV}-${originH}`;
+    },
+
+    /**
+     * Update the list of focusable items
+     */
+    _updateItemsList() {
+      const menu = this.$refs.menu;
+      if (!menu) return;
+
+      this._items = Array.from(
+        menu.querySelectorAll('.ux-context-menu__item:not(.ux-context-menu__item--disabled)')
+      );
+    },
+
+    /**
+     * Handle keyboard navigation
+     */
+    handleKeydown(e) {
+      if (!this.isOpen) return;
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          this.focusNext();
+          break;
+
+        case 'ArrowUp':
+          e.preventDefault();
+          this.focusPrev();
+          break;
+
+        case 'ArrowRight':
+          // Open submenu if focused item has one
+          e.preventDefault();
+          this._openSubmenu();
+          break;
+
+        case 'ArrowLeft':
+          // Close submenu
+          e.preventDefault();
+          this._closeSubmenu();
+          break;
+
+        case 'Home':
+          e.preventDefault();
+          this.focusFirst();
+          break;
+
+        case 'End':
+          e.preventDefault();
+          this.focusLast();
+          break;
+
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          if (this.activeIndex >= 0 && this._items[this.activeIndex]) {
+            this._items[this.activeIndex].click();
+          }
+          break;
+
+        case 'Tab':
+          // Close on tab
+          this.close();
+          break;
+      }
+    },
+
+    /**
+     * Focus the next menu item
+     */
+    focusNext() {
+      if (this._items.length === 0) return;
+
+      this.activeIndex = this.activeIndex < this._items.length - 1 ? this.activeIndex + 1 : 0;
+      this._items[this.activeIndex]?.focus();
+    },
+
+    /**
+     * Focus the previous menu item
+     */
+    focusPrev() {
+      if (this._items.length === 0) return;
+
+      this.activeIndex = this.activeIndex > 0 ? this.activeIndex - 1 : this._items.length - 1;
+      this._items[this.activeIndex]?.focus();
+    },
+
+    /**
+     * Focus the first menu item
+     */
+    focusFirst() {
+      if (this._items.length === 0) return;
+
+      this.activeIndex = 0;
+      this._items[0]?.focus();
+    },
+
+    /**
+     * Focus the last menu item
+     */
+    focusLast() {
+      if (this._items.length === 0) return;
+
+      this.activeIndex = this._items.length - 1;
+      this._items[this.activeIndex]?.focus();
+    },
+
+    /**
+     * Open submenu for the currently focused item
+     */
+    _openSubmenu() {
+      const currentItem = this._items[this.activeIndex];
+      if (!currentItem) return;
+
+      const submenu = currentItem.closest('.ux-context-menu__submenu');
+      if (submenu) {
+        submenu.classList.add('ux-context-menu__submenu--open');
+        // Focus first item in submenu
+        const submenuContent = submenu.querySelector('.ux-context-menu__submenu-content');
+        const firstItem = submenuContent?.querySelector('.ux-context-menu__item:not(.ux-context-menu__item--disabled)');
+        if (firstItem) {
+          firstItem.focus();
+          this._updateItemsList();
+          this.activeIndex = this._items.indexOf(firstItem);
+        }
+      }
+    },
+
+    /**
+     * Close the current submenu
+     */
+    _closeSubmenu() {
+      const openSubmenu = this.$refs.menu?.querySelector('.ux-context-menu__submenu--open');
+      if (openSubmenu) {
+        openSubmenu.classList.remove('ux-context-menu__submenu--open');
+        // Focus the submenu trigger
+        const trigger = openSubmenu.querySelector(':scope > .ux-context-menu__item');
+        if (trigger) {
+          trigger.focus();
+          this._updateItemsList();
+          this.activeIndex = this._items.indexOf(trigger);
+        }
+      }
+    },
+
+    /**
+     * Get inline styles for positioning
+     */
+    getStyle() {
+      return {
+        left: this.x + 'px',
+        top: this.y + 'px'
+      };
+    },
+
+    /**
+     * ARIA attributes for the menu
+     */
+    get menuAriaAttrs() {
+      return {
+        'role': 'menu',
+        'id': this.menuId,
+        'aria-orientation': 'vertical'
+      };
+    },
+
+    /**
+     * ARIA attributes for menu items
+     */
+    getItemAriaAttrs(item, index) {
+      return {
+        'role': item.submenu ? 'menuitem' : 'menuitem',
+        'tabindex': index === this.activeIndex ? '0' : '-1',
+        'aria-disabled': item.disabled ? 'true' : 'false',
+        'aria-haspopup': item.submenu ? 'menu' : undefined,
+        'aria-expanded': item.submenu ? 'false' : undefined
+      };
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxContextMenu', contextMenuComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxContextMenu', contextMenuComponent);
+    });
+  }
+
+})();
+
+/**
  * UX DataTable Component
  * Responsive data table with standard and "no more tables" mobile views
  * @requires ux-core.js
@@ -9190,6 +15832,333 @@
       .ux-datatable__search {
         width: 100%;
       }
+    }
+
+    /* ========================================
+       Bulk Actions Toolbar
+    ======================================== */
+
+    .ux-datatable__bulk-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-sm) var(--ux-space-lg);
+      background: linear-gradient(135deg, rgba(var(--ux-primary-rgb), 0.1), rgba(var(--ux-primary-rgb), 0.05));
+      border-bottom: 1px solid rgba(var(--ux-primary-rgb), 0.2);
+      flex-shrink: 0;
+      animation: ux-datatable-bulk-slide-in 200ms var(--ux-ease);
+    }
+
+    @keyframes ux-datatable-bulk-slide-in {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ux-datatable__bulk-info {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-primary);
+    }
+
+    .ux-datatable__bulk-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 var(--ux-space-xs);
+      background-color: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+      border-radius: 12px;
+      font-size: var(--ux-font-size-xs);
+      font-weight: 600;
+    }
+
+    .ux-datatable__bulk-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-datatable__bulk-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__bulk-btn:hover {
+      background: var(--ux-surface-secondary);
+      border-color: var(--ux-primary);
+    }
+
+    .ux-datatable__bulk-btn--danger:hover {
+      background: rgba(var(--ux-danger-rgb, 255, 59, 48), 0.1);
+      border-color: var(--ux-danger);
+      color: var(--ux-danger);
+    }
+
+    .ux-datatable__bulk-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-datatable__bulk-clear {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: var(--ux-border-radius);
+      color: var(--ux-text-secondary);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__bulk-clear:hover {
+      background: var(--ux-surface);
+      color: var(--ux-text);
+    }
+
+    .ux-datatable__bulk-clear svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    @media (max-width: 767px) {
+      .ux-datatable__bulk-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--ux-space-sm);
+      }
+
+      .ux-datatable__bulk-actions {
+        justify-content: flex-end;
+      }
+    }
+
+    /* ========================================
+       Column Filters Row
+    ======================================== */
+
+    .ux-datatable__filters {
+      display: table-row;
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-datatable__filter-cell {
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      border-bottom: 1px solid var(--ux-border-color);
+      vertical-align: middle;
+    }
+
+    .ux-datatable__filter-input {
+      width: 100%;
+      min-width: 80px;
+      max-width: 200px;
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-sm);
+      background-color: var(--ux-surface);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      transition: border-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__filter-input:focus {
+      outline: none;
+      border-color: var(--ux-primary);
+    }
+
+    .ux-datatable__filter-input::placeholder {
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-datatable__filter-select {
+      width: 100%;
+      min-width: 80px;
+      max-width: 200px;
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      padding-right: calc(var(--ux-space-sm) + 16px);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-sm);
+      background-color: var(--ux-surface);
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right var(--ux-space-xs) center;
+      background-size: 16px;
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__filter-select:focus {
+      outline: none;
+      border-color: var(--ux-primary);
+    }
+
+    .ux-datatable__filter-date {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-datatable__filter-date input {
+      flex: 1;
+      min-width: 100px;
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-sm);
+      background-color: var(--ux-surface);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+    }
+
+    .ux-datatable__filter-date input:focus {
+      outline: none;
+      border-color: var(--ux-primary);
+    }
+
+    .ux-datatable__filter-clear {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: var(--ux-border-radius-sm);
+      color: var(--ux-text-tertiary);
+      cursor: pointer;
+      opacity: 0;
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__filter-cell:hover .ux-datatable__filter-clear,
+    .ux-datatable__filter-clear:focus {
+      opacity: 1;
+    }
+
+    .ux-datatable__filter-clear:hover {
+      background: var(--ux-surface-tertiary);
+      color: var(--ux-text);
+    }
+
+    .ux-datatable__filter-clear svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-datatable__filter-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    /* Active filters indicator */
+    .ux-datatable__active-filters {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-xs) var(--ux-space-lg);
+      background-color: var(--ux-surface-tertiary);
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-datatable__filter-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      padding: 2px var(--ux-space-sm);
+      background-color: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: 999px;
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text);
+    }
+
+    .ux-datatable__filter-tag-label {
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-datatable__filter-tag-remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      margin-left: 2px;
+      background: none;
+      border: none;
+      border-radius: 50%;
+      color: var(--ux-text-tertiary);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__filter-tag-remove:hover {
+      background: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+
+    .ux-datatable__filter-tag-remove svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .ux-datatable__clear-filters {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      padding: 2px var(--ux-space-sm);
+      background: none;
+      border: none;
+      border-radius: var(--ux-border-radius-sm);
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-primary);
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__clear-filters:hover {
+      background-color: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    /* Hide filters on mobile responsive view */
+    @media (max-width: 767px) {
+      .ux-datatable--responsive .ux-datatable__filters {
+        display: none;
+      }
+    }
+
+    .ux-datatable--force-responsive .ux-datatable__filters {
+      display: none;
     }
 
     /* ========================================
@@ -9790,6 +16759,9 @@
     edit: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
     delete: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
     view: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    close: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+    filter: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+    export: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>',
     // View toggle icons
     viewTable: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
     viewCards: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -9834,6 +16806,14 @@
     searchQuery: '',
     searchPlaceholder: config.searchPlaceholder || 'Search...',
 
+    // Column filters
+    filterable: config.filterable || false,
+    columnFilters: {},
+    showFilters: config.showFilters || false,
+
+    // Bulk actions
+    bulkActions: config.bulkActions || [],
+
     // Responsive
     responsive: config.responsive !== false,
     forceResponsive: config.forceResponsive || false,
@@ -9859,6 +16839,11 @@
       noResults: config.labels?.noResults || 'No results found',
       viewTable: config.labels?.viewTable || 'Table view',
       viewCards: config.labels?.viewCards || 'Cards view',
+      selected: config.labels?.selected || 'selected',
+      clearSelection: config.labels?.clearSelection || 'Clear selection',
+      clearFilters: config.labels?.clearFilters || 'Clear filters',
+      filterBy: config.labels?.filterBy || 'Filter',
+      all: config.labels?.all || 'All',
       ...config.labels
     },
 
@@ -9876,6 +16861,13 @@
 
     // Initialize
     init() {
+      // Initialize column filters
+      this.columns.forEach(col => {
+        if (col.filterable !== false && this.filterable) {
+          this.columnFilters[col.key] = '';
+        }
+      });
+
       // Watch for external data changes
       if (config.watchData) {
         this.$watch('rows', () => {
@@ -9886,20 +16878,87 @@
       }
     },
 
-    // Computed: Filtered rows (search)
+    // Computed: Filtered rows (search + column filters)
     get filteredRows() {
-      if (!this.searchQuery.trim()) {
-        return this.rows;
+      let result = this.rows;
+
+      // Apply global search
+      if (this.searchQuery.trim()) {
+        const query = this.searchQuery.toLowerCase().trim();
+        result = result.filter(row => {
+          return this.columns.some(col => {
+            const value = this.getCellValue(row, col);
+            if (value === null || value === undefined) return false;
+            return String(value).toLowerCase().includes(query);
+          });
+        });
       }
 
-      const query = this.searchQuery.toLowerCase().trim();
-      return this.rows.filter(row => {
-        return this.columns.some(col => {
-          const value = this.getCellValue(row, col);
-          if (value === null || value === undefined) return false;
-          return String(value).toLowerCase().includes(query);
+      // Apply column filters
+      if (this.filterable && this.hasActiveFilters) {
+        result = result.filter(row => {
+          return this.columns.every(col => {
+            const filterValue = this.columnFilters[col.key];
+            if (!filterValue || filterValue === '') return true;
+
+            const cellValue = this.getCellValue(row, col);
+            if (cellValue === null || cellValue === undefined) return false;
+
+            // Handle different filter types
+            if (col.filterType === 'select') {
+              return String(cellValue) === String(filterValue);
+            } else if (col.filterType === 'date-range') {
+              // filterValue should be { from: 'date', to: 'date' }
+              if (typeof filterValue === 'object') {
+                const date = new Date(cellValue).getTime();
+                const from = filterValue.from ? new Date(filterValue.from).getTime() : -Infinity;
+                const to = filterValue.to ? new Date(filterValue.to).getTime() : Infinity;
+                return date >= from && date <= to;
+              }
+              return true;
+            } else {
+              // Default: text contains
+              return String(cellValue).toLowerCase().includes(String(filterValue).toLowerCase());
+            }
+          });
         });
+      }
+
+      return result;
+    },
+
+    // Check if any column filter is active
+    get hasActiveFilters() {
+      return Object.values(this.columnFilters).some(v => {
+        if (typeof v === 'object') {
+          return v.from || v.to;
+        }
+        return v && v !== '';
       });
+    },
+
+    // Get active filters as array for display
+    get activeFiltersList() {
+      const filters = [];
+      this.columns.forEach(col => {
+        const value = this.columnFilters[col.key];
+        if (value && value !== '') {
+          if (typeof value === 'object' && (value.from || value.to)) {
+            let label = '';
+            if (value.from && value.to) {
+              label = `${value.from} - ${value.to}`;
+            } else if (value.from) {
+              label = `>= ${value.from}`;
+            } else {
+              label = `<= ${value.to}`;
+            }
+            filters.push({ key: col.key, label: col.label, value: label });
+          } else {
+            filters.push({ key: col.key, label: col.label, value });
+          }
+        }
+      });
+      return filters;
     },
 
     // Computed: Sorted rows
@@ -10114,6 +17173,77 @@
     onAction(action, row, event) {
       event.stopPropagation();
       this.$dispatch('row-action', { action, row, event });
+    },
+
+    // Column filters
+    setColumnFilter(key, value) {
+      this.columnFilters[key] = value;
+      this.currentPage = 1;
+      this.$dispatch('filter-change', { filters: this.columnFilters });
+    },
+
+    clearColumnFilter(key) {
+      const col = this.columns.find(c => c.key === key);
+      if (col && col.filterType === 'date-range') {
+        this.columnFilters[key] = { from: '', to: '' };
+      } else {
+        this.columnFilters[key] = '';
+      }
+      this.currentPage = 1;
+      this.$dispatch('filter-change', { filters: this.columnFilters });
+    },
+
+    clearAllFilters() {
+      this.columns.forEach(col => {
+        if (col.filterType === 'date-range') {
+          this.columnFilters[col.key] = { from: '', to: '' };
+        } else {
+          this.columnFilters[col.key] = '';
+        }
+      });
+      this.currentPage = 1;
+      this.$dispatch('filter-change', { filters: this.columnFilters });
+    },
+
+    toggleFilters() {
+      this.showFilters = !this.showFilters;
+    },
+
+    // Get unique values for select filter
+    getUniqueValues(columnKey) {
+      const values = new Set();
+      this.rows.forEach(row => {
+        const col = this.columns.find(c => c.key === columnKey);
+        if (col) {
+          const value = this.getCellValue(row, col);
+          if (value !== null && value !== undefined && value !== '') {
+            values.add(value);
+          }
+        }
+      });
+      return Array.from(values).sort();
+    },
+
+    // Bulk actions
+    clearSelection() {
+      this.selectedRows = [];
+      this.selectAll = false;
+      this.$dispatch('selection-change', { selected: this.selectedRows });
+    },
+
+    onBulkAction(action, event) {
+      const selectedData = this.rows.filter(row => this.selectedRows.includes(this.getRowId(row)));
+      this.$dispatch('bulk-action', {
+        action,
+        selectedRows: this.selectedRows,
+        selectedData,
+        event
+      });
+    },
+
+    // Get selected rows data
+    getSelectedData() {
+      return this.rows.filter(row => this.selectedRows.includes(this.getRowId(row)));
     },
 
     // Get icons
@@ -10808,6 +17938,709 @@
   }
 })();
 
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       UX Dropdown - Menu Dropdown Component
+       iOS 26 Style - Liquid Glass Design
+       ========================================================================== */
+
+    :root {
+      /* Dropdown Tokens */
+      --ux-dropdown-min-width: 180px;
+      --ux-dropdown-max-width: 320px;
+      --ux-dropdown-padding: var(--ux-space-xs);
+      --ux-dropdown-border-radius: var(--ux-border-radius-lg);
+      --ux-dropdown-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.1);
+      --ux-dropdown-item-height: 44px;
+      --ux-dropdown-item-padding: 0 var(--ux-space-md);
+      --ux-dropdown-item-gap: var(--ux-space-sm);
+      --ux-dropdown-divider-margin: var(--ux-space-xs);
+      --ux-dropdown-header-padding: var(--ux-space-sm) var(--ux-space-md);
+    }
+
+    /* ==========================================================================
+       Dropdown Container
+       ========================================================================== */
+
+    .ux-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* ==========================================================================
+       Dropdown Trigger
+       ========================================================================== */
+
+    .ux-dropdown__trigger {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-dropdown__trigger[aria-expanded="true"] .ux-dropdown__caret {
+      transform: rotate(180deg);
+    }
+
+    .ux-dropdown__caret {
+      width: 16px;
+      height: 16px;
+      transition: transform var(--ux-transition-fast) var(--ux-ease-ios);
+      opacity: 0.6;
+    }
+
+    .ux-dropdown__caret svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ==========================================================================
+       Dropdown Menu
+       ========================================================================== */
+
+    .ux-dropdown__menu {
+      position: absolute;
+      z-index: var(--ux-z-dropdown);
+      min-width: var(--ux-dropdown-min-width);
+      max-width: var(--ux-dropdown-max-width);
+      max-height: 320px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: var(--ux-dropdown-padding);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-dropdown-border-radius);
+      box-shadow: var(--ux-dropdown-shadow);
+
+      /* Hidden by default */
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.95) translateY(-8px);
+      transform-origin: top left;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease-ios),
+        transform var(--ux-transition-fast) var(--ux-ease-ios),
+        visibility var(--ux-transition-fast);
+    }
+
+    /* Visible state */
+    .ux-dropdown--open .ux-dropdown__menu,
+    .ux-dropdown__menu[data-show] {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+
+    /* Position variants */
+    .ux-dropdown__menu--top {
+      bottom: 100%;
+      top: auto;
+      margin-bottom: var(--ux-space-xs);
+      transform-origin: bottom left;
+      transform: scale(0.95) translateY(8px);
+    }
+
+    .ux-dropdown--open .ux-dropdown__menu--top,
+    .ux-dropdown__menu--top[data-show] {
+      transform: scale(1) translateY(0);
+    }
+
+    .ux-dropdown__menu--right {
+      right: 0;
+      left: auto;
+      transform-origin: top right;
+    }
+
+    .ux-dropdown__menu--top.ux-dropdown__menu--right {
+      transform-origin: bottom right;
+    }
+
+    .ux-dropdown__menu--left {
+      left: 0;
+      right: auto;
+    }
+
+    .ux-dropdown__menu--center {
+      left: 50%;
+      transform: scale(0.95) translateY(-8px) translateX(-50%);
+      transform-origin: top center;
+    }
+
+    .ux-dropdown--open .ux-dropdown__menu--center,
+    .ux-dropdown__menu--center[data-show] {
+      transform: scale(1) translateY(0) translateX(-50%);
+    }
+
+    /* ==========================================================================
+       Dropdown Item
+       ========================================================================== */
+
+    .ux-dropdown__item {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-dropdown-item-gap);
+      min-height: var(--ux-dropdown-item-height);
+      padding: var(--ux-dropdown-item-padding);
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text);
+      text-decoration: none;
+      border-radius: var(--ux-border-radius);
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease-ios);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-dropdown__item:hover,
+    .ux-dropdown__item:focus {
+      background: var(--ux-surface-secondary);
+      outline: none;
+    }
+
+    .ux-dropdown__item:active {
+      background: var(--ux-surface-tertiary);
+    }
+
+    .ux-dropdown__item:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: -2px;
+    }
+
+    /* Item icon */
+    .ux-dropdown__item-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    .ux-dropdown__item-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Item text */
+    .ux-dropdown__item-text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Item shortcut */
+    .ux-dropdown__item-shortcut {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      margin-left: auto;
+      padding-left: var(--ux-space-md);
+    }
+
+    /* Item badge */
+    .ux-dropdown__item-badge {
+      font-size: var(--ux-font-size-xs);
+      background: var(--ux-primary);
+      color: white;
+      padding: 2px 6px;
+      border-radius: var(--ux-border-radius-pill);
+      margin-left: auto;
+    }
+
+    /* Item check (for selectable items) */
+    .ux-dropdown__item-check {
+      width: 16px;
+      height: 16px;
+      margin-left: auto;
+      opacity: 0;
+      color: var(--ux-primary);
+      transition: opacity var(--ux-transition-fast);
+    }
+
+    .ux-dropdown__item--selected .ux-dropdown__item-check {
+      opacity: 1;
+    }
+
+    .ux-dropdown__item-check svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ==========================================================================
+       Item Variants
+       ========================================================================== */
+
+    /* Danger item */
+    .ux-dropdown__item--danger {
+      color: var(--ux-danger);
+    }
+
+    .ux-dropdown__item--danger:hover,
+    .ux-dropdown__item--danger:focus {
+      background: rgba(var(--ux-danger-rgb), 0.1);
+    }
+
+    .ux-dropdown__item--danger .ux-dropdown__item-icon {
+      opacity: 1;
+    }
+
+    /* Disabled item */
+    .ux-dropdown__item--disabled,
+    .ux-dropdown__item:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    /* Selected item */
+    .ux-dropdown__item--selected {
+      color: var(--ux-primary);
+      font-weight: 500;
+    }
+
+    /* Active item (keyboard navigation) */
+    .ux-dropdown__item--active {
+      background: var(--ux-surface-secondary);
+    }
+
+    /* ==========================================================================
+       Dropdown Divider
+       ========================================================================== */
+
+    .ux-dropdown__divider {
+      height: 1px;
+      background: var(--ux-border-color);
+      margin: var(--ux-dropdown-divider-margin) 0;
+    }
+
+    /* ==========================================================================
+       Dropdown Header
+       ========================================================================== */
+
+    .ux-dropdown__header {
+      padding: var(--ux-dropdown-header-padding);
+      font-size: var(--ux-font-size-xs);
+      font-weight: 600;
+      color: var(--ux-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ==========================================================================
+       Dropdown Group
+       ========================================================================== */
+
+    .ux-dropdown__group {
+      padding: var(--ux-space-xs) 0;
+    }
+
+    .ux-dropdown__group:first-child {
+      padding-top: 0;
+    }
+
+    .ux-dropdown__group:last-child {
+      padding-bottom: 0;
+    }
+
+    .ux-dropdown__group + .ux-dropdown__group {
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-dropdown__menu--glass,
+    .ux-dropdown--glass .ux-dropdown__menu {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-dropdown__menu--glass .ux-dropdown__item:hover,
+    .ux-dropdown--glass .ux-dropdown__item:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .ux-dropdown__menu--glass .ux-dropdown__item:active,
+    .ux-dropdown--glass .ux-dropdown__item:active {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* ==========================================================================
+       Compact Variant
+       ========================================================================== */
+
+    .ux-dropdown__menu--compact {
+      --ux-dropdown-item-height: 36px;
+      --ux-dropdown-padding: 4px;
+    }
+
+    .ux-dropdown__menu--compact .ux-dropdown__item {
+      font-size: var(--ux-font-size-sm);
+    }
+
+    /* ==========================================================================
+       Wide Variant
+       ========================================================================== */
+
+    .ux-dropdown__menu--wide {
+      --ux-dropdown-min-width: 240px;
+    }
+
+    .ux-dropdown__menu--full {
+      width: 100%;
+      max-width: none;
+    }
+
+    /* ==========================================================================
+       Submenu
+       ========================================================================== */
+
+    .ux-dropdown__submenu {
+      position: relative;
+    }
+
+    .ux-dropdown__submenu > .ux-dropdown__item::after {
+      content: '';
+      width: 16px;
+      height: 16px;
+      margin-left: auto;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.5;
+    }
+
+    .ux-dropdown__submenu .ux-dropdown__menu {
+      left: 100%;
+      top: 0;
+      margin-left: var(--ux-space-xs);
+      transform-origin: left top;
+    }
+
+    .ux-dropdown__submenu:hover > .ux-dropdown__menu {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      :root:not(.ux-light) {
+        --ux-dropdown-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      :root:not(.ux-light) .ux-dropdown__menu--glass .ux-dropdown__item:hover,
+      :root:not(.ux-light) .ux-dropdown--glass .ux-dropdown__item:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .ux-dark {
+      --ux-dropdown-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .ux-dark .ux-dropdown__menu--glass .ux-dropdown__item:hover,
+    .ux-dark .ux-dropdown--glass .ux-dropdown__item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-dropdown__menu {
+        transition: opacity var(--ux-transition-fast), visibility var(--ux-transition-fast);
+        transform: none !important;
+      }
+
+      .ux-dropdown--open .ux-dropdown__menu,
+      .ux-dropdown__menu[data-show] {
+        transform: none !important;
+      }
+    }
+
+    /* ==========================================================================
+       Mobile Styles
+       ========================================================================== */
+
+    @media (max-width: 767px) {
+      .ux-dropdown__menu {
+        --ux-dropdown-item-height: 48px;
+      }
+
+      /* Full width on very small screens */
+      .ux-dropdown--mobile-full .ux-dropdown__menu {
+        position: fixed;
+        left: var(--ux-space-md) !important;
+        right: var(--ux-space-md) !important;
+        bottom: var(--ux-space-md);
+        top: auto !important;
+        max-width: none;
+        width: auto;
+        border-radius: var(--ux-border-radius-xl);
+        transform-origin: bottom center;
+        transform: scale(0.95) translateY(20px);
+      }
+
+      .ux-dropdown--mobile-full.ux-dropdown--open .ux-dropdown__menu {
+        transform: scale(1) translateY(0);
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-dropdown-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-dropdown-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const dropdownComponent = (config = {}) => ({
+    isOpen: false,
+    activeIndex: -1,
+    items: [],
+
+    // Config
+    closeOnSelect: config.closeOnSelect !== false,
+    closeOnClickOutside: config.closeOnClickOutside !== false,
+    closeOnEscape: config.closeOnEscape !== false,
+    triggerOnHover: config.triggerOnHover || false,
+    hoverDelay: config.hoverDelay || 150,
+
+    // Hover timer
+    _hoverTimer: null,
+
+    init() {
+      // Get focusable items
+      this.$nextTick(() => {
+        this.items = Array.from(this.$el.querySelectorAll('.ux-dropdown__item:not(.ux-dropdown__item--disabled)'));
+      });
+
+      // Click outside handler
+      if (this.closeOnClickOutside) {
+        this._clickOutsideHandler = (e) => {
+          if (this.isOpen && !this.$el.contains(e.target)) {
+            this.close();
+          }
+        };
+        document.addEventListener('click', this._clickOutsideHandler);
+      }
+
+      // Escape handler
+      if (this.closeOnEscape) {
+        this._escapeHandler = (e) => {
+          if (this.isOpen && e.key === 'Escape') {
+            this.close();
+            this.focusTrigger();
+          }
+        };
+        document.addEventListener('keydown', this._escapeHandler);
+      }
+    },
+
+    destroy() {
+      if (this._clickOutsideHandler) {
+        document.removeEventListener('click', this._clickOutsideHandler);
+      }
+      if (this._escapeHandler) {
+        document.removeEventListener('keydown', this._escapeHandler);
+      }
+      if (this._hoverTimer) {
+        clearTimeout(this._hoverTimer);
+      }
+    },
+
+    // Open dropdown
+    open() {
+      if (this.isOpen) return;
+
+      this.isOpen = true;
+      this.activeIndex = -1;
+
+      // Refresh items list
+      this.$nextTick(() => {
+        this.items = Array.from(this.$el.querySelectorAll('.ux-dropdown__item:not(.ux-dropdown__item--disabled)'));
+      });
+
+      this.$dispatch('dropdown:open');
+    },
+
+    // Close dropdown
+    close() {
+      if (!this.isOpen) return;
+
+      this.isOpen = false;
+      this.activeIndex = -1;
+
+      this.$dispatch('dropdown:close');
+    },
+
+    // Toggle dropdown
+    toggle() {
+      this.isOpen ? this.close() : this.open();
+    },
+
+    // Select an item
+    select(value, closeAfter = this.closeOnSelect) {
+      this.$dispatch('dropdown:select', { value });
+
+      if (closeAfter) {
+        this.close();
+        this.focusTrigger();
+      }
+    },
+
+    // Focus management
+    focusTrigger() {
+      const trigger = this.$el.querySelector('.ux-dropdown__trigger');
+      if (trigger) trigger.focus();
+    },
+
+    focusItem(index) {
+      if (index >= 0 && index < this.items.length) {
+        this.activeIndex = index;
+        this.items[index].focus();
+      }
+    },
+
+    focusFirst() {
+      this.focusItem(0);
+    },
+
+    focusLast() {
+      this.focusItem(this.items.length - 1);
+    },
+
+    focusNext() {
+      const nextIndex = this.activeIndex < this.items.length - 1 ? this.activeIndex + 1 : 0;
+      this.focusItem(nextIndex);
+    },
+
+    focusPrev() {
+      const prevIndex = this.activeIndex > 0 ? this.activeIndex - 1 : this.items.length - 1;
+      this.focusItem(prevIndex);
+    },
+
+    // Keyboard navigation
+    handleKeydown(e) {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          if (!this.isOpen) {
+            this.open();
+            this.$nextTick(() => this.focusFirst());
+          } else {
+            this.focusNext();
+          }
+          break;
+
+        case 'ArrowUp':
+          e.preventDefault();
+          if (!this.isOpen) {
+            this.open();
+            this.$nextTick(() => this.focusLast());
+          } else {
+            this.focusPrev();
+          }
+          break;
+
+        case 'Home':
+          if (this.isOpen) {
+            e.preventDefault();
+            this.focusFirst();
+          }
+          break;
+
+        case 'End':
+          if (this.isOpen) {
+            e.preventDefault();
+            this.focusLast();
+          }
+          break;
+
+        case 'Enter':
+        case ' ':
+          if (this.isOpen && this.activeIndex >= 0) {
+            e.preventDefault();
+            this.items[this.activeIndex].click();
+          } else if (!this.isOpen) {
+            e.preventDefault();
+            this.open();
+          }
+          break;
+
+        case 'Tab':
+          if (this.isOpen) {
+            this.close();
+          }
+          break;
+      }
+    },
+
+    // Hover handlers (for hover-triggered dropdowns)
+    handleMouseEnter() {
+      if (!this.triggerOnHover) return;
+
+      if (this._hoverTimer) {
+        clearTimeout(this._hoverTimer);
+      }
+
+      this._hoverTimer = setTimeout(() => {
+        this.open();
+      }, this.hoverDelay);
+    },
+
+    handleMouseLeave() {
+      if (!this.triggerOnHover) return;
+
+      if (this._hoverTimer) {
+        clearTimeout(this._hoverTimer);
+      }
+
+      this._hoverTimer = setTimeout(() => {
+        this.close();
+      }, this.hoverDelay);
+    },
+
+    // ARIA attributes for trigger
+    get triggerAttrs() {
+      return {
+        'aria-haspopup': 'true',
+        'aria-expanded': this.isOpen.toString()
+      };
+    },
+
+    // Container classes
+    get containerClasses() {
+      return {
+        'ux-dropdown--open': this.isOpen
+      };
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxDropdown', dropdownComponent);
+  }
+
+})();
+
 /**
  * UX FAB Component
  * Floating Action Buttons estilo Material/iOS
@@ -11302,6 +19135,1735 @@
       Alpine.data('uxFab', fabComponent);
     });
   }
+})();
+
+/**
+ * UX Form Wizard Component
+ * Multi-step form wizard with validation support
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Form Wizard
+    ======================================== */
+
+    .ux-form-wizard {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+    }
+
+    /* ========================================
+       Steps Progress Indicator
+    ======================================== */
+
+    .ux-form-wizard__steps {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: var(--ux-space-lg) var(--ux-space-xl);
+      position: relative;
+      background-color: var(--ux-surface-secondary);
+      border-bottom: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg) var(--ux-border-radius-lg) 0 0;
+    }
+
+    /* Connector line behind steps */
+    .ux-form-wizard__steps::before {
+      content: '';
+      position: absolute;
+      top: calc(var(--ux-space-lg) + 18px);
+      left: calc(var(--ux-space-xl) + 18px);
+      right: calc(var(--ux-space-xl) + 18px);
+      height: 2px;
+      background-color: var(--ux-border-color);
+      z-index: 0;
+    }
+
+    /* Progress line (completed portion) */
+    .ux-form-wizard__progress-line {
+      position: absolute;
+      top: calc(var(--ux-space-lg) + 18px);
+      left: calc(var(--ux-space-xl) + 18px);
+      height: 2px;
+      background-color: var(--ux-primary);
+      z-index: 1;
+      transition: width var(--ux-transition-normal) var(--ux-ease-out);
+    }
+
+    /* ========================================
+       Individual Step
+    ======================================== */
+
+    .ux-form-wizard__step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-form-wizard__step--disabled {
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .ux-form-wizard__step--clickable {
+      cursor: pointer;
+    }
+
+    /* Step indicator (circle with number/icon) */
+    .ux-form-wizard__step-indicator {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: var(--ux-surface);
+      border: 2px solid var(--ux-border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--ux-font-size-sm);
+      font-weight: 600;
+      color: var(--ux-text-secondary);
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease-out),
+        border-color var(--ux-transition-fast) var(--ux-ease-out),
+        color var(--ux-transition-fast) var(--ux-ease-out),
+        transform var(--ux-transition-fast) var(--ux-ease-out),
+        box-shadow var(--ux-transition-fast) var(--ux-ease-out);
+    }
+
+    .ux-form-wizard__step:hover:not(.ux-form-wizard__step--disabled) .ux-form-wizard__step-indicator {
+      border-color: var(--ux-primary);
+      transform: scale(1.08);
+    }
+
+    .ux-form-wizard__step-indicator svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Step label */
+    .ux-form-wizard__step-label {
+      margin-top: var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-text-secondary);
+      text-align: center;
+      max-width: 100px;
+      line-height: 1.3;
+      transition: color var(--ux-transition-fast) var(--ux-ease-out);
+    }
+
+    /* Step description (optional) */
+    .ux-form-wizard__step-description {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      text-align: center;
+      max-width: 120px;
+      margin-top: var(--ux-space-xs);
+    }
+
+    /* ========================================
+       Step States
+    ======================================== */
+
+    /* Active step */
+    .ux-form-wizard__step--active .ux-form-wizard__step-indicator {
+      background-color: var(--ux-primary);
+      border-color: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+      box-shadow: 0 2px 8px rgba(var(--ux-primary-rgb), 0.35);
+    }
+
+    .ux-form-wizard__step--active .ux-form-wizard__step-label {
+      color: var(--ux-primary);
+      font-weight: 600;
+    }
+
+    /* Completed step */
+    .ux-form-wizard__step--completed .ux-form-wizard__step-indicator {
+      background-color: var(--ux-success);
+      border-color: var(--ux-success);
+      color: var(--ux-success-contrast);
+    }
+
+    .ux-form-wizard__step--completed .ux-form-wizard__step-label {
+      color: var(--ux-success);
+    }
+
+    /* Error step */
+    .ux-form-wizard__step--error .ux-form-wizard__step-indicator {
+      background-color: var(--ux-danger);
+      border-color: var(--ux-danger);
+      color: var(--ux-danger-contrast);
+      animation: uxFormWizardShake 0.4s ease-out;
+    }
+
+    .ux-form-wizard__step--error .ux-form-wizard__step-label {
+      color: var(--ux-danger);
+    }
+
+    @keyframes uxFormWizardShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+
+    /* Disabled step */
+    .ux-form-wizard__step--disabled .ux-form-wizard__step-indicator {
+      opacity: 0.5;
+    }
+
+    .ux-form-wizard__step--disabled .ux-form-wizard__step-label {
+      opacity: 0.5;
+    }
+
+    /* ========================================
+       Step Content Area
+    ======================================== */
+
+    .ux-form-wizard__content {
+      flex: 1;
+      padding: var(--ux-space-xl);
+      min-height: 200px;
+    }
+
+    .ux-form-wizard__panel {
+      display: none;
+      animation: uxFormWizardFadeIn var(--ux-transition-normal) var(--ux-ease-out);
+    }
+
+    .ux-form-wizard__panel--active {
+      display: block;
+    }
+
+    @keyframes uxFormWizardFadeIn {
+      from {
+        opacity: 0;
+        transform: translateX(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Panel header */
+    .ux-form-wizard__panel-header {
+      margin-bottom: var(--ux-space-xl);
+    }
+
+    .ux-form-wizard__panel-title {
+      font-size: var(--ux-font-size-xl);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0 0 var(--ux-space-xs) 0;
+    }
+
+    .ux-form-wizard__panel-subtitle {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin: 0;
+    }
+
+    /* Panel body (form fields) */
+    .ux-form-wizard__panel-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-lg);
+    }
+
+    /* ========================================
+       Actions (Navigation Buttons)
+    ======================================== */
+
+    .ux-form-wizard__actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--ux-space-lg) var(--ux-space-xl);
+      border-top: 1px solid var(--ux-border-color);
+      background-color: var(--ux-surface-secondary);
+      border-radius: 0 0 var(--ux-border-radius-lg) var(--ux-border-radius-lg);
+      gap: var(--ux-space-md);
+    }
+
+    .ux-form-wizard__actions-start {
+      display: flex;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-form-wizard__actions-end {
+      display: flex;
+      gap: var(--ux-space-sm);
+    }
+
+    /* Progress text in actions */
+    .ux-form-wizard__progress-text {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ========================================
+       Vertical Variant (Sidebar Steps)
+    ======================================== */
+
+    .ux-form-wizard--vertical {
+      flex-direction: row;
+    }
+
+    .ux-form-wizard--vertical .ux-form-wizard__steps {
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      min-width: 220px;
+      max-width: 280px;
+      padding: var(--ux-space-xl);
+      border-bottom: none;
+      border-right: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg) 0 0 var(--ux-border-radius-lg);
+      gap: var(--ux-space-md);
+    }
+
+    /* Vertical connector line */
+    .ux-form-wizard--vertical .ux-form-wizard__steps::before {
+      top: calc(var(--ux-space-xl) + 18px);
+      bottom: calc(var(--ux-space-xl) + 18px);
+      left: calc(var(--ux-space-xl) + 17px);
+      right: auto;
+      width: 2px;
+      height: auto;
+    }
+
+    .ux-form-wizard--vertical .ux-form-wizard__progress-line {
+      top: calc(var(--ux-space-xl) + 18px);
+      left: calc(var(--ux-space-xl) + 17px);
+      width: 2px !important;
+      height: 0;
+      transition: height var(--ux-transition-normal) var(--ux-ease-out);
+    }
+
+    .ux-form-wizard--vertical .ux-form-wizard__step {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .ux-form-wizard--vertical .ux-form-wizard__step-label {
+      margin-top: 0;
+      margin-left: var(--ux-space-md);
+      text-align: left;
+      max-width: none;
+    }
+
+    .ux-form-wizard--vertical .ux-form-wizard__step-description {
+      text-align: left;
+      margin-left: var(--ux-space-md);
+      margin-top: var(--ux-space-xs);
+      max-width: none;
+    }
+
+    .ux-form-wizard--vertical .ux-form-wizard__body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-radius: 0 var(--ux-border-radius-lg) var(--ux-border-radius-lg) 0;
+    }
+
+    .ux-form-wizard--vertical .ux-form-wizard__content {
+      flex: 1;
+      border-radius: 0 var(--ux-border-radius-lg) 0 0;
+    }
+
+    .ux-form-wizard--vertical .ux-form-wizard__actions {
+      border-radius: 0 0 var(--ux-border-radius-lg) 0;
+    }
+
+    /* ========================================
+       Compact Variant
+    ======================================== */
+
+    .ux-form-wizard--compact .ux-form-wizard__steps {
+      padding: var(--ux-space-md) var(--ux-space-lg);
+    }
+
+    .ux-form-wizard--compact .ux-form-wizard__step-indicator {
+      width: 28px;
+      height: 28px;
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-form-wizard--compact .ux-form-wizard__step-indicator svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-form-wizard--compact .ux-form-wizard__steps::before {
+      top: calc(var(--ux-space-md) + 14px);
+    }
+
+    .ux-form-wizard--compact .ux-form-wizard__progress-line {
+      top: calc(var(--ux-space-md) + 14px);
+    }
+
+    .ux-form-wizard--compact .ux-form-wizard__step-label {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-form-wizard--compact .ux-form-wizard__content {
+      padding: var(--ux-space-lg);
+    }
+
+    .ux-form-wizard--compact .ux-form-wizard__actions {
+      padding: var(--ux-space-md) var(--ux-space-lg);
+    }
+
+    /* ========================================
+       Dots Variant (Minimal Progress)
+    ======================================== */
+
+    .ux-form-wizard--dots .ux-form-wizard__steps {
+      justify-content: center;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-md);
+    }
+
+    .ux-form-wizard--dots .ux-form-wizard__steps::before {
+      display: none;
+    }
+
+    .ux-form-wizard--dots .ux-form-wizard__progress-line {
+      display: none;
+    }
+
+    .ux-form-wizard--dots .ux-form-wizard__step {
+      flex: none;
+    }
+
+    .ux-form-wizard--dots .ux-form-wizard__step-indicator {
+      width: 10px;
+      height: 10px;
+      border-width: 0;
+      background-color: var(--ux-border-color);
+    }
+
+    .ux-form-wizard--dots .ux-form-wizard__step-indicator span,
+    .ux-form-wizard--dots .ux-form-wizard__step-indicator svg {
+      display: none;
+    }
+
+    .ux-form-wizard--dots .ux-form-wizard__step-label {
+      display: none;
+    }
+
+    .ux-form-wizard--dots .ux-form-wizard__step--active .ux-form-wizard__step-indicator {
+      transform: scale(1.3);
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-form-wizard--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-form-wizard--glass .ux-form-wizard__steps {
+      background: var(--ux-glass-bg-thin);
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-form-wizard--glass .ux-form-wizard__step-indicator {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+    }
+
+    .ux-form-wizard--glass .ux-form-wizard__step--active .ux-form-wizard__step-indicator {
+      background: var(--ux-primary);
+      border-color: var(--ux-primary);
+    }
+
+    .ux-form-wizard--glass .ux-form-wizard__step--completed .ux-form-wizard__step-indicator {
+      background: var(--ux-success);
+      border-color: var(--ux-success);
+    }
+
+    .ux-form-wizard--glass .ux-form-wizard__step--error .ux-form-wizard__step-indicator {
+      background: var(--ux-danger);
+      border-color: var(--ux-danger);
+    }
+
+    .ux-form-wizard--glass .ux-form-wizard__content {
+      background: transparent;
+    }
+
+    .ux-form-wizard--glass .ux-form-wizard__actions {
+      background: var(--ux-glass-bg-thin);
+      border-top-color: var(--ux-glass-border);
+    }
+
+    .ux-form-wizard--glass.ux-form-wizard--vertical .ux-form-wizard__steps {
+      border-right-color: var(--ux-glass-border);
+    }
+
+    /* ========================================
+       Borderless Variant
+    ======================================== */
+
+    .ux-form-wizard--borderless {
+      background: transparent;
+    }
+
+    .ux-form-wizard--borderless .ux-form-wizard__steps {
+      background: transparent;
+      border-bottom: none;
+    }
+
+    .ux-form-wizard--borderless .ux-form-wizard__actions {
+      background: transparent;
+      border-top: none;
+    }
+
+    /* ========================================
+       Color Variants
+    ======================================== */
+
+    .ux-form-wizard.ux-color-success .ux-form-wizard__step--active .ux-form-wizard__step-indicator {
+      background-color: var(--ux-success);
+      border-color: var(--ux-success);
+      box-shadow: 0 2px 8px rgba(var(--ux-success-rgb), 0.35);
+    }
+
+    .ux-form-wizard.ux-color-success .ux-form-wizard__step--active .ux-form-wizard__step-label {
+      color: var(--ux-success);
+    }
+
+    .ux-form-wizard.ux-color-success .ux-form-wizard__progress-line {
+      background-color: var(--ux-success);
+    }
+
+    .ux-form-wizard.ux-color-warning .ux-form-wizard__step--active .ux-form-wizard__step-indicator {
+      background-color: var(--ux-warning);
+      border-color: var(--ux-warning);
+      box-shadow: 0 2px 8px rgba(var(--ux-warning-rgb), 0.35);
+    }
+
+    .ux-form-wizard.ux-color-warning .ux-form-wizard__step--active .ux-form-wizard__step-label {
+      color: var(--ux-warning);
+    }
+
+    .ux-form-wizard.ux-color-warning .ux-form-wizard__progress-line {
+      background-color: var(--ux-warning);
+    }
+
+    .ux-form-wizard.ux-color-tertiary .ux-form-wizard__step--active .ux-form-wizard__step-indicator {
+      background-color: var(--ux-tertiary);
+      border-color: var(--ux-tertiary);
+      box-shadow: 0 2px 8px rgba(var(--ux-tertiary-rgb), 0.35);
+    }
+
+    .ux-form-wizard.ux-color-tertiary .ux-form-wizard__step--active .ux-form-wizard__step-label {
+      color: var(--ux-tertiary);
+    }
+
+    .ux-form-wizard.ux-color-tertiary .ux-form-wizard__progress-line {
+      background-color: var(--ux-tertiary);
+    }
+
+    /* ========================================
+       Responsive
+    ======================================== */
+
+    @media (max-width: 767px) {
+      .ux-form-wizard__steps {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: var(--ux-space-md) var(--ux-space-lg);
+      }
+
+      .ux-form-wizard__steps::-webkit-scrollbar {
+        display: none;
+      }
+
+      .ux-form-wizard__step-label {
+        display: none;
+      }
+
+      .ux-form-wizard__step--active .ux-form-wizard__step-label {
+        display: block;
+      }
+
+      .ux-form-wizard__step-description {
+        display: none;
+      }
+
+      .ux-form-wizard__content {
+        padding: var(--ux-space-lg);
+      }
+
+      .ux-form-wizard__actions {
+        padding: var(--ux-space-md) var(--ux-space-lg);
+        flex-wrap: wrap;
+      }
+
+      .ux-form-wizard__progress-text {
+        width: 100%;
+        text-align: center;
+        order: -1;
+        margin-bottom: var(--ux-space-sm);
+      }
+
+      /* Vertical becomes horizontal on mobile */
+      .ux-form-wizard--vertical {
+        flex-direction: column;
+      }
+
+      .ux-form-wizard--vertical .ux-form-wizard__steps {
+        flex-direction: row;
+        min-width: auto;
+        max-width: none;
+        border-right: none;
+        border-bottom: 1px solid var(--ux-border-color);
+        border-radius: var(--ux-border-radius-lg) var(--ux-border-radius-lg) 0 0;
+      }
+
+      .ux-form-wizard--vertical .ux-form-wizard__steps::before {
+        top: calc(var(--ux-space-md) + 18px);
+        bottom: auto;
+        left: calc(var(--ux-space-lg) + 18px);
+        right: calc(var(--ux-space-lg) + 18px);
+        width: auto;
+        height: 2px;
+      }
+
+      .ux-form-wizard--vertical .ux-form-wizard__progress-line {
+        top: calc(var(--ux-space-md) + 18px);
+        left: calc(var(--ux-space-lg) + 18px);
+        width: 0 !important;
+        height: 2px !important;
+      }
+
+      .ux-form-wizard--vertical .ux-form-wizard__step {
+        flex-direction: column;
+      }
+
+      .ux-form-wizard--vertical .ux-form-wizard__step-label {
+        margin-left: 0;
+        margin-top: var(--ux-space-sm);
+        text-align: center;
+      }
+
+      .ux-form-wizard--vertical .ux-form-wizard__body {
+        border-radius: 0 0 var(--ux-border-radius-lg) var(--ux-border-radius-lg);
+      }
+
+      .ux-form-wizard--vertical .ux-form-wizard__content {
+        border-radius: 0;
+      }
+
+      .ux-form-wizard--vertical .ux-form-wizard__actions {
+        border-radius: 0 0 var(--ux-border-radius-lg) var(--ux-border-radius-lg);
+      }
+    }
+
+    /* ========================================
+       Dark Mode
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-form-wizard {
+        background-color: var(--ux-surface);
+      }
+
+      .ux-form-wizard__steps {
+        background-color: var(--ux-surface-secondary);
+      }
+
+      .ux-form-wizard__actions {
+        background-color: var(--ux-surface-secondary);
+      }
+    }
+
+    .ux-dark .ux-form-wizard {
+      background-color: var(--ux-surface);
+    }
+
+    .ux-dark .ux-form-wizard__steps {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-dark .ux-form-wizard__actions {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-form-wizard__step-indicator,
+      .ux-form-wizard__progress-line,
+      .ux-form-wizard__panel {
+        transition: none;
+        animation: none;
+      }
+
+      .ux-form-wizard__step--error .ux-form-wizard__step-indicator {
+        animation: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-form-wizard-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-form-wizard-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // SVG icons
+  const icons = {
+    check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+    error: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+  };
+
+  // Alpine component for form wizard
+  const formWizardComponent = (config = {}) => ({
+    // State
+    currentStep: config.initialStep || 0,
+    totalSteps: config.totalSteps || 3,
+    steps: config.steps || [],
+    completedSteps: config.completedSteps || [],
+    errorSteps: config.errorSteps || [],
+    isVertical: config.vertical || false,
+
+    // Configuration
+    linear: config.linear !== false, // Default: must complete steps in order
+    allowSkip: config.allowSkip || false,
+    validateOnNext: config.validateOnNext !== false, // Default: validate before advancing
+    showProgressText: config.showProgressText || false,
+
+    // Validation callback (can be overridden)
+    validateStep: config.validateStep || null,
+
+    // Lifecycle
+    init() {
+      // Initialize totalSteps from steps array if provided
+      if (this.steps.length > 0 && !config.totalSteps) {
+        this.totalSteps = this.steps.length;
+      }
+
+      // Auto-complete previous steps if starting from later step
+      if (this.currentStep > 0 && this.completedSteps.length === 0) {
+        for (let i = 0; i < this.currentStep; i++) {
+          this.completedSteps.push(i);
+        }
+      }
+
+      // Dispatch init event
+      this.$dispatch('form-wizard:init', { currentStep: this.currentStep, totalSteps: this.totalSteps });
+    },
+
+    // Navigation methods
+    async nextStep() {
+      if (this.currentStep >= this.totalSteps - 1) return false;
+
+      // Validate current step before advancing
+      if (this.validateOnNext && this.validateStep) {
+        const isValid = await this.validateStep(this.currentStep);
+        if (!isValid) {
+          this.setError(this.currentStep);
+          this.$dispatch('form-wizard:validation-error', { step: this.currentStep });
+          return false;
+        }
+      }
+
+      // Mark current step as completed
+      this.complete(this.currentStep);
+
+      // Move to next step
+      this.currentStep++;
+      this.$dispatch('form-wizard:step-change', { step: this.currentStep, direction: 'next' });
+      return true;
+    },
+
+    prevStep() {
+      if (this.currentStep <= 0) return false;
+
+      this.currentStep--;
+      this.$dispatch('form-wizard:step-change', { step: this.currentStep, direction: 'prev' });
+      return true;
+    },
+
+    goToStep(step) {
+      if (step < 0 || step >= this.totalSteps) return false;
+
+      // In linear mode, restrict navigation
+      if (this.linear && !this.allowSkip) {
+        // Can only go to completed steps or next available step
+        if (step > this.currentStep + 1) return false;
+        if (step > this.currentStep && !this.completedSteps.includes(this.currentStep)) return false;
+      }
+
+      const direction = step > this.currentStep ? 'next' : 'prev';
+      this.currentStep = step;
+      this.$dispatch('form-wizard:step-change', { step: this.currentStep, direction });
+      return true;
+    },
+
+    // Step state methods
+    isActive(step) {
+      return this.currentStep === step;
+    },
+
+    isCompleted(step) {
+      return this.completedSteps.includes(step);
+    },
+
+    isError(step) {
+      return this.errorSteps.includes(step);
+    },
+
+    canGoTo(step) {
+      if (!this.linear || this.allowSkip) return true;
+      return step <= this.currentStep || this.completedSteps.includes(step - 1);
+    },
+
+    // Mark step states
+    complete(step = null) {
+      const targetStep = step !== null ? step : this.currentStep;
+      if (!this.completedSteps.includes(targetStep)) {
+        this.completedSteps.push(targetStep);
+      }
+      // Remove from errors
+      this.clearError(targetStep);
+      this.$dispatch('form-wizard:step-completed', { step: targetStep });
+    },
+
+    setError(step = null) {
+      const targetStep = step !== null ? step : this.currentStep;
+      if (!this.errorSteps.includes(targetStep)) {
+        this.errorSteps.push(targetStep);
+      }
+      // Remove from completed
+      this.completedSteps = this.completedSteps.filter(s => s !== targetStep);
+      this.$dispatch('form-wizard:step-error', { step: targetStep });
+    },
+
+    clearError(step = null) {
+      const targetStep = step !== null ? step : this.currentStep;
+      this.errorSteps = this.errorSteps.filter(s => s !== targetStep);
+    },
+
+    // Get step classes for template binding
+    getStepClasses(step) {
+      return {
+        'ux-form-wizard__step--active': this.isActive(step),
+        'ux-form-wizard__step--completed': this.isCompleted(step) && !this.isActive(step),
+        'ux-form-wizard__step--error': this.isError(step),
+        'ux-form-wizard__step--disabled': !this.canGoTo(step),
+        'ux-form-wizard__step--clickable': this.canGoTo(step)
+      };
+    },
+
+    // Get icon for step indicator
+    getStepIcon(step) {
+      if (this.isError(step)) return icons.error;
+      if (this.isCompleted(step) && !this.isActive(step)) return icons.check;
+      return null;
+    },
+
+    // Progress calculation
+    get progress() {
+      return Math.round((this.completedSteps.length / this.totalSteps) * 100);
+    },
+
+    get progressWidth() {
+      if (this.totalSteps <= 1) return '0%';
+      const stepWidth = 100 / (this.totalSteps - 1);
+      return `${Math.min(this.completedSteps.length * stepWidth, 100)}%`;
+    },
+
+    get progressHeight() {
+      // For vertical layout
+      if (this.totalSteps <= 1) return '0%';
+      const stepHeight = 100 / (this.totalSteps - 1);
+      return `${Math.min(this.completedSteps.length * stepHeight, 100)}%`;
+    },
+
+    // Utility getters
+    get isFirst() {
+      return this.currentStep === 0;
+    },
+
+    get isLast() {
+      return this.currentStep === this.totalSteps - 1;
+    },
+
+    get allCompleted() {
+      return this.completedSteps.length === this.totalSteps;
+    },
+
+    get progressText() {
+      return `Step ${this.currentStep + 1} of ${this.totalSteps}`;
+    },
+
+    get currentStepData() {
+      return this.steps[this.currentStep] || null;
+    },
+
+    // Reset wizard
+    reset() {
+      this.currentStep = 0;
+      this.completedSteps = [];
+      this.errorSteps = [];
+      this.$dispatch('form-wizard:reset');
+    },
+
+    // Submit handler (for final step)
+    async submit() {
+      // Validate final step
+      if (this.validateOnNext && this.validateStep) {
+        const isValid = await this.validateStep(this.currentStep);
+        if (!isValid) {
+          this.setError(this.currentStep);
+          this.$dispatch('form-wizard:validation-error', { step: this.currentStep });
+          return false;
+        }
+      }
+
+      // Mark final step as completed
+      this.complete(this.currentStep);
+      this.$dispatch('form-wizard:submit', { completedSteps: this.completedSteps });
+      return true;
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxFormWizard', formWizardComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxFormWizard', formWizardComponent);
+    });
+  }
+})();
+
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       UX Form - Form Groups with Validation States
+       iOS 26 Style - Liquid Glass Design
+       ========================================================================== */
+
+    :root {
+      /* Form Group Tokens */
+      --ux-form-gap: var(--ux-space-xs);
+      --ux-form-label-size: var(--ux-font-size-sm);
+      --ux-form-label-color: var(--ux-text-secondary);
+      --ux-form-label-weight: 500;
+      --ux-form-helper-size: var(--ux-font-size-xs);
+      --ux-form-helper-color: var(--ux-text-tertiary);
+      --ux-form-error-color: var(--ux-danger);
+      --ux-form-success-color: var(--ux-success);
+      --ux-form-warning-color: var(--ux-warning);
+      --ux-form-icon-size: 16px;
+    }
+
+    /* ==========================================================================
+       Form Group - Container for label + input + helper/error
+       ========================================================================== */
+
+    .ux-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-form-gap);
+      margin-bottom: var(--ux-space-md);
+    }
+
+    .ux-form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Horizontal layout (inline) */
+    .ux-form-group--horizontal {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-form-group--horizontal .ux-form-group__label {
+      flex-shrink: 0;
+      min-width: 120px;
+      margin-bottom: 0;
+    }
+
+    .ux-form-group--horizontal .ux-form-group__control {
+      flex: 1;
+    }
+
+    /* ==========================================================================
+       Label
+       ========================================================================== */
+
+    .ux-form-group__label {
+      font-size: var(--ux-form-label-size);
+      font-weight: var(--ux-form-label-weight);
+      color: var(--ux-form-label-color);
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-form-group__label--required::after {
+      content: '*';
+      color: var(--ux-form-error-color);
+      font-weight: 600;
+    }
+
+    /* Optional badge */
+    .ux-form-group__optional {
+      font-size: var(--ux-font-size-xs);
+      font-weight: 400;
+      color: var(--ux-text-tertiary);
+      margin-left: auto;
+    }
+
+    /* ==========================================================================
+       Control Wrapper (input + icons)
+       ========================================================================== */
+
+    .ux-form-group__control {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-form-gap);
+    }
+
+    .ux-form-group__input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Input with validation icon */
+    .ux-form-group__input-wrapper .ux-input,
+    .ux-form-group__input-wrapper .ux-textarea,
+    .ux-form-group__input-wrapper .ux-select,
+    .ux-form-group__input-wrapper input,
+    .ux-form-group__input-wrapper textarea,
+    .ux-form-group__input-wrapper select {
+      width: 100%;
+      padding-right: calc(var(--ux-space-md) + var(--ux-form-icon-size) + var(--ux-space-sm));
+    }
+
+    /* Validation icon */
+    .ux-form-group__icon {
+      position: absolute;
+      right: var(--ux-space-md);
+      top: 50%;
+      transform: translateY(-50%);
+      width: var(--ux-form-icon-size);
+      height: var(--ux-form-icon-size);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--ux-transition-fast) var(--ux-ease-ios);
+    }
+
+    .ux-form-group__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ==========================================================================
+       Helper Text
+       ========================================================================== */
+
+    .ux-form-group__helper {
+      font-size: var(--ux-form-helper-size);
+      color: var(--ux-form-helper-color);
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-form-group__helper svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ==========================================================================
+       Error Message
+       ========================================================================== */
+
+    .ux-form-group__error {
+      font-size: var(--ux-form-helper-size);
+      color: var(--ux-form-error-color);
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--ux-space-xs);
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease-ios),
+        max-height var(--ux-transition-fast) var(--ux-ease-ios);
+    }
+
+    .ux-form-group__error svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      fill: currentColor;
+    }
+
+    /* ==========================================================================
+       Success Message
+       ========================================================================== */
+
+    .ux-form-group__success {
+      font-size: var(--ux-form-helper-size);
+      color: var(--ux-form-success-color);
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--ux-space-xs);
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition:
+        opacity var(--ux-transition-fast) var(--ux-ease-ios),
+        max-height var(--ux-transition-fast) var(--ux-ease-ios);
+    }
+
+    .ux-form-group__success svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      fill: currentColor;
+    }
+
+    /* ==========================================================================
+       Validation States
+       ========================================================================== */
+
+    /* Error State */
+    .ux-form-group--error .ux-form-group__label {
+      color: var(--ux-form-error-color);
+    }
+
+    .ux-form-group--error .ux-input,
+    .ux-form-group--error .ux-textarea,
+    .ux-form-group--error .ux-select,
+    .ux-form-group--error input,
+    .ux-form-group--error textarea,
+    .ux-form-group--error select {
+      border-color: var(--ux-form-error-color) !important;
+      background-color: rgba(var(--ux-danger-rgb), 0.03);
+    }
+
+    .ux-form-group--error .ux-input:focus,
+    .ux-form-group--error .ux-textarea:focus,
+    .ux-form-group--error .ux-select:focus,
+    .ux-form-group--error input:focus,
+    .ux-form-group--error textarea:focus,
+    .ux-form-group--error select:focus {
+      box-shadow: 0 0 0 3px rgba(var(--ux-danger-rgb), 0.15);
+    }
+
+    .ux-form-group--error .ux-form-group__icon--error {
+      opacity: 1;
+      color: var(--ux-form-error-color);
+    }
+
+    .ux-form-group--error .ux-form-group__error {
+      opacity: 1;
+      max-height: 100px;
+    }
+
+    .ux-form-group--error .ux-form-group__helper {
+      display: none;
+    }
+
+    /* Success State */
+    .ux-form-group--success .ux-form-group__label {
+      color: var(--ux-form-success-color);
+    }
+
+    .ux-form-group--success .ux-input,
+    .ux-form-group--success .ux-textarea,
+    .ux-form-group--success .ux-select,
+    .ux-form-group--success input,
+    .ux-form-group--success textarea,
+    .ux-form-group--success select {
+      border-color: var(--ux-form-success-color) !important;
+      background-color: rgba(var(--ux-success-rgb), 0.03);
+    }
+
+    .ux-form-group--success .ux-input:focus,
+    .ux-form-group--success .ux-textarea:focus,
+    .ux-form-group--success .ux-select:focus,
+    .ux-form-group--success input:focus,
+    .ux-form-group--success textarea:focus,
+    .ux-form-group--success select:focus {
+      box-shadow: 0 0 0 3px rgba(var(--ux-success-rgb), 0.15);
+    }
+
+    .ux-form-group--success .ux-form-group__icon--success {
+      opacity: 1;
+      color: var(--ux-form-success-color);
+    }
+
+    .ux-form-group--success .ux-form-group__success {
+      opacity: 1;
+      max-height: 100px;
+    }
+
+    .ux-form-group--success .ux-form-group__helper {
+      display: none;
+    }
+
+    /* Warning State */
+    .ux-form-group--warning .ux-form-group__label {
+      color: var(--ux-form-warning-color);
+    }
+
+    .ux-form-group--warning .ux-input,
+    .ux-form-group--warning .ux-textarea,
+    .ux-form-group--warning .ux-select,
+    .ux-form-group--warning input,
+    .ux-form-group--warning textarea,
+    .ux-form-group--warning select {
+      border-color: var(--ux-form-warning-color) !important;
+      background-color: rgba(var(--ux-warning-rgb), 0.03);
+    }
+
+    .ux-form-group--warning .ux-input:focus,
+    .ux-form-group--warning .ux-textarea:focus,
+    .ux-form-group--warning .ux-select:focus,
+    .ux-form-group--warning input:focus,
+    .ux-form-group--warning textarea:focus,
+    .ux-form-group--warning select:focus {
+      box-shadow: 0 0 0 3px rgba(var(--ux-warning-rgb), 0.15);
+    }
+
+    .ux-form-group--warning .ux-form-group__icon--warning {
+      opacity: 1;
+      color: var(--ux-form-warning-color);
+    }
+
+    /* Disabled State */
+    .ux-form-group--disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .ux-form-group--disabled .ux-form-group__label {
+      color: var(--ux-text-tertiary);
+    }
+
+    /* ==========================================================================
+       Form Section (Fieldset with Title)
+       ========================================================================== */
+
+    .ux-form-section {
+      margin-bottom: var(--ux-space-xl);
+      padding: 0;
+      border: none;
+    }
+
+    .ux-form-section__header {
+      margin-bottom: var(--ux-space-lg);
+      padding-bottom: var(--ux-space-sm);
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-form-section__title {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0 0 var(--ux-space-xs) 0;
+    }
+
+    .ux-form-section__description {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin: 0;
+    }
+
+    .ux-form-section__content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-md);
+    }
+
+    /* Compact section */
+    .ux-form-section--compact .ux-form-section__header {
+      margin-bottom: var(--ux-space-md);
+    }
+
+    .ux-form-section--compact .ux-form-section__title {
+      font-size: var(--ux-font-size-md);
+    }
+
+    /* ==========================================================================
+       Form Row (Multiple inputs inline)
+       ========================================================================== */
+
+    .ux-form-row {
+      display: flex;
+      gap: var(--ux-space-md);
+      margin-bottom: var(--ux-space-md);
+    }
+
+    .ux-form-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .ux-form-row > .ux-form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    /* Fixed width columns */
+    .ux-form-row > .ux-form-group--auto {
+      flex: 0 0 auto;
+    }
+
+    .ux-form-row > .ux-form-group--fixed {
+      flex: 0 0 200px;
+    }
+
+    /* Responsive: stack on mobile */
+    @media (max-width: 767px) {
+      .ux-form-row {
+        flex-direction: column;
+        gap: var(--ux-space-md);
+      }
+
+      .ux-form-row > .ux-form-group--fixed {
+        flex: 1;
+      }
+
+      .ux-form-group--horizontal {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .ux-form-group--horizontal .ux-form-group__label {
+        min-width: 0;
+        margin-bottom: var(--ux-space-xs);
+      }
+    }
+
+    /* ==========================================================================
+       Form Actions (Submit buttons)
+       ========================================================================== */
+
+    .ux-form-actions {
+      display: flex;
+      gap: var(--ux-space-sm);
+      justify-content: flex-end;
+      padding-top: var(--ux-space-lg);
+      margin-top: var(--ux-space-lg);
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    .ux-form-actions--start {
+      justify-content: flex-start;
+    }
+
+    .ux-form-actions--center {
+      justify-content: center;
+    }
+
+    .ux-form-actions--between {
+      justify-content: space-between;
+    }
+
+    .ux-form-actions--sticky {
+      position: sticky;
+      bottom: 0;
+      background: var(--ux-surface);
+      padding: var(--ux-space-md);
+      margin: var(--ux-space-lg) calc(var(--ux-space-lg) * -1) 0;
+      border-top: 1px solid var(--ux-border-color);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ==========================================================================
+       Character Counter
+       ========================================================================== */
+
+    .ux-form-group__counter {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      text-align: right;
+      margin-left: auto;
+    }
+
+    .ux-form-group__counter--warning {
+      color: var(--ux-form-warning-color);
+    }
+
+    .ux-form-group__counter--error {
+      color: var(--ux-form-error-color);
+    }
+
+    .ux-form-group__footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    /* ==========================================================================
+       Input Prefix/Suffix
+       ========================================================================== */
+
+    .ux-form-group__addon {
+      display: flex;
+      align-items: center;
+      padding: 0 var(--ux-space-sm);
+      background: var(--ux-surface-secondary);
+      border: 1px solid var(--ux-border-color);
+      color: var(--ux-text-secondary);
+      font-size: var(--ux-font-size-sm);
+      white-space: nowrap;
+    }
+
+    .ux-form-group__addon--start {
+      border-right: none;
+      border-radius: var(--ux-border-radius) 0 0 var(--ux-border-radius);
+    }
+
+    .ux-form-group__addon--end {
+      border-left: none;
+      border-radius: 0 var(--ux-border-radius) var(--ux-border-radius) 0;
+    }
+
+    .ux-form-group__input-wrapper--has-addon-start input,
+    .ux-form-group__input-wrapper--has-addon-start .ux-input {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    .ux-form-group__input-wrapper--has-addon-end input,
+    .ux-form-group__input-wrapper--has-addon-end .ux-input {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-form-group--glass .ux-input,
+    .ux-form-group--glass .ux-textarea,
+    .ux-form-group--glass .ux-select,
+    .ux-form-group--glass input,
+    .ux-form-group--glass textarea,
+    .ux-form-group--glass select {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-form-group--glass .ux-form-group__addon {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      :root:not(.ux-light) {
+        --ux-form-label-color: var(--ux-text-secondary);
+        --ux-form-helper-color: var(--ux-text-tertiary);
+      }
+
+      :root:not(.ux-light) .ux-form-group--error .ux-input,
+      :root:not(.ux-light) .ux-form-group--error input {
+        background-color: rgba(var(--ux-danger-rgb), 0.08);
+      }
+
+      :root:not(.ux-light) .ux-form-group--success .ux-input,
+      :root:not(.ux-light) .ux-form-group--success input {
+        background-color: rgba(var(--ux-success-rgb), 0.08);
+      }
+
+      :root:not(.ux-light) .ux-form-actions--sticky {
+        background: var(--ux-surface);
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+      }
+    }
+
+    .ux-dark {
+      --ux-form-label-color: var(--ux-text-secondary);
+      --ux-form-helper-color: var(--ux-text-tertiary);
+    }
+
+    .ux-dark .ux-form-group--error .ux-input,
+    .ux-dark .ux-form-group--error input {
+      background-color: rgba(var(--ux-danger-rgb), 0.08);
+    }
+
+    .ux-dark .ux-form-group--success .ux-input,
+    .ux-dark .ux-form-group--success input {
+      background-color: rgba(var(--ux-success-rgb), 0.08);
+    }
+
+    .ux-dark .ux-form-actions--sticky {
+      background: var(--ux-surface);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-form-group__error,
+      .ux-form-group__success,
+      .ux-form-group__icon {
+        transition: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-form-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-form-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component for form validation
+  const formGroupComponent = (config = {}) => ({
+    // State
+    value: config.value || '',
+    error: config.error || '',
+    success: config.success || '',
+    touched: false,
+    dirty: false,
+
+    // Validation rules
+    rules: config.rules || [],
+
+    // Character counter
+    maxLength: config.maxLength || null,
+
+    // Computed state
+    get state() {
+      if (this.error) return 'error';
+      if (this.success) return 'success';
+      return '';
+    },
+
+    get charCount() {
+      return this.value ? this.value.length : 0;
+    },
+
+    get charCountState() {
+      if (!this.maxLength) return '';
+      const ratio = this.charCount / this.maxLength;
+      if (ratio >= 1) return 'error';
+      if (ratio >= 0.9) return 'warning';
+      return '';
+    },
+
+    get containerClasses() {
+      return {
+        'ux-form-group--error': this.state === 'error',
+        'ux-form-group--success': this.state === 'success',
+        'ux-form-group--touched': this.touched,
+        'ux-form-group--dirty': this.dirty
+      };
+    },
+
+    // Methods
+    init() {
+      // Watch for external value changes
+      if (config.watchValue) {
+        this.$watch('value', () => this.validate());
+      }
+    },
+
+    onInput(e) {
+      this.value = e.target.value;
+      this.dirty = true;
+
+      // Clear error on input
+      if (config.clearOnInput !== false) {
+        this.error = '';
+      }
+
+      // Validate on input (optional)
+      if (config.validateOnInput) {
+        this.validate();
+      }
+
+      this.$dispatch('form-input', { value: this.value, name: config.name });
+    },
+
+    onBlur() {
+      this.touched = true;
+
+      // Validate on blur
+      if (config.validateOnBlur !== false) {
+        this.validate();
+      }
+
+      this.$dispatch('form-blur', { value: this.value, name: config.name });
+    },
+
+    onFocus() {
+      this.$dispatch('form-focus', { value: this.value, name: config.name });
+    },
+
+    validate() {
+      this.error = '';
+      this.success = '';
+
+      for (const rule of this.rules) {
+        const result = rule(this.value);
+        if (result !== true && result !== '') {
+          this.error = result;
+          return false;
+        }
+      }
+
+      // Show success if configured and has value
+      if (config.showSuccess && this.value && this.touched) {
+        this.success = config.successMessage || '';
+      }
+
+      return true;
+    },
+
+    setError(message) {
+      this.error = message;
+      this.success = '';
+    },
+
+    setSuccess(message) {
+      this.error = '';
+      this.success = message;
+    },
+
+    reset() {
+      this.value = config.value || '';
+      this.error = '';
+      this.success = '';
+      this.touched = false;
+      this.dirty = false;
+    }
+  });
+
+  // Common validation rules
+  const validationRules = {
+    required: (message = 'This field is required') => (value) => {
+      if (!value || (typeof value === 'string' && !value.trim())) {
+        return message;
+      }
+      return true;
+    },
+
+    email: (message = 'Please enter a valid email') => (value) => {
+      if (!value) return true;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(value) ? true : message;
+    },
+
+    minLength: (min, message) => (value) => {
+      if (!value) return true;
+      const msg = message || `Minimum ${min} characters required`;
+      return value.length >= min ? true : msg;
+    },
+
+    maxLength: (max, message) => (value) => {
+      if (!value) return true;
+      const msg = message || `Maximum ${max} characters allowed`;
+      return value.length <= max ? true : msg;
+    },
+
+    pattern: (regex, message = 'Invalid format') => (value) => {
+      if (!value) return true;
+      return regex.test(value) ? true : message;
+    },
+
+    numeric: (message = 'Please enter a number') => (value) => {
+      if (!value) return true;
+      return !isNaN(value) && !isNaN(parseFloat(value)) ? true : message;
+    },
+
+    phone: (message = 'Please enter a valid phone number') => (value) => {
+      if (!value) return true;
+      const phoneRegex = /^[\d\s\-+()]{7,}$/;
+      return phoneRegex.test(value) ? true : message;
+    },
+
+    url: (message = 'Please enter a valid URL') => (value) => {
+      if (!value) return true;
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return message;
+      }
+    },
+
+    match: (field, message = 'Fields do not match') => (value, formData) => {
+      if (!value) return true;
+      return value === formData[field] ? true : message;
+    }
+  };
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxFormGroup', formGroupComponent);
+    window.UX.formRules = validationRules;
+  }
+
+  // Export for non-Alpine usage
+  window.UXFormRules = validationRules;
+
 })();
 
 /**
@@ -12633,6 +22195,31 @@
     [data-theme="dark"] input.ux-input[type="month"]::-webkit-calendar-picker-indicator,
     [data-theme="dark"] input.ux-input[type="week"]::-webkit-calendar-picker-indicator {
       filter: invert(1) opacity(0.6);
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-input,
+      input.ux-input,
+      textarea.ux-input,
+      select.ux-input {
+        transition: none;
+      }
+
+      .ux-input-group--floating .ux-input__label {
+        transition: none;
+      }
+
+      .ux-input-password__toggle {
+        transition: none;
+      }
+
+      .ux-input__clear {
+        transition: none;
+      }
     }
   `;
 
@@ -15850,6 +25437,28 @@
     .ux-navbar--lg .ux-navbar__title {
       font-size: var(--ux-font-size-xl);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-navbar__button {
+        transition: none;
+      }
+
+      .ux-navbar--collapsible .ux-navbar__large-title {
+        transition: none;
+      }
+
+      .ux-navbar--collapsible .ux-navbar__center {
+        transition: none;
+      }
+
+      .ux-navbar__progress-bar {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -15884,6 +25493,3982 @@
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxNavbar', navbarComponent);
     });
+  }
+})();
+
+/**
+ * UX Notification Center Component
+ * Panel for managing and displaying notifications
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Notification Center Trigger
+       ========================================================================== */
+
+    .ux-notification-trigger {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--ux-touch-target);
+      height: var(--ux-touch-target);
+      background: transparent;
+      border: none;
+      border-radius: var(--ux-radius-full);
+      color: var(--ux-text);
+      cursor: pointer;
+      transition: background var(--ux-transition-fast);
+    }
+
+    .ux-notification-trigger:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-notification-trigger svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .ux-notification-trigger__badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: white;
+      background: var(--ux-danger);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ux-background);
+    }
+
+    .ux-notification-trigger__badge--dot {
+      min-width: 10px;
+      width: 10px;
+      height: 10px;
+      padding: 0;
+    }
+
+    /* ==========================================================================
+       Notification Panel
+       ========================================================================== */
+
+    .ux-notification-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      max-width: 400px;
+      z-index: var(--ux-z-modal);
+      background: var(--ux-surface);
+      box-shadow: var(--ux-shadow-2xl);
+      transform: translateX(100%);
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--ux-transition-normal) var(--ux-ease-out);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ux-notification-panel--open {
+      transform: translateX(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .ux-notification-panel__backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: calc(var(--ux-z-modal) - 1);
+      background: rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-notification-panel__backdrop--open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ==========================================================================
+       Panel Header
+       ========================================================================== */
+
+    .ux-notification-panel__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      border-bottom: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+    }
+
+    .ux-notification-panel__title {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+
+    .ux-notification-panel__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-notification-panel__action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: none;
+      border-radius: var(--ux-radius-md);
+      color: var(--ux-text-secondary);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-notification-panel__action:hover {
+      background: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+
+    .ux-notification-panel__action svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* ==========================================================================
+       Panel Filters
+       ========================================================================== */
+
+    .ux-notification-panel__filters {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-sm) var(--ux-space-lg);
+      border-bottom: 1px solid var(--ux-border-color);
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+
+    .ux-notification-panel__filter {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: var(--ux-space-xs) var(--ux-space-md);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-text-secondary);
+      background: var(--ux-surface-secondary);
+      border: none;
+      border-radius: var(--ux-radius-full);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-notification-panel__filter:hover {
+      background: var(--ux-surface-tertiary);
+    }
+
+    .ux-notification-panel__filter--active {
+      background: var(--ux-primary);
+      color: white;
+    }
+
+    .ux-notification-panel__filter-count {
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ux-notification-panel__filter--active .ux-notification-panel__filter-count {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ==========================================================================
+       Panel Content
+       ========================================================================== */
+
+    .ux-notification-panel__content {
+      flex: 1;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .ux-notification-panel__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .ux-notification-panel__group {
+      padding: var(--ux-space-xs) var(--ux-space-lg);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ux-text-tertiary);
+      background: var(--ux-surface-secondary);
+    }
+
+    /* ==========================================================================
+       Notification Item
+       ========================================================================== */
+
+    .ux-notification-item {
+      display: flex;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      border-bottom: 1px solid var(--ux-border-color);
+      cursor: pointer;
+      transition: background var(--ux-transition-fast);
+    }
+
+    .ux-notification-item:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-notification-item--unread {
+      background: var(--ux-primary-tint);
+    }
+
+    .ux-notification-item--unread:hover {
+      background: rgba(var(--ux-primary-rgb), 0.15);
+    }
+
+    .ux-notification-item__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      border-radius: var(--ux-radius-full);
+      background: var(--ux-surface-tertiary);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-notification-item__icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ux-notification-item__icon--info { background: var(--ux-primary-tint); color: var(--ux-primary); }
+    .ux-notification-item__icon--success { background: var(--ux-success-tint); color: var(--ux-success); }
+    .ux-notification-item__icon--warning { background: var(--ux-warning-tint); color: var(--ux-warning); }
+    .ux-notification-item__icon--error { background: var(--ux-danger-tint); color: var(--ux-danger); }
+
+    .ux-notification-item__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ux-notification-item__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--ux-space-sm);
+      margin-bottom: 2px;
+    }
+
+    .ux-notification-item__title {
+      font-size: var(--ux-font-size-md);
+      font-weight: 500;
+      color: var(--ux-text);
+      line-height: 1.3;
+    }
+
+    .ux-notification-item--unread .ux-notification-item__title {
+      font-weight: 600;
+    }
+
+    .ux-notification-item__time {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .ux-notification-item__message {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .ux-notification-item__actions {
+      display: flex;
+      gap: var(--ux-space-sm);
+      margin-top: var(--ux-space-sm);
+    }
+
+    .ux-notification-item__action-btn {
+      padding: var(--ux-space-xs) var(--ux-space-md);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-primary);
+      background: transparent;
+      border: 1px solid var(--ux-primary);
+      border-radius: var(--ux-radius-md);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-notification-item__action-btn:hover {
+      background: var(--ux-primary);
+      color: white;
+    }
+
+    .ux-notification-item__action-btn--primary {
+      background: var(--ux-primary);
+      color: white;
+      border-color: var(--ux-primary);
+    }
+
+    .ux-notification-item__action-btn--primary:hover {
+      background: var(--ux-primary-shade);
+    }
+
+    /* Indicator dot for unread */
+    .ux-notification-item__dot {
+      width: 8px;
+      height: 8px;
+      flex-shrink: 0;
+      background: var(--ux-primary);
+      border-radius: 50%;
+      margin-top: 6px;
+    }
+
+    /* ==========================================================================
+       Empty State
+       ========================================================================== */
+
+    .ux-notification-panel__empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-3xl);
+      text-align: center;
+    }
+
+    .ux-notification-panel__empty-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: var(--ux-space-lg);
+      color: var(--ux-text-tertiary);
+      opacity: 0.5;
+    }
+
+    .ux-notification-panel__empty-title {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 500;
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-xs);
+    }
+
+    .ux-notification-panel__empty-description {
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text-tertiary);
+    }
+
+    /* ==========================================================================
+       Panel Footer
+       ========================================================================== */
+
+    .ux-notification-panel__footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      border-top: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+    }
+
+    .ux-notification-panel__footer-link {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-primary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .ux-notification-panel__footer-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-notification-panel--glass {
+      background: var(--ux-glass-bg-thick);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy));
+      border-left: 1px solid var(--ux-glass-border);
+    }
+
+    .ux-notification-panel--glass .ux-notification-panel__header,
+    .ux-notification-panel--glass .ux-notification-panel__filters,
+    .ux-notification-panel--glass .ux-notification-panel__footer {
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-notification-panel--glass .ux-notification-item {
+      border-color: var(--ux-glass-border);
+    }
+
+    /* ==========================================================================
+       Dropdown Variant (instead of panel)
+       ========================================================================== */
+
+    .ux-notification-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 380px;
+      max-height: 480px;
+      z-index: var(--ux-z-dropdown);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-radius-xl);
+      box-shadow: var(--ux-shadow-xl);
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all var(--ux-transition-fast) var(--ux-ease-out);
+    }
+
+    .ux-notification-dropdown--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .ux-notification-dropdown .ux-notification-panel__content {
+      max-height: 360px;
+    }
+
+    /* ==========================================================================
+       Mobile Adjustments
+       ========================================================================== */
+
+    @media (max-width: 767px) {
+      .ux-notification-panel {
+        max-width: none;
+      }
+
+      .ux-notification-panel__header {
+        padding-top: calc(var(--ux-safe-top) + var(--ux-space-md));
+      }
+
+      .ux-notification-panel__footer {
+        padding-bottom: calc(var(--ux-safe-bottom) + var(--ux-space-md));
+      }
+
+      .ux-notification-dropdown {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-height: 70dvh;
+        border-radius: var(--ux-radius-xl) var(--ux-radius-xl) 0 0;
+        transform: translateY(100%);
+      }
+
+      .ux-notification-dropdown--open {
+        transform: translateY(0);
+      }
+
+      .ux-notification-dropdown .ux-notification-panel__content {
+        max-height: calc(70dvh - 120px);
+      }
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-notification-panel__backdrop {
+        background: rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    .ux-dark .ux-notification-panel__backdrop {
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-notification-panel,
+      .ux-notification-panel__backdrop,
+      .ux-notification-dropdown,
+      .ux-notification-item {
+        transition: none;
+      }
+    }
+  `;
+
+  // Icons
+  const icons = {
+    bell: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+    close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    checkAll: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L7 17l-5-5"/><path d="M22 10l-9.5 9.5-2-2"/></svg>`,
+    settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+    trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+    info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+    success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+    warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    error: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    empty: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-notifications-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-notifications-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const notificationCenterData = (options = {}) => ({
+    // Configuration
+    notifications: options.notifications || [],
+    filters: options.filters || ['all', 'unread'],
+    filterLabels: options.filterLabels || {
+      all: 'Todas',
+      unread: 'No leidas',
+      info: 'Info',
+      success: 'Exito',
+      warning: 'Avisos',
+      error: 'Errores'
+    },
+    showFilters: options.showFilters ?? true,
+    showFooter: options.showFooter ?? true,
+    groupByDate: options.groupByDate ?? true,
+    maxVisible: options.maxVisible ?? 50,
+    variant: options.variant || 'panel', // 'panel' or 'dropdown'
+
+    // State
+    isOpen: false,
+    activeFilter: 'all',
+
+    // Icons
+    icons: icons,
+
+    // Lifecycle
+    init() {
+      // Close on escape
+      this._escHandler = (e) => {
+        if (e.key === 'Escape' && this.isOpen) {
+          this.close();
+        }
+      };
+      document.addEventListener('keydown', this._escHandler);
+    },
+
+    destroy() {
+      if (this._escHandler) {
+        document.removeEventListener('keydown', this._escHandler);
+      }
+    },
+
+    // Open panel
+    open() {
+      this.isOpen = true;
+
+      if (this.variant === 'panel' && window.UX && window.UX.lockScroll) {
+        window.UX.lockScroll();
+      }
+
+      this.$dispatch('notifications:open');
+    },
+
+    // Close panel
+    close() {
+      this.isOpen = false;
+
+      if (this.variant === 'panel' && window.UX && window.UX.unlockScroll) {
+        window.UX.unlockScroll();
+      }
+
+      this.$dispatch('notifications:close');
+    },
+
+    // Toggle panel
+    toggle() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    },
+
+    // Get filtered notifications
+    get filteredNotifications() {
+      let filtered = [...this.notifications];
+
+      // Apply filter
+      if (this.activeFilter !== 'all') {
+        if (this.activeFilter === 'unread') {
+          filtered = filtered.filter(n => !n.read);
+        } else {
+          filtered = filtered.filter(n => n.type === this.activeFilter);
+        }
+      }
+
+      // Limit
+      filtered = filtered.slice(0, this.maxVisible);
+
+      // Group by date if enabled
+      if (this.groupByDate) {
+        return this.groupNotificationsByDate(filtered);
+      }
+
+      return [{ group: null, items: filtered }];
+    },
+
+    // Group notifications by date
+    groupNotificationsByDate(notifications) {
+      const groups = {};
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      notifications.forEach(notification => {
+        const date = new Date(notification.timestamp);
+        const notifDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+        let groupKey;
+        if (notifDate.getTime() === today.getTime()) {
+          groupKey = 'Hoy';
+        } else if (notifDate.getTime() === yesterday.getTime()) {
+          groupKey = 'Ayer';
+        } else {
+          groupKey = date.toLocaleDateString('es-ES', { month: 'long', day: 'numeric' });
+        }
+
+        if (!groups[groupKey]) {
+          groups[groupKey] = [];
+        }
+        groups[groupKey].push(notification);
+      });
+
+      return Object.entries(groups).map(([group, items]) => ({ group, items }));
+    },
+
+    // Count unread notifications
+    get unreadCount() {
+      return this.notifications.filter(n => !n.read).length;
+    },
+
+    // Count by filter
+    getFilterCount(filter) {
+      if (filter === 'all') return this.notifications.length;
+      if (filter === 'unread') return this.unreadCount;
+      return this.notifications.filter(n => n.type === filter).length;
+    },
+
+    // Mark notification as read
+    markAsRead(notificationId) {
+      const notification = this.notifications.find(n => n.id === notificationId);
+      if (notification) {
+        notification.read = true;
+        this.$dispatch('notification:read', { notification });
+      }
+    },
+
+    // Mark all as read
+    markAllAsRead() {
+      this.notifications.forEach(n => n.read = true);
+      this.$dispatch('notifications:all-read');
+    },
+
+    // Delete notification
+    deleteNotification(notificationId) {
+      const index = this.notifications.findIndex(n => n.id === notificationId);
+      if (index !== -1) {
+        const notification = this.notifications[index];
+        this.notifications.splice(index, 1);
+        this.$dispatch('notification:delete', { notification });
+      }
+    },
+
+    // Clear all notifications
+    clearAll() {
+      this.notifications = [];
+      this.$dispatch('notifications:clear');
+    },
+
+    // Add new notification
+    addNotification(notification) {
+      const newNotif = {
+        id: notification.id || Date.now().toString(),
+        title: notification.title,
+        message: notification.message,
+        type: notification.type || 'info',
+        timestamp: notification.timestamp || new Date().toISOString(),
+        read: notification.read ?? false,
+        actions: notification.actions || [],
+        data: notification.data || {}
+      };
+
+      this.notifications.unshift(newNotif);
+      this.$dispatch('notification:add', { notification: newNotif });
+
+      return newNotif;
+    },
+
+    // Handle notification click
+    handleClick(notification) {
+      if (!notification.read) {
+        this.markAsRead(notification.id);
+      }
+      this.$dispatch('notification:click', { notification });
+    },
+
+    // Handle action click
+    handleAction(notification, action) {
+      this.$dispatch('notification:action', { notification, action });
+      if (action.callback && typeof action.callback === 'function') {
+        action.callback(notification);
+      }
+    },
+
+    // Format relative time
+    formatTime(timestamp) {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diff = now - date;
+
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+
+      if (minutes < 1) return 'Ahora';
+      if (minutes < 60) return `${minutes}m`;
+      if (hours < 24) return `${hours}h`;
+      if (days < 7) return `${days}d`;
+
+      return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+    },
+
+    // Get icon by type
+    getTypeIcon(type) {
+      switch (type) {
+        case 'success': return this.icons.success;
+        case 'warning': return this.icons.warning;
+        case 'error': return this.icons.error;
+        default: return this.icons.info;
+      }
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxNotificationCenter', notificationCenterData);
+  }
+
+  // Expose icons for external use
+  window.UX = window.UX || {};
+  window.UX.notificationIcons = icons;
+})();
+
+/**
+ * UX Numpad Component
+ * Numeric keypad for POS and calculator interfaces
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Numpad Container
+    ======================================== */
+
+    :root {
+      --ux-numpad-key-size: 64px;
+      --ux-numpad-key-size-sm: 52px;
+      --ux-numpad-key-size-lg: 76px;
+      --ux-numpad-gap: var(--ux-space-sm);
+      --ux-numpad-border-radius: var(--ux-border-radius-lg);
+      --ux-numpad-font-size: 1.5rem;
+      --ux-numpad-font-size-sm: 1.25rem;
+      --ux-numpad-font-size-lg: 1.75rem;
+    }
+
+    .ux-numpad {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-md);
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-numpad-border-radius);
+      max-width: fit-content;
+    }
+
+    .ux-numpad--full-width {
+      max-width: 100%;
+    }
+
+    .ux-numpad--compact {
+      padding: var(--ux-space-sm);
+      gap: var(--ux-space-sm);
+    }
+
+    /* ========================================
+       Numpad Display
+    ======================================== */
+
+    .ux-numpad__display {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      min-height: 56px;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      background-color: var(--ux-surface-secondary);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+      font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--ux-text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ux-numpad__display--lg {
+      min-height: 72px;
+      font-size: 2.5rem;
+    }
+
+    .ux-numpad__display--sm {
+      min-height: 44px;
+      font-size: 1.5rem;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+    }
+
+    .ux-numpad__display-label {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 400;
+      color: var(--ux-text-secondary);
+      margin-right: auto;
+      font-family: inherit;
+    }
+
+    .ux-numpad__display-value {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ux-numpad__display-currency {
+      font-size: 0.75em;
+      color: var(--ux-text-secondary);
+      margin-right: var(--ux-space-xs);
+    }
+
+    /* ========================================
+       Numpad Grid
+    ======================================== */
+
+    .ux-numpad__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--ux-numpad-gap);
+    }
+
+    .ux-numpad__grid--4cols {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* ========================================
+       Numpad Keys
+    ======================================== */
+
+    .ux-numpad__key {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: var(--ux-numpad-key-size);
+      min-height: var(--ux-numpad-key-size);
+      padding: var(--ux-space-sm);
+      background-color: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+      font-size: var(--ux-numpad-font-size);
+      font-weight: 500;
+      color: var(--ux-text);
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        transform 100ms var(--ux-ease),
+        box-shadow var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-numpad__key:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-numpad__key:active {
+      transform: scale(0.95);
+      background-color: var(--ux-surface-tertiary);
+    }
+
+    .ux-numpad__key:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: 2px;
+    }
+
+    /* Key Sizes */
+    .ux-numpad--sm .ux-numpad__key {
+      min-width: var(--ux-numpad-key-size-sm);
+      min-height: var(--ux-numpad-key-size-sm);
+      font-size: var(--ux-numpad-font-size-sm);
+    }
+
+    .ux-numpad--lg .ux-numpad__key {
+      min-width: var(--ux-numpad-key-size-lg);
+      min-height: var(--ux-numpad-key-size-lg);
+      font-size: var(--ux-numpad-font-size-lg);
+    }
+
+    /* Key spanning 2 columns (e.g., 0 key) */
+    .ux-numpad__key--wide {
+      grid-column: span 2;
+    }
+
+    /* Key spanning 2 rows */
+    .ux-numpad__key--tall {
+      grid-row: span 2;
+    }
+
+    /* Action keys (backspace, clear, etc.) */
+    .ux-numpad__key--action {
+      background-color: var(--ux-surface-secondary);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-numpad__key--action:hover {
+      background-color: var(--ux-surface-tertiary);
+    }
+
+    /* Primary action key (enter, confirm) */
+    .ux-numpad__key--primary {
+      background-color: var(--ux-primary);
+      border-color: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+    }
+
+    .ux-numpad__key--primary:hover {
+      background-color: var(--ux-primary-shade);
+    }
+
+    .ux-numpad__key--primary:active {
+      background-color: var(--ux-primary-shade);
+    }
+
+    /* Success key */
+    .ux-numpad__key--success {
+      background-color: var(--ux-success);
+      border-color: var(--ux-success);
+      color: white;
+    }
+
+    .ux-numpad__key--success:hover {
+      background-color: var(--ux-success-shade, #34c759);
+    }
+
+    /* Danger key (clear all, delete) */
+    .ux-numpad__key--danger {
+      background-color: transparent;
+      border-color: var(--ux-danger);
+      color: var(--ux-danger);
+    }
+
+    .ux-numpad__key--danger:hover {
+      background-color: rgba(var(--ux-danger-rgb, 255, 59, 48), 0.1);
+    }
+
+    /* Disabled key */
+    .ux-numpad__key:disabled,
+    .ux-numpad__key--disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* Key icons */
+    .ux-numpad__key svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .ux-numpad--sm .ux-numpad__key svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ux-numpad--lg .ux-numpad__key svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    /* ========================================
+       Quick Amount Buttons
+    ======================================== */
+
+    .ux-numpad__quick-amounts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-numpad__quick-btn {
+      flex: 1;
+      min-width: 60px;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      background-color: var(--ux-surface-secondary);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-text);
+      cursor: pointer;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        transform 100ms var(--ux-ease);
+    }
+
+    .ux-numpad__quick-btn:hover {
+      background-color: var(--ux-surface-tertiary);
+    }
+
+    .ux-numpad__quick-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* ========================================
+       Glass Variant
+    ======================================== */
+
+    .ux-numpad--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-numpad--glass .ux-numpad__display {
+      background: var(--ux-glass-bg-thin);
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-numpad--glass .ux-numpad__key {
+      background: var(--ux-glass-bg-thin);
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-numpad--glass .ux-numpad__key:hover {
+      background: var(--ux-glass-bg);
+    }
+
+    .ux-numpad--glass .ux-numpad__key--action {
+      background: var(--ux-glass-bg);
+    }
+
+    /* ========================================
+       Calculator Layout
+    ======================================== */
+
+    .ux-numpad--calculator .ux-numpad__grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .ux-numpad--calculator .ux-numpad__key--operator {
+      background-color: var(--ux-warning);
+      border-color: var(--ux-warning);
+      color: white;
+    }
+
+    .ux-numpad--calculator .ux-numpad__key--operator:hover {
+      background-color: var(--ux-warning-shade, #ff9500);
+    }
+
+    /* ========================================
+       PIN Entry Layout
+    ======================================== */
+
+    .ux-numpad--pin {
+      max-width: 280px;
+    }
+
+    .ux-numpad--pin .ux-numpad__display {
+      letter-spacing: 1rem;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .ux-numpad__pin-dots {
+      display: flex;
+      justify-content: center;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-md);
+    }
+
+    .ux-numpad__pin-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background-color: var(--ux-border-color);
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-numpad__pin-dot--filled {
+      background-color: var(--ux-primary);
+    }
+
+    /* ========================================
+       Responsive
+    ======================================== */
+
+    @media (max-width: 767px) {
+      .ux-numpad {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .ux-numpad__key {
+        min-width: 0;
+        min-height: 56px;
+      }
+
+      .ux-numpad__display {
+        font-size: 1.75rem;
+      }
+    }
+
+    /* ========================================
+       Dark Mode
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-numpad__key {
+        border-color: var(--ux-border-color);
+      }
+    }
+
+    .ux-dark .ux-numpad__key {
+      border-color: var(--ux-border-color);
+    }
+  `;
+
+  // Icons
+  const icons = {
+    backspace: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 002-2V6a2 2 0 00-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>',
+    clear: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+    enter: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 01-4 4H4"/></svg>',
+    check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    plus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    minus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    multiply: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    divide: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="6" r="1" fill="currentColor"/><line x1="5" y1="12" x2="19" y2="12"/><circle cx="12" cy="18" r="1" fill="currentColor"/></svg>',
+    equals: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/></svg>',
+    percent: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>'
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-numpad-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-numpad-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for numpad
+  const numpadComponent = (config = {}) => ({
+    // Value
+    value: config.initialValue || '',
+    displayValue: '',
+
+    // Configuration
+    maxLength: config.maxLength || 12,
+    decimals: config.decimals ?? 2,
+    allowNegative: config.allowNegative || false,
+    allowDecimal: config.allowDecimal !== false,
+    currency: config.currency || '',
+    currencyPosition: config.currencyPosition || 'prefix',
+
+    // PIN mode
+    pinMode: config.pinMode || false,
+    pinLength: config.pinLength || 4,
+    pinMask: config.pinMask !== false,
+
+    // Quick amounts
+    quickAmounts: config.quickAmounts || [],
+
+    // Layout
+    layout: config.layout || 'standard', // standard, calculator, phone
+
+    // Labels
+    labels: {
+      clear: config.labels?.clear || 'C',
+      backspace: config.labels?.backspace || '⌫',
+      enter: config.labels?.enter || 'Enter',
+      decimal: config.labels?.decimal || '.',
+      negative: config.labels?.negative || '±',
+      ...config.labels
+    },
+
+    // State
+    hasDecimal: false,
+    isNegative: false,
+
+    // Initialize
+    init() {
+      this.updateDisplay();
+
+      // Keyboard support
+      this._keyHandler = (e) => {
+        if (!this.$el.contains(document.activeElement) && document.activeElement !== document.body) return;
+
+        if (e.key >= '0' && e.key <= '9') {
+          this.appendDigit(e.key);
+        } else if (e.key === '.' || e.key === ',') {
+          this.appendDecimal();
+        } else if (e.key === 'Backspace') {
+          this.backspace();
+        } else if (e.key === 'Delete' || e.key === 'Escape') {
+          this.clear();
+        } else if (e.key === 'Enter') {
+          this.submit();
+        } else if (e.key === '-' && this.allowNegative) {
+          this.toggleNegative();
+        }
+      };
+
+      document.addEventListener('keydown', this._keyHandler);
+    },
+
+    destroy() {
+      if (this._keyHandler) {
+        document.removeEventListener('keydown', this._keyHandler);
+      }
+    },
+
+    // Append a digit
+    appendDigit(digit) {
+      // Check max length
+      const cleanValue = this.value.replace(/[^0-9]/g, '');
+      if (cleanValue.length >= this.maxLength) return;
+
+      // PIN mode length check
+      if (this.pinMode && this.value.length >= this.pinLength) return;
+
+      // Prevent leading zeros (except for decimals)
+      if (this.value === '0' && digit === '0' && !this.hasDecimal) return;
+      if (this.value === '0' && digit !== '0' && !this.hasDecimal) {
+        this.value = '';
+      }
+
+      this.value += digit;
+      this.updateDisplay();
+      this.emitChange();
+
+      // Auto-submit for PIN mode
+      if (this.pinMode && this.value.length === this.pinLength) {
+        this.$nextTick(() => this.submit());
+      }
+    },
+
+    // Append decimal point
+    appendDecimal() {
+      if (!this.allowDecimal || this.hasDecimal || this.pinMode) return;
+
+      if (this.value === '') {
+        this.value = '0';
+      }
+
+      this.value += '.';
+      this.hasDecimal = true;
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Backspace (delete last character)
+    backspace() {
+      if (this.value.length === 0) return;
+
+      const lastChar = this.value.slice(-1);
+      if (lastChar === '.') {
+        this.hasDecimal = false;
+      }
+
+      this.value = this.value.slice(0, -1);
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Clear all
+    clear() {
+      this.value = '';
+      this.hasDecimal = false;
+      this.isNegative = false;
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Toggle negative
+    toggleNegative() {
+      if (!this.allowNegative) return;
+
+      this.isNegative = !this.isNegative;
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Set quick amount
+    setQuickAmount(amount) {
+      this.value = String(amount);
+      this.hasDecimal = this.value.includes('.');
+      this.updateDisplay();
+      this.emitChange();
+    },
+
+    // Update display value
+    updateDisplay() {
+      if (this.pinMode && this.pinMask) {
+        this.displayValue = '•'.repeat(this.value.length);
+      } else if (this.value === '') {
+        this.displayValue = '0';
+      } else {
+        let display = this.value;
+
+        // Format with thousand separators for display
+        if (!this.pinMode && this.decimals >= 0) {
+          const parts = display.split('.');
+          parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+          display = parts.join('.');
+        }
+
+        if (this.isNegative && display !== '0' && display !== '') {
+          display = '-' + display;
+        }
+
+        this.displayValue = display;
+      }
+    },
+
+    // Get numeric value
+    getNumericValue() {
+      let num = parseFloat(this.value) || 0;
+      if (this.isNegative) num = -num;
+      return num;
+    },
+
+    // Submit value
+    submit() {
+      const numericValue = this.getNumericValue();
+      this.$dispatch('numpad-submit', {
+        value: this.value,
+        numericValue: numericValue,
+        displayValue: this.displayValue,
+        isNegative: this.isNegative
+      });
+    },
+
+    // Emit change event
+    emitChange() {
+      this.$dispatch('numpad-change', {
+        value: this.value,
+        numericValue: this.getNumericValue(),
+        displayValue: this.displayValue
+      });
+    },
+
+    // Get icon HTML
+    getIcon(name) {
+      return icons[name] || '';
+    },
+
+    // Get PIN dots
+    getPinDots() {
+      const dots = [];
+      for (let i = 0; i < this.pinLength; i++) {
+        dots.push(i < this.value.length);
+      }
+      return dots;
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxNumpad', numpadComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxNumpad', numpadComponent);
+    });
+  }
+})();
+
+/**
+ * UX Order Ticket Component
+ * Kitchen display/POS order ticket for restaurant systems
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Order Ticket Variables
+       ========================================================================== */
+
+    :root {
+      --ux-order-ticket-width: 320px;
+      --ux-order-ticket-padding: var(--ux-space-md);
+      --ux-order-ticket-border-radius: var(--ux-radius-lg, 12px);
+      --ux-order-ticket-font-family: var(--ux-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+
+      /* Status colors */
+      --ux-order-ticket-pending: var(--ux-warning, #f59e0b);
+      --ux-order-ticket-pending-bg: rgba(245, 158, 11, 0.1);
+      --ux-order-ticket-preparing: var(--ux-primary, #3b82f6);
+      --ux-order-ticket-preparing-bg: rgba(59, 130, 246, 0.1);
+      --ux-order-ticket-ready: var(--ux-success, #22c55e);
+      --ux-order-ticket-ready-bg: rgba(34, 197, 94, 0.1);
+      --ux-order-ticket-completed: var(--ux-gray-500, #6b7280);
+      --ux-order-ticket-completed-bg: rgba(107, 114, 128, 0.1);
+      --ux-order-ticket-cancelled: var(--ux-danger, #ef4444);
+      --ux-order-ticket-cancelled-bg: rgba(239, 68, 68, 0.1);
+      --ux-order-ticket-urgent: var(--ux-danger, #ef4444);
+      --ux-order-ticket-urgent-bg: rgba(239, 68, 68, 0.15);
+    }
+
+    /* ==========================================================================
+       Order Ticket Container
+       ========================================================================== */
+
+    .ux-order-ticket {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: var(--ux-order-ticket-width);
+      background-color: var(--ux-surface, #ffffff);
+      border-radius: var(--ux-order-ticket-border-radius);
+      box-shadow: var(--ux-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+      overflow: hidden;
+      font-family: var(--ux-order-ticket-font-family);
+      transition: box-shadow var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+    }
+
+    .ux-order-ticket:hover {
+      box-shadow: var(--ux-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    }
+
+    /* Status border indicator */
+    .ux-order-ticket::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background-color: var(--ux-order-ticket-status-color, var(--ux-order-ticket-pending));
+    }
+
+    /* ==========================================================================
+       Order Ticket Header
+       ========================================================================== */
+
+    .ux-order-ticket__header {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-xs, 4px);
+      padding: var(--ux-order-ticket-padding);
+      padding-top: calc(var(--ux-order-ticket-padding) + 4px);
+      border-bottom: 1px solid var(--ux-border-color, #e5e7eb);
+      background-color: var(--ux-surface-secondary, #f9fafb);
+    }
+
+    .ux-order-ticket__header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ux-space-sm, 8px);
+    }
+
+    .ux-order-ticket__order-number {
+      font-size: var(--ux-font-size-xl, 1.25rem);
+      font-weight: 700;
+      color: var(--ux-text, #111827);
+      margin: 0;
+    }
+
+    .ux-order-ticket__status {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs, 4px);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: var(--ux-font-size-xs, 0.75rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background-color: var(--ux-order-ticket-status-bg, var(--ux-order-ticket-pending-bg));
+      color: var(--ux-order-ticket-status-color, var(--ux-order-ticket-pending));
+    }
+
+    .ux-order-ticket__status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: currentColor;
+    }
+
+    .ux-order-ticket__status--pulse .ux-order-ticket__status-dot {
+      animation: ux-order-ticket-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes ux-order-ticket-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .ux-order-ticket__header-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-md, 16px);
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      color: var(--ux-text-secondary, #6b7280);
+    }
+
+    .ux-order-ticket__meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs, 4px);
+    }
+
+    .ux-order-ticket__meta-icon {
+      width: 14px;
+      height: 14px;
+      opacity: 0.7;
+    }
+
+    .ux-order-ticket__meta-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-order-ticket__time {
+      font-weight: 500;
+    }
+
+    .ux-order-ticket__table {
+      font-weight: 600;
+      color: var(--ux-text, #111827);
+    }
+
+    .ux-order-ticket__type {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: var(--ux-font-size-xs, 0.75rem);
+      font-weight: 500;
+      background-color: var(--ux-surface-tertiary, #e5e7eb);
+      color: var(--ux-text-secondary, #6b7280);
+    }
+
+    .ux-order-ticket__type--dine-in {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: var(--ux-primary, #3b82f6);
+    }
+
+    .ux-order-ticket__type--takeout {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: var(--ux-warning, #f59e0b);
+    }
+
+    .ux-order-ticket__type--delivery {
+      background-color: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+    }
+
+    /* ==========================================================================
+       Order Ticket Items
+       ========================================================================== */
+
+    .ux-order-ticket__items {
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .ux-order-ticket__item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--ux-space-sm, 8px);
+      padding: var(--ux-space-md, 16px) var(--ux-order-ticket-padding);
+      border-bottom: 1px solid var(--ux-border-color, #e5e7eb);
+      transition: background-color var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+    }
+
+    .ux-order-ticket__item:last-child {
+      border-bottom: none;
+    }
+
+    .ux-order-ticket__item:hover {
+      background-color: var(--ux-surface-secondary, #f9fafb);
+    }
+
+    .ux-order-ticket__item--completed {
+      opacity: 0.6;
+      text-decoration: line-through;
+      text-decoration-color: var(--ux-text-tertiary, #9ca3af);
+    }
+
+    .ux-order-ticket__item--urgent {
+      background-color: var(--ux-order-ticket-urgent-bg);
+    }
+
+    .ux-order-ticket__item-qty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      font-weight: 700;
+      background-color: var(--ux-surface-tertiary, #e5e7eb);
+      color: var(--ux-text, #111827);
+      flex-shrink: 0;
+    }
+
+    .ux-order-ticket__item--urgent .ux-order-ticket__item-qty {
+      background-color: var(--ux-order-ticket-urgent);
+      color: white;
+    }
+
+    .ux-order-ticket__item-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .ux-order-ticket__item-name {
+      font-size: var(--ux-font-size-md, 1rem);
+      font-weight: 600;
+      color: var(--ux-text, #111827);
+      line-height: 1.3;
+    }
+
+    .ux-order-ticket__item-modifiers {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 2px;
+    }
+
+    .ux-order-ticket__item-modifier {
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      color: var(--ux-text-secondary, #6b7280);
+      padding-left: var(--ux-space-sm, 8px);
+    }
+
+    .ux-order-ticket__item-modifier::before {
+      content: '+ ';
+      color: var(--ux-text-tertiary, #9ca3af);
+    }
+
+    .ux-order-ticket__item-modifier--remove {
+      color: var(--ux-danger, #ef4444);
+    }
+
+    .ux-order-ticket__item-modifier--remove::before {
+      content: '- ';
+      color: var(--ux-danger, #ef4444);
+    }
+
+    .ux-order-ticket__item-notes {
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      font-style: italic;
+      color: var(--ux-warning, #f59e0b);
+      margin-top: 4px;
+      padding: 4px 8px;
+      background-color: rgba(245, 158, 11, 0.1);
+      border-radius: 4px;
+      border-left: 2px solid var(--ux-warning, #f59e0b);
+    }
+
+    .ux-order-ticket__item-price {
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      font-weight: 500;
+      color: var(--ux-text-secondary, #6b7280);
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       Order Ticket Footer
+       ========================================================================== */
+
+    .ux-order-ticket__footer {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-sm, 8px);
+      padding: var(--ux-order-ticket-padding);
+      border-top: 1px solid var(--ux-border-color, #e5e7eb);
+      background-color: var(--ux-surface-secondary, #f9fafb);
+    }
+
+    .ux-order-ticket__totals {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-xs, 4px);
+    }
+
+    .ux-order-ticket__total-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      color: var(--ux-text-secondary, #6b7280);
+    }
+
+    .ux-order-ticket__total-row--grand {
+      padding-top: var(--ux-space-sm, 8px);
+      margin-top: var(--ux-space-xs, 4px);
+      border-top: 1px dashed var(--ux-border-color, #e5e7eb);
+      font-size: var(--ux-font-size-lg, 1.125rem);
+      font-weight: 700;
+      color: var(--ux-text, #111827);
+    }
+
+    .ux-order-ticket__total-label {
+      flex: 1;
+    }
+
+    .ux-order-ticket__total-value {
+      font-weight: 600;
+      text-align: right;
+    }
+
+    /* ==========================================================================
+       Order Ticket Actions
+       ========================================================================== */
+
+    .ux-order-ticket__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm, 8px);
+      padding: var(--ux-order-ticket-padding);
+      padding-top: 0;
+    }
+
+    .ux-order-ticket__actions--full {
+      padding-top: var(--ux-order-ticket-padding);
+      border-top: 1px solid var(--ux-border-color, #e5e7eb);
+    }
+
+    .ux-order-ticket__action {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-xs, 4px);
+      padding: var(--ux-space-sm, 8px) var(--ux-space-md, 16px);
+      border: none;
+      border-radius: 8px;
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-order-ticket__action--primary {
+      background-color: var(--ux-primary, #3b82f6);
+      color: white;
+    }
+
+    .ux-order-ticket__action--primary:hover {
+      background-color: var(--ux-primary-shade, #2563eb);
+    }
+
+    .ux-order-ticket__action--success {
+      background-color: var(--ux-success, #22c55e);
+      color: white;
+    }
+
+    .ux-order-ticket__action--success:hover {
+      background-color: var(--ux-success-shade, #16a34a);
+    }
+
+    .ux-order-ticket__action--secondary {
+      background-color: var(--ux-surface-tertiary, #e5e7eb);
+      color: var(--ux-text, #111827);
+    }
+
+    .ux-order-ticket__action--secondary:hover {
+      background-color: var(--ux-border-color, #d1d5db);
+    }
+
+    .ux-order-ticket__action:active {
+      transform: scale(0.98);
+    }
+
+    .ux-order-ticket__action-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-order-ticket__action-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ==========================================================================
+       Order Ticket Timer
+       ========================================================================== */
+
+    .ux-order-ticket__timer {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs, 4px);
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ux-order-ticket__timer--warning {
+      color: var(--ux-warning, #f59e0b);
+    }
+
+    .ux-order-ticket__timer--danger {
+      color: var(--ux-danger, #ef4444);
+      animation: ux-order-ticket-blink 1s ease-in-out infinite;
+    }
+
+    @keyframes ux-order-ticket-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .ux-order-ticket__timer-icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-order-ticket__timer-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ==========================================================================
+       Order Ticket Notes (Special Instructions)
+       ========================================================================== */
+
+    .ux-order-ticket__notes {
+      padding: var(--ux-space-sm, 8px) var(--ux-order-ticket-padding);
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      font-style: italic;
+      color: var(--ux-warning, #f59e0b);
+      background-color: rgba(245, 158, 11, 0.08);
+      border-top: 1px dashed var(--ux-warning, #f59e0b);
+    }
+
+    .ux-order-ticket__notes-label {
+      font-weight: 600;
+      font-style: normal;
+      margin-right: var(--ux-space-xs, 4px);
+    }
+
+    /* ==========================================================================
+       Status Variants
+       ========================================================================== */
+
+    .ux-order-ticket--pending {
+      --ux-order-ticket-status-color: var(--ux-order-ticket-pending);
+      --ux-order-ticket-status-bg: var(--ux-order-ticket-pending-bg);
+    }
+
+    .ux-order-ticket--preparing {
+      --ux-order-ticket-status-color: var(--ux-order-ticket-preparing);
+      --ux-order-ticket-status-bg: var(--ux-order-ticket-preparing-bg);
+    }
+
+    .ux-order-ticket--ready {
+      --ux-order-ticket-status-color: var(--ux-order-ticket-ready);
+      --ux-order-ticket-status-bg: var(--ux-order-ticket-ready-bg);
+    }
+
+    .ux-order-ticket--completed {
+      --ux-order-ticket-status-color: var(--ux-order-ticket-completed);
+      --ux-order-ticket-status-bg: var(--ux-order-ticket-completed-bg);
+      opacity: 0.7;
+    }
+
+    .ux-order-ticket--cancelled {
+      --ux-order-ticket-status-color: var(--ux-order-ticket-cancelled);
+      --ux-order-ticket-status-bg: var(--ux-order-ticket-cancelled-bg);
+      opacity: 0.5;
+    }
+
+    .ux-order-ticket--urgent {
+      box-shadow: 0 0 0 2px var(--ux-order-ticket-urgent),
+                  var(--ux-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+      animation: ux-order-ticket-urgent-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes ux-order-ticket-urgent-pulse {
+      0%, 100% { box-shadow: 0 0 0 2px var(--ux-order-ticket-urgent), var(--ux-shadow-lg); }
+      50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.4), var(--ux-shadow-lg); }
+    }
+
+    /* ==========================================================================
+       Size Variants
+       ========================================================================== */
+
+    .ux-order-ticket--sm {
+      --ux-order-ticket-width: 260px;
+      --ux-order-ticket-padding: var(--ux-space-sm, 8px);
+    }
+
+    .ux-order-ticket--sm .ux-order-ticket__order-number {
+      font-size: var(--ux-font-size-lg, 1.125rem);
+    }
+
+    .ux-order-ticket--sm .ux-order-ticket__item-name {
+      font-size: var(--ux-font-size-sm, 0.875rem);
+    }
+
+    .ux-order-ticket--lg {
+      --ux-order-ticket-width: 380px;
+      --ux-order-ticket-padding: var(--ux-space-lg, 24px);
+    }
+
+    .ux-order-ticket--lg .ux-order-ticket__order-number {
+      font-size: var(--ux-font-size-2xl, 1.5rem);
+    }
+
+    .ux-order-ticket--full {
+      --ux-order-ticket-width: 100%;
+    }
+
+    /* ==========================================================================
+       Glass Variant (iOS 26 Liquid Glass)
+       ========================================================================== */
+
+    .ux-order-ticket--glass {
+      box-shadow: var(--ux-glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.08)),
+                  var(--ux-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.5));
+      border: 0.5px solid var(--ux-glass-border, rgba(255, 255, 255, 0.18));
+    }
+
+    .ux-order-ticket--glass .ux-order-ticket__header,
+    .ux-order-ticket--glass .ux-order-ticket__footer {
+      background: var(--ux-glass-bg-thin, rgba(255, 255, 255, 0.5));
+    }
+
+    .ux-order-ticket--glass .ux-order-ticket__header {
+      border-bottom-color: var(--ux-glass-border, rgba(255, 255, 255, 0.18));
+    }
+
+    .ux-order-ticket--glass .ux-order-ticket__footer {
+      border-top-color: var(--ux-glass-border, rgba(255, 255, 255, 0.18));
+    }
+
+    .ux-order-ticket--glass .ux-order-ticket__item {
+      border-bottom-color: var(--ux-glass-border, rgba(255, 255, 255, 0.18));
+    }
+
+    /* ==========================================================================
+       Order Ticket Grid
+       ========================================================================== */
+
+    .ux-order-ticket-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(var(--ux-order-ticket-width), 1fr));
+      gap: var(--ux-space-lg, 24px);
+      padding: var(--ux-space-md, 16px);
+    }
+
+    .ux-order-ticket-grid .ux-order-ticket {
+      width: 100%;
+    }
+
+    /* Kanban-style columns */
+    .ux-order-ticket-column {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-md, 16px);
+      min-width: var(--ux-order-ticket-width);
+      padding: var(--ux-space-md, 16px);
+      background-color: var(--ux-surface-secondary, #f9fafb);
+      border-radius: var(--ux-border-radius-lg, 12px);
+    }
+
+    .ux-order-ticket-column__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-sm, 8px);
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--ux-text-secondary, #6b7280);
+    }
+
+    .ux-order-ticket-column__count {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 12px;
+      font-size: var(--ux-font-size-xs, 0.75rem);
+      font-weight: 700;
+      background-color: var(--ux-surface-tertiary, #e5e7eb);
+      color: var(--ux-text, #111827);
+    }
+
+    /* ==========================================================================
+       Print Styles
+       ========================================================================== */
+
+    @media print {
+      .ux-order-ticket {
+        width: 80mm;
+        box-shadow: none;
+        border: 1px solid #000;
+        border-radius: 0;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .ux-order-ticket::before {
+        display: none;
+      }
+
+      .ux-order-ticket__header,
+      .ux-order-ticket__footer {
+        background-color: transparent;
+      }
+
+      .ux-order-ticket__status {
+        border: 1px solid currentColor;
+        background-color: transparent;
+      }
+
+      .ux-order-ticket__actions {
+        display: none;
+      }
+
+      .ux-order-ticket__items {
+        max-height: none;
+        overflow: visible;
+      }
+
+      .ux-order-ticket__item:hover {
+        background-color: transparent;
+      }
+
+      .ux-order-ticket--glass {
+        background: white;
+        border: 1px solid #000;
+      }
+
+      .ux-order-ticket-grid {
+        display: block;
+      }
+
+      .ux-order-ticket-grid .ux-order-ticket {
+        margin-bottom: 16px;
+      }
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      :root:not(.ux-light):not(.ux-theme-light) {
+        --ux-order-ticket-pending-bg: rgba(245, 158, 11, 0.15);
+        --ux-order-ticket-preparing-bg: rgba(59, 130, 246, 0.15);
+        --ux-order-ticket-ready-bg: rgba(34, 197, 94, 0.15);
+        --ux-order-ticket-completed-bg: rgba(107, 114, 128, 0.15);
+        --ux-order-ticket-cancelled-bg: rgba(239, 68, 68, 0.15);
+        --ux-order-ticket-urgent-bg: rgba(239, 68, 68, 0.2);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-order-ticket__item-qty {
+        background-color: var(--ux-gray-700, #374151);
+        color: var(--ux-gray-100, #f3f4f6);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-order-ticket__type {
+        background-color: var(--ux-gray-700, #374151);
+        color: var(--ux-gray-300, #d1d5db);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-order-ticket__action--secondary {
+        background-color: var(--ux-gray-700, #374151);
+        color: var(--ux-gray-100, #f3f4f6);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-order-ticket__action--secondary:hover {
+        background-color: var(--ux-gray-600, #4b5563);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-order-ticket-column {
+        background-color: var(--ux-gray-800, #1f2937);
+      }
+
+      :root:not(.ux-light):not(.ux-theme-light) .ux-order-ticket-column__count {
+        background-color: var(--ux-gray-700, #374151);
+        color: var(--ux-gray-100, #f3f4f6);
+      }
+    }
+
+    .ux-dark .ux-order-ticket__item-qty,
+    .ux-theme-dark .ux-order-ticket__item-qty {
+      background-color: var(--ux-gray-700, #374151);
+      color: var(--ux-gray-100, #f3f4f6);
+    }
+
+    .ux-dark .ux-order-ticket__type,
+    .ux-theme-dark .ux-order-ticket__type {
+      background-color: var(--ux-gray-700, #374151);
+      color: var(--ux-gray-300, #d1d5db);
+    }
+
+    .ux-dark .ux-order-ticket__action--secondary,
+    .ux-theme-dark .ux-order-ticket__action--secondary {
+      background-color: var(--ux-gray-700, #374151);
+      color: var(--ux-gray-100, #f3f4f6);
+    }
+
+    .ux-dark .ux-order-ticket__action--secondary:hover,
+    .ux-theme-dark .ux-order-ticket__action--secondary:hover {
+      background-color: var(--ux-gray-600, #4b5563);
+    }
+
+    .ux-dark .ux-order-ticket-column,
+    .ux-theme-dark .ux-order-ticket-column {
+      background-color: var(--ux-gray-800, #1f2937);
+    }
+
+    .ux-dark .ux-order-ticket-column__count,
+    .ux-theme-dark .ux-order-ticket-column__count {
+      background-color: var(--ux-gray-700, #374151);
+      color: var(--ux-gray-100, #f3f4f6);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-order-ticket,
+      .ux-order-ticket__item,
+      .ux-order-ticket__action {
+        transition: none;
+      }
+
+      .ux-order-ticket--urgent,
+      .ux-order-ticket__status--pulse .ux-order-ticket__status-dot,
+      .ux-order-ticket__timer--danger {
+        animation: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-order-ticket-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-order-ticket-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const orderTicketData = (options = {}) => ({
+    // Order identification
+    orderNumber: options.orderNumber || '',
+    orderId: options.orderId || null,
+
+    // Order metadata
+    table: options.table || null,
+    type: options.type || 'dine-in', // 'dine-in', 'takeout', 'delivery'
+    createdAt: options.createdAt || new Date(),
+    customer: options.customer || null,
+    server: options.server || null,
+
+    // Order status
+    status: options.status || 'pending', // 'pending', 'preparing', 'ready', 'completed', 'cancelled'
+    urgent: options.urgent || false,
+
+    // Order items
+    items: options.items || [],
+
+    // Totals
+    subtotal: options.subtotal || 0,
+    tax: options.tax || 0,
+    discount: options.discount || 0,
+    total: options.total || 0,
+    showTotals: options.showTotals ?? false,
+
+    // Notes
+    notes: options.notes || '',
+
+    // Timer
+    elapsedTime: 0,
+    timerInterval: null,
+    warningThreshold: options.warningThreshold || 10, // minutes
+    dangerThreshold: options.dangerThreshold || 15, // minutes
+
+    // Currency
+    currency: options.currency || '$',
+    currencyPosition: options.currencyPosition || 'before', // 'before' or 'after'
+
+    // Lifecycle
+    init() {
+      this.startTimer();
+    },
+
+    destroy() {
+      this.stopTimer();
+    },
+
+    // Timer methods
+    startTimer() {
+      if (this.timerInterval) return;
+
+      const startTime = new Date(this.createdAt).getTime();
+
+      this.timerInterval = setInterval(() => {
+        const now = Date.now();
+        this.elapsedTime = Math.floor((now - startTime) / 1000);
+      }, 1000);
+
+      // Initial calculation
+      const now = Date.now();
+      this.elapsedTime = Math.floor((now - startTime) / 1000);
+    },
+
+    stopTimer() {
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
+      }
+    },
+
+    get formattedTime() {
+      const hours = Math.floor(this.elapsedTime / 3600);
+      const minutes = Math.floor((this.elapsedTime % 3600) / 60);
+      const seconds = this.elapsedTime % 60;
+
+      if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    },
+
+    get elapsedMinutes() {
+      return Math.floor(this.elapsedTime / 60);
+    },
+
+    get timerStatus() {
+      if (this.elapsedMinutes >= this.dangerThreshold) return 'danger';
+      if (this.elapsedMinutes >= this.warningThreshold) return 'warning';
+      return 'normal';
+    },
+
+    // Format price
+    formatPrice(amount) {
+      const formatted = parseFloat(amount).toFixed(2);
+      if (this.currencyPosition === 'before') {
+        return `${this.currency}${formatted}`;
+      }
+      return `${formatted}${this.currency}`;
+    },
+
+    // Calculate totals
+    calculateSubtotal() {
+      return this.items.reduce((sum, item) => {
+        const itemTotal = (item.price || 0) * (item.qty || 1);
+        return sum + itemTotal;
+      }, 0);
+    },
+
+    calculateTotal() {
+      const subtotal = this.subtotal || this.calculateSubtotal();
+      return subtotal + (this.tax || 0) - (this.discount || 0);
+    },
+
+    // Status methods
+    setStatus(newStatus) {
+      const validStatuses = ['pending', 'preparing', 'ready', 'completed', 'cancelled'];
+      if (validStatuses.includes(newStatus)) {
+        const oldStatus = this.status;
+        this.status = newStatus;
+
+        if (newStatus === 'completed' || newStatus === 'cancelled') {
+          this.stopTimer();
+        }
+
+        this.$dispatch('order-ticket:status-change', {
+          orderId: this.orderId,
+          orderNumber: this.orderNumber,
+          oldStatus,
+          newStatus
+        });
+      }
+    },
+
+    startPreparing() {
+      this.setStatus('preparing');
+    },
+
+    markReady() {
+      this.setStatus('ready');
+    },
+
+    complete() {
+      this.setStatus('completed');
+    },
+
+    cancel() {
+      this.setStatus('cancelled');
+    },
+
+    // Item methods
+    toggleItemCompleted(index) {
+      if (this.items[index]) {
+        this.items[index].completed = !this.items[index].completed;
+        this.$dispatch('order-ticket:item-toggle', {
+          orderId: this.orderId,
+          itemIndex: index,
+          completed: this.items[index].completed
+        });
+      }
+    },
+
+    get completedItemsCount() {
+      return this.items.filter(item => item.completed).length;
+    },
+
+    get allItemsCompleted() {
+      return this.items.length > 0 && this.items.every(item => item.completed);
+    },
+
+    // Print
+    print() {
+      window.print();
+      this.$dispatch('order-ticket:print', {
+        orderId: this.orderId,
+        orderNumber: this.orderNumber
+      });
+    },
+
+    // Get order data
+    getData() {
+      return {
+        orderId: this.orderId,
+        orderNumber: this.orderNumber,
+        table: this.table,
+        type: this.type,
+        status: this.status,
+        urgent: this.urgent,
+        items: this.items,
+        subtotal: this.subtotal,
+        tax: this.tax,
+        discount: this.discount,
+        total: this.total,
+        notes: this.notes,
+        createdAt: this.createdAt,
+        customer: this.customer,
+        server: this.server,
+        elapsedTime: this.elapsedTime
+      };
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxOrderTicket', orderTicketData);
+  }
+})();
+
+/**
+ * UX Pagination Component
+ * Pagination control with page navigation, per-page selector, and info display
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Pagination
+    ======================================== */
+
+    .ux-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-md);
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      flex-wrap: wrap;
+    }
+
+    /* ========================================
+       Pagination Info (Showing X to Y of Z)
+    ======================================== */
+
+    .ux-pagination__info {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      white-space: nowrap;
+    }
+
+    .ux-pagination__info-highlight {
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+
+    /* ========================================
+       Pagination Controls (Page Buttons)
+    ======================================== */
+
+    .ux-pagination__controls {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    /* ========================================
+       Pagination Button (Base)
+    ======================================== */
+
+    .ux-pagination__btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 var(--ux-space-sm);
+      background: none;
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-text);
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        border-color var(--ux-transition-fast) var(--ux-ease),
+        color var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-pagination__btn:hover:not(:disabled):not(.ux-pagination__btn--active) {
+      background-color: var(--ux-surface-secondary);
+      border-color: var(--ux-primary);
+    }
+
+    .ux-pagination__btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .ux-pagination__btn:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: 2px;
+    }
+
+    .ux-pagination__btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Active Page Button */
+    .ux-pagination__btn--active {
+      background-color: var(--ux-primary);
+      border-color: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+    }
+
+    .ux-pagination__btn--active:hover:not(:disabled) {
+      background-color: var(--ux-primary-shade);
+      border-color: var(--ux-primary-shade);
+    }
+
+    /* ========================================
+       Previous/Next Arrow Buttons
+    ======================================== */
+
+    .ux-pagination__prev,
+    .ux-pagination__next {
+      min-width: 36px;
+      padding: 0;
+    }
+
+    .ux-pagination__prev svg,
+    .ux-pagination__next svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Ellipsis
+    ======================================== */
+
+    .ux-pagination__ellipsis {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-tertiary);
+      user-select: none;
+    }
+
+    /* ========================================
+       Per Page Selector
+    ======================================== */
+
+    .ux-pagination__per-page {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-pagination__per-page select {
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      padding-right: calc(var(--ux-space-sm) + 18px);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      background-color: var(--ux-surface);
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right var(--ux-space-xs) center;
+      background-size: 16px;
+      color: var(--ux-text);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-sm);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-pagination__per-page select:hover {
+      border-color: var(--ux-primary);
+    }
+
+    .ux-pagination__per-page select:focus {
+      outline: none;
+      border-color: var(--ux-primary);
+    }
+
+    /* ========================================
+       Size Variants
+    ======================================== */
+
+    /* Small */
+    .ux-pagination--sm .ux-pagination__btn {
+      min-width: 28px;
+      height: 28px;
+      font-size: var(--ux-font-size-xs);
+      border-radius: var(--ux-border-radius-sm);
+    }
+
+    .ux-pagination--sm .ux-pagination__prev svg,
+    .ux-pagination--sm .ux-pagination__next svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-pagination--sm .ux-pagination__ellipsis {
+      min-width: 28px;
+      height: 28px;
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-pagination--sm .ux-pagination__info {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-pagination--sm .ux-pagination__per-page {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-pagination--sm .ux-pagination__per-page select {
+      font-size: var(--ux-font-size-xs);
+      padding: 2px var(--ux-space-xs);
+      padding-right: calc(var(--ux-space-xs) + 14px);
+      background-size: 12px;
+    }
+
+    /* Large */
+    .ux-pagination--lg .ux-pagination__btn {
+      min-width: 44px;
+      height: 44px;
+      font-size: var(--ux-font-size-md);
+      border-radius: var(--ux-border-radius-lg);
+    }
+
+    .ux-pagination--lg .ux-pagination__prev svg,
+    .ux-pagination--lg .ux-pagination__next svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .ux-pagination--lg .ux-pagination__ellipsis {
+      min-width: 44px;
+      height: 44px;
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-pagination--lg .ux-pagination__info {
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-pagination--lg .ux-pagination__per-page {
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-pagination--lg .ux-pagination__per-page select {
+      font-size: var(--ux-font-size-md);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      padding-right: calc(var(--ux-space-md) + 20px);
+      background-size: 18px;
+    }
+
+    /* ========================================
+       Simple Variant (Prev/Next only)
+    ======================================== */
+
+    .ux-pagination--simple {
+      justify-content: center;
+    }
+
+    .ux-pagination--simple .ux-pagination__controls {
+      gap: var(--ux-space-md);
+    }
+
+    .ux-pagination--simple .ux-pagination__current {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      font-weight: 500;
+    }
+
+    .ux-pagination--simple .ux-pagination__current-separator {
+      color: var(--ux-text-tertiary);
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-pagination--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+    }
+
+    .ux-pagination--glass .ux-pagination__btn {
+      background: var(--ux-glass-bg-thin);
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-pagination--glass .ux-pagination__btn:hover:not(:disabled):not(.ux-pagination__btn--active) {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-pagination--glass .ux-pagination__btn--active {
+      background: var(--ux-glass-bg-thick);
+      border-color: var(--ux-glass-border);
+      color: var(--ux-text);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    .ux-pagination--glass .ux-pagination__per-page select {
+      background-color: var(--ux-glass-bg-thin);
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-pagination--glass .ux-pagination__per-page select:hover,
+    .ux-pagination--glass .ux-pagination__per-page select:focus {
+      background-color: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+    }
+
+    /* ========================================
+       Bordered Variant
+    ======================================== */
+
+    .ux-pagination--bordered {
+      border: 1px solid var(--ux-border-color);
+    }
+
+    /* ========================================
+       Compact Layout (no info, centered)
+    ======================================== */
+
+    .ux-pagination--compact {
+      justify-content: center;
+      padding: var(--ux-space-sm);
+    }
+
+    /* ========================================
+       Responsive
+    ======================================== */
+
+    @media (max-width: 767px) {
+      .ux-pagination {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--ux-space-sm);
+      }
+
+      .ux-pagination__info {
+        order: 2;
+      }
+
+      .ux-pagination__controls {
+        order: 1;
+      }
+
+      .ux-pagination__per-page {
+        order: 3;
+      }
+
+      /* Hide page numbers on mobile, show simple nav */
+      .ux-pagination:not(.ux-pagination--simple) .ux-pagination__btn:not(.ux-pagination__prev):not(.ux-pagination__next) {
+        display: none;
+      }
+
+      .ux-pagination:not(.ux-pagination--simple) .ux-pagination__ellipsis {
+        display: none;
+      }
+
+      /* Show current page indicator on mobile */
+      .ux-pagination__mobile-current {
+        display: flex;
+        align-items: center;
+        font-size: var(--ux-font-size-sm);
+        color: var(--ux-text);
+        font-weight: 500;
+        gap: var(--ux-space-xs);
+      }
+
+      .ux-pagination__mobile-current-separator {
+        color: var(--ux-text-tertiary);
+      }
+    }
+
+    @media (min-width: 768px) {
+      .ux-pagination__mobile-current {
+        display: none;
+      }
+    }
+
+    /* ========================================
+       Disabled State
+    ======================================== */
+
+    .ux-pagination--disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-pagination__btn {
+        transition: none;
+      }
+
+      .ux-pagination__btn:active:not(:disabled) {
+        transform: none;
+      }
+
+      .ux-pagination__per-page select {
+        transition: none;
+      }
+    }
+  `;
+
+  // Icons
+  const icons = {
+    chevronLeft: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+    chevronRight: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+    chevronsLeft: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>',
+    chevronsRight: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7l5 5-5 5M6 7l5 5-5 5"/></svg>'
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-pagination-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-pagination-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for pagination
+  // ARIA: role="navigation", aria-label for pagination
+  const paginationComponent = (config = {}) => ({
+    // State
+    currentPage: config.currentPage || 1,
+    totalPages: config.totalPages || 1,
+    totalItems: config.totalItems || 0,
+    perPage: config.perPage || 10,
+    perPageOptions: config.perPageOptions || [10, 25, 50, 100],
+
+    // Options
+    showInfo: config.showInfo !== false,
+    showPerPage: config.showPerPage !== false,
+    showFirstLast: config.showFirstLast || false,
+    siblingCount: config.siblingCount || 1,
+    boundaryCount: config.boundaryCount || 1,
+    disabled: config.disabled || false,
+
+    // Labels (for i18n)
+    labels: {
+      showing: config.labels?.showing || 'Showing',
+      to: config.labels?.to || 'to',
+      of: config.labels?.of || 'of',
+      items: config.labels?.items || 'items',
+      perPage: config.labels?.perPage || 'per page',
+      first: config.labels?.first || 'First',
+      last: config.labels?.last || 'Last',
+      previous: config.labels?.previous || 'Previous',
+      next: config.labels?.next || 'Next',
+      page: config.labels?.page || 'Page',
+      ...config.labels
+    },
+
+    // Component ID
+    paginationId: config.id || 'ux-pagination-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for navigation
+    get ariaAttrs() {
+      return {
+        'role': 'navigation',
+        'aria-label': config.ariaLabel || 'Pagination navigation'
+      };
+    },
+
+    // Initialize
+    init() {
+      // Validate current page
+      this.validateCurrentPage();
+
+      // Watch for external changes
+      this.$watch('totalPages', () => this.validateCurrentPage());
+      this.$watch('totalItems', () => this.recalculateTotalPages());
+    },
+
+    // Validate and adjust current page
+    validateCurrentPage() {
+      if (this.currentPage < 1) {
+        this.currentPage = 1;
+      } else if (this.currentPage > this.totalPages && this.totalPages > 0) {
+        this.currentPage = this.totalPages;
+      }
+    },
+
+    // Recalculate total pages when totalItems changes
+    recalculateTotalPages() {
+      if (this.totalItems > 0) {
+        this.totalPages = Math.ceil(this.totalItems / this.perPage);
+        this.validateCurrentPage();
+      }
+    },
+
+    // Computed: Visible pages with ellipsis
+    get visiblePages() {
+      const total = this.totalPages;
+      const current = this.currentPage;
+      const sibling = this.siblingCount;
+      const boundary = this.boundaryCount;
+
+      if (total <= 0) return [];
+
+      // Calculate range
+      const range = (start, end) => {
+        const length = end - start + 1;
+        return Array.from({ length }, (_, i) => start + i);
+      };
+
+      // Total page numbers to display (excluding ellipsis)
+      const totalPageNumbers = boundary * 2 + sibling * 2 + 3;
+
+      // If total pages is less than page numbers we want to show
+      if (total <= totalPageNumbers) {
+        return range(1, total);
+      }
+
+      const leftSiblingIndex = Math.max(current - sibling, boundary + 1);
+      const rightSiblingIndex = Math.min(current + sibling, total - boundary);
+
+      const showLeftEllipsis = leftSiblingIndex > boundary + 2;
+      const showRightEllipsis = rightSiblingIndex < total - boundary - 1;
+
+      const pages = [];
+
+      // Add left boundary pages
+      for (let i = 1; i <= boundary; i++) {
+        pages.push(i);
+      }
+
+      // Add left ellipsis
+      if (showLeftEllipsis) {
+        pages.push('...');
+      } else if (boundary + 1 < leftSiblingIndex) {
+        // Add pages between boundary and sibling
+        for (let i = boundary + 1; i < leftSiblingIndex; i++) {
+          pages.push(i);
+        }
+      }
+
+      // Add sibling pages
+      for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) {
+        if (i > boundary && i <= total - boundary) {
+          pages.push(i);
+        }
+      }
+
+      // Add right ellipsis
+      if (showRightEllipsis) {
+        pages.push('...');
+      } else if (rightSiblingIndex < total - boundary) {
+        // Add pages between sibling and boundary
+        for (let i = rightSiblingIndex + 1; i <= total - boundary; i++) {
+          pages.push(i);
+        }
+      }
+
+      // Add right boundary pages
+      for (let i = total - boundary + 1; i <= total; i++) {
+        if (i > boundary) {
+          pages.push(i);
+        }
+      }
+
+      return pages;
+    },
+
+    // Computed: Showing info text
+    get showingInfo() {
+      if (this.totalItems <= 0) return '';
+
+      const start = (this.currentPage - 1) * this.perPage + 1;
+      const end = Math.min(this.currentPage * this.perPage, this.totalItems);
+
+      return {
+        start,
+        end,
+        total: this.totalItems,
+        text: `${this.labels.showing} ${start} ${this.labels.to} ${end} ${this.labels.of} ${this.totalItems} ${this.labels.items}`
+      };
+    },
+
+    // Computed: Can go previous
+    get canGoPrevious() {
+      return this.currentPage > 1 && !this.disabled;
+    },
+
+    // Computed: Can go next
+    get canGoNext() {
+      return this.currentPage < this.totalPages && !this.disabled;
+    },
+
+    // Computed: Can go first
+    get canGoFirst() {
+      return this.currentPage > 1 && !this.disabled;
+    },
+
+    // Computed: Can go last
+    get canGoLast() {
+      return this.currentPage < this.totalPages && !this.disabled;
+    },
+
+    // Navigate to page
+    goToPage(page) {
+      if (this.disabled) return;
+      if (typeof page !== 'number') return;
+      if (page < 1 || page > this.totalPages) return;
+      if (page === this.currentPage) return;
+
+      this.currentPage = page;
+      this.$dispatch('page-change', {
+        page: this.currentPage,
+        perPage: this.perPage,
+        totalPages: this.totalPages,
+        totalItems: this.totalItems
+      });
+    },
+
+    // Previous page
+    prevPage() {
+      if (this.canGoPrevious) {
+        this.goToPage(this.currentPage - 1);
+      }
+    },
+
+    // Next page
+    nextPage() {
+      if (this.canGoNext) {
+        this.goToPage(this.currentPage + 1);
+      }
+    },
+
+    // First page
+    firstPage() {
+      if (this.canGoFirst) {
+        this.goToPage(1);
+      }
+    },
+
+    // Last page
+    lastPage() {
+      if (this.canGoLast) {
+        this.goToPage(this.totalPages);
+      }
+    },
+
+    // Change per page
+    changePerPage(value) {
+      if (this.disabled) return;
+
+      const newPerPage = parseInt(value);
+      if (isNaN(newPerPage) || newPerPage < 1) return;
+
+      this.perPage = newPerPage;
+
+      // Recalculate total pages if we have totalItems
+      if (this.totalItems > 0) {
+        this.totalPages = Math.ceil(this.totalItems / this.perPage);
+      }
+
+      // Adjust current page if needed
+      if (this.currentPage > this.totalPages) {
+        this.currentPage = Math.max(1, this.totalPages);
+      }
+
+      this.$dispatch('per-page-change', {
+        perPage: this.perPage,
+        page: this.currentPage,
+        totalPages: this.totalPages,
+        totalItems: this.totalItems
+      });
+    },
+
+    // Check if page is active
+    isActive(page) {
+      return this.currentPage === page;
+    },
+
+    // Get button aria label
+    getPageAriaLabel(page) {
+      if (page === '...') return null;
+      if (this.isActive(page)) {
+        return `${this.labels.page} ${page}, current page`;
+      }
+      return `Go to ${this.labels.page.toLowerCase()} ${page}`;
+    },
+
+    // Get icon
+    getIcon(name) {
+      return icons[name] || '';
+    },
+
+    // Update state externally
+    setPage(page) {
+      this.currentPage = page;
+      this.validateCurrentPage();
+    },
+
+    setTotalPages(total) {
+      this.totalPages = total;
+      this.validateCurrentPage();
+    },
+
+    setTotalItems(total) {
+      this.totalItems = total;
+      this.recalculateTotalPages();
+    },
+
+    setPerPage(perPage) {
+      this.changePerPage(perPage);
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxPagination', paginationComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxPagination', paginationComponent);
+    });
+  }
+})();
+
+/**
+ * UX Payment Selector Component
+ * Payment method selection, split payments, and change calculator for POS
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Payment Method Selector
+       ========================================================================== */
+
+    :root {
+      --ux-payment-method-gap: var(--ux-space-sm);
+      --ux-payment-method-padding: var(--ux-space-md);
+      --ux-payment-method-radius: var(--ux-radius-lg);
+      --ux-payment-method-border: 2px solid var(--ux-border-color);
+      --ux-payment-method-bg: var(--ux-surface);
+      --ux-payment-method-selected-bg: var(--ux-primary-tint);
+      --ux-payment-method-selected-border: var(--ux-primary);
+      --ux-payment-icon-size: 32px;
+      --ux-payment-quick-size: 56px;
+    }
+
+    .ux-payment {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-lg);
+    }
+
+    .ux-payment__section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-payment__label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--ux-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ==========================================================================
+       Payment Methods Grid
+       ========================================================================== */
+
+    .ux-payment-methods {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: var(--ux-payment-method-gap);
+    }
+
+    .ux-payment-methods--list {
+      grid-template-columns: 1fr;
+    }
+
+    .ux-payment-methods--2col {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ux-payment-methods--3col {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .ux-payment-method {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-xs);
+      padding: var(--ux-payment-method-padding);
+      background: var(--ux-payment-method-bg);
+      border: var(--ux-payment-method-border);
+      border-radius: var(--ux-payment-method-radius);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast) var(--ux-ease-out);
+      min-height: 80px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-payment-method:active {
+      transform: scale(0.97);
+    }
+
+    .ux-payment-method--selected {
+      background: var(--ux-payment-method-selected-bg);
+      border-color: var(--ux-payment-method-selected-border);
+      box-shadow: 0 0 0 1px var(--ux-payment-method-selected-border);
+    }
+
+    .ux-payment-method--disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .ux-payment-method--horizontal {
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: var(--ux-space-md);
+      min-height: auto;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+    }
+
+    .ux-payment-method__icon {
+      width: var(--ux-payment-icon-size);
+      height: var(--ux-payment-icon-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ux-text-secondary);
+      transition: color var(--ux-transition-fast);
+    }
+
+    .ux-payment-method__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-payment-method--selected .ux-payment-method__icon {
+      color: var(--ux-primary);
+    }
+
+    .ux-payment-method__name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--ux-text);
+      text-align: center;
+    }
+
+    .ux-payment-method--horizontal .ux-payment-method__name {
+      text-align: left;
+    }
+
+    .ux-payment-method__desc {
+      font-size: 0.75rem;
+      color: var(--ux-text-tertiary);
+    }
+
+    /* ==========================================================================
+       Quick Amounts
+       ========================================================================== */
+
+    .ux-payment-quick {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-payment-quick--3col {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .ux-payment-quick--5col {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .ux-payment-quick__btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: var(--ux-payment-quick-size);
+      background: var(--ux-surface-secondary);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ux-text);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast) var(--ux-ease-out);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-payment-quick__btn:hover {
+      background: var(--ux-surface-tertiary);
+    }
+
+    .ux-payment-quick__btn:active {
+      transform: scale(0.95);
+      background: var(--ux-primary-tint);
+    }
+
+    .ux-payment-quick__btn--exact {
+      background: var(--ux-success-tint);
+      border-color: var(--ux-success);
+      color: var(--ux-success-shade);
+    }
+
+    .ux-payment-quick__btn--exact:hover {
+      background: var(--ux-success);
+      color: white;
+    }
+
+    /* ==========================================================================
+       Change Calculator
+       ========================================================================== */
+
+    .ux-payment-change {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-lg);
+      background: var(--ux-surface-secondary);
+      border-radius: var(--ux-radius-lg);
+    }
+
+    .ux-payment-change__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ux-payment-change__label {
+      font-size: 0.9375rem;
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-payment-change__value {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--ux-text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ux-payment-change__row--total {
+      padding-top: var(--ux-space-md);
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    .ux-payment-change__row--total .ux-payment-change__label {
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+
+    .ux-payment-change__row--total .ux-payment-change__value {
+      font-size: 1.5rem;
+      color: var(--ux-primary);
+    }
+
+    .ux-payment-change__row--change .ux-payment-change__value {
+      color: var(--ux-success);
+    }
+
+    .ux-payment-change__row--due .ux-payment-change__value {
+      color: var(--ux-danger);
+    }
+
+    /* ==========================================================================
+       Split Payment
+       ========================================================================== */
+
+    .ux-payment-split {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-payment-split__item {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-md);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-radius-md);
+    }
+
+    .ux-payment-split__method {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      flex: 1;
+    }
+
+    .ux-payment-split__method-icon {
+      width: 24px;
+      height: 24px;
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-payment-split__method-name {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--ux-text);
+    }
+
+    .ux-payment-split__amount {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--ux-text);
+      font-variant-numeric: tabular-nums;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .ux-payment-split__remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--ux-danger-tint);
+      border: none;
+      border-radius: 50%;
+      color: var(--ux-danger);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-payment-split__remove:hover {
+      background: var(--ux-danger);
+      color: white;
+    }
+
+    .ux-payment-split__add {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-md);
+      background: transparent;
+      border: 2px dashed var(--ux-border-color);
+      border-radius: var(--ux-radius-md);
+      color: var(--ux-text-secondary);
+      font-size: 0.9375rem;
+      cursor: pointer;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-payment-split__add:hover {
+      border-color: var(--ux-primary);
+      color: var(--ux-primary);
+      background: var(--ux-primary-tint);
+    }
+
+    /* ==========================================================================
+       Payment Summary
+       ========================================================================== */
+
+    .ux-payment-summary {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-lg);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-radius-lg);
+    }
+
+    .ux-payment-summary__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9375rem;
+    }
+
+    .ux-payment-summary__label {
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-payment-summary__value {
+      font-weight: 500;
+      color: var(--ux-text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ux-payment-summary__row--total {
+      padding-top: var(--ux-space-md);
+      margin-top: var(--ux-space-sm);
+      border-top: 2px solid var(--ux-border-color);
+    }
+
+    .ux-payment-summary__row--total .ux-payment-summary__label {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+
+    .ux-payment-summary__row--total .ux-payment-summary__value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--ux-primary);
+    }
+
+    /* ==========================================================================
+       Payment Actions
+       ========================================================================== */
+
+    .ux-payment-actions {
+      display: flex;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-payment-actions--stacked {
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-payment--glass .ux-payment-method {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-payment--glass .ux-payment-method--selected {
+      background: rgba(var(--ux-primary-rgb), 0.2);
+    }
+
+    .ux-payment--glass .ux-payment-change,
+    .ux-payment--glass .ux-payment-summary {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-payment--glass .ux-payment-quick__btn {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-payment--glass .ux-payment-split__item {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    /* ==========================================================================
+       Compact Variant
+       ========================================================================== */
+
+    .ux-payment--compact .ux-payment-method {
+      min-height: 60px;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+    }
+
+    .ux-payment--compact .ux-payment-method__icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    .ux-payment--compact .ux-payment-quick__btn {
+      height: 44px;
+      font-size: 0.875rem;
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ux-payment-method-bg: var(--ux-gray-800);
+        --ux-payment-method-selected-bg: rgba(var(--ux-primary-rgb), 0.2);
+      }
+
+      .ux-payment-quick__btn {
+        background: var(--ux-gray-800);
+        border-color: var(--ux-gray-700);
+      }
+
+      .ux-payment-quick__btn:hover {
+        background: var(--ux-gray-700);
+      }
+
+      .ux-payment-quick__btn--exact {
+        background: rgba(var(--ux-success-rgb), 0.2);
+      }
+    }
+
+    .ux-dark {
+      --ux-payment-method-bg: var(--ux-gray-800);
+      --ux-payment-method-selected-bg: rgba(var(--ux-primary-rgb), 0.2);
+    }
+
+    .ux-dark .ux-payment-quick__btn {
+      background: var(--ux-gray-800);
+      border-color: var(--ux-gray-700);
+    }
+
+    .ux-dark .ux-payment-quick__btn:hover {
+      background: var(--ux-gray-700);
+    }
+
+    .ux-dark .ux-payment-quick__btn--exact {
+      background: rgba(var(--ux-success-rgb), 0.2);
+    }
+
+    /* ==========================================================================
+       Responsive
+       ========================================================================== */
+
+    @media (max-width: 767px) {
+      .ux-payment-methods {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .ux-payment-quick {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .ux-payment-actions {
+        flex-direction: column;
+      }
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-payment-method,
+      .ux-payment-quick__btn {
+        transition: none;
+      }
+    }
+  `;
+
+  // Payment method icons
+  const icons = {
+    cash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="6" width="20" height="12" rx="2"/>
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M6 12h.01M18 12h.01"/>
+    </svg>`,
+    card: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M2 10h20"/>
+      <path d="M6 14h4"/>
+    </svg>`,
+    contactless: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 12a6 6 0 0 1 6-6"/>
+      <path d="M6 16a10 10 0 0 1 10-10"/>
+      <path d="M6 20a14 14 0 0 1 14-14"/>
+      <circle cx="6" cy="20" r="2" fill="currentColor"/>
+    </svg>`,
+    wallet: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M22 10H18a2 2 0 0 0-2 2v0a2 2 0 0 0 2 2h4"/>
+      <circle cx="18" cy="12" r="1" fill="currentColor"/>
+    </svg>`,
+    transfer: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17 3L21 7L17 11"/>
+      <path d="M21 7H3"/>
+      <path d="M7 21L3 17L7 13"/>
+      <path d="M3 17h18"/>
+    </svg>`,
+    voucher: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 9a3 3 0 0 1 0 6v4a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-4a3 3 0 0 1 0-6V5a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v4Z"/>
+      <path d="M9 4v16"/>
+    </svg>`,
+    crypto: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M9.5 9.5c0-1.5 1-2.5 2.5-2.5s2.5 1 2.5 2.5c0 1-0.5 1.5-1.5 2l-1 0.5V14"/>
+      <circle cx="12" cy="16.5" r="0.5" fill="currentColor"/>
+    </svg>`,
+    qr: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1"/>
+      <rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/>
+      <rect x="14" y="14" width="3" height="3"/>
+      <path d="M18 14v3h3"/>
+      <path d="M14 18h3v3"/>
+    </svg>`,
+    check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="5" width="18" height="14" rx="2"/>
+      <path d="M7 15h6"/>
+      <path d="M7 11h10"/>
+    </svg>`,
+    plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>`,
+    close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6L6 18M6 6l12 12"/>
+    </svg>`
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-payment-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-payment-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const paymentData = (options = {}) => ({
+    // Configuration
+    total: options.total || 0,
+    currency: options.currency || '€',
+    currencyPosition: options.currencyPosition || 'after', // 'before' or 'after'
+    quickAmounts: options.quickAmounts || [5, 10, 20, 50, 100],
+    methods: options.methods || [
+      { id: 'cash', name: 'Efectivo', icon: 'cash' },
+      { id: 'card', name: 'Tarjeta', icon: 'card' },
+      { id: 'contactless', name: 'Contactless', icon: 'contactless' }
+    ],
+    allowSplit: options.allowSplit ?? false,
+    showChange: options.showChange ?? true,
+
+    // State
+    selectedMethod: options.defaultMethod || null,
+    amountReceived: 0,
+    splitPayments: [],
+    icons: icons,
+
+    // Computed
+    get change() {
+      if (this.allowSplit) {
+        const totalPaid = this.splitPayments.reduce((sum, p) => sum + p.amount, 0);
+        return Math.max(0, totalPaid - this.total);
+      }
+      return Math.max(0, this.amountReceived - this.total);
+    },
+
+    get amountDue() {
+      if (this.allowSplit) {
+        const totalPaid = this.splitPayments.reduce((sum, p) => sum + p.amount, 0);
+        return Math.max(0, this.total - totalPaid);
+      }
+      return Math.max(0, this.total - this.amountReceived);
+    },
+
+    get isPaid() {
+      if (this.allowSplit) {
+        const totalPaid = this.splitPayments.reduce((sum, p) => sum + p.amount, 0);
+        return totalPaid >= this.total;
+      }
+      return this.amountReceived >= this.total;
+    },
+
+    get totalPaid() {
+      if (this.allowSplit) {
+        return this.splitPayments.reduce((sum, p) => sum + p.amount, 0);
+      }
+      return this.amountReceived;
+    },
+
+    // Methods
+    init() {
+      if (this.methods.length > 0 && !this.selectedMethod) {
+        this.selectedMethod = this.methods[0].id;
+      }
+    },
+
+    formatCurrency(amount) {
+      const formatted = amount.toFixed(2);
+      return this.currencyPosition === 'before'
+        ? `${this.currency}${formatted}`
+        : `${formatted}${this.currency}`;
+    },
+
+    selectMethod(methodId) {
+      this.selectedMethod = methodId;
+      this.$dispatch('payment:method-selected', {
+        method: methodId,
+        methodData: this.methods.find(m => m.id === methodId)
+      });
+    },
+
+    setAmount(amount) {
+      this.amountReceived = amount;
+      this.$dispatch('payment:amount-changed', {
+        amount: amount,
+        change: this.change,
+        isPaid: this.isPaid
+      });
+    },
+
+    addQuickAmount(amount) {
+      this.amountReceived = amount;
+      this.$dispatch('payment:amount-changed', {
+        amount: amount,
+        change: this.change,
+        isPaid: this.isPaid
+      });
+    },
+
+    setExactAmount() {
+      this.amountReceived = this.total;
+      this.$dispatch('payment:amount-changed', {
+        amount: this.total,
+        change: 0,
+        isPaid: true
+      });
+    },
+
+    // Split payment methods
+    addSplitPayment(methodId, amount) {
+      const method = this.methods.find(m => m.id === methodId);
+      if (method) {
+        this.splitPayments.push({
+          id: Date.now(),
+          methodId: methodId,
+          method: method,
+          amount: amount || this.amountDue
+        });
+        this.$dispatch('payment:split-added', {
+          payments: this.splitPayments,
+          totalPaid: this.totalPaid,
+          amountDue: this.amountDue
+        });
+      }
+    },
+
+    removeSplitPayment(paymentId) {
+      const index = this.splitPayments.findIndex(p => p.id === paymentId);
+      if (index > -1) {
+        this.splitPayments.splice(index, 1);
+        this.$dispatch('payment:split-removed', {
+          payments: this.splitPayments,
+          totalPaid: this.totalPaid,
+          amountDue: this.amountDue
+        });
+      }
+    },
+
+    updateSplitAmount(paymentId, amount) {
+      const payment = this.splitPayments.find(p => p.id === paymentId);
+      if (payment) {
+        payment.amount = amount;
+        this.$dispatch('payment:split-updated', {
+          payments: this.splitPayments,
+          totalPaid: this.totalPaid,
+          amountDue: this.amountDue
+        });
+      }
+    },
+
+    clearSplitPayments() {
+      this.splitPayments = [];
+      this.$dispatch('payment:split-cleared');
+    },
+
+    // Process payment
+    processPayment() {
+      if (!this.isPaid) {
+        this.$dispatch('payment:insufficient', {
+          total: this.total,
+          paid: this.totalPaid,
+          due: this.amountDue
+        });
+        return false;
+      }
+
+      const paymentData = {
+        total: this.total,
+        method: this.selectedMethod,
+        amountReceived: this.amountReceived,
+        change: this.change,
+        splitPayments: this.splitPayments.length > 0 ? [...this.splitPayments] : null
+      };
+
+      this.$dispatch('payment:processed', paymentData);
+      return true;
+    },
+
+    reset() {
+      this.amountReceived = 0;
+      this.splitPayments = [];
+      if (this.methods.length > 0) {
+        this.selectedMethod = this.methods[0].id;
+      }
+      this.$dispatch('payment:reset');
+    },
+
+    getIcon(name) {
+      return this.icons[name] || this.icons.cash;
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxPayment', paymentData);
   }
 })();
 
@@ -16808,6 +30393,38 @@
     .ux-popover--dropdown .ux-popover__content {
       padding: 0;
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-popover {
+        transition: opacity 0.1s ease, visibility 0.1s ease;
+        transform: none;
+      }
+
+      .ux-popover--open {
+        transform: none;
+      }
+
+      .ux-tooltip {
+        transition: opacity 0.1s ease, visibility 0.1s ease;
+        transform: none;
+      }
+
+      .ux-tooltip--visible {
+        transform: none;
+      }
+
+      .ux-tooltip--top {
+        transform: none;
+      }
+
+      .ux-tooltip--top.ux-tooltip--visible {
+        transform: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -17057,6 +30674,1123 @@
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxTooltip', tooltipComponent);
     });
+  }
+})();
+
+/**
+ * UX Product Card Component
+ * Product cards for POS and e-commerce grids
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Product Card
+    ======================================== */
+
+    :root {
+      --ux-product-card-radius: var(--ux-border-radius-lg);
+      --ux-product-card-padding: var(--ux-space-sm);
+      --ux-product-card-image-ratio: 1;
+      --ux-product-card-gap: var(--ux-space-xs);
+    }
+
+    .ux-product-card {
+      display: flex;
+      flex-direction: column;
+      background-color: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-product-card-radius);
+      overflow: hidden;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        transform 150ms var(--ux-ease),
+        box-shadow 150ms var(--ux-ease),
+        border-color 150ms var(--ux-ease);
+    }
+
+    .ux-product-card:hover {
+      border-color: var(--ux-primary);
+      box-shadow: var(--ux-shadow-md);
+    }
+
+    .ux-product-card:active {
+      transform: scale(0.97);
+    }
+
+    /* Disabled/Unavailable state */
+    .ux-product-card--unavailable {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .ux-product-card--out-of-stock {
+      position: relative;
+    }
+
+    .ux-product-card--out-of-stock::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(var(--ux-gray-900-rgb, 17, 24, 39), 0.4);
+      border-radius: var(--ux-product-card-radius);
+    }
+
+    /* Selected state */
+    .ux-product-card--selected {
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 2px rgba(var(--ux-primary-rgb), 0.3);
+    }
+
+    /* ========================================
+       Product Image
+    ======================================== */
+
+    .ux-product-card__image-wrapper {
+      position: relative;
+      aspect-ratio: var(--ux-product-card-image-ratio);
+      background-color: var(--ux-surface-secondary);
+      overflow: hidden;
+    }
+
+    .ux-product-card__image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 300ms var(--ux-ease);
+    }
+
+    .ux-product-card:hover .ux-product-card__image {
+      transform: scale(1.05);
+    }
+
+    /* Placeholder when no image */
+    .ux-product-card__placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--ux-surface-secondary) 0%, var(--ux-surface-tertiary) 100%);
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-product-card__placeholder svg {
+      width: 48px;
+      height: 48px;
+      opacity: 0.5;
+    }
+
+    /* ========================================
+       Product Badges
+    ======================================== */
+
+    .ux-product-card__badges {
+      position: absolute;
+      top: var(--ux-space-xs);
+      left: var(--ux-space-xs);
+      right: var(--ux-space-xs);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--ux-space-xs);
+      z-index: 2;
+    }
+
+    .ux-product-card__badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px var(--ux-space-xs);
+      background-color: var(--ux-primary);
+      border-radius: var(--ux-border-radius-sm);
+      font-size: var(--ux-font-size-xs);
+      font-weight: 600;
+      color: var(--ux-primary-contrast);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ux-product-card__badge--sale {
+      background-color: var(--ux-danger);
+      color: white;
+    }
+
+    .ux-product-card__badge--new {
+      background-color: var(--ux-success);
+      color: white;
+    }
+
+    .ux-product-card__badge--low-stock {
+      background-color: var(--ux-warning);
+      color: var(--ux-gray-900);
+    }
+
+    .ux-product-card__badge--out {
+      background-color: var(--ux-gray-600);
+      color: white;
+    }
+
+    /* ========================================
+       Product Content
+    ======================================== */
+
+    .ux-product-card__content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-product-card-gap);
+      padding: var(--ux-product-card-padding);
+      flex: 1;
+    }
+
+    .ux-product-card__name {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-text);
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
+    }
+
+    .ux-product-card__category {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ux-product-card__sku {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      font-family: monospace;
+    }
+
+    /* ========================================
+       Product Price
+    ======================================== */
+
+    .ux-product-card__price-wrapper {
+      display: flex;
+      align-items: baseline;
+      gap: var(--ux-space-xs);
+      flex-wrap: wrap;
+    }
+
+    .ux-product-card__price {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 700;
+      color: var(--ux-text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ux-product-card__price--sale {
+      color: var(--ux-danger);
+    }
+
+    .ux-product-card__price-original {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-tertiary);
+      text-decoration: line-through;
+    }
+
+    .ux-product-card__discount {
+      font-size: var(--ux-font-size-xs);
+      font-weight: 600;
+      color: var(--ux-danger);
+      background-color: rgba(var(--ux-danger-rgb, 255, 59, 48), 0.1);
+      padding: 1px var(--ux-space-xs);
+      border-radius: var(--ux-border-radius-sm);
+    }
+
+    /* ========================================
+       Product Stock
+    ======================================== */
+
+    .ux-product-card__stock {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-product-card__stock--low {
+      color: var(--ux-warning);
+    }
+
+    .ux-product-card__stock--out {
+      color: var(--ux-danger);
+    }
+
+    .ux-product-card__stock--available {
+      color: var(--ux-success);
+    }
+
+    /* ========================================
+       Quick Add Button
+    ======================================== */
+
+    .ux-product-card__quick-add {
+      position: absolute;
+      bottom: var(--ux-space-sm);
+      right: var(--ux-space-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background-color: var(--ux-primary);
+      border: none;
+      border-radius: 50%;
+      color: var(--ux-primary-contrast);
+      cursor: pointer;
+      opacity: 0;
+      transform: scale(0.8);
+      transition:
+        opacity 150ms var(--ux-ease),
+        transform 150ms var(--ux-ease),
+        background-color 150ms var(--ux-ease);
+      z-index: 3;
+    }
+
+    .ux-product-card:hover .ux-product-card__quick-add {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .ux-product-card__quick-add:hover {
+      background-color: var(--ux-primary-shade);
+    }
+
+    .ux-product-card__quick-add:active {
+      transform: scale(0.9);
+    }
+
+    .ux-product-card__quick-add svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Always show quick add on touch devices */
+    @media (hover: none) {
+      .ux-product-card__quick-add {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* ========================================
+       Product Grid
+    ======================================== */
+
+    .ux-product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: var(--ux-space-md);
+    }
+
+    .ux-product-grid--2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ux-product-grid--3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .ux-product-grid--4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .ux-product-grid--5 {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .ux-product-grid--6 {
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    .ux-product-grid--compact {
+      gap: var(--ux-space-sm);
+    }
+
+    /* Responsive grid */
+    @media (max-width: 991px) {
+      .ux-product-grid--4,
+      .ux-product-grid--5,
+      .ux-product-grid--6 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 767px) {
+      .ux-product-grid--3,
+      .ux-product-grid--4,
+      .ux-product-grid--5,
+      .ux-product-grid--6 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .ux-product-grid {
+        gap: var(--ux-space-sm);
+      }
+    }
+
+    /* ========================================
+       Card Sizes
+    ======================================== */
+
+    .ux-product-card--sm {
+      --ux-product-card-padding: var(--ux-space-xs);
+    }
+
+    .ux-product-card--sm .ux-product-card__name {
+      font-size: var(--ux-font-size-xs);
+      -webkit-line-clamp: 1;
+    }
+
+    .ux-product-card--sm .ux-product-card__price {
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-product-card--lg {
+      --ux-product-card-padding: var(--ux-space-md);
+    }
+
+    .ux-product-card--lg .ux-product-card__name {
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-product-card--lg .ux-product-card__price {
+      font-size: var(--ux-font-size-xl);
+    }
+
+    /* ========================================
+       Horizontal Layout
+    ======================================== */
+
+    .ux-product-card--horizontal {
+      flex-direction: row;
+    }
+
+    .ux-product-card--horizontal .ux-product-card__image-wrapper {
+      width: 100px;
+      min-height: 100px;
+      aspect-ratio: 1;
+      flex-shrink: 0;
+    }
+
+    .ux-product-card--horizontal .ux-product-card__content {
+      justify-content: center;
+    }
+
+    /* ========================================
+       Glass Variant
+    ======================================== */
+
+    .ux-product-card--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-product-card--glass .ux-product-card__placeholder {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    /* ========================================
+       Add to Cart Animation
+    ======================================== */
+
+    @keyframes ux-product-add-pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(var(--ux-primary-rgb), 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 15px rgba(var(--ux-primary-rgb), 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(var(--ux-primary-rgb), 0);
+      }
+    }
+
+    .ux-product-card--adding {
+      animation: ux-product-add-pulse 0.5s ease-out;
+    }
+
+    /* ========================================
+       Dark Mode
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-product-card {
+        border-color: var(--ux-border-color);
+      }
+    }
+
+    .ux-dark .ux-product-card {
+      border-color: var(--ux-border-color);
+    }
+  `;
+
+  // Icons
+  const icons = {
+    placeholder: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+    plus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    cart: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>',
+    check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>'
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-product-card-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-product-card-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for product card
+  const productCardComponent = (config = {}) => ({
+    // Product data
+    product: config.product || {},
+
+    // State
+    isAdding: false,
+    isSelected: false,
+
+    // Configuration
+    showQuickAdd: config.showQuickAdd !== false,
+    currency: config.currency || '$',
+    locale: config.locale || 'en-US',
+    lowStockThreshold: config.lowStockThreshold || 5,
+
+    // Labels
+    labels: {
+      addToCart: config.labels?.addToCart || 'Add to cart',
+      outOfStock: config.labels?.outOfStock || 'Out of stock',
+      lowStock: config.labels?.lowStock || 'Low stock',
+      inStock: config.labels?.inStock || 'In stock',
+      sale: config.labels?.sale || 'Sale',
+      new: config.labels?.new || 'New',
+      ...config.labels
+    },
+
+    // Initialize
+    init() {
+      // Set initial selected state
+      if (config.selected) {
+        this.isSelected = true;
+      }
+    },
+
+    // Format price
+    formatPrice(price) {
+      if (price === null || price === undefined) return '';
+      return new Intl.NumberFormat(this.locale, {
+        style: 'currency',
+        currency: this.getCurrencyCode()
+      }).format(price);
+    },
+
+    // Get currency code from symbol
+    getCurrencyCode() {
+      const currencyMap = {
+        '$': 'USD',
+        '€': 'EUR',
+        '£': 'GBP',
+        '¥': 'JPY',
+        '₹': 'INR'
+      };
+      return currencyMap[this.currency] || 'USD';
+    },
+
+    // Calculate discount percentage
+    getDiscountPercent() {
+      if (!this.product.originalPrice || !this.product.price) return 0;
+      const discount = ((this.product.originalPrice - this.product.price) / this.product.originalPrice) * 100;
+      return Math.round(discount);
+    },
+
+    // Get stock status
+    getStockStatus() {
+      const stock = this.product.stock;
+      if (stock === undefined || stock === null) return 'available';
+      if (stock <= 0) return 'out';
+      if (stock <= this.lowStockThreshold) return 'low';
+      return 'available';
+    },
+
+    // Get stock text
+    getStockText() {
+      const status = this.getStockStatus();
+      const stock = this.product.stock;
+
+      switch (status) {
+        case 'out':
+          return this.labels.outOfStock;
+        case 'low':
+          return `${this.labels.lowStock}: ${stock}`;
+        default:
+          return stock !== undefined ? `${this.labels.inStock}: ${stock}` : '';
+      }
+    },
+
+    // Check if product is available
+    isAvailable() {
+      return this.getStockStatus() !== 'out';
+    },
+
+    // Add to cart with animation
+    addToCart(event) {
+      if (event) event.stopPropagation();
+      if (!this.isAvailable()) return;
+
+      this.isAdding = true;
+
+      this.$dispatch('product-add', {
+        product: this.product,
+        quantity: 1
+      });
+
+      // Reset animation after delay
+      setTimeout(() => {
+        this.isAdding = false;
+      }, 500);
+    },
+
+    // Select product
+    select() {
+      this.$dispatch('product-select', {
+        product: this.product,
+        selected: !this.isSelected
+      });
+    },
+
+    // Get icon
+    getIcon(name) {
+      return icons[name] || '';
+    }
+  });
+
+  // Alpine component for product grid
+  const productGridComponent = (config = {}) => ({
+    products: config.products || [],
+    selectedProducts: [],
+    multiSelect: config.multiSelect || false,
+
+    // Filter and sort
+    searchQuery: '',
+    sortBy: config.sortBy || 'name',
+    sortDirection: 'asc',
+    categoryFilter: '',
+
+    // Get filtered products
+    get filteredProducts() {
+      let result = this.products;
+
+      // Search filter
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        result = result.filter(p =>
+          p.name?.toLowerCase().includes(query) ||
+          p.sku?.toLowerCase().includes(query) ||
+          p.category?.toLowerCase().includes(query)
+        );
+      }
+
+      // Category filter
+      if (this.categoryFilter) {
+        result = result.filter(p => p.category === this.categoryFilter);
+      }
+
+      // Sort
+      result = [...result].sort((a, b) => {
+        let valA = a[this.sortBy];
+        let valB = b[this.sortBy];
+
+        if (typeof valA === 'string') {
+          valA = valA.toLowerCase();
+          valB = valB?.toLowerCase() || '';
+        }
+
+        if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      return result;
+    },
+
+    // Get unique categories
+    get categories() {
+      const cats = new Set();
+      this.products.forEach(p => {
+        if (p.category) cats.add(p.category);
+      });
+      return Array.from(cats).sort();
+    },
+
+    // Toggle product selection
+    toggleSelect(product) {
+      const index = this.selectedProducts.findIndex(p => p.id === product.id);
+      if (index > -1) {
+        this.selectedProducts.splice(index, 1);
+      } else {
+        if (!this.multiSelect) {
+          this.selectedProducts = [];
+        }
+        this.selectedProducts.push(product);
+      }
+      this.$dispatch('selection-change', { selected: this.selectedProducts });
+    },
+
+    // Check if product is selected
+    isSelected(product) {
+      return this.selectedProducts.some(p => p.id === product.id);
+    },
+
+    // Clear selection
+    clearSelection() {
+      this.selectedProducts = [];
+      this.$dispatch('selection-change', { selected: [] });
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxProductCard', productCardComponent);
+    window.UX.registerComponent('uxProductGrid', productGridComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxProductCard', productCardComponent);
+      Alpine.data('uxProductGrid', productGridComponent);
+    });
+  }
+})();
+
+/**
+ * UX Progress Circle Component
+ * Circular progress indicator with percentage and animated fill
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Progress Circle Container
+       ========================================================================== */
+
+    :root {
+      --ux-progress-circle-size: 120px;
+      --ux-progress-circle-stroke: 8px;
+      --ux-progress-circle-bg: var(--ux-gray-200);
+      --ux-progress-circle-color: var(--ux-primary);
+      --ux-progress-circle-duration: 1s;
+    }
+
+    .ux-progress-circle {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--ux-progress-circle-size);
+      height: var(--ux-progress-circle-size);
+    }
+
+    .ux-progress-circle__svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .ux-progress-circle__bg {
+      fill: none;
+      stroke: var(--ux-progress-circle-bg);
+      stroke-width: var(--ux-progress-circle-stroke);
+    }
+
+    .ux-progress-circle__fill {
+      fill: none;
+      stroke: var(--ux-progress-circle-color);
+      stroke-width: var(--ux-progress-circle-stroke);
+      stroke-linecap: round;
+      transition: stroke-dashoffset var(--ux-progress-circle-duration) var(--ux-ease-out);
+    }
+
+    .ux-progress-circle--animated .ux-progress-circle__fill {
+      animation: ux-progress-circle-fill var(--ux-progress-circle-duration) var(--ux-ease-out) forwards;
+    }
+
+    @keyframes ux-progress-circle-fill {
+      from {
+        stroke-dashoffset: var(--circumference);
+      }
+    }
+
+    /* ==========================================================================
+       Center Content
+       ========================================================================== */
+
+    .ux-progress-circle__content {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .ux-progress-circle__value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--ux-text);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ux-progress-circle__label {
+      font-size: 0.75rem;
+      color: var(--ux-text-secondary);
+      margin-top: 2px;
+    }
+
+    .ux-progress-circle__icon {
+      width: 32px;
+      height: 32px;
+      color: var(--ux-progress-circle-color);
+    }
+
+    /* ==========================================================================
+       Size Variants
+       ========================================================================== */
+
+    .ux-progress-circle--xs {
+      --ux-progress-circle-size: 48px;
+      --ux-progress-circle-stroke: 4px;
+    }
+
+    .ux-progress-circle--xs .ux-progress-circle__value {
+      font-size: 0.875rem;
+    }
+
+    .ux-progress-circle--xs .ux-progress-circle__label {
+      display: none;
+    }
+
+    .ux-progress-circle--sm {
+      --ux-progress-circle-size: 80px;
+      --ux-progress-circle-stroke: 6px;
+    }
+
+    .ux-progress-circle--sm .ux-progress-circle__value {
+      font-size: 1.25rem;
+    }
+
+    .ux-progress-circle--sm .ux-progress-circle__label {
+      font-size: 0.6875rem;
+    }
+
+    .ux-progress-circle--lg {
+      --ux-progress-circle-size: 160px;
+      --ux-progress-circle-stroke: 10px;
+    }
+
+    .ux-progress-circle--lg .ux-progress-circle__value {
+      font-size: 2.5rem;
+    }
+
+    .ux-progress-circle--lg .ux-progress-circle__label {
+      font-size: 0.875rem;
+    }
+
+    .ux-progress-circle--xl {
+      --ux-progress-circle-size: 200px;
+      --ux-progress-circle-stroke: 12px;
+    }
+
+    .ux-progress-circle--xl .ux-progress-circle__value {
+      font-size: 3rem;
+    }
+
+    .ux-progress-circle--xl .ux-progress-circle__label {
+      font-size: 1rem;
+    }
+
+    /* ==========================================================================
+       Stroke Variants
+       ========================================================================== */
+
+    .ux-progress-circle--thin {
+      --ux-progress-circle-stroke: 4px;
+    }
+
+    .ux-progress-circle--thick {
+      --ux-progress-circle-stroke: 12px;
+    }
+
+    /* ==========================================================================
+       Color Variants
+       ========================================================================== */
+
+    .ux-progress-circle--primary {
+      --ux-progress-circle-color: var(--ux-primary);
+    }
+
+    .ux-progress-circle--success {
+      --ux-progress-circle-color: var(--ux-success);
+    }
+
+    .ux-progress-circle--warning {
+      --ux-progress-circle-color: var(--ux-warning);
+    }
+
+    .ux-progress-circle--danger {
+      --ux-progress-circle-color: var(--ux-danger);
+    }
+
+    .ux-progress-circle--gradient .ux-progress-circle__fill {
+      stroke: url(#progress-gradient);
+    }
+
+    /* ==========================================================================
+       Indeterminate (Spinner)
+       ========================================================================== */
+
+    .ux-progress-circle--indeterminate .ux-progress-circle__svg {
+      animation: ux-progress-circle-rotate 1.5s linear infinite;
+    }
+
+    .ux-progress-circle--indeterminate .ux-progress-circle__fill {
+      stroke-dasharray: 80, 200;
+      stroke-dashoffset: 0;
+      animation: ux-progress-circle-dash 1.5s ease-in-out infinite;
+    }
+
+    @keyframes ux-progress-circle-rotate {
+      100% {
+        transform: rotate(270deg);
+      }
+    }
+
+    @keyframes ux-progress-circle-dash {
+      0% {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+      }
+      50% {
+        stroke-dasharray: 89, 200;
+        stroke-dashoffset: -35;
+      }
+      100% {
+        stroke-dasharray: 89, 200;
+        stroke-dashoffset: -124;
+      }
+    }
+
+    /* ==========================================================================
+       Semi Circle
+       ========================================================================== */
+
+    .ux-progress-circle--semi .ux-progress-circle__svg {
+      transform: rotate(-90deg);
+    }
+
+    .ux-progress-circle--semi {
+      height: calc(var(--ux-progress-circle-size) / 2 + var(--ux-progress-circle-stroke));
+      overflow: hidden;
+    }
+
+    .ux-progress-circle--semi .ux-progress-circle__content {
+      top: auto;
+      bottom: var(--ux-progress-circle-stroke);
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-progress-circle--glass .ux-progress-circle__bg {
+      stroke: rgba(255, 255, 255, 0.2);
+    }
+
+    .ux-progress-circle--glass .ux-progress-circle__value,
+    .ux-progress-circle--glass .ux-progress-circle__label {
+      color: white;
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ux-progress-circle-bg: var(--ux-gray-700);
+      }
+    }
+
+    .ux-dark {
+      --ux-progress-circle-bg: var(--ux-gray-700);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-progress-circle__fill {
+        transition: none;
+      }
+
+      .ux-progress-circle--animated .ux-progress-circle__fill {
+        animation: none;
+      }
+
+      .ux-progress-circle--indeterminate .ux-progress-circle__svg,
+      .ux-progress-circle--indeterminate .ux-progress-circle__fill {
+        animation: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-progress-circle-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-progress-circle-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const progressCircleData = (options = {}) => ({
+    // Configuration
+    value: options.value ?? 0,
+    max: options.max ?? 100,
+    size: options.size || 120,
+    strokeWidth: options.strokeWidth || 8,
+    showValue: options.showValue ?? true,
+    showLabel: options.showLabel ?? false,
+    label: options.label || '',
+    format: options.format || 'percent', // 'percent', 'value', 'custom'
+    customFormat: options.customFormat || null,
+    animated: options.animated ?? true,
+    animateOnVisible: options.animateOnVisible ?? true,
+    thresholds: options.thresholds || null, // { warning: 50, danger: 80 }
+
+    // State
+    isVisible: false,
+    hasAnimated: false,
+
+    // Computed
+    get percentage() {
+      return Math.min(100, Math.max(0, (this.value / this.max) * 100));
+    },
+
+    get radius() {
+      return (this.size - this.strokeWidth) / 2;
+    },
+
+    get circumference() {
+      return 2 * Math.PI * this.radius;
+    },
+
+    get dashOffset() {
+      return this.circumference - (this.percentage / 100) * this.circumference;
+    },
+
+    get displayValue() {
+      if (this.customFormat) {
+        return this.customFormat(this.value, this.max, this.percentage);
+      }
+
+      switch (this.format) {
+        case 'percent':
+          return Math.round(this.percentage) + '%';
+        case 'value':
+          return this.value;
+        case 'fraction':
+          return `${this.value}/${this.max}`;
+        default:
+          return Math.round(this.percentage) + '%';
+      }
+    },
+
+    get colorClass() {
+      if (!this.thresholds) return '';
+
+      if (this.thresholds.danger && this.percentage >= this.thresholds.danger) {
+        return 'ux-progress-circle--danger';
+      }
+      if (this.thresholds.warning && this.percentage >= this.thresholds.warning) {
+        return 'ux-progress-circle--warning';
+      }
+      if (this.thresholds.success && this.percentage >= this.thresholds.success) {
+        return 'ux-progress-circle--success';
+      }
+      return '';
+    },
+
+    // Lifecycle
+    init() {
+      if (this.animateOnVisible) {
+        this.setupIntersectionObserver();
+      } else {
+        this.isVisible = true;
+        this.hasAnimated = true;
+      }
+    },
+
+    setupIntersectionObserver() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !this.hasAnimated) {
+            this.isVisible = true;
+            this.hasAnimated = true;
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.5 });
+
+      observer.observe(this.$el);
+    },
+
+    // Methods
+    setValue(newValue) {
+      this.value = Math.min(this.max, Math.max(0, newValue));
+      this.$dispatch('progress-circle:change', {
+        value: this.value,
+        percentage: this.percentage
+      });
+    },
+
+    increment(amount = 1) {
+      this.setValue(this.value + amount);
+    },
+
+    decrement(amount = 1) {
+      this.setValue(this.value - amount);
+    },
+
+    reset() {
+      this.value = 0;
+      this.$dispatch('progress-circle:reset');
+    },
+
+    complete() {
+      this.setValue(this.max);
+      this.$dispatch('progress-circle:complete');
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxProgressCircle', progressCircleData);
   }
 })();
 
@@ -17914,6 +32648,597 @@
   // Auto-init
   window.UXOffline.init();
 
+})();
+
+/**
+ * UX Quantity Stepper Component
+ * Quantity selector with +/- buttons for cart quantity adjustment
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Quantity Stepper
+    ======================================== */
+
+    :root {
+      --ux-quantity-stepper-height: 44px;
+      --ux-quantity-stepper-height-sm: 36px;
+      --ux-quantity-stepper-height-lg: 52px;
+      --ux-quantity-stepper-btn-width: 44px;
+      --ux-quantity-stepper-btn-width-sm: 36px;
+      --ux-quantity-stepper-btn-width-lg: 52px;
+      --ux-quantity-stepper-input-width: 56px;
+      --ux-quantity-stepper-input-width-sm: 44px;
+      --ux-quantity-stepper-input-width-lg: 68px;
+      --ux-quantity-stepper-border-radius: var(--ux-border-radius);
+      --ux-quantity-stepper-font-size: var(--ux-font-size-md);
+      --ux-quantity-stepper-font-size-sm: var(--ux-font-size-sm);
+      --ux-quantity-stepper-font-size-lg: var(--ux-font-size-lg);
+      --ux-quantity-stepper-icon-size: 20px;
+      --ux-quantity-stepper-icon-size-sm: 16px;
+      --ux-quantity-stepper-icon-size-lg: 24px;
+    }
+
+    .ux-quantity-stepper {
+      display: inline-flex;
+      align-items: center;
+      height: var(--ux-quantity-stepper-height);
+      background-color: var(--ux-surface-secondary);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-quantity-stepper-border-radius);
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ========================================
+       Buttons (+/-)
+    ======================================== */
+
+    .ux-quantity-stepper__btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--ux-quantity-stepper-btn-width);
+      height: 100%;
+      padding: 0;
+      background-color: transparent;
+      border: none;
+      color: var(--ux-primary);
+      cursor: pointer;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        color var(--ux-transition-fast) var(--ux-ease),
+        transform var(--ux-transition-fast) var(--ux-ease);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .ux-quantity-stepper__btn:hover {
+      background-color: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    .ux-quantity-stepper__btn:active {
+      background-color: rgba(var(--ux-primary-rgb), 0.15);
+      transform: scale(0.95);
+    }
+
+    .ux-quantity-stepper__btn:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: -2px;
+    }
+
+    .ux-quantity-stepper__btn svg {
+      width: var(--ux-quantity-stepper-icon-size);
+      height: var(--ux-quantity-stepper-icon-size);
+    }
+
+    /* Disabled button state */
+    .ux-quantity-stepper__btn--disabled,
+    .ux-quantity-stepper__btn:disabled {
+      color: var(--ux-text-tertiary);
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .ux-quantity-stepper__btn--disabled:hover,
+    .ux-quantity-stepper__btn:disabled:hover {
+      background-color: transparent;
+    }
+
+    /* ========================================
+       Input (center number display)
+    ======================================== */
+
+    .ux-quantity-stepper__input {
+      width: var(--ux-quantity-stepper-input-width);
+      height: 100%;
+      padding: 0;
+      background-color: transparent;
+      border: none;
+      border-left: 1px solid var(--ux-border-color);
+      border-right: 1px solid var(--ux-border-color);
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-quantity-stepper-font-size);
+      font-weight: 600;
+      text-align: center;
+      color: var(--ux-text);
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    .ux-quantity-stepper__input::-webkit-outer-spin-button,
+    .ux-quantity-stepper__input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .ux-quantity-stepper__input:focus {
+      outline: none;
+      background-color: rgba(var(--ux-primary-rgb), 0.05);
+    }
+
+    .ux-quantity-stepper__input:disabled {
+      color: var(--ux-text-tertiary);
+      cursor: not-allowed;
+    }
+
+    /* ========================================
+       Size Variants
+    ======================================== */
+
+    /* Small */
+    .ux-quantity-stepper--sm {
+      height: var(--ux-quantity-stepper-height-sm);
+    }
+
+    .ux-quantity-stepper--sm .ux-quantity-stepper__btn {
+      width: var(--ux-quantity-stepper-btn-width-sm);
+    }
+
+    .ux-quantity-stepper--sm .ux-quantity-stepper__btn svg {
+      width: var(--ux-quantity-stepper-icon-size-sm);
+      height: var(--ux-quantity-stepper-icon-size-sm);
+    }
+
+    .ux-quantity-stepper--sm .ux-quantity-stepper__input {
+      width: var(--ux-quantity-stepper-input-width-sm);
+      font-size: var(--ux-quantity-stepper-font-size-sm);
+    }
+
+    /* Large */
+    .ux-quantity-stepper--lg {
+      height: var(--ux-quantity-stepper-height-lg);
+    }
+
+    .ux-quantity-stepper--lg .ux-quantity-stepper__btn {
+      width: var(--ux-quantity-stepper-btn-width-lg);
+    }
+
+    .ux-quantity-stepper--lg .ux-quantity-stepper__btn svg {
+      width: var(--ux-quantity-stepper-icon-size-lg);
+      height: var(--ux-quantity-stepper-icon-size-lg);
+    }
+
+    .ux-quantity-stepper--lg .ux-quantity-stepper__input {
+      width: var(--ux-quantity-stepper-input-width-lg);
+      font-size: var(--ux-quantity-stepper-font-size-lg);
+    }
+
+    /* ========================================
+       Vertical Variant (Stacked)
+    ======================================== */
+
+    .ux-quantity-stepper--vertical {
+      flex-direction: column;
+      width: var(--ux-quantity-stepper-btn-width);
+      height: auto;
+    }
+
+    .ux-quantity-stepper--vertical .ux-quantity-stepper__btn {
+      width: 100%;
+      height: var(--ux-quantity-stepper-btn-width);
+    }
+
+    .ux-quantity-stepper--vertical .ux-quantity-stepper__btn--minus {
+      order: 3;
+    }
+
+    .ux-quantity-stepper--vertical .ux-quantity-stepper__btn--plus {
+      order: 1;
+    }
+
+    .ux-quantity-stepper--vertical .ux-quantity-stepper__input {
+      order: 2;
+      width: 100%;
+      height: var(--ux-quantity-stepper-btn-width);
+      border-left: none;
+      border-right: none;
+      border-top: 1px solid var(--ux-border-color);
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    /* Vertical Small */
+    .ux-quantity-stepper--vertical.ux-quantity-stepper--sm {
+      width: var(--ux-quantity-stepper-btn-width-sm);
+    }
+
+    .ux-quantity-stepper--vertical.ux-quantity-stepper--sm .ux-quantity-stepper__btn {
+      height: var(--ux-quantity-stepper-btn-width-sm);
+    }
+
+    .ux-quantity-stepper--vertical.ux-quantity-stepper--sm .ux-quantity-stepper__input {
+      height: var(--ux-quantity-stepper-btn-width-sm);
+    }
+
+    /* Vertical Large */
+    .ux-quantity-stepper--vertical.ux-quantity-stepper--lg {
+      width: var(--ux-quantity-stepper-btn-width-lg);
+    }
+
+    .ux-quantity-stepper--vertical.ux-quantity-stepper--lg .ux-quantity-stepper__btn {
+      height: var(--ux-quantity-stepper-btn-width-lg);
+    }
+
+    .ux-quantity-stepper--vertical.ux-quantity-stepper--lg .ux-quantity-stepper__input {
+      height: var(--ux-quantity-stepper-btn-width-lg);
+    }
+
+    /* ========================================
+       Rounded Variant
+    ======================================== */
+
+    .ux-quantity-stepper--round {
+      border-radius: 9999px;
+    }
+
+    /* ========================================
+       Compact Variant (no visible input)
+    ======================================== */
+
+    .ux-quantity-stepper--compact .ux-quantity-stepper__input {
+      width: 36px;
+      border-left: none;
+      border-right: none;
+    }
+
+    .ux-quantity-stepper--compact.ux-quantity-stepper--sm .ux-quantity-stepper__input {
+      width: 28px;
+    }
+
+    .ux-quantity-stepper--compact.ux-quantity-stepper--lg .ux-quantity-stepper__input {
+      width: 44px;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter comes from universal selector [class*="--glass"] in ux-core.js */
+    .ux-quantity-stepper--glass {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    .ux-quantity-stepper--glass .ux-quantity-stepper__input {
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-quantity-stepper--glass .ux-quantity-stepper__btn:hover {
+      background-color: var(--ux-glass-bg);
+    }
+
+    .ux-quantity-stepper--glass .ux-quantity-stepper__btn:active {
+      background-color: var(--ux-glass-bg-thick);
+    }
+
+    /* ========================================
+       Disabled State
+    ======================================== */
+
+    .ux-quantity-stepper--disabled,
+    .ux-quantity-stepper:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* ========================================
+       Color Variants (using composition system)
+    ======================================== */
+
+    .ux-quantity-stepper.ux-color-primary .ux-quantity-stepper__btn {
+      color: var(--ux-primary);
+    }
+
+    .ux-quantity-stepper.ux-color-primary .ux-quantity-stepper__btn:hover {
+      background-color: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    .ux-quantity-stepper.ux-color-success .ux-quantity-stepper__btn {
+      color: var(--ux-success);
+    }
+
+    .ux-quantity-stepper.ux-color-success .ux-quantity-stepper__btn:hover {
+      background-color: rgba(var(--ux-success-rgb), 0.1);
+    }
+
+    .ux-quantity-stepper.ux-color-danger .ux-quantity-stepper__btn {
+      color: var(--ux-danger);
+    }
+
+    .ux-quantity-stepper.ux-color-danger .ux-quantity-stepper__btn:hover {
+      background-color: rgba(var(--ux-danger-rgb), 0.1);
+    }
+
+    /* ========================================
+       Long Press Indicator
+    ======================================== */
+
+    .ux-quantity-stepper__btn--pressing {
+      background-color: rgba(var(--ux-primary-rgb), 0.2) !important;
+    }
+
+    /* ========================================
+       Dark Mode
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-quantity-stepper {
+        background-color: var(--ux-surface-secondary);
+        border-color: var(--ux-border-color);
+      }
+
+      .ux-quantity-stepper--glass {
+        background: var(--ux-glass-bg-thin);
+        border-color: var(--ux-glass-border);
+      }
+    }
+
+    .ux-dark .ux-quantity-stepper {
+      background-color: var(--ux-surface-secondary);
+      border-color: var(--ux-border-color);
+    }
+
+    .ux-dark .ux-quantity-stepper--glass {
+      background: var(--ux-glass-bg-thin);
+      border-color: var(--ux-glass-border);
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-quantity-stepper__btn {
+        transition: none;
+      }
+
+      .ux-quantity-stepper__btn:active {
+        transform: none;
+      }
+
+      .ux-quantity-stepper__input {
+        transition: none;
+      }
+    }
+  `;
+
+  // SVG icons for +/- buttons
+  const minusIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+  const plusIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-quantity-stepper-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-quantity-stepper-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for quantity stepper
+  // ARIA: role="spinbutton", aria-valuenow, aria-valuemin, aria-valuemax
+  const quantityStepperComponent = (config = {}) => ({
+    value: config.value ?? 1,
+    min: config.min ?? 0,
+    max: config.max ?? 999,
+    step: config.step ?? 1,
+    disabled: config.disabled ?? false,
+    readonly: config.readonly ?? false,
+
+    // Long press state
+    _longPressTimer: null,
+    _longPressInterval: null,
+    _isLongPressing: false,
+    _longPressDelay: config.longPressDelay ?? 400,
+    _longPressSpeed: config.longPressSpeed ?? 100,
+
+    // Icons
+    minusIcon,
+    plusIcon,
+
+    init() {
+      // Clamp initial value
+      this.value = this._clamp(this.value);
+    },
+
+    destroy() {
+      this._stopLongPress();
+    },
+
+    // ARIA attributes for the component
+    get ariaAttrs() {
+      return {
+        'role': 'spinbutton',
+        'aria-valuenow': this.value,
+        'aria-valuemin': this.min,
+        'aria-valuemax': this.max,
+        'aria-label': `Quantity: ${this.value}`
+      };
+    },
+
+    // Check if at min/max
+    get isAtMin() {
+      return this.value <= this.min;
+    },
+
+    get isAtMax() {
+      return this.value >= this.max;
+    },
+
+    // Clamp value to min/max
+    _clamp(val) {
+      return Math.min(Math.max(val, this.min), this.max);
+    },
+
+    // Set value with clamping and event dispatch
+    setValue(newValue) {
+      if (this.disabled || this.readonly) return;
+
+      const oldValue = this.value;
+      const clampedValue = this._clamp(Number(newValue) || 0);
+
+      if (clampedValue !== oldValue) {
+        this.value = clampedValue;
+        this.$dispatch('quantity-change', {
+          value: this.value,
+          oldValue: oldValue
+        });
+      } else {
+        // Reset input to valid value
+        this.value = clampedValue;
+      }
+    },
+
+    // Increment value
+    increment() {
+      if (this.disabled || this.readonly || this.isAtMax) return;
+      this.setValue(this.value + this.step);
+    },
+
+    // Decrement value
+    decrement() {
+      if (this.disabled || this.readonly || this.isAtMin) return;
+      this.setValue(this.value - this.step);
+    },
+
+    // Handle input change
+    onInput(event) {
+      const inputValue = event.target.value;
+
+      // Allow empty input while typing
+      if (inputValue === '') return;
+
+      const numValue = parseInt(inputValue, 10);
+      if (!isNaN(numValue)) {
+        this.setValue(numValue);
+      }
+    },
+
+    // Handle input blur - ensure valid value
+    onBlur(event) {
+      const inputValue = event.target.value;
+      if (inputValue === '' || isNaN(parseInt(inputValue, 10))) {
+        this.value = this.min;
+      } else {
+        this.setValue(parseInt(inputValue, 10));
+      }
+    },
+
+    // Handle keyboard navigation
+    onKeydown(event) {
+      if (this.disabled || this.readonly) return;
+
+      switch (event.key) {
+        case 'ArrowUp':
+          event.preventDefault();
+          this.increment();
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          this.decrement();
+          break;
+        case 'Home':
+          event.preventDefault();
+          this.setValue(this.min);
+          break;
+        case 'End':
+          event.preventDefault();
+          this.setValue(this.max);
+          break;
+        case 'PageUp':
+          event.preventDefault();
+          this.setValue(this.value + (this.step * 10));
+          break;
+        case 'PageDown':
+          event.preventDefault();
+          this.setValue(this.value - (this.step * 10));
+          break;
+      }
+    },
+
+    // Long press handlers for rapid changes
+    _startLongPress(action) {
+      if (this.disabled || this.readonly) return;
+
+      this._isLongPressing = true;
+
+      // Initial action
+      action();
+
+      // Start long press timer
+      this._longPressTimer = setTimeout(() => {
+        // Start rapid interval
+        this._longPressInterval = setInterval(() => {
+          action();
+        }, this._longPressSpeed);
+      }, this._longPressDelay);
+    },
+
+    _stopLongPress() {
+      this._isLongPressing = false;
+
+      if (this._longPressTimer) {
+        clearTimeout(this._longPressTimer);
+        this._longPressTimer = null;
+      }
+
+      if (this._longPressInterval) {
+        clearInterval(this._longPressInterval);
+        this._longPressInterval = null;
+      }
+    },
+
+    // Mouse/touch handlers for increment
+    onIncrementStart(event) {
+      event.preventDefault();
+      this._startLongPress(() => this.increment());
+    },
+
+    // Mouse/touch handlers for decrement
+    onDecrementStart(event) {
+      event.preventDefault();
+      this._startLongPress(() => this.decrement());
+    },
+
+    // Stop long press on mouse/touch end
+    onPressEnd() {
+      this._stopLongPress();
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxQuantityStepper', quantityStepperComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxQuantityStepper', quantityStepperComponent);
+    });
+  }
 })();
 
 /**
@@ -19117,6 +34442,639 @@
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxRating', ratingComponent);
     });
+  }
+})();
+
+/**
+ * UX Receipt Preview Component
+ * Thermal receipt format for POS systems
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Receipt Container
+       ========================================================================== */
+
+    .ux-receipt {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #000;
+      background: #fff;
+      width: 280px;
+      padding: 16px 12px;
+      margin: 0 auto;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Print-ready: no shadows */
+    @media print {
+      .ux-receipt {
+        box-shadow: none;
+        margin: 0;
+        padding: 8px;
+      }
+    }
+
+    /* ==========================================================================
+       Receipt Header
+       ========================================================================== */
+
+    .ux-receipt__header {
+      text-align: center;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #ccc;
+      margin-bottom: 12px;
+    }
+
+    .ux-receipt__logo {
+      max-width: 120px;
+      max-height: 60px;
+      margin: 0 auto 8px;
+    }
+
+    .ux-receipt__logo img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .ux-receipt__company {
+      font-size: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .ux-receipt__address,
+    .ux-receipt__phone,
+    .ux-receipt__tax-id {
+      font-size: 11px;
+      color: #333;
+      margin: 2px 0;
+    }
+
+    /* ==========================================================================
+       Receipt Info
+       ========================================================================== */
+
+    .ux-receipt__info {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 4px 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #ccc;
+      margin-bottom: 12px;
+      font-size: 11px;
+    }
+
+    .ux-receipt__info-item {
+      display: flex;
+      gap: 4px;
+    }
+
+    .ux-receipt__info-label {
+      color: #666;
+    }
+
+    .ux-receipt__info-value {
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       Receipt Items
+       ========================================================================== */
+
+    .ux-receipt__items {
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #ccc;
+      margin-bottom: 12px;
+    }
+
+    .ux-receipt__items-header {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #eee;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #666;
+    }
+
+    .ux-receipt__item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 4px 0;
+    }
+
+    .ux-receipt__item-name {
+      flex: 1;
+      min-width: 0;
+      word-wrap: break-word;
+    }
+
+    .ux-receipt__item-qty {
+      flex-shrink: 0;
+      width: 30px;
+      text-align: center;
+      color: #666;
+    }
+
+    .ux-receipt__item-price {
+      flex-shrink: 0;
+      width: 60px;
+      text-align: right;
+    }
+
+    .ux-receipt__item-total {
+      flex-shrink: 0;
+      width: 70px;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .ux-receipt__item--discount {
+      color: #c00;
+      font-size: 11px;
+    }
+
+    .ux-receipt__item--discount .ux-receipt__item-name {
+      padding-left: 8px;
+    }
+
+    /* ==========================================================================
+       Receipt Totals
+       ========================================================================== */
+
+    .ux-receipt__totals {
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #ccc;
+      margin-bottom: 12px;
+    }
+
+    .ux-receipt__total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 2px 0;
+    }
+
+    .ux-receipt__total-label {
+      color: #666;
+    }
+
+    .ux-receipt__total-value {
+      font-weight: 500;
+      text-align: right;
+    }
+
+    .ux-receipt__total-row--subtotal {
+      padding-top: 4px;
+    }
+
+    .ux-receipt__total-row--grand {
+      font-size: 16px;
+      font-weight: bold;
+      padding-top: 8px;
+      margin-top: 8px;
+      border-top: 2px solid #000;
+    }
+
+    .ux-receipt__total-row--grand .ux-receipt__total-value {
+      font-size: 18px;
+    }
+
+    /* ==========================================================================
+       Receipt Payment
+       ========================================================================== */
+
+    .ux-receipt__payment {
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #ccc;
+      margin-bottom: 12px;
+    }
+
+    .ux-receipt__payment-title {
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .ux-receipt__payment-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 2px 0;
+    }
+
+    .ux-receipt__payment-method {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ux-receipt__payment-icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-receipt__change {
+      font-size: 14px;
+      font-weight: bold;
+      padding-top: 4px;
+      margin-top: 4px;
+      border-top: 1px solid #eee;
+    }
+
+    /* ==========================================================================
+       Receipt Footer
+       ========================================================================== */
+
+    .ux-receipt__footer {
+      text-align: center;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .ux-receipt__thanks {
+      font-size: 14px;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 8px;
+    }
+
+    .ux-receipt__message {
+      margin: 8px 0;
+      font-style: italic;
+    }
+
+    .ux-receipt__social {
+      margin-top: 8px;
+    }
+
+    /* ==========================================================================
+       Receipt QR Code
+       ========================================================================== */
+
+    .ux-receipt__qr {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      border-top: 1px dashed #ccc;
+      margin-top: 12px;
+    }
+
+    .ux-receipt__qr-code {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 4px;
+    }
+
+    .ux-receipt__qr-code img,
+    .ux-receipt__qr-code svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-receipt__qr-label {
+      font-size: 10px;
+      color: #666;
+    }
+
+    /* ==========================================================================
+       Receipt Barcode
+       ========================================================================== */
+
+    .ux-receipt__barcode {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      border-top: 1px dashed #ccc;
+      margin-top: 12px;
+    }
+
+    .ux-receipt__barcode-image {
+      max-width: 200px;
+      height: 40px;
+      margin-bottom: 4px;
+    }
+
+    .ux-receipt__barcode-image img,
+    .ux-receipt__barcode-image svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-receipt__barcode-number {
+      font-size: 10px;
+      letter-spacing: 2px;
+    }
+
+    /* ==========================================================================
+       Receipt Divider
+       ========================================================================== */
+
+    .ux-receipt__divider {
+      border: none;
+      border-top: 1px dashed #ccc;
+      margin: 12px 0;
+    }
+
+    .ux-receipt__divider--double {
+      border-top-width: 2px;
+      border-top-style: double;
+      border-color: #000;
+    }
+
+    /* ==========================================================================
+       Receipt Copy Indicator
+       ========================================================================== */
+
+    .ux-receipt__copy {
+      text-align: center;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #999;
+      padding: 8px 0;
+      border: 1px dashed #ccc;
+      margin-top: 12px;
+    }
+
+    /* ==========================================================================
+       Receipt Sizes
+       ========================================================================== */
+
+    .ux-receipt--58mm {
+      width: 200px;
+      font-size: 10px;
+    }
+
+    .ux-receipt--58mm .ux-receipt__company {
+      font-size: 14px;
+    }
+
+    .ux-receipt--58mm .ux-receipt__total-row--grand {
+      font-size: 14px;
+    }
+
+    .ux-receipt--58mm .ux-receipt__total-row--grand .ux-receipt__total-value {
+      font-size: 16px;
+    }
+
+    .ux-receipt--80mm {
+      width: 280px;
+    }
+
+    .ux-receipt--a4 {
+      width: 100%;
+      max-width: 500px;
+      font-size: 14px;
+      padding: 24px;
+    }
+
+    .ux-receipt--a4 .ux-receipt__company {
+      font-size: 20px;
+    }
+
+    .ux-receipt--a4 .ux-receipt__total-row--grand {
+      font-size: 18px;
+    }
+
+    /* ==========================================================================
+       Receipt Preview Wrapper
+       ========================================================================== */
+
+    .ux-receipt-preview {
+      background: var(--ux-surface-secondary);
+      border-radius: var(--ux-radius-lg);
+      padding: var(--ux-space-lg);
+      overflow: auto;
+    }
+
+    .ux-receipt-preview__toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-sm);
+      margin-bottom: var(--ux-space-lg);
+    }
+
+    /* ==========================================================================
+       Print Styles
+       ========================================================================== */
+
+    @media print {
+      .ux-receipt-preview {
+        background: none;
+        padding: 0;
+      }
+
+      .ux-receipt-preview__toolbar {
+        display: none;
+      }
+
+      .ux-receipt {
+        width: auto;
+        max-width: none;
+      }
+
+      body * {
+        visibility: hidden;
+      }
+
+      .ux-receipt,
+      .ux-receipt * {
+        visibility: visible;
+      }
+
+      .ux-receipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+    }
+
+    /* ==========================================================================
+       Dark Mode (preview only, receipt always white)
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-receipt-preview {
+        background: var(--ux-surface-secondary);
+      }
+    }
+
+    .ux-dark .ux-receipt-preview {
+      background: var(--ux-surface-secondary);
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-receipt-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-receipt-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const receiptData = (options = {}) => ({
+    // Company info
+    company: {
+      name: options.companyName || 'Mi Empresa',
+      address: options.companyAddress || '',
+      phone: options.companyPhone || '',
+      taxId: options.companyTaxId || '',
+      logo: options.companyLogo || null,
+      ...options.company
+    },
+
+    // Receipt info
+    receipt: {
+      number: options.receiptNumber || '',
+      date: options.receiptDate || new Date().toLocaleDateString('es-ES'),
+      time: options.receiptTime || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+      cashier: options.cashier || '',
+      terminal: options.terminal || '',
+      ...options.receipt
+    },
+
+    // Items
+    items: options.items || [],
+
+    // Totals
+    subtotal: options.subtotal || 0,
+    discount: options.discount || 0,
+    discountLabel: options.discountLabel || 'Descuento',
+    tax: options.tax || 0,
+    taxLabel: options.taxLabel || 'IVA',
+    taxRate: options.taxRate || null,
+    total: options.total || 0,
+
+    // Payment
+    payments: options.payments || [],
+    change: options.change || 0,
+
+    // Footer
+    footer: {
+      thanks: options.thanksMessage || 'Gracias por su compra',
+      message: options.footerMessage || '',
+      social: options.socialMedia || '',
+      ...options.footer
+    },
+
+    // QR/Barcode
+    qrCode: options.qrCode || null,
+    qrLabel: options.qrLabel || 'Escanea para ver factura',
+    barcode: options.barcode || null,
+    barcodeNumber: options.barcodeNumber || '',
+
+    // Options
+    size: options.size || '80mm', // '58mm', '80mm', 'a4'
+    showHeader: options.showHeader ?? true,
+    showItemsHeader: options.showItemsHeader ?? true,
+    showTax: options.showTax ?? true,
+    showPayment: options.showPayment ?? true,
+    showFooter: options.showFooter ?? true,
+    showQR: options.showQR ?? false,
+    showBarcode: options.showBarcode ?? false,
+    copyType: options.copyType || null, // 'customer', 'merchant', null
+
+    // Currency
+    currency: options.currency || '€',
+    currencyPosition: options.currencyPosition || 'after', // 'before' or 'after'
+
+    // Format price
+    formatPrice(amount) {
+      const formatted = parseFloat(amount).toFixed(2);
+      if (this.currencyPosition === 'before') {
+        return `${this.currency}${formatted}`;
+      }
+      return `${formatted}${this.currency}`;
+    },
+
+    // Calculate totals
+    calculateSubtotal() {
+      return this.items.reduce((sum, item) => {
+        const itemTotal = (item.price || 0) * (item.qty || 1);
+        const itemDiscount = item.discount || 0;
+        return sum + itemTotal - itemDiscount;
+      }, 0);
+    },
+
+    calculateTotal() {
+      const subtotal = this.subtotal || this.calculateSubtotal();
+      const afterDiscount = subtotal - (this.discount || 0);
+      const afterTax = afterDiscount + (this.tax || 0);
+      return afterTax;
+    },
+
+    // Print receipt
+    print() {
+      window.print();
+      this.$dispatch('receipt:print');
+    },
+
+    // Download as image (requires html2canvas)
+    async downloadImage() {
+      if (typeof html2canvas === 'undefined') {
+        console.error('html2canvas is required for image download');
+        return;
+      }
+
+      const receiptEl = this.$el.querySelector('.ux-receipt');
+      if (!receiptEl) return;
+
+      try {
+        const canvas = await html2canvas(receiptEl, {
+          scale: 2,
+          backgroundColor: '#ffffff'
+        });
+
+        const link = document.createElement('a');
+        link.download = `receipt-${this.receipt.number || Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        this.$dispatch('receipt:download', { format: 'image' });
+      } catch (error) {
+        console.error('Error generating image:', error);
+      }
+    },
+
+    // Get receipt data as JSON
+    getData() {
+      return {
+        company: this.company,
+        receipt: this.receipt,
+        items: this.items,
+        subtotal: this.subtotal,
+        discount: this.discount,
+        tax: this.tax,
+        total: this.total,
+        payments: this.payments,
+        change: this.change
+      };
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxReceipt', receiptData);
   }
 })();
 
@@ -20835,6 +36793,513 @@
 
     return escapedText.replace(regex, '<span class="ux-searchbar__highlight">$1</span>');
   };
+})();
+
+/**
+ * UX Section Component
+ * Content sections with header, description, actions, and collapsible functionality
+ * iOS 26 Liquid Glass design
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ========================================
+       UX Section
+       Content sections for organizing page content
+    ======================================== */
+
+    :root {
+      /* Section Tokens */
+      --ux-section-padding: var(--ux-space-lg);
+      --ux-section-padding-compact: var(--ux-space-md);
+      --ux-section-gap: var(--ux-space-md);
+      --ux-section-border-radius: var(--ux-border-radius-lg);
+      --ux-section-header-gap: var(--ux-space-sm);
+      --ux-section-margin-y: var(--ux-space-lg);
+      --ux-section-inset-margin-x: var(--ux-space-lg);
+    }
+
+    .ux-section {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin: var(--ux-section-margin-y) 0;
+    }
+
+    .ux-section:first-child {
+      margin-top: 0;
+    }
+
+    .ux-section:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ========================================
+       Section Header
+    ======================================== */
+
+    .ux-section__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--ux-space-md);
+      padding: var(--ux-section-padding);
+      padding-bottom: var(--ux-space-sm);
+    }
+
+    .ux-section__header-content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-section-header-gap);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ux-section__title {
+      margin: 0;
+      font-size: var(--ux-font-size-lg);
+      font-weight: var(--ux-font-weight-semibold);
+      color: var(--ux-text);
+      line-height: 1.3;
+    }
+
+    .ux-section__description {
+      margin: 0;
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      line-height: 1.5;
+    }
+
+    .ux-section__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      flex-shrink: 0;
+    }
+
+    /* ========================================
+       Section Content
+    ======================================== */
+
+    .ux-section__content {
+      padding: var(--ux-section-padding);
+      padding-top: 0;
+    }
+
+    /* When no header, add top padding */
+    .ux-section__content:first-child {
+      padding-top: var(--ux-section-padding);
+    }
+
+    /* ========================================
+       Bordered Variant
+    ======================================== */
+
+    .ux-section--bordered {
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-section-border-radius);
+      background-color: var(--ux-surface);
+    }
+
+    .ux-section--bordered .ux-section__header {
+      border-bottom: 1px solid var(--ux-border-color);
+      padding-bottom: var(--ux-section-padding);
+    }
+
+    .ux-section--bordered .ux-section__content {
+      padding-top: var(--ux-section-padding);
+    }
+
+    /* ========================================
+       Card Variant
+    ======================================== */
+
+    .ux-section--card {
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-section-border-radius);
+      box-shadow: var(--ux-shadow-sm);
+    }
+
+    .ux-section--card .ux-section__header {
+      border-bottom: 1px solid var(--ux-border-color);
+      padding-bottom: var(--ux-section-padding);
+    }
+
+    .ux-section--card .ux-section__content {
+      padding-top: var(--ux-section-padding);
+    }
+
+    /* ========================================
+       Inset Variant (iOS grouped style)
+    ======================================== */
+
+    .ux-section--inset {
+      margin-left: var(--ux-section-inset-margin-x);
+      margin-right: var(--ux-section-inset-margin-x);
+    }
+
+    /* ========================================
+       Compact Variant
+    ======================================== */
+
+    .ux-section--compact {
+      --ux-section-padding: var(--ux-section-padding-compact);
+      --ux-section-gap: var(--ux-space-sm);
+      --ux-section-margin-y: var(--ux-space-md);
+    }
+
+    .ux-section--compact .ux-section__title {
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-section--compact .ux-section__description {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    /* ========================================
+       Collapsible Variant
+    ======================================== */
+
+    .ux-section--collapsible .ux-section__header {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-section--collapsible .ux-section__header:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-section--collapsible .ux-section__header:active {
+      background-color: var(--ux-light);
+    }
+
+    .ux-section__chevron {
+      width: 20px;
+      height: 20px;
+      color: var(--ux-text-tertiary);
+      flex-shrink: 0;
+      transition: transform var(--ux-transition-base) var(--ux-ease);
+      margin-left: auto;
+    }
+
+    .ux-section__chevron svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-section--expanded .ux-section__chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Collapsible content animation */
+    .ux-section--collapsible .ux-section__body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows var(--ux-transition-base) var(--ux-ease);
+    }
+
+    .ux-section--collapsible.ux-section--expanded .ux-section__body {
+      grid-template-rows: 1fr;
+    }
+
+    .ux-section__body-inner {
+      overflow: hidden;
+    }
+
+    /* ========================================
+       Glass Variant (iOS 26 Liquid Glass)
+    ======================================== */
+
+    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
+    .ux-section--glass {
+      border: 0.5px solid var(--ux-glass-border);
+      border-radius: var(--ux-glass-radius-lg);
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+      overflow: hidden;
+    }
+
+    .ux-section--glass .ux-section__header {
+      border-bottom: 0.5px solid var(--ux-glass-border);
+      padding-bottom: var(--ux-section-padding);
+    }
+
+    .ux-section--glass .ux-section__content {
+      padding-top: var(--ux-section-padding);
+    }
+
+    .ux-section--glass.ux-section--collapsible .ux-section__header:hover {
+      background-color: var(--ux-glass-bg-thin);
+    }
+
+    .ux-section--glass.ux-section--collapsible .ux-section__header:active {
+      background-color: var(--ux-glass-bg);
+    }
+
+    /* ========================================
+       Sizes
+    ======================================== */
+
+    .ux-section--sm .ux-section__header,
+    .ux-section--sm .ux-section__content {
+      padding: var(--ux-space-md);
+    }
+
+    .ux-section--sm .ux-section__header {
+      padding-bottom: var(--ux-space-xs);
+    }
+
+    .ux-section--sm .ux-section__title {
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-section--sm .ux-section__description {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-section--lg .ux-section__header,
+    .ux-section--lg .ux-section__content {
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-section--lg .ux-section__header {
+      padding-bottom: var(--ux-space-md);
+    }
+
+    .ux-section--lg .ux-section__title {
+      font-size: var(--ux-font-size-xl);
+    }
+
+    /* ========================================
+       Divider Between Sections
+    ======================================== */
+
+    .ux-section--divider {
+      border-bottom: 1px solid var(--ux-border-color);
+      padding-bottom: var(--ux-section-margin-y);
+    }
+
+    .ux-section--divider:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    /* ========================================
+       Header-only Section (for list headers)
+    ======================================== */
+
+    .ux-section--header-only .ux-section__header {
+      padding-bottom: var(--ux-space-sm);
+    }
+
+    .ux-section--header-only .ux-section__title {
+      font-size: var(--ux-font-size-sm);
+      font-weight: var(--ux-font-weight-medium);
+      color: var(--ux-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ========================================
+       Disabled State
+    ======================================== */
+
+    .ux-section--disabled {
+      opacity: var(--ux-disabled-opacity);
+      pointer-events: none;
+    }
+
+    /* ========================================
+       Dark Mode
+    ======================================== */
+
+    @media (prefers-color-scheme: dark) {
+      :root:not(.ux-light) .ux-section--bordered {
+        border-color: var(--ux-border-color);
+        background-color: var(--ux-surface);
+      }
+
+      :root:not(.ux-light) .ux-section--bordered .ux-section__header {
+        border-bottom-color: var(--ux-border-color);
+      }
+
+      :root:not(.ux-light) .ux-section--card {
+        background-color: var(--ux-surface);
+        box-shadow: var(--ux-shadow-md);
+      }
+
+      :root:not(.ux-light) .ux-section--collapsible .ux-section__header:hover {
+        background-color: var(--ux-surface-secondary);
+      }
+
+      :root:not(.ux-light) .ux-section--collapsible .ux-section__header:active {
+        background-color: var(--ux-surface-tertiary);
+      }
+    }
+
+    .ux-dark .ux-section--bordered,
+    .ux-theme-dark .ux-section--bordered {
+      border-color: var(--ux-border-color);
+      background-color: var(--ux-surface);
+    }
+
+    .ux-dark .ux-section--bordered .ux-section__header,
+    .ux-theme-dark .ux-section--bordered .ux-section__header {
+      border-bottom-color: var(--ux-border-color);
+    }
+
+    .ux-dark .ux-section--card,
+    .ux-theme-dark .ux-section--card {
+      background-color: var(--ux-surface);
+      box-shadow: var(--ux-shadow-md);
+    }
+
+    .ux-dark .ux-section--collapsible .ux-section__header:hover,
+    .ux-theme-dark .ux-section--collapsible .ux-section__header:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    .ux-dark .ux-section--collapsible .ux-section__header:active,
+    .ux-theme-dark .ux-section--collapsible .ux-section__header:active {
+      background-color: var(--ux-surface-tertiary);
+    }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-section__chevron {
+        transition: none;
+      }
+
+      .ux-section--collapsible .ux-section__body {
+        transition: none;
+      }
+
+      .ux-section--collapsible .ux-section__header {
+        transition: none;
+      }
+    }
+
+    /* ========================================
+       Responsive
+    ======================================== */
+
+    @media (max-width: 767px) {
+      .ux-section--inset {
+        margin-left: var(--ux-space-md);
+        margin-right: var(--ux-space-md);
+      }
+
+      .ux-section__header {
+        flex-wrap: wrap;
+      }
+
+      .ux-section__actions {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: var(--ux-space-sm);
+      }
+
+      /* Keep actions inline on small screens if few items */
+      .ux-section__header:has(.ux-section__actions:only-child),
+      .ux-section__header:has(.ux-section__actions > :only-child) {
+        flex-wrap: nowrap;
+      }
+
+      .ux-section__header:has(.ux-section__actions > :only-child) .ux-section__actions {
+        width: auto;
+        margin-top: 0;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-section-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-section-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine component for collapsible section
+  // ARIA: aria-expanded on header, aria-controls, region role on content
+  // Keyboard: Enter/Space to toggle
+  const sectionComponent = (config = {}) => ({
+    isExpanded: config.expanded !== false, // Default to expanded
+    disabled: config.disabled || false,
+    sectionId: config.id || 'ux-section-' + Math.random().toString(36).substr(2, 9),
+
+    // ARIA attributes for header
+    get headerAriaAttrs() {
+      return {
+        'aria-expanded': this.isExpanded ? 'true' : 'false',
+        'aria-controls': this.sectionId + '-content',
+        'id': this.sectionId + '-header',
+        'role': 'button',
+        'tabindex': '0'
+      };
+    },
+
+    // ARIA attributes for content
+    get contentAriaAttrs() {
+      return {
+        'role': 'region',
+        'aria-labelledby': this.sectionId + '-header',
+        'id': this.sectionId + '-content'
+      };
+    },
+
+    init() {
+      // Add expanded class based on initial state
+      if (this.isExpanded) {
+        this.$el.classList.add('ux-section--expanded');
+      }
+    },
+
+    toggle() {
+      if (this.disabled) return;
+      this.isExpanded = !this.isExpanded;
+      this.$el.classList.toggle('ux-section--expanded', this.isExpanded);
+      this.$dispatch('section:toggle', { expanded: this.isExpanded });
+    },
+
+    expand() {
+      if (this.disabled || this.isExpanded) return;
+      this.isExpanded = true;
+      this.$el.classList.add('ux-section--expanded');
+      this.$dispatch('section:expand');
+    },
+
+    collapse() {
+      if (!this.isExpanded) return;
+      this.isExpanded = false;
+      this.$el.classList.remove('ux-section--expanded');
+      this.$dispatch('section:collapse');
+    },
+
+    // Keyboard handler for Enter/Space
+    handleKeydown(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        this.toggle();
+      }
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxSection', sectionComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxSection', sectionComponent);
+    });
+  }
 })();
 
 /**
@@ -25050,6 +41515,1282 @@
   }
 })();
 
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       UX State - Empty, Error, Success, Loading States
+       iOS 26 Style - Liquid Glass Design
+       ========================================================================== */
+
+    :root {
+      /* State Tokens */
+      --ux-state-padding: var(--ux-space-2xl);
+      --ux-state-icon-size: 64px;
+      --ux-state-icon-size-sm: 48px;
+      --ux-state-icon-size-lg: 80px;
+      --ux-state-icon-color: var(--ux-text-tertiary);
+      --ux-state-title-size: var(--ux-font-size-lg);
+      --ux-state-description-size: var(--ux-font-size-md);
+      --ux-state-gap: var(--ux-space-md);
+    }
+
+    /* ==========================================================================
+       Base State Container
+       ========================================================================== */
+
+    .ux-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--ux-state-padding);
+      min-height: 200px;
+      gap: var(--ux-state-gap);
+    }
+
+    /* Size variants */
+    .ux-state--sm {
+      --ux-state-padding: var(--ux-space-lg);
+      --ux-state-icon-size: var(--ux-state-icon-size-sm);
+      --ux-state-title-size: var(--ux-font-size-md);
+      --ux-state-description-size: var(--ux-font-size-sm);
+      min-height: 150px;
+    }
+
+    .ux-state--lg {
+      --ux-state-padding: var(--ux-space-3xl);
+      --ux-state-icon-size: var(--ux-state-icon-size-lg);
+      --ux-state-title-size: var(--ux-font-size-xl);
+      min-height: 300px;
+    }
+
+    /* Full height variant */
+    .ux-state--full {
+      min-height: 100%;
+      flex: 1;
+    }
+
+    /* ==========================================================================
+       State Icon
+       ========================================================================== */
+
+    .ux-state__icon {
+      width: var(--ux-state-icon-size);
+      height: var(--ux-state-icon-size);
+      color: var(--ux-state-icon-color);
+      opacity: 0.6;
+      margin-bottom: var(--ux-space-sm);
+      transition: transform var(--ux-transition-normal) var(--ux-ease-ios);
+    }
+
+    .ux-state__icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-state__icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Animated icon */
+    .ux-state__icon--animated {
+      animation: ux-state-float 3s ease-in-out infinite;
+    }
+
+    @keyframes ux-state-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Icon with background circle */
+    .ux-state__icon--circle {
+      padding: var(--ux-space-lg);
+      background: var(--ux-surface-secondary);
+      border-radius: 50%;
+      width: auto;
+      height: auto;
+    }
+
+    .ux-state__icon--circle svg {
+      width: var(--ux-state-icon-size);
+      height: var(--ux-state-icon-size);
+    }
+
+    /* ==========================================================================
+       State Content
+       ========================================================================== */
+
+    .ux-state__content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      max-width: 320px;
+    }
+
+    .ux-state__title {
+      font-size: var(--ux-state-title-size);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .ux-state__description {
+      font-size: var(--ux-state-description-size);
+      color: var(--ux-text-secondary);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ==========================================================================
+       State Actions
+       ========================================================================== */
+
+    .ux-state__actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      margin-top: var(--ux-space-md);
+    }
+
+    .ux-state__actions--row {
+      flex-direction: row;
+    }
+
+    /* ==========================================================================
+       Empty State
+       ========================================================================== */
+
+    .ux-empty-state {
+      --ux-state-icon-color: var(--ux-text-tertiary);
+    }
+
+    .ux-empty-state .ux-state__icon {
+      opacity: 0.5;
+    }
+
+    /* ==========================================================================
+       Error State
+       ========================================================================== */
+
+    .ux-error-state {
+      --ux-state-icon-color: var(--ux-danger);
+    }
+
+    .ux-error-state .ux-state__icon {
+      opacity: 0.8;
+    }
+
+    .ux-error-state .ux-state__title {
+      color: var(--ux-danger);
+    }
+
+    /* ==========================================================================
+       Success State
+       ========================================================================== */
+
+    .ux-success-state {
+      --ux-state-icon-color: var(--ux-success);
+    }
+
+    .ux-success-state .ux-state__icon {
+      opacity: 0.8;
+    }
+
+    .ux-success-state .ux-state__title {
+      color: var(--ux-success);
+    }
+
+    /* Checkmark animation */
+    .ux-success-state .ux-state__icon--animated svg {
+      animation: ux-state-checkmark 0.5s ease-out forwards;
+    }
+
+    @keyframes ux-state-checkmark {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ==========================================================================
+       Warning State
+       ========================================================================== */
+
+    .ux-warning-state {
+      --ux-state-icon-color: var(--ux-warning);
+    }
+
+    .ux-warning-state .ux-state__icon {
+      opacity: 0.8;
+    }
+
+    .ux-warning-state .ux-state__title {
+      color: var(--ux-warning);
+    }
+
+    /* ==========================================================================
+       Info State
+       ========================================================================== */
+
+    .ux-info-state {
+      --ux-state-icon-color: var(--ux-primary);
+    }
+
+    .ux-info-state .ux-state__icon {
+      opacity: 0.8;
+    }
+
+    /* ==========================================================================
+       Offline State
+       ========================================================================== */
+
+    .ux-offline-state {
+      --ux-state-icon-color: var(--ux-text-tertiary);
+    }
+
+    .ux-offline-state .ux-state__icon svg {
+      stroke-dasharray: 100;
+      animation: ux-state-offline-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes ux-state-offline-pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* ==========================================================================
+       Loading State (Alternative to spinner)
+       ========================================================================== */
+
+    .ux-loading-state {
+      --ux-state-icon-color: var(--ux-primary);
+    }
+
+    .ux-loading-state .ux-state__icon svg {
+      animation: ux-state-spin 1s linear infinite;
+    }
+
+    @keyframes ux-state-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ==========================================================================
+       Search Empty State
+       ========================================================================== */
+
+    .ux-search-empty-state {
+      --ux-state-icon-color: var(--ux-text-tertiary);
+    }
+
+    .ux-search-empty-state .ux-state__highlight {
+      background: rgba(var(--ux-primary-rgb), 0.1);
+      color: var(--ux-primary);
+      padding: 2px 8px;
+      border-radius: var(--ux-border-radius-sm);
+      font-weight: 500;
+    }
+
+    /* ==========================================================================
+       No Permission State
+       ========================================================================== */
+
+    .ux-no-permission-state {
+      --ux-state-icon-color: var(--ux-danger);
+    }
+
+    /* ==========================================================================
+       Inline State (Compact for lists/cards)
+       ========================================================================== */
+
+    .ux-state--inline {
+      flex-direction: row;
+      text-align: left;
+      padding: var(--ux-space-md);
+      min-height: auto;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-state--inline .ux-state__icon {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    .ux-state--inline .ux-state__content {
+      align-items: flex-start;
+      max-width: none;
+    }
+
+    .ux-state--inline .ux-state__actions {
+      margin-top: var(--ux-space-sm);
+      align-items: flex-start;
+    }
+
+    /* ==========================================================================
+       Card State (With border)
+       ========================================================================== */
+
+    .ux-state--card {
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+    }
+
+    .ux-state--card.ux-error-state {
+      border-color: rgba(var(--ux-danger-rgb), 0.3);
+      background: rgba(var(--ux-danger-rgb), 0.03);
+    }
+
+    .ux-state--card.ux-success-state {
+      border-color: rgba(var(--ux-success-rgb), 0.3);
+      background: rgba(var(--ux-success-rgb), 0.03);
+    }
+
+    .ux-state--card.ux-warning-state {
+      border-color: rgba(var(--ux-warning-rgb), 0.3);
+      background: rgba(var(--ux-warning-rgb), 0.03);
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-state--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border: 1px solid var(--ux-glass-border);
+      border-radius: var(--ux-border-radius-lg);
+    }
+
+    .ux-state--glass .ux-state__icon--circle {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ==========================================================================
+       Connection Status Banner
+       ========================================================================== */
+
+    .ux-connection-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      transition: all var(--ux-transition-normal) var(--ux-ease-ios);
+    }
+
+    .ux-connection-status__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: ux-status-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes ux-status-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    /* Online */
+    .ux-connection-status--online {
+      background: rgba(var(--ux-success-rgb), 0.1);
+      color: var(--ux-success);
+    }
+
+    .ux-connection-status--online .ux-connection-status__dot {
+      background: var(--ux-success);
+    }
+
+    /* Offline */
+    .ux-connection-status--offline {
+      background: rgba(var(--ux-danger-rgb), 0.1);
+      color: var(--ux-danger);
+    }
+
+    .ux-connection-status--offline .ux-connection-status__dot {
+      background: var(--ux-danger);
+    }
+
+    /* Reconnecting */
+    .ux-connection-status--reconnecting {
+      background: rgba(var(--ux-warning-rgb), 0.1);
+      color: var(--ux-warning);
+    }
+
+    .ux-connection-status--reconnecting .ux-connection-status__dot {
+      background: var(--ux-warning);
+      animation: ux-status-blink 0.5s ease-in-out infinite;
+    }
+
+    @keyframes ux-status-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ==========================================================================
+       Page-Level States (Full viewport)
+       ========================================================================== */
+
+    .ux-page-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: var(--ux-space-xl);
+    }
+
+    .ux-page-state .ux-state {
+      max-width: 400px;
+    }
+
+    /* ==========================================================================
+       List Empty State
+       ========================================================================== */
+
+    .ux-list-empty {
+      padding: var(--ux-space-xl) var(--ux-space-lg);
+    }
+
+    /* ==========================================================================
+       Table Empty State
+       ========================================================================== */
+
+    .ux-table-empty {
+      padding: var(--ux-space-2xl);
+    }
+
+    .ux-table-empty td {
+      text-align: center;
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      :root:not(.ux-light) .ux-state__icon--circle {
+        background: var(--ux-surface-tertiary);
+      }
+
+      :root:not(.ux-light) .ux-state--card {
+        background: var(--ux-surface-secondary);
+      }
+
+      :root:not(.ux-light) .ux-state--glass .ux-state__icon--circle {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .ux-dark .ux-state__icon--circle {
+      background: var(--ux-surface-tertiary);
+    }
+
+    .ux-dark .ux-state--card {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-dark .ux-state--glass .ux-state__icon--circle {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-state__icon--animated,
+      .ux-loading-state .ux-state__icon svg,
+      .ux-offline-state .ux-state__icon svg,
+      .ux-connection-status__dot,
+      .ux-success-state .ux-state__icon--animated svg {
+        animation: none;
+      }
+    }
+
+    /* ==========================================================================
+       Responsive
+       ========================================================================== */
+
+    @media (max-width: 767px) {
+      .ux-state {
+        --ux-state-padding: var(--ux-space-xl);
+        --ux-state-icon-size: 56px;
+      }
+
+      .ux-state--lg {
+        --ux-state-icon-size: 64px;
+      }
+
+      .ux-state__content {
+        max-width: 280px;
+      }
+
+      .ux-state__actions--row {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .ux-state__actions--row .ux-button {
+        width: 100%;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-state-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-state-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // SVG Icons for states
+  const stateIcons = {
+    empty: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 7.5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9"/>
+      <path d="M16.5 2H7.5a2 2 0 0 0-2 2v1.5h13V4a2 2 0 0 0-2-2z"/>
+      <path d="M12 11v4"/>
+      <path d="M12 18.5v.5"/>
+    </svg>`,
+
+    emptyFolder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      <line x1="12" y1="11" x2="12" y2="17"/>
+      <line x1="9" y1="14" x2="15" y2="14"/>
+    </svg>`,
+
+    error: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="15" y1="9" x2="9" y2="15"/>
+      <line x1="9" y1="9" x2="15" y2="15"/>
+    </svg>`,
+
+    success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="16 10 11 15 8 12"/>
+    </svg>`,
+
+    warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>`,
+
+    info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="16" x2="12" y2="12"/>
+      <line x1="12" y1="8" x2="12.01" y2="8"/>
+    </svg>`,
+
+    offline: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="1" y1="1" x2="23" y2="23"/>
+      <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+      <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+      <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+      <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+      <line x1="12" y1="20" x2="12.01" y2="20"/>
+    </svg>`,
+
+    search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      <line x1="8" y1="11" x2="14" y2="11"/>
+    </svg>`,
+
+    lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      <circle cx="12" cy="16" r="1"/>
+    </svg>`,
+
+    cart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="21" r="1"/>
+      <circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="10" y1="11" x2="14" y2="11"/>
+    </svg>`,
+
+    file: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="12" y1="12" x2="12" y2="18"/>
+      <line x1="9" y1="15" x2="15" y2="15"/>
+    </svg>`,
+
+    users: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>`,
+
+    calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/>
+      <line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+      <line x1="10" y1="14" x2="14" y2="14"/>
+    </svg>`,
+
+    inbox: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+      <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+    </svg>`
+  };
+
+  // Export icons for use
+  if (window.UX) {
+    window.UX.stateIcons = stateIcons;
+  }
+
+  window.UXStateIcons = stateIcons;
+
+})();
+
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       UX Stats - KPI & Stats Cards
+       iOS 26 Style - Liquid Glass Design
+       ========================================================================== */
+
+    :root {
+      /* Stats Card Tokens */
+      --ux-stats-padding: var(--ux-space-lg);
+      --ux-stats-border-radius: var(--ux-border-radius-lg);
+      --ux-stats-gap: var(--ux-space-sm);
+      --ux-stats-value-size: 2rem;
+      --ux-stats-value-weight: 700;
+      --ux-stats-label-size: var(--ux-font-size-sm);
+      --ux-stats-label-color: var(--ux-text-secondary);
+      --ux-stats-icon-size: 48px;
+      --ux-stats-icon-bg: var(--ux-surface-secondary);
+      --ux-stats-trend-size: var(--ux-font-size-sm);
+    }
+
+    /* ==========================================================================
+       Stats Card
+       ========================================================================== */
+
+    .ux-stats-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-stats-gap);
+      padding: var(--ux-stats-padding);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-stats-border-radius);
+      transition: transform var(--ux-transition-fast) var(--ux-ease-ios),
+                  box-shadow var(--ux-transition-fast) var(--ux-ease-ios);
+    }
+
+    .ux-stats-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--ux-shadow-md);
+    }
+
+    /* Clickable card */
+    a.ux-stats-card,
+    button.ux-stats-card {
+      cursor: pointer;
+      text-decoration: none;
+      text-align: left;
+    }
+
+    a.ux-stats-card:active,
+    button.ux-stats-card:active {
+      transform: scale(0.98);
+    }
+
+    /* ==========================================================================
+       Stats Header (Label + Icon)
+       ========================================================================== */
+
+    .ux-stats-card__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-stats-card__label {
+      font-size: var(--ux-stats-label-size);
+      font-weight: 500;
+      color: var(--ux-stats-label-color);
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .ux-stats-card__icon {
+      width: var(--ux-stats-icon-size);
+      height: var(--ux-stats-icon-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--ux-stats-icon-bg);
+      border-radius: var(--ux-border-radius);
+      color: var(--ux-primary);
+      flex-shrink: 0;
+    }
+
+    .ux-stats-card__icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .ux-stats-card__icon img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    /* Icon sizes */
+    .ux-stats-card__icon--sm {
+      --ux-stats-icon-size: 36px;
+    }
+
+    .ux-stats-card__icon--sm svg,
+    .ux-stats-card__icon--sm img {
+      width: 18px;
+      height: 18px;
+    }
+
+    .ux-stats-card__icon--lg {
+      --ux-stats-icon-size: 56px;
+    }
+
+    .ux-stats-card__icon--lg svg,
+    .ux-stats-card__icon--lg img {
+      width: 28px;
+      height: 28px;
+    }
+
+    /* Icon colors */
+    .ux-stats-card__icon--primary { background: rgba(var(--ux-primary-rgb), 0.1); color: var(--ux-primary); }
+    .ux-stats-card__icon--success { background: rgba(var(--ux-success-rgb), 0.1); color: var(--ux-success); }
+    .ux-stats-card__icon--warning { background: rgba(var(--ux-warning-rgb), 0.1); color: var(--ux-warning); }
+    .ux-stats-card__icon--danger { background: rgba(var(--ux-danger-rgb), 0.1); color: var(--ux-danger); }
+    .ux-stats-card__icon--info { background: rgba(var(--ux-info-rgb, var(--ux-primary-rgb)), 0.1); color: var(--ux-info, var(--ux-primary)); }
+
+    /* ==========================================================================
+       Stats Value
+       ========================================================================== */
+
+    .ux-stats-card__value {
+      font-size: var(--ux-stats-value-size);
+      font-weight: var(--ux-stats-value-weight);
+      color: var(--ux-text);
+      line-height: 1.2;
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Value sizes */
+    .ux-stats-card__value--sm {
+      --ux-stats-value-size: 1.5rem;
+    }
+
+    .ux-stats-card__value--lg {
+      --ux-stats-value-size: 2.5rem;
+    }
+
+    .ux-stats-card__value--xl {
+      --ux-stats-value-size: 3rem;
+    }
+
+    /* Value with prefix/suffix */
+    .ux-stats-card__value-wrapper {
+      display: flex;
+      align-items: baseline;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-stats-card__value-prefix,
+    .ux-stats-card__value-suffix {
+      font-size: calc(var(--ux-stats-value-size) * 0.6);
+      font-weight: 500;
+      color: var(--ux-text-secondary);
+    }
+
+    /* ==========================================================================
+       Stats Footer (Trend + Description)
+       ========================================================================== */
+
+    .ux-stats-card__footer {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      margin-top: var(--ux-space-xs);
+    }
+
+    .ux-stats-card__trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: var(--ux-stats-trend-size);
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: var(--ux-border-radius-pill);
+    }
+
+    .ux-stats-card__trend svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Trend up */
+    .ux-stats-card__trend--up {
+      color: var(--ux-success);
+      background: rgba(var(--ux-success-rgb), 0.1);
+    }
+
+    /* Trend down */
+    .ux-stats-card__trend--down {
+      color: var(--ux-danger);
+      background: rgba(var(--ux-danger-rgb), 0.1);
+    }
+
+    /* Trend neutral */
+    .ux-stats-card__trend--neutral {
+      color: var(--ux-text-secondary);
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-stats-card__description {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+    }
+
+    /* ==========================================================================
+       Stats Progress
+       ========================================================================== */
+
+    .ux-stats-card__progress {
+      margin-top: var(--ux-space-sm);
+    }
+
+    .ux-stats-card__progress-bar {
+      height: 6px;
+      background: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-pill);
+      overflow: hidden;
+    }
+
+    .ux-stats-card__progress-fill {
+      height: 100%;
+      background: var(--ux-primary);
+      border-radius: var(--ux-border-radius-pill);
+      transition: width var(--ux-transition-slow) var(--ux-ease-ios);
+    }
+
+    .ux-stats-card__progress-fill--success { background: var(--ux-success); }
+    .ux-stats-card__progress-fill--warning { background: var(--ux-warning); }
+    .ux-stats-card__progress-fill--danger { background: var(--ux-danger); }
+
+    .ux-stats-card__progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      margin-top: var(--ux-space-xs);
+    }
+
+    /* ==========================================================================
+       Stats Sparkline (Mini chart)
+       ========================================================================== */
+
+    .ux-stats-card__sparkline {
+      height: 40px;
+      margin-top: var(--ux-space-sm);
+    }
+
+    .ux-stats-card__sparkline svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ux-stats-card__sparkline path {
+      fill: none;
+      stroke: var(--ux-primary);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .ux-stats-card__sparkline-fill {
+      fill: rgba(var(--ux-primary-rgb), 0.1);
+      stroke: none;
+    }
+
+    /* ==========================================================================
+       Size Variants
+       ========================================================================== */
+
+    /* Small */
+    .ux-stats-card--sm {
+      --ux-stats-padding: var(--ux-space-md);
+      --ux-stats-value-size: 1.5rem;
+      --ux-stats-icon-size: 36px;
+    }
+
+    /* Large */
+    .ux-stats-card--lg {
+      --ux-stats-padding: var(--ux-space-xl);
+      --ux-stats-value-size: 2.5rem;
+      --ux-stats-icon-size: 56px;
+    }
+
+    /* ==========================================================================
+       Layout Variants
+       ========================================================================== */
+
+    /* Horizontal layout */
+    .ux-stats-card--horizontal {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .ux-stats-card--horizontal .ux-stats-card__icon {
+      order: -1;
+    }
+
+    .ux-stats-card--horizontal .ux-stats-card__body {
+      flex: 1;
+    }
+
+    /* Centered layout */
+    .ux-stats-card--centered {
+      text-align: center;
+      align-items: center;
+    }
+
+    .ux-stats-card--centered .ux-stats-card__header {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ux-stats-card--centered .ux-stats-card__footer {
+      justify-content: center;
+    }
+
+    /* ==========================================================================
+       Color Variants
+       ========================================================================== */
+
+    .ux-stats-card--primary {
+      background: var(--ux-primary);
+      border-color: var(--ux-primary);
+      color: white;
+    }
+
+    .ux-stats-card--primary .ux-stats-card__label,
+    .ux-stats-card--primary .ux-stats-card__description {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .ux-stats-card--primary .ux-stats-card__value {
+      color: white;
+    }
+
+    .ux-stats-card--primary .ux-stats-card__icon {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .ux-stats-card--primary .ux-stats-card__progress-bar {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .ux-stats-card--primary .ux-stats-card__progress-fill {
+      background: white;
+    }
+
+    /* Gradient variant */
+    .ux-stats-card--gradient {
+      background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-secondary) 100%);
+      border: none;
+      color: white;
+    }
+
+    .ux-stats-card--gradient .ux-stats-card__label,
+    .ux-stats-card--gradient .ux-stats-card__description {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .ux-stats-card--gradient .ux-stats-card__value {
+      color: white;
+    }
+
+    .ux-stats-card--gradient .ux-stats-card__icon {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-stats-card--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-stats-card--glass .ux-stats-card__icon {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* ==========================================================================
+       Stats Grid
+       ========================================================================== */
+
+    .ux-stats-grid {
+      display: grid;
+      gap: var(--ux-space-md);
+    }
+
+    /* Auto-fit columns */
+    .ux-stats-grid--auto {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    /* Fixed columns */
+    .ux-stats-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    .ux-stats-grid--3 { grid-template-columns: repeat(3, 1fr); }
+    .ux-stats-grid--4 { grid-template-columns: repeat(4, 1fr); }
+
+    /* Responsive grid */
+    @media (max-width: 991px) {
+      .ux-stats-grid--4 { grid-template-columns: repeat(2, 1fr); }
+      .ux-stats-grid--3 { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 767px) {
+      .ux-stats-grid--4,
+      .ux-stats-grid--3,
+      .ux-stats-grid--2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ==========================================================================
+       Stats Row (Horizontal scrolling)
+       ========================================================================== */
+
+    .ux-stats-row {
+      display: flex;
+      gap: var(--ux-space-md);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: var(--ux-space-sm);
+    }
+
+    .ux-stats-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ux-stats-row .ux-stats-card {
+      flex-shrink: 0;
+      min-width: 200px;
+      scroll-snap-align: start;
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      :root:not(.ux-light) .ux-stats-card--glass .ux-stats-card__icon {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .ux-dark .ux-stats-card--glass .ux-stats-card__icon {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-stats-card {
+        transition: none;
+      }
+
+      .ux-stats-card:hover {
+        transform: none;
+      }
+
+      .ux-stats-card__progress-fill {
+        transition: none;
+      }
+    }
+
+    /* ==========================================================================
+       Animation - Counter
+       ========================================================================== */
+
+    .ux-stats-card__value--animated {
+      animation: ux-stats-count-up 0.8s var(--ux-ease-ios) forwards;
+    }
+
+    @keyframes ux-stats-count-up {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-stats-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-stats-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component for animated counter
+  const statsCardComponent = (config = {}) => ({
+    value: config.value || 0,
+    targetValue: config.targetValue || config.value || 0,
+    displayValue: 0,
+    animated: config.animated !== false,
+    duration: config.duration || 1000,
+    decimals: config.decimals || 0,
+    prefix: config.prefix || '',
+    suffix: config.suffix || '',
+
+    init() {
+      if (this.animated) {
+        // Use Intersection Observer to animate when visible
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              this.animateValue();
+              observer.disconnect();
+            }
+          });
+        }, { threshold: 0.3 });
+
+        observer.observe(this.$el);
+      } else {
+        this.displayValue = this.targetValue;
+      }
+    },
+
+    animateValue() {
+      const startTime = performance.now();
+      const startValue = 0;
+      const endValue = this.targetValue;
+
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / this.duration, 1);
+
+        // Easing function (ease-out)
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+
+        this.displayValue = startValue + (endValue - startValue) * easeOut;
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          this.displayValue = endValue;
+        }
+      };
+
+      requestAnimationFrame(animate);
+    },
+
+    get formattedValue() {
+      const num = this.displayValue.toFixed(this.decimals);
+      // Add thousands separator
+      const parts = num.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return this.prefix + parts.join('.') + this.suffix;
+    },
+
+    // Update value externally
+    updateValue(newValue) {
+      this.targetValue = newValue;
+      if (this.animated) {
+        this.animateValue();
+      } else {
+        this.displayValue = newValue;
+      }
+    }
+  });
+
+  // Simple sparkline generator
+  const generateSparklinePath = (data, width = 100, height = 40) => {
+    if (!data || data.length < 2) return '';
+
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min || 1;
+
+    const points = data.map((value, index) => {
+      const x = (index / (data.length - 1)) * width;
+      const y = height - ((value - min) / range) * height;
+      return `${x},${y}`;
+    });
+
+    return `M${points.join(' L')}`;
+  };
+
+  // Generate sparkline with fill
+  const generateSparklineFill = (data, width = 100, height = 40) => {
+    const linePath = generateSparklinePath(data, width, height);
+    if (!linePath) return '';
+
+    return `${linePath} L${width},${height} L0,${height} Z`;
+  };
+
+  // Register component and utilities
+  if (window.UX) {
+    window.UX.registerComponent('uxStatsCard', statsCardComponent);
+    window.UX.generateSparklinePath = generateSparklinePath;
+    window.UX.generateSparklineFill = generateSparklineFill;
+  }
+
+  window.UXSparkline = {
+    path: generateSparklinePath,
+    fill: generateSparklineFill
+  };
+
+})();
+
 /**
  * UX Stepper Component
  * Stepper/Wizard para formularios multi-paso
@@ -25653,6 +43394,267 @@
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxStepper', stepperComponent);
     });
+  }
+})();
+
+/**
+ * UX Stock Indicator Component
+ * Inventory/POS stock status display
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* Stock Indicator Variables */
+    :root {
+      --ux-stock-indicator-height: 24px;
+      --ux-stock-indicator-padding: 0 var(--ux-space-sm);
+      --ux-stock-indicator-gap: var(--ux-space-xs);
+      --ux-stock-indicator-font-size: 0.8125rem;
+      --ux-stock-indicator-border-radius: var(--ux-radius-sm);
+
+      /* Dot */
+      --ux-stock-indicator-dot-size: 8px;
+
+      /* State Colors */
+      --ux-stock-in-stock: var(--ux-green-500);
+      --ux-stock-in-stock-bg: var(--ux-green-50);
+      --ux-stock-low-stock: var(--ux-yellow-500);
+      --ux-stock-low-stock-bg: var(--ux-yellow-50);
+      --ux-stock-out-of-stock: var(--ux-red-500);
+      --ux-stock-out-of-stock-bg: var(--ux-red-50);
+      --ux-stock-backorder: var(--ux-blue-500);
+      --ux-stock-backorder-bg: var(--ux-blue-50);
+    }
+
+    /* Base Stock Indicator */
+    .ux-stock-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-stock-indicator-gap);
+      height: var(--ux-stock-indicator-height);
+      padding: var(--ux-stock-indicator-padding);
+      font-size: var(--ux-stock-indicator-font-size);
+      font-weight: 500;
+      line-height: 1;
+      white-space: nowrap;
+      border-radius: var(--ux-stock-indicator-border-radius);
+      background: transparent;
+      transition: opacity var(--ux-transition-fast) var(--ux-ease-default);
+    }
+
+    /* Dot Element */
+    .ux-stock-indicator__dot {
+      width: var(--ux-stock-indicator-dot-size);
+      height: var(--ux-stock-indicator-dot-size);
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: currentColor;
+    }
+
+    /* Pulse animation for low stock */
+    .ux-stock-indicator--low-stock .ux-stock-indicator__dot {
+      animation: ux-stock-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes ux-stock-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Label Element */
+    .ux-stock-indicator__label {
+      color: var(--ux-text-secondary);
+    }
+
+    /* Count Element */
+    .ux-stock-indicator__count {
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--ux-text);
+    }
+
+    /* =====================
+       STATE MODIFIERS
+       ===================== */
+
+    /* In Stock */
+    .ux-stock-indicator--in-stock {
+      color: var(--ux-stock-in-stock);
+    }
+    .ux-stock-indicator--in-stock .ux-stock-indicator__label {
+      color: var(--ux-stock-in-stock);
+    }
+
+    /* Low Stock */
+    .ux-stock-indicator--low-stock {
+      color: var(--ux-stock-low-stock);
+    }
+    .ux-stock-indicator--low-stock .ux-stock-indicator__label {
+      color: var(--ux-stock-low-stock);
+    }
+
+    /* Out of Stock */
+    .ux-stock-indicator--out-of-stock {
+      color: var(--ux-stock-out-of-stock);
+    }
+    .ux-stock-indicator--out-of-stock .ux-stock-indicator__label {
+      color: var(--ux-stock-out-of-stock);
+    }
+
+    /* Backorder */
+    .ux-stock-indicator--backorder {
+      color: var(--ux-stock-backorder);
+    }
+    .ux-stock-indicator--backorder .ux-stock-indicator__label {
+      color: var(--ux-stock-backorder);
+    }
+
+    /* =====================
+       VARIANT MODIFIERS
+       ===================== */
+
+    /* Compact - Dot only */
+    .ux-stock-indicator--compact {
+      padding: 0;
+      height: auto;
+      gap: 0;
+    }
+    .ux-stock-indicator--compact .ux-stock-indicator__label,
+    .ux-stock-indicator--compact .ux-stock-indicator__count {
+      display: none;
+    }
+
+    /* Badge - Pill shape with background */
+    .ux-stock-indicator--badge {
+      border-radius: 9999px;
+      padding: 0 var(--ux-space-sm);
+    }
+
+    .ux-stock-indicator--badge.ux-stock-indicator--in-stock {
+      background: var(--ux-stock-in-stock-bg);
+    }
+    .ux-stock-indicator--badge.ux-stock-indicator--low-stock {
+      background: var(--ux-stock-low-stock-bg);
+    }
+    .ux-stock-indicator--badge.ux-stock-indicator--out-of-stock {
+      background: var(--ux-stock-out-of-stock-bg);
+    }
+    .ux-stock-indicator--badge.ux-stock-indicator--backorder {
+      background: var(--ux-stock-backorder-bg);
+    }
+
+    /* =====================
+       DARK MODE
+       ===================== */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ux-stock-in-stock-bg: rgba(34, 197, 94, 0.15);
+        --ux-stock-low-stock-bg: rgba(234, 179, 8, 0.15);
+        --ux-stock-out-of-stock-bg: rgba(239, 68, 68, 0.15);
+        --ux-stock-backorder-bg: rgba(59, 130, 246, 0.15);
+      }
+    }
+
+    .ux-dark {
+      --ux-stock-in-stock-bg: rgba(34, 197, 94, 0.15);
+      --ux-stock-low-stock-bg: rgba(234, 179, 8, 0.15);
+      --ux-stock-out-of-stock-bg: rgba(239, 68, 68, 0.15);
+      --ux-stock-backorder-bg: rgba(59, 130, 246, 0.15);
+    }
+
+    /* =====================
+       REDUCED MOTION
+       ===================== */
+    @media (prefers-reduced-motion: reduce) {
+      .ux-stock-indicator--low-stock .ux-stock-indicator__dot {
+        animation: none;
+      }
+    }
+  `;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-stock-indicator-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-stock-indicator-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const componentData = (options = {}) => ({
+    // State
+    quantity: options.quantity ?? 0,
+    lowThreshold: options.lowThreshold ?? 10,
+    backorder: options.backorder ?? false,
+
+    // Computed: determine stock status
+    get stockStatus() {
+      if (this.backorder) return 'backorder';
+      if (this.quantity <= 0) return 'out-of-stock';
+      if (this.quantity <= this.lowThreshold) return 'low-stock';
+      return 'in-stock';
+    },
+
+    // Get status label text
+    get statusLabel() {
+      switch (this.stockStatus) {
+        case 'in-stock': return 'In Stock';
+        case 'low-stock': return 'Low Stock';
+        case 'out-of-stock': return 'Out of Stock';
+        case 'backorder': return 'Backorder';
+        default: return '';
+      }
+    },
+
+    // Get CSS modifier class
+    get statusClass() {
+      return `ux-stock-indicator--${this.stockStatus}`;
+    },
+
+    // Update quantity
+    setQuantity(qty) {
+      this.quantity = Math.max(0, parseInt(qty, 10) || 0);
+      this.$dispatch('stock:change', {
+        quantity: this.quantity,
+        status: this.stockStatus
+      });
+    },
+
+    // Update threshold
+    setThreshold(threshold) {
+      this.lowThreshold = Math.max(1, parseInt(threshold, 10) || 10);
+    },
+
+    // Toggle backorder status
+    toggleBackorder() {
+      this.backorder = !this.backorder;
+      this.$dispatch('stock:change', {
+        quantity: this.quantity,
+        status: this.stockStatus,
+        backorder: this.backorder
+      });
+    },
+
+    // Init
+    init() {
+      // Watch for external quantity changes via x-model or :quantity
+      if (this.$el.hasAttribute('x-model')) {
+        this.$watch('quantity', () => {
+          this.$dispatch('stock:change', {
+            quantity: this.quantity,
+            status: this.stockStatus
+          });
+        });
+      }
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxStockIndicator', componentData);
   }
 })();
 
@@ -26985,6 +44987,597 @@
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxTabs', tabsComponent);
     });
+  }
+})();
+
+/**
+ * UX Tag Input Component
+ * Multi-select input with chips/tags
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Tag Input Container
+       ========================================================================== */
+
+    :root {
+      --ux-tag-input-min-height: 44px;
+      --ux-tag-input-padding: var(--ux-space-xs);
+      --ux-tag-input-gap: var(--ux-space-xs);
+      --ux-tag-input-radius: var(--ux-radius-lg);
+      --ux-tag-height: 28px;
+      --ux-tag-font-size: 0.8125rem;
+    }
+
+    .ux-tag-input {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--ux-tag-input-gap);
+      min-height: var(--ux-tag-input-min-height);
+      padding: var(--ux-tag-input-padding);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-tag-input-radius);
+      cursor: text;
+      transition: border-color var(--ux-transition-fast), box-shadow var(--ux-transition-fast);
+    }
+
+    .ux-tag-input:focus-within {
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
+    }
+
+    .ux-tag-input--disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-tag-input--error {
+      border-color: var(--ux-danger);
+    }
+
+    .ux-tag-input--error:focus-within {
+      box-shadow: 0 0 0 3px rgba(var(--ux-danger-rgb), 0.15);
+    }
+
+    /* ==========================================================================
+       Tags
+       ========================================================================== */
+
+    .ux-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: var(--ux-tag-height);
+      padding: 0 8px;
+      font-size: var(--ux-tag-font-size);
+      font-weight: 500;
+      background: var(--ux-primary-tint);
+      color: var(--ux-primary);
+      border-radius: var(--ux-radius-full);
+      white-space: nowrap;
+      user-select: none;
+      animation: ux-tag-appear 0.2s var(--ux-ease-out);
+    }
+
+    @keyframes ux-tag-appear {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .ux-tag--removing {
+      animation: ux-tag-remove 0.15s var(--ux-ease-in) forwards;
+    }
+
+    @keyframes ux-tag-remove {
+      to {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+    }
+
+    .ux-tag__text {
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ux-tag__remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      margin-left: 2px;
+      margin-right: -4px;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: inherit;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-tag__remove:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .ux-tag__remove svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* Tag Colors */
+    .ux-tag--secondary {
+      background: var(--ux-surface-tertiary);
+      color: var(--ux-text);
+    }
+
+    .ux-tag--success {
+      background: var(--ux-success-tint);
+      color: var(--ux-success-shade);
+    }
+
+    .ux-tag--warning {
+      background: var(--ux-warning-tint);
+      color: var(--ux-warning-shade);
+    }
+
+    .ux-tag--danger {
+      background: var(--ux-danger-tint);
+      color: var(--ux-danger-shade);
+    }
+
+    /* ==========================================================================
+       Input Field
+       ========================================================================== */
+
+    .ux-tag-input__field {
+      flex: 1;
+      min-width: 80px;
+      height: var(--ux-tag-height);
+      padding: 0 var(--ux-space-xs);
+      font-size: 0.9375rem;
+      color: var(--ux-text);
+      background: transparent;
+      border: none;
+      outline: none;
+    }
+
+    .ux-tag-input__field::placeholder {
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-tag-input--disabled .ux-tag-input__field {
+      cursor: not-allowed;
+    }
+
+    /* ==========================================================================
+       Suggestions Dropdown
+       ========================================================================== */
+
+    .ux-tag-input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .ux-tag-input__suggestions {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: var(--ux-z-dropdown);
+      max-height: 200px;
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-radius-lg);
+      box-shadow: var(--ux-shadow-lg);
+      overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all var(--ux-transition-fast) var(--ux-ease-out);
+    }
+
+    .ux-tag-input__suggestions--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .ux-tag-input__suggestion {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      font-size: 0.9375rem;
+      color: var(--ux-text);
+      cursor: pointer;
+      transition: background var(--ux-transition-fast);
+    }
+
+    .ux-tag-input__suggestion:hover,
+    .ux-tag-input__suggestion--active {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-tag-input__suggestion--disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .ux-tag-input__suggestion-create {
+      color: var(--ux-primary);
+      font-weight: 500;
+    }
+
+    .ux-tag-input__no-results {
+      padding: var(--ux-space-md);
+      text-align: center;
+      color: var(--ux-text-tertiary);
+      font-size: 0.875rem;
+    }
+
+    /* ==========================================================================
+       Counter & Limit
+       ========================================================================== */
+
+    .ux-tag-input__counter {
+      margin-left: auto;
+      padding: 0 var(--ux-space-xs);
+      font-size: 0.75rem;
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-tag-input__counter--limit {
+      color: var(--ux-danger);
+    }
+
+    /* ==========================================================================
+       Size Variants
+       ========================================================================== */
+
+    .ux-tag-input--sm {
+      min-height: 36px;
+      --ux-tag-height: 24px;
+      --ux-tag-font-size: 0.75rem;
+    }
+
+    .ux-tag-input--sm .ux-tag-input__field {
+      font-size: 0.875rem;
+    }
+
+    .ux-tag-input--lg {
+      min-height: 52px;
+      --ux-tag-height: 32px;
+      --ux-tag-font-size: 0.875rem;
+    }
+
+    .ux-tag-input--lg .ux-tag-input__field {
+      font-size: 1rem;
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-tag-input--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-tag-input--glass .ux-tag {
+      background: rgba(var(--ux-primary-rgb), 0.2);
+    }
+
+    .ux-tag-input-wrapper--glass .ux-tag-input__suggestions {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-tag__remove:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+    }
+
+    .ux-dark .ux-tag__remove:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-tag {
+        animation: none;
+      }
+
+      .ux-tag--removing {
+        animation: none;
+        opacity: 0;
+      }
+
+      .ux-tag-input__suggestions {
+        transition: opacity var(--ux-transition-fast);
+        transform: none;
+      }
+    }
+  `;
+
+  // Close icon
+  const closeIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 6L6 18M6 6l12 12"/>
+  </svg>`;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-tag-input-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-tag-input-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const tagInputData = (options = {}) => ({
+    // Configuration
+    placeholder: options.placeholder || 'Add tag...',
+    suggestions: options.suggestions || [],
+    maxTags: options.maxTags || Infinity,
+    maxLength: options.maxLength || 50,
+    allowCreate: options.allowCreate ?? true,
+    allowDuplicates: options.allowDuplicates ?? false,
+    delimiter: options.delimiter || ',',
+    validateTag: options.validateTag || null,
+    transformTag: options.transformTag || null,
+    disabled: options.disabled ?? false,
+    showCounter: options.showCounter ?? false,
+
+    // State
+    tags: options.value || [],
+    inputValue: '',
+    isOpen: false,
+    activeIndex: -1,
+    filteredSuggestions: [],
+    closeIcon: closeIcon,
+
+    // Lifecycle
+    init() {
+      this.$watch('inputValue', () => {
+        this.filterSuggestions();
+      });
+    },
+
+    // Computed
+    get canAddMore() {
+      return this.tags.length < this.maxTags;
+    },
+
+    get isAtLimit() {
+      return this.tags.length >= this.maxTags;
+    },
+
+    // Filter suggestions based on input
+    filterSuggestions() {
+      if (!this.inputValue.trim()) {
+        this.filteredSuggestions = [];
+        this.isOpen = false;
+        return;
+      }
+
+      const query = this.inputValue.toLowerCase().trim();
+
+      this.filteredSuggestions = this.suggestions.filter(suggestion => {
+        const text = typeof suggestion === 'string' ? suggestion : suggestion.label || suggestion.value;
+        const isMatch = text.toLowerCase().includes(query);
+        const isAlreadySelected = this.tags.some(tag =>
+          (typeof tag === 'string' ? tag : tag.value) === (typeof suggestion === 'string' ? suggestion : suggestion.value)
+        );
+        return isMatch && (this.allowDuplicates || !isAlreadySelected);
+      }).slice(0, 10);
+
+      this.isOpen = this.filteredSuggestions.length > 0 || (this.allowCreate && this.inputValue.trim());
+      this.activeIndex = -1;
+    },
+
+    // Get display text for tag/suggestion
+    getLabel(item) {
+      if (typeof item === 'string') return item;
+      return item.label || item.value || item.name || '';
+    },
+
+    getValue(item) {
+      if (typeof item === 'string') return item;
+      return item.value || item.label || item.name || '';
+    },
+
+    // Add tag
+    addTag(value) {
+      if (this.disabled || !this.canAddMore) return false;
+
+      let tag = typeof value === 'string' ? value.trim() : value;
+
+      if (!tag || (typeof tag === 'string' && !tag.length)) return false;
+
+      // Transform tag if function provided
+      if (this.transformTag && typeof tag === 'string') {
+        tag = this.transformTag(tag);
+      }
+
+      // Validate tag if function provided
+      if (this.validateTag) {
+        const validation = this.validateTag(tag, this.tags);
+        if (validation !== true) {
+          this.$dispatch('tag-input:invalid', { tag, reason: validation });
+          return false;
+        }
+      }
+
+      // Check for duplicates
+      const tagValue = this.getValue(tag);
+      if (!this.allowDuplicates && this.tags.some(t => this.getValue(t) === tagValue)) {
+        this.$dispatch('tag-input:duplicate', { tag });
+        return false;
+      }
+
+      // Check max length
+      if (typeof tag === 'string' && tag.length > this.maxLength) {
+        tag = tag.substring(0, this.maxLength);
+      }
+
+      this.tags.push(tag);
+      this.inputValue = '';
+      this.isOpen = false;
+      this.activeIndex = -1;
+
+      this.$dispatch('tag-input:add', { tag, tags: [...this.tags] });
+      this.$dispatch('tag-input:change', { tags: [...this.tags] });
+
+      return true;
+    },
+
+    // Remove tag by index
+    removeTag(index) {
+      if (this.disabled || index < 0 || index >= this.tags.length) return;
+
+      const removed = this.tags.splice(index, 1)[0];
+
+      this.$dispatch('tag-input:remove', { tag: removed, tags: [...this.tags] });
+      this.$dispatch('tag-input:change', { tags: [...this.tags] });
+    },
+
+    // Remove last tag
+    removeLastTag() {
+      if (this.tags.length > 0) {
+        this.removeTag(this.tags.length - 1);
+      }
+    },
+
+    // Clear all tags
+    clearAll() {
+      if (this.disabled) return;
+
+      this.tags = [];
+      this.inputValue = '';
+      this.$dispatch('tag-input:clear');
+      this.$dispatch('tag-input:change', { tags: [] });
+    },
+
+    // Select suggestion
+    selectSuggestion(suggestion) {
+      this.addTag(suggestion);
+      this.$refs.input?.focus();
+    },
+
+    // Handle input
+    onInput(event) {
+      // Check for delimiter
+      if (this.delimiter && this.inputValue.includes(this.delimiter)) {
+        const parts = this.inputValue.split(this.delimiter);
+        parts.forEach((part, i) => {
+          if (i < parts.length - 1 && part.trim()) {
+            this.addTag(part.trim());
+          }
+        });
+        this.inputValue = parts[parts.length - 1];
+      }
+    },
+
+    // Handle keyboard navigation
+    onKeydown(event) {
+      switch (event.key) {
+        case 'Enter':
+          event.preventDefault();
+          if (this.activeIndex >= 0 && this.filteredSuggestions[this.activeIndex]) {
+            this.selectSuggestion(this.filteredSuggestions[this.activeIndex]);
+          } else if (this.inputValue.trim() && this.allowCreate) {
+            this.addTag(this.inputValue);
+          }
+          break;
+
+        case 'Backspace':
+          if (!this.inputValue && this.tags.length > 0) {
+            this.removeLastTag();
+          }
+          break;
+
+        case 'ArrowDown':
+          event.preventDefault();
+          if (!this.isOpen && this.inputValue) {
+            this.filterSuggestions();
+          } else {
+            const maxIndex = this.allowCreate && this.inputValue.trim()
+              ? this.filteredSuggestions.length
+              : this.filteredSuggestions.length - 1;
+            this.activeIndex = Math.min(this.activeIndex + 1, maxIndex);
+          }
+          break;
+
+        case 'ArrowUp':
+          event.preventDefault();
+          this.activeIndex = Math.max(this.activeIndex - 1, -1);
+          break;
+
+        case 'Escape':
+          this.isOpen = false;
+          this.activeIndex = -1;
+          break;
+
+        case 'Tab':
+          this.isOpen = false;
+          break;
+      }
+    },
+
+    onFocus() {
+      if (this.inputValue) {
+        this.filterSuggestions();
+      }
+      this.$dispatch('tag-input:focus');
+    },
+
+    onBlur() {
+      // Delay to allow click on suggestions
+      setTimeout(() => {
+        this.isOpen = false;
+        this.activeIndex = -1;
+      }, 150);
+      this.$dispatch('tag-input:blur');
+    },
+
+    // Focus the input
+    focus() {
+      this.$refs.input?.focus();
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxTagInput', tagInputData);
   }
 })();
 
@@ -28488,6 +47081,20 @@
     .ux-toggle--glass input[type="checkbox"]:checked + .ux-toggle__track {
       background: var(--ux-primary);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-toggle__track {
+        transition: none;
+      }
+
+      .ux-toggle__thumb {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -29355,6 +47962,911 @@
       Alpine.data('uxTooltip', tooltipComponent);
     });
   }
+})();
+
+/**
+ * UX Tree View Component
+ * Hierarchical expandable/collapsible tree structure
+ * @requires ux-core.js
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Tree View
+       ========================================================================== */
+
+    .ux-tree {
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text);
+      user-select: none;
+    }
+
+    .ux-tree__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .ux-tree__list--nested {
+      padding-left: var(--ux-space-lg);
+    }
+
+    /* ==========================================================================
+       Tree Node
+       ========================================================================== */
+
+    .ux-tree__node {
+      margin: 0;
+      padding: 0;
+    }
+
+    .ux-tree__item {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      border-radius: var(--ux-radius-md);
+      cursor: pointer;
+      transition: background var(--ux-transition-fast) var(--ux-ease-out);
+    }
+
+    .ux-tree__item:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-tree__item:active {
+      background: var(--ux-surface-tertiary);
+    }
+
+    .ux-tree__item--selected {
+      background: var(--ux-primary-tint);
+      color: var(--ux-primary);
+    }
+
+    .ux-tree__item--selected:hover {
+      background: var(--ux-primary-tint);
+    }
+
+    /* ==========================================================================
+       Toggle Arrow
+       ========================================================================== */
+
+    .ux-tree__toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: var(--ux-text-tertiary);
+      transition: transform var(--ux-transition-fast) var(--ux-ease-out);
+    }
+
+    .ux-tree__toggle svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-tree__toggle--expanded {
+      transform: rotate(90deg);
+    }
+
+    .ux-tree__toggle--empty {
+      visibility: hidden;
+    }
+
+    /* ==========================================================================
+       Checkbox (for selectable trees)
+       ========================================================================== */
+
+    .ux-tree__checkbox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      border: 2px solid var(--ux-border-color);
+      border-radius: var(--ux-radius-sm);
+      background: var(--ux-surface);
+      color: transparent;
+      transition: all var(--ux-transition-fast) var(--ux-ease-out);
+    }
+
+    .ux-tree__checkbox svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .ux-tree__checkbox--checked {
+      background: var(--ux-primary);
+      border-color: var(--ux-primary);
+      color: white;
+    }
+
+    .ux-tree__checkbox--indeterminate {
+      background: var(--ux-primary);
+      border-color: var(--ux-primary);
+      color: white;
+    }
+
+    .ux-tree__checkbox--indeterminate svg {
+      display: none;
+    }
+
+    .ux-tree__checkbox--indeterminate::after {
+      content: '';
+      width: 8px;
+      height: 2px;
+      background: white;
+      border-radius: 1px;
+    }
+
+    /* ==========================================================================
+       Icon
+       ========================================================================== */
+
+    .ux-tree__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-tree__icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-tree__icon--folder {
+      color: var(--ux-warning);
+    }
+
+    .ux-tree__icon--file {
+      color: var(--ux-text-tertiary);
+    }
+
+    /* ==========================================================================
+       Label
+       ========================================================================== */
+
+    .ux-tree__label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+
+    .ux-tree__label--editable {
+      padding: 2px 4px;
+      margin: -2px -4px;
+      border-radius: var(--ux-radius-sm);
+      outline: none;
+    }
+
+    .ux-tree__label--editable:focus {
+      background: var(--ux-surface);
+      box-shadow: 0 0 0 2px var(--ux-primary);
+    }
+
+    /* ==========================================================================
+       Badge / Count
+       ========================================================================== */
+
+    .ux-tree__badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 6px;
+      font-size: var(--ux-font-size-xs);
+      font-weight: 600;
+      background: var(--ux-surface-tertiary);
+      color: var(--ux-text-secondary);
+      border-radius: 9px;
+      flex-shrink: 0;
+    }
+
+    .ux-tree__badge--primary {
+      background: var(--ux-primary-tint);
+      color: var(--ux-primary);
+    }
+
+    /* ==========================================================================
+       Actions
+       ========================================================================== */
+
+    .ux-tree__actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      opacity: 0;
+      transition: opacity var(--ux-transition-fast);
+    }
+
+    .ux-tree__item:hover .ux-tree__actions {
+      opacity: 1;
+    }
+
+    .ux-tree__action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: var(--ux-radius-sm);
+      color: var(--ux-text-tertiary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-tree__action:hover {
+      background: var(--ux-surface-tertiary);
+      color: var(--ux-text);
+    }
+
+    .ux-tree__action svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ==========================================================================
+       Loading State
+       ========================================================================== */
+
+    .ux-tree__loading {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      padding-left: calc(var(--ux-space-lg) + var(--ux-space-sm));
+      color: var(--ux-text-tertiary);
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-tree__loading-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--ux-border-color);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-tree-spin 0.8s linear infinite;
+    }
+
+    @keyframes ux-tree-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ==========================================================================
+       Empty State
+       ========================================================================== */
+
+    .ux-tree__empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--ux-space-xl);
+      color: var(--ux-text-tertiary);
+      text-align: center;
+    }
+
+    .ux-tree__empty-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: var(--ux-space-md);
+      opacity: 0.5;
+    }
+
+    /* ==========================================================================
+       Drag & Drop
+       ========================================================================== */
+
+    .ux-tree__item--dragging {
+      opacity: 0.5;
+    }
+
+    .ux-tree__item--drag-over {
+      background: var(--ux-primary-tint);
+      outline: 2px dashed var(--ux-primary);
+      outline-offset: -2px;
+    }
+
+    .ux-tree__drop-indicator {
+      height: 2px;
+      background: var(--ux-primary);
+      margin: 0 var(--ux-space-sm);
+      border-radius: 1px;
+    }
+
+    /* ==========================================================================
+       Size Variants
+       ========================================================================== */
+
+    .ux-tree--sm {
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-tree--sm .ux-tree__item {
+      padding: 2px var(--ux-space-xs);
+    }
+
+    .ux-tree--sm .ux-tree__toggle,
+    .ux-tree--sm .ux-tree__icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-tree--sm .ux-tree__toggle svg,
+    .ux-tree--sm .ux-tree__icon svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .ux-tree--sm .ux-tree__list--nested {
+      padding-left: var(--ux-space-md);
+    }
+
+    .ux-tree--lg {
+      font-size: var(--ux-font-size-lg);
+    }
+
+    .ux-tree--lg .ux-tree__item {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+    }
+
+    .ux-tree--lg .ux-tree__toggle,
+    .ux-tree--lg .ux-tree__icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    .ux-tree--lg .ux-tree__toggle svg,
+    .ux-tree--lg .ux-tree__icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* ==========================================================================
+       Lines Variant
+       ========================================================================== */
+
+    .ux-tree--lines .ux-tree__list--nested {
+      position: relative;
+      margin-left: 10px;
+      padding-left: var(--ux-space-md);
+    }
+
+    .ux-tree--lines .ux-tree__list--nested::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: var(--ux-space-md);
+      width: 1px;
+      background: var(--ux-border-color);
+    }
+
+    .ux-tree--lines .ux-tree__node {
+      position: relative;
+    }
+
+    .ux-tree--lines .ux-tree__list--nested > .ux-tree__node::before {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: calc(-1 * var(--ux-space-md));
+      width: var(--ux-space-sm);
+      height: 1px;
+      background: var(--ux-border-color);
+    }
+
+    /* ==========================================================================
+       Bordered Variant
+       ========================================================================== */
+
+    .ux-tree--bordered {
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-radius-lg);
+      padding: var(--ux-space-sm);
+    }
+
+    /* ==========================================================================
+       Glass Variant
+       ========================================================================== */
+
+    .ux-tree--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border: 1px solid var(--ux-glass-border);
+      border-radius: var(--ux-radius-lg);
+      padding: var(--ux-space-sm);
+    }
+
+    .ux-tree--glass .ux-tree__item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .ux-tree--glass .ux-tree__item--selected {
+      background: rgba(var(--ux-primary-rgb), 0.2);
+    }
+
+    /* ==========================================================================
+       Dark Mode
+       ========================================================================== */
+
+    @media (prefers-color-scheme: dark) {
+      .ux-tree--glass .ux-tree__item:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    .ux-dark .ux-tree--glass .ux-tree__item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* ==========================================================================
+       Reduced Motion
+       ========================================================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-tree__toggle,
+      .ux-tree__item,
+      .ux-tree__checkbox,
+      .ux-tree__actions {
+        transition: none;
+      }
+
+      .ux-tree__loading-spinner {
+        animation: none;
+      }
+    }
+  `;
+
+  // Icons
+  const icons = {
+    chevron: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+    folder: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 7c0-1.1.9-2 2-2h4l2 2h8c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V7z"/></svg>`,
+    folderOpen: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2h-7l-2-2H5z"/><path d="M3 12h18v5c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-5z" opacity="0.3"/></svg>`,
+    file: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+    check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+    edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+    trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+    empty: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>`
+  };
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-tree-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-tree-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const treeData = (options = {}) => ({
+    // Configuration
+    data: options.data || [],
+    selectable: options.selectable ?? false,
+    multiSelect: options.multiSelect ?? false,
+    checkable: options.checkable ?? false,
+    editable: options.editable ?? false,
+    draggable: options.draggable ?? false,
+    showIcons: options.showIcons ?? true,
+    showActions: options.showActions ?? false,
+    expandOnClick: options.expandOnClick ?? true,
+    lazyLoad: options.lazyLoad ?? false,
+    loadChildren: options.loadChildren || null,
+
+    // State
+    expandedNodes: new Set(options.expanded || []),
+    selectedNodes: new Set(options.selected || []),
+    checkedNodes: new Set(options.checked || []),
+    loadingNodes: new Set(),
+    editingNode: null,
+    draggedNode: null,
+    dragOverNode: null,
+
+    // Icons
+    icons: icons,
+
+    // Lifecycle
+    init() {
+      // Auto-expand to selected nodes
+      if (this.selectedNodes.size > 0) {
+        this.expandToNodes([...this.selectedNodes]);
+      }
+    },
+
+    // Toggle node expansion
+    toggle(nodeId) {
+      if (this.expandedNodes.has(nodeId)) {
+        this.collapse(nodeId);
+      } else {
+        this.expand(nodeId);
+      }
+    },
+
+    // Expand node
+    async expand(nodeId) {
+      const node = this.findNode(nodeId);
+      if (!node) return;
+
+      // Lazy load children if needed
+      if (this.lazyLoad && this.loadChildren && !node.childrenLoaded) {
+        this.loadingNodes.add(nodeId);
+        try {
+          const children = await this.loadChildren(node);
+          node.children = children;
+          node.childrenLoaded = true;
+        } catch (error) {
+          console.error('Failed to load children:', error);
+          this.$dispatch('tree:load-error', { nodeId, error });
+        } finally {
+          this.loadingNodes.delete(nodeId);
+        }
+      }
+
+      this.expandedNodes.add(nodeId);
+      this.$dispatch('tree:expand', { nodeId, node });
+    },
+
+    // Collapse node
+    collapse(nodeId) {
+      this.expandedNodes.delete(nodeId);
+      this.$dispatch('tree:collapse', { nodeId });
+    },
+
+    // Expand all nodes
+    expandAll() {
+      const expandRecursive = (nodes) => {
+        nodes.forEach(node => {
+          if (node.children && node.children.length > 0) {
+            this.expandedNodes.add(node.id);
+            expandRecursive(node.children);
+          }
+        });
+      };
+      expandRecursive(this.data);
+      this.$dispatch('tree:expand-all');
+    },
+
+    // Collapse all nodes
+    collapseAll() {
+      this.expandedNodes.clear();
+      this.$dispatch('tree:collapse-all');
+    },
+
+    // Select node
+    select(nodeId) {
+      const node = this.findNode(nodeId);
+      if (!node) return;
+
+      if (!this.multiSelect) {
+        this.selectedNodes.clear();
+      }
+
+      if (this.selectedNodes.has(nodeId)) {
+        this.selectedNodes.delete(nodeId);
+      } else {
+        this.selectedNodes.add(nodeId);
+      }
+
+      this.$dispatch('tree:select', {
+        nodeId,
+        node,
+        selected: [...this.selectedNodes]
+      });
+    },
+
+    // Check node (with checkbox)
+    check(nodeId, checked = null) {
+      const node = this.findNode(nodeId);
+      if (!node) return;
+
+      const isChecked = checked !== null ? checked : !this.checkedNodes.has(nodeId);
+
+      if (isChecked) {
+        this.checkedNodes.add(nodeId);
+        // Check all children
+        if (node.children) {
+          this.checkAllChildren(node, true);
+        }
+      } else {
+        this.checkedNodes.delete(nodeId);
+        // Uncheck all children
+        if (node.children) {
+          this.checkAllChildren(node, false);
+        }
+      }
+
+      // Update parent states
+      this.updateParentCheckState(nodeId);
+
+      this.$dispatch('tree:check', {
+        nodeId,
+        node,
+        checked: isChecked,
+        checkedNodes: [...this.checkedNodes]
+      });
+    },
+
+    // Check/uncheck all children recursively
+    checkAllChildren(node, checked) {
+      if (!node.children) return;
+      node.children.forEach(child => {
+        if (checked) {
+          this.checkedNodes.add(child.id);
+        } else {
+          this.checkedNodes.delete(child.id);
+        }
+        this.checkAllChildren(child, checked);
+      });
+    },
+
+    // Update parent check state (for indeterminate)
+    updateParentCheckState(nodeId) {
+      const parent = this.findParent(nodeId);
+      if (!parent) return;
+
+      const allChecked = parent.children.every(child => this.checkedNodes.has(child.id));
+      const someChecked = parent.children.some(child =>
+        this.checkedNodes.has(child.id) || this.isIndeterminate(child.id)
+      );
+
+      if (allChecked) {
+        this.checkedNodes.add(parent.id);
+      } else {
+        this.checkedNodes.delete(parent.id);
+      }
+
+      // Continue up the tree
+      this.updateParentCheckState(parent.id);
+    },
+
+    // Check if node is indeterminate
+    isIndeterminate(nodeId) {
+      const node = this.findNode(nodeId);
+      if (!node || !node.children || node.children.length === 0) return false;
+
+      const checkedCount = node.children.filter(child =>
+        this.checkedNodes.has(child.id)
+      ).length;
+
+      return checkedCount > 0 && checkedCount < node.children.length;
+    },
+
+    // Get checkbox state
+    getCheckState(nodeId) {
+      if (this.checkedNodes.has(nodeId)) return 'checked';
+      if (this.isIndeterminate(nodeId)) return 'indeterminate';
+      return 'unchecked';
+    },
+
+    // Find node by ID
+    findNode(nodeId, nodes = this.data) {
+      for (const node of nodes) {
+        if (node.id === nodeId) return node;
+        if (node.children) {
+          const found = this.findNode(nodeId, node.children);
+          if (found) return found;
+        }
+      }
+      return null;
+    },
+
+    // Find parent of node
+    findParent(nodeId, nodes = this.data, parent = null) {
+      for (const node of nodes) {
+        if (node.id === nodeId) return parent;
+        if (node.children) {
+          const found = this.findParent(nodeId, node.children, node);
+          if (found) return found;
+        }
+      }
+      return null;
+    },
+
+    // Expand to show specific nodes
+    expandToNodes(nodeIds) {
+      nodeIds.forEach(nodeId => {
+        let parent = this.findParent(nodeId);
+        while (parent) {
+          this.expandedNodes.add(parent.id);
+          parent = this.findParent(parent.id);
+        }
+      });
+    },
+
+    // Start editing node
+    startEdit(nodeId) {
+      if (!this.editable) return;
+      this.editingNode = nodeId;
+      this.$nextTick(() => {
+        const input = this.$el.querySelector(`[data-node-id="${nodeId}"] .ux-tree__label--editable`);
+        if (input) {
+          input.focus();
+          // Select all text
+          const range = document.createRange();
+          range.selectNodeContents(input);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      });
+    },
+
+    // Finish editing node
+    finishEdit(nodeId, newLabel) {
+      const node = this.findNode(nodeId);
+      if (node && newLabel.trim()) {
+        const oldLabel = node.label;
+        node.label = newLabel.trim();
+        this.$dispatch('tree:rename', { nodeId, node, oldLabel, newLabel: node.label });
+      }
+      this.editingNode = null;
+    },
+
+    // Cancel editing
+    cancelEdit() {
+      this.editingNode = null;
+    },
+
+    // Handle item click
+    handleClick(nodeId, node, event) {
+      if (this.selectable) {
+        this.select(nodeId);
+      }
+
+      if (this.expandOnClick && node.children && node.children.length > 0) {
+        this.toggle(nodeId);
+      }
+
+      this.$dispatch('tree:click', { nodeId, node, event });
+    },
+
+    // Handle double click
+    handleDoubleClick(nodeId, node, event) {
+      if (this.editable) {
+        this.startEdit(nodeId);
+      }
+      this.$dispatch('tree:dblclick', { nodeId, node, event });
+    },
+
+    // Drag & Drop handlers
+    handleDragStart(nodeId, event) {
+      if (!this.draggable) return;
+      this.draggedNode = nodeId;
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', nodeId);
+    },
+
+    handleDragOver(nodeId, event) {
+      if (!this.draggable || !this.draggedNode) return;
+      if (nodeId === this.draggedNode) return;
+
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      this.dragOverNode = nodeId;
+    },
+
+    handleDragLeave(nodeId) {
+      if (this.dragOverNode === nodeId) {
+        this.dragOverNode = null;
+      }
+    },
+
+    handleDrop(nodeId, event) {
+      if (!this.draggable || !this.draggedNode) return;
+      event.preventDefault();
+
+      const draggedNode = this.findNode(this.draggedNode);
+      const targetNode = this.findNode(nodeId);
+
+      if (draggedNode && targetNode && this.draggedNode !== nodeId) {
+        // Check if target is not a descendant of dragged
+        if (!this.isDescendant(this.draggedNode, nodeId)) {
+          this.$dispatch('tree:drop', {
+            draggedNodeId: this.draggedNode,
+            targetNodeId: nodeId,
+            draggedNode,
+            targetNode
+          });
+        }
+      }
+
+      this.draggedNode = null;
+      this.dragOverNode = null;
+    },
+
+    handleDragEnd() {
+      this.draggedNode = null;
+      this.dragOverNode = null;
+    },
+
+    // Check if nodeId is descendant of parentId
+    isDescendant(parentId, nodeId) {
+      const parent = this.findNode(parentId);
+      if (!parent || !parent.children) return false;
+
+      for (const child of parent.children) {
+        if (child.id === nodeId) return true;
+        if (this.isDescendant(child.id, nodeId)) return true;
+      }
+      return false;
+    },
+
+    // Actions
+    addNode(parentId = null, newNode) {
+      const parent = parentId ? this.findNode(parentId) : null;
+      if (parent) {
+        if (!parent.children) parent.children = [];
+        parent.children.push(newNode);
+        this.expandedNodes.add(parentId);
+      } else {
+        this.data.push(newNode);
+      }
+      this.$dispatch('tree:add', { parentId, node: newNode });
+    },
+
+    removeNode(nodeId) {
+      const removeFromList = (nodes) => {
+        const index = nodes.findIndex(n => n.id === nodeId);
+        if (index !== -1) {
+          nodes.splice(index, 1);
+          return true;
+        }
+        for (const node of nodes) {
+          if (node.children && removeFromList(node.children)) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      const node = this.findNode(nodeId);
+      if (removeFromList(this.data)) {
+        this.selectedNodes.delete(nodeId);
+        this.checkedNodes.delete(nodeId);
+        this.expandedNodes.delete(nodeId);
+        this.$dispatch('tree:remove', { nodeId, node });
+      }
+    },
+
+    // Get selected nodes data
+    getSelected() {
+      return [...this.selectedNodes].map(id => this.findNode(id)).filter(Boolean);
+    },
+
+    // Get checked nodes data
+    getChecked() {
+      return [...this.checkedNodes].map(id => this.findNode(id)).filter(Boolean);
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxTree', treeData);
+  }
+
+  // Expose icons for external use
+  window.UX = window.UX || {};
+  window.UX.treeIcons = icons;
 })();
 
 /**
@@ -30255,4 +49767,435 @@
       Alpine.data('uxUpload', uploadComponent);
     });
   }
+})();
+
+/**
+ * UX Virtual Keyboard Component
+ * Button to trigger the system virtual/touch keyboard
+ *
+ * LIMITATIONS:
+ * ============
+ * 1. Browser Support: Only works in Chromium-based browsers (Chrome, Edge, Opera)
+ *    with the VirtualKeyboard API enabled.
+ * 2. Device Requirement: Requires a touch-enabled device or tablet mode enabled.
+ * 3. Windows: Must have "Touch keyboard" enabled in Settings > Time & Language > Typing.
+ * 4. Security: Only works after user interaction (click/touch), not programmatically.
+ * 5. HTTPS: Requires secure context (HTTPS) in production.
+ * 6. Not supported: Firefox, Safari, iOS (uses native keyboard behavior).
+ */
+(function() {
+  'use strict';
+
+  const styles = `
+    /* ==========================================================================
+       Virtual Keyboard Button
+       ========================================================================== */
+
+    .ux-virtual-keyboard-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-sm);
+      min-width: var(--ux-touch-target);
+      height: var(--ux-touch-target);
+      padding: 0 var(--ux-space-md);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--ux-text);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-radius-md);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast) var(--ux-ease-out);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ux-virtual-keyboard-btn:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-virtual-keyboard-btn:active {
+      transform: scale(0.97);
+    }
+
+    .ux-virtual-keyboard-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .ux-virtual-keyboard-btn__icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Icon-only variant */
+    .ux-virtual-keyboard-btn--icon-only {
+      width: var(--ux-touch-target);
+      padding: 0;
+    }
+
+    /* Size variants */
+    .ux-virtual-keyboard-btn--sm {
+      height: var(--ux-touch-target-sm);
+      min-width: var(--ux-touch-target-sm);
+      padding: 0 var(--ux-space-sm);
+      font-size: 0.8125rem;
+    }
+
+    .ux-virtual-keyboard-btn--sm.ux-virtual-keyboard-btn--icon-only {
+      width: var(--ux-touch-target-sm);
+    }
+
+    .ux-virtual-keyboard-btn--sm .ux-virtual-keyboard-btn__icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-virtual-keyboard-btn--lg {
+      height: 52px;
+      min-width: 52px;
+      padding: 0 var(--ux-space-lg);
+      font-size: 1rem;
+    }
+
+    .ux-virtual-keyboard-btn--lg.ux-virtual-keyboard-btn--icon-only {
+      width: 52px;
+    }
+
+    .ux-virtual-keyboard-btn--lg .ux-virtual-keyboard-btn__icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Color variants */
+    .ux-virtual-keyboard-btn--primary {
+      background: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+      border-color: var(--ux-primary);
+    }
+
+    .ux-virtual-keyboard-btn--primary:hover {
+      background: var(--ux-primary-shade);
+    }
+
+    /* Glass variant */
+    .ux-virtual-keyboard-btn--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    /* Input group integration */
+    .ux-input-group .ux-virtual-keyboard-btn {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      margin-left: -1px;
+    }
+
+    /* ==========================================================================
+       Keyboard Status Indicator
+       ========================================================================== */
+
+    .ux-virtual-keyboard-status {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      font-size: 0.75rem;
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-virtual-keyboard-status__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ux-gray-400);
+    }
+
+    .ux-virtual-keyboard-status--supported .ux-virtual-keyboard-status__dot {
+      background: var(--ux-success);
+    }
+
+    .ux-virtual-keyboard-status--unsupported .ux-virtual-keyboard-status__dot {
+      background: var(--ux-danger);
+    }
+  `;
+
+  // Keyboard icon
+  const keyboardIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2"/>
+    <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01"/>
+    <path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01"/>
+    <path d="M8 16h8"/>
+  </svg>`;
+
+  // Inject styles
+  if (window.UX) {
+    window.UX.injectStyles('ux-virtual-keyboard-styles', styles);
+  } else {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'ux-virtual-keyboard-styles';
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+  }
+
+  // Alpine.js component
+  const virtualKeyboardData = (options = {}) => ({
+    // Configuration
+    targetSelector: options.targetSelector || null,
+    showAlert: options.showAlert ?? true,
+    alertTitle: options.alertTitle || 'Teclado Virtual No Disponible',
+    alertMessage: options.alertMessage || 'El teclado virtual no está disponible en este navegador o dispositivo. Requisitos: navegador Chromium (Chrome, Edge) en dispositivo táctil con Windows.',
+
+    // State
+    isSupported: false,
+    isVisible: false,
+    keyboardIcon: keyboardIcon,
+
+    // Lifecycle
+    init() {
+      this.checkSupport();
+
+      // Listen for keyboard geometry changes if supported
+      if ('virtualKeyboard' in navigator) {
+        navigator.virtualKeyboard.overlaysContent = true;
+
+        navigator.virtualKeyboard.addEventListener('geometrychange', (e) => {
+          const { height } = e.target.boundingRect;
+          this.isVisible = height > 0;
+          this.$dispatch('virtualkeyboard:change', {
+            isVisible: this.isVisible,
+            height: height
+          });
+        });
+      }
+    },
+
+    // Check API support
+    checkSupport() {
+      this.isSupported = 'virtualKeyboard' in navigator;
+      return this.isSupported;
+    },
+
+    // Get detailed support info
+    getSupportInfo() {
+      return {
+        apiAvailable: 'virtualKeyboard' in navigator,
+        isSecureContext: window.isSecureContext,
+        isTouchDevice: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+        browser: this.detectBrowser(),
+        recommendation: this.getRecommendation()
+      };
+    },
+
+    detectBrowser() {
+      const ua = navigator.userAgent;
+      if (ua.includes('Edg/')) return 'Edge';
+      if (ua.includes('Chrome/')) return 'Chrome';
+      if (ua.includes('Firefox/')) return 'Firefox';
+      if (ua.includes('Safari/') && !ua.includes('Chrome')) return 'Safari';
+      return 'Unknown';
+    },
+
+    getRecommendation() {
+      const info = {
+        apiAvailable: 'virtualKeyboard' in navigator,
+        isSecureContext: window.isSecureContext,
+        isTouchDevice: 'ontouchstart' in window || navigator.maxTouchPoints > 0
+      };
+
+      if (!info.apiAvailable) {
+        return 'Usa Chrome o Edge en un dispositivo táctil con Windows.';
+      }
+      if (!info.isSecureContext) {
+        return 'Requiere conexión HTTPS segura.';
+      }
+      if (!info.isTouchDevice) {
+        return 'Activa el modo tableta o usa un dispositivo táctil.';
+      }
+      return 'Todo listo para usar el teclado virtual.';
+    },
+
+    // Show virtual keyboard
+    async show(targetEl = null) {
+      // Find target input
+      let target = targetEl;
+      if (!target && this.targetSelector) {
+        target = document.querySelector(this.targetSelector);
+      }
+      if (!target) {
+        target = document.activeElement;
+      }
+
+      // Check if target is focusable
+      const focusableSelector = 'input, textarea, [contenteditable="true"]';
+      if (!target || !target.matches(focusableSelector)) {
+        console.warn('VirtualKeyboard: No focusable element found');
+        return false;
+      }
+
+      // Check API support
+      if (!this.isSupported) {
+        if (this.showAlert) {
+          this.showUnsupportedAlert();
+        }
+        this.$dispatch('virtualkeyboard:unsupported', this.getSupportInfo());
+        return false;
+      }
+
+      // Focus the target and show keyboard
+      try {
+        target.focus();
+        navigator.virtualKeyboard.show();
+        this.$dispatch('virtualkeyboard:show', { target });
+        return true;
+      } catch (error) {
+        console.error('VirtualKeyboard: Error showing keyboard', error);
+        this.$dispatch('virtualkeyboard:error', { error });
+        return false;
+      }
+    },
+
+    // Hide virtual keyboard
+    hide() {
+      if (!this.isSupported) return false;
+
+      try {
+        navigator.virtualKeyboard.hide();
+        this.$dispatch('virtualkeyboard:hide');
+        return true;
+      } catch (error) {
+        console.error('VirtualKeyboard: Error hiding keyboard', error);
+        return false;
+      }
+    },
+
+    // Toggle keyboard
+    toggle(targetEl = null) {
+      if (this.isVisible) {
+        this.hide();
+      } else {
+        this.show(targetEl);
+      }
+    },
+
+    // Show alert using UX Alert component
+    showUnsupportedAlert() {
+      // Try to use uxAlert if available
+      if (window.Alpine && document.querySelector('[x-data*="uxAlert"]')) {
+        // Dispatch event for external alert handling
+        this.$dispatch('virtualkeyboard:alert', {
+          title: this.alertTitle,
+          message: this.alertMessage
+        });
+      } else {
+        // Create a simple alert modal
+        this.createFallbackAlert();
+      }
+    },
+
+    createFallbackAlert() {
+      // Check if alert already exists
+      if (document.getElementById('ux-vk-alert')) return;
+
+      const alertHtml = `
+        <div id="ux-vk-alert" class="ux-alert-backdrop" style="
+          position: fixed;
+          inset: 0;
+          z-index: var(--ux-z-modal-backdrop, 400);
+          background: rgba(0,0,0,0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+        ">
+          <div class="ux-alert" style="
+            background: var(--ux-surface);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--ux-shadow-xl);
+          ">
+            <div style="
+              width: 48px;
+              height: 48px;
+              margin: 0 auto 1rem;
+              background: var(--ux-warning-tint);
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ux-warning)" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4M12 16h.01"/>
+              </svg>
+            </div>
+            <h3 style="margin: 0 0 0.5rem; font-size: 1.125rem; font-weight: 600; color: var(--ux-text);">
+              ${this.alertTitle}
+            </h3>
+            <p style="margin: 0 0 1.5rem; font-size: 0.9375rem; color: var(--ux-text-secondary); line-height: 1.5;">
+              ${this.alertMessage}
+            </p>
+            <button onclick="document.getElementById('ux-vk-alert').remove()" style="
+              width: 100%;
+              height: 44px;
+              background: var(--ux-primary);
+              color: white;
+              border: none;
+              border-radius: 8px;
+              font-size: 1rem;
+              font-weight: 500;
+              cursor: pointer;
+            ">
+              Entendido
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', alertHtml);
+
+      // Close on backdrop click
+      const backdrop = document.getElementById('ux-vk-alert');
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) backdrop.remove();
+      });
+
+      // Close on escape
+      const escHandler = (e) => {
+        if (e.key === 'Escape') {
+          backdrop.remove();
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+    }
+  });
+
+  // Register component
+  if (window.UX) {
+    window.UX.registerComponent('uxVirtualKeyboard', virtualKeyboardData);
+  }
+
+  // Also expose a simple function for non-Alpine usage
+  window.UX = window.UX || {};
+  window.UX.showVirtualKeyboard = function(targetSelector) {
+    if (!('virtualKeyboard' in navigator)) {
+      console.warn('VirtualKeyboard API not supported');
+      return false;
+    }
+    const target = targetSelector ? document.querySelector(targetSelector) : document.activeElement;
+    if (target && target.focus) {
+      target.focus();
+      navigator.virtualKeyboard.show();
+      return true;
+    }
+    return false;
+  };
 })();

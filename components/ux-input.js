@@ -528,6 +528,31 @@
     [data-theme="dark"] input.ux-input[type="week"]::-webkit-calendar-picker-indicator {
       filter: invert(1) opacity(0.6);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-input,
+      input.ux-input,
+      textarea.ux-input,
+      select.ux-input {
+        transition: none;
+      }
+
+      .ux-input-group--floating .ux-input__label {
+        transition: none;
+      }
+
+      .ux-input-password__toggle {
+        transition: none;
+      }
+
+      .ux-input__clear {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles

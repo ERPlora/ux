@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Calendar - UX Library</title>
+  <link rel="stylesheet" href="../bootstrap-grid.min.css">
+  <script src="../dist/ux.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--ux-surface-secondary);
+      padding: 2rem;
+      padding-bottom: 4rem;
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--ux-text);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    pre {
+      background: var(--ux-gray-900);
+      color: var(--ux-gray-100);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+    .result-display {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--ux-surface-secondary);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .demo-glass-bg {
+      background: linear-gradient(135deg, var(--ux-blue-400), var(--ux-cyan-500));
+      padding: 2rem;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <h1 style="margin-bottom: 0.5rem;">Calendar</h1>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+    Calendario mensual con selección de fecha, rango de fechas e indicadores de eventos.
+  </p>
+
+  <!-- Basic Calendar -->
+  <section class="demo-section">
+    <h2>Calendario Básico</h2>
+
+    <div class="demo-grid">
+      <div>
+        <div x-data="uxCalendar()" @calendar:select="selectedDisplay = $event.detail.formatted">
+          <div class="ux-calendar">
+            <!-- Header -->
+            <div class="ux-calendar__header">
+              <button class="ux-calendar__nav-btn" @click="prevMonth()" x-html="icons.prev"></button>
+              <span class="ux-calendar__title" x-text="currentMonthYear"></span>
+              <button class="ux-calendar__nav-btn" @click="nextMonth()" x-html="icons.next"></button>
+            </div>
+
+            <!-- Weekdays -->
+            <div class="ux-calendar__weekdays">
+              <template x-for="day in weekdays" :key="day">
+                <div class="ux-calendar__weekday" x-text="day"></div>
+              </template>
+            </div>
+
+            <!-- Days -->
+            <div class="ux-calendar__days">
+              <template x-for="dayObj in calendarDays" :key="dayObj.date.toISOString()">
+                <button class="ux-calendar__day"
+                        :class="{
+                          'ux-calendar__day--other-month': dayObj.isOtherMonth && showOtherMonths,
+                          'ux-calendar__day--today': dayObj.isToday,
+                          'ux-calendar__day--selected': dayObj.isSelected,
+                          'ux-calendar__day--disabled': dayObj.isDisabled
+                        }"
+                        :style="dayObj.isOtherMonth && !showOtherMonths ? 'visibility: hidden' : ''"
+                        @click="selectDate(dayObj)"
+                        x-text="dayObj.day">
+                </button>
+              </template>
+            </div>
+
+            <!-- Footer -->
+            <div class="ux-calendar__footer" x-show="showFooter">
+              <button class="ux-calendar__today-btn" @click="goToToday()">Hoy</button>
+              <button class="ux-calendar__clear-btn" @click="clearSelection()" x-show="selectedDate">Limpiar</button>
+            </div>
+          </div>
+
+          <div class="result-display" x-data="{ selectedDisplay: null }" x-show="selectedDate">
+            Fecha seleccionada: <strong x-text="formatDate(selectedDate)"></strong>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <pre>&lt;div x-data="uxCalendar()"&gt;
+  &lt;div class="ux-calendar"&gt;
+    &lt;!-- Header --&gt;
+    &lt;div class="ux-calendar__header"&gt;
+      &lt;button @click="prevMonth()"&gt;←&lt;/button&gt;
+      &lt;span x-text="currentMonthYear"&gt;&lt;/span&gt;
+      &lt;button @click="nextMonth()"&gt;→&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Weekdays --&gt;
+    &lt;div class="ux-calendar__weekdays"&gt;...&lt;/div&gt;
+
+    &lt;!-- Days --&gt;
+    &lt;div class="ux-calendar__days"&gt;
+      &lt;template x-for="dayObj in calendarDays"&gt;
+        &lt;button class="ux-calendar__day"
+                @click="selectDate(dayObj)"&gt;
+        &lt;/button&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Range Selection -->
+  <section class="demo-section">
+    <h2>Selección de Rango</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Selecciona una fecha de inicio y una de fin.
+    </p>
+
+    <div class="demo-grid">
+      <div x-data="{
+        ...uxCalendar({ range: true }),
+        rangeDisplay: ''
+      }" @calendar:range-select="rangeDisplay = $event.detail.startFormatted + ' → ' + $event.detail.endFormatted">
+        <div class="ux-calendar">
+          <div class="ux-calendar__header">
+            <button class="ux-calendar__nav-btn" @click="prevMonth()" x-html="icons.prev"></button>
+            <span class="ux-calendar__title" x-text="currentMonthYear"></span>
+            <button class="ux-calendar__nav-btn" @click="nextMonth()" x-html="icons.next"></button>
+          </div>
+
+          <div class="ux-calendar__weekdays">
+            <template x-for="day in weekdays" :key="day">
+              <div class="ux-calendar__weekday" x-text="day"></div>
+            </template>
+          </div>
+
+          <div class="ux-calendar__days">
+            <template x-for="dayObj in calendarDays" :key="dayObj.date.toISOString()">
+              <button class="ux-calendar__day"
+                      :class="{
+                        'ux-calendar__day--other-month': dayObj.isOtherMonth,
+                        'ux-calendar__day--today': dayObj.isToday,
+                        'ux-calendar__day--range-start': dayObj.isRangeStart,
+                        'ux-calendar__day--range-end': dayObj.isRangeEnd,
+                        'ux-calendar__day--in-range': dayObj.isInRange,
+                        'ux-calendar__day--range-hover': dayObj.isRangeHover,
+                        'ux-calendar__day--disabled': dayObj.isDisabled
+                      }"
+                      @click="selectDate(dayObj)"
+                      @mouseenter="onDayHover(dayObj)"
+                      @mouseleave="onDayLeave()"
+                      x-text="dayObj.day">
+              </button>
+            </template>
+          </div>
+
+          <div class="ux-calendar__footer">
+            <button class="ux-calendar__today-btn" @click="goToToday()">Hoy</button>
+            <button class="ux-calendar__clear-btn" @click="clearSelection()" x-show="rangeStart">Limpiar</button>
+          </div>
+        </div>
+
+        <div class="result-display" x-show="rangeStart && rangeEnd">
+          Rango: <strong x-text="rangeDisplay"></strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- With Events -->
+  <section class="demo-section">
+    <h2>Con Eventos</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Muestra indicadores de eventos en días específicos.
+    </p>
+
+    <div class="demo-grid">
+      <div x-data="uxCalendar({
+        events: [
+          { date: new Date().toISOString().split('T')[0], color: 'primary', title: 'Hoy' },
+          { date: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0], color: 'success', title: 'Reunión' },
+          { date: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0], color: 'warning', title: 'Deadline' },
+          { date: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0], color: 'danger', title: 'Urgente' },
+          { date: new Date(Date.now() + 86400000 * 10).toISOString().split('T')[0], color: 'primary', title: 'Evento' }
+        ]
+      })">
+        <div class="ux-calendar">
+          <div class="ux-calendar__header">
+            <button class="ux-calendar__nav-btn" @click="prevMonth()" x-html="icons.prev"></button>
+            <span class="ux-calendar__title" x-text="currentMonthYear"></span>
+            <button class="ux-calendar__nav-btn" @click="nextMonth()" x-html="icons.next"></button>
+          </div>
+
+          <div class="ux-calendar__weekdays">
+            <template x-for="day in weekdays" :key="day">
+              <div class="ux-calendar__weekday" x-text="day"></div>
+            </template>
+          </div>
+
+          <div class="ux-calendar__days">
+            <template x-for="dayObj in calendarDays" :key="dayObj.date.toISOString()">
+              <button class="ux-calendar__day"
+                      :class="{
+                        'ux-calendar__day--other-month': dayObj.isOtherMonth,
+                        'ux-calendar__day--today': dayObj.isToday,
+                        'ux-calendar__day--selected': dayObj.isSelected
+                      }"
+                      @click="selectDate(dayObj)">
+                <span x-text="dayObj.day"></span>
+                <div class="ux-calendar__day-events" x-show="dayObj.events.length > 0">
+                  <template x-for="event in dayObj.events.slice(0, 3)" :key="event.title">
+                    <span class="ux-calendar__day-event"
+                          :class="'ux-calendar__day-event--' + (event.color || 'primary')"></span>
+                  </template>
+                </div>
+              </button>
+            </template>
+          </div>
+
+          <div class="ux-calendar__footer">
+            <button class="ux-calendar__today-btn" @click="goToToday()">Hoy</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Leyenda</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ux-primary);"></span>
+            Evento normal
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ux-success);"></span>
+            Completado
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ux-warning);"></span>
+            Pendiente
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ux-danger);"></span>
+            Urgente
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Min/Max Dates -->
+  <section class="demo-section">
+    <h2>Fechas Mínima y Máxima</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Restringe la selección a un rango de fechas.
+    </p>
+
+    <div class="demo-grid">
+      <div x-data="uxCalendar({
+        minDate: new Date(),
+        maxDate: new Date(Date.now() + 86400000 * 30)
+      })">
+        <div class="ux-calendar">
+          <div class="ux-calendar__header">
+            <button class="ux-calendar__nav-btn" @click="prevMonth()" x-html="icons.prev"></button>
+            <span class="ux-calendar__title" x-text="currentMonthYear"></span>
+            <button class="ux-calendar__nav-btn" @click="nextMonth()" x-html="icons.next"></button>
+          </div>
+
+          <div class="ux-calendar__weekdays">
+            <template x-for="day in weekdays" :key="day">
+              <div class="ux-calendar__weekday" x-text="day"></div>
+            </template>
+          </div>
+
+          <div class="ux-calendar__days">
+            <template x-for="dayObj in calendarDays" :key="dayObj.date.toISOString()">
+              <button class="ux-calendar__day"
+                      :class="{
+                        'ux-calendar__day--other-month': dayObj.isOtherMonth,
+                        'ux-calendar__day--today': dayObj.isToday,
+                        'ux-calendar__day--selected': dayObj.isSelected,
+                        'ux-calendar__day--disabled': dayObj.isDisabled
+                      }"
+                      :disabled="dayObj.isDisabled"
+                      @click="selectDate(dayObj)"
+                      x-text="dayObj.day">
+              </button>
+            </template>
+          </div>
+        </div>
+        <p style="margin-top: 0.5rem; font-size: 0.8125rem; color: var(--ux-text-tertiary);">
+          Solo se pueden seleccionar los próximos 30 días.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Disabled Days -->
+  <section class="demo-section">
+    <h2>Días Deshabilitados</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Deshabilita días específicos de la semana (ej: fines de semana).
+    </p>
+
+    <div class="demo-grid">
+      <div x-data="uxCalendar({
+        disabledDays: [0, 6],
+        highlightWeekends: true
+      })">
+        <div class="ux-calendar">
+          <div class="ux-calendar__header">
+            <button class="ux-calendar__nav-btn" @click="prevMonth()" x-html="icons.prev"></button>
+            <span class="ux-calendar__title" x-text="currentMonthYear"></span>
+            <button class="ux-calendar__nav-btn" @click="nextMonth()" x-html="icons.next"></button>
+          </div>
+
+          <div class="ux-calendar__weekdays">
+            <template x-for="day in weekdays" :key="day">
+              <div class="ux-calendar__weekday" x-text="day"></div>
+            </template>
+          </div>
+
+          <div class="ux-calendar__days">
+            <template x-for="dayObj in calendarDays" :key="dayObj.date.toISOString()">
+              <button class="ux-calendar__day"
+                      :class="{
+                        'ux-calendar__day--other-month': dayObj.isOtherMonth,
+                        'ux-calendar__day--today': dayObj.isToday,
+                        'ux-calendar__day--selected': dayObj.isSelected,
+                        'ux-calendar__day--disabled': dayObj.isDisabled,
+                        'ux-calendar__day--weekend': dayObj.isWeekend && highlightWeekends
+                      }"
+                      :disabled="dayObj.isDisabled"
+                      @click="selectDate(dayObj)"
+                      x-text="dayObj.day">
+              </button>
+            </template>
+          </div>
+        </div>
+        <p style="margin-top: 0.5rem; font-size: 0.8125rem; color: var(--ux-text-tertiary);">
+          Sábados y domingos deshabilitados.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Glass Variant -->
+  <section class="demo-section">
+    <h2>Glass Variant</h2>
+
+    <div class="demo-glass-bg">
+      <div x-data="uxCalendar({ showFooter: false })">
+        <div class="ux-calendar ux-calendar--glass">
+          <div class="ux-calendar__header">
+            <button class="ux-calendar__nav-btn" @click="prevMonth()" x-html="icons.prev"></button>
+            <span class="ux-calendar__title" x-text="currentMonthYear" style="color: white;"></span>
+            <button class="ux-calendar__nav-btn" @click="nextMonth()" x-html="icons.next"></button>
+          </div>
+
+          <div class="ux-calendar__weekdays">
+            <template x-for="day in weekdays" :key="day">
+              <div class="ux-calendar__weekday" x-text="day" style="color: rgba(255,255,255,0.6);"></div>
+            </template>
+          </div>
+
+          <div class="ux-calendar__days">
+            <template x-for="dayObj in calendarDays" :key="dayObj.date.toISOString()">
+              <button class="ux-calendar__day"
+                      :class="{
+                        'ux-calendar__day--other-month': dayObj.isOtherMonth,
+                        'ux-calendar__day--today': dayObj.isToday,
+                        'ux-calendar__day--selected': dayObj.isSelected
+                      }"
+                      :style="dayObj.isOtherMonth ? 'color: rgba(255,255,255,0.3)' : 'color: white'"
+                      @click="selectDate(dayObj)"
+                      x-text="dayObj.day">
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sizes -->
+  <section class="demo-section">
+    <h2>Tamaños</h2>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start;">
+      <div x-data="uxCalendar({ showFooter: false })">
+        <p style="font-size: 0.875rem; margin-bottom: 0.5rem; color: var(--ux-text-secondary);">Small</p>
+        <div class="ux-calendar ux-calendar--sm">
+          <div class="ux-calendar__header">
+            <button class="ux-calendar__nav-btn" @click="prevMonth()" x-html="icons.prev"></button>
+            <span class="ux-calendar__title" x-text="currentMonthYear"></span>
+            <button class="ux-calendar__nav-btn" @click="nextMonth()" x-html="icons.next"></button>
+          </div>
+          <div class="ux-calendar__weekdays">
+            <template x-for="day in weekdays" :key="day">
+              <div class="ux-calendar__weekday" x-text="day"></div>
+            </template>
+          </div>
+          <div class="ux-calendar__days">
+            <template x-for="dayObj in calendarDays" :key="dayObj.date.toISOString()">
+              <button class="ux-calendar__day"
+                      :class="{ 'ux-calendar__day--other-month': dayObj.isOtherMonth, 'ux-calendar__day--today': dayObj.isToday, 'ux-calendar__day--selected': dayObj.isSelected }"
+                      @click="selectDate(dayObj)" x-text="dayObj.day"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div x-data="uxCalendar({ showFooter: false })">
+        <p style="font-size: 0.875rem; margin-bottom: 0.5rem; color: var(--ux-text-secondary);">Large</p>
+        <div class="ux-calendar ux-calendar--lg">
+          <div class="ux-calendar__header">
+            <button class="ux-calendar__nav-btn" @click="prevMonth()" x-html="icons.prev"></button>
+            <span class="ux-calendar__title" x-text="currentMonthYear"></span>
+            <button class="ux-calendar__nav-btn" @click="nextMonth()" x-html="icons.next"></button>
+          </div>
+          <div class="ux-calendar__weekdays">
+            <template x-for="day in weekdays" :key="day">
+              <div class="ux-calendar__weekday" x-text="day"></div>
+            </template>
+          </div>
+          <div class="ux-calendar__days">
+            <template x-for="dayObj in calendarDays" :key="dayObj.date.toISOString()">
+              <button class="ux-calendar__day"
+                      :class="{ 'ux-calendar__day--other-month': dayObj.isOtherMonth, 'ux-calendar__day--today': dayObj.isToday, 'ux-calendar__day--selected': dayObj.isSelected }"
+                      @click="selectDate(dayObj)" x-text="dayObj.day"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- API Reference -->
+  <section class="demo-section">
+    <h2>API Reference</h2>
+
+    <h3>Opciones</h3>
+    <pre>uxCalendar({
+  locale: 'es',              // Idioma
+  firstDayOfWeek: 1,         // 0=Domingo, 1=Lunes
+  minDate: null,             // Fecha mínima seleccionable
+  maxDate: null,             // Fecha máxima seleccionable
+  disabledDates: [],         // Fechas específicas deshabilitadas
+  disabledDays: [],          // Días de semana deshabilitados [0-6]
+  events: [],                // Eventos { date, color, title }
+  range: false,              // Modo selección de rango
+  showFooter: true,          // Mostrar footer
+  showOtherMonths: true,     // Mostrar días de otros meses
+  highlightWeekends: false,  // Resaltar fines de semana
+  value: null                // Fecha inicial seleccionada
+})</pre>
+
+    <h3>Propiedades</h3>
+    <pre>currentDate      // Fecha actual del calendario
+selectedDate     // Fecha seleccionada (modo normal)
+rangeStart       // Fecha inicio (modo rango)
+rangeEnd         // Fecha fin (modo rango)
+calendarDays     // Array de días del mes actual
+currentMonthYear // String "Mes Año"
+weekdays         // Array de nombres de días</pre>
+
+    <h3>Métodos</h3>
+    <pre>prevMonth()          // Ir al mes anterior
+nextMonth()          // Ir al mes siguiente
+goToToday()          // Ir a hoy
+goToDate(date)       // Ir a fecha específica
+selectDate(dayObj)   // Seleccionar un día
+clearSelection()     // Limpiar selección
+formatDate(date)     // Formatear fecha (YYYY-MM-DD)</pre>
+
+    <h3>Eventos</h3>
+    <pre>@calendar:select       // Fecha seleccionada (modo normal)
+@calendar:range-start  // Inicio de rango seleccionado
+@calendar:range-select // Rango completo seleccionado
+@calendar:navigate     // Navegación mes anterior/siguiente
+@calendar:today        // Click en "Hoy"
+@calendar:clear        // Selección limpiada</pre>
+
+    <h3>Clases CSS</h3>
+    <pre>.ux-calendar              // Contenedor
+.ux-calendar--sm          // Pequeño
+.ux-calendar--lg          // Grande
+.ux-calendar--full        // Ancho 100%
+.ux-calendar--glass       // Glass morphism
+.ux-calendar--inline      // Sin borde/sombra</pre>
+  </section>
+
+</body>
+</html>

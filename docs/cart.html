@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Cart - UX Library</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-cart.js"></script>
+  <script src="../components/ux-content.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text);
+    }
+    .demo-section p {
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--ux-space-lg);
+    }
+    @media (max-width: 767px) {
+      .demo-grid { grid-template-columns: 1fr; }
+    }
+    .code-block {
+      background: #1a1a2e;
+      color: #e5e5e5;
+      padding: var(--ux-space-md);
+      border-radius: var(--ux-border-radius);
+      overflow-x: auto;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: var(--ux-font-size-sm);
+      line-height: 1.6;
+    }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content" style="padding: var(--ux-space-lg); max-width: 1200px; margin: 0 auto;">
+    <h1 style="margin-bottom: var(--ux-space-sm);">Cart</h1>
+    <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xl);">Carrito de compras POS con lista de items, controles de cantidad, resumen y acciones.</p>
+
+    <!-- Full Cart -->
+    <section class="demo-section">
+      <h3>Carrito Completo POS</h3>
+      <p>Carrito con lista de items, controles de cantidad, resumen y acciones.</p>
+
+      <div class="demo-grid">
+        <div>
+          <div x-data="uxCart({
+            items: [
+              { id: 1, name: 'Cafe Americano Grande', price: 3.50, quantity: 2, image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=100&h=100&fit=crop' },
+              { id: 2, name: 'Croissant de Mantequilla', price: 2.80, quantity: 1, image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=100&h=100&fit=crop' },
+              { id: 3, name: 'Smoothie Tropical con Frutas Frescas', price: 5.90, quantity: 1, image: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=100&h=100&fit=crop' }
+            ],
+            taxRate: 21,
+            currency: '€',
+            locale: 'es-ES',
+            labels: {
+              title: 'Carrito',
+              subtotal: 'Subtotal',
+              tax: 'IVA (21%)',
+              total: 'Total',
+              clearCart: 'Vaciar',
+              checkout: 'Pagar',
+              items: 'items'
+            }
+          })" class="ux-cart ux-cart--bordered" style="height: 500px;">
+
+            <!-- Header -->
+            <div class="ux-cart__header">
+              <h2 class="ux-cart__title">
+                <span x-text="labels.title"></span>
+                <span class="ux-cart__count" x-text="itemCount"></span>
+              </h2>
+              <button type="button" class="ux-cart__clear" @click="clearCart()" x-show="!isEmpty">
+                <span x-html="getIcon('trash')"></span>
+                <span x-text="labels.clearCart"></span>
+              </button>
+            </div>
+
+            <!-- Items -->
+            <div class="ux-cart__items">
+              <template x-if="isEmpty">
+                <div class="ux-cart__empty">
+                  <div class="ux-cart__empty-icon" x-html="getIcon('cart')"></div>
+                  <h3 class="ux-cart__empty-title" x-text="labels.empty"></h3>
+                  <p class="ux-cart__empty-text" x-text="labels.emptyText"></p>
+                </div>
+              </template>
+
+              <ul class="ux-cart__items-list" x-show="!isEmpty">
+                <template x-for="(item, index) in items" :key="item.id">
+                  <li class="ux-cart-item">
+                    <template x-if="item.image">
+                      <img :src="item.image" :alt="item.name" class="ux-cart-item__image">
+                    </template>
+                    <template x-if="!item.image">
+                      <div class="ux-cart-item__image-placeholder">
+                        <span x-html="getIcon('placeholder')"></span>
+                      </div>
+                    </template>
+
+                    <div class="ux-cart-item__content">
+                      <h4 class="ux-cart-item__name" x-text="item.name"></h4>
+                      <span class="ux-cart-item__unit-price" x-text="formatPrice(item.price) + ' c/u'"></span>
+
+                      <div class="ux-cart-item__qty">
+                        <button type="button" class="ux-cart-item__qty-btn" @click="decrementQuantity(index)">
+                          <span x-html="getIcon('minus')"></span>
+                        </button>
+                        <span class="ux-cart-item__qty-value" x-text="item.quantity"></span>
+                        <button type="button" class="ux-cart-item__qty-btn" @click="incrementQuantity(index)">
+                          <span x-html="getIcon('plus')"></span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: var(--ux-space-xs);">
+                      <span class="ux-cart-item__price" x-text="formatPrice(item.price * item.quantity)"></span>
+                      <button type="button" class="ux-cart-item__remove" @click="removeItem(index)">
+                        <span x-html="getIcon('trash')"></span>
+                      </button>
+                    </div>
+                  </li>
+                </template>
+              </ul>
+            </div>
+
+            <!-- Summary -->
+            <div class="ux-cart-summary" x-show="!isEmpty">
+              <div class="ux-cart-summary__row">
+                <span class="ux-cart-summary__label" x-text="labels.subtotal"></span>
+                <span class="ux-cart-summary__value" x-text="formatPrice(subtotal)"></span>
+              </div>
+              <div class="ux-cart-summary__row" x-show="discount > 0">
+                <span class="ux-cart-summary__label" x-text="labels.discount"></span>
+                <span class="ux-cart-summary__value ux-cart-summary__row--discount" x-text="'-' + formatPrice(discount)"></span>
+              </div>
+              <div class="ux-cart-summary__row">
+                <span class="ux-cart-summary__label" x-text="labels.tax"></span>
+                <span class="ux-cart-summary__value" x-text="formatPrice(tax)"></span>
+              </div>
+              <div class="ux-cart-summary__row ux-cart-summary__row--total">
+                <span class="ux-cart-summary__label" x-text="labels.total"></span>
+                <span class="ux-cart-summary__value" x-text="formatPrice(total)"></span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="ux-cart__actions" x-show="!isEmpty">
+              <button type="button" class="ux-button ux-color-primary ux-button--lg" @click="checkout()">
+                <span x-text="labels.checkout + ' ' + formatPrice(total)"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxCart({
+  items: [
+    { id: 1, name: 'Producto', price: 9.99, quantity: 2, image: '...' }
+  ],
+  taxRate: 21,
+  currency: '€',
+  locale: 'es-ES'
+})"</span> <span class="attr">class</span>=<span class="string">"ux-cart"</span><span class="tag">&gt;</span>
+
+  <span class="comment">&lt;!-- Header --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-cart__header"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h2</span> <span class="attr">class</span>=<span class="string">"ux-cart__title"</span><span class="tag">&gt;</span>
+      Carrito <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-cart__count"</span> <span class="attr">x-text</span>=<span class="string">"itemCount"</span><span class="tag">&gt;&lt;/span&gt;</span>
+    <span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-cart__clear"</span> <span class="attr">@click</span>=<span class="string">"clearCart()"</span><span class="tag">&gt;</span>Vaciar<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="comment">&lt;!-- Items --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-cart__items"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;ul</span> <span class="attr">class</span>=<span class="string">"ux-cart__items-list"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;template</span> <span class="attr">x-for</span>=<span class="string">"(item, index) in items"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;li</span> <span class="attr">class</span>=<span class="string">"ux-cart-item"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/li&gt;</span>
+      <span class="tag">&lt;/template&gt;</span>
+    <span class="tag">&lt;/ul&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="comment">&lt;!-- Summary --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-cart-summary"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-cart-summary__row--total"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;span&gt;</span>Total<span class="tag">&lt;/span&gt;</span>
+      <span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"formatPrice(total)"</span><span class="tag">&gt;&lt;/span&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="comment">&lt;!-- Actions --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-cart__actions"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-primary"</span> <span class="attr">@click</span>=<span class="string">"checkout()"</span><span class="tag">&gt;</span>Pagar<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cart with Discount -->
+    <section class="demo-section">
+      <h3>Carrito con Descuento</h3>
+      <p>Carrito mostrando descuento aplicado con <code>discountPercent</code>.</p>
+
+      <div class="demo-box" style="max-width: 400px;">
+        <div x-data="uxCart({
+          items: [
+            { id: 1, name: 'Laptop Pro 15\"', price: 1299.99, quantity: 1 },
+            { id: 2, name: 'Mouse Wireless', price: 29.99, quantity: 2 }
+          ],
+          discountPercent: 10,
+          taxRate: 8,
+          currency: '$'
+        })" class="ux-cart ux-cart--bordered" style="height: auto;">
+
+          <div class="ux-cart__header">
+            <h2 class="ux-cart__title">Order Summary</h2>
+          </div>
+
+          <div class="ux-cart__items" style="max-height: none;">
+            <ul class="ux-cart__items-list">
+              <template x-for="(item, index) in items" :key="item.id">
+                <li class="ux-cart-item ux-cart-item--compact">
+                  <div class="ux-cart-item__image-placeholder">
+                    <span x-html="getIcon('placeholder')"></span>
+                  </div>
+                  <div class="ux-cart-item__content">
+                    <h4 class="ux-cart-item__name" x-text="item.name"></h4>
+                    <span class="ux-cart-item__meta" x-text="'Qty: ' + item.quantity"></span>
+                  </div>
+                  <span class="ux-cart-item__price" x-text="formatPrice(item.price * item.quantity)"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+
+          <div class="ux-cart-summary">
+            <div class="ux-cart-summary__row">
+              <span class="ux-cart-summary__label">Subtotal</span>
+              <span class="ux-cart-summary__value" x-text="formatPrice(subtotal)"></span>
+            </div>
+            <div class="ux-cart-summary__row ux-cart-summary__row--discount">
+              <span class="ux-cart-summary__label">Discount (10%)</span>
+              <span class="ux-cart-summary__value" x-text="'-' + formatPrice(discount)"></span>
+            </div>
+            <div class="ux-cart-summary__row">
+              <span class="ux-cart-summary__label">Tax (8%)</span>
+              <span class="ux-cart-summary__value" x-text="formatPrice(tax)"></span>
+            </div>
+            <div class="ux-cart-summary__row ux-cart-summary__row--total">
+              <span class="ux-cart-summary__label">Total</span>
+              <span class="ux-cart-summary__value" x-text="formatPrice(total)"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="attr">uxCart</span>({
+  <span class="attr">items</span>: [...],
+  <span class="attr">discountPercent</span>: <span class="string">10</span>,  <span class="comment">// 10% discount</span>
+  <span class="comment">// or</span>
+  <span class="attr">discountAmount</span>: <span class="string">50</span>,   <span class="comment">// $50 off</span>
+  <span class="attr">taxRate</span>: <span class="string">8</span>
+})</pre>
+    </section>
+
+    <!-- Glass Variant -->
+    <section class="demo-section">
+      <h3>Variante Glass</h3>
+      <p>Carrito con efecto glass morphism usando <code>.ux-cart--glass</code>.</p>
+
+      <div class="demo-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: var(--ux-space-xl);">
+        <div style="max-width: 350px;">
+          <div x-data="uxCart({
+            items: [
+              { id: 1, name: 'Premium Plan', price: 29.99, quantity: 1 },
+              { id: 2, name: 'Extra Storage', price: 9.99, quantity: 1 }
+            ],
+            currency: '$'
+          })" class="ux-cart ux-cart--glass" style="height: auto;">
+
+            <div class="ux-cart__header">
+              <h2 class="ux-cart__title">Your Plan</h2>
+            </div>
+
+            <div class="ux-cart__items" style="max-height: none;">
+              <ul class="ux-cart__items-list">
+                <template x-for="(item, index) in items" :key="item.id">
+                  <li class="ux-cart-item ux-cart-item--compact">
+                    <div class="ux-cart-item__content">
+                      <h4 class="ux-cart-item__name" x-text="item.name"></h4>
+                    </div>
+                    <span class="ux-cart-item__price" x-text="formatPrice(item.price)"></span>
+                  </li>
+                </template>
+              </ul>
+            </div>
+
+            <div class="ux-cart-summary">
+              <div class="ux-cart-summary__row ux-cart-summary__row--total">
+                <span class="ux-cart-summary__label">Monthly Total</span>
+                <span class="ux-cart-summary__value" x-text="formatPrice(total)"></span>
+              </div>
+            </div>
+
+            <div class="ux-cart__actions">
+              <button type="button" class="ux-button ux-color-primary">Subscribe</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-cart ux-cart--glass"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <!-- API Reference -->
+    <section class="demo-section">
+      <h3>Componente Alpine.js</h3>
+      <p>Opciones de configuracion, propiedades y metodos disponibles.</p>
+
+      <pre class="code-block"><span class="comment">// Configuracion uxCart</span>
+<span class="attr">uxCart</span>({
+  <span class="comment">// Items iniciales</span>
+  <span class="attr">items</span>: [
+    {
+      <span class="attr">id</span>: <span class="string">1</span>,
+      <span class="attr">name</span>: <span class="string">'Producto'</span>,
+      <span class="attr">price</span>: <span class="string">9.99</span>,
+      <span class="attr">quantity</span>: <span class="string">1</span>,
+      <span class="attr">image</span>: <span class="string">'https://...'</span>,     <span class="comment">// Opcional</span>
+      <span class="attr">maxQuantity</span>: <span class="string">10</span>,          <span class="comment">// Limite de cantidad</span>
+      <span class="attr">options</span>: { <span class="attr">size</span>: <span class="string">'L'</span> }    <span class="comment">// Opciones/variantes</span>
+    }
+  ],
+
+  <span class="comment">// Moneda y formato</span>
+  <span class="attr">currency</span>: <span class="string">'$'</span>,           <span class="comment">// Simbolo</span>
+  <span class="attr">locale</span>: <span class="string">'en-US'</span>,         <span class="comment">// Locale para formato</span>
+
+  <span class="comment">// Calculos</span>
+  <span class="attr">taxRate</span>: <span class="string">0</span>,              <span class="comment">// % de impuesto</span>
+  <span class="attr">discountAmount</span>: <span class="string">0</span>,       <span class="comment">// Descuento fijo</span>
+  <span class="attr">discountPercent</span>: <span class="string">0</span>,      <span class="comment">// Descuento %</span>
+  <span class="attr">shippingCost</span>: <span class="string">0</span>,         <span class="comment">// Costo de envio</span>
+
+  <span class="comment">// Labels personalizables</span>
+  <span class="attr">labels</span>: { <span class="attr">title</span>: <span class="string">'Cart'</span>, <span class="attr">empty</span>: <span class="string">'Your cart is empty'</span>, ... }
+})
+
+<span class="comment">// Propiedades reactivas:</span>
+<span class="attr">items</span>           <span class="comment">// Array de items</span>
+<span class="attr">itemCount</span>       <span class="comment">// Total de items (suma cantidades)</span>
+<span class="attr">subtotal</span>        <span class="comment">// Subtotal antes de impuestos</span>
+<span class="attr">discount</span>        <span class="comment">// Monto de descuento</span>
+<span class="attr">tax</span>             <span class="comment">// Monto de impuestos</span>
+<span class="attr">total</span>           <span class="comment">// Total final</span>
+<span class="attr">isEmpty</span>         <span class="comment">// True si carrito vacio</span>
+
+<span class="comment">// Metodos:</span>
+<span class="attr">addItem</span>(product, qty)       <span class="comment">// Agregar item</span>
+<span class="attr">removeItem</span>(index)           <span class="comment">// Eliminar item</span>
+<span class="attr">updateQuantity</span>(index, qty)  <span class="comment">// Actualizar cantidad</span>
+<span class="attr">incrementQuantity</span>(index)    <span class="comment">// +1 cantidad</span>
+<span class="attr">decrementQuantity</span>(index)    <span class="comment">// -1 cantidad</span>
+<span class="attr">clearCart</span>()                 <span class="comment">// Vaciar carrito</span>
+<span class="attr">checkout</span>()                  <span class="comment">// Procesar pago</span>
+<span class="attr">formatPrice</span>(n)              <span class="comment">// Formatear precio</span>
+
+<span class="comment">// Eventos:</span>
+<span class="attr">@cart-update</span>          <span class="comment">// { items, total }</span>
+<span class="attr">@cart-item-removed</span>    <span class="comment">// { item, items }</span>
+<span class="attr">@cart-cleared</span>         <span class="comment">// (sin datos)</span>
+<span class="attr">@cart-checkout</span>        <span class="comment">// { items, subtotal, discount, tax, shipping, total }</span></pre>
+    </section>
+
+    <!-- CSS Classes -->
+    <section class="demo-section">
+      <h3>Clases CSS</h3>
+      <p>Clases disponibles para personalizar el carrito.</p>
+
+      <pre class="code-block"><span class="comment">/* Contenedor */</span>
+<span class="tag">.ux-cart</span>                  <span class="comment">// Contenedor principal</span>
+<span class="tag">.ux-cart--bordered</span>        <span class="comment">// Con borde</span>
+<span class="tag">.ux-cart--glass</span>           <span class="comment">// Variante glass</span>
+<span class="tag">.ux-cart--mini</span>            <span class="comment">// Version mini (dropdown)</span>
+
+<span class="comment">/* Header */</span>
+<span class="tag">.ux-cart__header</span>
+<span class="tag">.ux-cart__title</span>
+<span class="tag">.ux-cart__count</span>           <span class="comment">// Badge contador</span>
+<span class="tag">.ux-cart__clear</span>           <span class="comment">// Boton vaciar</span>
+
+<span class="comment">/* Items */</span>
+<span class="tag">.ux-cart__items</span>           <span class="comment">// Contenedor scrolleable</span>
+<span class="tag">.ux-cart__items-list</span>      <span class="comment">// Lista ul</span>
+
+<span class="comment">/* Item */</span>
+<span class="tag">.ux-cart-item</span>             <span class="comment">// Item individual</span>
+<span class="tag">.ux-cart-item--compact</span>    <span class="comment">// Version compacta</span>
+<span class="tag">.ux-cart-item__image</span>
+<span class="tag">.ux-cart-item__content</span>
+<span class="tag">.ux-cart-item__name</span>
+<span class="tag">.ux-cart-item__qty</span>        <span class="comment">// Controles cantidad</span>
+<span class="tag">.ux-cart-item__price</span>
+<span class="tag">.ux-cart-item__remove</span>
+
+<span class="comment">/* Summary */</span>
+<span class="tag">.ux-cart-summary</span>
+<span class="tag">.ux-cart-summary__row</span>
+<span class="tag">.ux-cart-summary__row--discount</span>
+<span class="tag">.ux-cart-summary__row--total</span>
+
+<span class="comment">/* Actions */</span>
+<span class="tag">.ux-cart__actions</span></pre>
+    </section>
+
+    <!-- HTMX Integration -->
+    <section class="demo-section">
+      <h3>Integracion con HTMX</h3>
+      <p>El carrito funciona perfectamente con HTMX para sincronizar con el servidor en tiempo real.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Agregar Producto al Carrito</h4>
+      <p>Click en producto para agregarlo al carrito via HTMX.</p>
+
+      <div class="demo-grid">
+        <div style="display: flex; flex-direction: column; gap: var(--ux-space-sm);">
+          <button class="ux-button ux-button--outline"
+                  hx-post="/api/cart/add"
+                  hx-vals='{"product_id": 1, "name": "Cafe Americano", "price": 3.50}'
+                  hx-target="#htmx-cart-items"
+                  hx-swap="innerHTML"
+                  hx-indicator="#add-spinner-1">
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" id="add-spinner-1"></span>
+            + Cafe Americano ($3.50)
+          </button>
+          <button class="ux-button ux-button--outline"
+                  hx-post="/api/cart/add"
+                  hx-vals='{"product_id": 2, "name": "Croissant", "price": 2.80}'
+                  hx-target="#htmx-cart-items"
+                  hx-swap="innerHTML"
+                  hx-indicator="#add-spinner-2">
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" id="add-spinner-2"></span>
+            + Croissant ($2.80)
+          </button>
+          <button class="ux-button ux-button--outline"
+                  hx-post="/api/cart/add"
+                  hx-vals='{"product_id": 3, "name": "Smoothie", "price": 5.90}'
+                  hx-target="#htmx-cart-items"
+                  hx-swap="innerHTML"
+                  hx-indicator="#add-spinner-3">
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" id="add-spinner-3"></span>
+            + Smoothie ($5.90)
+          </button>
+        </div>
+
+        <div class="ux-cart ux-cart--bordered" style="height: 300px;">
+          <div class="ux-cart__header">
+            <h2 class="ux-cart__title">Carrito HTMX</h2>
+          </div>
+          <div id="htmx-cart-items" class="ux-cart__items" style="padding: var(--ux-space-md);">
+            <p style="color: var(--ux-text-secondary); text-align: center;">Agrega productos...</p>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Boton que agrega producto al carrito --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">hx-post</span>=<span class="string">"/api/cart/add"</span>
+        <span class="attr">hx-vals</span>=<span class="string">'{"product_id": 1, "quantity": 1}'</span>
+        <span class="attr">hx-target</span>=<span class="string">"#cart-items"</span>
+        <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+  Agregar al Carrito
+<span class="tag">&lt;/button&gt;</span>
+
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"cart-items"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- El servidor devuelve la lista actualizada --&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Actualizar Cantidad</h4>
+      <p>Botones +/- que actualizan cantidad en el servidor.</p>
+
+      <div class="demo-box">
+        <div class="ux-cart-item" style="display: flex; align-items: center; gap: var(--ux-space-md); padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius);">
+          <div style="flex: 1;">
+            <h4 style="margin: 0;">Cafe Americano</h4>
+            <span style="color: var(--ux-text-secondary);">$3.50 c/u</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: var(--ux-space-sm);">
+            <button class="ux-button ux-button--sm ux-button--outline"
+                    hx-post="/api/cart/update"
+                    hx-vals='{"item_id": 1, "action": "decrement"}'
+                    hx-target="#qty-display"
+                    hx-swap="innerHTML">
+              -
+            </button>
+            <span id="qty-display" style="min-width: 30px; text-align: center; font-weight: 600;">2</span>
+            <button class="ux-button ux-button--sm ux-button--outline"
+                    hx-post="/api/cart/update"
+                    hx-vals='{"item_id": 1, "action": "increment"}'
+                    hx-target="#qty-display"
+                    hx-swap="innerHTML">
+              +
+            </button>
+          </div>
+
+          <span style="font-weight: 700; min-width: 60px; text-align: right;">$7.00</span>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Controles de cantidad con HTMX --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">hx-post</span>=<span class="string">"/api/cart/update"</span>
+        <span class="attr">hx-vals</span>=<span class="string">'{"item_id": 1, "action": "decrement"}'</span>
+        <span class="attr">hx-target</span>=<span class="string">"#qty"</span><span class="tag">&gt;</span>-<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;span</span> <span class="attr">id</span>=<span class="string">"qty"</span><span class="tag">&gt;</span>2<span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">hx-post</span>=<span class="string">"/api/cart/update"</span>
+        <span class="attr">hx-vals</span>=<span class="string">'{"item_id": 1, "action": "increment"}'</span>
+        <span class="attr">hx-target</span>=<span class="string">"#qty"</span><span class="tag">&gt;</span>+<span class="tag">&lt;/button&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Eliminar Item</h4>
+      <p>Eliminar item del carrito con confirmacion.</p>
+
+      <div class="demo-box">
+        <div id="removable-items" style="display: flex; flex-direction: column; gap: var(--ux-space-sm);">
+          <div class="ux-cart-item" style="display: flex; align-items: center; gap: var(--ux-space-md); padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius);">
+            <div style="flex: 1;">
+              <h4 style="margin: 0;">Cafe Americano</h4>
+            </div>
+            <span>$3.50</span>
+            <button class="ux-button ux-button--sm ux-button--clear"
+                    style="color: var(--ux-danger);"
+                    hx-delete="/api/cart/item/1"
+                    hx-target="closest .ux-cart-item"
+                    hx-swap="outerHTML"
+                    hx-confirm="Eliminar este producto?">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="ux-cart-item" style="display: flex; align-items: center; gap: var(--ux-space-md); padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius);">
+            <div style="flex: 1;">
+              <h4 style="margin: 0;">Croissant</h4>
+            </div>
+            <span>$2.80</span>
+            <button class="ux-button ux-button--sm ux-button--clear"
+                    style="color: var(--ux-danger);"
+                    hx-delete="/api/cart/item/2"
+                    hx-target="closest .ux-cart-item"
+                    hx-swap="outerHTML"
+                    hx-confirm="Eliminar este producto?">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Eliminar item con HTMX --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-cart-item"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;span&gt;</span>Cafe<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">hx-delete</span>=<span class="string">"/api/cart/item/1"</span>
+          <span class="attr">hx-target</span>=<span class="string">"closest .ux-cart-item"</span>
+          <span class="attr">hx-swap</span>=<span class="string">"outerHTML"</span>
+          <span class="attr">hx-confirm</span>=<span class="string">"Eliminar?"</span><span class="tag">&gt;</span>
+    Eliminar
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Carrito Completo con HTMX</h4>
+      <p>Carrito que carga desde el servidor y actualiza totales automaticamente.</p>
+
+      <div class="demo-box">
+        <div class="ux-cart ux-cart--bordered" style="max-width: 400px;">
+          <div class="ux-cart__header">
+            <h2 class="ux-cart__title">Mi Pedido</h2>
+            <button class="ux-button ux-button--sm ux-button--clear"
+                    style="color: var(--ux-danger);"
+                    hx-delete="/api/cart/clear"
+                    hx-target="#full-cart-content"
+                    hx-swap="innerHTML"
+                    hx-confirm="Vaciar carrito?">
+              Vaciar
+            </button>
+          </div>
+
+          <div id="full-cart-content"
+               hx-get="/api/cart"
+               hx-trigger="load"
+               hx-swap="innerHTML"
+               style="min-height: 200px;">
+            <div style="padding: var(--ux-space-xl); text-align: center;">
+              <span class="ux-spinner"></span>
+              <p style="color: var(--ux-text-secondary); margin-top: var(--ux-space-sm);">Cargando carrito...</p>
+            </div>
+          </div>
+
+          <div class="ux-cart__actions">
+            <button class="ux-button ux-color-primary" style="flex: 1;"
+                    hx-post="/api/checkout"
+                    hx-target="#checkout-result"
+                    hx-swap="innerHTML"
+                    hx-indicator="#checkout-spinner">
+              <span class="ux-spinner ux-spinner--sm htmx-indicator" id="checkout-spinner"></span>
+              Proceder al Pago
+            </button>
+          </div>
+        </div>
+        <div id="checkout-result" style="margin-top: var(--ux-space-md);"></div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Carrito que carga del servidor --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-cart"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"cart-content"</span>
+       <span class="attr">hx-get</span>=<span class="string">"/api/cart"</span>
+       <span class="attr">hx-trigger</span>=<span class="string">"load"</span>
+       <span class="attr">hx-swap</span>=<span class="string">"innerHTML"</span><span class="tag">&gt;</span>
+    Cargando...
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;button</span> <span class="attr">hx-post</span>=<span class="string">"/api/checkout"</span>
+          <span class="attr">hx-target</span>=<span class="string">"#result"</span><span class="tag">&gt;</span>
+    Pagar
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Sincronizacion OOB (Out of Band)</h4>
+      <p>Actualizar contador del carrito en navbar automaticamente.</p>
+
+      <div class="demo-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius); margin-bottom: var(--ux-space-md);">
+          <span>Navbar con contador:</span>
+          <div style="display: flex; align-items: center; gap: var(--ux-space-sm);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <span id="navbar-cart-count" class="ux-badge ux-color-primary" style="min-width: 24px; text-align: center;">3</span>
+          </div>
+        </div>
+
+        <button class="ux-button ux-button--outline"
+                hx-post="/api/cart/add-oob"
+                hx-vals='{"product_id": 99}'
+                hx-target="#oob-result"
+                hx-swap="innerHTML">
+          Agregar Producto (actualiza contador)
+        </button>
+        <div id="oob-result" style="margin-top: var(--ux-space-sm);"></div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Contador en navbar --&gt;</span>
+<span class="tag">&lt;span</span> <span class="attr">id</span>=<span class="string">"cart-count"</span><span class="tag">&gt;</span>3<span class="tag">&lt;/span&gt;</span>
+
+<span class="comment">&lt;!-- Boton que agrega producto --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">hx-post</span>=<span class="string">"/api/cart/add"</span><span class="tag">&gt;</span>Agregar<span class="tag">&lt;/button&gt;</span>
+
+<span class="comment">&lt;!-- Respuesta del servidor con OOB swap --&gt;</span>
+<span class="tag">&lt;div&gt;</span>Producto agregado!<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;span</span> <span class="attr">id</span>=<span class="string">"cart-count"</span> <span class="attr">hx-swap-oob</span>=<span class="string">"true"</span><span class="tag">&gt;</span>4<span class="tag">&lt;/span&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Aplicar Codigo de Descuento</h4>
+      <p>Validar codigo de descuento en el servidor.</p>
+
+      <div class="demo-box">
+        <form hx-post="/api/cart/apply-discount"
+              hx-target="#discount-result"
+              hx-swap="innerHTML"
+              hx-indicator="#discount-spinner"
+              style="display: flex; gap: var(--ux-space-sm); max-width: 400px;">
+          <input type="text"
+                 name="code"
+                 class="ux-input__field"
+                 placeholder="Codigo de descuento"
+                 style="flex: 1;">
+          <button type="submit" class="ux-button ux-button--outline">
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" id="discount-spinner"></span>
+            Aplicar
+          </button>
+        </form>
+        <div id="discount-result" style="margin-top: var(--ux-space-sm);"></div>
+      </div>
+
+      <pre class="code-block"><span class="comment">&lt;!-- Aplicar descuento con HTMX --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/cart/apply-discount"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#result"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"code"</span> <span class="attr">placeholder</span>=<span class="string">"Codigo"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span><span class="tag">&gt;</span>Aplicar<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"result"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
+    </section>
+
+  </div>
+</body>
+</html>

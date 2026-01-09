@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tree View - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-tree.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: 0.8125rem; overflow-x: auto; white-space: pre; }
+    .demo-controls { display: flex; gap: var(--ux-space-sm); margin-bottom: var(--ux-space-md); flex-wrap: wrap; }
+    .demo-output { padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-radius-md); font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); }
+  </style>
+</head>
+<body class="ux-app">
+  <div class="demo-section">
+    <h3>Uso Basico</h3>
+    <p>Arbol jerarquico expandible/colapsable con iconos.</p>
+    <div class="demo-box" x-data="uxTree({
+      showIcons: true,
+      data: [
+        {
+          id: 'folder1',
+          label: 'Documentos',
+          icon: 'folder',
+          children: [
+            { id: 'file1', label: 'Informe.pdf', icon: 'file' },
+            { id: 'file2', label: 'Presentacion.pptx', icon: 'file' },
+            {
+              id: 'folder2',
+              label: 'Proyectos',
+              icon: 'folder',
+              children: [
+                { id: 'file3', label: 'Proyecto A.doc', icon: 'file' },
+                { id: 'file4', label: 'Proyecto B.doc', icon: 'file' }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'folder3',
+          label: 'Imagenes',
+          icon: 'folder',
+          children: [
+            { id: 'img1', label: 'foto1.jpg', icon: 'file' },
+            { id: 'img2', label: 'foto2.png', icon: 'file' }
+          ]
+        },
+        { id: 'file5', label: 'README.md', icon: 'file' }
+      ]
+    })">
+      <div class="ux-tree">
+        <template x-for="node in data" :key="node.id">
+          <div class="ux-tree__node" x-data="{ node }">
+            <div class="ux-tree__item"
+                 @click="handleClick(node.id, node, $event)"
+                 :data-node-id="node.id">
+              <!-- Toggle -->
+              <span class="ux-tree__toggle"
+                    :class="{
+                      'ux-tree__toggle--expanded': expandedNodes.has(node.id),
+                      'ux-tree__toggle--empty': !node.children || node.children.length === 0
+                    }"
+                    @click.stop="toggle(node.id)"
+                    x-html="icons.chevron"></span>
+              <!-- Icon -->
+              <span class="ux-tree__icon"
+                    :class="node.icon === 'folder' ? 'ux-tree__icon--folder' : 'ux-tree__icon--file'"
+                    x-html="node.icon === 'folder' ? (expandedNodes.has(node.id) ? icons.folderOpen : icons.folder) : icons.file"></span>
+              <!-- Label -->
+              <span class="ux-tree__label" x-text="node.label"></span>
+            </div>
+            <!-- Children -->
+            <template x-if="node.children && node.children.length > 0 && expandedNodes.has(node.id)">
+              <ul class="ux-tree__list ux-tree__list--nested">
+                <template x-for="child in node.children" :key="child.id">
+                  <li class="ux-tree__node">
+                    <div class="ux-tree__item"
+                         @click="handleClick(child.id, child, $event)"
+                         :data-node-id="child.id">
+                      <span class="ux-tree__toggle"
+                            :class="{
+                              'ux-tree__toggle--expanded': expandedNodes.has(child.id),
+                              'ux-tree__toggle--empty': !child.children || child.children.length === 0
+                            }"
+                            @click.stop="toggle(child.id)"
+                            x-html="icons.chevron"></span>
+                      <span class="ux-tree__icon"
+                            :class="child.icon === 'folder' ? 'ux-tree__icon--folder' : 'ux-tree__icon--file'"
+                            x-html="child.icon === 'folder' ? (expandedNodes.has(child.id) ? icons.folderOpen : icons.folder) : icons.file"></span>
+                      <span class="ux-tree__label" x-text="child.label"></span>
+                    </div>
+                    <!-- Nested children (level 3) -->
+                    <template x-if="child.children && child.children.length > 0 && expandedNodes.has(child.id)">
+                      <ul class="ux-tree__list ux-tree__list--nested">
+                        <template x-for="grandchild in child.children" :key="grandchild.id">
+                          <li class="ux-tree__node">
+                            <div class="ux-tree__item" @click="handleClick(grandchild.id, grandchild, $event)">
+                              <span class="ux-tree__toggle ux-tree__toggle--empty" x-html="icons.chevron"></span>
+                              <span class="ux-tree__icon ux-tree__icon--file" x-html="icons.file"></span>
+                              <span class="ux-tree__label" x-text="grandchild.label"></span>
+                            </div>
+                          </li>
+                        </template>
+                      </ul>
+                    </template>
+                  </li>
+                </template>
+              </ul>
+            </template>
+          </div>
+        </template>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxTree({
+  data: [
+    {
+      id: 'folder1',
+      label: 'Documentos',
+      icon: 'folder',
+      children: [
+        { id: 'file1', label: 'Informe.pdf', icon: 'file' },
+        { id: 'folder2', label: 'Proyectos', icon: 'folder', children: [...] }
+      ]
+    }
+  ]
+})"&gt;
+  &lt;div class="ux-tree"&gt;
+    &lt;!-- Tree structure --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Arbol con Seleccion</h3>
+    <p>Permite seleccionar nodos haciendo click.</p>
+    <div class="demo-box" x-data="uxTree({
+      selectable: true,
+      data: [
+        { id: 'item1', label: 'Opcion 1' },
+        { id: 'item2', label: 'Opcion 2' },
+        {
+          id: 'group1',
+          label: 'Grupo A',
+          children: [
+            { id: 'item3', label: 'Opcion 3' },
+            { id: 'item4', label: 'Opcion 4' }
+          ]
+        },
+        {
+          id: 'group2',
+          label: 'Grupo B',
+          children: [
+            { id: 'item5', label: 'Opcion 5' },
+            { id: 'item6', label: 'Opcion 6' }
+          ]
+        }
+      ]
+    })" @tree:select.window="console.log('Selected:', $event.detail)">
+      <div class="ux-tree">
+        <template x-for="node in data" :key="node.id">
+          <div class="ux-tree__node">
+            <div class="ux-tree__item"
+                 :class="{ 'ux-tree__item--selected': selectedNodes.has(node.id) }"
+                 @click="handleClick(node.id, node, $event)">
+              <span class="ux-tree__toggle"
+                    :class="{
+                      'ux-tree__toggle--expanded': expandedNodes.has(node.id),
+                      'ux-tree__toggle--empty': !node.children
+                    }"
+                    @click.stop="toggle(node.id)"
+                    x-html="icons.chevron"></span>
+              <span class="ux-tree__label" x-text="node.label"></span>
+            </div>
+            <template x-if="node.children && expandedNodes.has(node.id)">
+              <ul class="ux-tree__list ux-tree__list--nested">
+                <template x-for="child in node.children" :key="child.id">
+                  <li class="ux-tree__node">
+                    <div class="ux-tree__item"
+                         :class="{ 'ux-tree__item--selected': selectedNodes.has(child.id) }"
+                         @click="handleClick(child.id, child, $event)">
+                      <span class="ux-tree__toggle ux-tree__toggle--empty" x-html="icons.chevron"></span>
+                      <span class="ux-tree__label" x-text="child.label"></span>
+                    </div>
+                  </li>
+                </template>
+              </ul>
+            </template>
+          </div>
+        </template>
+      </div>
+      <div class="demo-output" style="margin-top: var(--ux-space-md);">
+        <strong>Seleccionado:</strong> <span x-text="[...selectedNodes].join(', ') || 'Ninguno'"></span>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxTree({ selectable: true, data: [...] })"&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Arbol con Checkboxes</h3>
+    <p>Checkboxes para seleccion multiple con estado indeterminado.</p>
+    <div class="demo-box" x-data="uxTree({
+      checkable: true,
+      data: [
+        {
+          id: 'all',
+          label: 'Seleccionar todo',
+          children: [
+            { id: 'cat1', label: 'Categoria 1', children: [
+              { id: 'opt1', label: 'Opcion 1.1' },
+              { id: 'opt2', label: 'Opcion 1.2' },
+              { id: 'opt3', label: 'Opcion 1.3' }
+            ]},
+            { id: 'cat2', label: 'Categoria 2', children: [
+              { id: 'opt4', label: 'Opcion 2.1' },
+              { id: 'opt5', label: 'Opcion 2.2' }
+            ]},
+            { id: 'cat3', label: 'Categoria 3' }
+          ]
+        }
+      ],
+      expanded: ['all', 'cat1', 'cat2']
+    })">
+      <div class="ux-tree">
+        <template x-for="node in data" :key="node.id">
+          <div class="ux-tree__node">
+            <div class="ux-tree__item" @click="toggle(node.id)">
+              <span class="ux-tree__toggle"
+                    :class="{ 'ux-tree__toggle--expanded': expandedNodes.has(node.id), 'ux-tree__toggle--empty': !node.children }"
+                    x-html="icons.chevron"></span>
+              <span class="ux-tree__checkbox"
+                    :class="{
+                      'ux-tree__checkbox--checked': checkedNodes.has(node.id),
+                      'ux-tree__checkbox--indeterminate': isIndeterminate(node.id)
+                    }"
+                    @click.stop="check(node.id)"
+                    x-html="icons.check"></span>
+              <span class="ux-tree__label" x-text="node.label"></span>
+            </div>
+            <template x-if="node.children && expandedNodes.has(node.id)">
+              <ul class="ux-tree__list ux-tree__list--nested">
+                <template x-for="child in node.children" :key="child.id">
+                  <li class="ux-tree__node">
+                    <div class="ux-tree__item" @click="toggle(child.id)">
+                      <span class="ux-tree__toggle"
+                            :class="{ 'ux-tree__toggle--expanded': expandedNodes.has(child.id), 'ux-tree__toggle--empty': !child.children }"
+                            x-html="icons.chevron"></span>
+                      <span class="ux-tree__checkbox"
+                            :class="{
+                              'ux-tree__checkbox--checked': checkedNodes.has(child.id),
+                              'ux-tree__checkbox--indeterminate': isIndeterminate(child.id)
+                            }"
+                            @click.stop="check(child.id)"
+                            x-html="icons.check"></span>
+                      <span class="ux-tree__label" x-text="child.label"></span>
+                    </div>
+                    <template x-if="child.children && expandedNodes.has(child.id)">
+                      <ul class="ux-tree__list ux-tree__list--nested">
+                        <template x-for="grandchild in child.children" :key="grandchild.id">
+                          <li class="ux-tree__node">
+                            <div class="ux-tree__item">
+                              <span class="ux-tree__toggle ux-tree__toggle--empty" x-html="icons.chevron"></span>
+                              <span class="ux-tree__checkbox"
+                                    :class="{ 'ux-tree__checkbox--checked': checkedNodes.has(grandchild.id) }"
+                                    @click.stop="check(grandchild.id)"
+                                    x-html="icons.check"></span>
+                              <span class="ux-tree__label" x-text="grandchild.label"></span>
+                            </div>
+                          </li>
+                        </template>
+                      </ul>
+                    </template>
+                  </li>
+                </template>
+              </ul>
+            </template>
+          </div>
+        </template>
+      </div>
+      <div class="demo-output" style="margin-top: var(--ux-space-md);">
+        <strong>Marcados:</strong> <span x-text="[...checkedNodes].join(', ') || 'Ninguno'"></span>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div x-data="uxTree({ checkable: true, data: [...] })"&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Controles Expandir/Colapsar</h3>
+    <p>Botones para expandir o colapsar todos los nodos.</p>
+    <div class="demo-box" x-data="uxTree({
+      data: [
+        { id: 'n1', label: 'Nivel 1 - A', children: [
+          { id: 'n1a', label: 'Nivel 2 - A.1', children: [
+            { id: 'n1a1', label: 'Nivel 3 - A.1.1' },
+            { id: 'n1a2', label: 'Nivel 3 - A.1.2' }
+          ]},
+          { id: 'n1b', label: 'Nivel 2 - A.2' }
+        ]},
+        { id: 'n2', label: 'Nivel 1 - B', children: [
+          { id: 'n2a', label: 'Nivel 2 - B.1' },
+          { id: 'n2b', label: 'Nivel 2 - B.2', children: [
+            { id: 'n2b1', label: 'Nivel 3 - B.2.1' }
+          ]}
+        ]},
+        { id: 'n3', label: 'Nivel 1 - C' }
+      ]
+    })">
+      <div class="demo-controls">
+        <button class="ux-button ux-button--outline ux-button--sm" @click="expandAll()">Expandir Todo</button>
+        <button class="ux-button ux-button--outline ux-button--sm" @click="collapseAll()">Colapsar Todo</button>
+      </div>
+      <div class="ux-tree ux-tree--bordered">
+        <template x-for="node in data" :key="node.id">
+          <div class="ux-tree__node">
+            <div class="ux-tree__item" @click="toggle(node.id)">
+              <span class="ux-tree__toggle"
+                    :class="{ 'ux-tree__toggle--expanded': expandedNodes.has(node.id), 'ux-tree__toggle--empty': !node.children }"
+                    x-html="icons.chevron"></span>
+              <span class="ux-tree__label" x-text="node.label"></span>
+            </div>
+            <template x-if="node.children && expandedNodes.has(node.id)">
+              <ul class="ux-tree__list ux-tree__list--nested">
+                <template x-for="child in node.children" :key="child.id">
+                  <li class="ux-tree__node">
+                    <div class="ux-tree__item" @click="toggle(child.id)">
+                      <span class="ux-tree__toggle"
+                            :class="{ 'ux-tree__toggle--expanded': expandedNodes.has(child.id), 'ux-tree__toggle--empty': !child.children }"
+                            x-html="icons.chevron"></span>
+                      <span class="ux-tree__label" x-text="child.label"></span>
+                    </div>
+                    <template x-if="child.children && expandedNodes.has(child.id)">
+                      <ul class="ux-tree__list ux-tree__list--nested">
+                        <template x-for="gc in child.children" :key="gc.id">
+                          <li class="ux-tree__node">
+                            <div class="ux-tree__item">
+                              <span class="ux-tree__toggle ux-tree__toggle--empty" x-html="icons.chevron"></span>
+                              <span class="ux-tree__label" x-text="gc.label"></span>
+                            </div>
+                          </li>
+                        </template>
+                      </ul>
+                    </template>
+                  </li>
+                </template>
+              </ul>
+            </template>
+          </div>
+        </template>
+      </div>
+    </div>
+    <pre class="code-block">&lt;button @click="expandAll()"&gt;Expandir Todo&lt;/button&gt;
+&lt;button @click="collapseAll()"&gt;Colapsar Todo&lt;/button&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Variante con Lineas</h3>
+    <p>Lineas de conexion entre nodos.</p>
+    <div class="demo-box" x-data="uxTree({
+      expanded: ['root', 'child1'],
+      data: [
+        { id: 'root', label: 'Raiz', children: [
+          { id: 'child1', label: 'Hijo 1', children: [
+            { id: 'gc1', label: 'Nieto 1' },
+            { id: 'gc2', label: 'Nieto 2' }
+          ]},
+          { id: 'child2', label: 'Hijo 2' },
+          { id: 'child3', label: 'Hijo 3' }
+        ]}
+      ]
+    })">
+      <div class="ux-tree ux-tree--lines">
+        <template x-for="node in data" :key="node.id">
+          <div class="ux-tree__node">
+            <div class="ux-tree__item" @click="toggle(node.id)">
+              <span class="ux-tree__toggle"
+                    :class="{ 'ux-tree__toggle--expanded': expandedNodes.has(node.id), 'ux-tree__toggle--empty': !node.children }"
+                    x-html="icons.chevron"></span>
+              <span class="ux-tree__label" x-text="node.label"></span>
+            </div>
+            <template x-if="node.children && expandedNodes.has(node.id)">
+              <ul class="ux-tree__list ux-tree__list--nested">
+                <template x-for="child in node.children" :key="child.id">
+                  <li class="ux-tree__node">
+                    <div class="ux-tree__item" @click="toggle(child.id)">
+                      <span class="ux-tree__toggle"
+                            :class="{ 'ux-tree__toggle--expanded': expandedNodes.has(child.id), 'ux-tree__toggle--empty': !child.children }"
+                            x-html="icons.chevron"></span>
+                      <span class="ux-tree__label" x-text="child.label"></span>
+                    </div>
+                    <template x-if="child.children && expandedNodes.has(child.id)">
+                      <ul class="ux-tree__list ux-tree__list--nested">
+                        <template x-for="gc in child.children" :key="gc.id">
+                          <li class="ux-tree__node">
+                            <div class="ux-tree__item">
+                              <span class="ux-tree__toggle ux-tree__toggle--empty" x-html="icons.chevron"></span>
+                              <span class="ux-tree__label" x-text="gc.label"></span>
+                            </div>
+                          </li>
+                        </template>
+                      </ul>
+                    </template>
+                  </li>
+                </template>
+              </ul>
+            </template>
+          </div>
+        </template>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-tree ux-tree--lines"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Variante Glass</h3>
+    <p>Efecto glass morphism para fondos con gradiente.</p>
+    <div class="demo-box" style="background: linear-gradient(135deg, var(--ux-primary-tint) 0%, var(--ux-tertiary-tint) 100%); padding: var(--ux-space-xl);">
+      <div x-data="uxTree({
+        expanded: ['apps'],
+        showIcons: true,
+        data: [
+          { id: 'apps', label: 'Aplicaciones', icon: 'folder', children: [
+            { id: 'app1', label: 'Safari', icon: 'file' },
+            { id: 'app2', label: 'Mail', icon: 'file' },
+            { id: 'app3', label: 'Musica', icon: 'file' }
+          ]},
+          { id: 'docs', label: 'Documentos', icon: 'folder', children: [
+            { id: 'doc1', label: 'Notas.txt', icon: 'file' }
+          ]},
+          { id: 'desktop', label: 'Escritorio', icon: 'folder' }
+        ]
+      })">
+        <div class="ux-tree ux-tree--glass">
+          <template x-for="node in data" :key="node.id">
+            <div class="ux-tree__node">
+              <div class="ux-tree__item" @click="toggle(node.id)">
+                <span class="ux-tree__toggle"
+                      :class="{ 'ux-tree__toggle--expanded': expandedNodes.has(node.id), 'ux-tree__toggle--empty': !node.children || node.children.length === 0 }"
+                      x-html="icons.chevron"></span>
+                <span class="ux-tree__icon ux-tree__icon--folder"
+                      x-html="expandedNodes.has(node.id) && node.children ? icons.folderOpen : icons.folder"></span>
+                <span class="ux-tree__label" x-text="node.label"></span>
+              </div>
+              <template x-if="node.children && expandedNodes.has(node.id)">
+                <ul class="ux-tree__list ux-tree__list--nested">
+                  <template x-for="child in node.children" :key="child.id">
+                    <li class="ux-tree__node">
+                      <div class="ux-tree__item">
+                        <span class="ux-tree__toggle ux-tree__toggle--empty" x-html="icons.chevron"></span>
+                        <span class="ux-tree__icon ux-tree__icon--file" x-html="icons.file"></span>
+                        <span class="ux-tree__label" x-text="child.label"></span>
+                      </div>
+                    </li>
+                  </template>
+                </ul>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-tree ux-tree--glass"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Tamanos</h3>
+    <p>Variantes de tamano: small, default, large.</p>
+    <div class="demo-box" style="display: flex; gap: var(--ux-space-xl); flex-wrap: wrap;">
+      <!-- Small -->
+      <div style="flex: 1; min-width: 200px;">
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-sm);">Small</p>
+        <div x-data="uxTree({
+          expanded: ['sm1'],
+          data: [
+            { id: 'sm1', label: 'Carpeta', children: [
+              { id: 'sm1a', label: 'Archivo 1' },
+              { id: 'sm1b', label: 'Archivo 2' }
+            ]},
+            { id: 'sm2', label: 'Otro' }
+          ]
+        })">
+          <div class="ux-tree ux-tree--sm ux-tree--bordered">
+            <template x-for="node in data" :key="node.id">
+              <div class="ux-tree__node">
+                <div class="ux-tree__item" @click="toggle(node.id)">
+                  <span class="ux-tree__toggle" :class="{ 'ux-tree__toggle--expanded': expandedNodes.has(node.id), 'ux-tree__toggle--empty': !node.children }" x-html="icons.chevron"></span>
+                  <span class="ux-tree__label" x-text="node.label"></span>
+                </div>
+                <template x-if="node.children && expandedNodes.has(node.id)">
+                  <ul class="ux-tree__list ux-tree__list--nested">
+                    <template x-for="child in node.children" :key="child.id">
+                      <li class="ux-tree__node">
+                        <div class="ux-tree__item">
+                          <span class="ux-tree__toggle ux-tree__toggle--empty" x-html="icons.chevron"></span>
+                          <span class="ux-tree__label" x-text="child.label"></span>
+                        </div>
+                      </li>
+                    </template>
+                  </ul>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <!-- Large -->
+      <div style="flex: 1; min-width: 200px;">
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-sm);">Large</p>
+        <div x-data="uxTree({
+          expanded: ['lg1'],
+          data: [
+            { id: 'lg1', label: 'Carpeta', children: [
+              { id: 'lg1a', label: 'Archivo 1' },
+              { id: 'lg1b', label: 'Archivo 2' }
+            ]},
+            { id: 'lg2', label: 'Otro' }
+          ]
+        })">
+          <div class="ux-tree ux-tree--lg ux-tree--bordered">
+            <template x-for="node in data" :key="node.id">
+              <div class="ux-tree__node">
+                <div class="ux-tree__item" @click="toggle(node.id)">
+                  <span class="ux-tree__toggle" :class="{ 'ux-tree__toggle--expanded': expandedNodes.has(node.id), 'ux-tree__toggle--empty': !node.children }" x-html="icons.chevron"></span>
+                  <span class="ux-tree__label" x-text="node.label"></span>
+                </div>
+                <template x-if="node.children && expandedNodes.has(node.id)">
+                  <ul class="ux-tree__list ux-tree__list--nested">
+                    <template x-for="child in node.children" :key="child.id">
+                      <li class="ux-tree__node">
+                        <div class="ux-tree__item">
+                          <span class="ux-tree__toggle ux-tree__toggle--empty" x-html="icons.chevron"></span>
+                          <span class="ux-tree__label" x-text="child.label"></span>
+                        </div>
+                      </li>
+                    </template>
+                  </ul>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-tree ux-tree--sm"&gt;...&lt;/div&gt;
+&lt;div class="ux-tree ux-tree--lg"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Con Badges</h3>
+    <p>Indicadores numericos en los nodos.</p>
+    <div class="demo-box" x-data="uxTree({
+      expanded: ['inbox'],
+      data: [
+        { id: 'inbox', label: 'Bandeja de entrada', badge: 23, badgeType: 'primary', children: [
+          { id: 'unread', label: 'No leidos', badge: 15 },
+          { id: 'starred', label: 'Destacados', badge: 8 }
+        ]},
+        { id: 'sent', label: 'Enviados', badge: 142 },
+        { id: 'drafts', label: 'Borradores', badge: 3 },
+        { id: 'trash', label: 'Papelera' }
+      ]
+    })">
+      <div class="ux-tree ux-tree--bordered">
+        <template x-for="node in data" :key="node.id">
+          <div class="ux-tree__node">
+            <div class="ux-tree__item" @click="toggle(node.id)">
+              <span class="ux-tree__toggle"
+                    :class="{ 'ux-tree__toggle--expanded': expandedNodes.has(node.id), 'ux-tree__toggle--empty': !node.children }"
+                    x-html="icons.chevron"></span>
+              <span class="ux-tree__label" x-text="node.label"></span>
+              <span x-show="node.badge" class="ux-tree__badge" :class="{ 'ux-tree__badge--primary': node.badgeType === 'primary' }" x-text="node.badge"></span>
+            </div>
+            <template x-if="node.children && expandedNodes.has(node.id)">
+              <ul class="ux-tree__list ux-tree__list--nested">
+                <template x-for="child in node.children" :key="child.id">
+                  <li class="ux-tree__node">
+                    <div class="ux-tree__item">
+                      <span class="ux-tree__toggle ux-tree__toggle--empty" x-html="icons.chevron"></span>
+                      <span class="ux-tree__label" x-text="child.label"></span>
+                      <span x-show="child.badge" class="ux-tree__badge" x-text="child.badge"></span>
+                    </div>
+                  </li>
+                </template>
+              </ul>
+            </template>
+          </div>
+        </template>
+      </div>
+    </div>
+    <pre class="code-block">// Data con badges
+{ id: 'inbox', label: 'Bandeja', badge: 23, badgeType: 'primary' }
+
+// Template
+&lt;span class="ux-tree__badge" :class="{ 'ux-tree__badge--primary': node.badgeType === 'primary' }"&gt;
+  &lt;span x-text="node.badge"&gt;&lt;/span&gt;
+&lt;/span&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>API y Eventos</h3>
+    <div class="demo-box">
+      <pre class="code-block">// Opciones de configuracion
+uxTree({
+  data: [],                // Array de nodos
+  selectable: false,       // Permitir seleccion
+  multiSelect: false,      // Seleccion multiple
+  checkable: false,        // Mostrar checkboxes
+  editable: false,         // Permitir edicion de labels
+  draggable: false,        // Permitir drag & drop
+  showIcons: true,         // Mostrar iconos
+  showActions: false,      // Mostrar acciones (add, edit, delete)
+  expandOnClick: true,     // Expandir al hacer click
+  lazyLoad: false,         // Cargar hijos bajo demanda
+  loadChildren: null,      // Funcion async para cargar hijos
+  expanded: [],            // IDs de nodos expandidos inicialmente
+  selected: [],            // IDs de nodos seleccionados inicialmente
+  checked: []              // IDs de nodos marcados inicialmente
+})
+
+// Metodos
+toggle(nodeId)             // Expandir/colapsar nodo
+expand(nodeId)             // Expandir nodo
+collapse(nodeId)           // Colapsar nodo
+expandAll()                // Expandir todos
+collapseAll()              // Colapsar todos
+select(nodeId)             // Seleccionar nodo
+check(nodeId, checked?)    // Marcar/desmarcar checkbox
+startEdit(nodeId)          // Iniciar edicion
+findNode(nodeId)           // Buscar nodo por ID
+getSelected()              // Obtener nodos seleccionados
+getChecked()               // Obtener nodos marcados
+addNode(parentId, node)    // Agregar nodo
+removeNode(nodeId)         // Eliminar nodo
+
+// Eventos
+@tree:expand               // Nodo expandido
+@tree:collapse             // Nodo colapsado
+@tree:expand-all           // Todos expandidos
+@tree:collapse-all         // Todos colapsados
+@tree:select               // Nodo seleccionado
+@tree:check                // Checkbox cambiado
+@tree:click                // Click en nodo
+@tree:dblclick             // Doble click en nodo
+@tree:rename               // Nodo renombrado
+@tree:add                  // Nodo agregado
+@tree:remove               // Nodo eliminado
+@tree:drop                 // Drag & drop completado
+@tree:load-error           // Error al cargar hijos</pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>Estructura de Nodo</h3>
+    <div class="demo-box">
+      <pre class="code-block">// Estructura basica de un nodo
+{
+  id: 'unique-id',         // ID unico (requerido)
+  label: 'Nombre',         // Texto a mostrar (requerido)
+  icon: 'folder',          // 'folder' o 'file' (opcional)
+  children: [],            // Array de nodos hijos (opcional)
+  badge: 5,                // Numero para badge (opcional)
+  badgeType: 'primary',    // Tipo de badge (opcional)
+  disabled: false,         // Deshabilitar nodo (opcional)
+  data: {}                 // Datos adicionales (opcional)
+}</pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>Integracion con HTMX</h3>
+    <p>Carga diferida de nodos hijos desde el servidor.</p>
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Tree con lazy loading --&gt;
+&lt;div x-data="uxTree({
+  lazyLoad: true,
+  loadChildren: async (node) => {
+    const response = await fetch(`/api/tree/${node.id}/children`);
+    return await response.json();
+  },
+  data: [
+    { id: 'root', label: 'Raiz', children: [] }
+  ]
+})"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- Con HTMX directo --&gt;
+&lt;div class="ux-tree"&gt;
+  &lt;div class="ux-tree__node"&gt;
+    &lt;div class="ux-tree__item"
+         hx-get="/api/tree/folder1/children"
+         hx-target="next .ux-tree__list--nested"
+         hx-trigger="click once"
+         hx-swap="innerHTML"&gt;
+      &lt;span class="ux-tree__toggle"&gt;...&lt;/span&gt;
+      &lt;span class="ux-tree__label"&gt;Carpeta&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;ul class="ux-tree__list ux-tree__list--nested"&gt;&lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+  </div>
+</body>
+</html>

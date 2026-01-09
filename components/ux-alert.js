@@ -374,6 +374,33 @@
       -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
       border: 0.5px solid var(--ux-glass-border);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-alert-backdrop {
+        transition: opacity 0.1s ease, visibility 0.1s ease;
+      }
+
+      .ux-alert {
+        transition: opacity 0.1s ease;
+        transform: none;
+      }
+
+      .ux-alert-backdrop--open .ux-alert {
+        transform: none;
+      }
+
+      .ux-alert__button {
+        transition: none;
+      }
+
+      .ux-alert__input {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles

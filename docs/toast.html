@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Toast - UX Library</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-button.js"></script>
@@ -205,25 +206,145 @@
 
     <!-- HTMX -->
     <section class="demo-section">
-      <h3>Con HTMX</h3>
-      <p>Mostrar toast desde respuesta del servidor.</p>
-      <pre class="code-block"><span class="comment">&lt;!-- Boton que dispara request --&gt;</span>
-<span class="tag">&lt;button</span> <span class="attr">hx-post</span>=<span class="string">"/api/save"</span>
-        <span class="attr">hx-target</span>=<span class="string">"#toast-container"</span>
-        <span class="attr">hx-swap</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
-  Guardar
-<span class="tag">&lt;/button&gt;</span>
+      <h3>Integracion con HTMX</h3>
+      <p>HTMX es la tecnologia principal para mostrar toasts desde respuestas del servidor.</p>
 
-<span class="comment">&lt;!-- Contenedor para toasts --&gt;</span>
-<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"toast-container"</span> <span class="attr">class</span>=<span class="string">"ux-toast-container"</span><span class="tag">&gt;&lt;/div&gt;</span>
+      <h4 style="margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Toast desde respuesta de formulario</h4>
+      <pre class="code-block"><span class="comment">&lt;!-- Formulario que muestra toast al guardar --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/settings"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#toast-container"</span>
+      <span class="attr">hx-swap</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"name"</span> <span class="attr">class</span>=<span class="string">"ux-input"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-primary"</span><span class="tag">&gt;</span>Guardar<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span>
 
-<span class="comment">&lt;!-- Respuesta del servidor (HTML) --&gt;</span>
-<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--success"</span>
+<span class="comment">&lt;!-- Contenedor fijo para toasts --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"toast-container"</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--bottom"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Servidor devuelve toast con auto-cierre --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--success ux-toast--visible"</span>
      <span class="attr">x-data</span>=<span class="string">"{ show: true }"</span>
      <span class="attr">x-show</span>=<span class="string">"show"</span>
-     <span class="attr">x-init</span>=<span class="string">"setTimeout(() => { show = false; $el.remove() }, 3000)"</span><span class="tag">&gt;</span>
-  Guardado!
+     <span class="attr">x-init</span>=<span class="string">"setTimeout(() => { show = false; setTimeout(() => $el.remove(), 300) }, 3000)"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-toast__message"</span><span class="tag">&gt;</span>Configuracion guardada<span class="tag">&lt;/span&gt;</span>
 <span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Toast con accion de reintentar</h4>
+      <pre class="code-block"><span class="comment">&lt;!-- Boton que puede fallar --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">id</span>=<span class="string">"sync-btn"</span>
+        <span class="attr">hx-post</span>=<span class="string">"/api/sync"</span>
+        <span class="attr">hx-target</span>=<span class="string">"#toast-container"</span>
+        <span class="attr">hx-swap</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
+  Sincronizar
+<span class="tag">&lt;/button&gt;</span>
+
+<span class="comment">&lt;!-- Servidor devuelve toast de error con accion --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--danger ux-toast--visible"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-toast__message"</span><span class="tag">&gt;</span>Error de conexion<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-toast__action"</span>
+          <span class="attr">hx-post</span>=<span class="string">"/api/sync"</span>
+          <span class="attr">hx-target</span>=<span class="string">"#toast-container"</span>
+          <span class="attr">hx-swap</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
+    Reintentar
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Toast con Out-of-Band (OOB)</h4>
+      <pre class="code-block"><span class="comment">&lt;!-- Formulario normal --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/products"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#products-table"</span>
+      <span class="attr">hx-swap</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"product"</span> <span class="attr">class</span>=<span class="string">"ux-input"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-primary"</span><span class="tag">&gt;</span>Agregar<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span>
+
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"toast-container"</span> <span class="attr">class</span>=<span class="string">"ux-toast-container"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Servidor devuelve fila + toast OOB --&gt;</span>
+<span class="tag">&lt;tr&gt;</span>
+  <span class="tag">&lt;td&gt;</span>Nuevo Producto<span class="tag">&lt;/td&gt;</span>
+  <span class="tag">&lt;td&gt;</span>$99.00<span class="tag">&lt;/td&gt;</span>
+<span class="tag">&lt;/tr&gt;</span>
+
+<span class="comment">&lt;!-- Toast inyectado via OOB --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"toast-container"</span> <span class="attr">hx-swap-oob</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--success ux-toast--visible"</span> ...&gt;
+    Producto agregado
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Toast para delete con confirmacion</h4>
+      <pre class="code-block"><span class="comment">&lt;!-- Boton eliminar --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">hx-delete</span>=<span class="string">"/api/items/123"</span>
+        <span class="attr">hx-target</span>=<span class="string">"#item-123"</span>
+        <span class="attr">hx-swap</span>=<span class="string">"outerHTML"</span>
+        <span class="attr">hx-confirm</span>=<span class="string">"Eliminar este item?"</span><span class="tag">&gt;</span>
+  Eliminar
+<span class="tag">&lt;/button&gt;</span>
+
+<span class="comment">&lt;!-- Servidor devuelve espacio vacio + toast OOB --&gt;</span>
+<span class="tag">&lt;div&gt;&lt;/div&gt;</span>
+
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"toast-container"</span> <span class="attr">hx-swap-oob</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--success ux-toast--visible"</span>
+       <span class="attr">x-data</span>=<span class="string">"{ show: true }"</span>
+       <span class="attr">x-show</span>=<span class="string">"show"</span>
+       <span class="attr">x-init</span>=<span class="string">"setTimeout(() => { show = false; setTimeout(() => $el.remove(), 300) }, 3000)"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-toast__message"</span><span class="tag">&gt;</span>Item eliminado<span class="tag">&lt;/span&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-toast__action"</span>
+            <span class="attr">hx-post</span>=<span class="string">"/api/items/123/restore"</span>
+            <span class="attr">hx-target</span>=<span class="string">"#items-list"</span>
+            <span class="attr">hx-swap</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
+      Deshacer
+    <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Toast de progreso para upload</h4>
+      <pre class="code-block"><span class="comment">&lt;!-- Upload con feedback de progreso --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">hx-post</span>=<span class="string">"/api/upload"</span>
+      <span class="attr">hx-encoding</span>=<span class="string">"multipart/form-data"</span>
+      <span class="attr">hx-target</span>=<span class="string">"#toast-container"</span>
+      <span class="attr">hx-swap</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"file"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">class</span>=<span class="string">"ux-button ux-color-primary"</span><span class="tag">&gt;</span>Subir<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span>
+
+<span class="comment">&lt;!-- Servidor devuelve toast de exito con link --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--success ux-toast--visible"</span> ...&gt;
+  <span class="tag">&lt;svg</span> <span class="attr">class</span>=<span class="string">"ux-toast__icon"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/svg&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-toast__message"</span><span class="tag">&gt;</span>Archivo subido<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="string">"/files/123"</span> <span class="attr">class</span>=<span class="string">"ux-toast__action"</span><span class="tag">&gt;</span>Ver<span class="tag">&lt;/a&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Toast de validacion inline</h4>
+      <pre class="code-block"><span class="comment">&lt;!-- Input con validacion que muestra toast --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="string">"email"</span>
+       <span class="attr">name</span>=<span class="string">"email"</span>
+       <span class="attr">class</span>=<span class="string">"ux-input"</span>
+       <span class="attr">hx-post</span>=<span class="string">"/api/validate/email"</span>
+       <span class="attr">hx-trigger</span>=<span class="string">"blur"</span>
+       <span class="attr">hx-target</span>=<span class="string">"#toast-container"</span>
+       <span class="attr">hx-swap</span>=<span class="string">"beforeend"</span><span class="tag">&gt;</span>
+
+<span class="comment">&lt;!-- Servidor devuelve toast de error si email ya existe --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-toast ux-toast--warning ux-toast--visible"</span> ...&gt;
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-toast__message"</span><span class="tag">&gt;</span>Este email ya esta registrado<span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-md);">Multiples toasts apilados</h4>
+      <pre class="code-block"><span class="comment">&lt;!-- Contenedor que apila toasts --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="string">"toast-container"</span> <span class="attr">class</span>=<span class="string">"ux-toast-container ux-toast-container--bottom-end"</span><span class="tag">&gt;</span>
+  <span class="comment">&lt;!-- Cada respuesta agrega un toast --&gt;</span>
+  <span class="comment">&lt;!-- Los toasts se apilan verticalmente --&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- CSS asegura que se apilen con gap --&gt;</span>
+.ux-toast-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ux-space-sm);
+}</pre>
     </section>
 
     <!-- API Table -->

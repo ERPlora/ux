@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Variant Selector - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-variant-selector.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text);
+    }
+    .demo-section p {
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+    }
+    .code-block {
+      background: #1a1a2e;
+      color: #e5e5e5;
+      padding: var(--ux-space-md);
+      border-radius: var(--ux-border-radius);
+      overflow-x: auto;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: var(--ux-font-size-md);
+      line-height: 1.6;
+    }
+    .code-block .tag { color: #ff7b72; }
+    .code-block .attr { color: #79c0ff; }
+    .code-block .string { color: #a5d6ff; }
+    .code-block .comment { color: #8b949e; }
+    .result-text {
+      margin-top: var(--ux-space-md);
+      padding: var(--ux-space-sm);
+      background: var(--ux-gray-100);
+      border-radius: var(--ux-radius-sm);
+      font-size: var(--ux-font-size-sm);
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content" style="padding: var(--ux-space-lg);">
+
+    <section class="demo-section">
+      <h3>Selector de Talla</h3>
+      <p>Selector basico para tallas de ropa o zapatos.</p>
+      <div class="demo-box"
+           x-data="uxVariantSelector({
+             label: 'Talla',
+             options: [
+               { value: 'xs', label: 'XS' },
+               { value: 's', label: 'S' },
+               { value: 'm', label: 'M' },
+               { value: 'l', label: 'L' },
+               { value: 'xl', label: 'XL' },
+               { value: 'xxl', label: 'XXL', available: false }
+             ],
+             selected: 'm'
+           })">
+        <div class="ux-variant-selector">
+          <div class="ux-variant-selector__label">
+            <span x-text="label"></span>
+            <span class="ux-variant-selector__selected" x-text="selectedOption?.label"></span>
+          </div>
+          <div class="ux-variant-selector__options">
+            <template x-for="opt in options" :key="opt.value">
+              <button class="ux-variant-selector__option"
+                      :class="{
+                        'ux-variant-selector__option--selected': isSelected(opt.value),
+                        'ux-variant-selector__option--unavailable': opt.available === false
+                      }"
+                      @click="select(opt.value)"
+                      x-text="opt.label">
+              </button>
+            </template>
+          </div>
+        </div>
+        <div class="result-text">Seleccionado: <strong x-text="selected"></strong></div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxVariantSelector({
+  label: 'Talla',
+  options: [
+    { value: 'xs', label: 'XS' },
+    { value: 's', label: 'S' },
+    { value: 'm', label: 'M' },
+    { value: 'l', label: 'L' },
+    { value: 'xl', label: 'XL' },
+    { value: 'xxl', label: 'XXL', available: false }
+  ],
+  selected: 'm'
+})"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector__options"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;template</span> <span class="attr">x-for</span>=<span class="string">"opt in options"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector__option"</span> <span class="attr">@click</span>=<span class="string">"select(opt.value)"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;/template&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Selector de Color</h3>
+      <p>Swatches de colores para seleccionar variante de producto.</p>
+      <div class="demo-box"
+           x-data="uxVariantSelector({
+             label: 'Color',
+             options: [
+               { value: 'black', label: 'Negro', color: '#000000' },
+               { value: 'white', label: 'Blanco', color: '#ffffff' },
+               { value: 'red', label: 'Rojo', color: '#ef4444' },
+               { value: 'blue', label: 'Azul', color: '#3b82f6' },
+               { value: 'green', label: 'Verde', color: '#22c55e' },
+               { value: 'yellow', label: 'Amarillo', color: '#eab308', available: false }
+             ],
+             selected: 'black'
+           })">
+        <div class="ux-variant-selector ux-variant-selector--color">
+          <div class="ux-variant-selector__label">
+            <span x-text="label"></span>
+            <span class="ux-variant-selector__selected" x-text="selectedOption?.label"></span>
+          </div>
+          <div class="ux-variant-selector__options">
+            <template x-for="opt in options" :key="opt.value">
+              <button class="ux-variant-selector__option"
+                      :class="{
+                        'ux-variant-selector__option--selected': isSelected(opt.value),
+                        'ux-variant-selector__option--unavailable': opt.available === false,
+                        'ux-variant-selector__option--light': isLightColor(opt.color)
+                      }"
+                      :style="'background-color: ' + opt.color"
+                      @click="select(opt.value)"
+                      :title="opt.label">
+              </button>
+            </template>
+          </div>
+        </div>
+        <div class="result-text">Seleccionado: <strong x-text="selectedOption?.label"></strong></div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector ux-variant-selector--color"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector__options"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector__option"</span>
+            <span class="attr">:style</span>=<span class="string">"'background-color: ' + opt.color"</span><span class="tag">&gt;&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Selector con Imagenes</h3>
+      <p>Miniaturas de imagen para variantes visuales.</p>
+      <div class="demo-box"
+           x-data="uxVariantSelector({
+             label: 'Estilo',
+             options: [
+               { value: 'solid', label: 'Solido', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop' },
+               { value: 'striped', label: 'Rayas', image: 'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=100&h=100&fit=crop' },
+               { value: 'print', label: 'Estampado', image: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=100&h=100&fit=crop' }
+             ],
+             selected: 'solid'
+           })">
+        <div class="ux-variant-selector ux-variant-selector--image">
+          <div class="ux-variant-selector__label">
+            <span x-text="label"></span>
+            <span class="ux-variant-selector__selected" x-text="selectedOption?.label"></span>
+          </div>
+          <div class="ux-variant-selector__options">
+            <template x-for="opt in options" :key="opt.value">
+              <button class="ux-variant-selector__option"
+                      :class="{ 'ux-variant-selector__option--selected': isSelected(opt.value) }"
+                      @click="select(opt.value)">
+                <img :src="opt.image" :alt="opt.label">
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector ux-variant-selector--image"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector__option"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;img</span> <span class="attr">:src</span>=<span class="string">"opt.image"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Variante Chip</h3>
+      <p>Estilo chip con bordes redondeados.</p>
+      <div class="demo-box"
+           x-data="uxVariantSelector({
+             label: 'Material',
+             options: [
+               { value: 'cotton', label: 'Algodon' },
+               { value: 'polyester', label: 'Poliester' },
+               { value: 'linen', label: 'Lino' },
+               { value: 'wool', label: 'Lana' }
+             ],
+             selected: 'cotton'
+           })">
+        <div class="ux-variant-selector ux-variant-selector--chip">
+          <div class="ux-variant-selector__label">
+            <span x-text="label"></span>
+          </div>
+          <div class="ux-variant-selector__options">
+            <template x-for="opt in options" :key="opt.value">
+              <button class="ux-variant-selector__option"
+                      :class="{ 'ux-variant-selector__option--selected': isSelected(opt.value) }"
+                      @click="select(opt.value)"
+                      x-text="opt.label">
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector ux-variant-selector--chip"</span><span class="tag">&gt;</span>...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Grupo de Botones</h3>
+      <p>Opciones agrupadas como un segmento.</p>
+      <div class="demo-box"
+           x-data="uxVariantSelector({
+             options: [
+               { value: 'daily', label: 'Diario' },
+               { value: 'weekly', label: 'Semanal' },
+               { value: 'monthly', label: 'Mensual' }
+             ],
+             selected: 'weekly'
+           })">
+        <div class="ux-variant-selector ux-variant-selector--button-group">
+          <div class="ux-variant-selector__options">
+            <template x-for="opt in options" :key="opt.value">
+              <button class="ux-variant-selector__option"
+                      :class="{ 'ux-variant-selector__option--selected': isSelected(opt.value) }"
+                      @click="select(opt.value)"
+                      x-text="opt.label">
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector ux-variant-selector--button-group"</span><span class="tag">&gt;</span>...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Con Precios</h3>
+      <p>Mostrar diferencia de precio por variante.</p>
+      <div class="demo-box"
+           x-data="uxVariantSelector({
+             label: 'Almacenamiento',
+             options: [
+               { value: '128', label: '128 GB', price: '$999' },
+               { value: '256', label: '256 GB', price: '$1,099', priceDiff: '+$100' },
+               { value: '512', label: '512 GB', price: '$1,299', priceDiff: '+$300' },
+               { value: '1tb', label: '1 TB', price: '$1,499', priceDiff: '+$500' }
+             ],
+             selected: '128'
+           })">
+        <div class="ux-variant-selector">
+          <div class="ux-variant-selector__label">
+            <span x-text="label"></span>
+            <span class="ux-variant-selector__selected" x-text="selectedOption?.price"></span>
+          </div>
+          <div class="ux-variant-selector__options">
+            <template x-for="opt in options" :key="opt.value">
+              <button class="ux-variant-selector__option"
+                      :class="{ 'ux-variant-selector__option--selected': isSelected(opt.value) }"
+                      @click="select(opt.value)"
+                      style="min-width: 80px; padding: var(--ux-space-sm) var(--ux-space-md);">
+                <div class="ux-variant-selector__option-content">
+                  <span class="ux-variant-selector__option-name" x-text="opt.label"></span>
+                  <span class="ux-variant-selector__option-price" x-text="opt.priceDiff || opt.price"></span>
+                </div>
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Dropdown</h3>
+      <p>Selector en formato desplegable para muchas opciones.</p>
+      <div class="demo-box"
+           x-data="uxVariantSelector({
+             label: 'Pais',
+             options: [
+               { value: 'es', label: 'Espana' },
+               { value: 'mx', label: 'Mexico' },
+               { value: 'ar', label: 'Argentina' },
+               { value: 'co', label: 'Colombia' },
+               { value: 'cl', label: 'Chile' },
+               { value: 'pe', label: 'Peru' }
+             ],
+             selected: 'es'
+           })"
+           @click.outside="close()">
+        <div class="ux-variant-selector ux-variant-selector--dropdown"
+             :class="{ 'ux-variant-selector--open': isOpen }"
+             style="max-width: 300px;">
+          <div class="ux-variant-selector__label" x-text="label" style="margin-bottom: var(--ux-space-xs);"></div>
+          <button class="ux-variant-selector__trigger" @click="toggle()">
+            <span x-text="selectedLabel"></span>
+            <svg class="ux-variant-selector__trigger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="ux-variant-selector__menu">
+            <template x-for="opt in options" :key="opt.value">
+              <button class="ux-variant-selector__option"
+                      :class="{ 'ux-variant-selector__option--selected': isSelected(opt.value) }"
+                      @click="select(opt.value)"
+                      x-text="opt.label">
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector ux-variant-selector--dropdown"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector__trigger"</span> <span class="attr">@click</span>=<span class="string">"toggle()"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"selectedLabel"</span><span class="tag">&gt;&lt;/span&gt;</span>
+  <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-variant-selector__menu"</span><span class="tag">&gt;</span>
+    ...
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Con Indicador de Stock</h3>
+      <p>Muestra disponibilidad de inventario.</p>
+      <div class="demo-box"
+           x-data="uxVariantSelector({
+             label: 'Talla',
+             options: [
+               { value: 's', label: 'S', stock: 15 },
+               { value: 'm', label: 'M', stock: 3 },
+               { value: 'l', label: 'L', stock: 8 },
+               { value: 'xl', label: 'XL', stock: 0, available: false }
+             ],
+             selected: 's'
+           })">
+        <div class="ux-variant-selector">
+          <div class="ux-variant-selector__label">
+            <span x-text="label"></span>
+          </div>
+          <div class="ux-variant-selector__options">
+            <template x-for="opt in options" :key="opt.value">
+              <button class="ux-variant-selector__option"
+                      :class="{
+                        'ux-variant-selector__option--selected': isSelected(opt.value),
+                        'ux-variant-selector__option--unavailable': opt.available === false
+                      }"
+                      @click="select(opt.value)"
+                      x-text="opt.label">
+              </button>
+            </template>
+          </div>
+          <div class="ux-variant-selector__stock"
+               :class="'ux-variant-selector__stock--' + getStockStatus(selectedOption)">
+            <span class="ux-variant-selector__stock-dot"></span>
+            <span class="ux-variant-selector__stock-text" x-text="getStockText(selectedOption)"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Seleccion Multiple</h3>
+      <p>Permite seleccionar varias opciones (ej. toppings).</p>
+      <div class="demo-box"
+           x-data="uxVariantSelector({
+             label: 'Extras',
+             options: [
+               { value: 'cheese', label: 'Queso extra' },
+               { value: 'bacon', label: 'Bacon' },
+               { value: 'mushroom', label: 'Champinones' },
+               { value: 'onion', label: 'Cebolla' }
+             ],
+             multiple: true,
+             selected: ['cheese']
+           })">
+        <div class="ux-variant-selector ux-variant-selector--chip">
+          <div class="ux-variant-selector__label">
+            <span x-text="label"></span>
+            <span class="ux-variant-selector__selected" x-text="selected.length + ' seleccionados'"></span>
+          </div>
+          <div class="ux-variant-selector__options">
+            <template x-for="opt in options" :key="opt.value">
+              <button class="ux-variant-selector__option"
+                      :class="{ 'ux-variant-selector__option--selected': isSelected(opt.value) }"
+                      @click="select(opt.value)"
+                      x-text="opt.label">
+              </button>
+            </template>
+          </div>
+        </div>
+        <div class="result-text">Seleccionados: <strong x-text="selected.join(', ')"></strong></div>
+      </div>
+      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxVariantSelector({
+  multiple: true,
+  selected: ['cheese']
+})"</span><span class="tag">&gt;</span>...
+<span class="tag">&lt;/div&gt;</span></pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Opciones</h3>
+      <p>Configuracion disponible para el componente.</p>
+      <div class="demo-box">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm);">Opcion</th>
+              <th style="padding: var(--ux-space-sm);">Tipo</th>
+              <th style="padding: var(--ux-space-sm);">Default</th>
+              <th style="padding: var(--ux-space-sm);">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>options</code></td>
+              <td style="padding: var(--ux-space-sm);">array</td>
+              <td style="padding: var(--ux-space-sm);">[]</td>
+              <td style="padding: var(--ux-space-sm);">Lista de opciones</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>selected</code></td>
+              <td style="padding: var(--ux-space-sm);">string | array</td>
+              <td style="padding: var(--ux-space-sm);">null</td>
+              <td style="padding: var(--ux-space-sm);">Valor(es) seleccionado(s)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>multiple</code></td>
+              <td style="padding: var(--ux-space-sm);">boolean</td>
+              <td style="padding: var(--ux-space-sm);">false</td>
+              <td style="padding: var(--ux-space-sm);">Permitir seleccion multiple</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>label</code></td>
+              <td style="padding: var(--ux-space-sm);">string</td>
+              <td style="padding: var(--ux-space-sm);">''</td>
+              <td style="padding: var(--ux-space-sm);">Etiqueta del selector</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Formato de Opciones</h3>
+      <p>Cada opcion puede tener las siguientes propiedades.</p>
+      <div class="demo-box">
+        <pre class="code-block" style="margin: 0;">{
+  <span class="attr">value</span>: <span class="string">'m'</span>,           <span class="comment">// Valor unico (requerido)</span>
+  <span class="attr">label</span>: <span class="string">'Medium'</span>,      <span class="comment">// Texto a mostrar (requerido)</span>
+  <span class="attr">available</span>: <span class="string">true</span>,     <span class="comment">// Si esta disponible</span>
+  <span class="attr">stock</span>: <span class="string">15</span>,           <span class="comment">// Cantidad en stock</span>
+  <span class="attr">price</span>: <span class="string">'$99'</span>,        <span class="comment">// Precio de esta variante</span>
+  <span class="attr">priceDiff</span>: <span class="string">'+$10'</span>,   <span class="comment">// Diferencia de precio</span>
+  <span class="attr">color</span>: <span class="string">'#ff0000'</span>,    <span class="comment">// Color (para swatches)</span>
+  <span class="attr">image</span>: <span class="string">'url...'</span>      <span class="comment">// URL de imagen (para thumbnails)</span>
+}</pre>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Eventos</h3>
+      <p>Evento emitido cuando cambia la seleccion.</p>
+      <div class="demo-box">
+        <pre class="code-block" style="margin: 0;"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxVariantSelector({ ... })"</span>
+     <span class="attr">@variant:change</span>=<span class="string">"handleChange($event.detail)"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">// $event.detail para seleccion simple:</span>
+{ <span class="attr">value</span>: <span class="string">'m'</span>, <span class="attr">option</span>: { ... } }
+
+<span class="comment">// $event.detail para seleccion multiple:</span>
+{ <span class="attr">values</span>: [<span class="string">'cheese'</span>, <span class="string">'bacon'</span>] }</pre>
+      </div>
+    </section>
+
+  </div>
+
+</body>
+</html>

@@ -324,6 +324,38 @@
     .ux-popover--dropdown .ux-popover__content {
       padding: 0;
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-popover {
+        transition: opacity 0.1s ease, visibility 0.1s ease;
+        transform: none;
+      }
+
+      .ux-popover--open {
+        transform: none;
+      }
+
+      .ux-tooltip {
+        transition: opacity 0.1s ease, visibility 0.1s ease;
+        transform: none;
+      }
+
+      .ux-tooltip--visible {
+        transform: none;
+      }
+
+      .ux-tooltip--top {
+        transform: none;
+      }
+
+      .ux-tooltip--top.ux-tooltip--visible {
+        transform: none;
+      }
+    }
   `;
 
   // Inject styles

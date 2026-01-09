@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Accordion - UX Library</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-navbar.js"></script>
@@ -465,23 +466,149 @@ uxAccordionItem({
   <!-- HTMX Integration -->
   <div class="demo-section">
     <h3>Integracion con HTMX</h3>
-    <p>Acordeones con contenido dinamico desde el servidor.</p>
+    <p>HTMX es la tecnologia principal para cargar contenido de acordeones desde el servidor.</p>
+
+    <h4 style="font-size: var(--ux-font-size-md); margin-bottom: var(--ux-space-sm);">Cargar contenido al abrir (lazy loading)</h4>
     <div class="demo-box">
-      <pre class="code-block">&lt;!-- Cargar contenido al abrir --&gt;
-&lt;div class="ux-accordion" x-data="uxAccordion()"&gt;
-  &lt;div class="ux-accordion-item" :class="{ 'ux-accordion-item--open': isOpen(0) }"&gt;
-    &lt;button class="ux-accordion-item__header"
-            @click="toggle(0)"
-            hx-get="/api/faq/1"
-            hx-target="#faq-content-1"
-            hx-trigger="click once"&gt;
-      &lt;span class="ux-accordion-item__title"&gt;Pregunta 1&lt;/span&gt;
-      &lt;span class="ux-accordion-item__chevron"&gt;...&lt;/span&gt;
+      <pre class="code-block">&lt;!-- Contenido cargado solo cuando se abre --&gt;
+&lt;div class="ux-accordion-item" id="faq-item-1"&gt;
+  &lt;button class="ux-accordion-item__header"
+          hx-get="/api/faq/1"
+          hx-target="#faq-content-1"
+          hx-trigger="click once"
+          hx-indicator="#faq-loader-1"&gt;
+    &lt;span class="ux-accordion-item__title"&gt;Como puedo cambiar mi contrasena?&lt;/span&gt;
+    &lt;span class="ux-accordion-item__chevron"&gt;...&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;div class="ux-accordion-item__body"&gt;
+    &lt;div class="ux-accordion-item__body-inner"&gt;
+      &lt;div class="ux-accordion-item__body-content" id="faq-content-1"&gt;
+        &lt;span id="faq-loader-1" class="htmx-indicator ux-spinner"&gt;&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Servidor devuelve solo el contenido --&gt;
+Ve a Configuracion &gt; Seguridad &gt; Cambiar contrasena...</pre>
+    </div>
+
+    <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Cargar lista completa desde servidor</h4>
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- FAQ cargado al iniciar --&gt;
+&lt;div class="ux-accordion ux-accordion--faq"
+     id="faq-list"
+     hx-get="/api/faqs"
+     hx-trigger="load"
+     hx-indicator="#faq-loading"&gt;
+  &lt;div id="faq-loading" class="htmx-indicator" style="padding: 1rem;"&gt;
+    &lt;span class="ux-spinner"&gt;&lt;/span&gt; Cargando preguntas...
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Servidor devuelve items completos --&gt;
+&lt;div class="ux-accordion-item"&gt;
+  &lt;button class="ux-accordion-item__header" onclick="this.closest('.ux-accordion-item').classList.toggle('ux-accordion-item--open')"&gt;
+    &lt;span class="ux-accordion-item__title"&gt;Como funciona?&lt;/span&gt;
+    &lt;span class="ux-accordion-item__chevron"&gt;...&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;div class="ux-accordion-item__body"&gt;
+    &lt;div class="ux-accordion-item__body-inner"&gt;
+      &lt;div class="ux-accordion-item__body-content"&gt;
+        Respuesta del servidor...
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+...</pre>
+    </div>
+
+    <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Busqueda en FAQ</h4>
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Buscador con filtrado en servidor --&gt;
+&lt;input type="search"
+       class="ux-input"
+       placeholder="Buscar pregunta..."
+       name="q"
+       hx-get="/api/faqs/search"
+       hx-trigger="input changed delay:300ms, search"
+       hx-target="#faq-accordion"
+       hx-indicator="#search-spinner"&gt;
+&lt;span id="search-spinner" class="htmx-indicator ux-spinner ux-spinner--sm"&gt;&lt;/span&gt;
+
+&lt;div id="faq-accordion" class="ux-accordion ux-accordion--faq"&gt;
+  &lt;!-- Resultados actualizados via HTMX --&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Categorias de FAQ</h4>
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Tabs para filtrar por categoria --&gt;
+&lt;div class="ux-tab-bar ux-tab-bar--pills" style="margin-bottom: 1rem;"&gt;
+  &lt;button class="ux-tab-button ux-tab-button--selected"
+          hx-get="/api/faqs?category=all"
+          hx-target="#faq-accordion"&gt;
+    Todas
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button"
+          hx-get="/api/faqs?category=cuenta"
+          hx-target="#faq-accordion"&gt;
+    Cuenta
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button"
+          hx-get="/api/faqs?category=pagos"
+          hx-target="#faq-accordion"&gt;
+    Pagos
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button"
+          hx-get="/api/faqs?category=envios"
+          hx-target="#faq-accordion"&gt;
+    Envios
+  &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div id="faq-accordion" class="ux-accordion ux-accordion--faq"
+     hx-get="/api/faqs?category=all"
+     hx-trigger="load"&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Acordeon de configuracion con guardado</h4>
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Formulario dentro de acordeon con auto-guardado --&gt;
+&lt;div class="ux-accordion ux-accordion--inset"&gt;
+  &lt;div class="ux-accordion-item ux-accordion-item--open"&gt;
+    &lt;button class="ux-accordion-item__header"&gt;
+      &lt;span class="ux-accordion-item__icon"&gt;...&lt;/span&gt;
+      &lt;div class="ux-accordion-item__content"&gt;
+        &lt;span class="ux-accordion-item__title"&gt;Notificaciones&lt;/span&gt;
+        &lt;span class="ux-accordion-item__subtitle"&gt;Configura tus alertas&lt;/span&gt;
+      &lt;/div&gt;
     &lt;/button&gt;
     &lt;div class="ux-accordion-item__body"&gt;
       &lt;div class="ux-accordion-item__body-inner"&gt;
-        &lt;div class="ux-accordion-item__body-content" id="faq-content-1"&gt;
-          &lt;span class="ux-spinner"&gt;&lt;/span&gt; Cargando...
+        &lt;div class="ux-accordion-item__body-content"&gt;
+          &lt;label class="ux-item"&gt;
+            &lt;span&gt;Email&lt;/span&gt;
+            &lt;span class="ux-toggle"&gt;
+              &lt;input type="checkbox" name="email_notifications"
+                     hx-post="/api/settings/notifications"
+                     hx-trigger="change"
+                     hx-swap="none"
+                     checked&gt;
+              &lt;span class="ux-toggle__track"&gt;&lt;/span&gt;
+            &lt;/span&gt;
+          &lt;/label&gt;
+          &lt;label class="ux-item"&gt;
+            &lt;span&gt;Push&lt;/span&gt;
+            &lt;span class="ux-toggle"&gt;
+              &lt;input type="checkbox" name="push_notifications"
+                     hx-post="/api/settings/notifications"
+                     hx-trigger="change"
+                     hx-swap="none"&gt;
+              &lt;span class="ux-toggle__track"&gt;&lt;/span&gt;
+            &lt;/span&gt;
+          &lt;/label&gt;
         &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -489,37 +616,71 @@ uxAccordionItem({
 &lt;/div&gt;</pre>
     </div>
 
+    <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Agregar pregunta a FAQ</h4>
     <div class="demo-box">
-      <pre class="code-block">&lt;!-- Cargar lista completa de FAQ desde servidor --&gt;
-&lt;div class="ux-accordion ux-accordion--faq"
-     hx-get="/api/faqs"
-     hx-trigger="load"&gt;
-  &lt;!-- Skeleton loading --&gt;
-  &lt;div class="ux-skeleton" style="height: 48px;"&gt;&lt;/div&gt;
-  &lt;div class="ux-skeleton" style="height: 48px;"&gt;&lt;/div&gt;
-  &lt;div class="ux-skeleton" style="height: 48px;"&gt;&lt;/div&gt;
+      <pre class="code-block">&lt;!-- Formulario para nueva pregunta --&gt;
+&lt;form hx-post="/api/faqs"
+      hx-target="#faq-accordion"
+      hx-swap="beforeend"
+      hx-on::after-request="this.reset()"&gt;
+  &lt;input type="text" name="question" class="ux-input" placeholder="Tu pregunta" required&gt;
+  &lt;textarea name="answer" class="ux-input" placeholder="Respuesta" rows="3"&gt;&lt;/textarea&gt;
+  &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+    Agregar Pregunta
+  &lt;/button&gt;
+&lt;/form&gt;
+
+&lt;div id="faq-accordion" class="ux-accordion ux-accordion--faq"&gt;
+  &lt;!-- FAQs existentes --&gt;
 &lt;/div&gt;
 
-&lt;!-- Respuesta del servidor --&gt;
-&lt;div class="ux-accordion-item"&gt;
-  &lt;button class="ux-accordion-item__header" ...&gt;
-    &lt;span class="ux-accordion-item__title"&gt;Como funciona?&lt;/span&gt;
-  &lt;/button&gt;
+&lt;!-- Servidor devuelve nuevo item --&gt;
+&lt;div class="ux-accordion-item" id="faq-new-123"&gt;
   ...
 &lt;/div&gt;</pre>
     </div>
 
+    <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Expandir detalles de pedido</h4>
     <div class="demo-box">
-      <pre class="code-block">&lt;!-- Buscar en FAQ --&gt;
-&lt;input type="search"
-       class="ux-input"
-       placeholder="Buscar pregunta..."
-       hx-get="/api/faqs/search"
-       hx-trigger="input changed delay:300ms"
-       hx-target="#faq-accordion"&gt;
+      <pre class="code-block">&lt;!-- Lista de pedidos con detalles expandibles --&gt;
+&lt;div class="ux-accordion ux-accordion--outline"&gt;
+  &lt;div class="ux-accordion-item" id="order-1"&gt;
+    &lt;button class="ux-accordion-item__header"
+            hx-get="/api/orders/1/details"
+            hx-target="#order-details-1"
+            hx-trigger="click once"&gt;
+      &lt;div class="ux-accordion-item__content"&gt;
+        &lt;span class="ux-accordion-item__title"&gt;Pedido #12345&lt;/span&gt;
+        &lt;span class="ux-accordion-item__subtitle"&gt;10 Enero 2024 - $299.99&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;span class="ux-badge ux-color-success"&gt;Entregado&lt;/span&gt;
+      &lt;span class="ux-accordion-item__chevron"&gt;...&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;div class="ux-accordion-item__body"&gt;
+      &lt;div class="ux-accordion-item__body-inner"&gt;
+        &lt;div id="order-details-1" class="ux-accordion-item__body-content"&gt;
+          &lt;span class="htmx-indicator ux-spinner"&gt;&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
 
-&lt;div id="faq-accordion" class="ux-accordion ux-accordion--faq"&gt;
-  &lt;!-- Resultados filtrados --&gt;
+&lt;!-- Servidor devuelve detalles --&gt;
+&lt;div class="ux-list ux-list--inset"&gt;
+  &lt;div class="ux-item"&gt;
+    &lt;span&gt;Producto A x 2&lt;/span&gt;
+    &lt;span&gt;$99.99&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-item"&gt;
+    &lt;span&gt;Producto B x 1&lt;/span&gt;
+    &lt;span&gt;$199.99&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style="margin-top: 1rem;"&gt;
+  &lt;button class="ux-button ux-button--sm" hx-get="/api/orders/1/invoice"&gt;
+    Descargar Factura
+  &lt;/button&gt;
 &lt;/div&gt;</pre>
     </div>
   </div>

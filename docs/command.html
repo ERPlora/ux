@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Command Palette - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-command.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: 0.8125rem; overflow-x: auto; white-space: pre; }
+    .demo-output { padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-radius-md); font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-top: var(--ux-space-md); }
+    .shortcut-hint { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: var(--ux-surface-secondary); border-radius: var(--ux-radius-md); font-family: monospace; font-size: var(--ux-font-size-sm); }
+    .shortcut-key { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 6px; background: var(--ux-surface); border: 1px solid var(--ux-border-color); border-radius: var(--ux-radius-sm); font-size: 0.75rem; }
+  </style>
+</head>
+<body class="ux-app">
+  <div class="demo-section">
+    <h3>Command Palette (Cmd+K)</h3>
+    <p>Paleta de comandos para navegacion rapida y acciones. Presiona <span class="shortcut-hint"><span class="shortcut-key">⌘</span><span class="shortcut-key">K</span></span> o haz click en el boton.</p>
+
+    <div class="demo-box" x-data="uxCommand({
+      placeholder: 'Buscar comandos, archivos, acciones...',
+      groups: [
+        {
+          name: 'Navegacion',
+          commands: [
+            { id: 'home', title: 'Ir a Inicio', description: 'Pagina principal', icon: 'folder', shortcut: 'Cmd+H', keywords: ['home', 'inicio'] },
+            { id: 'settings', title: 'Configuracion', description: 'Ajustes de la aplicacion', icon: 'settings', shortcut: 'Cmd+,', keywords: ['settings', 'config'] },
+            { id: 'profile', title: 'Mi Perfil', description: 'Ver y editar perfil', icon: 'user', keywords: ['profile', 'cuenta'] }
+          ]
+        },
+        {
+          name: 'Acciones',
+          commands: [
+            { id: 'new-file', title: 'Nuevo Archivo', description: 'Crear un nuevo documento', icon: 'file', shortcut: 'Cmd+N' },
+            { id: 'new-folder', title: 'Nueva Carpeta', description: 'Crear una carpeta', icon: 'folder', shortcut: 'Cmd+Shift+N' },
+            { id: 'search', title: 'Buscar en Archivos', description: 'Buscar texto en todos los archivos', icon: 'search', shortcut: 'Cmd+Shift+F' }
+          ]
+        },
+        {
+          name: 'Tema',
+          commands: [
+            { id: 'theme-light', title: 'Tema Claro', description: 'Cambiar a modo claro', keywords: ['light', 'claro'] },
+            { id: 'theme-dark', title: 'Tema Oscuro', description: 'Cambiar a modo oscuro', keywords: ['dark', 'oscuro'] },
+            { id: 'theme-system', title: 'Tema del Sistema', description: 'Usar preferencia del sistema', keywords: ['system', 'auto'] }
+          ]
+        }
+      ]
+    })" @command:execute.window="console.log('Comando ejecutado:', $event.detail.command)">
+      <!-- Trigger Button -->
+      <button class="ux-button ux-button--outline" @click="open()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Buscar comandos...
+        <span class="shortcut-hint" style="margin-left: auto;">
+          <span class="shortcut-key">⌘</span><span class="shortcut-key">K</span>
+        </span>
+      </button>
+
+      <!-- Backdrop -->
+      <div class="ux-command-backdrop"
+           :class="{ 'ux-command-backdrop--open': isOpen }"
+           @click="close()"></div>
+
+      <!-- Command Palette -->
+      <div class="ux-command" :class="{ 'ux-command--open': isOpen }">
+        <!-- Search -->
+        <div class="ux-command__search">
+          <span class="ux-command__search-icon" x-html="icons.search"></span>
+          <input type="text"
+                 class="ux-command__input"
+                 :placeholder="placeholder"
+                 x-model="query"
+                 @input="filterCommands()"
+                 @keydown="handleKeydown($event)"
+                 autocomplete="off"
+                 spellcheck="false">
+          <div class="ux-command__shortcut">
+            <span class="ux-command__key">Esc</span>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="ux-command__results">
+          <!-- Loading -->
+          <div x-show="loading" class="ux-command__loading">
+            <div class="ux-command__loading-spinner"></div>
+          </div>
+
+          <!-- Empty State -->
+          <div x-show="!loading && filteredCommands.length === 0" class="ux-command__empty">
+            <div class="ux-command__empty-icon" x-html="icons.empty"></div>
+            <div class="ux-command__empty-title">Sin resultados</div>
+            <div class="ux-command__empty-description">No se encontraron comandos para "<span x-text="query"></span>"</div>
+          </div>
+
+          <!-- Results List -->
+          <template x-for="(group, groupIndex) in filteredCommands" :key="group.group">
+            <div class="ux-command__group">
+              <div class="ux-command__group-title" x-text="group.group"></div>
+              <ul class="ux-command__list">
+                <template x-for="(cmd, itemIndex) in group.commands" :key="cmd.id">
+                  <li class="ux-command__item"
+                      :class="{ 'ux-command__item--active': isActiveItem(groupIndex, itemIndex) }"
+                      @click="executeCommand(cmd)"
+                      @mouseenter="activeIndex = groupIndex > 0 ? filteredCommands.slice(0, groupIndex).reduce((a, g) => a + g.commands.length, 0) + itemIndex : itemIndex">
+                    <div class="ux-command__item-icon" x-html="getIcon(cmd)"></div>
+                    <div class="ux-command__item-content">
+                      <div class="ux-command__item-title" x-html="highlightMatch(cmd.title, query)"></div>
+                      <div class="ux-command__item-description" x-text="cmd.description" x-show="cmd.description"></div>
+                    </div>
+                    <div x-show="cmd.recent" class="ux-command__recent">
+                      <span x-html="icons.clock" style="width:12px;height:12px;"></span>
+                      Reciente
+                    </div>
+                    <div x-show="cmd.shortcut && showShortcuts" class="ux-command__item-shortcut">
+                      <template x-for="key in formatShortcut(cmd.shortcut)" :key="key">
+                        <span class="ux-command__key" x-text="key"></span>
+                      </template>
+                    </div>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </template>
+        </div>
+
+        <!-- Footer -->
+        <div x-show="showFooter" class="ux-command__footer">
+          <div class="ux-command__footer-hints">
+            <span class="ux-command__footer-hint">
+              <span class="ux-command__key">↑</span>
+              <span class="ux-command__key">↓</span>
+              Navegar
+            </span>
+            <span class="ux-command__footer-hint">
+              <span class="ux-command__key">↵</span>
+              Seleccionar
+            </span>
+            <span class="ux-command__footer-hint">
+              <span class="ux-command__key">Esc</span>
+              Cerrar
+            </span>
+          </div>
+          <button x-show="recentCommands.length > 0"
+                  @click="clearRecent()"
+                  style="background:none;border:none;color:var(--ux-text-tertiary);cursor:pointer;font-size:inherit;">
+            Limpiar recientes
+          </button>
+        </div>
+      </div>
+
+      <div class="demo-output">
+        <strong>Tip:</strong> Presiona <span class="shortcut-key">⌘</span>+<span class="shortcut-key">K</span> en cualquier momento para abrir la paleta de comandos.
+      </div>
+    </div>
+
+    <pre class="code-block">&lt;div x-data="uxCommand({
+  placeholder: 'Buscar comandos...',
+  groups: [
+    {
+      name: 'Navegacion',
+      commands: [
+        { id: 'home', title: 'Ir a Inicio', icon: 'folder', shortcut: 'Cmd+H' },
+        { id: 'settings', title: 'Configuracion', icon: 'settings' }
+      ]
+    },
+    {
+      name: 'Acciones',
+      commands: [
+        { id: 'new-file', title: 'Nuevo Archivo', shortcut: 'Cmd+N' }
+      ]
+    }
+  ]
+})"&gt;
+  &lt;button @click="open()"&gt;Abrir paleta (Cmd+K)&lt;/button&gt;
+  &lt;!-- ... estructura de la paleta ... --&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Variante Glass</h3>
+    <p>Efecto glass morphism para fondos con gradiente.</p>
+    <div class="demo-box" style="background: linear-gradient(135deg, var(--ux-primary-tint) 0%, var(--ux-tertiary-tint) 100%); padding: var(--ux-space-xl);">
+      <div x-data="uxCommand({
+        placeholder: 'Buscar...',
+        commands: [
+          { id: 'cmd1', title: 'Accion 1', description: 'Descripcion de la accion' },
+          { id: 'cmd2', title: 'Accion 2', description: 'Otra descripcion' },
+          { id: 'cmd3', title: 'Accion 3', description: 'Mas acciones' }
+        ]
+      })">
+        <button class="ux-button ux-button--glass" @click="open()">
+          Abrir paleta glass
+        </button>
+
+        <div class="ux-command-backdrop"
+             :class="{ 'ux-command-backdrop--open': isOpen }"
+             @click="close()"></div>
+
+        <div class="ux-command ux-command--glass" :class="{ 'ux-command--open': isOpen }">
+          <div class="ux-command__search">
+            <span class="ux-command__search-icon" x-html="icons.search"></span>
+            <input type="text" class="ux-command__input" :placeholder="placeholder"
+                   x-model="query" @input="filterCommands()" @keydown="handleKeydown($event)">
+            <div class="ux-command__shortcut"><span class="ux-command__key">Esc</span></div>
+          </div>
+          <div class="ux-command__results">
+            <template x-for="(group, gi) in filteredCommands" :key="group.group">
+              <div class="ux-command__group">
+                <div class="ux-command__group-title" x-text="group.group"></div>
+                <ul class="ux-command__list">
+                  <template x-for="(cmd, ii) in group.commands" :key="cmd.id">
+                    <li class="ux-command__item" :class="{ 'ux-command__item--active': isActiveItem(gi, ii) }"
+                        @click="executeCommand(cmd)">
+                      <div class="ux-command__item-icon" x-html="getIcon(cmd)"></div>
+                      <div class="ux-command__item-content">
+                        <div class="ux-command__item-title" x-text="cmd.title"></div>
+                        <div class="ux-command__item-description" x-text="cmd.description"></div>
+                      </div>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">&lt;div class="ux-command ux-command--glass"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Con Acciones Ejecutables</h3>
+    <p>Comandos que ejecutan funciones al seleccionarse.</p>
+    <div class="demo-box" x-data="{
+      ...uxCommand({
+        placeholder: 'Ejecutar accion...',
+        commands: [
+          {
+            id: 'alert',
+            title: 'Mostrar Alerta',
+            description: 'Muestra una alerta de prueba',
+            icon: 'command',
+            action: () => alert('Alerta ejecutada!')
+          },
+          {
+            id: 'log',
+            title: 'Log en Consola',
+            description: 'Imprime mensaje en consola',
+            action: () => console.log('Comando ejecutado desde la paleta!')
+          },
+          {
+            id: 'toggle-dark',
+            title: 'Alternar Modo Oscuro',
+            description: 'Cambiar entre claro y oscuro',
+            action: () => document.body.classList.toggle('ux-dark')
+          },
+          {
+            id: 'scroll-top',
+            title: 'Ir Arriba',
+            description: 'Desplazar al inicio de la pagina',
+            action: () => window.scrollTo({ top: 0, behavior: 'smooth' })
+          }
+        ]
+      }),
+      lastExecuted: null
+    }" @command:execute.window="lastExecuted = $event.detail.command.title">
+      <button class="ux-button ux-color-primary" @click="open()">
+        Ejecutar Comando
+      </button>
+
+      <div class="ux-command-backdrop" :class="{ 'ux-command-backdrop--open': isOpen }" @click="close()"></div>
+      <div class="ux-command" :class="{ 'ux-command--open': isOpen }">
+        <div class="ux-command__search">
+          <span class="ux-command__search-icon" x-html="icons.search"></span>
+          <input type="text" class="ux-command__input" :placeholder="placeholder"
+                 x-model="query" @input="filterCommands()" @keydown="handleKeydown($event)">
+        </div>
+        <div class="ux-command__results">
+          <template x-for="(group, gi) in filteredCommands" :key="group.group">
+            <div class="ux-command__group">
+              <ul class="ux-command__list">
+                <template x-for="(cmd, ii) in group.commands" :key="cmd.id">
+                  <li class="ux-command__item" :class="{ 'ux-command__item--active': isActiveItem(gi, ii) }"
+                      @click="executeCommand(cmd)">
+                    <div class="ux-command__item-icon" x-html="getIcon(cmd)"></div>
+                    <div class="ux-command__item-content">
+                      <div class="ux-command__item-title" x-text="cmd.title"></div>
+                      <div class="ux-command__item-description" x-text="cmd.description"></div>
+                    </div>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div class="demo-output" x-show="lastExecuted">
+        Ultimo comando ejecutado: <strong x-text="lastExecuted"></strong>
+      </div>
+    </div>
+    <pre class="code-block">// Comandos con acciones ejecutables
+{
+  id: 'toggle-dark',
+  title: 'Alternar Modo Oscuro',
+  action: () => document.body.classList.toggle('ux-dark')
+}</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Busqueda Asincrona</h3>
+    <p>Cargar resultados desde una API o fuente externa.</p>
+    <div class="demo-box" x-data="uxCommand({
+      placeholder: 'Buscar usuarios...',
+      loadResults: async (query) => {
+        // Simular delay de API
+        await new Promise(r => setTimeout(r, 500));
+
+        // Datos de ejemplo
+        const users = [
+          { id: 'u1', title: 'Ana Garcia', description: 'ana@email.com', icon: 'user' },
+          { id: 'u2', title: 'Carlos Lopez', description: 'carlos@email.com', icon: 'user' },
+          { id: 'u3', title: 'Maria Rodriguez', description: 'maria@email.com', icon: 'user' },
+          { id: 'u4', title: 'Pedro Martinez', description: 'pedro@email.com', icon: 'user' },
+          { id: 'u5', title: 'Laura Sanchez', description: 'laura@email.com', icon: 'user' }
+        ];
+
+        // Filtrar por query
+        const filtered = users.filter(u =>
+          u.title.toLowerCase().includes(query.toLowerCase()) ||
+          u.description.toLowerCase().includes(query.toLowerCase())
+        );
+
+        return [{ group: 'Usuarios', commands: filtered }];
+      }
+    })">
+      <button class="ux-button ux-button--outline" @click="open()">
+        Buscar Usuarios
+      </button>
+
+      <div class="ux-command-backdrop" :class="{ 'ux-command-backdrop--open': isOpen }" @click="close()"></div>
+      <div class="ux-command" :class="{ 'ux-command--open': isOpen }">
+        <div class="ux-command__search">
+          <span class="ux-command__search-icon" x-html="icons.search"></span>
+          <input type="text" class="ux-command__input" :placeholder="placeholder"
+                 x-model="query" @input="filterCommands()" @keydown="handleKeydown($event)">
+        </div>
+        <div class="ux-command__results">
+          <div x-show="loading" class="ux-command__loading">
+            <div class="ux-command__loading-spinner"></div>
+          </div>
+          <div x-show="!loading && query && filteredCommands.length === 0" class="ux-command__empty">
+            <div class="ux-command__empty-title">Sin resultados</div>
+          </div>
+          <div x-show="!loading && !query" class="ux-command__empty">
+            <div class="ux-command__empty-icon" x-html="icons.search"></div>
+            <div class="ux-command__empty-title">Escribe para buscar</div>
+            <div class="ux-command__empty-description">Ingresa un nombre o email</div>
+          </div>
+          <template x-for="(group, gi) in filteredCommands" :key="group.group">
+            <div class="ux-command__group">
+              <div class="ux-command__group-title" x-text="group.group"></div>
+              <ul class="ux-command__list">
+                <template x-for="(cmd, ii) in group.commands" :key="cmd.id">
+                  <li class="ux-command__item" :class="{ 'ux-command__item--active': isActiveItem(gi, ii) }"
+                      @click="executeCommand(cmd)">
+                    <div class="ux-command__item-icon" x-html="getIcon(cmd)"></div>
+                    <div class="ux-command__item-content">
+                      <div class="ux-command__item-title" x-html="highlightMatch(cmd.title, query)"></div>
+                      <div class="ux-command__item-description" x-text="cmd.description"></div>
+                    </div>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+    <pre class="code-block">uxCommand({
+  loadResults: async (query) => {
+    const response = await fetch(`/api/search?q=${query}`);
+    const data = await response.json();
+    return [{ group: 'Resultados', commands: data }];
+  }
+})</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>API y Eventos</h3>
+    <div class="demo-box">
+      <pre class="code-block">// Opciones de configuracion
+uxCommand({
+  placeholder: 'Buscar...',        // Placeholder del input
+  commands: [],                     // Lista plana de comandos
+  groups: [],                       // Comandos agrupados
+  maxRecent: 5,                     // Maximo de recientes
+  closeOnSelect: true,              // Cerrar al seleccionar
+  fuzzySearch: true,                // Busqueda difusa
+  showShortcuts: true,              // Mostrar atajos
+  showFooter: true,                 // Mostrar footer
+  loadResults: null                 // Funcion async para busqueda
+})
+
+// Estructura de comando
+{
+  id: 'unique-id',                  // ID unico (requerido)
+  title: 'Titulo',                  // Titulo del comando (requerido)
+  description: 'Descripcion',       // Descripcion opcional
+  icon: 'search',                   // Nombre de icono o SVG
+  shortcut: 'Cmd+K',                // Atajo de teclado
+  keywords: ['alias', 'tags'],      // Keywords para busqueda
+  url: '/path',                     // URL para navegacion
+  action: () => {},                 // Funcion a ejecutar
+  group: 'Categoria'                // Grupo (si no se usan groups)
+}
+
+// Metodos
+open()                              // Abrir paleta
+close()                             // Cerrar paleta
+toggle()                            // Alternar estado
+filterCommands()                    // Filtrar comandos
+executeCommand(cmd)                 // Ejecutar comando
+clearRecent()                       // Limpiar recientes
+
+// Eventos
+@command:open                       // Paleta abierta
+@command:close                      // Paleta cerrada
+@command:execute                    // Comando ejecutado
+
+// Iconos disponibles
+icons.search, icons.arrow, icons.enter, icons.command,
+icons.file, icons.folder, icons.settings, icons.user, icons.clock</pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>Integracion con HTMX</h3>
+    <p>Busqueda en tiempo real contra el servidor.</p>
+    <div class="demo-box">
+      <pre class="code-block">&lt;!-- Busqueda con HTMX --&gt;
+&lt;div x-data="uxCommand({ placeholder: 'Buscar...' })"&gt;
+  &lt;div class="ux-command__search"&gt;
+    &lt;input type="text"
+           class="ux-command__input"
+           name="q"
+           hx-get="/api/search"
+           hx-trigger="keyup changed delay:300ms"
+           hx-target="#command-results"
+           hx-indicator=".ux-command__loading"&gt;
+  &lt;/div&gt;
+  &lt;div id="command-results" class="ux-command__results"&gt;
+    &lt;!-- Resultados se cargan aqui --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Respuesta del servidor --&gt;
+&lt;div class="ux-command__group"&gt;
+  &lt;div class="ux-command__group-title"&gt;Resultados&lt;/div&gt;
+  &lt;ul class="ux-command__list"&gt;
+    &lt;li class="ux-command__item"&gt;
+      &lt;div class="ux-command__item-content"&gt;
+        &lt;div class="ux-command__item-title"&gt;Resultado 1&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>Atajos de Teclado</h3>
+    <div class="demo-box">
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md);">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: var(--ux-space-sm);">Atajo</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Accion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><span class="shortcut-key">⌘</span> + <span class="shortcut-key">K</span></td>
+            <td style="padding: var(--ux-space-sm);">Abrir/cerrar paleta de comandos</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><span class="shortcut-key">↑</span> / <span class="shortcut-key">↓</span></td>
+            <td style="padding: var(--ux-space-sm);">Navegar entre resultados</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><span class="shortcut-key">Tab</span> / <span class="shortcut-key">Shift</span>+<span class="shortcut-key">Tab</span></td>
+            <td style="padding: var(--ux-space-sm);">Navegar siguiente/anterior</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><span class="shortcut-key">Enter</span></td>
+            <td style="padding: var(--ux-space-sm);">Ejecutar comando seleccionado</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><span class="shortcut-key">Esc</span></td>
+            <td style="padding: var(--ux-space-sm);">Cerrar paleta</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

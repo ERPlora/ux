@@ -256,6 +256,24 @@
     .ux-chip--glass .ux-chip__close:hover {
       background: var(--ux-glass-bg-thick);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-chip {
+        transition: none;
+      }
+
+      .ux-chip--interactive:active {
+        transform: none;
+      }
+
+      .ux-chip__close {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles

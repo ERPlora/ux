@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Tabs - UX Library</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-navbar.js"></script>
@@ -407,6 +408,166 @@
     ...
     &lt;div class="ux-tab-bar__indicator" :style="indicatorStyle"&gt;&lt;/div&gt;
   &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- HTMX Integration -->
+    <div class="demo-section">
+      <h3>Integracion con HTMX</h3>
+      <p>HTMX es la tecnologia principal para cargar contenido de tabs desde el servidor.</p>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0 var(--ux-space-sm);">Cargar contenido al click</h4>
+      <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-md);">Cada tab carga su contenido desde el servidor al ser seleccionado.</p>
+      <pre class="code-block"><code>&lt;div class="ux-tab-bar"&gt;
+  &lt;button class="ux-tab-button ux-tab-button--selected"
+          hx-get="/api/tabs/overview"
+          hx-target="#tab-content"
+          hx-trigger="click"
+          hx-swap="innerHTML"&gt;
+    Overview
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button"
+          hx-get="/api/tabs/features"
+          hx-target="#tab-content"
+          hx-trigger="click"&gt;
+    Features
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button"
+          hx-get="/api/tabs/reviews"
+          hx-target="#tab-content"
+          hx-trigger="click"&gt;
+    Reviews
+  &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div id="tab-content" class="ux-tab-content"&gt;
+  &lt;!-- Contenido cargado via HTMX --&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-xl) 0 var(--ux-space-sm);">Cargar al iniciar + click</h4>
+      <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-md);">El primer tab carga al iniciar y los demas al click.</p>
+      <pre class="code-block"><code>&lt;div class="ux-tab-bar"&gt;
+  &lt;button class="ux-tab-button ux-tab-button--selected"
+          hx-get="/api/dashboard/summary"
+          hx-target="#dashboard-content"
+          hx-trigger="load, click"
+          hx-indicator="#tab-loader"&gt;
+    Resumen
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button"
+          hx-get="/api/dashboard/analytics"
+          hx-target="#dashboard-content"
+          hx-trigger="click"
+          hx-indicator="#tab-loader"&gt;
+    Analiticas
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button"
+          hx-get="/api/dashboard/reports"
+          hx-target="#dashboard-content"
+          hx-trigger="click"
+          hx-indicator="#tab-loader"&gt;
+    Reportes
+  &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div id="dashboard-content"&gt;
+  &lt;div id="tab-loader" class="htmx-indicator" style="text-align: center; padding: 2rem;"&gt;
+    &lt;span class="ux-spinner"&gt;&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-xl) 0 var(--ux-space-sm);">Tabs con hx-boost para SPA-like</h4>
+      <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-md);">Navegacion tipo SPA sin JavaScript adicional.</p>
+      <pre class="code-block"><code>&lt;div class="ux-tab-bar" hx-boost="true" hx-target="#main-content" hx-select="#main-content"&gt;
+  &lt;a href="/products" class="ux-tab-button"&gt;Productos&lt;/a&gt;
+  &lt;a href="/orders" class="ux-tab-button"&gt;Pedidos&lt;/a&gt;
+  &lt;a href="/customers" class="ux-tab-button"&gt;Clientes&lt;/a&gt;
+&lt;/div&gt;
+
+&lt;div id="main-content"&gt;
+  &lt;!-- Contenido de la pagina --&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-xl) 0 var(--ux-space-sm);">Bottom tabs con navegacion</h4>
+      <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-md);">Barra inferior de navegacion que carga vistas.</p>
+      <pre class="code-block"><code>&lt;div id="app-content"&gt;
+  &lt;!-- Contenido de la app --&gt;
+&lt;/div&gt;
+
+&lt;div class="ux-tab-bar ux-tab-bar--bottom"&gt;
+  &lt;button class="ux-tab-button ux-tab-button--layout-icon-top ux-tab-button--selected"
+          hx-get="/app/home"
+          hx-target="#app-content"
+          hx-push-url="true"&gt;
+    &lt;span class="ux-tab-button__icon"&gt;&lt;svg&gt;...&lt;/svg&gt;&lt;/span&gt;
+    &lt;span class="ux-tab-button__label"&gt;Home&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button ux-tab-button--layout-icon-top"
+          hx-get="/app/search"
+          hx-target="#app-content"
+          hx-push-url="true"&gt;
+    &lt;span class="ux-tab-button__icon"&gt;&lt;svg&gt;...&lt;/svg&gt;&lt;/span&gt;
+    &lt;span class="ux-tab-button__label"&gt;Search&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button ux-tab-button--layout-icon-top"
+          hx-get="/app/profile"
+          hx-target="#app-content"
+          hx-push-url="true"&gt;
+    &lt;span class="ux-tab-button__icon"&gt;&lt;svg&gt;...&lt;/svg&gt;&lt;/span&gt;
+    &lt;span class="ux-tab-button__label"&gt;Profile&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-xl) 0 var(--ux-space-sm);">Actualizar badge desde servidor</h4>
+      <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-md);">Contadores de notificacion que se actualizan automaticamente.</p>
+      <pre class="code-block"><code>&lt;div class="ux-tab-bar ux-tab-bar--bottom"&gt;
+  &lt;button class="ux-tab-button ux-tab-button--layout-icon-top"&gt;
+    &lt;span class="ux-tab-button__icon"&gt;&lt;svg&gt;...&lt;/svg&gt;&lt;/span&gt;
+    &lt;span class="ux-tab-button__label"&gt;Inbox&lt;/span&gt;
+    &lt;span class="ux-tab-button__badge"
+          id="inbox-badge"
+          hx-get="/api/inbox/unread-count"
+          hx-trigger="load, every 30s"
+          hx-swap="innerHTML"&gt;0&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button ux-tab-button--layout-icon-top"&gt;
+    &lt;span class="ux-tab-button__icon"&gt;&lt;svg&gt;...&lt;/svg&gt;&lt;/span&gt;
+    &lt;span class="ux-tab-button__label"&gt;Alerts&lt;/span&gt;
+    &lt;span class="ux-tab-button__badge ux-tab-button__badge--dot"
+          id="alerts-badge"
+          hx-get="/api/alerts/has-new"
+          hx-trigger="load, every 60s"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Servidor devuelve solo el numero o vacio --&gt;
+5</code></pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-xl) 0 var(--ux-space-sm);">Tabs con parametros</h4>
+      <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-md);">Enviar datos adicionales al servidor.</p>
+      <pre class="code-block"><code>&lt;div class="ux-tab-bar ux-tab-bar--pills"&gt;
+  &lt;button class="ux-tab-button ux-tab-button--selected"
+          hx-get="/api/products"
+          hx-vals='{"category": "all"}'
+          hx-target="#products-grid"&gt;
+    Todos
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button"
+          hx-get="/api/products"
+          hx-vals='{"category": "electronics"}'
+          hx-target="#products-grid"&gt;
+    Electronica
+  &lt;/button&gt;
+  &lt;button class="ux-tab-button"
+          hx-get="/api/products"
+          hx-vals='{"category": "clothing"}'
+          hx-target="#products-grid"&gt;
+    Ropa
+  &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div id="products-grid"&gt;
+  &lt;!-- Grid de productos --&gt;
 &lt;/div&gt;</code></pre>
     </div>
 

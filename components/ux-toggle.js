@@ -239,6 +239,20 @@
     .ux-toggle--glass input[type="checkbox"]:checked + .ux-toggle__track {
       background: var(--ux-primary);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-toggle__track {
+        transition: none;
+      }
+
+      .ux-toggle__thumb {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles
