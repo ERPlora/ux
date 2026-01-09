@@ -400,6 +400,192 @@
     }
 
     /* ========================================
+       Image Upload Button (Simple)
+       Usage: Button + Preview side by side
+    ======================================== */
+
+    .ux-upload-image {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-upload-image__preview {
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--ux-surface-secondary);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-md);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .ux-upload-image__preview--rounded {
+      border-radius: 50%;
+    }
+
+    .ux-upload-image__preview--lg {
+      width: 80px;
+      height: 80px;
+    }
+
+    .ux-upload-image__preview--sm {
+      width: 48px;
+      height: 48px;
+    }
+
+    .ux-upload-image__preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ux-upload-image__preview svg,
+    .ux-upload-image__preview .icon {
+      width: 24px;
+      height: 24px;
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-upload-image__preview--lg svg,
+    .ux-upload-image__preview--lg .icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    /* Button with hidden input */
+    .ux-upload-image__button {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .ux-upload-image__button input[type="file"] {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ========================================
+       Upload Area (Drop Zone)
+    ======================================== */
+
+    .ux-upload-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+      padding: var(--ux-space-xl);
+      background-color: var(--ux-surface);
+      border: 2px dashed var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+      cursor: pointer;
+      text-align: center;
+      transition:
+        border-color var(--ux-transition-fast) var(--ux-ease),
+        background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-upload-area:hover {
+      border-color: var(--ux-primary);
+      background-color: rgba(var(--ux-primary-rgb), 0.02);
+    }
+
+    .ux-upload-area--dragover {
+      border-color: var(--ux-primary);
+      background-color: rgba(var(--ux-primary-rgb), 0.05);
+      border-style: solid;
+    }
+
+    .ux-upload-area--sm {
+      min-height: 120px;
+      padding: var(--ux-space-lg);
+    }
+
+    .ux-upload-area--lg {
+      min-height: 240px;
+      padding: var(--ux-space-2xl);
+    }
+
+    .ux-upload-area__icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text-tertiary);
+      transition: color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-upload-area:hover .ux-upload-area__icon,
+    .ux-upload-area--dragover .ux-upload-area__icon {
+      color: var(--ux-primary);
+    }
+
+    .ux-upload-area--sm .ux-upload-area__icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    .ux-upload-area__text {
+      font-size: var(--ux-font-size-md);
+      font-weight: 500;
+      color: var(--ux-text);
+      margin-bottom: var(--ux-space-xs);
+    }
+
+    .ux-upload-area__hint {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-upload-area__link {
+      color: var(--ux-primary);
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .ux-upload-area__link:hover {
+      text-decoration: underline;
+    }
+
+    .ux-upload-area input[type="file"] {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Upload area with preview */
+    .ux-upload-area--has-preview {
+      padding: var(--ux-space-md);
+    }
+
+    .ux-upload-area__preview {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: var(--ux-border-radius-md);
+      margin-bottom: var(--ux-space-md);
+    }
+
+    /* Disabled state */
+    .ux-upload-area--disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* Error state */
+    .ux-upload-area--error {
+      border-color: var(--ux-danger);
+    }
+
+    /* ========================================
        States
     ======================================== */
 
