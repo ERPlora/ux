@@ -8,6 +8,7 @@
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-spinner.js"></script>
   <script src="../components/ux-numpad.js"></script>
   <script src="../components/ux-code-block.js"></script>
   <style>
@@ -254,6 +255,242 @@
     </div>
 
     <pre class="ux-code-block" data-lang="html">&lt;div class="ux-numpad ux-numpad--glass"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- PIN Pad Component -->
+  <div class="demo-section">
+    <h3>PIN Pad</h3>
+    <p>Componente dedicado para entrada de PIN con botones circulares estilo iOS, indicadores de puntos animados, estados de error/success, y boton de backspace en la posicion correcta.</p>
+
+    <div class="demo-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: var(--ux-border-radius-lg);">
+      <div x-data="uxPinpad({ length: 4, hint: 'Demo PIN: 1234' })"
+           class="ux-pinpad ux-pinpad--glass"
+           @pinpad-submit="
+             setLoading(true);
+             setTimeout(() => {
+               if ($event.detail.pin === '1234') {
+                 setSuccess();
+               } else {
+                 setError('PIN incorrecto');
+               }
+             }, 1000);
+           ">
+
+        <!-- Label -->
+        <p class="ux-pinpad__label" x-text="label"></p>
+
+        <!-- PIN Dots -->
+        <div class="ux-pinpad__dots">
+          <template x-for="i in length" :key="i">
+            <div class="ux-pinpad__dot" :class="getDotClass(i - 1)"></div>
+          </template>
+        </div>
+
+        <!-- Numpad Grid -->
+        <div class="ux-pinpad__grid">
+          <template x-for="key in keys" :key="key">
+            <button type="button"
+                    class="ux-pinpad__key"
+                    :class="{ 'ux-pinpad__key--hidden': key === '' }"
+                    :disabled="loading"
+                    @click="handleKey(key)">
+              <span x-show="key !== 'backspace'" x-text="key"></span>
+              <span x-show="key === 'backspace'" x-html="getBackspaceIcon()"></span>
+            </button>
+          </template>
+        </div>
+
+        <!-- Loading indicator -->
+        <div x-show="loading" class="ux-pinpad__loading">
+          <span class="ux-spinner ux-spinner--sm"></span>
+          <span x-text="loadingText"></span>
+        </div>
+
+        <!-- Error message -->
+        <p x-show="errorMessage" class="ux-pinpad__error" x-text="errorMessage"></p>
+
+        <!-- Hint -->
+        <p x-show="hint && !loading && !errorMessage" class="ux-pinpad__hint" x-text="hint"></p>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxPinpad({ length: 4 })"
+     class="ux-pinpad ux-pinpad--glass"
+     @pinpad-submit="validatePin($event.detail.pin)"&gt;
+
+  &lt;!-- Label --&gt;
+  &lt;p class="ux-pinpad__label" x-text="label"&gt;&lt;/p&gt;
+
+  &lt;!-- PIN Dots --&gt;
+  &lt;div class="ux-pinpad__dots"&gt;
+    &lt;template x-for="i in length" :key="i"&gt;
+      &lt;div class="ux-pinpad__dot" :class="getDotClass(i - 1)"&gt;&lt;/div&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Numpad Grid --&gt;
+  &lt;div class="ux-pinpad__grid"&gt;
+    &lt;template x-for="key in keys" :key="key"&gt;
+      &lt;button type="button"
+              class="ux-pinpad__key"
+              :class="{ 'ux-pinpad__key--hidden': key === '' }"
+              :disabled="loading"
+              @click="handleKey(key)"&gt;
+        &lt;span x-show="key !== 'backspace'" x-text="key"&gt;&lt;/span&gt;
+        &lt;span x-show="key === 'backspace'" x-html="getBackspaceIcon()"&gt;&lt;/span&gt;
+      &lt;/button&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Loading --&gt;
+  &lt;div x-show="loading" class="ux-pinpad__loading"&gt;
+    &lt;span class="ux-spinner ux-spinner--sm"&gt;&lt;/span&gt;
+    &lt;span x-text="loadingText"&gt;&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- PIN Pad with HTMX -->
+  <div class="demo-section">
+    <h3>PIN Pad con HTMX</h3>
+    <p>Validacion de PIN en el servidor con HTMX.</p>
+
+    <div class="demo-box">
+      <div x-data="uxPinpad({ length: 4, label: 'Ingrese PIN de empleado' })"
+           class="ux-pinpad"
+           @pinpad-submit="
+             setLoading(true);
+             htmx.ajax('POST', '/api/validate-pin', {
+               values: { pin: $event.detail.pin },
+               target: '#pin-htmx-result'
+             }).then(() => {
+               // El servidor deberia responder con HX-Trigger para setSuccess o setError
+               setLoading(false);
+             });
+           ">
+
+        <p class="ux-pinpad__label" x-text="label"></p>
+
+        <div class="ux-pinpad__dots">
+          <template x-for="i in length" :key="i">
+            <div class="ux-pinpad__dot" :class="getDotClass(i - 1)"></div>
+          </template>
+        </div>
+
+        <div class="ux-pinpad__grid">
+          <template x-for="key in keys" :key="key">
+            <button type="button"
+                    class="ux-pinpad__key"
+                    :class="{ 'ux-pinpad__key--hidden': key === '' }"
+                    :disabled="loading"
+                    @click="handleKey(key)">
+              <span x-show="key !== 'backspace'" x-text="key"></span>
+              <span x-show="key === 'backspace'" x-html="getBackspaceIcon()"></span>
+            </button>
+          </template>
+        </div>
+
+        <div x-show="loading" class="ux-pinpad__loading">
+          <span class="ux-spinner ux-spinner--sm"></span>
+          <span x-text="loadingText"></span>
+        </div>
+
+        <p x-show="errorMessage" class="ux-pinpad__error" x-text="errorMessage"></p>
+      </div>
+      <div id="pin-htmx-result" style="padding: var(--ux-space-md); text-align: center;"></div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;!-- PIN Pad con validacion HTMX --&gt;
+&lt;div x-data="uxPinpad({ length: 4 })"
+     class="ux-pinpad"
+     @pinpad-submit="
+       setLoading(true);
+       htmx.ajax('POST', '/api/validate-pin', {
+         values: { pin: $event.detail.pin },
+         target: '#result'
+       }).then(() =&gt; setLoading(false));
+     "&gt;
+  ...
+&lt;/div&gt;</pre>
+
+    <pre class="ux-code-block" data-lang="python"># Django view para validar PIN
+@require_POST
+def validate_pin(request):
+    pin = request.POST.get('pin', '')
+
+    try:
+        employee = Employee.objects.get(pin_hash=hash_pin(pin))
+        request.session['employee_id'] = employee.id
+
+        return HttpResponse(f'''
+            &lt;div class="ux-alert ux-color-success"&gt;
+                Bienvenido, {employee.name}
+            &lt;/div&gt;
+        ''', headers={'HX-Trigger': 'pin-valid'})
+
+    except Employee.DoesNotExist:
+        return HttpResponse('''
+            &lt;div class="ux-alert ux-color-danger"&gt;
+                PIN incorrecto
+            &lt;/div&gt;
+        ''', headers={'HX-Trigger': 'pin-invalid'})</pre>
+  </div>
+
+  <!-- PIN Pad Sizes -->
+  <div class="demo-section">
+    <h3>PIN Pad - Tamanos</h3>
+    <p>Variantes de tamano: pequeno (.ux-pinpad--sm) y grande (.ux-pinpad--lg).</p>
+
+    <div class="demo-grid">
+      <!-- Small -->
+      <div x-data="uxPinpad({ length: 4, label: 'PIN pequeno' })"
+           class="ux-pinpad ux-pinpad--sm"
+           @pinpad-submit="alert('PIN: ' + $event.detail.pin)">
+        <p class="ux-pinpad__label" x-text="label"></p>
+        <div class="ux-pinpad__dots">
+          <template x-for="i in length" :key="i">
+            <div class="ux-pinpad__dot" :class="getDotClass(i - 1)"></div>
+          </template>
+        </div>
+        <div class="ux-pinpad__grid">
+          <template x-for="key in keys" :key="key">
+            <button type="button" class="ux-pinpad__key" :class="{ 'ux-pinpad__key--hidden': key === '' }" @click="handleKey(key)">
+              <span x-show="key !== 'backspace'" x-text="key"></span>
+              <span x-show="key === 'backspace'" x-html="getBackspaceIcon()"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Large -->
+      <div x-data="uxPinpad({ length: 6, label: 'PIN de 6 digitos' })"
+           class="ux-pinpad ux-pinpad--lg"
+           @pinpad-submit="alert('PIN: ' + $event.detail.pin)">
+        <p class="ux-pinpad__label" x-text="label"></p>
+        <div class="ux-pinpad__dots">
+          <template x-for="i in length" :key="i">
+            <div class="ux-pinpad__dot" :class="getDotClass(i - 1)"></div>
+          </template>
+        </div>
+        <div class="ux-pinpad__grid">
+          <template x-for="key in keys" :key="key">
+            <button type="button" class="ux-pinpad__key" :class="{ 'ux-pinpad__key--hidden': key === '' }" @click="handleKey(key)">
+              <span x-show="key !== 'backspace'" x-text="key"></span>
+              <span x-show="key === 'backspace'" x-html="getBackspaceIcon()"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Pequeno --&gt;
+&lt;div class="ux-pinpad ux-pinpad--sm"&gt;...&lt;/div&gt;
+
+&lt;!-- Grande --&gt;
+&lt;div class="ux-pinpad ux-pinpad--lg"&gt;...&lt;/div&gt;
+
+&lt;!-- 6 digitos --&gt;
+&lt;div x-data="uxPinpad({ length: 6 })"&gt;...&lt;/div&gt;</pre>
   </div>
 
   <!-- Small Size -->
@@ -937,6 +1174,49 @@ Delete    Limpiar todo
 Enter     Submit
 -         Toggle negativo</pre>
     </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Componente uxPinpad</h4>
+    <div style="background: var(--ux-surface); padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg);">
+      <pre class="ux-code-block" data-lang="javascript">// Configuracion del componente uxPinpad
+uxPinpad({
+  // Longitud del PIN
+  length: 4,              // Numero de digitos (4 o 6)
+
+  // Textos
+  label: 'Introduce tu PIN',
+  hint: '',               // Texto de ayuda
+  loadingText: 'Verificando...',
+})
+
+// Propiedades reactivas:
+pin             // PIN actual como string
+length          // Longitud del PIN
+loading         // Estado de carga
+error           // Estado de error
+success         // Estado de exito
+errorMessage    // Mensaje de error
+keys            // Array de teclas [1-9, '', 0, 'backspace']
+
+// Metodos:
+handleKey(key)        // Manejar tecla (numero o 'backspace')
+clear()               // Limpiar PIN
+submit()              // Emitir evento submit
+setLoading(bool)      // Activar/desactivar loading
+setError(message)     // Mostrar error con animacion shake
+setSuccess()          // Mostrar estado success
+isDotFilled(index)    // Verificar si dot esta lleno
+getDotClass(index)    // Obtener clase CSS del dot
+getBackspaceIcon()    // Obtener SVG de backspace
+
+// Eventos emitidos:
+@pinpad-submit        // { pin: '1234' }
+
+// Soporte de teclado (automatico):
+0-9       Agregar digito
+Backspace Borrar ultimo
+Delete    Limpiar todo
+Escape    Limpiar todo</pre>
+    </div>
   </div>
 
   <!-- CSS Classes -->
@@ -979,10 +1259,34 @@ Enter     Submit
 .ux-numpad__quick-amounts     // Contenedor montos
 .ux-numpad__quick-btn         // Boton de monto
 
-/* PIN */
+/* PIN (numpad mode) */
 .ux-numpad__pin-dots          // Contenedor dots
 .ux-numpad__pin-dot           // Dot individual
-.ux-numpad__pin-dot--filled   // Dot relleno</pre>
+.ux-numpad__pin-dot--filled   // Dot relleno
+
+/* ========================================
+   PIN Pad Component
+======================================== */
+
+/* Contenedor */
+.ux-pinpad                    // Contenedor principal
+.ux-pinpad--sm                // Tamano pequeno
+.ux-pinpad--lg                // Tamano grande
+.ux-pinpad--glass             // Variante glass
+
+/* Elementos */
+.ux-pinpad__label             // Label/titulo
+.ux-pinpad__dots              // Contenedor de dots
+.ux-pinpad__dot               // Dot individual
+.ux-pinpad__dot--filled       // Dot relleno
+.ux-pinpad__dot--error        // Dot en error (rojo + shake)
+.ux-pinpad__dot--success      // Dot success (verde)
+.ux-pinpad__grid              // Grid de teclas
+.ux-pinpad__key               // Tecla circular
+.ux-pinpad__key--hidden       // Tecla oculta (espacio vacio)
+.ux-pinpad__loading           // Indicador de carga
+.ux-pinpad__hint              // Texto de ayuda
+.ux-pinpad__error             // Mensaje de error</pre>
     </div>
   </div>
 

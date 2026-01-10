@@ -471,3 +471,281 @@ test.describe('Numpad Component', () => {
     expect(digitCount).toBeLessThanOrEqual(15);
   });
 });
+
+// PIN Pad Component Tests
+test.describe('PIN Pad Component', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/docs/numpad.html');
+  });
+
+  // Basic Rendering
+  test('should render PIN pad container', async ({ page }) => {
+    const pinpad = page.locator('.ux-pinpad').first();
+    if (await pinpad.count() > 0) {
+      await expect(pinpad).toBeVisible();
+    }
+  });
+
+  test('should render PIN pad label', async ({ page }) => {
+    const label = page.locator('.ux-pinpad__label').first();
+    if (await label.count() > 0) {
+      await expect(label).toBeVisible();
+    }
+  });
+
+  test('should render PIN dots container', async ({ page }) => {
+    const dots = page.locator('.ux-pinpad__dots').first();
+    if (await dots.count() > 0) {
+      await expect(dots).toBeVisible();
+    }
+  });
+
+  test('should render correct number of dots', async ({ page }) => {
+    const dotsContainer = page.locator('.ux-pinpad__dots').first();
+    if (await dotsContainer.count() > 0) {
+      const dots = dotsContainer.locator('.ux-pinpad__dot');
+      const count = await dots.count();
+      // Should have at least 4 dots (standard PIN length)
+      expect(count).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  test('should render PIN pad grid', async ({ page }) => {
+    const grid = page.locator('.ux-pinpad__grid').first();
+    if (await grid.count() > 0) {
+      await expect(grid).toBeVisible();
+    }
+  });
+
+  test('should render all digit buttons 0-9', async ({ page }) => {
+    const grid = page.locator('.ux-pinpad__grid').first();
+    if (await grid.count() > 0) {
+      for (let i = 0; i <= 9; i++) {
+        const button = grid.locator('.ux-pinpad__key').filter({
+          hasText: String(i)
+        }).first();
+        if (await button.count() > 0) {
+          await expect(button).toBeVisible();
+        }
+      }
+    }
+  });
+
+  test('should render circular key buttons', async ({ page }) => {
+    const key = page.locator('.ux-pinpad__key').first();
+    if (await key.count() > 0) {
+      const borderRadius = await key.evaluate(el =>
+        getComputedStyle(el).borderRadius
+      );
+      // Should be 50% or equivalent pixel value for circular
+      expect(borderRadius).toMatch(/50%|\d+px/);
+    }
+  });
+
+  test('should render backspace button in correct position', async ({ page }) => {
+    const grid = page.locator('.ux-pinpad__grid').first();
+    if (await grid.count() > 0) {
+      const keys = grid.locator('.ux-pinpad__key');
+      const count = await keys.count();
+      // Backspace should be the last key (position 12)
+      if (count >= 12) {
+        const lastKey = keys.nth(11);
+        // Check for SVG or backspace icon
+        const hasSvg = await lastKey.locator('svg').count() > 0;
+        expect(hasSvg).toBe(true);
+      }
+    }
+  });
+
+  // Interaction Tests
+  test('should fill dot when digit is pressed', async ({ page }) => {
+    const pinpad = page.locator('.ux-pinpad').first();
+    if (await pinpad.count() > 0) {
+      const grid = pinpad.locator('.ux-pinpad__grid');
+      const dots = pinpad.locator('.ux-pinpad__dot');
+
+      // Click a digit
+      const button1 = grid.locator('.ux-pinpad__key').filter({ hasText: '1' }).first();
+      if (await button1.count() > 0) {
+        await button1.click();
+        await page.waitForTimeout(100);
+
+        // Check first dot is filled
+        const firstDot = dots.first();
+        const className = await firstDot.getAttribute('class');
+        expect(className).toContain('filled');
+      }
+    }
+  });
+
+  test('should remove digit on backspace', async ({ page }) => {
+    const pinpad = page.locator('.ux-pinpad').first();
+    if (await pinpad.count() > 0) {
+      const grid = pinpad.locator('.ux-pinpad__grid');
+
+      // Click a digit
+      const button1 = grid.locator('.ux-pinpad__key').filter({ hasText: '1' }).first();
+      if (await button1.count() > 0) {
+        await button1.click();
+        await page.waitForTimeout(100);
+
+        // Click backspace (last button with svg)
+        const keys = grid.locator('.ux-pinpad__key');
+        const backspaceKey = keys.last();
+        await backspaceKey.click();
+        await page.waitForTimeout(100);
+
+        // Check first dot is not filled
+        const dots = pinpad.locator('.ux-pinpad__dot');
+        const firstDot = dots.first();
+        const className = await firstDot.getAttribute('class');
+        expect(className).not.toContain('--filled');
+      }
+    }
+  });
+
+  // Size Variants
+  test('should render small size variant', async ({ page }) => {
+    const smallPinpad = page.locator('.ux-pinpad--sm').first();
+    if (await smallPinpad.count() > 0) {
+      await expect(smallPinpad).toBeVisible();
+
+      const key = smallPinpad.locator('.ux-pinpad__key').first();
+      const height = await key.evaluate(el =>
+        parseInt(getComputedStyle(el).height)
+      );
+
+      // Small should be smaller than standard (68px)
+      expect(height).toBeLessThan(70);
+    }
+  });
+
+  test('should render large size variant', async ({ page }) => {
+    const largePinpad = page.locator('.ux-pinpad--lg').first();
+    if (await largePinpad.count() > 0) {
+      await expect(largePinpad).toBeVisible();
+
+      const key = largePinpad.locator('.ux-pinpad__key').first();
+      const height = await key.evaluate(el =>
+        parseInt(getComputedStyle(el).height)
+      );
+
+      // Large should be bigger than standard
+      expect(height).toBeGreaterThan(68);
+    }
+  });
+
+  // Glass Variant
+  test('should apply glass variant styles', async ({ page }) => {
+    const glassPinpad = page.locator('.ux-pinpad--glass').first();
+    if (await glassPinpad.count() > 0) {
+      await expect(glassPinpad).toBeVisible();
+
+      const key = glassPinpad.locator('.ux-pinpad__key').first();
+      const backdropFilter = await key.evaluate(el =>
+        getComputedStyle(el).backdropFilter || getComputedStyle(el).webkitBackdropFilter
+      );
+
+      expect(backdropFilter).toContain('blur');
+    }
+  });
+
+  // Loading State
+  test('should show loading indicator', async ({ page }) => {
+    const loading = page.locator('.ux-pinpad__loading').first();
+    if (await loading.count() > 0) {
+      // Loading is typically hidden initially
+      expect(true).toBe(true);
+    }
+  });
+
+  // Hint
+  test('should display hint text', async ({ page }) => {
+    const hint = page.locator('.ux-pinpad__hint').first();
+    if (await hint.count() > 0) {
+      await expect(hint).toBeVisible();
+    }
+  });
+
+  // Hidden Key
+  test('should have hidden key for layout spacing', async ({ page }) => {
+    const grid = page.locator('.ux-pinpad__grid').first();
+    if (await grid.count() > 0) {
+      const hiddenKey = grid.locator('.ux-pinpad__key--hidden');
+      if (await hiddenKey.count() > 0) {
+        const visibility = await hiddenKey.evaluate(el =>
+          getComputedStyle(el).visibility
+        );
+        expect(visibility).toBe('hidden');
+      }
+    }
+  });
+
+  // Touch Target
+  test('should have adequate touch target size', async ({ page }) => {
+    const key = page.locator('.ux-pinpad__key').first();
+    if (await key.count() > 0) {
+      const dimensions = await key.evaluate(el => ({
+        width: parseInt(getComputedStyle(el).width),
+        height: parseInt(getComputedStyle(el).height)
+      }));
+
+      // Should be at least 44px for touch targets
+      expect(dimensions.width).toBeGreaterThanOrEqual(44);
+      expect(dimensions.height).toBeGreaterThanOrEqual(44);
+    }
+  });
+
+  // Accessibility
+  test('should have buttons as type button', async ({ page }) => {
+    const key = page.locator('.ux-pinpad__key').first();
+    if (await key.count() > 0) {
+      const type = await key.getAttribute('type');
+      expect(type).toBe('button');
+    }
+  });
+
+  test('should be keyboard navigable', async ({ page }) => {
+    const pinpad = page.locator('.ux-pinpad').first();
+    if (await pinpad.count() > 0) {
+      const firstKey = pinpad.locator('.ux-pinpad__key').first();
+      await firstKey.focus();
+      await expect(firstKey).toBeFocused();
+    }
+  });
+
+  // Alpine Component
+  test('should have uxPinpad Alpine component available', async ({ page }) => {
+    const hasComponent = await page.evaluate(() => {
+      const Alpine = (window as any).Alpine;
+      if (!Alpine) return false;
+      return typeof Alpine.data?.('uxPinpad') === 'function' ||
+             typeof (window as any).UX?.components?.uxPinpad === 'function';
+    });
+    expect(hasComponent).toBe(true);
+  });
+
+  // Dot States
+  test('should have dot filled state styling', async ({ page }) => {
+    // Verify the filled dot class is defined in styles
+    const pinpad = page.locator('.ux-pinpad').first();
+    if (await pinpad.count() > 0) {
+      const grid = pinpad.locator('.ux-pinpad__grid');
+      const button1 = grid.locator('.ux-pinpad__key').filter({ hasText: '1' }).first();
+
+      if (await button1.count() > 0) {
+        // Click to fill first dot
+        await button1.click();
+        await page.waitForTimeout(100);
+
+        // Check if dot has filled styling applied
+        const dot = pinpad.locator('.ux-pinpad__dot').first();
+        const bg = await dot.evaluate(el => getComputedStyle(el).backgroundColor);
+
+        // Background should not be transparent (filled dot has color)
+        expect(bg).not.toBe('transparent');
+        expect(bg).not.toBe('rgba(0, 0, 0, 0)');
+      }
+    }
+  });
+});

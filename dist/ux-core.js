@@ -662,6 +662,10 @@
       --ux-variant-border: transparent;
       --ux-variant-bg-hover: transparent;
       --ux-variant-soft-opacity: 0.15;
+
+      /* Demo/Documentation Gradient */
+      --ux-demo-gradient: linear-gradient(135deg, var(--ux-indigo-400) 0%, var(--ux-purple-600) 100%);
+      --ux-demo-gradient-dark: linear-gradient(135deg, var(--ux-gray-900) 0%, var(--ux-slate-800) 100%);
     }
 
     /* ========================================

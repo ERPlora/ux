@@ -388,6 +388,217 @@
     .ux-dark .ux-numpad__key {
       border-color: var(--ux-border-color);
     }
+
+    /* ========================================
+       PIN Pad Component
+    ======================================== */
+
+    :root {
+      --ux-pinpad-dot-size: 18px;
+      --ux-pinpad-key-size: 68px;
+      --ux-pinpad-key-size-sm: 56px;
+      --ux-pinpad-key-size-lg: 80px;
+    }
+
+    .ux-pinpad {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--ux-space-lg);
+      padding: var(--ux-space-lg);
+    }
+
+    .ux-pinpad__label {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin: 0;
+    }
+
+    /* PIN Dots */
+    .ux-pinpad__dots {
+      display: flex;
+      gap: var(--ux-space-md);
+    }
+
+    .ux-pinpad__dot {
+      width: var(--ux-pinpad-dot-size);
+      height: var(--ux-pinpad-dot-size);
+      border-radius: 50%;
+      border: 2px solid var(--ux-border-color);
+      background: transparent;
+      transition: all 0.2s ease;
+    }
+
+    .ux-pinpad__dot--filled {
+      background: var(--ux-primary);
+      border-color: var(--ux-primary);
+      transform: scale(1.15);
+      box-shadow: 0 0 12px var(--ux-primary);
+    }
+
+    .ux-pinpad__dot--error {
+      background: var(--ux-danger);
+      border-color: var(--ux-danger);
+      box-shadow: 0 0 12px var(--ux-danger);
+      animation: ux-pinpad-shake 0.5s ease;
+    }
+
+    .ux-pinpad__dot--success {
+      background: var(--ux-success);
+      border-color: var(--ux-success);
+      box-shadow: 0 0 12px var(--ux-success);
+    }
+
+    @keyframes ux-pinpad-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+
+    /* PIN Pad Grid */
+    .ux-pinpad__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--ux-space-sm);
+      max-width: 260px;
+    }
+
+    /* PIN Pad Keys */
+    .ux-pinpad__key {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--ux-pinpad-key-size);
+      height: var(--ux-pinpad-key-size);
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--ux-text);
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        background-color var(--ux-transition-fast) var(--ux-ease),
+        transform 100ms var(--ux-ease);
+    }
+
+    .ux-pinpad__key:hover {
+      background: rgba(var(--ux-text-rgb, 0, 0, 0), 0.05);
+    }
+
+    .ux-pinpad__key:active {
+      transform: scale(0.92);
+      background: rgba(var(--ux-text-rgb, 0, 0, 0), 0.1);
+    }
+
+    .ux-pinpad__key:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: 2px;
+    }
+
+    .ux-pinpad__key:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .ux-pinpad__key--hidden {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .ux-pinpad__key svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Glass Variant */
+    .ux-pinpad--glass .ux-pinpad__key {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .ux-pinpad--glass .ux-pinpad__key:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .ux-pinpad--glass .ux-pinpad__key:active {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Size Variants */
+    .ux-pinpad--sm .ux-pinpad__key {
+      width: var(--ux-pinpad-key-size-sm);
+      height: var(--ux-pinpad-key-size-sm);
+      font-size: 1.25rem;
+    }
+
+    .ux-pinpad--sm .ux-pinpad__dot {
+      width: 14px;
+      height: 14px;
+    }
+
+    .ux-pinpad--lg .ux-pinpad__key {
+      width: var(--ux-pinpad-key-size-lg);
+      height: var(--ux-pinpad-key-size-lg);
+      font-size: 1.75rem;
+    }
+
+    .ux-pinpad--lg .ux-pinpad__dot {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Loading State */
+    .ux-pinpad__loading {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    /* Hint */
+    .ux-pinpad__hint {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      margin: 0;
+    }
+
+    /* Error Message */
+    .ux-pinpad__error {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-danger);
+      margin: 0;
+    }
+
+    /* Dark Mode Glass */
+    @media (prefers-color-scheme: dark) {
+      .ux-pinpad--glass .ux-pinpad__key {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .ux-pinpad--glass .ux-pinpad__key:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .ux-dark .ux-pinpad--glass .ux-pinpad__key {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .ux-dark .ux-pinpad--glass .ux-pinpad__key:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
   `;
 
   // Icons
@@ -635,6 +846,148 @@
   } else {
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxNumpad', numpadComponent);
+    });
+  }
+
+  // Alpine component for PIN Pad
+  const pinpadComponent = (config = {}) => ({
+    // PIN value
+    pin: '',
+
+    // Configuration
+    length: config.length || 4,
+    label: config.label || 'Introduce tu PIN',
+    hint: config.hint || '',
+    loadingText: config.loadingText || 'Verificando...',
+
+    // State
+    loading: false,
+    error: false,
+    success: false,
+    errorMessage: '',
+
+    // Keys layout: 1-9, empty, 0, backspace
+    keys: [1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'backspace'],
+
+    // Initialize
+    init() {
+      // Keyboard support
+      this._keyHandler = (e) => {
+        if (this.loading) return;
+        if (!this.$el.contains(document.activeElement) && document.activeElement !== document.body) return;
+
+        if (e.key >= '0' && e.key <= '9') {
+          e.preventDefault();
+          this.handleKey(parseInt(e.key));
+        } else if (e.key === 'Backspace') {
+          e.preventDefault();
+          this.handleKey('backspace');
+        } else if (e.key === 'Delete' || e.key === 'Escape') {
+          e.preventDefault();
+          this.clear();
+        }
+      };
+
+      document.addEventListener('keydown', this._keyHandler);
+    },
+
+    destroy() {
+      if (this._keyHandler) {
+        document.removeEventListener('keydown', this._keyHandler);
+      }
+    },
+
+    // Handle key press
+    handleKey(key) {
+      if (this.loading) return;
+
+      // Clear error state on new input
+      if (this.error) {
+        this.error = false;
+        this.errorMessage = '';
+      }
+
+      if (key === 'backspace') {
+        this.pin = this.pin.slice(0, -1);
+        return;
+      }
+
+      if (key === '' || key === null || key === undefined) return;
+
+      // Add digit if not at max length
+      if (this.pin.length < this.length) {
+        this.pin += String(key);
+
+        // Auto-submit when PIN is complete
+        if (this.pin.length === this.length) {
+          this.$nextTick(() => this.submit());
+        }
+      }
+    },
+
+    // Clear PIN
+    clear() {
+      this.pin = '';
+      this.error = false;
+      this.success = false;
+      this.errorMessage = '';
+    },
+
+    // Submit PIN
+    submit() {
+      this.$dispatch('pinpad-submit', {
+        pin: this.pin
+      });
+    },
+
+    // Set loading state (call from parent)
+    setLoading(isLoading) {
+      this.loading = isLoading;
+    },
+
+    // Set error state (call from parent)
+    setError(message = 'PIN incorrecto') {
+      this.error = true;
+      this.errorMessage = message;
+      this.pin = '';
+      this.loading = false;
+
+      // Auto-clear error after animation
+      setTimeout(() => {
+        this.error = false;
+      }, 500);
+    },
+
+    // Set success state (call from parent)
+    setSuccess() {
+      this.success = true;
+      this.loading = false;
+    },
+
+    // Check if dot should be filled
+    isDotFilled(index) {
+      return this.pin.length > index;
+    },
+
+    // Get dot class
+    getDotClass(index) {
+      if (this.error) return 'ux-pinpad__dot--error';
+      if (this.success && this.isDotFilled(index)) return 'ux-pinpad__dot--success';
+      if (this.isDotFilled(index)) return 'ux-pinpad__dot--filled';
+      return '';
+    },
+
+    // Get backspace icon
+    getBackspaceIcon() {
+      return icons.backspace;
+    }
+  });
+
+  if (window.UX) {
+    window.UX.registerComponent('uxPinpad', pinpadComponent);
+  } else {
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('uxPinpad', pinpadComponent);
     });
   }
 })();
