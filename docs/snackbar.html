@@ -10,16 +10,12 @@
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-content.js"></script>
   <script src="../components/ux-snackbar.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); }
     .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
     .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
     .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-md); }
-    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
-    .code-block .tag { color: #ff7b72; }
-    .code-block .attr { color: #79c0ff; }
-    .code-block .string { color: #a5d6ff; }
-    .code-block .comment { color: #6a737d; }
   </style>
 </head>
 <body class="ux-app">
@@ -42,13 +38,13 @@
           No Auto-dismiss
         </button>
       </div>
-      <pre class="code-block"><span class="comment">// Basico</span>
+      <pre class="ux-code-block" data-lang="javascript">// Basico
 UXSnackbar.show({ message: 'Mensaje enviado' });
 
-<span class="comment">// Con opciones</span>
+// Con opciones
 UXSnackbar.show({
   message: 'Archivo eliminado',
-  duration: 4000,  <span class="comment">// ms, 0 = no auto-dismiss</span>
+  duration: 4000,  // ms, 0 = no auto-dismiss
   closable: true
 });</pre>
     </section>
@@ -73,11 +69,11 @@ UXSnackbar.show({
           Success Action
         </button>
       </div>
-      <pre class="code-block">UXSnackbar.show({
+      <pre class="ux-code-block" data-lang="javascript">UXSnackbar.show({
   message: 'Elemento eliminado',
   actionLabel: 'Deshacer',
   onAction: () => {
-    <span class="comment">// Restaurar elemento</span>
+    // Restaurar elemento
   }
 });</pre>
     </section>
@@ -212,6 +208,164 @@ UXSnackbar.show({
           </button>
         </div>
       </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Integrar snackbars con respuestas HTMX desde Django. Usar el header <code>HX-Trigger</code> para disparar snackbars automaticamente.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Template HTML con HTMX</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Formulario con HTMX --&gt;
+&lt;form hx-post="/api/items/create/"
+      hx-target="#item-list"
+      hx-swap="beforeend"&gt;
+  &lt;input type="text" name="name" class="ux-input" placeholder="Nombre del item"&gt;
+  &lt;button type="submit" class="ux-button ux-color-primary"&gt;Crear&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;!-- Boton de eliminar con confirmacion --&gt;
+&lt;button hx-delete="/api/items/{{ item.id }}/"
+        hx-target="closest .item-row"
+        hx-swap="outerHTML"
+        hx-confirm="Eliminar este elemento?"&gt;
+  Eliminar
+&lt;/button&gt;
+
+&lt;!-- Escuchar eventos personalizados de HTMX --&gt;
+&lt;script&gt;
+document.body.addEventListener('showSnackbar', (e) => {
+  UXSnackbar.show(e.detail);
+});
+&lt;/script&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Vista Django</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+import json
+
+def create_item(request):
+    # Crear item...
+    item = Item.objects.create(name=request.POST['name'])
+
+    # Respuesta con snackbar via HX-Trigger
+    response = HttpResponse(render_to_string('partials/item_row.html', {'item': item}))
+    response['HX-Trigger'] = json.dumps({
+        'showSnackbar': {
+            'message': f'Item "{item.name}" creado exitosamente',
+            'type': 'success',
+            'showProgress': True
+        }
+    })
+    return response
+
+def delete_item(request, item_id):
+    item = Item.objects.get(id=item_id)
+    item_name = item.name
+    item.delete()
+
+    response = HttpResponse('')
+    response['HX-Trigger'] = json.dumps({
+        'showSnackbar': {
+            'message': f'"{item_name}" eliminado',
+            'type': 'danger',
+            'actionLabel': 'Deshacer',
+            'duration': 5000
+        }
+    })
+    return response
+
+def update_item(request, item_id):
+    item = Item.objects.get(id=item_id)
+    item.name = request.POST['name']
+    item.save()
+
+    response = HttpResponse(render_to_string('partials/item_row.html', {'item': item}))
+    response['HX-Trigger'] = json.dumps({
+        'showSnackbar': {
+            'message': 'Cambios guardados',
+            'type': 'success'
+        }
+    })
+    return response</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Middleware para Mensajes Django</h4>
+      <pre class="ux-code-block" data-lang="python"># middleware.py
+from django.contrib import messages
+import json
+
+class HTMXSnackbarMiddleware:
+    """Convierte mensajes de Django en snackbars HTMX."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        # Solo para requests HTMX
+        if not request.headers.get('HX-Request'):
+            return response
+
+        # Obtener mensajes pendientes
+        storage = messages.get_messages(request)
+        snackbar_messages = []
+
+        type_map = {
+            messages.SUCCESS: 'success',
+            messages.WARNING: 'warning',
+            messages.ERROR: 'danger',
+            messages.INFO: 'info',
+        }
+
+        for msg in storage:
+            snackbar_messages.append({
+                'message': str(msg),
+                'type': type_map.get(msg.level, 'info')
+            })
+
+        if snackbar_messages:
+            # Agregar al HX-Trigger existente o crear nuevo
+            existing = response.get('HX-Trigger', '{}')
+            triggers = json.loads(existing) if existing != '{}' else {}
+
+            # Usar el primer mensaje (o encolar multiples)
+            triggers['showSnackbar'] = snackbar_messages[0]
+            response['HX-Trigger'] = json.dumps(triggers)
+
+        return response</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Ejemplo Completo: CRUD con Snackbars</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Lista de tareas con acciones HTMX --&gt;
+&lt;div id="task-list"&gt;
+  {% for task in tasks %}
+  &lt;div class="ux-list__item task-row" id="task-{{ task.id }}"&gt;
+    &lt;span&gt;{{ task.title }}&lt;/span&gt;
+    &lt;div class="ux-list__end"&gt;
+      &lt;button class="ux-button ux-button--sm"
+              hx-patch="/tasks/{{ task.id }}/toggle/"
+              hx-target="#task-{{ task.id }}"
+              hx-swap="outerHTML"&gt;
+        {% if task.completed %}Reabrir{% else %}Completar{% endif %}
+      &lt;/button&gt;
+      &lt;button class="ux-button ux-button--sm ux-color-danger"
+              hx-delete="/tasks/{{ task.id }}/"
+              hx-target="#task-{{ task.id }}"
+              hx-swap="outerHTML swap:0.3s"&gt;
+        Eliminar
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  {% endfor %}
+&lt;/div&gt;
+
+&lt;!-- Formulario para nueva tarea --&gt;
+&lt;form hx-post="/tasks/create/"
+      hx-target="#task-list"
+      hx-swap="beforeend"
+      hx-on::after-request="this.reset()"&gt;
+  &lt;input type="text" name="title" class="ux-input" placeholder="Nueva tarea..." required&gt;
+  &lt;button type="submit" class="ux-button ux-color-primary"&gt;Agregar&lt;/button&gt;
+&lt;/form&gt;</pre>
     </section>
 
     <section class="demo-section">

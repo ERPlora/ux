@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Shift Calendar - UX Library</title>
+  <link rel="stylesheet" href="../bootstrap-grid.min.css">
+  <script src="../dist/ux.min.js"></script>
+  <script src="../components/ux-shift-calendar.js"></script>
+  <script src="../components/ux-code-block.js"></script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--ux-surface-secondary);
+      padding: 2rem;
+      padding-bottom: 4rem;
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--ux-text);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .demo-calendar {
+      height: 600px;
+    }
+    .demo-glass-bg {
+      background: linear-gradient(135deg, var(--ux-indigo-400), var(--ux-cyan-500));
+      padding: 2rem;
+      border-radius: 16px;
+    }
+    .result-display {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--ux-surface-secondary);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <h1 style="margin-bottom: 0.5rem;">Shift Calendar</h1>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+    Calendario de turnos semanal con vista de horas, arrastrar para crear turnos y filtrado por empleado.
+  </p>
+
+  <!-- Basic Shift Calendar -->
+  <section class="demo-section">
+    <h2>Calendario de Turnos Basico</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Vista semanal con turnos de diferentes tipos. Haz clic en un turno para seleccionarlo.
+    </p>
+
+    <div class="demo-calendar" x-data="uxShiftCalendar({
+      shifts: [
+        { id: 's1', date: new Date().toISOString().split('T')[0], employeeId: 'e1', employeeName: 'Ana Garcia', startTime: '08:00', endTime: '14:00', type: 'morning', department: 'Ventas' },
+        { id: 's2', date: new Date().toISOString().split('T')[0], employeeId: 'e2', employeeName: 'Carlos Lopez', startTime: '14:00', endTime: '22:00', type: 'afternoon', department: 'Soporte' },
+        { id: 's3', date: new Date(Date.now() + 86400000).toISOString().split('T')[0], employeeId: 'e3', employeeName: 'Maria Torres', startTime: '22:00', endTime: '06:00', type: 'night', department: 'Seguridad' },
+        { id: 's4', date: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0], employeeId: 'e1', employeeName: 'Ana Garcia', startTime: '08:00', endTime: '18:00', type: 'full-day', department: 'Ventas' },
+        { id: 's5', date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0], employeeId: 'e2', employeeName: 'Carlos Lopez', startTime: '10:00', endTime: '16:00', type: 'morning', department: 'Soporte' }
+      ],
+      employees: [
+        { id: 'e1', name: 'Ana Garcia' },
+        { id: 'e2', name: 'Carlos Lopez' },
+        { id: 'e3', name: 'Maria Torres' }
+      ]
+    })" @shift-calendar:select="selectedShift = $event.detail.shift">
+      <div class="ux-shift-calendar">
+        <!-- Header -->
+        <div class="ux-shift-calendar__header">
+          <div class="ux-shift-calendar__header-start">
+            <div class="ux-shift-calendar__nav">
+              <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(-1)" x-html="icons.prev"></button>
+              <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(1)" x-html="icons.next"></button>
+            </div>
+            <button class="ux-shift-calendar__today-btn" @click="goToToday()">Hoy</button>
+          </div>
+
+          <div class="ux-shift-calendar__header-center">
+            <span class="ux-shift-calendar__title" x-text="weekRangeTitle"></span>
+          </div>
+
+          <div class="ux-shift-calendar__header-end">
+            <div class="ux-shift-calendar__filter">
+              <button class="ux-shift-calendar__filter-btn">
+                <span x-html="icons.filter"></span>
+                <span>Filtrar</span>
+                <span class="ux-shift-calendar__filter-badge" x-show="filteredEmployeeIds.length > 0" x-text="filteredEmployeeIds.length"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid -->
+        <div class="ux-shift-calendar__grid-wrapper">
+          <div class="ux-shift-calendar__grid">
+            <!-- Day headers -->
+            <div class="ux-shift-calendar__corner"></div>
+            <template x-for="(date, dayIndex) in weekDates" :key="dayIndex">
+              <div class="ux-shift-calendar__day-header"
+                   :class="{
+                     'ux-shift-calendar__day-header--today': isToday(date),
+                     'ux-shift-calendar__day-header--weekend': isWeekend(date)
+                   }">
+                <span class="ux-shift-calendar__day-name" x-text="dayNames[date.getDay()]"></span>
+                <span class="ux-shift-calendar__day-number" x-text="date.getDate()"></span>
+              </div>
+            </template>
+
+            <!-- Time slots and cells -->
+            <template x-for="slot in timeSlots" :key="slot.hour">
+              <template x-for="(colIndex) in [0,1,2,3,4,5,6,7]" :key="colIndex">
+                <template x-if="colIndex === 0">
+                  <div class="ux-shift-calendar__time-slot">
+                    <span x-text="slot.label"></span>
+                  </div>
+                </template>
+                <template x-if="colIndex > 0">
+                  <div class="ux-shift-calendar__cell"
+                       :class="{
+                         'ux-shift-calendar__cell--weekend': isWeekend(weekDates[colIndex - 1])
+                       }"
+                       @mousedown="onCellMouseDown(weekDates[colIndex - 1], slot.hour, $event)"
+                       @mousemove="onCellMouseMove(weekDates[colIndex - 1], slot.hour, $event)">
+
+                    <!-- Shifts for this day/hour -->
+                    <template x-if="slot.hour === startHour">
+                      <template x-for="shift in getShiftsForDay(weekDates[colIndex - 1])" :key="shift.id">
+                        <div class="ux-shift-calendar__shift"
+                             :class="'ux-shift-calendar__shift--' + getShiftType(shift)"
+                             :style="getShiftStyle(shift)"
+                             @click="onShiftClick(shift, $event)">
+                          <div class="ux-shift-calendar__shift-name" x-text="shift.employeeName"></div>
+                          <div class="ux-shift-calendar__shift-time" x-text="shift.startTime + ' - ' + shift.endTime"></div>
+                          <div class="ux-shift-calendar__shift-department" x-text="shift.department"></div>
+                        </div>
+                      </template>
+                    </template>
+                  </div>
+                </template>
+              </template>
+            </template>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="ux-shift-calendar__legend" x-show="showLegend">
+          <div class="ux-shift-calendar__legend-item">
+            <span class="ux-shift-calendar__legend-color ux-shift-calendar__legend-color--morning"></span>
+            <span>Manana</span>
+          </div>
+          <div class="ux-shift-calendar__legend-item">
+            <span class="ux-shift-calendar__legend-color ux-shift-calendar__legend-color--afternoon"></span>
+            <span>Tarde</span>
+          </div>
+          <div class="ux-shift-calendar__legend-item">
+            <span class="ux-shift-calendar__legend-color ux-shift-calendar__legend-color--night"></span>
+            <span>Noche</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-display" x-show="selectedShift">
+        Turno seleccionado: <strong x-text="selectedShift?.employeeName"></strong> -
+        <span x-text="selectedShift?.startTime + ' - ' + selectedShift?.endTime"></span>
+        (<span x-text="selectedShift?.department"></span>)
+      </div>
+    </div>
+  </section>
+
+  <!-- Drag to Create -->
+  <section class="demo-section">
+    <h2>Arrastrar para Crear Turnos</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Arrastra sobre las celdas para crear un nuevo turno. El evento <code>shift-calendar:create</code> se dispara con los datos.
+    </p>
+
+    <div class="demo-calendar" x-data="{
+      ...uxShiftCalendar({ shifts: [], showLegend: false }),
+      newShiftData: null
+    }" @shift-calendar:create="newShiftData = $event.detail">
+      <div class="ux-shift-calendar">
+        <div class="ux-shift-calendar__header">
+          <div class="ux-shift-calendar__header-start">
+            <div class="ux-shift-calendar__nav">
+              <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(-1)" x-html="icons.prev"></button>
+              <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(1)" x-html="icons.next"></button>
+            </div>
+          </div>
+          <div class="ux-shift-calendar__header-center">
+            <span class="ux-shift-calendar__title" x-text="weekRangeTitle"></span>
+          </div>
+          <div class="ux-shift-calendar__header-end">
+            <button class="ux-shift-calendar__today-btn" @click="goToToday()">Hoy</button>
+          </div>
+        </div>
+
+        <div class="ux-shift-calendar__grid-wrapper">
+          <div class="ux-shift-calendar__grid">
+            <div class="ux-shift-calendar__corner"></div>
+            <template x-for="(date, dayIndex) in weekDates" :key="dayIndex">
+              <div class="ux-shift-calendar__day-header"
+                   :class="{ 'ux-shift-calendar__day-header--today': isToday(date) }">
+                <span class="ux-shift-calendar__day-name" x-text="dayNames[date.getDay()]"></span>
+                <span class="ux-shift-calendar__day-number" x-text="date.getDate()"></span>
+              </div>
+            </template>
+
+            <template x-for="slot in timeSlots" :key="slot.hour">
+              <template x-for="(colIndex) in [0,1,2,3,4,5,6,7]" :key="colIndex">
+                <template x-if="colIndex === 0">
+                  <div class="ux-shift-calendar__time-slot">
+                    <span x-text="slot.label"></span>
+                  </div>
+                </template>
+                <template x-if="colIndex > 0">
+                  <div class="ux-shift-calendar__cell"
+                       :class="{
+                         'ux-shift-calendar__cell--selecting': isSelecting && selectionStart?.date === formatDate(weekDates[colIndex - 1])
+                       }"
+                       @mousedown="onCellMouseDown(weekDates[colIndex - 1], slot.hour, $event)"
+                       @mousemove="onCellMouseMove(weekDates[colIndex - 1], slot.hour, $event)">
+                  </div>
+                </template>
+              </template>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-display" x-show="newShiftData">
+        Nuevo turno a crear:
+        <strong x-text="newShiftData?.date"></strong> de
+        <span x-text="newShiftData?.startTime"></span> a
+        <span x-text="newShiftData?.endTime"></span>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxShiftCalendar({ shifts: [] })"
+     @shift-calendar:create="handleCreate($event.detail)"&gt;
+  &lt;!-- El componente dispara eventos al arrastrar --&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+function handleCreate(data) {
+  console.log(data);
+  // { date: '2025-01-15', startTime: '09:00', endTime: '14:00' }
+}
+&lt;/script&gt;</pre>
+  </section>
+
+  <!-- With Employee Filter -->
+  <section class="demo-section">
+    <h2>Filtro por Empleado</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Filtra los turnos por empleado usando <code>filterByEmployee(id)</code>.
+    </p>
+
+    <div x-data="{
+      ...uxShiftCalendar({
+        shifts: [
+          { id: 's1', date: new Date().toISOString().split('T')[0], employeeId: 'e1', employeeName: 'Ana Garcia', startTime: '08:00', endTime: '14:00', type: 'morning', department: 'Ventas' },
+          { id: 's2', date: new Date().toISOString().split('T')[0], employeeId: 'e2', employeeName: 'Carlos Lopez', startTime: '10:00', endTime: '18:00', type: 'afternoon', department: 'Soporte' },
+          { id: 's3', date: new Date().toISOString().split('T')[0], employeeId: 'e3', employeeName: 'Maria Torres', startTime: '14:00', endTime: '22:00', type: 'night', department: 'Seguridad' },
+          { id: 's4', date: new Date(Date.now() + 86400000).toISOString().split('T')[0], employeeId: 'e1', employeeName: 'Ana Garcia', startTime: '08:00', endTime: '16:00', type: 'full-day', department: 'Ventas' },
+          { id: 's5', date: new Date(Date.now() + 86400000).toISOString().split('T')[0], employeeId: 'e2', employeeName: 'Carlos Lopez', startTime: '08:00', endTime: '14:00', type: 'morning', department: 'Soporte' }
+        ],
+        employees: [
+          { id: 'e1', name: 'Ana Garcia', color: 'amber' },
+          { id: 'e2', name: 'Carlos Lopez', color: 'blue' },
+          { id: 'e3', name: 'Maria Torres', color: 'indigo' }
+        ],
+        showLegend: false
+      }),
+      showFilterPanel: false
+    }">
+      <!-- Filter buttons -->
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+        <template x-for="emp in employees" :key="emp.id">
+          <button class="ux-button ux-button--sm"
+                  :class="isEmployeeFiltered(emp.id) ? 'ux-color-primary' : 'ux-button--outline'"
+                  @click="filterByEmployee(emp.id)"
+                  x-text="emp.name">
+          </button>
+        </template>
+        <button class="ux-button ux-button--sm ux-button--clear"
+                @click="clearFilters()"
+                x-show="filteredEmployeeIds.length > 0">
+          Limpiar filtros
+        </button>
+      </div>
+
+      <div class="demo-calendar">
+        <div class="ux-shift-calendar">
+          <div class="ux-shift-calendar__header">
+            <div class="ux-shift-calendar__header-start">
+              <div class="ux-shift-calendar__nav">
+                <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(-1)" x-html="icons.prev"></button>
+                <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(1)" x-html="icons.next"></button>
+              </div>
+            </div>
+            <div class="ux-shift-calendar__header-center">
+              <span class="ux-shift-calendar__title" x-text="weekRangeTitle"></span>
+            </div>
+            <div class="ux-shift-calendar__header-end">
+              <span class="ux-shift-calendar__subtitle" x-show="filteredEmployeeIds.length > 0">
+                Mostrando <span x-text="filteredEmployeeIds.length"></span> empleado(s)
+              </span>
+            </div>
+          </div>
+
+          <div class="ux-shift-calendar__grid-wrapper">
+            <div class="ux-shift-calendar__grid">
+              <div class="ux-shift-calendar__corner"></div>
+              <template x-for="(date, dayIndex) in weekDates" :key="dayIndex">
+                <div class="ux-shift-calendar__day-header"
+                     :class="{ 'ux-shift-calendar__day-header--today': isToday(date) }">
+                  <span class="ux-shift-calendar__day-name" x-text="dayNames[date.getDay()]"></span>
+                  <span class="ux-shift-calendar__day-number" x-text="date.getDate()"></span>
+                </div>
+              </template>
+
+              <template x-for="slot in timeSlots" :key="slot.hour">
+                <template x-for="(colIndex) in [0,1,2,3,4,5,6,7]" :key="colIndex">
+                  <template x-if="colIndex === 0">
+                    <div class="ux-shift-calendar__time-slot">
+                      <span x-text="slot.label"></span>
+                    </div>
+                  </template>
+                  <template x-if="colIndex > 0">
+                    <div class="ux-shift-calendar__cell">
+                      <template x-if="slot.hour === startHour">
+                        <template x-for="shift in getShiftsForDay(weekDates[colIndex - 1])" :key="shift.id">
+                          <div class="ux-shift-calendar__shift"
+                               :class="'ux-shift-calendar__shift--' + getShiftType(shift)"
+                               :style="getShiftStyle(shift)"
+                               @click="onShiftClick(shift, $event)">
+                            <div class="ux-shift-calendar__shift-name" x-text="shift.employeeName"></div>
+                            <div class="ux-shift-calendar__shift-time" x-text="shift.startTime + ' - ' + shift.endTime"></div>
+                          </div>
+                        </template>
+                      </template>
+                    </div>
+                  </template>
+                </template>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Glass Variant -->
+  <section class="demo-section">
+    <h2>Glass Variant</h2>
+
+    <div class="demo-glass-bg">
+      <div x-data="uxShiftCalendar({
+        startHour: 8,
+        endHour: 18,
+        shifts: [
+          { id: 's1', date: new Date().toISOString().split('T')[0], employeeId: 'e1', employeeName: 'Ana Garcia', startTime: '08:00', endTime: '12:00', type: 'morning' },
+          { id: 's2', date: new Date().toISOString().split('T')[0], employeeId: 'e2', employeeName: 'Carlos Lopez', startTime: '12:00', endTime: '18:00', type: 'afternoon' }
+        ],
+        showLegend: false
+      })" style="height: 500px;">
+        <div class="ux-shift-calendar ux-shift-calendar--glass">
+          <div class="ux-shift-calendar__header">
+            <div class="ux-shift-calendar__header-start">
+              <div class="ux-shift-calendar__nav">
+                <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(-1)" x-html="icons.prev"></button>
+                <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(1)" x-html="icons.next"></button>
+              </div>
+            </div>
+            <div class="ux-shift-calendar__header-center">
+              <span class="ux-shift-calendar__title" x-text="weekRangeTitle" style="color: white;"></span>
+            </div>
+            <div class="ux-shift-calendar__header-end">
+              <button class="ux-shift-calendar__today-btn" @click="goToToday()">Hoy</button>
+            </div>
+          </div>
+
+          <div class="ux-shift-calendar__grid-wrapper">
+            <div class="ux-shift-calendar__grid">
+              <div class="ux-shift-calendar__corner"></div>
+              <template x-for="(date, dayIndex) in weekDates" :key="dayIndex">
+                <div class="ux-shift-calendar__day-header"
+                     :class="{ 'ux-shift-calendar__day-header--today': isToday(date) }"
+                     style="color: white;">
+                  <span class="ux-shift-calendar__day-name" x-text="dayNames[date.getDay()]" style="color: rgba(255,255,255,0.7);"></span>
+                  <span class="ux-shift-calendar__day-number" x-text="date.getDate()"></span>
+                </div>
+              </template>
+
+              <template x-for="slot in timeSlots" :key="slot.hour">
+                <template x-for="(colIndex) in [0,1,2,3,4,5,6,7]" :key="colIndex">
+                  <template x-if="colIndex === 0">
+                    <div class="ux-shift-calendar__time-slot" style="color: rgba(255,255,255,0.6);">
+                      <span x-text="slot.label"></span>
+                    </div>
+                  </template>
+                  <template x-if="colIndex > 0">
+                    <div class="ux-shift-calendar__cell">
+                      <template x-if="slot.hour === startHour">
+                        <template x-for="shift in getShiftsForDay(weekDates[colIndex - 1])" :key="shift.id">
+                          <div class="ux-shift-calendar__shift"
+                               :class="'ux-shift-calendar__shift--' + getShiftType(shift)"
+                               :style="getShiftStyle(shift)">
+                            <div class="ux-shift-calendar__shift-name" x-text="shift.employeeName"></div>
+                            <div class="ux-shift-calendar__shift-time" x-text="shift.startTime + ' - ' + shift.endTime"></div>
+                          </div>
+                        </template>
+                      </template>
+                    </div>
+                  </template>
+                </template>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compact Variant -->
+  <section class="demo-section">
+    <h2>Variante Compacta</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Usa <code>.ux-shift-calendar--compact</code> para una vista mas densa.
+    </p>
+
+    <div x-data="uxShiftCalendar({
+      startHour: 8,
+      endHour: 20,
+      shifts: [
+        { id: 's1', date: new Date().toISOString().split('T')[0], employeeId: 'e1', employeeName: 'Ana', startTime: '08:00', endTime: '14:00', type: 'morning' },
+        { id: 's2', date: new Date().toISOString().split('T')[0], employeeId: 'e2', employeeName: 'Carlos', startTime: '14:00', endTime: '20:00', type: 'afternoon' },
+        { id: 's3', date: new Date(Date.now() + 86400000).toISOString().split('T')[0], employeeId: 'e1', employeeName: 'Ana', startTime: '09:00', endTime: '17:00', type: 'full-day' }
+      ],
+      showLegend: true
+    })" style="height: 450px;">
+      <div class="ux-shift-calendar ux-shift-calendar--compact">
+        <div class="ux-shift-calendar__header">
+          <div class="ux-shift-calendar__header-start">
+            <div class="ux-shift-calendar__nav">
+              <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(-1)" x-html="icons.prev"></button>
+              <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(1)" x-html="icons.next"></button>
+            </div>
+          </div>
+          <div class="ux-shift-calendar__header-center">
+            <span class="ux-shift-calendar__title" x-text="weekRangeTitle"></span>
+          </div>
+          <div class="ux-shift-calendar__header-end">
+            <button class="ux-shift-calendar__today-btn" @click="goToToday()">Hoy</button>
+          </div>
+        </div>
+
+        <div class="ux-shift-calendar__grid-wrapper">
+          <div class="ux-shift-calendar__grid">
+            <div class="ux-shift-calendar__corner"></div>
+            <template x-for="(date, dayIndex) in weekDates" :key="dayIndex">
+              <div class="ux-shift-calendar__day-header"
+                   :class="{ 'ux-shift-calendar__day-header--today': isToday(date) }">
+                <span class="ux-shift-calendar__day-name" x-text="dayNames[date.getDay()]"></span>
+                <span class="ux-shift-calendar__day-number" x-text="date.getDate()"></span>
+              </div>
+            </template>
+
+            <template x-for="slot in timeSlots" :key="slot.hour">
+              <template x-for="(colIndex) in [0,1,2,3,4,5,6,7]" :key="colIndex">
+                <template x-if="colIndex === 0">
+                  <div class="ux-shift-calendar__time-slot">
+                    <span x-text="slot.label"></span>
+                  </div>
+                </template>
+                <template x-if="colIndex > 0">
+                  <div class="ux-shift-calendar__cell">
+                    <template x-if="slot.hour === startHour">
+                      <template x-for="shift in getShiftsForDay(weekDates[colIndex - 1])" :key="shift.id">
+                        <div class="ux-shift-calendar__shift"
+                             :class="'ux-shift-calendar__shift--' + getShiftType(shift)"
+                             :style="getShiftStyle(shift)">
+                          <div class="ux-shift-calendar__shift-name" x-text="shift.employeeName"></div>
+                          <div class="ux-shift-calendar__shift-time" x-text="shift.startTime + ' - ' + shift.endTime"></div>
+                        </div>
+                      </template>
+                    </template>
+                  </div>
+                </template>
+              </template>
+            </template>
+          </div>
+        </div>
+
+        <div class="ux-shift-calendar__legend" x-show="showLegend">
+          <div class="ux-shift-calendar__legend-item">
+            <span class="ux-shift-calendar__legend-color ux-shift-calendar__legend-color--morning"></span>
+            <span>Manana</span>
+          </div>
+          <div class="ux-shift-calendar__legend-item">
+            <span class="ux-shift-calendar__legend-color ux-shift-calendar__legend-color--afternoon"></span>
+            <span>Tarde</span>
+          </div>
+          <div class="ux-shift-calendar__legend-item">
+            <span class="ux-shift-calendar__legend-color ux-shift-calendar__legend-color--night"></span>
+            <span>Noche</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- API Reference -->
+  <section class="demo-section">
+    <h2>API Reference</h2>
+
+    <h3>Opciones</h3>
+    <pre class="ux-code-block" data-lang="javascript">uxShiftCalendar({
+  startHour: 6,              // Hora de inicio del calendario
+  endHour: 22,               // Hora de fin del calendario
+  hourStep: 1,               // Intervalo de horas
+  firstDayOfWeek: 1,         // 0=Domingo, 1=Lunes
+  locale: 'es',              // Idioma para fechas
+  showLegend: true,          // Mostrar leyenda de colores
+  readOnly: false,           // Deshabilitar creacion de turnos
+  shifts: [],                // Array de turnos
+  employees: []              // Array de empleados
+})</pre>
+
+    <h3>Estructura de Turno</h3>
+    <pre class="ux-code-block" data-lang="javascript">{
+  id: 'shift-1',             // ID unico
+  date: '2025-01-15',        // Fecha YYYY-MM-DD
+  employeeId: 'e1',          // ID del empleado
+  employeeName: 'Ana Garcia', // Nombre del empleado
+  startTime: '08:00',        // Hora inicio HH:MM
+  endTime: '14:00',          // Hora fin HH:MM
+  type: 'morning',           // morning, afternoon, night, full-day, overtime, off
+  department: 'Ventas'       // Departamento (opcional)
+}</pre>
+
+    <h3>Propiedades</h3>
+    <pre class="ux-code-block" data-lang="javascript">currentDate          // Fecha actual del calendario
+weekDates            // Array de 7 fechas de la semana
+weekRangeTitle       // String con el rango de la semana
+timeSlots            // Array de slots de hora
+shifts               // Array de turnos
+filteredEmployeeIds  // Array de IDs filtrados
+selectedShift        // Turno seleccionado actualmente</pre>
+
+    <h3>Metodos</h3>
+    <pre class="ux-code-block" data-lang="javascript">// Navegacion
+navigateWeek(direction)      // -1 = semana anterior, 1 = semana siguiente
+goToToday()                  // Ir a la semana actual
+goToDate(date)               // Ir a una fecha especifica
+
+// CRUD de turnos
+addShift(shiftData)          // Agregar turno
+editShift(shiftId, updates)  // Editar turno
+deleteShift(shiftId)         // Eliminar turno
+
+// Filtrado
+filterByEmployee(employeeId) // Toggle filtro por empleado
+clearFilters()               // Limpiar todos los filtros
+isEmployeeFiltered(id)       // Verificar si un empleado esta filtrado
+
+// Utilidades
+getShiftsForDay(date)        // Obtener turnos de un dia
+getShiftType(shift)          // Obtener tipo de turno automatico
+formatDate(date)             // Formatear fecha a YYYY-MM-DD
+formatTime(hours, minutes)   // Formatear hora a HH:MM</pre>
+
+    <h3>Eventos</h3>
+    <pre class="ux-code-block" data-lang="javascript">@shift-calendar:navigate   // Navegacion de semana
+  // { direction: 1|-1, weekStart: Date, weekEnd: Date }
+
+@shift-calendar:today      // Click en "Hoy"
+
+@shift-calendar:select     // Turno seleccionado
+  // { shift: {...} }
+
+@shift-calendar:create     // Arrastrar para crear turno
+  // { date: 'YYYY-MM-DD', startTime: 'HH:MM', endTime: 'HH:MM' }
+
+@shift-calendar:add        // Turno agregado
+  // { shift: {...} }
+
+@shift-calendar:edit       // Turno editado
+  // { shift: {...} }
+
+@shift-calendar:delete     // Turno eliminado
+  // { shift: {...} }
+
+@shift-calendar:filter     // Filtros cambiados
+  // { filteredEmployeeIds: [...] }</pre>
+
+    <h3>Clases CSS</h3>
+    <pre class="ux-code-block" data-lang="css">.ux-shift-calendar                    // Contenedor principal
+.ux-shift-calendar--glass             // Variante glass
+.ux-shift-calendar--compact           // Variante compacta
+
+.ux-shift-calendar__header            // Header con navegacion
+.ux-shift-calendar__grid              // Grid de la semana
+.ux-shift-calendar__day-header        // Cabecera de dia
+.ux-shift-calendar__day-header--today // Dia actual
+.ux-shift-calendar__time-slot         // Slot de hora
+.ux-shift-calendar__cell              // Celda del grid
+.ux-shift-calendar__shift             // Bloque de turno
+
+// Tipos de turno
+.ux-shift-calendar__shift--morning    // Turno de manana (amarillo)
+.ux-shift-calendar__shift--afternoon  // Turno de tarde (azul)
+.ux-shift-calendar__shift--night      // Turno de noche (indigo)
+.ux-shift-calendar__shift--full-day   // Turno completo (verde)
+.ux-shift-calendar__shift--overtime   // Horas extra (naranja)
+.ux-shift-calendar__shift--off        // Dia libre (gris)</pre>
+  </section>
+
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Integracion con Django para cargar y guardar turnos desde el servidor.
+    </p>
+
+    <h3>Template Django</h3>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- templates/shifts/calendar.html --&gt;
+&lt;div id="shift-calendar"
+     x-data="uxShiftCalendar({
+       shifts: {{ shifts_json|safe }},
+       employees: {{ employees_json|safe }}
+     })"
+     @shift-calendar:create="openCreateModal($event.detail)"
+     @shift-calendar:select="openEditModal($event.detail.shift)"
+     @shift-calendar:navigate="loadWeekShifts($event.detail)"&gt;
+
+  &lt;div class="ux-shift-calendar"
+       hx-get="{% url 'shifts:week' %}"
+       hx-trigger="load-week from:body"
+       hx-vals="js:{start: event.detail.weekStart, end: event.detail.weekEnd}"
+       hx-target="#shifts-data"
+       hx-swap="innerHTML"&gt;
+
+    &lt;!-- Header con navegacion --&gt;
+    &lt;div class="ux-shift-calendar__header"&gt;
+      &lt;div class="ux-shift-calendar__header-start"&gt;
+        &lt;div class="ux-shift-calendar__nav"&gt;
+          &lt;button class="ux-shift-calendar__nav-btn"
+                  @click="navigateWeek(-1)"
+                  x-html="icons.prev"&gt;&lt;/button&gt;
+          &lt;button class="ux-shift-calendar__nav-btn"
+                  @click="navigateWeek(1)"
+                  x-html="icons.next"&gt;&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;button class="ux-shift-calendar__today-btn" @click="goToToday()"&gt;
+          Hoy
+        &lt;/button&gt;
+      &lt;/div&gt;
+
+      &lt;div class="ux-shift-calendar__header-center"&gt;
+        &lt;span class="ux-shift-calendar__title" x-text="weekRangeTitle"&gt;&lt;/span&gt;
+      &lt;/div&gt;
+
+      &lt;div class="ux-shift-calendar__header-end"&gt;
+        &lt;button class="ux-button ux-button--sm ux-color-primary"
+                hx-get="{% url 'shifts:create' %}"
+                hx-target="#modal-container"
+                hx-swap="innerHTML"&gt;
+          + Nuevo Turno
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Grid --&gt;
+    &lt;div class="ux-shift-calendar__grid-wrapper"&gt;
+      &lt;div class="ux-shift-calendar__grid"&gt;
+        &lt;!-- ... grid content ... --&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Legend --&gt;
+    &lt;div class="ux-shift-calendar__legend"&gt;
+      &lt;div class="ux-shift-calendar__legend-item"&gt;
+        &lt;span class="ux-shift-calendar__legend-color ux-shift-calendar__legend-color--morning"&gt;&lt;/span&gt;
+        &lt;span&gt;Manana&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;!-- ... --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Container para datos HTMX --&gt;
+  &lt;div id="shifts-data" style="display: none;"&gt;&lt;/div&gt;
+
+  &lt;!-- Container para modales --&gt;
+  &lt;div id="modal-container"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+function loadWeekShifts(detail) {
+  document.body.dispatchEvent(
+    new CustomEvent('load-week', { detail })
+  );
+}
+
+function openCreateModal(detail) {
+  htmx.ajax('GET', `/shifts/create/?date=${detail.date}&amp;start=${detail.startTime}&amp;end=${detail.endTime}`,
+    { target: '#modal-container', swap: 'innerHTML' }
+  );
+}
+
+function openEditModal(shift) {
+  htmx.ajax('GET', `/shifts/${shift.id}/edit/`,
+    { target: '#modal-container', swap: 'innerHTML' }
+  );
+}
+&lt;/script&gt;</pre>
+
+    <h3>Vista Django</h3>
+    <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.http import require_GET, require_POST
+from .models import Shift, Employee
+import json
+from datetime import datetime, timedelta
+
+def calendar_view(request):
+    """Vista principal del calendario de turnos"""
+    # Obtener semana actual
+    today = datetime.now().date()
+    week_start = today - timedelta(days=today.weekday())
+    week_end = week_start + timedelta(days=6)
+
+    shifts = Shift.objects.filter(
+        date__range=[week_start, week_end]
+    ).select_related('employee')
+
+    employees = Employee.objects.filter(is_active=True)
+
+    shifts_json = json.dumps([
+        {
+            'id': str(s.id),
+            'date': s.date.isoformat(),
+            'employeeId': str(s.employee_id),
+            'employeeName': s.employee.name,
+            'startTime': s.start_time.strftime('%H:%M'),
+            'endTime': s.end_time.strftime('%H:%M'),
+            'type': s.shift_type,
+            'department': s.employee.department
+        }
+        for s in shifts
+    ])
+
+    employees_json = json.dumps([
+        {'id': str(e.id), 'name': e.name}
+        for e in employees
+    ])
+
+    return render(request, 'shifts/calendar.html', {
+        'shifts_json': shifts_json,
+        'employees_json': employees_json
+    })
+
+
+@require_GET
+def week_shifts(request):
+    """Obtener turnos de una semana (HTMX)"""
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+
+    shifts = Shift.objects.filter(
+        date__range=[start, end]
+    ).select_related('employee')
+
+    shifts_data = [
+        {
+            'id': str(s.id),
+            'date': s.date.isoformat(),
+            'employeeId': str(s.employee_id),
+            'employeeName': s.employee.name,
+            'startTime': s.start_time.strftime('%H:%M'),
+            'endTime': s.end_time.strftime('%H:%M'),
+            'type': s.shift_type,
+            'department': s.employee.department
+        }
+        for s in shifts
+    ]
+
+    return HttpResponse(f'''
+        &lt;script&gt;
+            document.querySelector('[x-data]').__x.$data.shifts = {json.dumps(shifts_data)};
+        &lt;/script&gt;
+    ''')
+
+
+@require_POST
+def create_shift(request):
+    """Crear un turno nuevo"""
+    shift = Shift.objects.create(
+        employee_id=request.POST['employee_id'],
+        date=request.POST['date'],
+        start_time=request.POST['start_time'],
+        end_time=request.POST['end_time'],
+        shift_type=request.POST.get('shift_type', 'morning')
+    )
+
+    # Cerrar modal y actualizar calendario
+    return HttpResponse(f'''
+        &lt;script&gt;
+            const calendar = document.querySelector('[x-data]').__x.$data;
+            calendar.addShift({{
+                id: '{shift.id}',
+                date: '{shift.date}',
+                employeeId: '{shift.employee_id}',
+                employeeName: '{shift.employee.name}',
+                startTime: '{shift.start_time.strftime('%H:%M')}',
+                endTime: '{shift.end_time.strftime('%H:%M')}',
+                type: '{shift.shift_type}',
+                department: '{shift.employee.department}'
+            }});
+            document.getElementById('modal-container').innerHTML = '';
+        &lt;/script&gt;
+    ''')</pre>
+
+    <h3>Modelo Django</h3>
+    <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+
+class Employee(models.Model):
+    name = models.CharField(max_length=100)
+    department = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Shift(models.Model):
+    SHIFT_TYPES = [
+        ('morning', 'Manana'),
+        ('afternoon', 'Tarde'),
+        ('night', 'Noche'),
+        ('full-day', 'Dia Completo'),
+        ('overtime', 'Horas Extra'),
+        ('off', 'Libre'),
+    ]
+
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    shift_type = models.CharField(max_length=20, choices=SHIFT_TYPES, default='morning')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['date', 'start_time']
+        unique_together = ['employee', 'date']
+
+    def __str__(self):
+        return f"{self.employee.name} - {self.date} ({self.get_shift_type_display()})"</pre>
+
+    <h3>URLs Django</h3>
+    <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+app_name = 'shifts'
+
+urlpatterns = [
+    path('', views.calendar_view, name='calendar'),
+    path('week/', views.week_shifts, name='week'),
+    path('create/', views.create_shift, name='create'),
+    path('&lt;int:pk&gt;/edit/', views.edit_shift, name='edit'),
+    path('&lt;int:pk&gt;/delete/', views.delete_shift, name='delete'),
+]</pre>
+  </section>
+
+</body>
+</html>

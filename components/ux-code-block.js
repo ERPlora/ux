@@ -634,4 +634,86 @@
     window.UX.highlightCode = highlight;
   }
 
+  // ========================================
+  // Auto-initialize simple <pre> blocks
+  // Adds copy button to any <pre> with class="ux-code-block"
+  // Works without Alpine.js for simple use cases
+  // ========================================
+
+  function initSimpleCodeBlocks() {
+    // Find all pre elements with ux-code-block class that aren't already initialized
+    const preElements = document.querySelectorAll('pre.ux-code-block:not([data-ux-initialized])');
+
+    preElements.forEach(pre => {
+      pre.setAttribute('data-ux-initialized', 'true');
+
+      // Create wrapper
+      const wrapper = document.createElement('div');
+      wrapper.className = 'ux-code-block';
+      wrapper.style.position = 'relative';
+
+      // Create header with copy button
+      const header = document.createElement('div');
+      header.className = 'ux-code-block__header';
+      header.innerHTML = `
+        <div class="ux-code-block__title">
+          <span class="ux-code-block__lang">${pre.dataset.lang || 'CODE'}</span>
+        </div>
+        <div class="ux-code-block__actions">
+          <button class="ux-code-block__btn" type="button" aria-label="Copiar código">
+            ${icons.copy}
+            <span>Copiar</span>
+          </button>
+        </div>
+      `;
+
+      // Get the copy button
+      const copyBtn = header.querySelector('.ux-code-block__btn');
+      const code = pre.textContent;
+
+      // Add click handler
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(code);
+          copyBtn.innerHTML = `${icons.check}<span>Copiado</span>`;
+          copyBtn.classList.add('ux-code-block__btn--copied');
+
+          setTimeout(() => {
+            copyBtn.innerHTML = `${icons.copy}<span>Copiar</span>`;
+            copyBtn.classList.remove('ux-code-block__btn--copied');
+          }, 2000);
+        } catch (err) {
+          console.error('Failed to copy:', err);
+        }
+      });
+
+      // Create content wrapper
+      const content = document.createElement('div');
+      content.className = 'ux-code-block__content';
+
+      // Move pre styles to code block styles
+      pre.className = 'ux-code-block__code';
+      pre.style.margin = '0';
+      pre.style.borderRadius = '0';
+
+      // Wrap elements
+      pre.parentNode.insertBefore(wrapper, pre);
+      content.appendChild(pre);
+      wrapper.appendChild(header);
+      wrapper.appendChild(content);
+    });
+  }
+
+  // Run on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSimpleCodeBlocks);
+  } else {
+    initSimpleCodeBlocks();
+  }
+
+  // Expose for dynamic content
+  if (window.UX) {
+    window.UX.initCodeBlocks = initSimpleCodeBlocks;
+  }
+
 })();

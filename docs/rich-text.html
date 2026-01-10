@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Rich Text Editor - UX Library</title>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-navbar.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-rich-text.js"></script>
+  <script src="../components/ux-code-block.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .demo-dark { background: var(--ux-gray-900); padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg); margin-bottom: var(--ux-space-md); }
+    .demo-glass-bg {
+      background: linear-gradient(135deg, var(--ux-primary) 0%, var(--ux-cyan-500) 100%);
+      padding: var(--ux-space-xl);
+      border-radius: var(--ux-border-radius-lg);
+      margin-bottom: var(--ux-space-md);
+    }
+  </style>
+</head>
+<body class="ux-app">
+
+  <div class="ux-content ux-padding">
+    <!-- Basic Example -->
+    <section class="demo-section">
+      <h3>Rich Text Editor Basico</h3>
+      <p>Editor WYSIWYG completo con barra de herramientas de formateo.</p>
+      <div class="demo-box">
+        <div x-data="uxRichText({ placeholder: 'Escribe tu contenido aqui...' })">
+          <div class="ux-rich-text">
+            <!-- Toolbar -->
+            <div class="ux-rich-text__toolbar">
+              <!-- Undo/Redo -->
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" @click="undo()" title="Deshacer (Ctrl+Z)">
+                  <span x-html="icons.undo"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" @click="redo()" title="Rehacer (Ctrl+Y)">
+                  <span x-html="icons.redo"></span>
+                </button>
+              </div>
+
+              <div class="ux-rich-text__toolbar-divider"></div>
+
+              <!-- Headings Dropdown -->
+              <div class="ux-rich-text__dropdown">
+                <button type="button" class="ux-rich-text__btn ux-rich-text__btn--dropdown" @click="headingDropdownOpen = !headingDropdownOpen">
+                  <span x-html="icons.heading"></span>
+                  <span x-text="currentHeading === 'p' ? 'Parrafo' : currentHeading.toUpperCase()"></span>
+                  <span x-html="icons.chevronDown"></span>
+                </button>
+                <div class="ux-rich-text__dropdown-menu" :class="headingDropdownOpen && 'ux-rich-text__dropdown-menu--open'">
+                  <button type="button" class="ux-rich-text__dropdown-item" @click="setHeading('p')">Parrafo</button>
+                  <button type="button" class="ux-rich-text__dropdown-item ux-rich-text__dropdown-item--h1" @click="setHeading('h1')">Titulo 1</button>
+                  <button type="button" class="ux-rich-text__dropdown-item ux-rich-text__dropdown-item--h2" @click="setHeading('h2')">Titulo 2</button>
+                  <button type="button" class="ux-rich-text__dropdown-item ux-rich-text__dropdown-item--h3" @click="setHeading('h3')">Titulo 3</button>
+                </div>
+              </div>
+
+              <div class="ux-rich-text__toolbar-divider"></div>
+
+              <!-- Text Formatting -->
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" :class="isBold && 'ux-rich-text__btn--active'" @click="toggleBold()" title="Negrita (Ctrl+B)">
+                  <span x-html="icons.bold"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isItalic && 'ux-rich-text__btn--active'" @click="toggleItalic()" title="Cursiva (Ctrl+I)">
+                  <span x-html="icons.italic"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isUnderline && 'ux-rich-text__btn--active'" @click="toggleUnderline()" title="Subrayado (Ctrl+U)">
+                  <span x-html="icons.underline"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isStrikethrough && 'ux-rich-text__btn--active'" @click="toggleStrikethrough()" title="Tachado">
+                  <span x-html="icons.strikethrough"></span>
+                </button>
+              </div>
+
+              <div class="ux-rich-text__toolbar-divider"></div>
+
+              <!-- Lists -->
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" :class="isList && 'ux-rich-text__btn--active'" @click="toggleUnorderedList()" title="Lista con vinetas">
+                  <span x-html="icons.listUl"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isOrderedList && 'ux-rich-text__btn--active'" @click="toggleOrderedList()" title="Lista numerada">
+                  <span x-html="icons.listOl"></span>
+                </button>
+              </div>
+
+              <div class="ux-rich-text__toolbar-divider"></div>
+
+              <!-- Alignment Dropdown -->
+              <div class="ux-rich-text__dropdown">
+                <button type="button" class="ux-rich-text__btn" @click="alignDropdownOpen = !alignDropdownOpen" title="Alineacion">
+                  <span x-html="icons['align' + currentAlign.charAt(0).toUpperCase() + currentAlign.slice(1)]"></span>
+                </button>
+                <div class="ux-rich-text__dropdown-menu" :class="alignDropdownOpen && 'ux-rich-text__dropdown-menu--open'">
+                  <button type="button" class="ux-rich-text__dropdown-item" @click="setAlign('left')">Izquierda</button>
+                  <button type="button" class="ux-rich-text__dropdown-item" @click="setAlign('center')">Centro</button>
+                  <button type="button" class="ux-rich-text__dropdown-item" @click="setAlign('right')">Derecha</button>
+                  <button type="button" class="ux-rich-text__dropdown-item" @click="setAlign('justify')">Justificado</button>
+                </div>
+              </div>
+
+              <div class="ux-rich-text__toolbar-divider"></div>
+
+              <!-- Link & Image -->
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" @click="insertLink()" title="Insertar enlace">
+                  <span x-html="icons.link"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" @click="insertImage()" title="Insertar imagen">
+                  <span x-html="icons.image"></span>
+                </button>
+              </div>
+
+              <div class="ux-rich-text__toolbar-divider"></div>
+
+              <!-- Source View -->
+              <button type="button" class="ux-rich-text__btn" :class="sourceView && 'ux-rich-text__btn--active'" @click="toggleSourceView()" title="Ver HTML">
+                <span x-html="icons.code"></span>
+              </button>
+            </div>
+
+            <!-- Editor Area -->
+            <div class="ux-rich-text__editor"
+                 x-ref="editor"
+                 contenteditable="true"
+                 :data-placeholder="placeholder"
+                 @input="handleInput()"
+                 @paste="handlePaste($event)"
+                 @keydown="handleKeydown($event)"></div>
+
+            <!-- Source View -->
+            <textarea class="ux-rich-text__source"
+                      x-ref="source"
+                      @input="handleInput()"></textarea>
+
+            <!-- Footer with counters -->
+            <div class="ux-rich-text__footer">
+              <span></span>
+              <div class="ux-rich-text__counter">
+                <span x-text="charCount + ' caracteres'"></span>
+                <span x-text="wordCount + ' palabras'"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxRichText({ placeholder: 'Escribe aqui...' })"&gt;
+  &lt;div class="ux-rich-text"&gt;
+    &lt;div class="ux-rich-text__toolbar"&gt;
+      &lt;!-- Toolbar buttons --&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-rich-text__editor"
+         x-ref="editor"
+         contenteditable="true"
+         :data-placeholder="placeholder"
+         @input="handleInput()"&gt;&lt;/div&gt;
+    &lt;textarea class="ux-rich-text__source" x-ref="source"&gt;&lt;/textarea&gt;
+    &lt;div class="ux-rich-text__footer"&gt;
+      &lt;div class="ux-rich-text__counter"&gt;
+        &lt;span x-text="charCount + ' caracteres'"&gt;&lt;/span&gt;
+        &lt;span x-text="wordCount + ' palabras'"&gt;&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- Minimal Toolbar -->
+    <section class="demo-section">
+      <h3>Toolbar Minimo</h3>
+      <p>Solo las herramientas basicas de formateo.</p>
+      <div class="demo-box">
+        <div x-data="uxRichText({ placeholder: 'Escribe aqui...' })">
+          <div class="ux-rich-text">
+            <div class="ux-rich-text__toolbar">
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" :class="isBold && 'ux-rich-text__btn--active'" @click="toggleBold()" title="Negrita">
+                  <span x-html="icons.bold"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isItalic && 'ux-rich-text__btn--active'" @click="toggleItalic()" title="Cursiva">
+                  <span x-html="icons.italic"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isUnderline && 'ux-rich-text__btn--active'" @click="toggleUnderline()" title="Subrayado">
+                  <span x-html="icons.underline"></span>
+                </button>
+              </div>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" :class="isList && 'ux-rich-text__btn--active'" @click="toggleUnorderedList()" title="Lista">
+                  <span x-html="icons.listUl"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" @click="insertLink()" title="Enlace">
+                  <span x-html="icons.link"></span>
+                </button>
+              </div>
+            </div>
+            <div class="ux-rich-text__editor"
+                 x-ref="editor"
+                 contenteditable="true"
+                 :data-placeholder="placeholder"
+                 @input="handleInput()"
+                 @keydown="handleKeydown($event)"></div>
+            <textarea class="ux-rich-text__source" x-ref="source"></textarea>
+          </div>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Solo incluir los botones necesarios en el toolbar --&gt;
+&lt;div class="ux-rich-text__toolbar"&gt;
+  &lt;button class="ux-rich-text__btn" @click="toggleBold()"&gt;B&lt;/button&gt;
+  &lt;button class="ux-rich-text__btn" @click="toggleItalic()"&gt;I&lt;/button&gt;
+  &lt;button class="ux-rich-text__btn" @click="toggleUnderline()"&gt;U&lt;/button&gt;
+  &lt;button class="ux-rich-text__btn" @click="toggleUnorderedList()"&gt;List&lt;/button&gt;
+  &lt;button class="ux-rich-text__btn" @click="insertLink()"&gt;Link&lt;/button&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- Sizes -->
+    <section class="demo-section">
+      <h3>Tamanos</h3>
+      <p>Pequeno, normal y grande.</p>
+      <div class="demo-box" style="display: flex; flex-direction: column; gap: var(--ux-space-lg);">
+        <!-- Small -->
+        <div x-data="uxRichText({ placeholder: 'Comentario corto...' })">
+          <label style="display: block; margin-bottom: var(--ux-space-xs); font-size: var(--ux-font-size-sm); font-weight: 500; color: var(--ux-text-secondary);">Pequeno (--sm)</label>
+          <div class="ux-rich-text ux-rich-text--sm">
+            <div class="ux-rich-text__toolbar">
+              <button type="button" class="ux-rich-text__btn" :class="isBold && 'ux-rich-text__btn--active'" @click="toggleBold()">
+                <span x-html="icons.bold"></span>
+              </button>
+              <button type="button" class="ux-rich-text__btn" :class="isItalic && 'ux-rich-text__btn--active'" @click="toggleItalic()">
+                <span x-html="icons.italic"></span>
+              </button>
+            </div>
+            <div class="ux-rich-text__editor" x-ref="editor" contenteditable="true" :data-placeholder="placeholder" @input="handleInput()" @keydown="handleKeydown($event)"></div>
+            <textarea class="ux-rich-text__source" x-ref="source"></textarea>
+          </div>
+        </div>
+
+        <!-- Large -->
+        <div x-data="uxRichText({ placeholder: 'Escribe un articulo completo...' })">
+          <label style="display: block; margin-bottom: var(--ux-space-xs); font-size: var(--ux-font-size-sm); font-weight: 500; color: var(--ux-text-secondary);">Grande (--lg)</label>
+          <div class="ux-rich-text ux-rich-text--lg">
+            <div class="ux-rich-text__toolbar">
+              <button type="button" class="ux-rich-text__btn" :class="isBold && 'ux-rich-text__btn--active'" @click="toggleBold()">
+                <span x-html="icons.bold"></span>
+              </button>
+              <button type="button" class="ux-rich-text__btn" :class="isItalic && 'ux-rich-text__btn--active'" @click="toggleItalic()">
+                <span x-html="icons.italic"></span>
+              </button>
+              <button type="button" class="ux-rich-text__btn" :class="isUnderline && 'ux-rich-text__btn--active'" @click="toggleUnderline()">
+                <span x-html="icons.underline"></span>
+              </button>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <button type="button" class="ux-rich-text__btn" :class="isList && 'ux-rich-text__btn--active'" @click="toggleUnorderedList()">
+                <span x-html="icons.listUl"></span>
+              </button>
+              <button type="button" class="ux-rich-text__btn" @click="insertLink()">
+                <span x-html="icons.link"></span>
+              </button>
+              <button type="button" class="ux-rich-text__btn" @click="insertImage()">
+                <span x-html="icons.image"></span>
+              </button>
+            </div>
+            <div class="ux-rich-text__editor" x-ref="editor" contenteditable="true" :data-placeholder="placeholder" @input="handleInput()" @keydown="handleKeydown($event)"></div>
+            <textarea class="ux-rich-text__source" x-ref="source"></textarea>
+            <div class="ux-rich-text__footer">
+              <span></span>
+              <div class="ux-rich-text__counter">
+                <span x-text="charCount + ' caracteres'"></span>
+                <span x-text="wordCount + ' palabras'"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-rich-text ux-rich-text--sm"&gt;...&lt;/div&gt;
+&lt;div class="ux-rich-text"&gt;...&lt;/div&gt;
+&lt;div class="ux-rich-text ux-rich-text--lg"&gt;...&lt;/div&gt;</pre>
+    </section>
+
+    <!-- Read-only Mode -->
+    <section class="demo-section">
+      <h3>Modo Solo Lectura</h3>
+      <p>El contenido se muestra sin la barra de herramientas y no es editable.</p>
+      <div class="demo-box">
+        <div x-data="uxRichText({ readonly: true, content: '<h2>Contenido de ejemplo</h2><p>Este es un <strong>texto formateado</strong> que se muestra en <em>modo solo lectura</em>.</p><ul><li>Item uno</li><li>Item dos</li><li>Item tres</li></ul><p>El usuario no puede editar este contenido.</p>' })" x-init="$refs.editor.innerHTML = content">
+          <div class="ux-rich-text ux-rich-text--readonly">
+            <div class="ux-rich-text__toolbar">
+              <!-- Hidden in readonly mode -->
+            </div>
+            <div class="ux-rich-text__editor" x-ref="editor" contenteditable="false"></div>
+            <textarea class="ux-rich-text__source" x-ref="source"></textarea>
+          </div>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-rich-text ux-rich-text--readonly"&gt;
+  &lt;div class="ux-rich-text__editor" contenteditable="false"&gt;
+    &lt;!-- Contenido HTML --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- Disabled State -->
+    <section class="demo-section">
+      <h3>Estado Deshabilitado</h3>
+      <p>El editor completo esta deshabilitado.</p>
+      <div class="demo-box">
+        <div x-data="uxRichText({ disabled: true, content: '<p>Este editor esta deshabilitado.</p>' })" x-init="$refs.editor.innerHTML = content">
+          <div class="ux-rich-text ux-rich-text--disabled">
+            <div class="ux-rich-text__toolbar">
+              <button type="button" class="ux-rich-text__btn" disabled>
+                <span x-html="icons.bold"></span>
+              </button>
+              <button type="button" class="ux-rich-text__btn" disabled>
+                <span x-html="icons.italic"></span>
+              </button>
+              <button type="button" class="ux-rich-text__btn" disabled>
+                <span x-html="icons.underline"></span>
+              </button>
+            </div>
+            <div class="ux-rich-text__editor" x-ref="editor" contenteditable="false"></div>
+            <textarea class="ux-rich-text__source" x-ref="source"></textarea>
+          </div>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-rich-text ux-rich-text--disabled"&gt;...&lt;/div&gt;</pre>
+    </section>
+
+    <!-- Glass Variant -->
+    <section class="demo-section">
+      <h3>Variante Glass</h3>
+      <p>Efecto glass morphism estilo iOS 26.</p>
+      <div class="demo-glass-bg">
+        <div x-data="uxRichText({ placeholder: 'Escribe con estilo glass...' })">
+          <div class="ux-rich-text ux-rich-text--glass">
+            <div class="ux-rich-text__toolbar">
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" @click="undo()" title="Deshacer">
+                  <span x-html="icons.undo"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" @click="redo()" title="Rehacer">
+                  <span x-html="icons.redo"></span>
+                </button>
+              </div>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" :class="isBold && 'ux-rich-text__btn--active'" @click="toggleBold()">
+                  <span x-html="icons.bold"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isItalic && 'ux-rich-text__btn--active'" @click="toggleItalic()">
+                  <span x-html="icons.italic"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isUnderline && 'ux-rich-text__btn--active'" @click="toggleUnderline()">
+                  <span x-html="icons.underline"></span>
+                </button>
+              </div>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" :class="isList && 'ux-rich-text__btn--active'" @click="toggleUnorderedList()">
+                  <span x-html="icons.listUl"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" @click="insertLink()">
+                  <span x-html="icons.link"></span>
+                </button>
+              </div>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <button type="button" class="ux-rich-text__btn" :class="sourceView && 'ux-rich-text__btn--active'" @click="toggleSourceView()">
+                <span x-html="icons.code"></span>
+              </button>
+            </div>
+            <div class="ux-rich-text__editor"
+                 x-ref="editor"
+                 contenteditable="true"
+                 :data-placeholder="placeholder"
+                 @input="handleInput()"
+                 @keydown="handleKeydown($event)"></div>
+            <textarea class="ux-rich-text__source" x-ref="source"></textarea>
+            <div class="ux-rich-text__footer">
+              <span></span>
+              <div class="ux-rich-text__counter">
+                <span x-text="charCount + ' caracteres'"></span>
+                <span x-text="wordCount + ' palabras'"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-rich-text ux-rich-text--glass"&gt;
+  &lt;!-- Toolbar and editor --&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- Dark Mode Preview -->
+    <section class="demo-section">
+      <h3>Modo Oscuro</h3>
+      <p>El editor se adapta automaticamente al modo oscuro.</p>
+      <div class="demo-dark ux-dark">
+        <div x-data="uxRichText({ placeholder: 'Escribe en modo oscuro...' })">
+          <div class="ux-rich-text">
+            <div class="ux-rich-text__toolbar">
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" @click="undo()">
+                  <span x-html="icons.undo"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" @click="redo()">
+                  <span x-html="icons.redo"></span>
+                </button>
+              </div>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" :class="isBold && 'ux-rich-text__btn--active'" @click="toggleBold()">
+                  <span x-html="icons.bold"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isItalic && 'ux-rich-text__btn--active'" @click="toggleItalic()">
+                  <span x-html="icons.italic"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isUnderline && 'ux-rich-text__btn--active'" @click="toggleUnderline()">
+                  <span x-html="icons.underline"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isStrikethrough && 'ux-rich-text__btn--active'" @click="toggleStrikethrough()">
+                  <span x-html="icons.strikethrough"></span>
+                </button>
+              </div>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" :class="isList && 'ux-rich-text__btn--active'" @click="toggleUnorderedList()">
+                  <span x-html="icons.listUl"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isOrderedList && 'ux-rich-text__btn--active'" @click="toggleOrderedList()">
+                  <span x-html="icons.listOl"></span>
+                </button>
+              </div>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <button type="button" class="ux-rich-text__btn" :class="sourceView && 'ux-rich-text__btn--active'" @click="toggleSourceView()">
+                <span x-html="icons.code"></span>
+              </button>
+            </div>
+            <div class="ux-rich-text__editor"
+                 x-ref="editor"
+                 contenteditable="true"
+                 :data-placeholder="placeholder"
+                 @input="handleInput()"
+                 @keydown="handleKeydown($event)"></div>
+            <textarea class="ux-rich-text__source" x-ref="source"></textarea>
+            <div class="ux-rich-text__footer">
+              <span></span>
+              <div class="ux-rich-text__counter">
+                <span x-text="charCount + ' caracteres'"></span>
+                <span x-text="wordCount + ' palabras'"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- El editor se adapta automaticamente con prefers-color-scheme: dark --&gt;
+&lt;!-- O usa la clase .ux-dark en un contenedor padre --&gt;
+&lt;div class="ux-dark"&gt;
+  &lt;div class="ux-rich-text"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- With Initial Content -->
+    <section class="demo-section">
+      <h3>Con Contenido Inicial</h3>
+      <p>Editor pre-cargado con HTML.</p>
+      <div class="demo-box">
+        <div x-data="uxRichText({
+          content: '<h2>Bienvenido al Editor</h2><p>Este es un <strong>editor de texto enriquecido</strong> con soporte para:</p><ul><li>Texto en <strong>negrita</strong> y <em>cursiva</em></li><li>Listas ordenadas y no ordenadas</li><li>Enlaces e imagenes</li><li>Multiples niveles de encabezados</li></ul><p>Prueba las herramientas de la barra superior.</p>'
+        })" x-init="$refs.editor.innerHTML = content">
+          <div class="ux-rich-text">
+            <div class="ux-rich-text__toolbar">
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" @click="undo()">
+                  <span x-html="icons.undo"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" @click="redo()">
+                  <span x-html="icons.redo"></span>
+                </button>
+              </div>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" :class="isBold && 'ux-rich-text__btn--active'" @click="toggleBold()">
+                  <span x-html="icons.bold"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isItalic && 'ux-rich-text__btn--active'" @click="toggleItalic()">
+                  <span x-html="icons.italic"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isUnderline && 'ux-rich-text__btn--active'" @click="toggleUnderline()">
+                  <span x-html="icons.underline"></span>
+                </button>
+              </div>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <div class="ux-rich-text__toolbar-group">
+                <button type="button" class="ux-rich-text__btn" :class="isList && 'ux-rich-text__btn--active'" @click="toggleUnorderedList()">
+                  <span x-html="icons.listUl"></span>
+                </button>
+                <button type="button" class="ux-rich-text__btn" :class="isOrderedList && 'ux-rich-text__btn--active'" @click="toggleOrderedList()">
+                  <span x-html="icons.listOl"></span>
+                </button>
+              </div>
+              <div class="ux-rich-text__toolbar-divider"></div>
+              <button type="button" class="ux-rich-text__btn" :class="sourceView && 'ux-rich-text__btn--active'" @click="toggleSourceView()">
+                <span x-html="icons.code"></span>
+              </button>
+            </div>
+            <div class="ux-rich-text__editor"
+                 x-ref="editor"
+                 contenteditable="true"
+                 @input="handleInput()"
+                 @keydown="handleKeydown($event)"></div>
+            <textarea class="ux-rich-text__source" x-ref="source"></textarea>
+            <div class="ux-rich-text__footer">
+              <span></span>
+              <div class="ux-rich-text__counter">
+                <span x-text="charCount + ' caracteres'"></span>
+                <span x-text="wordCount + ' palabras'"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxRichText({ content: '&lt;h2&gt;Titulo&lt;/h2&gt;&lt;p&gt;Contenido...&lt;/p&gt;' })"
+     x-init="$refs.editor.innerHTML = content"&gt;
+  ...
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- Keyboard Shortcuts -->
+    <section class="demo-section">
+      <h3>Atajos de Teclado</h3>
+      <div class="demo-box">
+        <table style="width: 100%; font-size: var(--ux-font-size-md);">
+          <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm);">Atajo</th>
+              <th style="padding: var(--ux-space-sm);">Accion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>Ctrl/Cmd + B</code></td>
+              <td style="padding: var(--ux-space-sm);">Negrita</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>Ctrl/Cmd + I</code></td>
+              <td style="padding: var(--ux-space-sm);">Cursiva</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>Ctrl/Cmd + U</code></td>
+              <td style="padding: var(--ux-space-sm);">Subrayado</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>Ctrl/Cmd + Z</code></td>
+              <td style="padding: var(--ux-space-sm);">Deshacer</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>Ctrl/Cmd + Shift + Z</code></td>
+              <td style="padding: var(--ux-space-sm);">Rehacer</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>Ctrl/Cmd + Y</code></td>
+              <td style="padding: var(--ux-space-sm);">Rehacer (alternativo)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- API -->
+    <section class="demo-section">
+      <h3>API - Componente Alpine</h3>
+      <div class="demo-box">
+        <h4 style="font-weight: 600; margin-bottom: var(--ux-space-sm);">uxRichText(config)</h4>
+        <p><strong>Configuracion:</strong></p>
+        <ul style="font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-left: var(--ux-space-lg); margin-bottom: var(--ux-space-md);">
+          <li><code>content</code>: Contenido HTML inicial</li>
+          <li><code>placeholder</code>: Texto placeholder</li>
+          <li><code>readonly</code>: Solo lectura (boolean)</li>
+          <li><code>disabled</code>: Deshabilitado (boolean)</li>
+          <li><code>maxLength</code>: Maximo de caracteres</li>
+          <li><code>plainTextPaste</code>: Pegar sin formato (boolean)</li>
+        </ul>
+        <p><strong>Propiedades reactivas:</strong></p>
+        <ul style="font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-left: var(--ux-space-lg); margin-bottom: var(--ux-space-md);">
+          <li><code>content</code>: Contenido HTML actual</li>
+          <li><code>charCount</code>: Cantidad de caracteres</li>
+          <li><code>wordCount</code>: Cantidad de palabras</li>
+          <li><code>sourceView</code>: Vista de codigo activa</li>
+          <li><code>isBold</code>, <code>isItalic</code>, etc.: Estados de formato</li>
+        </ul>
+        <p><strong>Metodos:</strong></p>
+        <ul style="font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-left: var(--ux-space-lg);">
+          <li><code>toggleBold()</code>: Alternar negrita</li>
+          <li><code>toggleItalic()</code>: Alternar cursiva</li>
+          <li><code>toggleUnderline()</code>: Alternar subrayado</li>
+          <li><code>toggleStrikethrough()</code>: Alternar tachado</li>
+          <li><code>toggleUnorderedList()</code>: Alternar lista</li>
+          <li><code>toggleOrderedList()</code>: Alternar lista numerada</li>
+          <li><code>setHeading(tag)</code>: Establecer encabezado (h1, h2, h3, p)</li>
+          <li><code>setAlign(align)</code>: Alinear (left, center, right, justify)</li>
+          <li><code>insertLink()</code>: Insertar enlace</li>
+          <li><code>insertImage()</code>: Insertar imagen</li>
+          <li><code>undo()</code>: Deshacer</li>
+          <li><code>redo()</code>: Rehacer</li>
+          <li><code>toggleSourceView()</code>: Alternar vista HTML</li>
+          <li><code>getHTML()</code>: Obtener HTML</li>
+          <li><code>setHTML(html)</code>: Establecer HTML</li>
+          <li><code>clear()</code>: Limpiar contenido</li>
+          <li><code>focus()</code>: Enfocar editor</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Events -->
+    <section class="demo-section">
+      <h3>Eventos</h3>
+      <div class="demo-box">
+        <table style="width: 100%; font-size: var(--ux-font-size-md);">
+          <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm);">Evento</th>
+              <th style="padding: var(--ux-space-sm);">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>rich-text:change</code></td>
+              <td style="padding: var(--ux-space-sm);">Se dispara al cambiar el contenido. <code>detail: { content }</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxRichText()"
+     @rich-text:change="console.log($event.detail.content)"&gt;
+  ...
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- CSS Classes -->
+    <section class="demo-section">
+      <h3>Clases CSS Disponibles</h3>
+      <div class="demo-box">
+        <table style="width: 100%; font-size: var(--ux-font-size-md);">
+          <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm);">Clase</th>
+              <th style="padding: var(--ux-space-sm);">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text</code></td>
+              <td style="padding: var(--ux-space-sm);">Contenedor principal</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text__toolbar</code></td>
+              <td style="padding: var(--ux-space-sm);">Barra de herramientas</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text__btn</code></td>
+              <td style="padding: var(--ux-space-sm);">Boton de toolbar</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text__btn--active</code></td>
+              <td style="padding: var(--ux-space-sm);">Boton activo</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text__toolbar-divider</code></td>
+              <td style="padding: var(--ux-space-sm);">Separador vertical</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text__editor</code></td>
+              <td style="padding: var(--ux-space-sm);">Area de edicion</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text__source</code></td>
+              <td style="padding: var(--ux-space-sm);">Textarea para vista HTML</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text__footer</code></td>
+              <td style="padding: var(--ux-space-sm);">Pie con contadores</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text--sm</code></td>
+              <td style="padding: var(--ux-space-sm);">Tamano pequeno</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text--lg</code></td>
+              <td style="padding: var(--ux-space-sm);">Tamano grande</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text--glass</code></td>
+              <td style="padding: var(--ux-space-sm);">Variante glass</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text--readonly</code></td>
+              <td style="padding: var(--ux-space-sm);">Solo lectura</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text--disabled</code></td>
+              <td style="padding: var(--ux-space-sm);">Deshabilitado</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--ux-space-sm);"><code>.ux-rich-text--error</code></td>
+              <td style="padding: var(--ux-space-sm);">Estado de error</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CSS Variables -->
+    <section class="demo-section">
+      <h3>Variables CSS</h3>
+      <div class="demo-box">
+        <pre class="ux-code-block" data-lang="css">:root {
+  --ux-rich-text-min-height: 200px;
+  --ux-rich-text-max-height: none;
+  --ux-rich-text-border-radius: var(--ux-border-radius);
+  --ux-rich-text-toolbar-bg: var(--ux-surface-secondary);
+  --ux-rich-text-toolbar-btn-size: 44px;
+  --ux-rich-text-content-padding: var(--ux-space-lg);
+  --ux-rich-text-font-size: 16px;
+}</pre>
+      </div>
+    </section>
+
+    <!-- HTMX + Django -->
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Save and load rich text content with HTMX and Django.</p>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Rich text editor with auto-save --&gt;
+&lt;form hx-post="{% url 'content:save' article.id %}"
+      hx-trigger="rich-text:change delay:2s"
+      hx-swap="none"
+      hx-indicator="#save-indicator"&gt;
+  {% csrf_token %}
+
+  &lt;div x-data="uxRichText({
+         placeholder: 'Escribe tu contenido...',
+         content: '{{ article.content|escapejs }}'
+       })"
+       x-init="$refs.editor.innerHTML = content"
+       @rich-text:change="$refs.hidden.value = $event.detail.content"&gt;
+
+    &lt;input type="hidden" name="content" x-ref="hidden"&gt;
+
+    &lt;div class="ux-rich-text"&gt;
+      &lt;div class="ux-rich-text__toolbar"&gt;
+        &lt;button type="button" class="ux-rich-text__btn" @click="toggleBold()"&gt;B&lt;/button&gt;
+        &lt;button type="button" class="ux-rich-text__btn" @click="toggleItalic()"&gt;I&lt;/button&gt;
+        &lt;!-- More toolbar buttons --&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-rich-text__editor"
+           x-ref="editor"
+           contenteditable="true"
+           @input="handleInput()"&gt;&lt;/div&gt;
+      &lt;textarea class="ux-rich-text__source" x-ref="source"&gt;&lt;/textarea&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-rich-text__footer"&gt;
+    &lt;span id="save-indicator" class="htmx-indicator"&gt;Guardando...&lt;/span&gt;
+    &lt;button type="submit" class="ux-button ux-color-primary"&gt;Guardar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;
+
+&lt;!-- Load content from server --&gt;
+&lt;div hx-get="{% url 'content:load' article.id %}"
+     hx-trigger="load"
+     hx-swap="innerHTML"&gt;
+  &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Upload image and insert into editor --&gt;
+&lt;form hx-post="{% url 'content:upload-image' %}"
+      hx-encoding="multipart/form-data"
+      hx-swap="none"
+      @htmx:after-request="insertImageFromResponse($event)"&gt;
+  {% csrf_token %}
+  &lt;input type="file" name="image" accept="image/*"&gt;
+&lt;/form&gt;</pre>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth.decorators import login_required
+import bleach
+
+ALLOWED_TAGS = [
+    'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3',
+    'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code'
+]
+ALLOWED_ATTRS = {
+    'a': ['href', 'title', 'target'],
+    'img': ['src', 'alt', 'width', 'height']
+}
+
+@login_required
+def editor_view(request, article_id):
+    """Render the rich text editor page."""
+    article = get_object_or_404(Article, id=article_id, author=request.user)
+    return render(request, 'content/editor.html', {'article': article})
+
+@login_required
+def load_content(request, article_id):
+    """Load article content as HTML partial."""
+    article = get_object_or_404(Article, id=article_id, author=request.user)
+    return render(request, 'content/partials/editor.html', {
+        'article': article
+    })
+
+@login_required
+@require_POST
+def save_content(request, article_id):
+    """Save rich text content with sanitization."""
+    article = get_object_or_404(Article, id=article_id, author=request.user)
+
+    # Sanitize HTML to prevent XSS
+    raw_content = request.POST.get('content', '')
+    clean_content = bleach.clean(
+        raw_content,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRS,
+        strip=True
+    )
+
+    article.content = clean_content
+    article.save()
+
+    # Return HX-Trigger header for toast notification
+    response = JsonResponse({'success': True})
+    response['HX-Trigger'] = 'content-saved'
+    return response
+
+@login_required
+@require_POST
+def upload_image(request):
+    """Handle image upload for rich text editor."""
+    if 'image' not in request.FILES:
+        return JsonResponse({'error': 'No image provided'}, status=400)
+
+    image = request.FILES['image']
+
+    # Validate file type
+    if not image.content_type.startswith('image/'):
+        return JsonResponse({'error': 'Invalid file type'}, status=400)
+
+    # Save image
+    upload = ImageUpload.objects.create(
+        image=image,
+        uploaded_by=request.user
+    )
+
+    return JsonResponse({
+        'success': True,
+        'url': upload.image.url,
+        'alt': image.name
+    })
+
+@login_required
+@require_GET
+def get_content(request, article_id):
+    """Get article content as JSON (for API use)."""
+    article = get_object_or_404(Article, id=article_id, author=request.user)
+    return JsonResponse({
+        'id': article.id,
+        'title': article.title,
+        'content': article.content,
+        'updated_at': article.updated_at.isoformat()
+    })
+
+# urls.py
+from django.urls import path
+from . import views
+
+app_name = 'content'
+urlpatterns = [
+    path('&lt;int:article_id&gt;/edit/', views.editor_view, name='edit'),
+    path('&lt;int:article_id&gt;/load/', views.load_content, name='load'),
+    path('&lt;int:article_id&gt;/save/', views.save_content, name='save'),
+    path('&lt;int:article_id&gt;/json/', views.get_content, name='json'),
+    path('upload/image/', views.upload_image, name='upload-image'),
+]</pre>
+    </section>
+  </div>
+</body>
+</html>

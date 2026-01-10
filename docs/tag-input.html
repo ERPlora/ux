@@ -6,6 +6,8 @@
   <title>Tag Input - UX Library</title>
   <link rel="stylesheet" href="../bootstrap-grid.min.css">
   <script src="../dist/ux.min.js"></script>
+  <script src="../components/ux-code-block.js"></script>
+
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
     body {
@@ -39,15 +41,6 @@
       padding: 0.125rem 0.375rem;
       border-radius: 4px;
       font-size: 0.875rem;
-    }
-    pre {
-      background: var(--ux-gray-900);
-      color: var(--ux-gray-100);
-      padding: 1rem;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-size: 0.8125rem;
-      line-height: 1.5;
     }
     .result-display {
       margin-top: 1rem;
@@ -112,7 +105,7 @@
       </div>
     </div>
 
-    <pre>&lt;div x-data="uxTagInput({ placeholder: 'Añade etiquetas...' })"&gt;
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxTagInput({ placeholder: 'Añade etiquetas...' })"&gt;
   &lt;div class="ux-tag-input" @click="focus()"&gt;
     &lt;template x-for="(tag, index) in tags"&gt;
       &lt;span class="ux-tag"&gt;
@@ -242,7 +235,7 @@
       </div>
     </div>
 
-    <pre>.ux-tag                // Primary (default)
+    <pre class="ux-code-block" data-lang="css">.ux-tag                // Primary (default)
 .ux-tag--secondary     // Gris
 .ux-tag--success       // Verde
 .ux-tag--warning       // Amarillo
@@ -349,7 +342,7 @@
       </div>
     </div>
 
-    <pre>uxTagInput({
+    <pre class="ux-code-block" data-lang="javascript">uxTagInput({
   validateTag: function(tag) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(tag)) {
@@ -385,7 +378,7 @@
                  @keydown="onKeydown($event)"
                  @focus="onFocus()"
                  @blur="onBlur()"
-                 style="color: white;">
+                 style="color: var(--ux-primary-contrast);">
         </div>
       </div>
     </div>
@@ -432,7 +425,7 @@
     </div>
 
     <h3>Eventos disponibles</h3>
-    <pre>@tag-input:add       // Tag añadido
+    <pre class="ux-code-block" data-lang="javascript">@tag-input:add       // Tag añadido
 @tag-input:remove    // Tag eliminado
 @tag-input:change    // Lista de tags cambiada
 @tag-input:invalid   // Tag no válido (con validación)
@@ -442,12 +435,180 @@
 @tag-input:blur      // Input perdió foco</pre>
   </section>
 
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Integra el tag input con Django y HTMX para sugerencias dinámicas desde el servidor.
+    </p>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Sugerencias desde Django</h3>
+      <p style="color: var(--ux-text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+        Busca sugerencias en tiempo real mientras el usuario escribe.
+      </p>
+    </div>
+
+    <h3>Template Django</h3>
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxTagInput({
+  placeholder: 'Buscar categorias...',
+  allowCreate: true
+})" class="ux-tag-input-wrapper"&gt;
+  &lt;label&gt;Categorias&lt;/label&gt;
+  &lt;div class="ux-tag-input" @click="focus()"&gt;
+    &lt;template x-for="(tag, index) in tags" :key="index"&gt;
+      &lt;span class="ux-tag"&gt;
+        &lt;span class="ux-tag__text" x-text="getLabel(tag)"&gt;&lt;/span&gt;
+        &lt;button type="button" class="ux-tag__remove" @click.stop="removeTag(index)"&gt;&amp;times;&lt;/button&gt;
+      &lt;/span&gt;
+    &lt;/template&gt;
+    &lt;input type="text"
+           class="ux-tag-input__field"
+           x-ref="input"
+           x-model="inputValue"
+           name="categories"
+           hx-get="{% url 'tag_suggestions' %}"
+           hx-trigger="input changed delay:300ms"
+           hx-target="#tag-suggestions"
+           :placeholder="tags.length === 0 ? placeholder : ''"
+           @keydown="onKeydown($event)"&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Sugerencias cargadas via HTMX --&gt;
+  &lt;div id="tag-suggestions" class="ux-tag-input__suggestions"&gt;
+    &lt;!-- Django renderiza aqui las sugerencias --&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Hidden inputs para enviar tags seleccionados --&gt;
+  &lt;template x-for="tag in tags" :key="tag"&gt;
+    &lt;input type="hidden" name="selected_tags" :value="getValue(tag)"&gt;
+  &lt;/template&gt;
+&lt;/div&gt;</pre>
+
+    <h3>Vista Django (views.py)</h3>
+    <pre class="ux-code-block" data-lang="python">from django.http import HttpResponse
+from django.template.loader import render_to_string
+from .models import Category
+
+def tag_suggestions(request):
+    """Endpoint HTMX para sugerencias de tags"""
+    query = request.GET.get('categories', '').strip()
+
+    if len(query) < 2:
+        return HttpResponse('')
+
+    # Buscar categorias que coincidan
+    suggestions = Category.objects.filter(
+        name__icontains=query
+    ).values('id', 'name')[:10]
+
+    html = render_to_string('partials/tag_suggestions.html', {
+        'suggestions': suggestions,
+        'query': query
+    })
+    return HttpResponse(html)</pre>
+
+    <h3>Partial de sugerencias (partials/tag_suggestions.html)</h3>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- partials/tag_suggestions.html --&gt;
+{% if suggestions %}
+  {% for item in suggestions %}
+    &lt;div class="ux-tag-input__suggestion"
+         @click="selectSuggestion({ value: '{{ item.id }}', label: '{{ item.name }}' })"&gt;
+      {{ item.name }}
+    &lt;/div&gt;
+  {% endfor %}
+{% elif query %}
+  &lt;div class="ux-tag-input__suggestion ux-tag-input__suggestion-create"
+       @click="addTag('{{ query }}')"&gt;
+    Crear "{{ query }}"
+  &lt;/div&gt;
+{% endif %}</pre>
+
+    <h3>URL Pattern (urls.py)</h3>
+    <pre class="ux-code-block" data-lang="python">from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('tags/suggestions/', views.tag_suggestions, name='tag_suggestions'),
+]</pre>
+
+    <h3>Con valores iniciales desde Django</h3>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Pasar tags existentes desde Django --&gt;
+&lt;div x-data="uxTagInput({
+  placeholder: 'Añadir etiquetas...',
+  value: {{ existing_tags|safe }},
+  allowCreate: true
+})" class="ux-tag-input-wrapper"&gt;
+  &lt;!-- ... resto del componente ... --&gt;
+&lt;/div&gt;
+
+&lt;!-- En la vista Django --&gt;
+{% comment %}
+context['existing_tags'] = json.dumps([
+    {'value': tag.id, 'label': tag.name}
+    for tag in article.tags.all()
+])
+{% endcomment %}</pre>
+
+    <h3>Guardar tags en Django (views.py)</h3>
+    <pre class="ux-code-block" data-lang="python">from django.views import View
+from django.http import JsonResponse
+from .models import Article, Tag
+
+class ArticleUpdateView(View):
+    def post(self, request, pk):
+        article = Article.objects.get(pk=pk)
+
+        # Obtener tags del formulario
+        selected_tags = request.POST.getlist('selected_tags')
+
+        # Limpiar tags existentes
+        article.tags.clear()
+
+        for tag_value in selected_tags:
+            # Si es ID numerico, es tag existente
+            if tag_value.isdigit():
+                tag = Tag.objects.get(pk=tag_value)
+            else:
+                # Crear nuevo tag
+                tag, created = Tag.objects.get_or_create(
+                    name=tag_value.strip()
+                )
+            article.tags.add(tag)
+
+        article.save()
+        return JsonResponse({'status': 'ok'})</pre>
+
+    <h3>Modelo Django (models.py)</h3>
+    <pre class="ux-code-block" data-lang="python">from django.db import models
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+class Article(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    tags = models.ManyToManyField(Tag, related_name='articles', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title</pre>
+  </section>
+
   <!-- API Reference -->
   <section class="demo-section">
     <h2>API Reference</h2>
 
     <h3>Opciones</h3>
-    <pre>uxTagInput({
+    <pre class="ux-code-block" data-lang="javascript">uxTagInput({
   placeholder: 'Add tag...',     // Placeholder del input
   suggestions: [],               // Array de sugerencias
   maxTags: Infinity,             // Máximo de tags
@@ -463,14 +624,14 @@
 })</pre>
 
     <h3>Propiedades</h3>
-    <pre>tags              // Array de tags actuales
+    <pre class="ux-code-block" data-lang="javascript">tags              // Array de tags actuales
 inputValue        // Valor del input
 isOpen            // Dropdown abierto
 canAddMore        // Puede añadir más tags
 isAtLimit         // Ha alcanzado el límite</pre>
 
     <h3>Métodos</h3>
-    <pre>addTag(value)           // Añadir tag
+    <pre class="ux-code-block" data-lang="javascript">addTag(value)           // Añadir tag
 removeTag(index)        // Eliminar tag por índice
 removeLastTag()         // Eliminar último tag
 clearAll()              // Eliminar todos
@@ -480,7 +641,7 @@ getLabel(item)          // Obtener texto del tag
 getValue(item)          // Obtener valor del tag</pre>
 
     <h3>Clases CSS</h3>
-    <pre>.ux-tag-input              // Contenedor
+    <pre class="ux-code-block" data-lang="css">.ux-tag-input              // Contenedor
 .ux-tag-input--sm          // Pequeño
 .ux-tag-input--lg          // Grande
 .ux-tag-input--glass       // Glass morphism

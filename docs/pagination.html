@@ -10,15 +10,12 @@
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-content.js"></script>
   <script src="../components/ux-pagination.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); }
     .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
     .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
     .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
-    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
-    .code-block .tag { color: #ff7b72; }
-    .code-block .attr { color: #79c0ff; }
-    .code-block .string { color: #a5d6ff; }
   </style>
 </head>
 <body class="ux-app">
@@ -73,13 +70,13 @@
           </div>
         </div>
       </div>
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxPagination({ currentPage: 1, totalPages: 10, totalItems: 100 })"</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-pagination"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-pagination__info"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
-    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-pagination__controls"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
-    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-pagination__per-page"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
-  <span class="tag">&lt;/div&gt;</span>
-<span class="tag">&lt;/div&gt;</span></pre>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxPagination({ currentPage: 1, totalPages: 10, totalItems: 100 })"&gt;
+  &lt;div class="ux-pagination"&gt;
+    &lt;div class="ux-pagination__info"&gt;...&lt;/div&gt;
+    &lt;div class="ux-pagination__controls"&gt;...&lt;/div&gt;
+    &lt;div class="ux-pagination__per-page"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
     </section>
 
     <section class="demo-section">
@@ -170,7 +167,7 @@
 
     <section class="demo-section">
       <h3>Glass Variant</h3>
-      <div class="demo-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: var(--ux-space-xl);">
+      <div class="demo-box" style="background: var(--ux-demo-gradient); padding: var(--ux-space-xl);">
         <div x-data="uxPagination({ currentPage: 3, totalPages: 10 })">
           <div class="ux-pagination ux-pagination--glass">
             <div class="ux-pagination__controls">
@@ -192,6 +189,119 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Integracion con Django Paginator y HTMX para paginacion server-side sin recargar la pagina.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Vista Django</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.core.paginator import Paginator
+from django.shortcuts import render
+
+def product_list(request):
+    products = Product.objects.all()
+    per_page = int(request.GET.get('per_page', 10))
+    paginator = Paginator(products, per_page)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    template = 'products/_list.html' if request.htmx else 'products/list.html'
+    return render(request, template, {
+        'page_obj': page_obj,
+        'per_page': per_page,
+    })</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Template Principal</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- products/list.html --&gt;
+&lt;div id="product-list"&gt;
+  {% include "products/_list.html" %}
+&lt;/div&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Partial con Paginacion</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- products/_list.html --&gt;
+&lt;ul class="ux-list"&gt;
+  {% for product in page_obj %}
+    &lt;li class="ux-list__item"&gt;{{ product.name }}&lt;/li&gt;
+  {% endfor %}
+&lt;/ul&gt;
+
+&lt;div class="ux-pagination ux-pagination--bordered"&gt;
+  &lt;div class="ux-pagination__info"&gt;
+    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} items
+  &lt;/div&gt;
+
+  &lt;div class="ux-pagination__controls"&gt;
+    &lt;button class="ux-pagination__btn ux-pagination__prev"
+            hx-get="?page={{ page_obj.previous_page_number }}&amp;per_page={{ per_page }}"
+            hx-target="#product-list"
+            hx-swap="innerHTML"
+            {% if not page_obj.has_previous %}disabled{% endif %}&gt;
+      &lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;&lt;path d="M15 18l-6-6 6-6"/&gt;&lt;/svg&gt;
+    &lt;/button&gt;
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if num == page_obj.number %}
+        &lt;button class="ux-pagination__btn ux-pagination__btn--active"&gt;{{ num }}&lt;/button&gt;
+      {% elif num == 1 or num == page_obj.paginator.num_pages or num|add:"-2" <= page_obj.number and num|add:"2" >= page_obj.number %}
+        &lt;button class="ux-pagination__btn"
+                hx-get="?page={{ num }}&amp;per_page={{ per_page }}"
+                hx-target="#product-list"
+                hx-swap="innerHTML"&gt;{{ num }}&lt;/button&gt;
+      {% elif num == 2 or num == page_obj.paginator.num_pages|add:"-1" %}
+        &lt;span class="ux-pagination__ellipsis"&gt;...&lt;/span&gt;
+      {% endif %}
+    {% endfor %}
+
+    &lt;button class="ux-pagination__btn ux-pagination__next"
+            hx-get="?page={{ page_obj.next_page_number }}&amp;per_page={{ per_page }}"
+            hx-target="#product-list"
+            hx-swap="innerHTML"
+            {% if not page_obj.has_next %}disabled{% endif %}&gt;
+      &lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;&lt;path d="M9 18l6-6-6-6"/&gt;&lt;/svg&gt;
+    &lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-pagination__per-page"&gt;
+    &lt;span&gt;Show&lt;/span&gt;
+    &lt;select hx-get="" hx-target="#product-list" hx-swap="innerHTML" name="per_page"
+            hx-vals='{"page": "1"}'&gt;
+      &lt;option value="10" {% if per_page == 10 %}selected{% endif %}&gt;10&lt;/option&gt;
+      &lt;option value="25" {% if per_page == 25 %}selected{% endif %}&gt;25&lt;/option&gt;
+      &lt;option value="50" {% if per_page == 50 %}selected{% endif %}&gt;50&lt;/option&gt;
+      &lt;option value="100" {% if per_page == 100 %}selected{% endif %}&gt;100&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;span&gt;per page&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Template Tag Reutilizable</h4>
+      <pre class="ux-code-block" data-lang="python"># templatetags/pagination_tags.py
+from django import template
+
+register = template.Library()
+
+@register.inclusion_tag('components/_pagination.html')
+def ux_pagination(page_obj, target_id='#content', per_page=10):
+    return {
+        'page_obj': page_obj,
+        'target_id': target_id,
+        'per_page': per_page,
+    }</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Uso del Template Tag</h4>
+      <pre class="ux-code-block" data-lang="html">{% load pagination_tags %}
+
+&lt;div id="content"&gt;
+  &lt;!-- Lista de items --&gt;
+  {% for item in page_obj %}
+    &lt;div&gt;{{ item }}&lt;/div&gt;
+  {% endfor %}
+
+  &lt;!-- Paginacion --&gt;
+  {% ux_pagination page_obj target_id="#content" per_page=per_page %}
+&lt;/div&gt;</pre>
     </section>
 
     <section class="demo-section">

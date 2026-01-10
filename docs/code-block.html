@@ -6,6 +6,7 @@
   <title>Code Block - UX Library</title>
   <link rel="stylesheet" href="../bootstrap-grid.min.css">
   <script src="../dist/ux.min.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
     body {
@@ -33,15 +34,6 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
       gap: 1.5rem;
-    }
-    pre.example {
-      background: var(--ux-gray-900);
-      color: var(--ux-gray-100);
-      padding: 1rem;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-size: 0.8125rem;
-      line-height: 1.5;
     }
     .demo-glass-bg {
       background: linear-gradient(135deg, var(--ux-purple-500), var(--ux-pink-500));
@@ -104,7 +96,7 @@ greet('World');`
       </div>
     </div>
 
-    <pre class="example">&lt;div x-data="uxCodeBlock({
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxCodeBlock({
   language: 'javascript',
   filename: 'example.js',
   code: \`function greet(name) { ... }\`
@@ -168,7 +160,7 @@ greet('World');`
   display: inline-flex;
   padding: 0.75rem 1.5rem;
   background: #3b82f6;
-  color: white;
+  color: var(--ux-primary-contrast);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
@@ -440,7 +432,7 @@ console.log(sum(2, 3)); // 5`
       </p>
     </div>
 
-    <pre class="example">&lt;code class="ux-code-inline"&gt;npm install&lt;/code&gt;</pre>
+    <pre class="ux-code-block" data-lang="html">&lt;code class="ux-code-inline"&gt;npm install&lt;/code&gt;</pre>
   </section>
 
   <!-- Glass Variant -->
@@ -536,7 +528,7 @@ console.log(sum(2, 3)); // 5`
     <h2>Opciones Alpine.js</h2>
 
     <div class="demo-box">
-      <pre class="example">uxCodeBlock({
+      <pre class="ux-code-block" data-lang="html">uxCodeBlock({
   code: '',                 // Código a mostrar
   language: 'javascript',   // Lenguaje: js, html, css, json, python, bash
   filename: '',             // Nombre del archivo (opcional)
@@ -569,6 +561,148 @@ setCode(code, language)     // Cambiar código programáticamente
 .token-tag                  // Tags HTML
 .token-attr-name            // Atributos HTML
 .token-attr-value           // Valores de atributos</pre>
+    </div>
+  </section>
+
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Carga bloques de codigo dinamicamente desde Django usando HTMX.
+    </p>
+
+    <div class="demo-grid">
+      <!-- Cargar codigo con HTMX -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Cargar codigo con HTMX</h3>
+        <pre class="ux-code-block" data-lang="html">&lt;!-- Boton que carga codigo desde Django --&gt;
+&lt;button class="ux-button ux-color-primary"
+        hx-get="/api/code/example/"
+        hx-target="#code-container"
+        hx-swap="innerHTML"&gt;
+  Ver codigo fuente
+&lt;/button&gt;
+
+&lt;!-- Contenedor donde se renderiza el codigo --&gt;
+&lt;div id="code-container"&gt;&lt;/div&gt;</pre>
+      </div>
+
+      <!-- Vista Django -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Vista Django</h3>
+        <pre class="ux-code-block" data-lang="html"># views.py
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+import html
+
+def code_example(request):
+    code = '''def hello_world():
+    print("Hello, World!")
+
+hello_world()'''
+
+    # Escapar HTML para mostrar correctamente
+    escaped_code = html.escape(code)
+
+    html_response = f'''
+    &lt;pre class="ux-code-block" data-lang="python"&gt;{escaped_code}&lt;/pre&gt;
+    '''
+    return HttpResponse(html_response)</pre>
+      </div>
+
+      <!-- Template Django con codigo -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Template Django</h3>
+        <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/code_snippet.html --&gt;
+{% load ux_tags %}
+
+&lt;pre class="ux-code-block" data-lang="{{ language }}"&gt;{{ code|escape }}&lt;/pre&gt;
+
+&lt;!-- Uso en vista --&gt;
+# views.py
+def get_code_snippet(request, snippet_id):
+    snippet = CodeSnippet.objects.get(id=snippet_id)
+    return render(request, 'partials/code_snippet.html', {
+        'code': snippet.content,
+        'language': snippet.language
+    })</pre>
+      </div>
+
+      <!-- Codigo desde modelo -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Modelo de Snippets</h3>
+        <pre class="ux-code-block" data-lang="html"># models.py
+from django.db import models
+
+class CodeSnippet(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    language = models.CharField(max_length=50, default='javascript')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+# urls.py
+urlpatterns = [
+    path('api/code/&lt;int:pk&gt;/',
+         views.get_snippet,
+         name='code_snippet'),
+]</pre>
+      </div>
+
+      <!-- Cargar multiples snippets -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Lista de Snippets con HTMX</h3>
+        <pre class="ux-code-block" data-lang="html">&lt;!-- Lista de snippets clickeables --&gt;
+&lt;ul class="ux-list"&gt;
+  {% for snippet in snippets %}
+  &lt;li class="ux-list__item"
+      hx-get="/api/code/{{ snippet.id }}/"
+      hx-target="#code-preview"
+      hx-swap="innerHTML"
+      style="cursor: pointer;"&gt;
+    {{ snippet.title }}
+    &lt;span class="ux-badge"&gt;{{ snippet.language }}&lt;/span&gt;
+  &lt;/li&gt;
+  {% endfor %}
+&lt;/ul&gt;
+
+&lt;!-- Preview del codigo seleccionado --&gt;
+&lt;div id="code-preview"&gt;
+  &lt;p class="ux-text-secondary"&gt;
+    Selecciona un snippet para ver el codigo
+  &lt;/p&gt;
+&lt;/div&gt;</pre>
+      </div>
+
+      <!-- Editar codigo inline -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Editar codigo con HTMX</h3>
+        <pre class="ux-code-block" data-lang="html">&lt;!-- Formulario de edicion inline --&gt;
+&lt;form hx-post="/api/code/{{ snippet.id }}/update/"
+      hx-target="#code-display"
+      hx-swap="outerHTML"&gt;
+
+  &lt;div class="ux-input"&gt;
+    &lt;textarea name="content"
+              rows="10"
+              class="ux-textarea"&gt;{{ snippet.content }}&lt;/textarea&gt;
+    &lt;label&gt;Codigo&lt;/label&gt;
+  &lt;/div&gt;
+
+  &lt;select name="language" class="ux-select"&gt;
+    &lt;option value="javascript"&gt;JavaScript&lt;/option&gt;
+    &lt;option value="python"&gt;Python&lt;/option&gt;
+    &lt;option value="html"&gt;HTML&lt;/option&gt;
+    &lt;option value="css"&gt;CSS&lt;/option&gt;
+  &lt;/select&gt;
+
+  &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+    Guardar
+  &lt;/button&gt;
+&lt;/form&gt;</pre>
+      </div>
     </div>
   </section>
 

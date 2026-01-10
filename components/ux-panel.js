@@ -521,10 +521,49 @@
     }
   });
 
+  // Alpine.js panel detail component (main + aside with mobile drawer)
+  const panelDetailData = (options = {}) => ({
+    isAsideOpen: false,
+    breakpoint: options.breakpoint ?? 768,
+
+    init() {
+      // Check initial viewport
+      this.checkViewport();
+      window.addEventListener('resize', () => this.checkViewport());
+    },
+
+    checkViewport() {
+      // Auto-close aside on desktop
+      if (window.innerWidth >= this.breakpoint) {
+        this.isAsideOpen = false;
+      }
+    },
+
+    toggleAside() {
+      this.isAsideOpen = !this.isAsideOpen;
+      if (this.isAsideOpen) {
+        window.UX?.lockScroll?.();
+      } else {
+        window.UX?.unlockScroll?.();
+      }
+    },
+
+    openAside() {
+      this.isAsideOpen = true;
+      window.UX?.lockScroll?.();
+    },
+
+    closeAside() {
+      this.isAsideOpen = false;
+      window.UX?.unlockScroll?.();
+    }
+  });
+
   // Register components
   if (window.UX) {
     window.UX.registerComponent('uxPanel', panelData);
     window.UX.registerComponent('uxPanelGroup', panelGroupData);
+    window.UX.registerComponent('uxPanelDetail', panelDetailData);
   }
 
 })();

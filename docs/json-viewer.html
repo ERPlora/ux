@@ -6,6 +6,7 @@
   <title>JSON Viewer - UX Library</title>
   <link rel="stylesheet" href="../bootstrap-grid.min.css">
   <script src="../dist/ux.min.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
     body {
@@ -33,15 +34,6 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
       gap: 1.5rem;
-    }
-    pre.example {
-      background: var(--ux-gray-900);
-      color: var(--ux-gray-100);
-      padding: 1rem;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-size: 0.8125rem;
-      line-height: 1.5;
     }
   </style>
 </head>
@@ -226,7 +218,7 @@
       </div>
     </div>
 
-    <pre class="example">&lt;div x-data="uxJsonViewer({
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxJsonViewer({
   data: { name: 'John', age: 30, ... },
   initialExpanded: 2
 })" class="ux-json-viewer"&gt;
@@ -267,7 +259,7 @@
       <div class="ux-json-viewer__header">
         <div class="ux-json-viewer__title">
           <span>API Response</span>
-          <span class="ux-json-viewer__badge" style="background: var(--ux-success); color: white;">200 OK</span>
+          <span class="ux-json-viewer__badge" style="background: var(--ux-success); color: var(--ux-primary-contrast);">200 OK</span>
         </div>
         <div class="ux-json-viewer__actions">
           <button class="ux-json-viewer__btn" @click="expandAll()">Expandir</button>
@@ -375,7 +367,7 @@
       <div class="ux-json-viewer__header">
         <div class="ux-json-viewer__title">
           <span>Error Response</span>
-          <span class="ux-json-viewer__badge" style="background: var(--ux-danger); color: white;">400 Error</span>
+          <span class="ux-json-viewer__badge" style="background: var(--ux-danger); color: var(--ux-primary-contrast);">400 Error</span>
         </div>
         <div class="ux-json-viewer__actions">
           <button class="ux-json-viewer__btn" @click="copyJson()">
@@ -448,7 +440,7 @@
     <h2>Opciones Alpine.js</h2>
 
     <div class="demo-box">
-      <pre class="example">uxJsonViewer({
+      <pre class="ux-code-block" data-lang="html">uxJsonViewer({
   data: {},                // Objeto JS o string JSON
   initialExpanded: 2,      // Profundidad de expansión inicial
   maxHeight: '500px',      // Altura máxima del contenedor
@@ -472,6 +464,187 @@ viewMode                  // 'tree' o 'raw'
 
 // Eventos
 @jsonviewer:copy          // Se dispara al copiar</pre>
+    </div>
+  </section>
+
+  <!-- HTMX + Django Integration -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Visualiza respuestas JSON desde una API Django usando HTMX para carga dinamica.
+    </p>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Vista Django (views.py)</h3>
+      <pre class="ux-code-block" data-lang="python">from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
+def api_user_detail(request, user_id):
+    """Endpoint que retorna datos de usuario en JSON"""
+    user = get_object_or_404(User, pk=user_id)
+    return JsonResponse({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'is_active': user.is_active,
+        'date_joined': user.date_joined.isoformat(),
+        'profile': {
+            'bio': user.profile.bio,
+            'avatar': user.profile.avatar.url if user.profile.avatar else None,
+            'preferences': user.profile.preferences
+        }
+    })
+
+@require_GET
+def api_orders_list(request):
+    """Endpoint que retorna lista de pedidos"""
+    orders = Order.objects.select_related('customer').all()[:10]
+    return JsonResponse({
+        'status': 200,
+        'count': orders.count(),
+        'results': [
+            {
+                'id': order.id,
+                'customer': order.customer.username,
+                'total': float(order.total),
+                'status': order.status,
+                'items': order.items.count(),
+                'created_at': order.created_at.isoformat()
+            }
+            for order in orders
+        ]
+    })</pre>
+    </div>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Template Django con HTMX</h3>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Boton que carga JSON de usuario --&gt;
+&lt;button class="ux-button ux-color-primary"
+        hx-get="{% url 'api_user_detail' user.id %}"
+        hx-target="#json-container"
+        hx-swap="innerHTML"
+        hx-indicator="#loading"&gt;
+  Ver datos JSON
+&lt;/button&gt;
+
+&lt;div class="ux-spinner" id="loading" style="display: none;"&gt;&lt;/div&gt;
+
+&lt;!-- Contenedor donde se renderiza el JSON Viewer --&gt;
+&lt;div id="json-container"&gt;&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Fragment Django para HTMX Response</h3>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/json_viewer.html --&gt;
+&lt;div x-data="uxJsonViewer({
+  data: {{ json_data|safe }},
+  initialExpanded: 2
+})" class="ux-json-viewer"&gt;
+  &lt;div class="ux-json-viewer__header"&gt;
+    &lt;div class="ux-json-viewer__title"&gt;
+      &lt;span&gt;{{ title }}&lt;/span&gt;
+      &lt;span class="ux-json-viewer__badge"&gt;{{ badge }}&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-json-viewer__actions"&gt;
+      &lt;button class="ux-json-viewer__btn" @click="expandAll()"&gt;Expandir&lt;/button&gt;
+      &lt;button class="ux-json-viewer__btn" @click="collapseAll()"&gt;Colapsar&lt;/button&gt;
+      &lt;button class="ux-json-viewer__btn" @click="copyJson()"&gt;
+        &lt;span x-html="copied ? icons.check : icons.copy"&gt;&lt;/span&gt;
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-json-viewer__content"&gt;
+    &lt;pre class="ux-json-viewer__raw" x-text="rawJson"&gt;&lt;/pre&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Vista que retorna el fragment</h3>
+      <pre class="ux-code-block" data-lang="python">import json
+from django.shortcuts import render
+
+def htmx_user_json(request, user_id):
+    """Vista que retorna un fragment HTML con el JSON Viewer"""
+    user = get_object_or_404(User, pk=user_id)
+    user_data = {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'is_active': user.is_active,
+        'profile': {
+            'bio': user.profile.bio,
+            'preferences': user.profile.preferences
+        }
+    }
+    return render(request, 'partials/json_viewer.html', {
+        'json_data': json.dumps(user_data),
+        'title': f'Usuario #{user.id}',
+        'badge': 'User'
+    })</pre>
+    </div>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Uso con hx-on para procesar respuesta JSON directa</h3>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Cargar JSON directamente y procesarlo con Alpine.js --&gt;
+&lt;div x-data="{
+  jsonData: null,
+  loading: false,
+  async loadJson(url) {
+    this.loading = true;
+    try {
+      const response = await fetch(url);
+      this.jsonData = await response.json();
+    } finally {
+      this.loading = false;
+    }
+  }
+}"&gt;
+  &lt;button class="ux-button ux-color-primary"
+          @click="loadJson('{% url 'api_orders_list' %}')"
+          :disabled="loading"&gt;
+    &lt;span x-show="loading" class="ux-spinner ux-spinner--sm"&gt;&lt;/span&gt;
+    &lt;span x-text="loading ? 'Cargando...' : 'Cargar Pedidos'"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+
+  &lt;template x-if="jsonData"&gt;
+    &lt;div x-data="uxJsonViewer({ data: jsonData, initialExpanded: 3 })"
+         class="ux-json-viewer" style="margin-top: 1rem;"&gt;
+      &lt;div class="ux-json-viewer__header"&gt;
+        &lt;div class="ux-json-viewer__title"&gt;
+          &lt;span&gt;Pedidos&lt;/span&gt;
+          &lt;span class="ux-json-viewer__badge"
+                x-text="jsonData.count + ' items'"&gt;&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class="ux-json-viewer__actions"&gt;
+          &lt;button class="ux-json-viewer__btn" @click="expandAll()"&gt;Expandir&lt;/button&gt;
+          &lt;button class="ux-json-viewer__btn" @click="collapseAll()"&gt;Colapsar&lt;/button&gt;
+          &lt;button class="ux-json-viewer__btn" @click="copyJson()"&gt;Copiar&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-json-viewer__content" style="max-height: 400px;"&gt;
+        &lt;pre class="ux-json-viewer__raw" x-text="rawJson"&gt;&lt;/pre&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/template&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">URLs Django</h3>
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    # API endpoints (retornan JSON)
+    path('api/users/&lt;int:user_id&gt;/', views.api_user_detail, name='api_user_detail'),
+    path('api/orders/', views.api_orders_list, name='api_orders_list'),
+
+    # HTMX endpoints (retornan HTML fragments)
+    path('htmx/users/&lt;int:user_id&gt;/json/', views.htmx_user_json, name='htmx_user_json'),
+]</pre>
     </div>
   </section>
 

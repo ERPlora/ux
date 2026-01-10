@@ -9,12 +9,12 @@
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-button.js"></script>
   <script src="../components/ux-notifications.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
     .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
     .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
     .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
-    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: 0.8125rem; overflow-x: auto; white-space: pre; }
     .demo-controls { display: flex; gap: var(--ux-space-sm); margin-bottom: var(--ux-space-md); flex-wrap: wrap; }
     .demo-output { padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-radius-md); font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-top: var(--ux-space-md); }
   </style>
@@ -120,7 +120,7 @@
       </div>
     </div>
 
-    <pre class="code-block">&lt;div x-data="uxNotificationCenter({
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxNotificationCenter({
   notifications: [
     { id: '1', title: 'Titulo', message: 'Mensaje', type: 'success', timestamp: '...', read: false }
   ]
@@ -197,7 +197,7 @@
       </div>
     </div>
 
-    <pre class="code-block">&lt;div x-data="uxNotificationCenter({ variant: 'dropdown' })"&gt;
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxNotificationCenter({ variant: 'dropdown' })"&gt;
   &lt;button @click="toggle()"&gt;...&lt;/button&gt;
   &lt;div class="ux-notification-dropdown" :class="{ 'ux-notification-dropdown--open': isOpen }"&gt;
     ...
@@ -271,7 +271,7 @@
       </div>
     </div>
 
-    <pre class="code-block">// Notificacion con acciones
+    <pre class="ux-code-block" data-lang="html">// Notificacion con acciones
 {
   id: 'a1',
   title: 'Solicitud de amistad',
@@ -362,7 +362,7 @@
       </div>
     </div>
 
-    <pre class="code-block">// Agregar notificacion
+    <pre class="ux-code-block" data-lang="html">// Agregar notificacion
 addNotification({
   title: 'Titulo',
   message: 'Mensaje de la notificacion',
@@ -428,13 +428,13 @@ clearAll();</pre>
       </div>
     </div>
 
-    <pre class="code-block">&lt;div class="ux-notification-panel ux-notification-panel--glass"&gt;...&lt;/div&gt;</pre>
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-notification-panel ux-notification-panel--glass"&gt;...&lt;/div&gt;</pre>
   </div>
 
   <div class="demo-section">
     <h3>API y Eventos</h3>
     <div class="demo-box">
-      <pre class="code-block">// Opciones de configuracion
+      <pre class="ux-code-block" data-lang="html">// Opciones de configuracion
 uxNotificationCenter({
   notifications: [],           // Array de notificaciones
   filters: ['all', 'unread'],  // Filtros disponibles
@@ -493,7 +493,7 @@ formatTime(timestamp)          // Formatear tiempo relativo
     <h3>Integracion con HTMX</h3>
     <p>Cargar notificaciones desde el servidor.</p>
     <div class="demo-box">
-      <pre class="code-block">&lt;!-- Cargar notificaciones al abrir --&gt;
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Cargar notificaciones al abrir --&gt;
 &lt;div x-data="uxNotificationCenter()"
      @notifications:open="htmx.ajax('GET', '/api/notifications', { target: '#notif-list' })"&gt;
   &lt;div class="ux-notification-panel__content"&gt;
@@ -531,6 +531,429 @@ formatTime(timestamp)          // Formatear tiempo relativo
     &lt;p class="ux-notification-item__message"&gt;Pedido #1234 recibido&lt;/p&gt;
   &lt;/div&gt;
 &lt;/li&gt;</pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>HTMX + Django</h3>
+    <p>Notificaciones en tiempo real con Django y HTMX usando SSE (Server-Sent Events) o WebSockets via Django Channels.</p>
+
+    <div class="demo-box">
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">1. Modelo Django</h4>
+      <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class Notification(models.Model):
+    TYPE_CHOICES = [
+        ('info', 'Info'),
+        ('success', 'Success'),
+        ('warning', 'Warning'),
+        ('error', 'Error'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='info')
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    data = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def to_dict(self):
+        return {
+            'id': str(self.id),
+            'title': self.title,
+            'message': self.message,
+            'type': self.type,
+            'read': self.read,
+            'timestamp': self.created_at.isoformat(),
+            'data': self.data,
+        }</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">2. Vistas Django (HTMX)</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth.decorators import login_required
+from .models import Notification
+
+@login_required
+@require_GET
+def notification_list(request):
+    """Retorna lista de notificaciones como HTML parcial para HTMX"""
+    notifications = Notification.objects.filter(user=request.user)[:50]
+    return render(request, 'notifications/_list.html', {
+        'notifications': notifications
+    })
+
+@login_required
+@require_GET
+def notification_count(request):
+    """Retorna contador de no leidas para polling"""
+    count = Notification.objects.filter(user=request.user, read=False).count()
+    if count > 99:
+        count = '99+'
+    return HttpResponse(f'&lt;span class="ux-notification-trigger__badge"&gt;{count}&lt;/span&gt;')
+
+@login_required
+@require_POST
+def mark_as_read(request, notification_id):
+    """Marca una notificacion como leida"""
+    Notification.objects.filter(
+        id=notification_id,
+        user=request.user
+    ).update(read=True)
+    return HttpResponse(status=204)
+
+@login_required
+@require_POST
+def mark_all_read(request):
+    """Marca todas las notificaciones como leidas"""
+    Notification.objects.filter(user=request.user, read=False).update(read=True)
+    return HttpResponse(status=204)
+
+@login_required
+@require_POST
+def clear_all(request):
+    """Elimina todas las notificaciones"""
+    Notification.objects.filter(user=request.user).delete()
+    return render(request, 'notifications/_empty.html')</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">3. URLs Django</h4>
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('notifications/', views.notification_list, name='notification_list'),
+    path('notifications/count/', views.notification_count, name='notification_count'),
+    path('notifications/&lt;int:notification_id&gt;/read/', views.mark_as_read, name='notification_read'),
+    path('notifications/mark-all-read/', views.mark_all_read, name='notification_mark_all_read'),
+    path('notifications/clear/', views.clear_all, name='notification_clear'),
+]</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">4. Templates Django (Parciales HTMX)</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/notifications/_list.html --&gt;
+{% for notification in notifications %}
+&lt;li class="ux-notification-item {% if not notification.read %}ux-notification-item--unread{% endif %}"
+    hx-post="{% url 'notification_read' notification.id %}"
+    hx-trigger="click"
+    hx-swap="none"&gt;
+  &lt;div class="ux-notification-item__icon ux-notification-item__icon--{{ notification.type }}"&gt;
+    {% if notification.type == 'success' %}
+      &lt;svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+        &lt;polyline points="20 6 9 17 4 12"&gt;&lt;/polyline&gt;
+      &lt;/svg&gt;
+    {% elif notification.type == 'warning' %}
+      &lt;svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+        &lt;path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"&gt;&lt;/path&gt;
+        &lt;line x1="12" y1="9" x2="12" y2="13"&gt;&lt;/line&gt;
+        &lt;line x1="12" y1="17" x2="12.01" y2="17"&gt;&lt;/line&gt;
+      &lt;/svg&gt;
+    {% elif notification.type == 'error' %}
+      &lt;svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+        &lt;circle cx="12" cy="12" r="10"&gt;&lt;/circle&gt;
+        &lt;line x1="15" y1="9" x2="9" y2="15"&gt;&lt;/line&gt;
+        &lt;line x1="9" y1="9" x2="15" y2="15"&gt;&lt;/line&gt;
+      &lt;/svg&gt;
+    {% else %}
+      &lt;svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+        &lt;circle cx="12" cy="12" r="10"&gt;&lt;/circle&gt;
+        &lt;line x1="12" y1="16" x2="12" y2="12"&gt;&lt;/line&gt;
+        &lt;line x1="12" y1="8" x2="12.01" y2="8"&gt;&lt;/line&gt;
+      &lt;/svg&gt;
+    {% endif %}
+  &lt;/div&gt;
+  &lt;div class="ux-notification-item__content"&gt;
+    &lt;div class="ux-notification-item__header"&gt;
+      &lt;span class="ux-notification-item__title"&gt;{{ notification.title }}&lt;/span&gt;
+      &lt;span class="ux-notification-item__time"&gt;{{ notification.created_at|timesince }}&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;p class="ux-notification-item__message"&gt;{{ notification.message }}&lt;/p&gt;
+  &lt;/div&gt;
+  {% if not notification.read %}
+  &lt;div class="ux-notification-item__dot"&gt;&lt;/div&gt;
+  {% endif %}
+&lt;/li&gt;
+{% empty %}
+&lt;li class="ux-notification-panel__empty"&gt;
+  &lt;div class="ux-notification-panel__empty-title"&gt;No hay notificaciones&lt;/div&gt;
+&lt;/li&gt;
+{% endfor %}
+
+&lt;!-- templates/notifications/_empty.html --&gt;
+&lt;div class="ux-notification-panel__empty"&gt;
+  &lt;div class="ux-notification-panel__empty-title"&gt;No hay notificaciones&lt;/div&gt;
+  &lt;div class="ux-notification-panel__empty-description"&gt;Las nuevas notificaciones apareceran aqui&lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">5. Frontend con HTMX</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Panel de notificaciones completo --&gt;
+&lt;div x-data="{ isOpen: false }"&gt;
+  &lt;!-- Trigger con polling para contador --&gt;
+  &lt;button class="ux-notification-trigger" @click="isOpen = !isOpen"&gt;
+    &lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+      &lt;path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"&gt;&lt;/path&gt;
+      &lt;path d="M13.73 21a2 2 0 0 1-3.46 0"&gt;&lt;/path&gt;
+    &lt;/svg&gt;
+    &lt;span hx-get="{% url 'notification_count' %}"
+          hx-trigger="load, every 30s"
+          hx-swap="innerHTML"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+
+  &lt;!-- Backdrop --&gt;
+  &lt;div class="ux-notification-panel__backdrop"
+       :class="{ 'ux-notification-panel__backdrop--open': isOpen }"
+       @click="isOpen = false"&gt;&lt;/div&gt;
+
+  &lt;!-- Panel --&gt;
+  &lt;div class="ux-notification-panel"
+       :class="{ 'ux-notification-panel--open': isOpen }"&gt;
+    &lt;div class="ux-notification-panel__header"&gt;
+      &lt;h2 class="ux-notification-panel__title"&gt;Notificaciones&lt;/h2&gt;
+      &lt;div class="ux-notification-panel__actions"&gt;
+        &lt;button class="ux-notification-panel__action"
+                hx-post="{% url 'notification_mark_all_read' %}"
+                hx-swap="none"
+                hx-on::after-request="htmx.trigger('#notif-list', 'refresh')"&gt;
+          &lt;svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+            &lt;polyline points="9 11 12 14 22 4"&gt;&lt;/polyline&gt;
+            &lt;path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"&gt;&lt;/path&gt;
+          &lt;/svg&gt;
+        &lt;/button&gt;
+        &lt;button class="ux-notification-panel__action" @click="isOpen = false"&gt;
+          &lt;svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+            &lt;line x1="18" y1="6" x2="6" y2="18"&gt;&lt;/line&gt;
+            &lt;line x1="6" y1="6" x2="18" y2="18"&gt;&lt;/line&gt;
+          &lt;/svg&gt;
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-notification-panel__content"&gt;
+      &lt;ul id="notif-list"
+          class="ux-notification-panel__list"
+          hx-get="{% url 'notification_list' %}"
+          hx-trigger="load, refresh from:body"
+          hx-swap="innerHTML"&gt;
+        &lt;!-- Cargando... --&gt;
+        &lt;li style="text-align: center; padding: var(--ux-space-lg);"&gt;
+          &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-notification-panel__footer"&gt;
+      &lt;a class="ux-notification-panel__footer-link"
+         hx-post="{% url 'notification_clear' %}"
+         hx-target="#notif-list"
+         hx-swap="innerHTML"&gt;
+        Borrar todas
+      &lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">6. Django Channels (WebSocket en tiempo real)</h4>
+      <pre class="ux-code-block" data-lang="python"># consumers.py
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+from .models import Notification
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user = self.scope['user']
+        if self.user.is_anonymous:
+            await self.close()
+            return
+
+        self.group_name = f'notifications_{self.user.id}'
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        if hasattr(self, 'group_name'):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def notification_new(self, event):
+        """Envia nueva notificacion al WebSocket"""
+        await self.send(text_data=json.dumps({
+            'type': 'new',
+            'notification': event['notification']
+        }))
+
+# routing.py
+from django.urls import path
+from . import consumers
+
+websocket_urlpatterns = [
+    path('ws/notifications/', consumers.NotificationConsumer.as_asgi()),
+]
+
+# utils.py - Enviar notificacion desde cualquier parte de Django
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
+def send_notification(user_id, notification_data):
+    """Envia notificacion en tiempo real via WebSocket"""
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'notifications_{user_id}',
+        {
+            'type': 'notification_new',
+            'notification': notification_data
+        }
+    )</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">7. Cliente WebSocket + Alpine.js</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Componente con WebSocket --&gt;
+&lt;div x-data="{
+  isOpen: false,
+  notifications: [],
+  unreadCount: 0,
+  ws: null,
+
+  init() {
+    this.connectWebSocket();
+    this.loadNotifications();
+  },
+
+  connectWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    this.ws = new WebSocket(`${protocol}//${window.location.host}/ws/notifications/`);
+
+    this.ws.onmessage = (event) =&gt; {
+      const data = JSON.parse(event.data);
+      if (data.type === 'new') {
+        this.notifications.unshift(data.notification);
+        this.unreadCount++;
+        this.showToast(data.notification);
+      }
+    };
+
+    this.ws.onclose = () =&gt; {
+      // Reconectar despues de 3 segundos
+      setTimeout(() =&gt; this.connectWebSocket(), 3000);
+    };
+  },
+
+  async loadNotifications() {
+    const response = await fetch('/api/notifications/');
+    const data = await response.json();
+    this.notifications = data.notifications;
+    this.unreadCount = data.unread_count;
+  },
+
+  showToast(notification) {
+    // Mostrar toast con la nueva notificacion
+    window.dispatchEvent(new CustomEvent('toast:show', {
+      detail: {
+        message: notification.title,
+        type: notification.type,
+        duration: 5000
+      }
+    }));
+  }
+}"&gt;
+  &lt;!-- Trigger --&gt;
+  &lt;button class="ux-notification-trigger" @click="isOpen = !isOpen"&gt;
+    &lt;svg&gt;...&lt;/svg&gt;
+    &lt;span x-show="unreadCount &gt; 0"
+          class="ux-notification-trigger__badge"
+          x-text="unreadCount &gt; 99 ? '99+' : unreadCount"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+
+  &lt;!-- Panel con notificaciones en tiempo real --&gt;
+  &lt;div class="ux-notification-panel" :class="{ 'ux-notification-panel--open': isOpen }"&gt;
+    &lt;!-- ... contenido del panel ... --&gt;
+    &lt;ul class="ux-notification-panel__list"&gt;
+      &lt;template x-for="notification in notifications" :key="notification.id"&gt;
+        &lt;li class="ux-notification-item"
+            :class="{ 'ux-notification-item--unread': !notification.read }"&gt;
+          &lt;!-- ... contenido de notificacion ... --&gt;
+        &lt;/li&gt;
+      &lt;/template&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">8. Server-Sent Events (SSE) - Alternativa Ligera</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py - SSE endpoint
+import json
+from django.http import StreamingHttpResponse
+from django.contrib.auth.decorators import login_required
+import time
+
+@login_required
+def notification_stream(request):
+    """Stream de notificaciones usando SSE"""
+    def event_stream():
+        last_id = 0
+        while True:
+            # Verificar nuevas notificaciones
+            notifications = Notification.objects.filter(
+                user=request.user,
+                id__gt=last_id
+            ).order_by('id')
+
+            for notif in notifications:
+                last_id = notif.id
+                data = json.dumps(notif.to_dict())
+                yield f"event: notification\ndata: {data}\n\n"
+
+            time.sleep(2)  # Polling cada 2 segundos
+
+    response = StreamingHttpResponse(
+        event_stream(),
+        content_type='text/event-stream'
+    )
+    response['Cache-Control'] = 'no-cache'
+    response['X-Accel-Buffering'] = 'no'
+    return response</pre>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Cliente SSE --&gt;
+&lt;script&gt;
+const eventSource = new EventSource('/notifications/stream/');
+
+eventSource.addEventListener('notification', (event) =&gt; {
+  const notification = JSON.parse(event.data);
+
+  // Agregar a la lista via Alpine.js
+  Alpine.store('notifications').add(notification);
+
+  // O refrescar via HTMX
+  htmx.trigger('#notif-list', 'refresh');
+});
+
+eventSource.onerror = () =&gt; {
+  // Reconectar automaticamente
+  setTimeout(() =&gt; {
+    eventSource.close();
+    location.reload();
+  }, 5000);
+};
+&lt;/script&gt;</pre>
     </div>
   </div>
 </body>

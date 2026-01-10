@@ -1247,6 +1247,409 @@
         transition: none;
       }
     }
+
+    /* ========================================
+       Export Button & Menu
+    ======================================== */
+
+    .ux-datatable__export {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .ux-datatable__export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__export-btn:hover {
+      background: var(--ux-surface-secondary);
+      border-color: var(--ux-primary);
+    }
+
+    .ux-datatable__export-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ux-datatable__export-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-datatable__export-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      z-index: var(--ux-z-dropdown, 100);
+      min-width: 180px;
+      margin-top: var(--ux-space-xs);
+      padding: var(--ux-space-xs);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+      box-shadow: var(--ux-shadow-lg);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__export-menu--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .ux-datatable__export-item {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      width: 100%;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      background: none;
+      border: none;
+      border-radius: var(--ux-border-radius);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      text-align: left;
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__export-item:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-datatable__export-item svg {
+      width: 18px;
+      height: 18px;
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-datatable__export-item-text {
+      flex: 1;
+    }
+
+    .ux-datatable__export-item-desc {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-datatable__export-divider {
+      height: 1px;
+      margin: var(--ux-space-xs) 0;
+      background: var(--ux-border-color);
+    }
+
+    .ux-datatable__export-option {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-xs) var(--ux-space-md);
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-datatable__export-option input[type="checkbox"] {
+      margin: 0;
+    }
+
+    /* Glass variant for export menu */
+    .ux-datatable--glass .ux-datatable__export-menu {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+    }
+
+    /* Dark mode */
+    @media (prefers-color-scheme: dark) {
+      .ux-datatable__export-menu {
+        background: var(--ux-surface);
+        border-color: var(--ux-border-color);
+      }
+    }
+
+    .ux-dark .ux-datatable__export-menu {
+      background: var(--ux-surface);
+      border-color: var(--ux-border-color);
+    }
+
+    /* ========================================
+       Column Resize
+    ======================================== */
+
+    .ux-datatable--resizable .ux-datatable__th {
+      position: relative;
+      user-select: none;
+    }
+
+    .ux-datatable__resize-handle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 8px;
+      height: 100%;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 1;
+      touch-action: none;
+    }
+
+    .ux-datatable__resize-handle::after {
+      content: '';
+      position: absolute;
+      top: 25%;
+      right: 3px;
+      width: 2px;
+      height: 50%;
+      background: transparent;
+      border-radius: 1px;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__resize-handle:hover::after,
+    .ux-datatable__resize-handle--active::after {
+      background: var(--ux-primary);
+    }
+
+    .ux-datatable--resizing {
+      cursor: col-resize;
+      user-select: none;
+    }
+
+    .ux-datatable--resizing .ux-datatable__th,
+    .ux-datatable--resizing .ux-datatable__td {
+      user-select: none;
+    }
+
+    .ux-datatable--resizable .ux-datatable__table {
+      table-layout: fixed;
+    }
+
+    .ux-datatable__th--resizing {
+      background-color: rgba(var(--ux-primary-rgb), 0.05);
+    }
+
+    /* Minimum column width indicator */
+    .ux-datatable__th--min-width {
+      background-color: rgba(var(--ux-warning-rgb, 245, 158, 11), 0.1);
+    }
+
+    /* ========================================
+       Column Visibility Menu
+    ======================================== */
+
+    .ux-datatable__column-toggle {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .ux-datatable__column-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__column-btn:hover {
+      background: var(--ux-surface-secondary);
+      border-color: var(--ux-primary);
+    }
+
+    .ux-datatable__column-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .ux-datatable__column-btn-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      background: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: var(--ux-space-xs);
+    }
+
+    .ux-datatable__column-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      z-index: var(--ux-z-dropdown, 100);
+      min-width: 220px;
+      max-height: 320px;
+      margin-top: var(--ux-space-xs);
+      padding: var(--ux-space-xs);
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+      box-shadow: var(--ux-shadow-lg);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all var(--ux-transition-fast) var(--ux-ease);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ux-datatable__column-menu--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .ux-datatable__column-menu-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      border-bottom: 1px solid var(--ux-border-color);
+      flex-shrink: 0;
+    }
+
+    .ux-datatable__column-menu-title {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+
+    .ux-datatable__column-menu-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-datatable__column-menu-action {
+      padding: 2px var(--ux-space-xs);
+      background: none;
+      border: none;
+      border-radius: var(--ux-border-radius-sm);
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-primary);
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__column-menu-action:hover {
+      background: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    .ux-datatable__column-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--ux-space-xs) 0;
+    }
+
+    .ux-datatable__column-item {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    .ux-datatable__column-item:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-datatable__column-item input[type="checkbox"] {
+      flex-shrink: 0;
+      margin: 0;
+    }
+
+    .ux-datatable__column-item-label {
+      flex: 1;
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ux-datatable__column-item--disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .ux-datatable__column-item-drag {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      color: var(--ux-text-tertiary);
+      cursor: grab;
+    }
+
+    .ux-datatable__column-item-drag:active {
+      cursor: grabbing;
+    }
+
+    .ux-datatable__column-item-drag svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Hidden column indicator in header */
+    .ux-datatable__th--hidden,
+    .ux-datatable__td--hidden {
+      display: none;
+    }
+
+    /* Glass variant for column menu */
+    .ux-datatable--glass .ux-datatable__column-menu {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+    }
+
+    /* Dark mode for column menu */
+    @media (prefers-color-scheme: dark) {
+      .ux-datatable__column-menu {
+        background: var(--ux-surface);
+        border-color: var(--ux-border-color);
+      }
+    }
+
+    .ux-dark .ux-datatable__column-menu {
+      background: var(--ux-surface);
+      border-color: var(--ux-border-color);
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .ux-datatable__column-menu,
+      .ux-datatable__resize-handle::after {
+        transition: none;
+      }
+    }
   `;
 
   // Icons
@@ -1272,7 +1675,17 @@
     chevronRight: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
     expand: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
     expandAll: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
-    collapseAll: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>'
+    collapseAll: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>',
+    // Export icons
+    download: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>',
+    csv: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h2M8 17h2M14 13h2M14 17h2"/></svg>',
+    excel: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13l3 4M11 13l-3 4M14 13h2v4h-2"/></svg>',
+    fileText: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>',
+    // Column visibility and resize icons
+    columns: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></svg>',
+    eye: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    eyeOff: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>',
+    gripVertical: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>'
   };
 
   // Inject styles
@@ -1338,6 +1751,19 @@
     expandAllState: false,
     singleExpand: config.singleExpand || false, // Only allow one row expanded at a time
 
+    // Column resize
+    resizable: config.resizable || false,
+    columnWidths: config.columnWidths || {},
+    minColumnWidth: config.minColumnWidth || 50,
+    _resizing: false,
+    _resizeColumn: null,
+    _resizeStartX: 0,
+    _resizeStartWidth: 0,
+
+    // Column visibility
+    hiddenColumns: config.hiddenColumns || [],
+    showColumnMenu: false,
+
     // Empty state
     emptyTitle: config.emptyTitle || 'No data',
     emptyText: config.emptyText || 'There are no records to display.',
@@ -1357,6 +1783,9 @@
       clearFilters: config.labels?.clearFilters || 'Clear filters',
       filterBy: config.labels?.filterBy || 'Filter',
       all: config.labels?.all || 'All',
+      columns: config.labels?.columns || 'Columns',
+      showAll: config.labels?.showAll || 'Show all',
+      hideAll: config.labels?.hideAll || 'Hide all',
       ...config.labels
     },
 
@@ -1843,6 +2272,447 @@
     // Get expanded rows data
     getExpandedData() {
       return this.rows.filter(row => this.expandedRows.includes(this.getRowId(row)));
+    },
+
+    // ========================================
+    // Export functionality
+    // ========================================
+
+    // Export menu state
+    exportMenuOpen: false,
+    exportSelectedOnly: false,
+    exportVisibleColumnsOnly: true,
+
+    // Toggle export menu
+    toggleExportMenu() {
+      this.exportMenuOpen = !this.exportMenuOpen;
+    },
+
+    closeExportMenu() {
+      this.exportMenuOpen = false;
+    },
+
+    // Get columns to export (respects visibility)
+    getExportColumns() {
+      if (this.exportVisibleColumnsOnly) {
+        return this.columns.filter(col => col.exportable !== false && col.visible !== false);
+      }
+      return this.columns.filter(col => col.exportable !== false);
+    },
+
+    // Get data to export
+    getExportData(selectedOnly = false) {
+      let data;
+      if (selectedOnly || this.exportSelectedOnly) {
+        data = this.getSelectedData();
+      } else {
+        // Export all filtered/sorted rows (not just current page)
+        data = this.sortedRows;
+      }
+      return data;
+    },
+
+    // Format value for export (handles dates, numbers, etc.)
+    formatExportValue(value, col, options = {}) {
+      if (value === null || value === undefined) {
+        return '';
+      }
+
+      // Date formatting
+      if (col.type === 'date' && value) {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+          const dateFormat = options.dateFormat || 'YYYY-MM-DD';
+          const pad = (n) => n.toString().padStart(2, '0');
+          const year = date.getFullYear();
+          const month = pad(date.getMonth() + 1);
+          const day = pad(date.getDate());
+          const hours = pad(date.getHours());
+          const minutes = pad(date.getMinutes());
+          const seconds = pad(date.getSeconds());
+
+          return dateFormat
+            .replace('YYYY', year)
+            .replace('MM', month)
+            .replace('DD', day)
+            .replace('HH', hours)
+            .replace('mm', minutes)
+            .replace('ss', seconds);
+        }
+      }
+
+      // Use raw value for export (don't use format function which may add currency symbols, etc.)
+      if (options.useRawValue) {
+        return value;
+      }
+
+      // If column has exportFormat, use it
+      if (col.exportFormat) {
+        return col.exportFormat(value);
+      }
+
+      return value;
+    },
+
+    // Escape CSV value
+    escapeCSV(value) {
+      if (value === null || value === undefined) {
+        return '';
+      }
+      const str = String(value);
+      // If contains comma, newline, or quote, wrap in quotes and escape quotes
+      if (str.includes(',') || str.includes('\n') || str.includes('"')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    },
+
+    // Export to CSV
+    exportToCSV(options = {}) {
+      const {
+        filename = 'export',
+        selectedOnly = this.exportSelectedOnly,
+        dateFormat = 'YYYY-MM-DD',
+        delimiter = ',',
+        includeHeaders = true,
+        useRawValue = true
+      } = options;
+
+      const columns = this.getExportColumns();
+      const data = this.getExportData(selectedOnly);
+
+      let csv = '';
+
+      // Add headers
+      if (includeHeaders) {
+        csv += columns.map(col => this.escapeCSV(col.label || col.key)).join(delimiter) + '\n';
+      }
+
+      // Add rows
+      data.forEach(row => {
+        const rowValues = columns.map(col => {
+          const value = this.getCellValue(row, col);
+          const formatted = this.formatExportValue(value, col, { dateFormat, useRawValue });
+          return this.escapeCSV(formatted);
+        });
+        csv += rowValues.join(delimiter) + '\n';
+      });
+
+      // Create and download file
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const fullFilename = `${filename}_${timestamp}.csv`;
+      this.downloadFile(csv, fullFilename, 'text/csv;charset=utf-8;');
+
+      this.closeExportMenu();
+      this.$dispatch('export', { type: 'csv', filename: fullFilename, rowCount: data.length });
+    },
+
+    // Export to Excel (XLSX format with basic formatting)
+    exportToExcel(options = {}) {
+      const {
+        filename = 'export',
+        selectedOnly = this.exportSelectedOnly,
+        dateFormat = 'YYYY-MM-DD',
+        sheetName = 'Data',
+        useRawValue = true
+      } = options;
+
+      const columns = this.getExportColumns();
+      const data = this.getExportData(selectedOnly);
+
+      // Build XML for Excel (Office Open XML SpreadsheetML)
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<?mso-application progid="Excel.Sheet"?>\n';
+      xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n';
+      xml += '  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\n';
+
+      // Styles
+      xml += '  <Styles>\n';
+      xml += '    <Style ss:ID="Header">\n';
+      xml += '      <Font ss:Bold="1"/>\n';
+      xml += '      <Interior ss:Color="#F3F4F6" ss:Pattern="Solid"/>\n';
+      xml += '      <Borders>\n';
+      xml += '        <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>\n';
+      xml += '      </Borders>\n';
+      xml += '    </Style>\n';
+      xml += '    <Style ss:ID="Date">\n';
+      xml += '      <NumberFormat ss:Format="yyyy-mm-dd"/>\n';
+      xml += '    </Style>\n';
+      xml += '    <Style ss:ID="Number">\n';
+      xml += '      <NumberFormat ss:Format="#,##0.00"/>\n';
+      xml += '    </Style>\n';
+      xml += '  </Styles>\n';
+
+      // Worksheet
+      xml += `  <Worksheet ss:Name="${this.escapeXML(sheetName)}">\n`;
+      xml += `    <Table ss:ExpandedColumnCount="${columns.length}" ss:ExpandedRowCount="${data.length + 1}">\n`;
+
+      // Column widths
+      columns.forEach(col => {
+        const width = col.exportWidth || 100;
+        xml += `      <Column ss:Width="${width}"/>\n`;
+      });
+
+      // Header row
+      xml += '      <Row>\n';
+      columns.forEach(col => {
+        xml += `        <Cell ss:StyleID="Header"><Data ss:Type="String">${this.escapeXML(col.label || col.key)}</Data></Cell>\n`;
+      });
+      xml += '      </Row>\n';
+
+      // Data rows
+      data.forEach(row => {
+        xml += '      <Row>\n';
+        columns.forEach(col => {
+          const value = this.getCellValue(row, col);
+          const formatted = this.formatExportValue(value, col, { dateFormat, useRawValue });
+
+          let type = 'String';
+          let style = '';
+
+          if (col.type === 'number' && typeof value === 'number') {
+            type = 'Number';
+            style = ' ss:StyleID="Number"';
+          } else if (col.type === 'date' && value) {
+            type = 'String';
+            style = ' ss:StyleID="Date"';
+          }
+
+          xml += `        <Cell${style}><Data ss:Type="${type}">${this.escapeXML(String(formatted))}</Data></Cell>\n`;
+        });
+        xml += '      </Row>\n';
+      });
+
+      xml += '    </Table>\n';
+      xml += '  </Worksheet>\n';
+      xml += '</Workbook>';
+
+      // Create and download file
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const fullFilename = `${filename}_${timestamp}.xls`;
+      this.downloadFile(xml, fullFilename, 'application/vnd.ms-excel');
+
+      this.closeExportMenu();
+      this.$dispatch('export', { type: 'excel', filename: fullFilename, rowCount: data.length });
+    },
+
+    // Escape XML special characters
+    escapeXML(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    },
+
+    // Download file helper
+    downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    },
+
+    // Quick export methods (for direct button binding)
+    quickExportCSV() {
+      this.exportToCSV({ selectedOnly: this.selectedRows.length > 0 });
+    },
+
+    quickExportExcel() {
+      this.exportToExcel({ selectedOnly: this.selectedRows.length > 0 });
+    },
+
+    // ========================================
+    // Column Resize functionality
+    // ========================================
+
+    // Get column width style
+    getColumnWidth(col) {
+      if (this.columnWidths[col.key]) {
+        return this.columnWidths[col.key] + 'px';
+      }
+      if (col.width) {
+        return typeof col.width === 'number' ? col.width + 'px' : col.width;
+      }
+      return 'auto';
+    },
+
+    // Set column width
+    setColumnWidth(colKey, width) {
+      const minWidth = this.minColumnWidth;
+      const newWidth = Math.max(width, minWidth);
+      this.columnWidths[colKey] = newWidth;
+      this.$dispatch('column-resize', { column: colKey, width: newWidth });
+    },
+
+    // Start resizing column
+    startResize(col, event) {
+      if (!this.resizable) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      this._resizing = true;
+      this._resizeColumn = col.key;
+
+      // Get current width
+      const th = event.target.closest('.ux-datatable__th');
+      this._resizeStartWidth = th ? th.offsetWidth : 100;
+      this._resizeStartX = event.clientX || (event.touches && event.touches[0].clientX);
+
+      // Add event listeners
+      this._resizeMove = this._handleResizeMove.bind(this);
+      this._resizeEnd = this._handleResizeEnd.bind(this);
+
+      document.addEventListener('mousemove', this._resizeMove);
+      document.addEventListener('mouseup', this._resizeEnd);
+      document.addEventListener('touchmove', this._resizeMove, { passive: false });
+      document.addEventListener('touchend', this._resizeEnd);
+
+      // Add resizing class to datatable
+      this.$el.classList.add('ux-datatable--resizing');
+    },
+
+    // Handle resize move
+    _handleResizeMove(event) {
+      if (!this._resizing) return;
+
+      event.preventDefault();
+
+      const clientX = event.clientX || (event.touches && event.touches[0].clientX);
+      const diff = clientX - this._resizeStartX;
+      const newWidth = this._resizeStartWidth + diff;
+
+      this.setColumnWidth(this._resizeColumn, newWidth);
+    },
+
+    // Handle resize end
+    _handleResizeEnd() {
+      this._resizing = false;
+      this._resizeColumn = null;
+
+      document.removeEventListener('mousemove', this._resizeMove);
+      document.removeEventListener('mouseup', this._resizeEnd);
+      document.removeEventListener('touchmove', this._resizeMove);
+      document.removeEventListener('touchend', this._resizeEnd);
+
+      this.$el.classList.remove('ux-datatable--resizing');
+    },
+
+    // Check if column is being resized
+    isColumnResizing(col) {
+      return this._resizing && this._resizeColumn === col.key;
+    },
+
+    // Reset column width
+    resetColumnWidth(colKey) {
+      delete this.columnWidths[colKey];
+      this.$dispatch('column-resize', { column: colKey, width: null });
+    },
+
+    // Reset all column widths
+    resetAllColumnWidths() {
+      this.columnWidths = {};
+      this.$dispatch('column-resize-reset');
+    },
+
+    // ========================================
+    // Column Visibility functionality
+    // ========================================
+
+    // Toggle column visibility menu
+    toggleColumnMenu() {
+      this.showColumnMenu = !this.showColumnMenu;
+    },
+
+    // Close column visibility menu
+    closeColumnMenu() {
+      this.showColumnMenu = false;
+    },
+
+    // Check if column is visible
+    isColumnVisible(col) {
+      return !this.hiddenColumns.includes(col.key);
+    },
+
+    // Toggle column visibility
+    toggleColumnVisibility(col) {
+      const index = this.hiddenColumns.indexOf(col.key);
+      if (index > -1) {
+        // Show column
+        this.hiddenColumns.splice(index, 1);
+        this.$dispatch('column-show', { column: col.key });
+      } else {
+        // Hide column (ensure at least one column remains visible)
+        const visibleCount = this.columns.filter(c => !this.hiddenColumns.includes(c.key)).length;
+        if (visibleCount > 1) {
+          this.hiddenColumns.push(col.key);
+          this.$dispatch('column-hide', { column: col.key });
+        }
+      }
+      this.$dispatch('column-visibility-change', { hiddenColumns: [...this.hiddenColumns] });
+    },
+
+    // Show column
+    showColumn(colKey) {
+      const index = this.hiddenColumns.indexOf(colKey);
+      if (index > -1) {
+        this.hiddenColumns.splice(index, 1);
+        this.$dispatch('column-show', { column: colKey });
+        this.$dispatch('column-visibility-change', { hiddenColumns: [...this.hiddenColumns] });
+      }
+    },
+
+    // Hide column
+    hideColumn(colKey) {
+      if (!this.hiddenColumns.includes(colKey)) {
+        // Ensure at least one column remains visible
+        const visibleCount = this.columns.filter(c => !this.hiddenColumns.includes(c.key)).length;
+        if (visibleCount > 1) {
+          this.hiddenColumns.push(colKey);
+          this.$dispatch('column-hide', { column: colKey });
+          this.$dispatch('column-visibility-change', { hiddenColumns: [...this.hiddenColumns] });
+        }
+      }
+    },
+
+    // Show all columns
+    showAllColumns() {
+      this.hiddenColumns = [];
+      this.$dispatch('column-visibility-change', { hiddenColumns: [] });
+    },
+
+    // Hide all columns except first
+    hideAllColumns() {
+      // Keep at least the first column visible
+      const firstCol = this.columns[0];
+      this.hiddenColumns = this.columns
+        .filter(col => col.key !== firstCol?.key)
+        .map(col => col.key);
+      this.$dispatch('column-visibility-change', { hiddenColumns: [...this.hiddenColumns] });
+    },
+
+    // Get visible columns
+    get visibleColumns() {
+      return this.columns.filter(col => this.isColumnVisible(col));
+    },
+
+    // Get hidden columns count
+    get hiddenColumnsCount() {
+      return this.hiddenColumns.length;
+    },
+
+    // Check if can hide column (at least one must remain)
+    canHideColumn(col) {
+      const visibleCount = this.columns.filter(c => !this.hiddenColumns.includes(c.key)).length;
+      return visibleCount > 1 || this.hiddenColumns.includes(col.key);
     }
   });
 

@@ -6,6 +6,8 @@
   <title>Progress Circle - UX Library</title>
   <link rel="stylesheet" href="../bootstrap-grid.min.css">
   <script src="../dist/ux.min.js"></script>
+  <script src="../components/ux-code-block.js"></script>
+
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
     body {
@@ -34,15 +36,6 @@
       flex-wrap: wrap;
       gap: 2rem;
       align-items: center;
-    }
-    pre {
-      background: var(--ux-gray-900);
-      color: var(--ux-gray-100);
-      padding: 1rem;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-size: 0.8125rem;
-      line-height: 1.5;
     }
     .demo-glass-bg {
       background: linear-gradient(135deg, var(--ux-indigo-500), var(--ux-purple-600));
@@ -110,7 +103,7 @@
       </div>
     </div>
 
-    <pre>&lt;div x-data="uxProgressCircle({ value: 75 })"&gt;
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxProgressCircle({ value: 75 })"&gt;
   &lt;div class="ux-progress-circle"&gt;
     &lt;svg class="ux-progress-circle__svg" :viewBox="'0 0 ' + size + ' ' + size"&gt;
       &lt;circle class="ux-progress-circle__bg" :cx="size/2" :cy="size/2" :r="radius"/&gt;
@@ -293,7 +286,7 @@
       </div>
     </div>
 
-    <pre>uxProgressCircle({
+    <pre class="ux-code-block" data-lang="javascript">uxProgressCircle({
   value: 45,
   thresholds: { warning: 50, danger: 80 }
 })</pre>
@@ -493,7 +486,7 @@
     <h2>API Reference</h2>
 
     <h3>Opciones</h3>
-    <pre>uxProgressCircle({
+    <pre class="ux-code-block" data-lang="javascript">uxProgressCircle({
   value: 0,                  // Valor actual
   max: 100,                  // Valor máximo
   size: 120,                 // Tamaño en px
@@ -509,7 +502,7 @@
 })</pre>
 
     <h3>Propiedades</h3>
-    <pre>percentage       // Porcentaje calculado (0-100)
+    <pre class="ux-code-block" data-lang="javascript">percentage       // Porcentaje calculado (0-100)
 radius           // Radio del círculo
 circumference    // Circunferencia
 dashOffset       // Offset para el trazo
@@ -517,20 +510,152 @@ displayValue     // Valor formateado
 colorClass       // Clase de color por umbral</pre>
 
     <h3>Métodos</h3>
-    <pre>setValue(value)    // Establecer valor
+    <pre class="ux-code-block" data-lang="javascript">setValue(value)    // Establecer valor
 increment(amount)  // Incrementar
 decrement(amount)  // Decrementar
 reset()            // Resetear a 0
 complete()         // Completar (100%)</pre>
 
     <h3>Clases CSS</h3>
-    <pre>.ux-progress-circle              // Contenedor
+    <pre class="ux-code-block" data-lang="css">.ux-progress-circle              // Contenedor
 .ux-progress-circle--xs/sm/lg/xl // Tamaños
 .ux-progress-circle--thin/thick  // Grosor del trazo
 .ux-progress-circle--primary/success/warning/danger  // Colores
 .ux-progress-circle--indeterminate  // Modo spinner
 .ux-progress-circle--glass       // Glass morphism
 .ux-progress-circle--animated    // Con animación</pre>
+  </section>
+
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Integra el progreso circular con valores dinámicos desde Django usando HTMX para actualizaciones en tiempo real.
+    </p>
+
+    <h3 style="font-size: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem;">Template Django con valor inicial</h3>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- templates/components/progress_circle.html --&gt;
+&lt;div x-data="uxProgressCircle({ value: {{ progress_value }} })"&gt;
+  &lt;div class="ux-progress-circle ux-progress-circle--{{ color_class|default:'primary' }}"&gt;
+    &lt;svg class="ux-progress-circle__svg" :viewBox="'0 0 ' + size + ' ' + size"&gt;
+      &lt;circle class="ux-progress-circle__bg" :cx="size / 2" :cy="size / 2" :r="radius"/&gt;
+      &lt;circle class="ux-progress-circle__fill" :cx="size / 2" :cy="size / 2" :r="radius"
+              :stroke-dasharray="circumference" :stroke-dashoffset="dashOffset"/&gt;
+    &lt;/svg&gt;
+    &lt;div class="ux-progress-circle__content"&gt;
+      &lt;span class="ux-progress-circle__value" x-text="displayValue"&gt;&lt;/span&gt;
+      &lt;span class="ux-progress-circle__label"&gt;{{ label }}&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+    <h3 style="font-size: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem;">Polling con HTMX para progreso en tiempo real</h3>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Componente con polling cada 2 segundos --&gt;
+&lt;div id="task-progress"
+     hx-get="/api/task/{{ task_id }}/progress/"
+     hx-trigger="every 2s"
+     hx-swap="innerHTML"&gt;
+  {% include "components/progress_circle.html" with progress_value=task.progress %}
+&lt;/div&gt;
+
+&lt;!-- Vista Django --&gt;
+&lt;!-- views.py --&gt;
+def task_progress(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    return render(request, 'components/progress_circle.html', {
+        'progress_value': task.progress,
+        'color_class': 'success' if task.progress == 100 else 'primary',
+        'label': 'Completado' if task.progress == 100 else 'En progreso'
+    })</pre>
+
+    <h3 style="font-size: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem;">Progreso con umbrales dinámicos</h3>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Uso de capacidad con colores por umbral --&gt;
+&lt;div x-data="uxProgressCircle({
+       value: {{ storage.used_gb }},
+       max: {{ storage.total_gb }},
+       format: 'value',
+       thresholds: { warning: 70, danger: 90 }
+     })"&gt;
+  &lt;div class="ux-progress-circle" :class="colorClass"&gt;
+    &lt;svg class="ux-progress-circle__svg" :viewBox="'0 0 ' + size + ' ' + size"&gt;
+      &lt;circle class="ux-progress-circle__bg" :cx="size / 2" :cy="size / 2" :r="radius"/&gt;
+      &lt;circle class="ux-progress-circle__fill" :cx="size / 2" :cy="size / 2" :r="radius"
+              :stroke-dasharray="circumference" :stroke-dashoffset="dashOffset"/&gt;
+    &lt;/svg&gt;
+    &lt;div class="ux-progress-circle__content"&gt;
+      &lt;span class="ux-progress-circle__value" x-text="displayValue"&gt;&lt;/span&gt;
+      &lt;span class="ux-progress-circle__label"&gt;GB usados&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+    <h3 style="font-size: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem;">Actualización por eventos SSE</h3>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Progreso con Server-Sent Events --&gt;
+&lt;div id="upload-progress"
+     hx-ext="sse"
+     sse-connect="/api/upload/{{ upload_id }}/stream/"
+     sse-swap="progress"&gt;
+  {% include "components/progress_circle.html" with progress_value=0 label="Subiendo..." %}
+&lt;/div&gt;
+
+&lt;!-- Vista Django con StreamingHttpResponse --&gt;
+&lt;!-- views.py --&gt;
+def upload_stream(request, upload_id):
+    def event_stream():
+        upload = Upload.objects.get(id=upload_id)
+        while upload.progress &lt; 100:
+            upload.refresh_from_db()
+            html = render_to_string('components/progress_circle.html', {
+                'progress_value': upload.progress,
+                'label': f'{upload.progress}% completado'
+            })
+            yield f"event: progress\ndata: {html}\n\n"
+            time.sleep(0.5)
+    return StreamingHttpResponse(event_stream(), content_type='text/event-stream')</pre>
+
+    <h3 style="font-size: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem;">Dashboard con multiples indicadores</h3>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- templates/dashboard/stats.html --&gt;
+&lt;div class="row"
+     hx-get="/dashboard/stats/"
+     hx-trigger="load, every 30s"
+     hx-swap="innerHTML"&gt;
+
+  &lt;div class="col-6 col-md-3"&gt;
+    &lt;div x-data="uxProgressCircle({ value: {{ cpu_usage }} })"&gt;
+      &lt;div class="ux-progress-circle ux-progress-circle--sm
+                  {% if cpu_usage &gt; 90 %}ux-progress-circle--danger
+                  {% elif cpu_usage &gt; 70 %}ux-progress-circle--warning
+                  {% else %}ux-progress-circle--success{% endif %}"&gt;
+        &lt;svg class="ux-progress-circle__svg" viewBox="0 0 80 80"&gt;
+          &lt;circle class="ux-progress-circle__bg" cx="40" cy="40" r="34"/&gt;
+          &lt;circle class="ux-progress-circle__fill" cx="40" cy="40" r="34"
+                  :stroke-dasharray="2 * Math.PI * 34"
+                  :stroke-dashoffset="2 * Math.PI * 34 * (1 - percentage / 100)"/&gt;
+        &lt;/svg&gt;
+        &lt;div class="ux-progress-circle__content"&gt;
+          &lt;span class="ux-progress-circle__value" x-text="displayValue"&gt;&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;p style="text-align: center; margin-top: 0.5rem;"&gt;CPU&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="col-6 col-md-3"&gt;
+    &lt;div x-data="uxProgressCircle({ value: {{ memory_usage }} })"&gt;
+      &lt;!-- Similar structure for memory --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+&lt;/div&gt;
+
+&lt;!-- views.py --&gt;
+def dashboard_stats(request):
+    return render(request, 'dashboard/stats.html', {
+        'cpu_usage': get_cpu_usage(),
+        'memory_usage': get_memory_usage(),
+        'disk_usage': get_disk_usage(),
+        'network_usage': get_network_usage()
+    })</pre>
   </section>
 
 </body>

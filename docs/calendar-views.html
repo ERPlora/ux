@@ -8,6 +8,7 @@
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-calendar-views.js"></script>
   <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); }
     .demo-section h3 {
@@ -27,20 +28,6 @@
       padding: var(--ux-space-lg);
       margin-bottom: var(--ux-space-md);
     }
-    .code-block {
-      background: #1a1a2e;
-      color: #e5e5e5;
-      padding: var(--ux-space-md);
-      border-radius: var(--ux-border-radius);
-      overflow-x: auto;
-      font-family: 'SF Mono', Monaco, monospace;
-      font-size: var(--ux-font-size-md);
-      line-height: 1.6;
-    }
-    .code-block .tag { color: #ff7b72; }
-    .code-block .attr { color: #79c0ff; }
-    .code-block .string { color: #a5d6ff; }
-    .code-block .comment { color: #8b949e; }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -332,8 +319,8 @@
     <!-- Usage -->
     <section class="demo-section">
       <h3>Uso</h3>
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calendar-view"</span>
-     <span class="attr">x-data</span>=<span class="string">"uxCalendarView({
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-calendar-view"
+     x-data="uxCalendarView({
        view: 'week',
        startHour: 8,
        endHour: 20,
@@ -346,29 +333,29 @@
            color: 'primary'
          }
        ]
-     })"</span>
-     <span class="attr">@calendar:eventclick</span>=<span class="string">"handleEventClick($event.detail.event)"</span><span class="tag">&gt;</span>
-  <span class="comment">&lt;!-- Header with navigation --&gt;</span>
-  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calendar-view__header"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"prev()"</span><span class="tag">&gt;</span>Prev<span class="tag">&lt;/button&gt;</span>
-    <span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"title"</span><span class="tag">&gt;&lt;/span&gt;</span>
-    <span class="tag">&lt;button</span> <span class="attr">@click</span>=<span class="string">"next()"</span><span class="tag">&gt;</span>Next<span class="tag">&lt;/button&gt;</span>
-  <span class="tag">&lt;/div&gt;</span>
-  <span class="comment">&lt;!-- Grid content... --&gt;</span>
-<span class="tag">&lt;/div&gt;</span></pre>
+     })"
+     @calendar:eventclick="handleEventClick($event.detail.event)"&gt;
+  &lt;!-- Header with navigation --&gt;
+  &lt;div class="ux-calendar-view__header"&gt;
+    &lt;button @click="prev()"&gt;Prev&lt;/button&gt;
+    &lt;span x-text="title"&gt;&lt;/span&gt;
+    &lt;button @click="next()"&gt;Next&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;!-- Grid content... --&gt;
+&lt;/div&gt;</pre>
     </section>
 
     <!-- Event Format -->
     <section class="demo-section">
       <h3>Formato de Evento</h3>
       <p>Los eventos requieren un objeto con las siguientes propiedades.</p>
-      <pre class="code-block"><span class="attr">const</span> event = {
-  <span class="attr">id</span>: <span class="string">1</span>,                              <span class="comment">// ID unico</span>
-  <span class="attr">title</span>: <span class="string">'Reunion de equipo'</span>,         <span class="comment">// Titulo del evento</span>
-  <span class="attr">start</span>: <span class="attr">new</span> Date(<span class="string">'2026-01-10T09:00'</span>), <span class="comment">// Fecha/hora inicio</span>
-  <span class="attr">end</span>: <span class="attr">new</span> Date(<span class="string">'2026-01-10T10:30'</span>),   <span class="comment">// Fecha/hora fin</span>
-  <span class="attr">color</span>: <span class="string">'primary'</span>,                    <span class="comment">// primary, success, danger, warning, secondary</span>
-  <span class="attr">allDay</span>: <span class="attr">false</span>                        <span class="comment">// Evento de todo el dia</span>
+      <pre class="ux-code-block" data-lang="javascript">const event = {
+  id: 1,                              // ID unico
+  title: 'Reunion de equipo',         // Titulo del evento
+  start: new Date('2026-01-10T09:00'), // Fecha/hora inicio
+  end: new Date('2026-01-10T10:30'),   // Fecha/hora fin
+  color: 'primary',                    // primary, success, danger, warning, secondary
+  allDay: false                        // Evento de todo el dia
 };</pre>
     </section>
 
@@ -445,6 +432,301 @@
           </tbody>
         </table>
       </div>
+    </section>
+
+    <!-- HTMX + Django -->
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Integra el calendario con Django usando HTMX para cargar eventos dinamicamente desde el servidor.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Modelo Django</h4>
+      <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+
+class Event(models.Model):
+    COLOR_CHOICES = [
+        ('primary', 'Primary'),
+        ('success', 'Success'),
+        ('warning', 'Warning'),
+        ('danger', 'Danger'),
+        ('secondary', 'Secondary'),
+    ]
+
+    title = models.CharField(max_length=200)
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+    color = models.CharField(max_length=20, choices=COLOR_CHOICES, default='primary')
+    all_day = models.BooleanField(default=False)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['start']
+
+    def __str__(self):
+        return self.title</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Vista Django</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET, require_POST
+from django.shortcuts import render
+from datetime import datetime, timedelta
+from .models import Event
+
+@require_GET
+def calendar_view(request):
+    """Render the calendar page."""
+    return render(request, 'calendar/index.html')
+
+@require_GET
+def get_events(request):
+    """Get events for a date range (HTMX endpoint)."""
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+
+    if start_date and end_date:
+        start = datetime.fromisoformat(start_date)
+        end = datetime.fromisoformat(end_date)
+        events = Event.objects.filter(start__gte=start, end__lte=end)
+    else:
+        # Default: current week
+        today = datetime.now()
+        start = today - timedelta(days=today.weekday())
+        end = start + timedelta(days=7)
+        events = Event.objects.filter(start__gte=start, end__lte=end)
+
+    events_data = [{
+        'id': e.id,
+        'title': e.title,
+        'start': e.start.isoformat(),
+        'end': e.end.isoformat(),
+        'color': e.color,
+        'allDay': e.all_day,
+    } for e in events]
+
+    return JsonResponse({'events': events_data})
+
+@require_POST
+def create_event(request):
+    """Create a new event (HTMX endpoint)."""
+    import json
+    data = json.loads(request.body)
+
+    event = Event.objects.create(
+        title=data['title'],
+        start=datetime.fromisoformat(data['start']),
+        end=datetime.fromisoformat(data['end']),
+        color=data.get('color', 'primary'),
+        all_day=data.get('allDay', False),
+    )
+
+    return JsonResponse({
+        'id': event.id,
+        'title': event.title,
+        'start': event.start.isoformat(),
+        'end': event.end.isoformat(),
+        'color': event.color,
+    })
+
+@require_POST
+def delete_event(request, event_id):
+    """Delete an event (HTMX endpoint)."""
+    Event.objects.filter(id=event_id).delete()
+    return JsonResponse({'success': True})</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">URLs</h4>
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('calendar/', views.calendar_view, name='calendar'),
+    path('api/events/', views.get_events, name='get_events'),
+    path('api/events/create/', views.create_event, name='create_event'),
+    path('api/events/&lt;int:event_id&gt;/delete/', views.delete_event, name='delete_event'),
+]</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Template con HTMX</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/calendar/index.html --&gt;
+&lt;div class="ux-calendar-view"
+     x-data="uxCalendarView({
+       view: 'week',
+       startHour: 8,
+       endHour: 20,
+       events: []
+     })"
+     x-init="loadEventsFromServer()"
+     @calendar:navigate="loadEventsFromServer()"
+     @calendar:eventclick="showEventDetail($event.detail.event)"&gt;
+
+  &lt;!-- Header --&gt;
+  &lt;div class="ux-calendar-view__header"&gt;
+    &lt;div class="ux-calendar-view__nav"&gt;
+      &lt;button class="ux-calendar-view__nav-btn" @click="prev()"&gt;
+        &lt;span x-html="icons.chevronLeft"&gt;&lt;/span&gt;
+      &lt;/button&gt;
+      &lt;button class="ux-calendar-view__nav-btn" @click="next()"&gt;
+        &lt;span x-html="icons.chevronRight"&gt;&lt;/span&gt;
+      &lt;/button&gt;
+      &lt;span class="ux-calendar-view__title" x-text="title"&gt;&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;button class="ux-calendar-view__today-btn" @click="goToToday()"&gt;Hoy&lt;/button&gt;
+    &lt;button class="ux-button ux-color-primary"
+            hx-get="{% url 'event_form' %}"
+            hx-target="#event-modal-content"
+            hx-trigger="click"&gt;
+      + Nuevo Evento
+    &lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Calendar grid content... --&gt;
+&lt;/div&gt;
+
+&lt;!-- Event Modal --&gt;
+&lt;div id="event-modal" class="ux-modal" x-data="{ open: false }"&gt;
+  &lt;div id="event-modal-content"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+// Extend Alpine component with HTMX integration
+document.addEventListener('alpine:init', () => {
+  Alpine.data('uxCalendarView', (options) => ({
+    ...window.UX._components.uxCalendarView(options),
+
+    async loadEventsFromServer() {
+      const start = this.getWeekStart(this.currentDate);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 7);
+
+      const response = await fetch(
+        `/api/events/?start=${start.toISOString()}&amp;end=${end.toISOString()}`
+      );
+      const data = await response.json();
+
+      // Convert ISO strings to Date objects
+      this.events = data.events.map(e =&gt; ({
+        ...e,
+        start: new Date(e.start),
+        end: new Date(e.end)
+      }));
+    },
+
+    showEventDetail(event) {
+      htmx.ajax('GET', `/api/events/${event.id}/`, {
+        target: '#event-modal-content'
+      });
+      document.getElementById('event-modal').classList.add('ux-modal--open');
+    }
+  }));
+});
+&lt;/script&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Formulario de Evento (Partial)</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/calendar/partials/event_form.html --&gt;
+&lt;form hx-post="{% url 'create_event' %}"
+      hx-target="#event-modal"
+      hx-swap="outerHTML"
+      @htmx:after-request="if(event.detail.successful) { Alpine.store('calendar').refresh() }"&gt;
+
+  &lt;div class="ux-modal__header"&gt;
+    &lt;h3&gt;Nuevo Evento&lt;/h3&gt;
+    &lt;button type="button" class="ux-modal__close" @click="$el.closest('.ux-modal').classList.remove('ux-modal--open')"&gt;
+      &amp;times;
+    &lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-modal__content"&gt;
+    &lt;div class="ux-input"&gt;
+      &lt;input type="text" name="title" required&gt;
+      &lt;label&gt;Titulo&lt;/label&gt;
+    &lt;/div&gt;
+
+    &lt;div class="row"&gt;
+      &lt;div class="col-6"&gt;
+        &lt;div class="ux-input"&gt;
+          &lt;input type="datetime-local" name="start" required&gt;
+          &lt;label&gt;Inicio&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="col-6"&gt;
+        &lt;div class="ux-input"&gt;
+          &lt;input type="datetime-local" name="end" required&gt;
+          &lt;label&gt;Fin&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-input"&gt;
+      &lt;select name="color"&gt;
+        &lt;option value="primary"&gt;Azul&lt;/option&gt;
+        &lt;option value="success"&gt;Verde&lt;/option&gt;
+        &lt;option value="warning"&gt;Amarillo&lt;/option&gt;
+        &lt;option value="danger"&gt;Rojo&lt;/option&gt;
+        &lt;option value="secondary"&gt;Gris&lt;/option&gt;
+      &lt;/select&gt;
+      &lt;label&gt;Color&lt;/label&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-modal__footer"&gt;
+    &lt;button type="button" class="ux-button"
+            @click="$el.closest('.ux-modal').classList.remove('ux-modal--open')"&gt;
+      Cancelar
+    &lt;/button&gt;
+    &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+      Guardar
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Detalle de Evento (Partial)</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/calendar/partials/event_detail.html --&gt;
+&lt;div class="ux-modal__header"&gt;
+  &lt;h3&gt;{{ event.title }}&lt;/h3&gt;
+  &lt;button type="button" class="ux-modal__close"
+          @click="$el.closest('.ux-modal').classList.remove('ux-modal--open')"&gt;
+    &amp;times;
+  &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div class="ux-modal__content"&gt;
+  &lt;div class="ux-list"&gt;
+    &lt;div class="ux-list__item"&gt;
+      &lt;div class="ux-list__item-start"&gt;
+        &lt;svg class="ux-icon"&gt;&lt;use href="#icon-clock"&gt;&lt;/use&gt;&lt;/svg&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-list__item-content"&gt;
+        &lt;div class="ux-list__item-title"&gt;{{ event.start|date:"d M Y, H:i" }}&lt;/div&gt;
+        &lt;div class="ux-list__item-subtitle"&gt;hasta {{ event.end|date:"H:i" }}&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    {% if event.description %}
+    &lt;div class="ux-list__item"&gt;
+      &lt;div class="ux-list__item-content"&gt;
+        &lt;div class="ux-list__item-title"&gt;Descripcion&lt;/div&gt;
+        &lt;div class="ux-list__item-subtitle"&gt;{{ event.description }}&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    {% endif %}
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="ux-modal__footer"&gt;
+  &lt;button class="ux-button ux-color-danger--outline"
+          hx-post="{% url 'delete_event' event.id %}"
+          hx-confirm="Eliminar este evento?"
+          hx-target="#event-modal"
+          hx-swap="outerHTML"&gt;
+    Eliminar
+  &lt;/button&gt;
+  &lt;button class="ux-button ux-color-primary"
+          hx-get="{% url 'edit_event' event.id %}"
+          hx-target="#event-modal-content"&gt;
+    Editar
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
     </section>
 
   </div>

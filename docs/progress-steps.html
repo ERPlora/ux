@@ -6,6 +6,7 @@
   <title>Progress Steps - UX Library</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     body {
       padding: 2rem;
@@ -28,18 +29,6 @@
       border: 1px solid var(--ux-border-color);
       border-radius: 8px;
       margin-bottom: 1rem;
-    }
-    .code-block {
-      background: var(--ux-gray-100);
-      border-radius: 8px;
-      padding: 1rem;
-      margin-top: 1rem;
-      font-family: monospace;
-      font-size: 0.875rem;
-      overflow-x: auto;
-    }
-    .ux-dark .code-block {
-      background: var(--ux-gray-800);
     }
   </style>
 </head>
@@ -106,7 +95,7 @@
       </div>
     </div>
 
-    <div class="code-block">
+    <pre class="ux-code-block" data-lang="html">
 &lt;div class="ux-progress-steps ux-progress-steps--horizontal" x-data="uxProgressSteps({ currentStep: 1, totalSteps: 4 })"&gt;
   &lt;div class="ux-progress-steps__step" :class="{ 'ux-progress-steps__step--completed': isCompleted(0), 'ux-progress-steps__step--active': isActive(0) }"&gt;
     &lt;div class="ux-progress-steps__indicator"&gt;
@@ -119,7 +108,7 @@
   &lt;/div&gt;
   ...
 &lt;/div&gt;
-    </div>
+    </pre>
   </section>
 
   <!-- With Descriptions -->
@@ -337,11 +326,11 @@
       </div>
     </div>
 
-    <div class="code-block">
+    <pre class="ux-code-block" data-lang="html">
 &lt;div class="ux-progress-steps ux-progress-steps--nav ux-progress-steps--clickable"&gt;
   ...
 &lt;/div&gt;
-    </div>
+    </pre>
   </section>
 
   <!-- With Progress Bar -->
@@ -401,6 +390,388 @@
         <button class="ux-button ux-button--sm ux-color-primary" @click="next()" :disabled="currentStep === totalSteps - 1">Next</button>
       </div>
     </div>
+  </section>
+
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">Multi-step form wizard with Django backend and HTMX for seamless step transitions.</p>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Order Checkout Wizard</h3>
+      <div class="ux-progress-steps ux-progress-steps--horizontal ux-progress-steps--bar" x-data="{ currentStep: 1 }">
+        <div class="ux-progress-steps__progress" :style="{ width: ((currentStep) / 3 * 100) + '%' }"></div>
+        <div class="ux-progress-steps__step" :class="{ 'ux-progress-steps__step--completed': currentStep > 1, 'ux-progress-steps__step--active': currentStep === 1 }">
+          <div class="ux-progress-steps__indicator"><span>1</span></div>
+          <div class="ux-progress-steps__content"><p class="ux-progress-steps__title">Shipping</p></div>
+        </div>
+        <div class="ux-progress-steps__step" :class="{ 'ux-progress-steps__step--completed': currentStep > 2, 'ux-progress-steps__step--active': currentStep === 2 }">
+          <div class="ux-progress-steps__indicator"><span>2</span></div>
+          <div class="ux-progress-steps__content"><p class="ux-progress-steps__title">Payment</p></div>
+        </div>
+        <div class="ux-progress-steps__step" :class="{ 'ux-progress-steps__step--completed': currentStep > 3, 'ux-progress-steps__step--active': currentStep === 3 }">
+          <div class="ux-progress-steps__indicator"><span>3</span></div>
+          <div class="ux-progress-steps__content"><p class="ux-progress-steps__title">Confirm</p></div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">
+&lt;!-- Template: checkout/wizard.html --&gt;
+&lt;div id="checkout-wizard"
+     x-data="{ currentStep: {{ wizard.current_step }} }"
+     @htmx:after-swap="currentStep = parseInt($event.detail.xhr.getResponseHeader('X-Step'))"&gt;
+
+  &lt;div class="ux-progress-steps ux-progress-steps--horizontal ux-progress-steps--bar"&gt;
+    &lt;div class="ux-progress-steps__progress" :style="{ width: ((currentStep) / 3 * 100) + '%' }"&gt;&lt;/div&gt;
+
+    &lt;div class="ux-progress-steps__step"
+         :class="{ 'ux-progress-steps__step--completed': currentStep &gt; 1,
+                   'ux-progress-steps__step--active': currentStep === 1 }"&gt;
+      &lt;div class="ux-progress-steps__indicator"&gt;&lt;span&gt;1&lt;/span&gt;&lt;/div&gt;
+      &lt;div class="ux-progress-steps__content"&gt;
+        &lt;p class="ux-progress-steps__title"&gt;Shipping&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-progress-steps__step"
+         :class="{ 'ux-progress-steps__step--completed': currentStep &gt; 2,
+                   'ux-progress-steps__step--active': currentStep === 2 }"&gt;
+      &lt;div class="ux-progress-steps__indicator"&gt;&lt;span&gt;2&lt;/span&gt;&lt;/div&gt;
+      &lt;div class="ux-progress-steps__content"&gt;
+        &lt;p class="ux-progress-steps__title"&gt;Payment&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-progress-steps__step"
+         :class="{ 'ux-progress-steps__step--completed': currentStep &gt; 3,
+                   'ux-progress-steps__step--active': currentStep === 3 }"&gt;
+      &lt;div class="ux-progress-steps__indicator"&gt;&lt;span&gt;3&lt;/span&gt;&lt;/div&gt;
+      &lt;div class="ux-progress-steps__content"&gt;
+        &lt;p class="ux-progress-steps__title"&gt;Confirm&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Step content loaded via HTMX --&gt;
+  &lt;div id="step-content"&gt;
+    {% include wizard.current_template %}
+  &lt;/div&gt;
+&lt;/div&gt;
+    </pre>
+
+    <pre class="ux-code-block" data-lang="html">
+&lt;!-- Template: checkout/partials/step_shipping.html --&gt;
+&lt;form hx-post="{% url 'checkout:shipping' %}"
+      hx-target="#step-content"
+      hx-swap="innerHTML"&gt;
+  {% csrf_token %}
+
+  &lt;div class="ux-input"&gt;
+    &lt;input type="text" name="address" value="{{ form.address.value|default:'' }}" required&gt;
+    &lt;label&gt;Street Address&lt;/label&gt;
+  &lt;/div&gt;
+
+  &lt;div class="row g-3"&gt;
+    &lt;div class="col-6"&gt;
+      &lt;div class="ux-input"&gt;
+        &lt;input type="text" name="city" value="{{ form.city.value|default:'' }}" required&gt;
+        &lt;label&gt;City&lt;/label&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="col-6"&gt;
+      &lt;div class="ux-input"&gt;
+        &lt;input type="text" name="postal_code" value="{{ form.postal_code.value|default:'' }}" required&gt;
+        &lt;label&gt;Postal Code&lt;/label&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;"&gt;
+    &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+      Continue to Payment
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;
+    </pre>
+
+    <pre class="ux-code-block" data-lang="html">
+&lt;!-- Template: checkout/partials/step_payment.html --&gt;
+&lt;form hx-post="{% url 'checkout:payment' %}"
+      hx-target="#step-content"
+      hx-swap="innerHTML"&gt;
+  {% csrf_token %}
+
+  &lt;div class="ux-input"&gt;
+    &lt;input type="text" name="card_number" placeholder="1234 5678 9012 3456" required&gt;
+    &lt;label&gt;Card Number&lt;/label&gt;
+  &lt;/div&gt;
+
+  &lt;div class="row g-3"&gt;
+    &lt;div class="col-6"&gt;
+      &lt;div class="ux-input"&gt;
+        &lt;input type="text" name="expiry" placeholder="MM/YY" required&gt;
+        &lt;label&gt;Expiry&lt;/label&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="col-6"&gt;
+      &lt;div class="ux-input"&gt;
+        &lt;input type="text" name="cvv" placeholder="123" required&gt;
+        &lt;label&gt;CVV&lt;/label&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div style="display: flex; gap: 0.5rem; justify-content: space-between; margin-top: 1.5rem;"&gt;
+    &lt;button type="button" class="ux-button"
+            hx-get="{% url 'checkout:shipping' %}"
+            hx-target="#step-content"&gt;
+      Back
+    &lt;/button&gt;
+    &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+      Review Order
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;
+    </pre>
+
+    <pre class="ux-code-block" data-lang="python">
+# views.py
+from django.http import HttpResponse
+from django.shortcuts import render
+
+class CheckoutWizardView:
+    STEPS = {
+        1: 'checkout/partials/step_shipping.html',
+        2: 'checkout/partials/step_payment.html',
+        3: 'checkout/partials/step_confirm.html',
+    }
+
+    def shipping(self, request):
+        if request.method == 'POST':
+            form = ShippingForm(request.POST)
+            if form.is_valid():
+                request.session['shipping'] = form.cleaned_data
+                response = render(request, self.STEPS[2], {'form': PaymentForm()})
+                response['X-Step'] = '2'
+                return response
+            return render(request, self.STEPS[1], {'form': form})
+
+        form = ShippingForm(initial=request.session.get('shipping', {}))
+        response = render(request, self.STEPS[1], {'form': form})
+        response['X-Step'] = '1'
+        return response
+
+    def payment(self, request):
+        if request.method == 'POST':
+            form = PaymentForm(request.POST)
+            if form.is_valid():
+                request.session['payment'] = form.cleaned_data
+                # Prepare order summary
+                context = {
+                    'shipping': request.session['shipping'],
+                    'payment': form.cleaned_data,
+                    'cart': get_cart(request),
+                }
+                response = render(request, self.STEPS[3], context)
+                response['X-Step'] = '3'
+                return response
+            return render(request, self.STEPS[2], {'form': form})
+
+        form = PaymentForm(initial=request.session.get('payment', {}))
+        response = render(request, self.STEPS[2], {'form': form})
+        response['X-Step'] = '2'
+        return response
+
+    def confirm(self, request):
+        if request.method == 'POST':
+            # Process the order
+            order = Order.objects.create(
+                shipping_address=request.session['shipping'],
+                payment_method=request.session['payment'],
+                user=request.user,
+            )
+            # Clear session
+            del request.session['shipping']
+            del request.session['payment']
+            # Redirect to success
+            return HttpResponse(
+                headers={'HX-Redirect': f'/orders/{order.id}/success/'}
+            )
+
+        context = {
+            'shipping': request.session['shipping'],
+            'payment': request.session['payment'],
+            'cart': get_cart(request),
+        }
+        response = render(request, self.STEPS[3], context)
+        response['X-Step'] = '3'
+        return response
+    </pre>
+
+    <pre class="ux-code-block" data-lang="python">
+# urls.py
+from django.urls import path
+from .views import CheckoutWizardView
+
+app_name = 'checkout'
+
+wizard = CheckoutWizardView()
+
+urlpatterns = [
+    path('shipping/', wizard.shipping, name='shipping'),
+    path('payment/', wizard.payment, name='payment'),
+    path('confirm/', wizard.confirm, name='confirm'),
+]
+    </pre>
+
+    <div class="demo-box" style="margin-top: 1.5rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Vertical Onboarding Flow</h3>
+      <div class="ux-progress-steps ux-progress-steps--vertical" style="max-width: 400px;" x-data="{ currentStep: 2 }">
+        <div class="ux-progress-steps__step" :class="{ 'ux-progress-steps__step--completed': currentStep > 1, 'ux-progress-steps__step--active': currentStep === 1 }">
+          <div class="ux-progress-steps__indicator">
+            <svg x-show="currentStep > 1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20,6 9,17 4,12"></polyline>
+            </svg>
+            <span x-show="currentStep <= 1">1</span>
+          </div>
+          <div class="ux-progress-steps__content">
+            <p class="ux-progress-steps__title">Create account</p>
+            <p class="ux-progress-steps__description">Email verified</p>
+          </div>
+        </div>
+        <div class="ux-progress-steps__step" :class="{ 'ux-progress-steps__step--completed': currentStep > 2, 'ux-progress-steps__step--active': currentStep === 2 }">
+          <div class="ux-progress-steps__indicator"><span>2</span></div>
+          <div class="ux-progress-steps__content">
+            <p class="ux-progress-steps__title">Company details</p>
+            <p class="ux-progress-steps__description">Tell us about your business</p>
+          </div>
+        </div>
+        <div class="ux-progress-steps__step" :class="{ 'ux-progress-steps__step--completed': currentStep > 3, 'ux-progress-steps__step--active': currentStep === 3 }">
+          <div class="ux-progress-steps__indicator"><span>3</span></div>
+          <div class="ux-progress-steps__content">
+            <p class="ux-progress-steps__title">Invite team</p>
+            <p class="ux-progress-steps__description">Add team members</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">
+&lt;!-- Template: onboarding/wizard.html --&gt;
+&lt;div id="onboarding-wizard"
+     x-data="{ currentStep: {{ current_step }} }"
+     @htmx:after-swap="currentStep = parseInt($event.detail.xhr.getResponseHeader('X-Step'))"&gt;
+
+  &lt;div class="ux-progress-steps ux-progress-steps--vertical"&gt;
+    &lt;div class="ux-progress-steps__step"
+         :class="{ 'ux-progress-steps__step--completed': currentStep &gt; 1,
+                   'ux-progress-steps__step--active': currentStep === 1 }"&gt;
+      &lt;div class="ux-progress-steps__indicator"&gt;
+        &lt;svg x-show="currentStep &gt; 1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"&gt;
+          &lt;polyline points="20,6 9,17 4,12"&gt;&lt;/polyline&gt;
+        &lt;/svg&gt;
+        &lt;span x-show="currentStep &lt;= 1"&gt;1&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-progress-steps__content"&gt;
+        &lt;p class="ux-progress-steps__title"&gt;Create account&lt;/p&gt;
+        &lt;p class="ux-progress-steps__description" x-text="currentStep &gt; 1 ? 'Email verified' : 'Sign up with email'"&gt;&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-progress-steps__step"
+         :class="{ 'ux-progress-steps__step--completed': currentStep &gt; 2,
+                   'ux-progress-steps__step--active': currentStep === 2 }"&gt;
+      &lt;div class="ux-progress-steps__indicator"&gt;
+        &lt;svg x-show="currentStep &gt; 2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"&gt;
+          &lt;polyline points="20,6 9,17 4,12"&gt;&lt;/polyline&gt;
+        &lt;/svg&gt;
+        &lt;span x-show="currentStep &lt;= 2"&gt;2&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-progress-steps__content"&gt;
+        &lt;p class="ux-progress-steps__title"&gt;Company details&lt;/p&gt;
+        &lt;p class="ux-progress-steps__description"&gt;Tell us about your business&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-progress-steps__step"
+         :class="{ 'ux-progress-steps__step--completed': currentStep &gt; 3,
+                   'ux-progress-steps__step--active': currentStep === 3 }"&gt;
+      &lt;div class="ux-progress-steps__indicator"&gt;&lt;span&gt;3&lt;/span&gt;&lt;/div&gt;
+      &lt;div class="ux-progress-steps__content"&gt;
+        &lt;p class="ux-progress-steps__title"&gt;Invite team&lt;/p&gt;
+        &lt;p class="ux-progress-steps__description"&gt;Add team members&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div id="step-form" class="mt-4"&gt;
+    {% include current_step_template %}
+  &lt;/div&gt;
+&lt;/div&gt;
+    </pre>
+
+    <pre class="ux-code-block" data-lang="python">
+# views.py - Onboarding with step validation
+from django.views import View
+
+class OnboardingView(View):
+    STEPS = {
+        1: ('onboarding/partials/account.html', AccountForm),
+        2: ('onboarding/partials/company.html', CompanyForm),
+        3: ('onboarding/partials/team.html', TeamForm),
+    }
+
+    def get_step(self, request, step):
+        template, form_class = self.STEPS[step]
+        form = form_class(initial=request.session.get(f'step_{step}', {}))
+        response = render(request, template, {'form': form, 'step': step})
+        response['X-Step'] = str(step)
+        return response
+
+    def post_step(self, request, step):
+        template, form_class = self.STEPS[step]
+        form = form_class(request.POST)
+
+        if form.is_valid():
+            # Save step data to session
+            request.session[f'step_{step}'] = form.cleaned_data
+
+            if step < 3:
+                # Move to next step
+                next_template, next_form_class = self.STEPS[step + 1]
+                next_form = next_form_class()
+                response = render(request, next_template, {
+                    'form': next_form,
+                    'step': step + 1
+                })
+                response['X-Step'] = str(step + 1)
+                return response
+            else:
+                # Complete onboarding
+                self.complete_onboarding(request)
+                return HttpResponse(headers={'HX-Redirect': '/dashboard/'})
+
+        # Validation failed, return form with errors
+        response = render(request, template, {'form': form, 'step': step})
+        response['X-Step'] = str(step)
+        return response
+
+    def complete_onboarding(self, request):
+        # Create company and user profile
+        company = Company.objects.create(**request.session['step_2'])
+        request.user.profile.company = company
+        request.user.profile.onboarding_complete = True
+        request.user.profile.save()
+
+        # Send team invitations
+        for email in request.session['step_3'].get('emails', []):
+            send_invitation(company, email)
+
+        # Clear session data
+        for i in range(1, 4):
+            request.session.pop(f'step_{i}', None)
+    </pre>
   </section>
 
   <!-- API Reference -->

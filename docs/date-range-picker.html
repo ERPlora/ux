@@ -8,6 +8,7 @@
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-date-range-picker.js"></script>
   <script src="../components/ux-content.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); }
     .demo-section h3 {
@@ -31,20 +32,6 @@
       gap: var(--ux-space-lg);
       align-items: flex-start;
     }
-    .code-block {
-      background: #1a1a2e;
-      color: #e5e5e5;
-      padding: var(--ux-space-md);
-      border-radius: var(--ux-border-radius);
-      overflow-x: auto;
-      font-family: 'SF Mono', Monaco, monospace;
-      font-size: var(--ux-font-size-md);
-      line-height: 1.6;
-    }
-    .code-block .tag { color: #ff7b72; }
-    .code-block .attr { color: #79c0ff; }
-    .code-block .string { color: #a5d6ff; }
-    .code-block .comment { color: #8b949e; }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -170,17 +157,17 @@
           </div>
         </div>
       </div>
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-date-range"</span>
-     <span class="attr">:class</span>=<span class="string">"{ 'ux-date-range--open': isOpen }"</span>
-     <span class="attr">x-data</span>=<span class="string">"uxDateRangePicker({
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-date-range"
+     :class="{ 'ux-date-range--open': isOpen }"
+     x-data="uxDateRangePicker({
        placeholder: 'Seleccionar fechas'
-     })"</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-date-range__trigger"</span> <span class="attr">@click</span>=<span class="string">"toggle()"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;span</span> <span class="attr">x-html</span>=<span class="string">"icons.calendar"</span><span class="tag">&gt;&lt;/span&gt;</span>
-    <span class="tag">&lt;span</span> <span class="attr">x-text</span>=<span class="string">"displayText || placeholder"</span><span class="tag">&gt;&lt;/span&gt;</span>
-  <span class="tag">&lt;/button&gt;</span>
-  <span class="comment">&lt;!-- Panel content... --&gt;</span>
-<span class="tag">&lt;/div&gt;</span></pre>
+     })"&gt;
+  &lt;button class="ux-date-range__trigger" @click="toggle()"&gt;
+    &lt;span x-html="icons.calendar"&gt;&lt;/span&gt;
+    &lt;span x-text="displayText || placeholder"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;!-- Panel content... --&gt;
+&lt;/div&gt;</pre>
     </section>
 
     <!-- With Initial Dates -->
@@ -400,21 +387,21 @@
     <section class="demo-section">
       <h3>Formato de Presets</h3>
       <p>Personaliza los presets con un array de objetos.</p>
-      <pre class="code-block"><span class="attr">const</span> presets = [
+      <pre class="ux-code-block" data-lang="javascript">const presets = [
   {
-    <span class="attr">label</span>: <span class="string">'Hoy'</span>,
-    <span class="attr">getValue</span>: () => {
-      <span class="attr">const</span> d = <span class="attr">new</span> Date();
-      <span class="attr">return</span> [d, d]; <span class="comment">// [startDate, endDate]</span>
+    label: 'Hoy',
+    getValue: () => {
+      const d = new Date();
+      return [d, d]; // [startDate, endDate]
     }
   },
   {
-    <span class="attr">label</span>: <span class="string">'Ultimos 7 dias'</span>,
-    <span class="attr">getValue</span>: () => {
-      <span class="attr">const</span> end = <span class="attr">new</span> Date();
-      <span class="attr">const</span> start = <span class="attr">new</span> Date();
+    label: 'Ultimos 7 dias',
+    getValue: () => {
+      const end = new Date();
+      const start = new Date();
       start.setDate(start.getDate() - 6);
-      <span class="attr">return</span> [start, end];
+      return [start, end];
     }
   }
 ];</pre>
@@ -466,6 +453,185 @@
           </tbody>
         </table>
       </div>
+    </section>
+
+    <!-- HTMX + Django -->
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Integra el date range picker con HTMX para filtrar datos por rango de fechas en Django.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Filtro de Reportes</h4>
+      <p>Filtra una tabla de reportes por rango de fechas usando el evento <code>daterange:change</code>.</p>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Filtro con HTMX --&gt;
+&lt;div x-data="uxDateRangePicker()"
+     @daterange:change.window="
+       $refs.startDate.value = $event.detail.startDate.toISOString().split('T')[0];
+       $refs.endDate.value = $event.detail.endDate.toISOString().split('T')[0];
+       htmx.trigger('#filter-form', 'submit');
+     "&gt;
+  &lt;div class="ux-date-range" :class="{ 'ux-date-range--open': isOpen }"&gt;
+    &lt;button class="ux-date-range__trigger" @click="toggle()"&gt;
+      &lt;span x-html="icons.calendar"&gt;&lt;/span&gt;
+      &lt;span x-text="displayText || 'Filtrar por fecha'"&gt;&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;!-- Panel... --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Formulario oculto para HTMX --&gt;
+&lt;form id="filter-form"
+      hx-get="/reportes/"
+      hx-target="#reports-table"
+      hx-trigger="submit"
+      hx-indicator="#loading"&gt;
+  &lt;input type="hidden" name="start_date" x-ref="startDate"&gt;
+  &lt;input type="hidden" name="end_date" x-ref="endDate"&gt;
+&lt;/form&gt;
+
+&lt;div id="reports-table"&gt;
+  &lt;!-- Tabla de reportes --&gt;
+&lt;/div&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Vista Django</h4>
+      <p>Procesa el filtro de fechas en el backend.</p>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from datetime import datetime
+from .models import Report
+
+def reports_list(request):
+    reports = Report.objects.all()
+
+    # Filtrar por rango de fechas
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if start_date and end_date:
+        start = datetime.strptime(start_date, '%Y-%m-%d')
+        end = datetime.strptime(end_date, '%Y-%m-%d')
+        reports = reports.filter(created_at__date__range=[start, end])
+
+    # Si es peticion HTMX, devolver solo la tabla
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/reports_table.html', {
+            'reports': reports
+        })
+
+    return render(request, 'reports/list.html', {
+        'reports': reports
+    })</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Filtro con Presets Personalizados</h4>
+      <p>Define presets especificos para tu aplicacion.</p>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxDateRangePicker({
+       presets: [
+         {
+           label: 'Hoy',
+           getValue: () => {
+             const d = new Date();
+             return [d, d];
+           }
+         },
+         {
+           label: 'Esta semana',
+           getValue: () => {
+             const end = new Date();
+             const start = new Date();
+             start.setDate(start.getDate() - start.getDay());
+             return [start, end];
+           }
+         },
+         {
+           label: 'Este mes',
+           getValue: () => {
+             const now = new Date();
+             const start = new Date(now.getFullYear(), now.getMonth(), 1);
+             return [start, now];
+           }
+         },
+         {
+           label: 'Ultimo trimestre',
+           getValue: () => {
+             const end = new Date();
+             const start = new Date();
+             start.setMonth(start.getMonth() - 3);
+             return [start, end];
+           }
+         }
+       ]
+     })"
+     @daterange:change="
+       fetch(`/api/ventas/?start=${$event.detail.startDate.toISOString()}&amp;end=${$event.detail.endDate.toISOString()}`)
+         .then(r => r.json())
+         .then(data => { ventas = data; })
+     "&gt;
+  &lt;!-- Trigger y panel... --&gt;
+&lt;/div&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Dashboard con Multiples Filtros</h4>
+      <p>Combina el date range picker con otros filtros HTMX.</p>
+      <pre class="ux-code-block" data-lang="html">&lt;form hx-get="/dashboard/stats/"
+      hx-target="#stats-container"
+      hx-trigger="change from:find input, change from:find select, daterange:change from:body"&gt;
+
+  &lt;!-- Filtro de categoria --&gt;
+  &lt;select name="category" class="ux-select"&gt;
+    &lt;option value=""&gt;Todas las categorias&lt;/option&gt;
+    &lt;option value="ventas"&gt;Ventas&lt;/option&gt;
+    &lt;option value="inventario"&gt;Inventario&lt;/option&gt;
+  &lt;/select&gt;
+
+  &lt;!-- Filtro de sucursal --&gt;
+  &lt;select name="branch" class="ux-select"&gt;
+    &lt;option value=""&gt;Todas las sucursales&lt;/option&gt;
+    {% for branch in branches %}
+    &lt;option value="{{ branch.id }}"&gt;{{ branch.name }}&lt;/option&gt;
+    {% endfor %}
+  &lt;/select&gt;
+
+  &lt;!-- Date Range Picker --&gt;
+  &lt;div x-data="uxDateRangePicker({ autoApply: true })"
+       @daterange:change="
+         document.querySelector('[name=start_date]').value = $event.detail.startDate.toISOString().split('T')[0];
+         document.querySelector('[name=end_date]').value = $event.detail.endDate.toISOString().split('T')[0];
+       "&gt;
+    &lt;div class="ux-date-range" :class="{ 'ux-date-range--open': isOpen }"&gt;
+      &lt;button type="button" class="ux-date-range__trigger" @click="toggle()"&gt;
+        &lt;span x-html="icons.calendar"&gt;&lt;/span&gt;
+        &lt;span x-text="displayText || 'Rango de fechas'"&gt;&lt;/span&gt;
+      &lt;/button&gt;
+      &lt;!-- Panel... --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;input type="hidden" name="start_date"&gt;
+  &lt;input type="hidden" name="end_date"&gt;
+&lt;/form&gt;
+
+&lt;div id="stats-container"&gt;
+  {% include 'partials/dashboard_stats.html' %}
+&lt;/div&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">URL Parameters</h4>
+      <p>Filtra usando parametros de URL para compartir enlaces con filtros aplicados.</p>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxDateRangePicker({
+       startDate: new URLSearchParams(location.search).get('start')
+         ? new Date(new URLSearchParams(location.search).get('start'))
+         : null,
+       endDate: new URLSearchParams(location.search).get('end')
+         ? new Date(new URLSearchParams(location.search).get('end'))
+         : null
+     })"
+     @daterange:change="
+       const url = new URL(location.href);
+       url.searchParams.set('start', $event.detail.startDate.toISOString().split('T')[0]);
+       url.searchParams.set('end', $event.detail.endDate.toISOString().split('T')[0]);
+       history.pushState({}, '', url);
+       htmx.ajax('GET', url.pathname + url.search, '#results');
+     "&gt;
+  &lt;!-- Date Range Picker --&gt;
+&lt;/div&gt;</pre>
     </section>
 
   </div>
