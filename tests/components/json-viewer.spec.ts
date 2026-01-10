@@ -369,7 +369,7 @@ test.describe('JSON Viewer Component', () => {
 
   // Dark Theme Default Test
   test('should have dark background by default', async ({ page }) => {
-    const viewer = page.locator('.ux-json-viewer').not(.filter({ hasText: 'ux-json-viewer--light' })).first();
+    const viewer = page.locator('.ux-json-viewer:not(.ux-json-viewer--light)').first();
     if (await viewer.count() > 0) {
       const bgColor = await viewer.evaluate(el =>
         getComputedStyle(el).backgroundColor
