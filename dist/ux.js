@@ -16002,8 +16002,10 @@
        Glass Variant (iOS 26 Liquid Glass)
     ======================================== */
 
-    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
     .ux-card--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
       box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
       border: 0.5px solid var(--ux-glass-border);
     }
