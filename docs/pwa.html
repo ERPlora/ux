@@ -709,6 +709,543 @@ urlpatterns = [
 &lt;/ul&gt;</pre>
     </section>
 
+    <!-- Background Sync -->
+    <section class="demo-section">
+      <h3>Background Sync</h3>
+      <p>Sincroniza datos cuando vuelve la conexion usando la Background Sync API.</p>
+
+      <pre class="ux-code-block" data-lang="javascript">// sw.js - Background Sync
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-pending-orders') {
+    event.waitUntil(syncPendingOrders());
+  }
+});
+
+async function syncPendingOrders() {
+  const db = await openDB();
+  const pendingOrders = await db.getAll('pending-orders');
+
+  for (const order of pendingOrders) {
+    try {
+      const response = await fetch('/api/orders/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+
+      if (response.ok) {
+        await db.delete('pending-orders', order.id);
+        // Notificar al cliente
+        const clients = await self.clients.matchAll();
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'ORDER_SYNCED',
+            orderId: order.id
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Sync failed for order:', order.id);
+    }
+  }
+}</pre>
+
+      <pre class="ux-code-block" data-lang="javascript">// En tu aplicacion - Registrar sync
+async function saveOrderOffline(orderData) {
+  // Guardar en IndexedDB
+  const db = await openDB();
+  await db.add('pending-orders', {
+    ...orderData,
+    id: Date.now(),
+    createdAt: new Date().toISOString()
+  });
+
+  // Registrar background sync
+  const registration = await navigator.serviceWorker.ready;
+  await registration.sync.register('sync-pending-orders');
+
+  // Mostrar confirmacion
+  showToast('Pedido guardado. Se enviara cuando vuelva la conexion.');
+}
+
+// Escuchar confirmacion de sync
+navigator.serviceWorker.addEventListener('message', (event) => {
+  if (event.data.type === 'ORDER_SYNCED') {
+    showToast(`Pedido #${event.data.orderId} sincronizado!`);
+  }
+});</pre>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Formulario con Background Sync --&gt;
+&lt;form x-data="{ submitting: false }"
+      @submit.prevent="
+        submitting = true;
+        if (navigator.onLine) {
+          // Enviar normalmente con HTMX
+          htmx.trigger($el, 'submit');
+        } else {
+          // Guardar para sync posterior
+          await saveOrderOffline(Object.fromEntries(new FormData($el)));
+        }
+        submitting = false;
+      "&gt;
+
+  &lt;div class="ux-input-group"&gt;
+    &lt;input type="text" name="product" class="ux-input" required&gt;
+    &lt;label class="ux-input__label"&gt;Producto&lt;/label&gt;
+  &lt;/div&gt;
+
+  &lt;button type="submit" class="ux-button ux-color-primary" :disabled="submitting"&gt;
+    &lt;span x-show="!submitting"&gt;Crear Pedido&lt;/span&gt;
+    &lt;span x-show="submitting" class="ux-spinner ux-spinner--sm"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/form&gt;</pre>
+    </section>
+
+    <!-- Push Notifications -->
+    <section class="demo-section">
+      <h3>Push Notifications</h3>
+      <p>Notificaciones push del servidor al dispositivo.</p>
+
+      <pre class="ux-code-block" data-lang="javascript">// Solicitar permisos y suscribir
+async function subscribeToPush() {
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') {
+    console.log('Notification permission denied');
+    return null;
+  }
+
+  const registration = await navigator.serviceWorker.ready;
+
+  // VAPID public key del servidor
+  const vapidPublicKey = 'YOUR_VAPID_PUBLIC_KEY';
+
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+  });
+
+  // Enviar subscription al servidor
+  await fetch('/api/push/subscribe/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscription)
+  });
+
+  return subscription;
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+}</pre>
+
+      <pre class="ux-code-block" data-lang="javascript">// sw.js - Recibir push
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() || {};
+
+  const options = {
+    body: data.body || 'Nueva notificacion',
+    icon: '/icon-192.png',
+    badge: '/badge-72.png',
+    vibrate: [100, 50, 100],
+    data: {
+      url: data.url || '/'
+    },
+    actions: data.actions || [
+      { action: 'open', title: 'Ver' },
+      { action: 'close', title: 'Cerrar' }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'App', options)
+  );
+});
+
+// Click en notificacion
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'close') return;
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(clientList => {
+      // Enfocar ventana existente o abrir nueva
+      for (const client of clientList) {
+        if (client.url === event.notification.data.url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(event.notification.data.url);
+    })
+  );
+});</pre>
+
+      <pre class="ux-code-block" data-lang="python"># Django - Enviar push notification
+# pip install pywebpush
+
+from pywebpush import webpush, WebPushException
+import json
+
+def send_push_notification(subscription_info, title, body, url='/'):
+    """Enviar notificacion push a un usuario"""
+    try:
+        webpush(
+            subscription_info=subscription_info,
+            data=json.dumps({
+                'title': title,
+                'body': body,
+                'url': url,
+                'actions': [
+                    {'action': 'open', 'title': 'Ver'},
+                    {'action': 'close', 'title': 'Cerrar'}
+                ]
+            }),
+            vapid_private_key='YOUR_VAPID_PRIVATE_KEY',
+            vapid_claims={
+                'sub': 'mailto:admin@example.com'
+            }
+        )
+        return True
+    except WebPushException as e:
+        print(f'Push failed: {e}')
+        return False
+
+# Ejemplo: notificar nuevo pedido
+def notify_new_order(order):
+    for subscription in UserPushSubscription.objects.filter(user=order.user):
+        send_push_notification(
+            subscription_info=subscription.subscription_json,
+            title='Nuevo Pedido',
+            body=f'Pedido #{order.id} recibido',
+            url=f'/orders/{order.id}/'
+        )</pre>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- UI para suscribirse --&gt;
+&lt;div x-data="{ subscribed: false, loading: false }"
+     x-init="
+       // Verificar si ya esta suscrito
+       navigator.serviceWorker.ready.then(async reg => {
+         const sub = await reg.pushManager.getSubscription();
+         subscribed = !!sub;
+       });
+     "&gt;
+
+  &lt;button class="ux-button"
+          :class="subscribed ? 'ux-color-success' : 'ux-color-primary'"
+          :disabled="loading"
+          @click="
+            loading = true;
+            if (!subscribed) {
+              await subscribeToPush();
+              subscribed = true;
+            }
+            loading = false;
+          "&gt;
+    &lt;span x-show="!subscribed"&gt;Activar Notificaciones&lt;/span&gt;
+    &lt;span x-show="subscribed"&gt;Notificaciones Activas&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- Workbox -->
+    <section class="demo-section">
+      <h3>Workbox Integration</h3>
+      <p>Usa Workbox para simplificar el desarrollo del Service Worker.</p>
+
+      <pre class="ux-code-block" data-lang="bash"># Instalar Workbox CLI
+npm install workbox-cli --save-dev
+
+# Generar Service Worker
+npx workbox generateSW workbox-config.js</pre>
+
+      <pre class="ux-code-block" data-lang="javascript">// workbox-config.js
+module.exports = {
+  globDirectory: 'static/',
+  globPatterns: [
+    '**/*.{js,css,html,png,svg,woff2}'
+  ],
+  swDest: 'static/sw.js',
+  runtimeCaching: [
+    {
+      // API calls - Network First
+      urlPattern: /\/api\//,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'api-cache',
+        networkTimeoutSeconds: 10,
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 5 * 60 // 5 minutes
+        }
+      }
+    },
+    {
+      // Images - Cache First
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'image-cache',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+        }
+      }
+    },
+    {
+      // Static assets - Stale While Revalidate
+      urlPattern: /\.(?:js|css)$/,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'static-cache'
+      }
+    },
+    {
+      // HTML pages - Network First
+      urlPattern: /\/$/,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'page-cache',
+        networkTimeoutSeconds: 3
+      }
+    }
+  ],
+  skipWaiting: true,
+  clientsClaim: true
+};</pre>
+
+      <pre class="ux-code-block" data-lang="javascript">// sw.js con Workbox (manual)
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js');
+
+const { registerRoute } = workbox.routing;
+const { CacheFirst, NetworkFirst, StaleWhileRevalidate } = workbox.strategies;
+const { ExpirationPlugin } = workbox.expiration;
+const { precacheAndRoute } = workbox.precaching;
+
+// Precache static assets
+precacheAndRoute(self.__WB_MANIFEST || []);
+
+// API - Network First con timeout
+registerRoute(
+  ({ url }) => url.pathname.startsWith('/api/'),
+  new NetworkFirst({
+    cacheName: 'api-cache',
+    networkTimeoutSeconds: 10,
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 5 * 60
+      })
+    ]
+  })
+);
+
+// Images - Cache First
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'image-cache',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 30 * 24 * 60 * 60
+      })
+    ]
+  })
+);
+
+// CSS/JS - Stale While Revalidate
+registerRoute(
+  ({ request }) => request.destination === 'style' || request.destination === 'script',
+  new StaleWhileRevalidate({
+    cacheName: 'static-cache'
+  })
+);
+
+// HTML - Network First
+registerRoute(
+  ({ request }) => request.destination === 'document',
+  new NetworkFirst({
+    cacheName: 'page-cache',
+    networkTimeoutSeconds: 3
+  })
+);</pre>
+    </section>
+
+    <!-- Cache Strategies -->
+    <section class="demo-section">
+      <h3>Cache Strategies</h3>
+      <p>Diferentes estrategias de cache segun el tipo de recurso.</p>
+
+      <div class="ux-card" style="margin-bottom: var(--ux-space-lg);">
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>Estrategia</th>
+              <th>Uso</th>
+              <th>Comportamiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Cache First</strong></td>
+              <td>Imagenes, fonts, assets estaticos</td>
+              <td>Cache primero, red como fallback</td>
+            </tr>
+            <tr>
+              <td><strong>Network First</strong></td>
+              <td>API, HTML dinamico</td>
+              <td>Red primero, cache como fallback</td>
+            </tr>
+            <tr>
+              <td><strong>Stale While Revalidate</strong></td>
+              <td>CSS, JS, contenido semi-dinamico</td>
+              <td>Cache inmediato + actualiza en background</td>
+            </tr>
+            <tr>
+              <td><strong>Network Only</strong></td>
+              <td>Auth, checkout, datos criticos</td>
+              <td>Solo red, sin cache</td>
+            </tr>
+            <tr>
+              <td><strong>Cache Only</strong></td>
+              <td>Assets precacheados</td>
+              <td>Solo cache, sin red</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre class="ux-code-block" data-lang="javascript">// Implementacion manual de estrategias
+
+// Cache First
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  cache.put(request, response.clone());
+  return response;
+}
+
+// Network First con timeout
+async function networkFirst(request, cacheName, timeout = 3000) {
+  const cache = await caches.open(cacheName);
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    const response = await fetch(request, { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    throw error;
+  }
+}
+
+// Stale While Revalidate
+async function staleWhileRevalidate(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+
+  const fetchPromise = fetch(request).then(response => {
+    cache.put(request, response.clone());
+    return response;
+  });
+
+  return cached || fetchPromise;
+}</pre>
+    </section>
+
+    <!-- Debugging Tips -->
+    <section class="demo-section">
+      <h3>Debugging Tips</h3>
+      <p>Herramientas y tecnicas para depurar PWAs.</p>
+
+      <pre class="ux-code-block" data-lang="javascript">// Ver estado del Service Worker
+navigator.serviceWorker.getRegistrations().then(registrations => {
+  console.log('SW Registrations:', registrations);
+});
+
+// Ver contenido del cache
+async function listCaches() {
+  const cacheNames = await caches.keys();
+  for (const name of cacheNames) {
+    const cache = await caches.open(name);
+    const keys = await cache.keys();
+    console.log(`Cache "${name}":`, keys.map(r => r.url));
+  }
+}
+listCaches();
+
+// Forzar actualizacion del SW
+navigator.serviceWorker.getRegistration().then(reg => {
+  reg.update();
+});
+
+// Limpiar todo el cache
+async function clearAllCaches() {
+  const cacheNames = await caches.keys();
+  await Promise.all(cacheNames.map(name => caches.delete(name)));
+  console.log('All caches cleared');
+}
+
+// Verificar espacio de almacenamiento
+if ('storage' in navigator && 'estimate' in navigator.storage) {
+  navigator.storage.estimate().then(estimate => {
+    console.log('Storage:', {
+      usage: (estimate.usage / 1024 / 1024).toFixed(2) + ' MB',
+      quota: (estimate.quota / 1024 / 1024).toFixed(2) + ' MB',
+      percent: ((estimate.usage / estimate.quota) * 100).toFixed(2) + '%'
+    });
+  });
+}</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Chrome DevTools</h4>
+      <ul class="ux-list ux-list--inset" style="max-width: 500px;">
+        <li class="ux-list__item">
+          <div class="ux-list__content">
+            <span class="ux-list__title">Application > Service Workers</span>
+            <span class="ux-list__subtitle">Ver estado, actualizar, bypass</span>
+          </div>
+        </li>
+        <li class="ux-list__item">
+          <div class="ux-list__content">
+            <span class="ux-list__title">Application > Storage</span>
+            <span class="ux-list__subtitle">Ver Cache, IndexedDB, LocalStorage</span>
+          </div>
+        </li>
+        <li class="ux-list__item">
+          <div class="ux-list__content">
+            <span class="ux-list__title">Application > Manifest</span>
+            <span class="ux-list__subtitle">Verificar manifest.json</span>
+          </div>
+        </li>
+        <li class="ux-list__item">
+          <div class="ux-list__content">
+            <span class="ux-list__title">Network > Offline checkbox</span>
+            <span class="ux-list__subtitle">Simular modo offline</span>
+          </div>
+        </li>
+        <li class="ux-list__item">
+          <div class="ux-list__content">
+            <span class="ux-list__title">Lighthouse > PWA audit</span>
+            <span class="ux-list__subtitle">Verificar requisitos PWA</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
     <!-- Clases CSS -->
     <section class="demo-section">
       <h3>Clases CSS</h3>
