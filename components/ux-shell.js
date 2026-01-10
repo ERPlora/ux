@@ -106,6 +106,59 @@
       padding: var(--ux-space-sm) 0;
     }
 
+    /* Sidebar Header (Logo + Title) */
+    .ux-shell__sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      border-bottom: 1px solid var(--ux-border-color);
+      min-height: 56px;
+      overflow: hidden;
+    }
+
+    .ux-shell__sidebar-logo {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      transition: width var(--ux-transition-normal) var(--ux-ease),
+                  height var(--ux-transition-normal) var(--ux-ease);
+    }
+
+    .ux-shell__sidebar-title {
+      flex: 1;
+      font-weight: 600;
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 1;
+      transition: opacity var(--ux-transition-fast) var(--ux-ease),
+                  visibility var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    /* Collapsed state - logo expands, title hides */
+    .ux-shell--sidebar-collapsed .ux-shell__sidebar-header {
+      justify-content: center;
+      padding: var(--ux-space-md) var(--ux-space-sm);
+    }
+
+    .ux-shell--sidebar-collapsed .ux-shell__sidebar-logo {
+      width: calc(var(--ux-shell-sidebar-collapsed-width) - var(--ux-space-lg));
+      height: calc(var(--ux-shell-sidebar-collapsed-width) - var(--ux-space-lg));
+      max-width: 40px;
+      max-height: 40px;
+    }
+
+    .ux-shell--sidebar-collapsed .ux-shell__sidebar-title {
+      opacity: 0;
+      visibility: hidden;
+      width: 0;
+      overflow: hidden;
+    }
+
     .ux-shell__sidebar-item {
       display: flex;
       align-items: center;
