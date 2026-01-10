@@ -10,15 +10,12 @@
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-content.js"></script>
   <script src="../components/ux-calculator.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); }
     .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
     .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
     .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-lg); justify-content: center; }
-    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
-    .code-block .tag { color: #ff7b72; }
-    .code-block .attr { color: #79c0ff; }
-    .code-block .string { color: #a5d6ff; }
   </style>
 </head>
 <body class="ux-app">
@@ -64,17 +61,17 @@
           </div>
         </div>
       </div>
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calculator"</span> <span class="attr">x-data</span>=<span class="string">"uxCalculator()"</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calculator__display"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calculator__expression"</span> <span class="attr">x-text</span>=<span class="string">"expression"</span><span class="tag">&gt;&lt;/div&gt;</span>
-    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calculator__result"</span> <span class="attr">x-text</span>=<span class="string">"display"</span><span class="tag">&gt;</span>0<span class="tag">&lt;/div&gt;</span>
-  <span class="tag">&lt;/div&gt;</span>
-  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-calculator__keypad"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-calculator__btn ux-calculator__btn--function"</span> <span class="attr">@click</span>=<span class="string">"clear()"</span><span class="tag">&gt;</span>AC<span class="tag">&lt;/button&gt;</span>
-    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-calculator__btn ux-calculator__btn--number"</span> <span class="attr">@click</span>=<span class="string">"inputDigit('7')"</span><span class="tag">&gt;</span>7<span class="tag">&lt;/button&gt;</span>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-calculator" x-data="uxCalculator()"&gt;
+  &lt;div class="ux-calculator__display"&gt;
+    &lt;div class="ux-calculator__expression" x-text="expression"&gt;&lt;/div&gt;
+    &lt;div class="ux-calculator__result" x-text="display"&gt;0&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-calculator__keypad"&gt;
+    &lt;button class="ux-calculator__btn ux-calculator__btn--function" @click="clear()"&gt;AC&lt;/button&gt;
+    &lt;button class="ux-calculator__btn ux-calculator__btn--number" @click="inputDigit('7')"&gt;7&lt;/button&gt;
     ...
-  <span class="tag">&lt;/div&gt;</span>
-<span class="tag">&lt;/div&gt;</span></pre>
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
     </section>
 
     <section class="demo-section">
@@ -112,7 +109,7 @@
 
     <section class="demo-section">
       <h3>Glass Variant</h3>
-      <div class="demo-box" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: var(--ux-space-xl);">
+      <div class="demo-box" style="background: var(--ux-demo-gradient-dark); padding: var(--ux-space-xl);">
         <div class="ux-calculator ux-calculator--glass" x-data="uxCalculator()">
           <div class="ux-calculator__display">
             <div class="ux-calculator__expression" x-text="expression">&nbsp;</div>
@@ -155,6 +152,60 @@
         <li><strong>Backspace</strong> - Borrar ultimo digito</li>
         <li><strong>%</strong> - Porcentaje</li>
       </ul>
+    </section>
+
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Enviar el resultado de la calculadora al servidor para guardarlo o procesarlo.</p>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Template: calculator.html --&gt;
+&lt;div class="ux-calculator"
+     x-data="uxCalculator()"
+     @calculator-result="$refs.resultInput.value = $event.detail.result"&gt;
+  &lt;!-- Calculator display and keypad... --&gt;
+
+  &lt;!-- Hidden form for HTMX submission --&gt;
+  &lt;form hx-post="{% url 'save_calculation' %}"
+        hx-target="#calculation-history"
+        hx-swap="afterbegin"&gt;
+    {% csrf_token %}
+    &lt;input type="hidden" name="result" x-ref="resultInput"&gt;
+    &lt;button type="submit" class="ux-button ux-color-primary" style="width: 100%; margin-top: var(--ux-space-md);"&gt;
+      Guardar Calculo
+    &lt;/button&gt;
+  &lt;/form&gt;
+&lt;/div&gt;
+
+&lt;div id="calculation-history"&gt;
+  &lt;!-- History items will be inserted here --&gt;
+&lt;/div&gt;</pre>
+
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+from .models import Calculation
+
+@require_POST
+def save_calculation(request):
+    result = request.POST.get('result', '0')
+    calc = Calculation.objects.create(
+        user=request.user,
+        result=result
+    )
+    return HttpResponse(f'''
+        &lt;div class="ux-list__item"&gt;
+            &lt;span&gt;{calc.result}&lt;/span&gt;
+            &lt;small&gt;{calc.created_at.strftime('%H:%M')}&lt;/small&gt;
+        &lt;/div&gt;
+    ''')</pre>
+
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('calculator/', views.calculator_view, name='calculator'),
+    path('calculator/save/', views.save_calculation, name='save_calculation'),
+]</pre>
     </section>
   </div>
 </body>

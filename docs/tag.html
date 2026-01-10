@@ -10,15 +10,12 @@
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-content.js"></script>
   <script src="../components/ux-tag.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); }
     .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
     .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
     .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-md); align-items: center; }
-    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
-    .code-block .tag { color: #ff7b72; }
-    .code-block .attr { color: #79c0ff; }
-    .code-block .string { color: #a5d6ff; }
   </style>
 </head>
 <body class="ux-app">
@@ -58,12 +55,12 @@
           </button>
         </span>
       </div>
-      <pre class="code-block"><span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tag"</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="string">"ux-tag__text"</span><span class="tag">&gt;</span>JavaScript<span class="tag">&lt;/span&gt;</span>
-  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="string">"ux-tag__remove"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;svg</span> ...<span class="tag">&gt;&lt;/svg&gt;</span>
-  <span class="tag">&lt;/button&gt;</span>
-<span class="tag">&lt;/span&gt;</span></pre>
+      <pre class="ux-code-block" data-lang="html">&lt;span class="ux-tag"&gt;
+  &lt;span class="ux-tag__text"&gt;JavaScript&lt;/span&gt;
+  &lt;button class="ux-tag__remove"&gt;
+    &lt;svg ...&gt;&lt;/svg&gt;
+  &lt;/button&gt;
+&lt;/span&gt;</pre>
     </section>
 
     <section class="demo-section">
@@ -272,6 +269,85 @@
           </button>
         </span>
       </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Tags dinamicos con HTMX y Django. Remover tags via peticion DELETE.</p>
+      <div class="demo-box" style="flex-direction: column; align-items: stretch;">
+        <div class="ux-tag-group" id="skill-tags">
+          <span class="ux-tag ux-tag--primary">
+            <span class="ux-tag__text">Python</span>
+            <button class="ux-tag__remove"
+                    hx-delete="/api/skills/1/"
+                    hx-target="closest .ux-tag"
+                    hx-swap="outerHTML swap:200ms"
+                    hx-confirm="Eliminar esta skill?"
+                    aria-label="Remove">
+              <svg class="ux-tag__remove-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </span>
+          <span class="ux-tag ux-tag--primary">
+            <span class="ux-tag__text">Django</span>
+            <button class="ux-tag__remove"
+                    hx-delete="/api/skills/2/"
+                    hx-target="closest .ux-tag"
+                    hx-swap="outerHTML swap:200ms"
+                    aria-label="Remove">
+              <svg class="ux-tag__remove-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </span>
+        </div>
+      </div>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Template Django</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Template: partials/skill_tags.html --&gt;
+{% for skill in user.skills.all %}
+&lt;span class="ux-tag ux-tag--primary"&gt;
+  &lt;span class="ux-tag__text"&gt;{{ skill.name }}&lt;/span&gt;
+  &lt;button class="ux-tag__remove"
+          hx-delete="{% url 'skill-delete' skill.id %}"
+          hx-target="closest .ux-tag"
+          hx-swap="outerHTML swap:200ms"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          aria-label="Remove"&gt;
+    &lt;svg class="ux-tag__remove-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+      &lt;line x1="18" y1="6" x2="6" y2="18"/&gt;&lt;line x1="6" y1="6" x2="18" y2="18"/&gt;
+    &lt;/svg&gt;
+  &lt;/button&gt;
+&lt;/span&gt;
+{% empty %}
+&lt;span style="color: var(--ux-text-secondary);"&gt;No hay skills&lt;/span&gt;
+{% endfor %}</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">View Django</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["DELETE"])
+def skill_delete(request, skill_id):
+    skill = get_object_or_404(Skill, id=skill_id, user=request.user)
+    skill.delete()
+    # Retornar vacio para que HTMX remueva el elemento
+    return HttpResponse("")</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Agregar Tags con HTMX</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Formulario para agregar nuevos tags --&gt;
+&lt;form hx-post="{% url 'skill-add' %}"
+      hx-target="#skill-tags"
+      hx-swap="beforeend"
+      hx-on::after-request="this.reset()"&gt;
+  {% csrf_token %}
+  &lt;div style="display: flex; gap: var(--ux-space-sm);"&gt;
+    &lt;input type="text" name="skill_name" class="ux-input" placeholder="Nueva skill..." required&gt;
+    &lt;button type="submit" class="ux-button ux-color-primary"&gt;Agregar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;</pre>
     </section>
 
     <section class="demo-section">

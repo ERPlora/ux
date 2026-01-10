@@ -8,6 +8,7 @@
   <script src="../components/ux-core.js"></script>
   <script src="../components/ux-button.js"></script>
   <script src="../components/ux-barcode-scanner.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); }
     .demo-section h3 {
@@ -27,20 +28,6 @@
       padding: var(--ux-space-lg);
       margin-bottom: var(--ux-space-md);
     }
-    .code-block {
-      background: #1a1a2e;
-      color: #e5e5e5;
-      padding: var(--ux-space-md);
-      border-radius: var(--ux-border-radius);
-      overflow-x: auto;
-      font-family: 'SF Mono', Monaco, monospace;
-      font-size: var(--ux-font-size-md);
-      line-height: 1.6;
-    }
-    .code-block .tag { color: #ff7b72; }
-    .code-block .attr { color: #79c0ff; }
-    .code-block .string { color: #a5d6ff; }
-    .code-block .comment { color: #8b949e; }
     .result-display {
       margin-top: var(--ux-space-md);
       padding: var(--ux-space-md);
@@ -139,21 +126,21 @@
         </div>
       </div>
 
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-barcode-scanner"</span>
-     <span class="attr">x-data</span>=<span class="string">"uxBarcodeScanner({ showManualInput: true })"</span>
-     <span class="attr">@scanner:detected</span>=<span class="string">"handleScan($event.detail)"</span><span class="tag">&gt;</span>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-barcode-scanner"
+     x-data="uxBarcodeScanner({ showManualInput: true })"
+     @scanner:detected="handleScan($event.detail)"&gt;
 
-  <span class="tag">&lt;video</span> <span class="attr">class</span>=<span class="string">"ux-barcode-scanner__video"</span> <span class="attr">x-ref</span>=<span class="string">"video"</span><span class="tag">&gt;&lt;/video&gt;</span>
+  &lt;video class="ux-barcode-scanner__video" x-ref="video"&gt;&lt;/video&gt;
 
-  <span class="comment">&lt;!-- Overlay con frame y linea de escaneo --&gt;</span>
-  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-barcode-scanner__overlay"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-barcode-scanner__frame"</span><span class="tag">&gt;</span>
-      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-barcode-scanner__corners"</span><span class="tag">&gt;&lt;/div&gt;</span>
-      <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-barcode-scanner__scan-line"</span><span class="tag">&gt;&lt;/div&gt;</span>
-    <span class="tag">&lt;/div&gt;</span>
-  <span class="tag">&lt;/div&gt;</span>
+  &lt;!-- Overlay con frame y linea de escaneo --&gt;
+  &lt;div class="ux-barcode-scanner__overlay"&gt;
+    &lt;div class="ux-barcode-scanner__frame"&gt;
+      &lt;div class="ux-barcode-scanner__corners"&gt;&lt;/div&gt;
+      &lt;div class="ux-barcode-scanner__scan-line"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
 
-<span class="tag">&lt;/div&gt;</span></pre>
+&lt;/div&gt;</pre>
     </section>
 
     <section class="demo-section">
@@ -240,9 +227,9 @@
           <li><code>scanner:close</code> - Escaner cerrado</li>
         </ul>
       </div>
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxBarcodeScanner()"</span>
-     <span class="attr">@scanner:detected</span>=<span class="string">"procesarCodigo($event.detail.rawValue)"</span><span class="tag">&gt;</span>
-<span class="tag">&lt;/div&gt;</span></pre>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxBarcodeScanner()"
+     @scanner:detected="procesarCodigo($event.detail.rawValue)"&gt;
+&lt;/div&gt;</pre>
     </section>
 
     <section class="demo-section">
@@ -284,6 +271,162 @@
           </tbody>
         </table>
       </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Integra el escaner con HTMX para buscar productos por codigo de barras en tiempo real.</p>
+
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm);">Busqueda de producto al escanear</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Al detectar un codigo, se hace una peticion HTMX para buscar el producto y mostrarlo.</p>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Escaner con busqueda HTMX --&gt;
+&lt;div x-data="uxBarcodeScanner({ continuous: false })"
+     @scanner:detected="
+       $refs.barcodeInput.value = $event.detail.rawValue;
+       htmx.trigger($refs.barcodeInput, 'barcode-scan');
+     "&gt;
+
+  &lt;video class="ux-barcode-scanner__video" x-ref="video"&gt;&lt;/video&gt;
+  &lt;div class="ux-barcode-scanner__overlay"&gt;...&lt;/div&gt;
+
+  &lt;!-- Input oculto para HTMX --&gt;
+  &lt;input type="hidden"
+         x-ref="barcodeInput"
+         name="barcode"
+         hx-get="/api/productos/buscar/"
+         hx-trigger="barcode-scan"
+         hx-target="#producto-resultado"
+         hx-indicator="#producto-loading"&gt;
+&lt;/div&gt;
+
+&lt;!-- Resultado del producto --&gt;
+&lt;div id="producto-resultado"&gt;&lt;/div&gt;
+&lt;div id="producto-loading" class="htmx-indicator"&gt;
+  &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm);">Vista Django</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Endpoint que busca el producto y devuelve HTML parcial.</p>
+      </div>
+
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from .models import Producto
+
+def buscar_producto_por_barcode(request):
+    barcode = request.GET.get('barcode', '')
+
+    if not barcode:
+        return HttpResponse('&lt;p class="ux-text-secondary"&gt;Escanea un codigo&lt;/p&gt;')
+
+    try:
+        producto = Producto.objects.get(codigo_barras=barcode)
+        return render(request, 'partials/producto_card.html', {
+            'producto': producto
+        })
+    except Producto.DoesNotExist:
+        return HttpResponse(f'''
+            &lt;div class="ux-alert ux-alert--warning"&gt;
+                Producto no encontrado: {barcode}
+            &lt;/div&gt;
+        ''')</pre>
+
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm);">Template parcial</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">HTML que se renderiza al encontrar un producto.</p>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- partials/producto_card.html --&gt;
+&lt;div class="ux-card"&gt;
+  &lt;div class="ux-card__content"&gt;
+    &lt;div style="display: flex; gap: var(--ux-space-md);"&gt;
+      &lt;img src="{{ producto.imagen.url }}"
+           alt="{{ producto.nombre }}"
+           style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--ux-radius-md);"&gt;
+      &lt;div&gt;
+        &lt;h4 style="margin: 0 0 4px;"&gt;{{ producto.nombre }}&lt;/h4&gt;
+        &lt;p class="ux-text-secondary" style="margin: 0 0 8px;"&gt;
+          SKU: {{ producto.sku }} | Codigo: {{ producto.codigo_barras }}
+        &lt;/p&gt;
+        &lt;span style="font-size: 1.25rem; font-weight: 600; color: var(--ux-primary);"&gt;
+          ${{ producto.precio }}
+        &lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-card__footer"&gt;
+    &lt;button class="ux-button ux-color-primary"
+            hx-post="/api/carrito/agregar/"
+            hx-vals='{"producto_id": "{{ producto.id }}"}'
+            hx-swap="none"&gt;
+      Agregar al carrito
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm);">Agregar multiples productos (modo continuo)</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Para escenarios de inventario donde se escanean muchos productos seguidos.</p>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Escaner en modo continuo para inventario --&gt;
+&lt;div x-data="{ productos: [] }"&gt;
+  &lt;div class="ux-barcode-scanner"
+       x-data="uxBarcodeScanner({ continuous: true, beepOnScan: true })"
+       @scanner:detected="
+         fetch('/api/productos/buscar/?barcode=' + $event.detail.rawValue)
+           .then(r =&gt; r.json())
+           .then(data =&gt; {
+             if (data.producto) {
+               productos.push(data.producto);
+             }
+           })
+       "&gt;
+    &lt;video class="ux-barcode-scanner__video" x-ref="video"&gt;&lt;/video&gt;
+    &lt;div class="ux-barcode-scanner__overlay"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Lista de productos escaneados --&gt;
+  &lt;ul class="ux-list"&gt;
+    &lt;template x-for="producto in productos" :key="producto.id"&gt;
+      &lt;li class="ux-list__item"&gt;
+        &lt;span x-text="producto.nombre"&gt;&lt;/span&gt;
+        &lt;span class="ux-badge" x-text="producto.codigo_barras"&gt;&lt;/span&gt;
+      &lt;/li&gt;
+    &lt;/template&gt;
+  &lt;/ul&gt;
+
+  &lt;!-- Guardar inventario --&gt;
+  &lt;button class="ux-button ux-color-success"
+          @click="
+            fetch('/api/inventario/guardar/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ productos: productos.map(p =&gt; p.id) })
+            })
+          "&gt;
+    Guardar inventario
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm);">URLs Django</h4>
+      </div>
+
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('api/productos/buscar/', views.buscar_producto_por_barcode, name='buscar_producto'),
+    path('api/carrito/agregar/', views.agregar_al_carrito, name='agregar_carrito'),
+    path('api/inventario/guardar/', views.guardar_inventario, name='guardar_inventario'),
+]</pre>
     </section>
 
     <section class="demo-section">

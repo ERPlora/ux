@@ -10,15 +10,12 @@
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-content.js"></script>
   <script src="../components/ux-divider.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); }
     .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
     .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
     .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
-    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
-    .code-block .tag { color: #ff7b72; }
-    .code-block .attr { color: #79c0ff; }
-    .code-block .string { color: #a5d6ff; }
     .vertical-demo { display: flex; align-items: stretch; height: 100px; gap: var(--ux-space-md); }
     .vertical-demo-item { display: flex; align-items: center; justify-content: center; padding: var(--ux-space-md); }
   </style>
@@ -37,7 +34,7 @@
         <div class="ux-divider"></div>
         <p>Contenido inferior</p>
       </div>
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-divider"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-divider"&gt;&lt;/div&gt;</pre>
     </section>
 
     <section class="demo-section">
@@ -54,9 +51,9 @@
 
         <div class="ux-divider--right ux-divider">Fin</div>
       </div>
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-divider"</span><span class="tag">&gt;</span>O<span class="tag">&lt;/div&gt;</span>
-<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-divider ux-divider--left"</span><span class="tag">&gt;</span>Inicio<span class="tag">&lt;/div&gt;</span>
-<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-divider ux-divider--right"</span><span class="tag">&gt;</span>Fin<span class="tag">&lt;/div&gt;</span></pre>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-divider"&gt;O&lt;/div&gt;
+&lt;div class="ux-divider ux-divider--left"&gt;Inicio&lt;/div&gt;
+&lt;div class="ux-divider ux-divider--right"&gt;Fin&lt;/div&gt;</pre>
     </section>
 
     <section class="demo-section">
@@ -71,7 +68,7 @@
           <div class="vertical-demo-item">Elemento 3</div>
         </div>
       </div>
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-divider ux-divider--vertical"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-divider ux-divider--vertical"&gt;&lt;/div&gt;</pre>
     </section>
 
     <section class="demo-section">
@@ -157,7 +154,7 @@
         <div class="ux-divider ux-divider--none ux-divider--inset"></div>
         <div style="padding: var(--ux-space-md);">Item 3</div>
       </div>
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-divider ux-divider--inset"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-divider ux-divider--inset"&gt;&lt;/div&gt;</pre>
     </section>
 
     <section class="demo-section">
@@ -234,6 +231,65 @@
           </tr>
         </tbody>
       </table>
+    </section>
+
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Uso de dividers en templates Django con contenido dinamico cargado via HTMX.</p>
+
+      <div class="demo-box">
+        <h4 style="font-size: var(--ux-font-size-md); margin-bottom: var(--ux-space-sm);">Template Django</h4>
+        <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/product_list.html --&gt;
+{% for product in products %}
+  &lt;div class="product-item"&gt;
+    &lt;h4&gt;{{ product.name }}&lt;/h4&gt;
+    &lt;p&gt;{{ product.description }}&lt;/p&gt;
+  &lt;/div&gt;
+  {% if not forloop.last %}
+    &lt;div class="ux-divider ux-divider--inset ux-divider--none"&gt;&lt;/div&gt;
+  {% endif %}
+{% empty %}
+  &lt;p&gt;No hay productos disponibles.&lt;/p&gt;
+{% endfor %}</pre>
+      </div>
+
+      <div class="demo-box">
+        <h4 style="font-size: var(--ux-font-size-md); margin-bottom: var(--ux-space-sm);">Carga dinamica con HTMX</h4>
+        <pre class="ux-code-block" data-lang="html">&lt;!-- Lista con carga dinamica --&gt;
+&lt;div id="product-list"
+     hx-get="/api/products/"
+     hx-trigger="load"
+     hx-swap="innerHTML"&gt;
+  &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Seccion con divider de texto --&gt;
+&lt;div class="ux-divider"&gt;Productos destacados&lt;/div&gt;
+
+&lt;div id="featured-products"
+     hx-get="/api/products/featured/"
+     hx-trigger="load"
+     hx-swap="innerHTML"&gt;
+&lt;/div&gt;</pre>
+      </div>
+
+      <div class="demo-box">
+        <h4 style="font-size: var(--ux-font-size-md); margin-bottom: var(--ux-space-sm);">Vista Django</h4>
+        <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+
+def product_list(request):
+    products = Product.objects.all()
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/product_list.html', {
+            'products': products
+        })
+
+    return render(request, 'products.html', {
+        'products': products
+    })</pre>
+      </div>
     </section>
   </div>
 </body>

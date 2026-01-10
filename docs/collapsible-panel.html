@@ -6,6 +6,7 @@
   <title>Collapsible Panel - UX Library</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     body {
       padding: 2rem;
@@ -38,20 +39,8 @@
       min-width: 300px;
       max-width: 400px;
     }
-    .code-block {
-      background: var(--ux-gray-100);
-      border-radius: 8px;
-      padding: 1rem;
-      margin-top: 1rem;
-      font-family: monospace;
-      font-size: 0.875rem;
-      overflow-x: auto;
-    }
-    .ux-dark .code-block {
-      background: var(--ux-gray-800);
-    }
     .glass-bg {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--ux-demo-gradient);
       padding: 2rem;
       border-radius: 16px;
     }
@@ -108,7 +97,7 @@
       </div>
     </div>
 
-    <div class="code-block">
+    <pre class="ux-code-block" data-lang="html">
 &lt;div x-data="uxPanel({ open: true })"&gt;
   &lt;div class="ux-panel" :class="{ 'ux-panel--open': isOpen }"&gt;
     &lt;button class="ux-panel__header" @click="toggle()"&gt;
@@ -126,7 +115,7 @@
     &lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;
-    </div>
+    </pre>
   </section>
 
   <!-- With Icon and Subtitle -->
@@ -257,11 +246,11 @@
       </div>
     </div>
 
-    <div class="code-block">
+    <pre class="ux-code-block" data-lang="html">
 &lt;div class="ux-panel ux-panel--sm"&gt;...&lt;/div&gt;
 &lt;div class="ux-panel"&gt;...&lt;/div&gt;
 &lt;div class="ux-panel ux-panel--lg"&gt;...&lt;/div&gt;
-    </div>
+    </pre>
   </section>
 
   <!-- Style Variants -->
@@ -419,12 +408,12 @@
       </div>
     </div>
 
-    <div class="code-block">
+    <pre class="ux-code-block" data-lang="html">
 &lt;div class="ux-panel ux-panel--primary"&gt;...&lt;/div&gt;
 &lt;div class="ux-panel ux-panel--success"&gt;...&lt;/div&gt;
 &lt;div class="ux-panel ux-panel--warning"&gt;...&lt;/div&gt;
 &lt;div class="ux-panel ux-panel--danger"&gt;...&lt;/div&gt;
-    </div>
+    </pre>
   </section>
 
   <!-- Panel with Footer -->
@@ -526,13 +515,13 @@
       </div>
     </div>
 
-    <div class="code-block">
+    <pre class="ux-code-block" data-lang="html">
 &lt;div class="ux-panel-group"&gt;
   &lt;div x-data="uxPanel({ open: true })"&gt;...&lt;/div&gt;
   &lt;div x-data="uxPanel()"&gt;...&lt;/div&gt;
   &lt;div x-data="uxPanel()"&gt;...&lt;/div&gt;
 &lt;/div&gt;
-    </div>
+    </pre>
   </section>
 
   <!-- Accordion Style -->
@@ -604,12 +593,12 @@
       </div>
     </div>
 
-    <div class="code-block">
+    <pre class="ux-code-block" data-lang="html">
 &lt;div class="ux-panel-group ux-panel-group--accordion" x-data="uxPanelGroup({ accordion: true })"&gt;
   &lt;!-- Only one panel open at a time --&gt;
   ...
 &lt;/div&gt;
-    </div>
+    </pre>
   </section>
 
   <!-- Glass Variant -->
@@ -629,7 +618,7 @@
           <div class="ux-panel__body">
             <div class="ux-panel__content">
               <div class="ux-panel__content-inner">
-                <p style="color: white;">Beautiful glass morphism effect for modern interfaces.</p>
+                <p style="color: var(--ux-primary-contrast);">Beautiful glass morphism effect for modern interfaces.</p>
               </div>
             </div>
           </div>
@@ -684,6 +673,187 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">Load panel content dynamically from the server when the panel is opened.</p>
+
+    <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Lazy Load Content on First Open</h3>
+    <pre class="ux-code-block" data-lang="html">
+&lt;!-- Panel with lazy-loaded content --&gt;
+&lt;div x-data="uxPanel()" @panel:open.once="$refs.content.dispatchEvent(new Event('load'))"&gt;
+  &lt;div class="ux-panel" :class="{ 'ux-panel--open': isOpen }"&gt;
+    &lt;button class="ux-panel__header" @click="toggle()"&gt;
+      &lt;div class="ux-panel__header-content"&gt;
+        &lt;h3 class="ux-panel__title"&gt;User Details&lt;/h3&gt;
+      &lt;/div&gt;
+      &lt;svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+        &lt;polyline points="6,9 12,15 18,9"&gt;&lt;/polyline&gt;
+      &lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;div class="ux-panel__body"&gt;
+      &lt;div class="ux-panel__content"&gt;
+        &lt;div class="ux-panel__content-inner"
+             x-ref="content"
+             hx-get="/api/users/123/details/"
+             hx-trigger="load"
+             hx-swap="innerHTML"&gt;
+          &lt;div class="ux-skeleton" style="height: 100px;"&gt;&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+    </pre>
+
+    <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Django View (Python)</h3>
+    <pre class="ux-code-block" data-lang="python">
+# views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+
+def user_details(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    return render(request, 'partials/user_details.html', {'user': user})
+    </pre>
+
+    <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Django Template Partial</h3>
+    <pre class="ux-code-block" data-lang="html">
+&lt;!-- partials/user_details.html --&gt;
+&lt;div class="ux-list ux-list--inset"&gt;
+  &lt;div class="ux-list__item"&gt;
+    &lt;span class="ux-list__label"&gt;Email&lt;/span&gt;
+    &lt;span class="ux-list__value"&gt;{{ user.email }}&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-list__item"&gt;
+    &lt;span class="ux-list__label"&gt;Joined&lt;/span&gt;
+    &lt;span class="ux-list__value"&gt;{{ user.date_joined|date:"M d, Y" }}&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-list__item"&gt;
+    &lt;span class="ux-list__label"&gt;Status&lt;/span&gt;
+    &lt;span class="ux-badge ux-color-success--soft"&gt;Active&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+    </pre>
+
+    <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">FAQ Accordion with Server-Side Content</h3>
+    <pre class="ux-code-block" data-lang="html">
+&lt;!-- Load FAQ items from server --&gt;
+&lt;div class="ux-panel-group ux-panel-group--accordion"
+     hx-get="/api/faqs/"
+     hx-trigger="load"
+     hx-swap="innerHTML"&gt;
+  &lt;div class="ux-skeleton" style="height: 200px;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+    </pre>
+
+    <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Django FAQ Template Partial</h3>
+    <pre class="ux-code-block" data-lang="html">
+&lt;!-- partials/faq_list.html --&gt;
+{% for faq in faqs %}
+&lt;div x-data="uxPanel({% if forloop.first %}{ open: true }{% endif %})"&gt;
+  &lt;div class="ux-panel" :class="{ 'ux-panel--open': isOpen }"&gt;
+    &lt;button class="ux-panel__header" @click="toggle()"&gt;
+      &lt;div class="ux-panel__header-content"&gt;
+        &lt;h3 class="ux-panel__title"&gt;{{ faq.question }}&lt;/h3&gt;
+      &lt;/div&gt;
+      &lt;svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+        &lt;polyline points="6,9 12,15 18,9"&gt;&lt;/polyline&gt;
+      &lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;div class="ux-panel__body"&gt;
+      &lt;div class="ux-panel__content"&gt;
+        &lt;div class="ux-panel__content-inner"&gt;
+          {{ faq.answer|safe }}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+{% endfor %}
+    </pre>
+
+    <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Panel with Form Submission</h3>
+    <pre class="ux-code-block" data-lang="html">
+&lt;!-- Settings panel with inline form --&gt;
+&lt;div x-data="uxPanel({ open: true })"&gt;
+  &lt;div class="ux-panel" :class="{ 'ux-panel--open': isOpen }"&gt;
+    &lt;button class="ux-panel__header" @click="toggle()"&gt;
+      &lt;div class="ux-panel__header-content"&gt;
+        &lt;svg class="ux-panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+          &lt;circle cx="12" cy="12" r="3"&gt;&lt;/circle&gt;
+          &lt;path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"&gt;&lt;/path&gt;
+        &lt;/svg&gt;
+        &lt;div&gt;
+          &lt;h3 class="ux-panel__title"&gt;Notification Settings&lt;/h3&gt;
+          &lt;p class="ux-panel__subtitle"&gt;Manage your notification preferences&lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+        &lt;polyline points="6,9 12,15 18,9"&gt;&lt;/polyline&gt;
+      &lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;div class="ux-panel__body"&gt;
+      &lt;div class="ux-panel__content"&gt;
+        &lt;form class="ux-panel__content-inner"
+              hx-post="/api/settings/notifications/"
+              hx-swap="none"
+              hx-on::after-request="if(event.detail.successful) htmx.trigger(document.body, 'toast', {message: 'Settings saved!'})"&gt;
+          {% csrf_token %}
+          &lt;div class="ux-list ux-list--inset"&gt;
+            &lt;label class="ux-list__item"&gt;
+              &lt;span&gt;Email notifications&lt;/span&gt;
+              &lt;input type="checkbox" name="email_notifications" class="ux-toggle"&gt;
+            &lt;/label&gt;
+            &lt;label class="ux-list__item"&gt;
+              &lt;span&gt;Push notifications&lt;/span&gt;
+              &lt;input type="checkbox" name="push_notifications" class="ux-toggle"&gt;
+            &lt;/label&gt;
+            &lt;label class="ux-list__item"&gt;
+              &lt;span&gt;SMS alerts&lt;/span&gt;
+              &lt;input type="checkbox" name="sms_alerts" class="ux-toggle"&gt;
+            &lt;/label&gt;
+          &lt;/div&gt;
+        &lt;/form&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-panel__footer"&gt;
+      &lt;button type="submit" class="ux-button ux-color-primary" form="notification-form"&gt;Save Changes&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+    </pre>
+
+    <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Refresh Content on Panel Open</h3>
+    <pre class="ux-code-block" data-lang="html">
+&lt;!-- Always refresh content when panel opens --&gt;
+&lt;div x-data="uxPanel()"&gt;
+  &lt;div class="ux-panel" :class="{ 'ux-panel--open': isOpen }"&gt;
+    &lt;button class="ux-panel__header"
+            @click="toggle(); if(!isOpen) htmx.trigger($refs.stats, 'refresh')"&gt;
+      &lt;div class="ux-panel__header-content"&gt;
+        &lt;h3 class="ux-panel__title"&gt;Live Statistics&lt;/h3&gt;
+      &lt;/div&gt;
+      &lt;svg class="ux-panel__toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+        &lt;polyline points="6,9 12,15 18,9"&gt;&lt;/polyline&gt;
+      &lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;div class="ux-panel__body"&gt;
+      &lt;div class="ux-panel__content"&gt;
+        &lt;div class="ux-panel__content-inner"
+             x-ref="stats"
+             hx-get="/api/stats/live/"
+             hx-trigger="refresh"
+             hx-swap="innerHTML"&gt;
+          &lt;p style="color: var(--ux-text-secondary);"&gt;Click to load statistics...&lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+    </pre>
   </section>
 
   <!-- API Reference -->

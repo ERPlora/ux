@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Work Order Card - UX Library</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="../components/ux-core.js"></script>
+  <script src="../components/ux-button.js"></script>
+  <script src="../components/ux-badge.js"></script>
+  <script src="../components/ux-progress.js"></script>
+  <script src="../components/ux-work-order.js"></script>
+  <script src="../components/ux-code-block.js"></script>
+  <style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .section-label { font-weight: 600; margin-bottom: var(--ux-space-sm); display: block; color: var(--ux-text); }
+    .demo-row { display: flex; flex-wrap: wrap; gap: var(--ux-space-lg); margin-bottom: var(--ux-space-lg); }
+  </style>
+</head>
+<body class="ux-app">
+
+  <!-- Basic Work Order Card -->
+  <div class="demo-section">
+    <h3>Work Order Card</h3>
+    <p>Work order cards for manufacturing and production tracking. Display order details, quantities, progress, and action buttons.</p>
+
+    <div class="demo-row">
+      <!-- Pending Work Order -->
+      <div x-data="uxWorkOrder({
+        workOrderNumber: 'WO-2024-0142',
+        product: {
+          name: 'Aluminum Housing Assembly',
+          sku: 'ALU-HSG-001'
+        },
+        status: 'pending',
+        priority: 'normal',
+        quantityOrdered: 500,
+        quantityCompleted: 0,
+        dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        machine: 'CNC Mill #3',
+        materials: [
+          { name: 'Aluminum Sheet 6061', qty: '50 units' },
+          { name: 'M4 Bolts', qty: '2000 pcs' },
+          { name: 'Rubber Gaskets', qty: '500 pcs' }
+        ]
+      })" class="ux-work-order ux-work-order--priority-normal"
+         @work-order:status-change.window="console.log('Status changed:', $event.detail)">
+        <div class="ux-work-order__header">
+          <div class="ux-work-order__header-top">
+            <h4 class="ux-work-order__number" x-text="workOrderNumber"></h4>
+            <span class="ux-work-order__status" :class="'ux-work-order__status--' + status">
+              <span class="ux-work-order__status-dot"></span>
+              <span x-text="statusLabel"></span>
+            </span>
+          </div>
+          <div class="ux-work-order__product">
+            <h5 class="ux-work-order__product-name" x-text="product.name"></h5>
+            <span class="ux-work-order__product-sku" x-text="product.sku"></span>
+          </div>
+        </div>
+
+        <div class="ux-work-order__content">
+          <div class="ux-work-order__quantities">
+            <div class="ux-work-order__quantity">
+              <span class="ux-work-order__quantity-label" x-text="labels.ordered"></span>
+              <span class="ux-work-order__quantity-value" x-text="quantityOrdered"></span>
+            </div>
+            <div class="ux-work-order__quantity">
+              <span class="ux-work-order__quantity-label" x-text="labels.completed"></span>
+              <span class="ux-work-order__quantity-value ux-work-order__quantity-value--completed" x-text="quantityCompleted"></span>
+            </div>
+            <div class="ux-work-order__quantity">
+              <span class="ux-work-order__quantity-label" x-text="labels.remaining"></span>
+              <span class="ux-work-order__quantity-value ux-work-order__quantity-value--remaining" x-text="quantityRemaining"></span>
+            </div>
+          </div>
+
+          <div class="ux-work-order__progress">
+            <div class="ux-work-order__progress-header">
+              <span class="ux-work-order__progress-label" x-text="labels.progress"></span>
+              <span class="ux-work-order__progress-value" x-text="progressPercent + '%'"></span>
+            </div>
+            <div class="ux-work-order__progress-bar">
+              <div class="ux-work-order__progress-fill" :style="'width: ' + progressPercent + '%'"></div>
+            </div>
+          </div>
+
+          <div class="ux-work-order__meta">
+            <div class="ux-work-order__due-date" :class="{'ux-work-order__due-date--overdue': isOverdue, 'ux-work-order__due-date--warning': isDueSoon}">
+              <span class="ux-work-order__due-date-icon" x-html="getIcon('calendar')"></span>
+              <span x-text="formattedDueDate"></span>
+            </div>
+            <div class="ux-work-order__machine">
+              <span class="ux-work-order__machine-icon" x-html="getIcon('machine')"></span>
+              <span class="ux-work-order__machine-name" x-text="machine"></span>
+            </div>
+          </div>
+
+          <div class="ux-work-order__materials" x-show="materials.length > 0">
+            <div class="ux-work-order__materials-header">
+              <span x-text="labels.materials"></span>
+              <span class="ux-work-order__materials-count" x-text="materials.length + ' items'"></span>
+            </div>
+            <ul class="ux-work-order__materials-list">
+              <template x-for="(material, index) in materials.slice(0, 3)" :key="index">
+                <li class="ux-work-order__material" :class="{'ux-work-order__material--shortage': material.shortage}">
+                  <span class="ux-work-order__material-name" x-text="material.name"></span>
+                  <span class="ux-work-order__material-qty" x-text="material.qty"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </div>
+
+        <div class="ux-work-order__actions">
+          <button type="button" class="ux-work-order__action ux-work-order__action--start" @click="start()">
+            <span class="ux-work-order__action-icon" x-html="getIcon('play')"></span>
+            <span x-text="labels.start"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- In Progress Work Order -->
+      <div x-data="uxWorkOrder({
+        workOrderNumber: 'WO-2024-0138',
+        product: {
+          name: 'Steel Bracket Type B',
+          sku: 'STL-BRK-002'
+        },
+        status: 'in-progress',
+        priority: 'high',
+        quantityOrdered: 1000,
+        quantityCompleted: 650,
+        dueDate: new Date(Date.now() + 12 * 60 * 60 * 1000),
+        machine: 'Press #1',
+        startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+        materials: [
+          { name: 'Steel Sheet 304', qty: '100 units' },
+          { name: 'Zinc Coating', qty: '5 L' }
+        ]
+      })" class="ux-work-order ux-work-order--priority-high">
+        <div class="ux-work-order__header">
+          <div class="ux-work-order__header-top">
+            <h4 class="ux-work-order__number" x-text="workOrderNumber"></h4>
+            <span class="ux-work-order__status ux-work-order__status--pulse" :class="'ux-work-order__status--' + status">
+              <span class="ux-work-order__status-dot"></span>
+              <span x-text="statusLabel"></span>
+            </span>
+          </div>
+          <div class="ux-work-order__product">
+            <h5 class="ux-work-order__product-name" x-text="product.name"></h5>
+            <span class="ux-work-order__product-sku" x-text="product.sku"></span>
+          </div>
+        </div>
+
+        <div class="ux-work-order__content">
+          <div class="ux-work-order__quantities">
+            <div class="ux-work-order__quantity">
+              <span class="ux-work-order__quantity-label" x-text="labels.ordered"></span>
+              <span class="ux-work-order__quantity-value" x-text="quantityOrdered"></span>
+            </div>
+            <div class="ux-work-order__quantity">
+              <span class="ux-work-order__quantity-label" x-text="labels.completed"></span>
+              <span class="ux-work-order__quantity-value ux-work-order__quantity-value--completed" x-text="quantityCompleted"></span>
+            </div>
+            <div class="ux-work-order__quantity">
+              <span class="ux-work-order__quantity-label" x-text="labels.remaining"></span>
+              <span class="ux-work-order__quantity-value ux-work-order__quantity-value--remaining" x-text="quantityRemaining"></span>
+            </div>
+          </div>
+
+          <div class="ux-work-order__progress">
+            <div class="ux-work-order__progress-header">
+              <span class="ux-work-order__progress-label" x-text="labels.progress"></span>
+              <span class="ux-work-order__progress-value" x-text="progressPercent + '%'"></span>
+            </div>
+            <div class="ux-work-order__progress-bar">
+              <div class="ux-work-order__progress-fill" :style="'width: ' + progressPercent + '%'"></div>
+            </div>
+          </div>
+
+          <div class="ux-work-order__meta">
+            <div class="ux-work-order__due-date" :class="{'ux-work-order__due-date--overdue': isOverdue, 'ux-work-order__due-date--warning': isDueSoon}">
+              <span class="ux-work-order__due-date-icon" x-html="getIcon('calendar')"></span>
+              <span x-text="formattedDueDate"></span>
+            </div>
+            <div class="ux-work-order__meta-item">
+              <span class="ux-work-order__meta-icon" x-html="getIcon('clock')"></span>
+              <span x-text="formattedElapsedTime"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-work-order__actions">
+          <button type="button" class="ux-work-order__action ux-work-order__action--pause" @click="pause()">
+            <span class="ux-work-order__action-icon" x-html="getIcon('pause')"></span>
+            <span x-text="labels.pause"></span>
+          </button>
+          <button type="button" class="ux-work-order__action ux-work-order__action--complete" @click="complete()">
+            <span class="ux-work-order__action-icon" x-html="getIcon('check')"></span>
+            <span x-text="labels.complete"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxWorkOrder({
+  workOrderNumber: 'WO-2024-0142',
+  product: {
+    name: 'Aluminum Housing Assembly',
+    sku: 'ALU-HSG-001'
+  },
+  status: 'pending',
+  priority: 'normal',
+  quantityOrdered: 500,
+  quantityCompleted: 0,
+  dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+  machine: 'CNC Mill #3',
+  materials: [
+    { name: 'Aluminum Sheet 6061', qty: '50 units' },
+    { name: 'M4 Bolts', qty: '2000 pcs' }
+  ]
+})" class="ux-work-order ux-work-order--priority-normal"&gt;
+  &lt;!-- Header --&gt;
+  &lt;div class="ux-work-order__header"&gt;
+    &lt;div class="ux-work-order__header-top"&gt;
+      &lt;h4 class="ux-work-order__number" x-text="workOrderNumber"&gt;&lt;/h4&gt;
+      &lt;span class="ux-work-order__status" :class="'ux-work-order__status--' + status"&gt;
+        &lt;span class="ux-work-order__status-dot"&gt;&lt;/span&gt;
+        &lt;span x-text="statusLabel"&gt;&lt;/span&gt;
+      &lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-work-order__product"&gt;
+      &lt;h5 class="ux-work-order__product-name" x-text="product.name"&gt;&lt;/h5&gt;
+      &lt;span class="ux-work-order__product-sku" x-text="product.sku"&gt;&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Content with quantities and progress --&gt;
+  &lt;div class="ux-work-order__content"&gt;
+    &lt;div class="ux-work-order__quantities"&gt;...&lt;/div&gt;
+    &lt;div class="ux-work-order__progress"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Action buttons --&gt;
+  &lt;div class="ux-work-order__actions"&gt;
+    &lt;button class="ux-work-order__action ux-work-order__action--start" @click="start()"&gt;
+      Start
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Priority Variants -->
+  <div class="demo-section">
+    <h3>Priority Variants</h3>
+    <p>Work orders support four priority levels: low, normal, high, and urgent. The priority indicator is shown on the left edge.</p>
+
+    <div class="demo-row">
+      <!-- Low Priority -->
+      <div class="ux-work-order ux-work-order--priority-low ux-work-order--compact" style="width: 280px;">
+        <div class="ux-work-order__header">
+          <div class="ux-work-order__header-top">
+            <h4 class="ux-work-order__number">WO-2024-0150</h4>
+            <span class="ux-work-order__priority ux-work-order__priority--low">Low</span>
+          </div>
+          <div class="ux-work-order__product">
+            <h5 class="ux-work-order__product-name">Plastic Cap Standard</h5>
+          </div>
+        </div>
+        <div class="ux-work-order__content">
+          <div class="ux-work-order__progress">
+            <div class="ux-work-order__progress-bar">
+              <div class="ux-work-order__progress-fill" style="width: 20%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Normal Priority -->
+      <div class="ux-work-order ux-work-order--priority-normal ux-work-order--compact" style="width: 280px;">
+        <div class="ux-work-order__header">
+          <div class="ux-work-order__header-top">
+            <h4 class="ux-work-order__number">WO-2024-0151</h4>
+            <span class="ux-work-order__priority ux-work-order__priority--normal">Normal</span>
+          </div>
+          <div class="ux-work-order__product">
+            <h5 class="ux-work-order__product-name">Connector Assembly</h5>
+          </div>
+        </div>
+        <div class="ux-work-order__content">
+          <div class="ux-work-order__progress">
+            <div class="ux-work-order__progress-bar">
+              <div class="ux-work-order__progress-fill" style="width: 45%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- High Priority -->
+      <div class="ux-work-order ux-work-order--priority-high ux-work-order--compact" style="width: 280px;">
+        <div class="ux-work-order__header">
+          <div class="ux-work-order__header-top">
+            <h4 class="ux-work-order__number">WO-2024-0152</h4>
+            <span class="ux-work-order__priority ux-work-order__priority--high">High</span>
+          </div>
+          <div class="ux-work-order__product">
+            <h5 class="ux-work-order__product-name">Motor Housing</h5>
+          </div>
+        </div>
+        <div class="ux-work-order__content">
+          <div class="ux-work-order__progress">
+            <div class="ux-work-order__progress-bar">
+              <div class="ux-work-order__progress-fill ux-work-order__progress-fill--warning" style="width: 70%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Urgent Priority -->
+      <div class="ux-work-order ux-work-order--priority-urgent ux-work-order--compact" style="width: 280px;">
+        <div class="ux-work-order__header">
+          <div class="ux-work-order__header-top">
+            <h4 class="ux-work-order__number">WO-2024-0153</h4>
+            <span class="ux-work-order__priority ux-work-order__priority--urgent">Urgent</span>
+          </div>
+          <div class="ux-work-order__product">
+            <h5 class="ux-work-order__product-name">Critical Valve Part</h5>
+          </div>
+        </div>
+        <div class="ux-work-order__content">
+          <div class="ux-work-order__progress">
+            <div class="ux-work-order__progress-bar">
+              <div class="ux-work-order__progress-fill" style="width: 90%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Priority classes --&gt;
+&lt;div class="ux-work-order ux-work-order--priority-low"&gt;...&lt;/div&gt;
+&lt;div class="ux-work-order ux-work-order--priority-normal"&gt;...&lt;/div&gt;
+&lt;div class="ux-work-order ux-work-order--priority-high"&gt;...&lt;/div&gt;
+&lt;div class="ux-work-order ux-work-order--priority-urgent"&gt;...&lt;/div&gt;
+
+&lt;!-- Priority label --&gt;
+&lt;span class="ux-work-order__priority ux-work-order__priority--high"&gt;High&lt;/span&gt;</pre>
+  </div>
+
+  <!-- Status Variants -->
+  <div class="demo-section">
+    <h3>Status Variants</h3>
+    <p>Work orders have four status states: pending, in-progress, on-hold, and completed.</p>
+
+    <div class="demo-row">
+      <span class="ux-work-order__status ux-work-order__status--pending">
+        <span class="ux-work-order__status-dot"></span>
+        <span>Pending</span>
+      </span>
+      <span class="ux-work-order__status ux-work-order__status--in-progress ux-work-order__status--pulse">
+        <span class="ux-work-order__status-dot"></span>
+        <span>In Progress</span>
+      </span>
+      <span class="ux-work-order__status ux-work-order__status--on-hold">
+        <span class="ux-work-order__status-dot"></span>
+        <span>On Hold</span>
+      </span>
+      <span class="ux-work-order__status ux-work-order__status--completed">
+        <span class="ux-work-order__status-dot"></span>
+        <span>Completed</span>
+      </span>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Status badges --&gt;
+&lt;span class="ux-work-order__status ux-work-order__status--pending"&gt;
+  &lt;span class="ux-work-order__status-dot"&gt;&lt;/span&gt;
+  &lt;span&gt;Pending&lt;/span&gt;
+&lt;/span&gt;
+
+&lt;!-- Animated pulse for in-progress --&gt;
+&lt;span class="ux-work-order__status ux-work-order__status--in-progress ux-work-order__status--pulse"&gt;
+  &lt;span class="ux-work-order__status-dot"&gt;&lt;/span&gt;
+  &lt;span&gt;In Progress&lt;/span&gt;
+&lt;/span&gt;</pre>
+  </div>
+
+  <!-- Compact Variant -->
+  <div class="demo-section">
+    <h3>Compact Variant</h3>
+    <p>Use the compact variant for denser displays like dashboard lists or mobile views.</p>
+
+    <div class="demo-row">
+      <div x-data="uxWorkOrder({
+        workOrderNumber: 'WO-2024-0160',
+        product: { name: 'Gear Assembly A' },
+        status: 'in-progress',
+        priority: 'normal',
+        quantityOrdered: 200,
+        quantityCompleted: 120
+      })" class="ux-work-order ux-work-order--compact ux-work-order--priority-normal" style="width: 300px;">
+        <div class="ux-work-order__header">
+          <div class="ux-work-order__header-top">
+            <h4 class="ux-work-order__number" x-text="workOrderNumber"></h4>
+            <span class="ux-work-order__status ux-work-order__status--pulse" :class="'ux-work-order__status--' + status">
+              <span class="ux-work-order__status-dot"></span>
+              <span x-text="statusLabel"></span>
+            </span>
+          </div>
+          <div class="ux-work-order__product">
+            <h5 class="ux-work-order__product-name" x-text="product.name"></h5>
+          </div>
+        </div>
+        <div class="ux-work-order__content">
+          <div class="ux-work-order__quantities">
+            <div class="ux-work-order__quantity">
+              <span class="ux-work-order__quantity-label">Ordered</span>
+              <span class="ux-work-order__quantity-value" x-text="quantityOrdered"></span>
+            </div>
+            <div class="ux-work-order__quantity">
+              <span class="ux-work-order__quantity-label">Done</span>
+              <span class="ux-work-order__quantity-value ux-work-order__quantity-value--completed" x-text="quantityCompleted"></span>
+            </div>
+          </div>
+          <div class="ux-work-order__progress">
+            <div class="ux-work-order__progress-bar">
+              <div class="ux-work-order__progress-fill" :style="'width: ' + progressPercent + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-work-order ux-work-order--compact"&gt;
+  &lt;!-- Compact hides materials and reduces padding --&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Material Shortage Warning -->
+  <div class="demo-section">
+    <h3>Material Shortage Warning</h3>
+    <p>Highlight materials that have shortages to alert operators.</p>
+
+    <div class="demo-row">
+      <div class="ux-work-order ux-work-order--priority-high" style="width: 360px;">
+        <div class="ux-work-order__header">
+          <div class="ux-work-order__header-top">
+            <h4 class="ux-work-order__number">WO-2024-0165</h4>
+            <span class="ux-work-order__status ux-work-order__status--on-hold">
+              <span class="ux-work-order__status-dot"></span>
+              <span>On Hold</span>
+            </span>
+          </div>
+          <div class="ux-work-order__product">
+            <h5 class="ux-work-order__product-name">Custom Enclosure</h5>
+            <span class="ux-work-order__product-sku">ENC-CST-005</span>
+          </div>
+        </div>
+        <div class="ux-work-order__content">
+          <div class="ux-work-order__materials">
+            <div class="ux-work-order__materials-header">
+              <span>Materials</span>
+              <span class="ux-work-order__materials-count">3 items</span>
+            </div>
+            <ul class="ux-work-order__materials-list">
+              <li class="ux-work-order__material">
+                <span class="ux-work-order__material-name">Sheet Metal 16ga</span>
+                <span class="ux-work-order__material-qty">20 units</span>
+              </li>
+              <li class="ux-work-order__material ux-work-order__material--shortage">
+                <span class="ux-work-order__material-name">Powder Coating Blue</span>
+                <span class="ux-work-order__material-qty">SHORTAGE</span>
+              </li>
+              <li class="ux-work-order__material">
+                <span class="ux-work-order__material-name">Hardware Kit</span>
+                <span class="ux-work-order__material-qty">10 sets</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;li class="ux-work-order__material ux-work-order__material--shortage"&gt;
+  &lt;span class="ux-work-order__material-name"&gt;Powder Coating Blue&lt;/span&gt;
+  &lt;span class="ux-work-order__material-qty"&gt;SHORTAGE&lt;/span&gt;
+&lt;/li&gt;</pre>
+  </div>
+
+  <!-- Overdue Work Order -->
+  <div class="demo-section">
+    <h3>Overdue Warning</h3>
+    <p>Work orders past their due date are highlighted with a warning style.</p>
+
+    <div class="demo-row">
+      <div x-data="uxWorkOrder({
+        workOrderNumber: 'WO-2024-0130',
+        product: { name: 'Delayed Component X', sku: 'DLY-CMP-001' },
+        status: 'in-progress',
+        priority: 'urgent',
+        quantityOrdered: 300,
+        quantityCompleted: 180,
+        dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        machine: 'Line 2'
+      })" class="ux-work-order ux-work-order--priority-urgent">
+        <div class="ux-work-order__header">
+          <div class="ux-work-order__header-top">
+            <h4 class="ux-work-order__number" x-text="workOrderNumber"></h4>
+            <span class="ux-work-order__status ux-work-order__status--pulse" :class="'ux-work-order__status--' + status">
+              <span class="ux-work-order__status-dot"></span>
+              <span x-text="statusLabel"></span>
+            </span>
+          </div>
+          <div class="ux-work-order__product">
+            <h5 class="ux-work-order__product-name" x-text="product.name"></h5>
+          </div>
+        </div>
+        <div class="ux-work-order__content">
+          <div class="ux-work-order__progress">
+            <div class="ux-work-order__progress-header">
+              <span class="ux-work-order__progress-label">Progress</span>
+              <span class="ux-work-order__progress-value" x-text="progressPercent + '%'"></span>
+            </div>
+            <div class="ux-work-order__progress-bar">
+              <div class="ux-work-order__progress-fill" :style="'width: ' + progressPercent + '%'"></div>
+            </div>
+          </div>
+          <div class="ux-work-order__meta">
+            <div class="ux-work-order__due-date ux-work-order__due-date--overdue">
+              <span class="ux-work-order__due-date-icon" x-html="getIcon('warning')"></span>
+              <span>OVERDUE - <span x-text="formattedDueDate"></span></span>
+            </div>
+          </div>
+        </div>
+        <div class="ux-work-order__actions">
+          <button type="button" class="ux-work-order__action ux-work-order__action--complete" @click="complete()">
+            <span class="ux-work-order__action-icon" x-html="getIcon('check')"></span>
+            <span>Complete Now</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-work-order__due-date ux-work-order__due-date--overdue"&gt;
+  &lt;span class="ux-work-order__due-date-icon"&gt;...&lt;/span&gt;
+  &lt;span&gt;OVERDUE - Jan 5, 2024&lt;/span&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Glass Variant -->
+  <div class="demo-section">
+    <h3>Glass Variant</h3>
+    <p>Glass morphism style for modern interfaces.</p>
+
+    <div style="background: var(--ux-demo-gradient); padding: 2rem; border-radius: var(--ux-border-radius-lg);">
+      <div class="demo-row">
+        <div x-data="uxWorkOrder({
+          workOrderNumber: 'WO-2024-0175',
+          product: { name: 'Glass Display Unit', sku: 'GLS-DSP-001' },
+          status: 'in-progress',
+          priority: 'normal',
+          quantityOrdered: 50,
+          quantityCompleted: 25
+        })" class="ux-work-order ux-work-order--glass ux-work-order--priority-normal">
+          <div class="ux-work-order__header">
+            <div class="ux-work-order__header-top">
+              <h4 class="ux-work-order__number" x-text="workOrderNumber"></h4>
+              <span class="ux-work-order__status ux-work-order__status--pulse" :class="'ux-work-order__status--' + status">
+                <span class="ux-work-order__status-dot"></span>
+                <span x-text="statusLabel"></span>
+              </span>
+            </div>
+            <div class="ux-work-order__product">
+              <h5 class="ux-work-order__product-name" x-text="product.name"></h5>
+              <span class="ux-work-order__product-sku" x-text="product.sku"></span>
+            </div>
+          </div>
+          <div class="ux-work-order__content">
+            <div class="ux-work-order__quantities">
+              <div class="ux-work-order__quantity">
+                <span class="ux-work-order__quantity-label">Ordered</span>
+                <span class="ux-work-order__quantity-value" x-text="quantityOrdered"></span>
+              </div>
+              <div class="ux-work-order__quantity">
+                <span class="ux-work-order__quantity-label">Completed</span>
+                <span class="ux-work-order__quantity-value ux-work-order__quantity-value--completed" x-text="quantityCompleted"></span>
+              </div>
+            </div>
+            <div class="ux-work-order__progress">
+              <div class="ux-work-order__progress-bar">
+                <div class="ux-work-order__progress-fill" :style="'width: ' + progressPercent + '%'"></div>
+              </div>
+            </div>
+          </div>
+          <div class="ux-work-order__actions">
+            <button type="button" class="ux-work-order__action ux-work-order__action--secondary">Details</button>
+            <button type="button" class="ux-work-order__action ux-work-order__action--complete" @click="complete()">Complete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-work-order ux-work-order--glass"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <!-- HTMX + Django -->
+  <div class="demo-section">
+    <h3>HTMX + Django</h3>
+    <p>Manage work orders with HTMX and Django for real-time production tracking.</p>
+
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Load work orders from Django --&gt;
+&lt;div class="ux-work-order-grid"
+     hx-get="{% url 'workorders:list' %}?status=pending"
+     hx-trigger="load"
+     hx-swap="innerHTML"&gt;
+  &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Work order card with HTMX actions --&gt;
+&lt;div id="wo-{{ work_order.id }}"
+     class="ux-work-order ux-work-order--priority-{{ work_order.priority }}"&gt;
+  &lt;div class="ux-work-order__header"&gt;
+    &lt;div class="ux-work-order__header-top"&gt;
+      &lt;h4 class="ux-work-order__number"&gt;{{ work_order.number }}&lt;/h4&gt;
+      &lt;span class="ux-work-order__status ux-work-order__status--{{ work_order.status }}"&gt;
+        &lt;span class="ux-work-order__status-dot"&gt;&lt;/span&gt;
+        &lt;span&gt;{{ work_order.get_status_display }}&lt;/span&gt;
+      &lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-work-order__product"&gt;
+      &lt;h5 class="ux-work-order__product-name"&gt;{{ work_order.product.name }}&lt;/h5&gt;
+      &lt;span class="ux-work-order__product-sku"&gt;{{ work_order.product.sku }}&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-work-order__content"&gt;
+    &lt;div class="ux-work-order__quantities"&gt;
+      &lt;div class="ux-work-order__quantity"&gt;
+        &lt;span class="ux-work-order__quantity-label"&gt;Ordered&lt;/span&gt;
+        &lt;span class="ux-work-order__quantity-value"&gt;{{ work_order.quantity_ordered }}&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-work-order__quantity"&gt;
+        &lt;span class="ux-work-order__quantity-label"&gt;Completed&lt;/span&gt;
+        &lt;span class="ux-work-order__quantity-value"&gt;{{ work_order.quantity_completed }}&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-work-order__progress"&gt;
+      &lt;div class="ux-work-order__progress-bar"&gt;
+        &lt;div class="ux-work-order__progress-fill" style="width: {{ work_order.progress_percent }}%"&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-work-order__actions"&gt;
+    {% if work_order.status == 'pending' %}
+    &lt;button class="ux-work-order__action ux-work-order__action--start"
+            hx-post="{% url 'workorders:start' work_order.id %}"
+            hx-target="#wo-{{ work_order.id }}"
+            hx-swap="outerHTML"&gt;
+      Start
+    &lt;/button&gt;
+    {% elif work_order.status == 'in-progress' %}
+    &lt;button class="ux-work-order__action ux-work-order__action--pause"
+            hx-post="{% url 'workorders:pause' work_order.id %}"
+            hx-target="#wo-{{ work_order.id }}"
+            hx-swap="outerHTML"&gt;
+      Pause
+    &lt;/button&gt;
+    &lt;button class="ux-work-order__action ux-work-order__action--complete"
+            hx-post="{% url 'workorders:complete' work_order.id %}"
+            hx-confirm="Mark this work order as complete?"
+            hx-target="#wo-{{ work_order.id }}"
+            hx-swap="outerHTML"&gt;
+      Complete
+    &lt;/button&gt;
+    {% endif %}
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Increment completed quantity --&gt;
+&lt;button class="ux-work-order__action"
+        hx-post="{% url 'workorders:increment' work_order.id %}"
+        hx-vals='{"amount": 10}'
+        hx-target="#wo-{{ work_order.id }}"
+        hx-swap="outerHTML"&gt;
+  +10 Units
+&lt;/button&gt;
+
+&lt;!-- Filter work orders by status --&gt;
+&lt;div class="ux-segment"&gt;
+  &lt;button class="ux-segment__button"
+          hx-get="{% url 'workorders:list' %}?status=pending"
+          hx-target="#work-orders-grid"&gt;Pending&lt;/button&gt;
+  &lt;button class="ux-segment__button"
+          hx-get="{% url 'workorders:list' %}?status=in-progress"
+          hx-target="#work-orders-grid"&gt;In Progress&lt;/button&gt;
+  &lt;button class="ux-segment__button"
+          hx-get="{% url 'workorders:list' %}?status=completed"
+          hx-target="#work-orders-grid"&gt;Completed&lt;/button&gt;
+&lt;/div&gt;</pre>
+    <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+
+@login_required
+def workorders_page(request):
+    """Render work orders management page."""
+    return render(request, 'workorders/index.html')
+
+@login_required
+@require_GET
+def workorders_list(request):
+    """Return filtered work orders as HTML partial."""
+    status = request.GET.get('status')
+    priority = request.GET.get('priority')
+    machine = request.GET.get('machine')
+
+    work_orders = WorkOrder.objects.select_related('product', 'machine')
+
+    if status:
+        work_orders = work_orders.filter(status=status)
+    if priority:
+        work_orders = work_orders.filter(priority=priority)
+    if machine:
+        work_orders = work_orders.filter(machine_id=machine)
+
+    work_orders = work_orders.order_by('-priority', 'due_date')[:50]
+
+    return render(request, 'workorders/partials/list.html', {
+        'work_orders': work_orders
+    })
+
+@login_required
+@require_POST
+def start_workorder(request, workorder_id):
+    """Start a work order."""
+    work_order = get_object_or_404(WorkOrder, id=workorder_id)
+    work_order.status = 'in-progress'
+    work_order.started_at = timezone.now()
+    work_order.save()
+
+    return render(request, 'workorders/partials/card.html', {
+        'work_order': work_order
+    })
+
+@login_required
+@require_POST
+def pause_workorder(request, workorder_id):
+    """Pause a work order."""
+    work_order = get_object_or_404(WorkOrder, id=workorder_id)
+    work_order.status = 'on-hold'
+    work_order.save()
+
+    return render(request, 'workorders/partials/card.html', {
+        'work_order': work_order
+    })
+
+@login_required
+@require_POST
+def complete_workorder(request, workorder_id):
+    """Mark a work order as complete."""
+    work_order = get_object_or_404(WorkOrder, id=workorder_id)
+    work_order.status = 'completed'
+    work_order.completed_at = timezone.now()
+    work_order.quantity_completed = work_order.quantity_ordered
+    work_order.save()
+
+    return render(request, 'workorders/partials/card.html', {
+        'work_order': work_order
+    })
+
+@login_required
+@require_POST
+def increment_quantity(request, workorder_id):
+    """Increment completed quantity."""
+    work_order = get_object_or_404(WorkOrder, id=workorder_id)
+    amount = int(request.POST.get('amount', 1))
+
+    work_order.quantity_completed = min(
+        work_order.quantity_completed + amount,
+        work_order.quantity_ordered
+    )
+    work_order.save()
+
+    # Auto-complete if quantity reached
+    if work_order.quantity_completed >= work_order.quantity_ordered:
+        work_order.status = 'completed'
+        work_order.completed_at = timezone.now()
+        work_order.save()
+
+    return render(request, 'workorders/partials/card.html', {
+        'work_order': work_order
+    })
+
+@login_required
+@require_POST
+def update_status(request, workorder_id):
+    """Update work order status via PATCH-like request."""
+    work_order = get_object_or_404(WorkOrder, id=workorder_id)
+    new_status = request.POST.get('status')
+
+    if new_status in ['pending', 'in-progress', 'on-hold', 'completed']:
+        work_order.status = new_status
+        if new_status == 'in-progress' and not work_order.started_at:
+            work_order.started_at = timezone.now()
+        elif new_status == 'completed':
+            work_order.completed_at = timezone.now()
+        work_order.save()
+
+    return render(request, 'workorders/partials/card.html', {
+        'work_order': work_order
+    })
+
+@login_required
+def workorder_detail(request, workorder_id):
+    """Return work order details as HTML partial."""
+    work_order = get_object_or_404(
+        WorkOrder.objects.select_related('product', 'machine')
+        .prefetch_related('materials'),
+        id=workorder_id
+    )
+    return render(request, 'workorders/partials/detail.html', {
+        'work_order': work_order
+    })
+
+# urls.py
+from django.urls import path
+from . import views
+
+app_name = 'workorders'
+urlpatterns = [
+    path('', views.workorders_page, name='index'),
+    path('list/', views.workorders_list, name='list'),
+    path('&lt;int:workorder_id&gt;/', views.workorder_detail, name='detail'),
+    path('&lt;int:workorder_id&gt;/start/', views.start_workorder, name='start'),
+    path('&lt;int:workorder_id&gt;/pause/', views.pause_workorder, name='pause'),
+    path('&lt;int:workorder_id&gt;/complete/', views.complete_workorder, name='complete'),
+    path('&lt;int:workorder_id&gt;/increment/', views.increment_quantity, name='increment'),
+    path('&lt;int:workorder_id&gt;/status/', views.update_status, name='update-status'),
+]</pre>
+  </div>
+
+  <!-- API Reference -->
+  <div class="demo-section">
+    <h3>Alpine.js Component API</h3>
+    <div style="background: var(--ux-surface); padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg);">
+      <pre class="ux-code-block" data-lang="javascript">// uxWorkOrder Component
+uxWorkOrder({
+  // Identification
+  workOrderNumber: 'WO-2024-0142',
+  workOrderId: 142,
+
+  // Product info
+  product: {
+    name: 'Product Name',
+    sku: 'SKU-001',
+    description: 'Optional description'
+  },
+
+  // Status: 'pending', 'in-progress', 'completed', 'on-hold'
+  status: 'pending',
+
+  // Priority: 'low', 'normal', 'high', 'urgent'
+  priority: 'normal',
+
+  // Quantities
+  quantityOrdered: 500,
+  quantityCompleted: 0,
+
+  // Due date
+  dueDate: new Date('2024-01-15'),
+
+  // Machine/Workstation
+  machine: 'CNC Mill #3',
+
+  // Materials (BOM)
+  materials: [
+    { name: 'Material A', qty: '50 units', shortage: false },
+    { name: 'Material B', qty: 'SHORTAGE', shortage: true }
+  ],
+
+  // Timer (auto-started when status is 'in-progress')
+  startedAt: new Date(),
+
+  // Display options
+  showMaterials: true,
+  showProgress: true,
+  showActions: true,
+
+  // Custom labels (i18n)
+  labels: {
+    ordered: 'Ordered',
+    completed: 'Completed',
+    remaining: 'Remaining',
+    progress: 'Progress',
+    start: 'Start',
+    pause: 'Pause',
+    complete: 'Complete'
+  }
+})
+
+// Properties (reactive)
+quantityRemaining     // Ordered - Completed
+progressPercent       // 0-100
+isOverdue             // true if past due date
+isDueSoon             // true if due within 24h
+formattedDueDate      // Formatted date string
+formattedElapsedTime  // HH:MM:SS or MM:SS
+statusLabel           // Translated status
+priorityLabel         // Translated priority
+hasShortage           // true if any material has shortage
+
+// Methods
+start()               // Set status to 'in-progress', start timer
+pause()               // Set status to 'on-hold', pause timer
+resume()              // Resume from 'on-hold'
+complete()            // Set status to 'completed'
+incrementCompleted(n) // Add n to completed quantity
+setCompleted(n)       // Set completed quantity to n
+setStatus(status)     // Set status directly
+getIcon(name)         // Get SVG icon by name
+getData()             // Get all work order data as object
+
+// Events
+@work-order:status-change  // { workOrderId, oldStatus, newStatus }
+@work-order:quantity-change // { workOrderId, quantityCompleted, quantityRemaining }</pre>
+    </div>
+  </div>
+
+  <!-- CSS Classes Reference -->
+  <div class="demo-section">
+    <h3>CSS Classes Reference</h3>
+    <div style="background: var(--ux-surface); padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg);">
+      <pre class="ux-code-block" data-lang="css">/* Container */
+.ux-work-order                    // Base card
+.ux-work-order--compact           // Compact variant
+.ux-work-order--detailed          // Detailed variant (wider)
+.ux-work-order--full              // Full width
+.ux-work-order--glass             // Glass morphism variant
+
+/* Priority (left border indicator) */
+.ux-work-order--priority-low
+.ux-work-order--priority-normal
+.ux-work-order--priority-high
+.ux-work-order--priority-urgent   // Has pulse animation
+
+/* Header */
+.ux-work-order__header
+.ux-work-order__header-top
+.ux-work-order__number            // Work order number
+.ux-work-order__product
+.ux-work-order__product-name
+.ux-work-order__product-sku
+
+/* Status badge */
+.ux-work-order__status
+.ux-work-order__status--pending
+.ux-work-order__status--in-progress
+.ux-work-order__status--completed
+.ux-work-order__status--on-hold
+.ux-work-order__status--pulse     // Animated dot
+.ux-work-order__status-dot
+
+/* Priority label */
+.ux-work-order__priority
+.ux-work-order__priority--low
+.ux-work-order__priority--normal
+.ux-work-order__priority--high
+.ux-work-order__priority--urgent
+
+/* Content */
+.ux-work-order__content
+.ux-work-order__quantities
+.ux-work-order__quantity
+.ux-work-order__quantity-label
+.ux-work-order__quantity-value
+.ux-work-order__quantity-value--completed
+.ux-work-order__quantity-value--remaining
+
+/* Progress */
+.ux-work-order__progress
+.ux-work-order__progress-header
+.ux-work-order__progress-label
+.ux-work-order__progress-value
+.ux-work-order__progress-bar
+.ux-work-order__progress-fill
+.ux-work-order__progress-fill--success
+.ux-work-order__progress-fill--warning
+
+/* Due date */
+.ux-work-order__due-date
+.ux-work-order__due-date--overdue
+.ux-work-order__due-date--warning
+.ux-work-order__due-date-icon
+
+/* Machine */
+.ux-work-order__machine
+.ux-work-order__machine-icon
+.ux-work-order__machine-name
+
+/* Materials */
+.ux-work-order__materials
+.ux-work-order__materials-header
+.ux-work-order__materials-count
+.ux-work-order__materials-list
+.ux-work-order__material
+.ux-work-order__material--shortage
+.ux-work-order__material-name
+.ux-work-order__material-qty
+
+/* Meta row */
+.ux-work-order__meta
+.ux-work-order__meta-item
+.ux-work-order__meta-icon
+
+/* Actions */
+.ux-work-order__actions
+.ux-work-order__action
+.ux-work-order__action--start
+.ux-work-order__action--pause
+.ux-work-order__action--complete
+.ux-work-order__action--secondary
+.ux-work-order__action-icon
+
+/* Grid layouts */
+.ux-work-order-grid               // Auto-fill grid
+.ux-work-order-column             // Kanban column
+.ux-work-order-column__header
+.ux-work-order-column__count</pre>
+    </div>
+  </div>
+
+</body>
+</html>

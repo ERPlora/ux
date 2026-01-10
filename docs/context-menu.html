@@ -10,15 +10,12 @@
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-content.js"></script>
   <script src="../components/ux-context-menu.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); }
     .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
     .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
     .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-xl); margin-bottom: var(--ux-space-md); min-height: 200px; display: flex; align-items: center; justify-content: center; }
-    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: var(--ux-font-size-md); }
-    .code-block .tag { color: #ff7b72; }
-    .code-block .attr { color: #79c0ff; }
-    .code-block .string { color: #a5d6ff; }
     .context-trigger { padding: var(--ux-space-xl); background: var(--ux-surface); border: 2px dashed var(--ux-border-color); border-radius: var(--ux-border-radius-lg); text-align: center; cursor: context-menu; user-select: none; }
   </style>
 </head>
@@ -67,13 +64,13 @@
           </div>
         </div>
       </div>
-      <pre class="code-block"><span class="tag">&lt;div</span> <span class="attr">x-data</span>=<span class="string">"uxContextMenu({ items: [...] })"</span>
-     <span class="attr">@contextmenu.prevent</span>=<span class="string">"open($event)"</span><span class="tag">&gt;</span>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxContextMenu({ items: [...] })"
+     @contextmenu.prevent="open($event)"&gt;
   Right-click here
-  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"ux-context-menu"</span> <span class="attr">x-show</span>=<span class="string">"isOpen"</span> <span class="attr">:style</span>=<span class="string">"menuStyle"</span><span class="tag">&gt;</span>
+  &lt;div class="ux-context-menu" x-show="isOpen" :style="menuStyle"&gt;
     ...
-  <span class="tag">&lt;/div&gt;</span>
-<span class="tag">&lt;/div&gt;</span></pre>
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
     </section>
 
     <section class="demo-section">
@@ -155,9 +152,9 @@
 
     <section class="demo-section">
       <h3>Glass Variant</h3>
-      <div class="demo-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      <div class="demo-box" style="background: var(--ux-demo-gradient);">
         <div class="context-trigger"
-             style="background: transparent; border-color: rgba(255,255,255,0.3); color: white;"
+             style="background: transparent; border-color: var(--ux-glass-bg-thin); color: var(--ux-primary-contrast);"
              x-data="uxContextMenu({
                items: [
                  { id: 'view', label: 'View', icon: 'eye' },
@@ -235,6 +232,167 @@
           </tr>
         </tbody>
       </table>
+    </section>
+
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Integracion con Django para acciones del servidor usando HTMX.</p>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Menu contextual basico con acciones Django</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Lista de items con menu contextual --&gt;
+{% for item in items %}
+&lt;div class="ux-list__item"
+     x-data="uxContextMenu({
+       items: [
+         { id: 'view', label: 'Ver detalles', icon: 'eye' },
+         { id: 'edit', label: 'Editar', icon: 'edit' },
+         { divider: true },
+         { id: 'delete', label: 'Eliminar', icon: 'trash', danger: true }
+       ]
+     })"
+     @contextmenu.prevent="open($event)"
+     @context-menu:select="
+       if ($event.detail.id === 'view') {
+         htmx.ajax('GET', '{% url \"item_detail\" item.pk %}', '#modal-content');
+       } else if ($event.detail.id === 'edit') {
+         htmx.ajax('GET', '{% url \"item_edit\" item.pk %}', '#modal-content');
+       } else if ($event.detail.id === 'delete') {
+         htmx.ajax('DELETE', '{% url \"item_delete\" item.pk %}', { target: '#item-{{ item.pk }}', swap: 'outerHTML' });
+       }
+     "&gt;
+  {{ item.name }}
+  &lt;div class="ux-context-menu" x-show="isOpen" x-transition :style="menuStyle" @click.outside="close()"&gt;
+    &lt;!-- Menu items renderizados por Alpine --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+{% endfor %}</pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Items del menu desde Django (dinamico)</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Menu con items generados desde el servidor --&gt;
+&lt;div class="context-trigger"
+     x-data="uxContextMenu({
+       items: {{ menu_items|safe }}
+     })"
+     @contextmenu.prevent="open($event)"
+     @context-menu:select="
+       htmx.ajax($event.detail.method || 'POST', $event.detail.url, {
+         target: $event.detail.target || 'body',
+         swap: $event.detail.swap || 'none'
+       });
+     "&gt;
+  Click derecho para acciones
+&lt;/div&gt;
+
+&lt;!-- En Django views.py --&gt;
+def get_context_menu(request):
+    menu_items = [
+        {'id': 'refresh', 'label': 'Actualizar', 'icon': 'refresh', 'url': '/api/refresh/', 'method': 'GET'},
+        {'id': 'export', 'label': 'Exportar', 'icon': 'download', 'url': '/api/export/'},
+        {'divider': True},
+        {'id': 'settings', 'label': 'Configuracion', 'icon': 'settings', 'url': '/settings/', 'target': '#modal-content'},
+    ]
+    return {'menu_items': json.dumps(menu_items)}</pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Menu con confirmacion antes de eliminar</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="{
+       ...uxContextMenu({
+         items: [
+           { id: 'edit', label: 'Editar', icon: 'edit' },
+           { id: 'duplicate', label: 'Duplicar', icon: 'copy' },
+           { divider: true },
+           { id: 'delete', label: 'Eliminar', icon: 'trash', danger: true }
+         ]
+       }),
+       confirmDelete: false,
+       itemId: '{{ item.pk }}'
+     }"
+     @contextmenu.prevent="open($event)"
+     @context-menu:select="
+       if ($event.detail.id === 'delete') {
+         confirmDelete = true;
+       } else if ($event.detail.id === 'edit') {
+         htmx.ajax('GET', '/items/' + itemId + '/edit/', '#modal-content');
+       }
+     "&gt;
+
+  &lt;!-- Alert de confirmacion --&gt;
+  &lt;template x-if="confirmDelete"&gt;
+    &lt;div class="ux-alert"&gt;
+      &lt;div class="ux-alert__content"&gt;
+        &lt;h3&gt;Confirmar eliminacion&lt;/h3&gt;
+        &lt;p&gt;Esta accion no se puede deshacer.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-alert__actions"&gt;
+        &lt;button class="ux-button" @click="confirmDelete = false"&gt;Cancelar&lt;/button&gt;
+        &lt;button class="ux-button ux-color-danger"
+                hx-delete="{% url 'item_delete' item.pk %}"
+                hx-target="#item-{{ item.pk }}"
+                hx-swap="outerHTML"
+                @click="confirmDelete = false"&gt;
+          Eliminar
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/template&gt;
+&lt;/div&gt;</pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Tabla con acciones por fila</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;table class="ux-datatable"&gt;
+  &lt;tbody&gt;
+    {% for row in rows %}
+    &lt;tr id="row-{{ row.pk }}"
+        x-data="uxContextMenu({
+          items: [
+            { id: 'view', label: 'Ver', icon: 'eye', url: '{% url \"row_detail\" row.pk %}' },
+            { id: 'edit', label: 'Editar', icon: 'edit', url: '{% url \"row_edit\" row.pk %}' },
+            { id: 'clone', label: 'Clonar', icon: 'copy', url: '{% url \"row_clone\" row.pk %}' },
+            { divider: true },
+            { id: 'archive', label: 'Archivar', icon: 'archive', url: '{% url \"row_archive\" row.pk %}' },
+            { id: 'delete', label: 'Eliminar', icon: 'trash', danger: true, url: '{% url \"row_delete\" row.pk %}' }
+          ]
+        })"
+        @contextmenu.prevent="open($event)"
+        @context-menu:select="
+          const action = $event.detail;
+          if (action.id === 'delete') {
+            htmx.ajax('DELETE', action.url, { target: '#row-{{ row.pk }}', swap: 'outerHTML' });
+          } else {
+            htmx.ajax('GET', action.url, '#modal-content');
+          }
+        "&gt;
+      &lt;td&gt;{{ row.name }}&lt;/td&gt;
+      &lt;td&gt;{{ row.status }}&lt;/td&gt;
+      &lt;td&gt;{{ row.date }}&lt;/td&gt;
+    &lt;/tr&gt;
+    {% endfor %}
+  &lt;/tbody&gt;
+&lt;/table&gt;</pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Django View para acciones del menu</h4>
+      <pre class="ux-code-block" data-lang="html"># views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["DELETE"])
+def item_delete(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    item.delete()
+    # Retorna elemento vacio para que HTMX lo reemplace
+    return HttpResponse('')
+
+@require_http_methods(["GET"])
+def item_edit(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    form = ItemForm(instance=item)
+    return render(request, 'partials/item_form.html', {'form': form, 'item': item})
+
+@require_http_methods(["POST"])
+def item_archive(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    item.is_archived = True
+    item.save()
+    # Retorna el item actualizado
+    return render(request, 'partials/item_row.html', {'item': item})</pre>
     </section>
   </div>
 </body>

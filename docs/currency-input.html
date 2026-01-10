@@ -6,6 +6,8 @@
   <title>Currency Input - UX Library</title>
   <link rel="stylesheet" href="../bootstrap-grid.min.css">
   <script src="../dist/ux.min.js"></script>
+  <script src="../components/ux-code-block.js"></script>
+
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
     body {
@@ -39,15 +41,6 @@
       flex-wrap: wrap;
       gap: 1.5rem;
       align-items: flex-start;
-    }
-    pre {
-      background: var(--ux-gray-900);
-      color: var(--ux-gray-100);
-      padding: 1rem;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-size: 0.8125rem;
-      line-height: 1.5;
     }
     .result-display {
       margin-top: 1rem;
@@ -101,7 +94,7 @@
           </div>
         </div>
 
-        <pre>&lt;div x-data="uxCurrencyInput({ currency: 'USD', value: 1234.56 })"
+        <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxCurrencyInput({ currency: 'USD', value: 1234.56 })"
      class="ux-currency"
      :class="getPositionClass()"&gt;
   &lt;span class="ux-currency__symbol ux-currency__symbol--prefix"&gt;$&lt;/span&gt;
@@ -438,7 +431,7 @@
 
     <div class="demo-glass-bg">
       <div class="ux-currency-field" style="max-width: 300px;">
-        <label class="ux-currency-field__label" style="color: white;">Importe</label>
+        <label class="ux-currency-field__label" style="color: var(--ux-primary-contrast);">Importe</label>
         <div x-data="uxCurrencyInput({ currency: 'USD', value: 500 })"
              class="ux-currency ux-currency--prefix ux-currency--glass">
           <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
@@ -517,7 +510,7 @@
     <h2>Opciones Alpine.js</h2>
 
     <div class="demo-box">
-      <pre>uxCurrencyInput({
+      <pre class="ux-code-block" data-lang="javascript">uxCurrencyInput({
   currency: 'USD',        // Código de moneda (USD, EUR, GBP, JPY, etc.)
   value: 0,               // Valor inicial
   symbol: null,           // Símbolo personalizado (auto si null)
@@ -545,6 +538,256 @@ decrement()               // Decrementar por step
 // Eventos
 @currency:change          // Se dispara al cambiar el valor
                           // detail: { value, formatted, display }</pre>
+    </div>
+  </section>
+
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1.5rem;">
+      Ejemplos de integración con HTMX y Django para conversión de monedas en tiempo real.
+    </p>
+
+    <div class="demo-grid">
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Conversión de Moneda con HTMX</h3>
+        <div class="demo-box">
+          <pre class="ux-code-block" data-lang="html">&lt;!-- Formulario de conversión de moneda --&gt;
+&lt;form hx-post="/api/convert/"
+      hx-trigger="input delay:500ms from:#amount-input"
+      hx-target="#conversion-result"
+      hx-swap="innerHTML"&gt;
+
+  &lt;div class="ux-currency-field"&gt;
+    &lt;label class="ux-currency-field__label"&gt;Cantidad USD&lt;/label&gt;
+    &lt;div x-data="uxCurrencyInput({ currency: 'USD', value: 100 })"
+         class="ux-currency ux-currency--prefix"
+         @currency:change="$refs.hiddenInput.value = $event.detail.value"&gt;
+      &lt;span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"&gt;&lt;/span&gt;
+      &lt;input type="text" id="amount-input"
+             inputmode="decimal" class="ux-input"
+             :value="displayValue"
+             @input="onInput($event)"
+             @focus="onFocus($event)"
+             @blur="onBlur()"&gt;
+      &lt;input type="hidden" name="amount" x-ref="hiddenInput" :value="getValue()"&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;input type="hidden" name="from_currency" value="USD"&gt;
+  &lt;input type="hidden" name="to_currency" value="EUR"&gt;
+&lt;/form&gt;
+
+&lt;!-- Resultado de la conversión --&gt;
+&lt;div id="conversion-result" class="result-display"&gt;
+  Resultado: &lt;strong&gt;0.00 EUR&lt;/strong&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Vista Django (views.py)</h3>
+        <div class="demo-box">
+          <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+from decimal import Decimal
+import requests
+
+# Tasas de cambio (en producción usar API externa)
+EXCHANGE_RATES = {
+    'USD': {'EUR': Decimal('0.92'), 'GBP': Decimal('0.79'), 'MXN': Decimal('17.15')},
+    'EUR': {'USD': Decimal('1.09'), 'GBP': Decimal('0.86'), 'MXN': Decimal('18.65')},
+    'GBP': {'USD': Decimal('1.27'), 'EUR': Decimal('1.16'), 'MXN': Decimal('21.75')},
+}
+
+@require_POST
+def convert_currency(request):
+    amount = Decimal(request.POST.get('amount', '0'))
+    from_currency = request.POST.get('from_currency', 'USD')
+    to_currency = request.POST.get('to_currency', 'EUR')
+
+    rate = EXCHANGE_RATES.get(from_currency, {}).get(to_currency, Decimal('1'))
+    converted = amount * rate
+
+    # Formatear con locale
+    symbols = {'USD': '$', 'EUR': '€', 'GBP': '£', 'MXN': '$'}
+    symbol = symbols.get(to_currency, '')
+
+    return HttpResponse(f'''
+        Resultado: &lt;strong&gt;{symbol}{converted:,.2f} {to_currency}&lt;/strong&gt;
+    ''')</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-grid" style="margin-top: 1.5rem;">
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Selector de Moneda con Conversión</h3>
+        <div class="demo-box">
+          <pre class="ux-code-block" data-lang="html">&lt;!-- Selector con conversión bidireccional --&gt;
+&lt;div x-data="{
+    fromCurrency: 'USD',
+    toCurrency: 'EUR',
+    amount: 100
+}"&gt;
+  &lt;div class="row g-3"&gt;
+    &lt;div class="col-5"&gt;
+      &lt;select class="ux-select" x-model="fromCurrency"
+              hx-get="/api/convert/"
+              hx-include="[name='amount'],[name='to_currency']"
+              hx-target="#result"&gt;
+        &lt;option value="USD"&gt;USD - Dólar&lt;/option&gt;
+        &lt;option value="EUR"&gt;EUR - Euro&lt;/option&gt;
+        &lt;option value="GBP"&gt;GBP - Libra&lt;/option&gt;
+        &lt;option value="MXN"&gt;MXN - Peso&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+
+    &lt;div class="col-2 text-center"&gt;
+      &lt;button class="ux-button ux-button--clear"
+              @click="[fromCurrency, toCurrency] = [toCurrency, fromCurrency]"&gt;
+        ⇄
+      &lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;div class="col-5"&gt;
+      &lt;select class="ux-select" x-model="toCurrency" name="to_currency"&gt;
+        &lt;option value="USD"&gt;USD - Dólar&lt;/option&gt;
+        &lt;option value="EUR"&gt;EUR - Euro&lt;/option&gt;
+        &lt;option value="GBP"&gt;GBP - Libra&lt;/option&gt;
+        &lt;option value="MXN"&gt;MXN - Peso&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div id="result" class="result-display mt-3"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Modelo Django con Campo de Moneda</h3>
+        <div class="demo-box">
+          <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+from decimal import Decimal
+
+class Product(models.Model):
+    name = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+
+    def get_price_in(self, target_currency):
+        """Convierte el precio a otra moneda."""
+        if self.currency == target_currency:
+            return self.price
+        rate = get_exchange_rate(self.currency, target_currency)
+        return self.price * rate
+
+# forms.py
+from django import forms
+
+class PriceForm(forms.Form):
+    amount = forms.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        min_value=Decimal('0.01'),
+        widget=forms.NumberInput(attrs={
+            'class': 'ux-input',
+            'inputmode': 'decimal',
+            'step': '0.01'
+        })
+    )
+    currency = forms.ChoiceField(choices=[
+        ('USD', 'USD'), ('EUR', 'EUR'),
+        ('GBP', 'GBP'), ('MXN', 'MXN')
+    ])</pre>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">API de Conversión con Tasas en Tiempo Real</h3>
+      <div class="demo-box">
+        <pre class="ux-code-block" data-lang="python"># services.py - Servicio de conversión con cache
+from django.core.cache import cache
+from decimal import Decimal
+import requests
+
+class CurrencyService:
+    CACHE_KEY = 'exchange_rates'
+    CACHE_TIMEOUT = 3600  # 1 hora
+
+    @classmethod
+    def get_rates(cls):
+        """Obtiene tasas de cambio con cache."""
+        rates = cache.get(cls.CACHE_KEY)
+        if rates is None:
+            # Usar API externa (ej: exchangerate-api.com)
+            response = requests.get(
+                'https://api.exchangerate-api.com/v4/latest/USD',
+                timeout=5
+            )
+            if response.ok:
+                data = response.json()
+                rates = data.get('rates', {})
+                cache.set(cls.CACHE_KEY, rates, cls.CACHE_TIMEOUT)
+        return rates or {}
+
+    @classmethod
+    def convert(cls, amount, from_currency, to_currency):
+        """Convierte una cantidad entre monedas."""
+        if from_currency == to_currency:
+            return Decimal(str(amount))
+
+        rates = cls.get_rates()
+        # Convertir a USD primero, luego a moneda destino
+        usd_rate = Decimal(str(rates.get(from_currency, 1)))
+        target_rate = Decimal(str(rates.get(to_currency, 1)))
+
+        usd_amount = Decimal(str(amount)) / usd_rate
+        return usd_amount * target_rate
+
+# views.py - Endpoint HTMX
+from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["GET", "POST"])
+def convert_api(request):
+    amount = request.GET.get('amount') or request.POST.get('amount', '0')
+    from_curr = request.GET.get('from_currency') or request.POST.get('from_currency', 'USD')
+    to_curr = request.GET.get('to_currency') or request.POST.get('to_currency', 'EUR')
+
+    try:
+        result = CurrencyService.convert(Decimal(amount), from_curr, to_curr)
+        formatted = f"{result:,.2f}"
+        return HttpResponse(f'''
+            &lt;div class="ux-currency ux-currency--prefix ux-currency--display" style="justify-content: center;"&gt;
+                &lt;span class="ux-currency__symbol ux-currency__symbol--prefix"&gt;
+                    {get_symbol(to_curr)}
+                &lt;/span&gt;
+                &lt;span style="font-size: 2rem; font-weight: 600;"&gt;{formatted}&lt;/span&gt;
+                &lt;span style="margin-left: 0.5rem; color: var(--ux-text-secondary);"&gt;{to_curr}&lt;/span&gt;
+            &lt;/div&gt;
+        ''')
+    except Exception as e:
+        return HttpResponse(f'&lt;span class="ux-text--danger"&gt;Error: {str(e)}&lt;/span&gt;', status=400)</pre>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">URLs Django</h3>
+      <div class="demo-box">
+        <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('api/convert/', views.convert_api, name='currency_convert'),
+]</pre>
+      </div>
     </div>
   </section>
 

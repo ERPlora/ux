@@ -9,12 +9,12 @@
   <script src="../components/ux-navbar.js"></script>
   <script src="../components/ux-button.js"></script>
   <script src="../components/ux-command.js"></script>
+  <script src="../components/ux-code-block.js"></script>
   <style>
     .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
     .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
     .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
     .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
-    .code-block { background: #1a1a2e; color: #e5e5e5; padding: var(--ux-space-md); border-radius: var(--ux-border-radius); font-family: monospace; font-size: 0.8125rem; overflow-x: auto; white-space: pre; }
     .demo-output { padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-radius-md); font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-top: var(--ux-space-md); }
     .shortcut-hint { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: var(--ux-surface-secondary); border-radius: var(--ux-radius-md); font-family: monospace; font-size: var(--ux-font-size-sm); }
     .shortcut-key { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 6px; background: var(--ux-surface); border: 1px solid var(--ux-border-color); border-radius: var(--ux-radius-sm); font-size: 0.75rem; }
@@ -163,7 +163,7 @@
       </div>
     </div>
 
-    <pre class="code-block">&lt;div x-data="uxCommand({
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxCommand({
   placeholder: 'Buscar comandos...',
   groups: [
     {
@@ -235,7 +235,7 @@
         </div>
       </div>
     </div>
-    <pre class="code-block">&lt;div class="ux-command ux-command--glass"&gt;...&lt;/div&gt;</pre>
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-command ux-command--glass"&gt;...&lt;/div&gt;</pre>
   </div>
 
   <div class="demo-section">
@@ -309,7 +309,7 @@
         Ultimo comando ejecutado: <strong x-text="lastExecuted"></strong>
       </div>
     </div>
-    <pre class="code-block">// Comandos con acciones ejecutables
+    <pre class="ux-code-block" data-lang="html">// Comandos con acciones ejecutables
 {
   id: 'toggle-dark',
   title: 'Alternar Modo Oscuro',
@@ -387,7 +387,7 @@
         </div>
       </div>
     </div>
-    <pre class="code-block">uxCommand({
+    <pre class="ux-code-block" data-lang="html">uxCommand({
   loadResults: async (query) => {
     const response = await fetch(`/api/search?q=${query}`);
     const data = await response.json();
@@ -399,7 +399,7 @@
   <div class="demo-section">
     <h3>API y Eventos</h3>
     <div class="demo-box">
-      <pre class="code-block">// Opciones de configuracion
+      <pre class="ux-code-block" data-lang="html">// Opciones de configuracion
 uxCommand({
   placeholder: 'Buscar...',        // Placeholder del input
   commands: [],                     // Lista plana de comandos
@@ -448,7 +448,7 @@ icons.file, icons.folder, icons.settings, icons.user, icons.clock</pre>
     <h3>Integracion con HTMX</h3>
     <p>Busqueda en tiempo real contra el servidor.</p>
     <div class="demo-box">
-      <pre class="code-block">&lt;!-- Busqueda con HTMX --&gt;
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Busqueda con HTMX --&gt;
 &lt;div x-data="uxCommand({ placeholder: 'Buscar...' })"&gt;
   &lt;div class="ux-command__search"&gt;
     &lt;input type="text"
@@ -475,6 +475,254 @@ icons.file, icons.folder, icons.settings, icons.user, icons.clock</pre>
     &lt;/li&gt;
   &lt;/ul&gt;
 &lt;/div&gt;</pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>HTMX + Django</h3>
+    <p>Integracion completa con Django para busqueda en tiempo real de comandos y acciones.</p>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md); font-weight: 600;">Template HTML (command_palette.html)</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Command Palette con busqueda Django --&gt;
+&lt;div x-data="uxCommand({ placeholder: 'Buscar comandos, paginas, usuarios...' })"&gt;
+  &lt;button class="ux-button ux-button--outline" @click="open()"&gt;
+    Buscar... &lt;span class="shortcut-hint"&gt;&lt;span class="shortcut-key"&gt;Cmd&lt;/span&gt;&lt;span class="shortcut-key"&gt;K&lt;/span&gt;&lt;/span&gt;
+  &lt;/button&gt;
+
+  &lt;div class="ux-command-backdrop" :class="{ 'ux-command-backdrop--open': isOpen }" @click="close()"&gt;&lt;/div&gt;
+
+  &lt;div class="ux-command" :class="{ 'ux-command--open': isOpen }"&gt;
+    &lt;div class="ux-command__search"&gt;
+      &lt;span class="ux-command__search-icon" x-html="icons.search"&gt;&lt;/span&gt;
+      &lt;input type="text"
+             class="ux-command__input"
+             name="q"
+             :placeholder="placeholder"
+             x-model="query"
+             hx-get="{% url 'command_search' %}"
+             hx-trigger="keyup changed delay:300ms"
+             hx-target="#command-results"
+             hx-indicator=".ux-command__loading"
+             autocomplete="off"&gt;
+      &lt;div class="ux-command__loading htmx-indicator"&gt;
+        &lt;div class="ux-command__loading-spinner"&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div id="command-results" class="ux-command__results"&gt;
+      &lt;!-- Resultados iniciales o recientes --&gt;
+      {% include 'partials/command_results.html' with results=recent_commands %}
+    &lt;/div&gt;
+
+    &lt;div class="ux-command__footer"&gt;
+      &lt;div class="ux-command__footer-hints"&gt;
+        &lt;span class="ux-command__footer-hint"&gt;
+          &lt;span class="ux-command__key"&gt;↑↓&lt;/span&gt; Navegar
+        &lt;/span&gt;
+        &lt;span class="ux-command__footer-hint"&gt;
+          &lt;span class="ux-command__key"&gt;↵&lt;/span&gt; Seleccionar
+        &lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md); font-weight: 600;">Partial de resultados (partials/command_results.html)</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- partials/command_results.html --&gt;
+{% if results %}
+  {% regroup results by category as grouped_results %}
+  {% for group in grouped_results %}
+    &lt;div class="ux-command__group"&gt;
+      &lt;div class="ux-command__group-title"&gt;{{ group.grouper }}&lt;/div&gt;
+      &lt;ul class="ux-command__list"&gt;
+        {% for item in group.list %}
+          &lt;li class="ux-command__item"
+              hx-get="{{ item.url }}"
+              hx-push-url="true"
+              hx-target="body"
+              @click="close()"&gt;
+            &lt;div class="ux-command__item-icon"&gt;
+              {% if item.icon %}
+                &lt;svg width="16" height="16"&gt;&lt;use href="#icon-{{ item.icon }}"&gt;&lt;/use&gt;&lt;/svg&gt;
+              {% endif %}
+            &lt;/div&gt;
+            &lt;div class="ux-command__item-content"&gt;
+              &lt;div class="ux-command__item-title"&gt;{{ item.title }}&lt;/div&gt;
+              {% if item.description %}
+                &lt;div class="ux-command__item-description"&gt;{{ item.description }}&lt;/div&gt;
+              {% endif %}
+            &lt;/div&gt;
+            {% if item.shortcut %}
+              &lt;div class="ux-command__item-shortcut"&gt;
+                &lt;span class="ux-command__key"&gt;{{ item.shortcut }}&lt;/span&gt;
+              &lt;/div&gt;
+            {% endif %}
+          &lt;/li&gt;
+        {% endfor %}
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  {% endfor %}
+{% else %}
+  &lt;div class="ux-command__empty"&gt;
+    &lt;div class="ux-command__empty-title"&gt;Sin resultados&lt;/div&gt;
+    &lt;div class="ux-command__empty-description"&gt;
+      No se encontraron comandos para "{{ query }}"
+    &lt;/div&gt;
+  &lt;/div&gt;
+{% endif %}</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md); font-weight: 600;">Vista Django (views.py)</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def command_search(request):
+    query = request.GET.get('q', '').strip()
+    results = []
+
+    if query:
+        # Buscar en paginas/navegacion
+        pages = [
+            {'title': 'Dashboard', 'url': '/', 'icon': 'home', 'category': 'Navegacion'},
+            {'title': 'Productos', 'url': '/productos/', 'icon': 'box', 'category': 'Navegacion'},
+            {'title': 'Pedidos', 'url': '/pedidos/', 'icon': 'clipboard', 'category': 'Navegacion'},
+            {'title': 'Clientes', 'url': '/clientes/', 'icon': 'users', 'category': 'Navegacion'},
+            {'title': 'Configuracion', 'url': '/settings/', 'icon': 'settings', 'category': 'Navegacion', 'shortcut': 'Cmd+,'},
+        ]
+
+        # Filtrar paginas
+        for page in pages:
+            if query.lower() in page['title'].lower():
+                results.append(page)
+
+        # Buscar usuarios
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        users = User.objects.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(email__icontains=query)
+        )[:5]
+
+        for user in users:
+            results.append({
+                'title': user.get_full_name() or user.username,
+                'description': user.email,
+                'url': f'/usuarios/{user.pk}/',
+                'icon': 'user',
+                'category': 'Usuarios'
+            })
+
+        # Buscar productos
+        from products.models import Product
+        products = Product.objects.filter(
+            Q(name__icontains=query) |
+            Q(sku__icontains=query)
+        )[:5]
+
+        for product in products:
+            results.append({
+                'title': product.name,
+                'description': f'SKU: {product.sku} - ${product.price}',
+                'url': f'/productos/{product.pk}/',
+                'icon': 'box',
+                'category': 'Productos'
+            })
+
+        # Acciones rapidas
+        actions = [
+            {'title': 'Nuevo Producto', 'url': '/productos/nuevo/', 'icon': 'plus', 'category': 'Acciones', 'shortcut': 'Cmd+N'},
+            {'title': 'Nuevo Pedido', 'url': '/pedidos/nuevo/', 'icon': 'plus', 'category': 'Acciones'},
+            {'title': 'Exportar Datos', 'url': '/export/', 'icon': 'download', 'category': 'Acciones'},
+        ]
+
+        for action in actions:
+            if query.lower() in action['title'].lower():
+                results.append(action)
+
+    html = render_to_string('partials/command_results.html', {
+        'results': results,
+        'query': query
+    })
+
+    return HttpResponse(html)</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md); font-weight: 600;">URLs (urls.py)</h4>
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('command/search/', views.command_search, name='command_search'),
+]</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md); font-weight: 600;">Busqueda con modelo Command</h4>
+      <pre class="ux-code-block" data-lang="python"># models.py - Modelo opcional para comandos personalizados
+from django.db import models
+
+class Command(models.Model):
+    CATEGORY_CHOICES = [
+        ('navigation', 'Navegacion'),
+        ('action', 'Acciones'),
+        ('settings', 'Configuracion'),
+    ]
+
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=255, blank=True)
+    url = models.CharField(max_length=255)
+    icon = models.CharField(max_length=50, default='command')
+    shortcut = models.CharField(max_length=50, blank=True)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    keywords = models.TextField(blank=True, help_text='Palabras clave separadas por coma')
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'title']
+
+    def matches(self, query):
+        """Verifica si el comando coincide con la busqueda"""
+        query = query.lower()
+        if query in self.title.lower():
+            return True
+        if query in self.description.lower():
+            return True
+        keywords = [k.strip() for k in self.keywords.split(',')]
+        return any(query in k.lower() for k in keywords)
+
+# views.py - Busqueda con modelo
+def command_search(request):
+    query = request.GET.get('q', '').strip()
+
+    if query:
+        commands = Command.objects.filter(is_active=True)
+        results = [
+            {
+                'title': cmd.title,
+                'description': cmd.description,
+                'url': cmd.url,
+                'icon': cmd.icon,
+                'shortcut': cmd.shortcut,
+                'category': cmd.get_category_display()
+            }
+            for cmd in commands if cmd.matches(query)
+        ]
+    else:
+        results = []
+
+    return render(request, 'partials/command_results.html', {'results': results})</pre>
     </div>
   </div>
 

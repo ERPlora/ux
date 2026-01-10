@@ -6,6 +6,8 @@
   <title>Signature Pad - UX Library</title>
   <link rel="stylesheet" href="../bootstrap-grid.min.css">
   <script src="../dist/ux.min.js"></script>
+  <script src="../components/ux-code-block.js"></script>
+
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
     body {
@@ -33,15 +35,6 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       gap: 1.5rem;
-    }
-    pre {
-      background: var(--ux-gray-900);
-      color: var(--ux-gray-100);
-      padding: 1rem;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-size: 0.8125rem;
-      line-height: 1.5;
     }
     .result-display {
       margin-top: 1rem;
@@ -114,7 +107,7 @@
           </div>
         </div>
 
-        <pre>&lt;div x-data="uxSignaturePad()"
+        <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxSignaturePad()"
      class="ux-signature-pad"&gt;
   &lt;label class="ux-signature-pad__label"&gt;Firma&lt;/label&gt;
   &lt;div class="ux-signature-pad__container"&gt;
@@ -388,17 +381,17 @@
            class="ux-signature-pad ux-signature-pad--glass"
            :class="{ 'ux-signature-pad--has-signature': hasSignature }"
            style="max-width: 450px;">
-        <label class="ux-signature-pad__label" style="color: white;">Firma digital</label>
+        <label class="ux-signature-pad__label" style="color: var(--ux-primary-contrast);">Firma digital</label>
         <div class="ux-signature-pad__container">
           <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
-          <div class="ux-signature-pad__guide" style="background: rgba(255,255,255,0.3);"></div>
-          <div class="ux-signature-pad__placeholder" x-show="!hasSignature" style="color: rgba(255,255,255,0.6);">
+          <div class="ux-signature-pad__guide" style="background: var(--ux-glass-bg-thin);"></div>
+          <div class="ux-signature-pad__placeholder" x-show="!hasSignature" style="color: rgba(var(--ux-surface-rgb), 0.6);">
             <span x-html="icons.pen"></span>
             <span>Firme aquí</span>
           </div>
         </div>
         <div class="ux-signature-pad__actions">
-          <button type="button" class="ux-signature-pad__btn" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;" @click="clear()" :disabled="!hasSignature">Limpiar</button>
+          <button type="button" class="ux-signature-pad__btn" style="background: var(--ux-glass-bg-thin); border-color: var(--ux-glass-border); color: var(--ux-primary-contrast);" @click="clear()" :disabled="!hasSignature">Limpiar</button>
           <button type="button" class="ux-signature-pad__btn" style="background: white; color: var(--ux-primary);" @click="download()" :disabled="!hasSignature">Descargar</button>
         </div>
       </div>
@@ -464,7 +457,7 @@
     <h2>Opciones Alpine.js</h2>
 
     <div class="demo-box">
-      <pre>uxSignaturePad({
+      <pre class="ux-code-block" data-lang="javascript">uxSignaturePad({
   width: null,              // Ancho (auto si null)
   height: 200,              // Alto en píxeles
   lineWidth: 2,             // Grosor de línea
@@ -499,6 +492,219 @@ isDrawing                   // Boolean si está dibujando
 @signature:change           // Al cambiar estado de firma
 @signature:clear            // Al limpiar
 @signature:download         // Al descargar</pre>
+    </div>
+  </section>
+
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1.5rem;">
+      Ejemplos de integración con Django para guardar firmas en el servidor.
+    </p>
+
+    <div class="demo-grid">
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Guardar firma con HTMX</h3>
+        <div class="demo-box">
+          <pre class="ux-code-block" data-lang="html">&lt;!-- Template Django --&gt;
+&lt;form x-data="{
+    signatureData: null,
+    updateSignature(data) {
+      this.signatureData = data;
+      this.$refs.signatureInput.value = data;
+    }
+  }"
+  hx-post="{% url 'save_signature' %}"
+  hx-target="#result"
+  hx-swap="innerHTML"&gt;
+
+  {% csrf_token %}
+  &lt;input type="hidden"
+         name="signature"
+         x-ref="signatureInput"&gt;
+
+  &lt;div x-data="uxSignaturePad()"
+       @signature:change="updateSignature(hasSignature ? getSignature() : null)"
+       class="ux-signature-pad"
+       :class="{ 'ux-signature-pad--has-signature': hasSignature }"&gt;
+
+    &lt;label class="ux-signature-pad__label"&gt;Firma del cliente&lt;/label&gt;
+
+    &lt;div class="ux-signature-pad__container"&gt;
+      &lt;canvas x-ref="canvas" class="ux-signature-pad__canvas"&gt;&lt;/canvas&gt;
+      &lt;div class="ux-signature-pad__guide"&gt;&lt;/div&gt;
+      &lt;div class="ux-signature-pad__placeholder" x-show="!hasSignature"&gt;
+        &lt;span x-html="icons.pen"&gt;&lt;/span&gt;
+        &lt;span&gt;Firme aquí&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-signature-pad__actions"&gt;
+      &lt;button type="button" class="ux-signature-pad__btn"
+              @click="clear()" :disabled="!hasSignature"&gt;
+        Limpiar
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;button type="submit" class="ux-button ux-color-primary"
+          :disabled="!signatureData"&gt;
+    Guardar firma
+  &lt;/button&gt;
+
+  &lt;div id="result"&gt;&lt;/div&gt;
+&lt;/form&gt;</pre>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Vista Django</h3>
+        <div class="demo-box">
+          <pre class="ux-code-block" data-lang="python"># views.py
+import base64
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+from django.core.files.base import ContentFile
+
+@require_POST
+def save_signature(request):
+    signature_data = request.POST.get('signature')
+
+    if not signature_data:
+        return HttpResponse(
+            '&lt;div class="ux-alert ux-color-danger"&gt;'
+            'Firma requerida&lt;/div&gt;',
+            status=400
+        )
+
+    # Decodificar base64 (data:image/png;base64,...)
+    format, imgstr = signature_data.split(';base64,')
+    ext = format.split('/')[-1]
+    image_data = base64.b64decode(imgstr)
+
+    # Guardar en modelo
+    from .models import Document
+    doc = Document.objects.create(
+        user=request.user,
+        # Guardar como archivo
+        signature=ContentFile(
+            image_data,
+            name=f'firma_{request.user.id}.{ext}'
+        )
+    )
+
+    return HttpResponse(
+        '&lt;div class="ux-alert ux-color-success"&gt;'
+        f'Firma guardada (ID: {doc.id})&lt;/div&gt;'
+    )</pre>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Modelo Django con campo de firma</h3>
+      <div class="demo-box">
+        <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+from django.contrib.auth import get_user_model
+
+class Document(models.Model):
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE
+    )
+    signature = models.ImageField(
+        upload_to='signatures/',
+        blank=True,
+        null=True
+    )
+    signed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-signed_at']
+
+    def __str__(self):
+        return f"Documento firmado por {self.user} - {self.signed_at}"
+
+
+# Alternativa: guardar como TextField (base64)
+class Contract(models.Model):
+    title = models.CharField(max_length=200)
+    signature_data = models.TextField(
+        blank=True,
+        help_text="Firma en formato base64"
+    )
+    signed_at = models.DateTimeField(null=True, blank=True)
+
+    def has_signature(self):
+        return bool(self.signature_data)</pre>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Cargar firma existente</h3>
+      <div class="demo-box">
+        <pre class="ux-code-block" data-lang="html">&lt;!-- Cargar firma desde Django --&gt;
+&lt;div x-data="uxSignaturePad()"
+     x-init="{% if document.signature %}loadSignature('{{ document.signature.url }}'){% endif %}"
+     class="ux-signature-pad"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- Con base64 desde el modelo --&gt;
+&lt;div x-data="uxSignaturePad()"
+     x-init="{% if contract.signature_data %}loadSignature('{{ contract.signature_data }}'){% endif %}"
+     class="ux-signature-pad"&gt;
+  ...
+&lt;/div&gt;</pre>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">Validacion con Django Forms</h3>
+      <div class="demo-box">
+        <pre class="ux-code-block" data-lang="python"># forms.py
+from django import forms
+import base64
+
+class SignatureForm(forms.Form):
+    name = forms.CharField(max_length=100)
+    signature = forms.CharField(widget=forms.HiddenInput())
+
+    def clean_signature(self):
+        signature = self.cleaned_data.get('signature')
+
+        if not signature:
+            raise forms.ValidationError('La firma es requerida')
+
+        # Validar formato base64
+        if not signature.startswith('data:image/'):
+            raise forms.ValidationError('Formato de firma inválido')
+
+        try:
+            format, imgstr = signature.split(';base64,')
+            base64.b64decode(imgstr)
+        except Exception:
+            raise forms.ValidationError('Firma corrupta')
+
+        return signature
+
+
+# views.py
+from .forms import SignatureForm
+
+def sign_document(request):
+    if request.method == 'POST':
+        form = SignatureForm(request.POST)
+        if form.is_valid():
+            # Procesar firma válida
+            pass
+    else:
+        form = SignatureForm()
+
+    return render(request, 'sign.html', {'form': form})</pre>
+      </div>
     </div>
   </section>
 
