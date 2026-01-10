@@ -42892,26 +42892,35 @@
        Glass Variant (iOS 26 Liquid Glass)
     ======================================== */
 
-    /* Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js */
-    .ux-input--glass,
-    input.ux-input--glass,
-    textarea.ux-input--glass,
-    select.ux-input--glass {
+    /* Glass variant - higher specificity to override base styles */
+    .ux-input.ux-input--glass,
+    input.ux-input.ux-input--glass,
+    textarea.ux-input.ux-input--glass,
+    select.ux-input.ux-input--glass {
       background: var(--ux-glass-bg-thin);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
       border: 0.5px solid var(--ux-glass-border);
+      color: #fff;
     }
 
-    .ux-input--glass:hover,
-    input.ux-input--glass:hover,
-    textarea.ux-input--glass:hover,
-    select.ux-input--glass:hover {
+    .ux-input.ux-input--glass::placeholder,
+    input.ux-input.ux-input--glass::placeholder,
+    textarea.ux-input.ux-input--glass::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .ux-input.ux-input--glass:hover,
+    input.ux-input.ux-input--glass:hover,
+    textarea.ux-input.ux-input--glass:hover,
+    select.ux-input.ux-input--glass:hover {
       background: var(--ux-glass-bg);
     }
 
-    .ux-input--glass:focus,
-    input.ux-input--glass:focus,
-    textarea.ux-input--glass:focus,
-    select.ux-input--glass:focus {
+    .ux-input.ux-input--glass:focus,
+    input.ux-input.ux-input--glass:focus,
+    textarea.ux-input.ux-input--glass:focus,
+    select.ux-input.ux-input--glass:focus {
       background: var(--ux-glass-bg);
       border-color: var(--ux-glass-border);
       box-shadow: var(--ux-glass-highlight);
