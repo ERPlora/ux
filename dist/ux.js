@@ -86607,6 +86607,123 @@
     }
 
     /* ========================================
+       Scrollable Tab Bar with Navigation Arrows
+    ======================================== */
+
+    .ux-tab-bar--scrollable {
+      position: relative;
+    }
+
+    .ux-tab-bar--scrollable .ux-tab-bar__scroll {
+      display: flex;
+      align-items: stretch;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-behavior: smooth;
+    }
+
+    .ux-tab-bar--scrollable .ux-tab-bar__scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Navigation Arrows */
+    .ux-tab-bar__arrow {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 2;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--ux-transition-fast), visibility var(--ux-transition-fast);
+    }
+
+    .ux-tab-bar__arrow--visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .ux-tab-bar__arrow--start {
+      left: 0;
+      background: linear-gradient(to right,
+        var(--ux-glass-bg-thick) 0%,
+        var(--ux-glass-bg) 50%,
+        transparent 100%);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+    }
+
+    .ux-tab-bar__arrow--end {
+      right: 0;
+      background: linear-gradient(to left,
+        var(--ux-glass-bg-thick) 0%,
+        var(--ux-glass-bg) 50%,
+        transparent 100%);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+    }
+
+    .ux-tab-bar__arrow svg {
+      width: 20px;
+      height: 20px;
+      color: var(--ux-text-secondary);
+      transition: color var(--ux-transition-fast), transform var(--ux-transition-fast);
+    }
+
+    .ux-tab-bar__arrow:hover svg {
+      color: var(--ux-text);
+      transform: scale(1.1);
+    }
+
+    .ux-tab-bar__arrow:active svg {
+      transform: scale(0.95);
+    }
+
+    /* Tabs don't expand in scrollable mode */
+    .ux-tab-bar--scrollable .ux-tab-button {
+      flex: none;
+      padding: var(--ux-space-sm) var(--ux-space-lg);
+    }
+
+    /* Dark mode arrows */
+    @media (prefers-color-scheme: dark) {
+      :root:not(.ux-light) .ux-tab-bar__arrow--start {
+        background: linear-gradient(to right,
+          var(--ux-glass-bg-thick) 0%,
+          var(--ux-glass-bg) 50%,
+          transparent 100%);
+      }
+      :root:not(.ux-light) .ux-tab-bar__arrow--end {
+        background: linear-gradient(to left,
+          var(--ux-glass-bg-thick) 0%,
+          var(--ux-glass-bg) 50%,
+          transparent 100%);
+      }
+    }
+
+    .ux-dark .ux-tab-bar__arrow--start {
+      background: linear-gradient(to right,
+        var(--ux-glass-bg-thick) 0%,
+        var(--ux-glass-bg) 50%,
+        transparent 100%);
+    }
+
+    .ux-dark .ux-tab-bar__arrow--end {
+      background: linear-gradient(to left,
+        var(--ux-glass-bg-thick) 0%,
+        var(--ux-glass-bg) 50%,
+        transparent 100%);
+    }
+
+    /* ========================================
        Tab Button
     ======================================== */
 
@@ -87018,11 +87135,64 @@
     }
   });
 
+  // Scrollable Tab Bar Component
+  const scrollableTabBarComponent = (config = {}) => ({
+    showStartArrow: false,
+    showEndArrow: false,
+    scrollAmount: config.scrollAmount || 200,
+    _scrollContainer: null,
+
+    init() {
+      this.$nextTick(() => {
+        this._scrollContainer = this.$el.querySelector('.ux-tab-bar__scroll');
+        if (this._scrollContainer) {
+          this.checkArrows();
+          this._scrollContainer.addEventListener('scroll', () => this.checkArrows());
+          window.addEventListener('resize', () => this.checkArrows());
+        }
+      });
+    },
+
+    destroy() {
+      if (this._scrollContainer) {
+        this._scrollContainer.removeEventListener('scroll', () => this.checkArrows());
+      }
+      window.removeEventListener('resize', () => this.checkArrows());
+    },
+
+    checkArrows() {
+      if (!this._scrollContainer) return;
+      const { scrollLeft, scrollWidth, clientWidth } = this._scrollContainer;
+      this.showStartArrow = scrollLeft > 5;
+      this.showEndArrow = scrollLeft < scrollWidth - clientWidth - 5;
+    },
+
+    scrollStart() {
+      if (!this._scrollContainer) return;
+      this._scrollContainer.scrollBy({ left: -this.scrollAmount, behavior: 'smooth' });
+    },
+
+    scrollEnd() {
+      if (!this._scrollContainer) return;
+      this._scrollContainer.scrollBy({ left: this.scrollAmount, behavior: 'smooth' });
+    },
+
+    scrollToTab(index) {
+      if (!this._scrollContainer) return;
+      const tabs = this._scrollContainer.querySelectorAll('.ux-tab-button');
+      if (tabs[index]) {
+        tabs[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  });
+
   if (window.UX) {
     window.UX.registerComponent('uxTabs', tabsComponent);
+    window.UX.registerComponent('uxScrollableTabBar', scrollableTabBarComponent);
   } else {
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxTabs', tabsComponent);
+      Alpine.data('uxScrollableTabBar', scrollableTabBarComponent);
     });
   }
 })();
