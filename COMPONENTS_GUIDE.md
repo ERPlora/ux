@@ -929,6 +929,27 @@ Flexible spacer.
 
 ---
 
+### ux-table.js
+Basic CSS table styles.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-table` | Table base class |
+| `.ux-table-wrapper` | Wrapper with rounded corners |
+| `.ux-table-responsive` | Horizontal scroll container |
+| `.ux-table--striped` | Alternating row backgrounds |
+| `.ux-table--hover` | Row hover effect |
+| `.ux-table--bordered` | Borders on all cells |
+| `.ux-table--compact` | Reduced padding |
+| `.ux-table--relaxed` | Increased padding |
+| `.ux-table--fixed` | Fixed column widths |
+| `.ux-table--glass` | Glass morphism variant |
+| `.ux-table-wrapper--glass` | Glass wrapper |
+
+**Cell utilities:** `.text-center`, `.text-right`, `.text-nowrap`
+
+---
+
 ### ux-list.js
 List component.
 
