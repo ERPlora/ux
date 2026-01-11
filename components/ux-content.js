@@ -61,7 +61,6 @@
       flex-direction: column;
       flex-shrink: 0;
       z-index: var(--ux-z-sticky);
-      background-color: var(--ux-surface);
     }
 
     .ux-header--fixed {
@@ -73,7 +72,6 @@
     }
 
     .ux-header--translucent {
-      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.8);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
     }
@@ -159,8 +157,6 @@
       flex-direction: column;
       flex-shrink: 0;
       z-index: var(--ux-z-sticky);
-      background-color: var(--ux-surface);
-      border-top: 1px solid var(--ux-border-color);
     }
 
     .ux-footer--fixed {
@@ -172,10 +168,8 @@
     }
 
     .ux-footer--translucent {
-      background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.8);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-top: none;
     }
 
     .ux-footer--safe-area {
@@ -795,73 +789,6 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-    }
-
-    /* ========================================
-       Content Color Variants
-    ======================================== */
-
-    .ux-content--primary {
-      --ux-content-background: var(--ux-primary);
-      --ux-content-color: var(--ux-primary-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
-    }
-
-    .ux-content--secondary {
-      --ux-content-background: var(--ux-secondary);
-      --ux-content-color: var(--ux-secondary-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
-    }
-
-    .ux-content--tertiary {
-      --ux-content-background: var(--ux-tertiary);
-      --ux-content-color: var(--ux-tertiary-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
-    }
-
-    .ux-content--success {
-      --ux-content-background: var(--ux-success);
-      --ux-content-color: var(--ux-success-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
-    }
-
-    .ux-content--warning {
-      --ux-content-background: var(--ux-warning);
-      --ux-content-color: var(--ux-warning-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
-    }
-
-    .ux-content--danger {
-      --ux-content-background: var(--ux-danger);
-      --ux-content-color: var(--ux-danger-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
-    }
-
-    .ux-content--light {
-      --ux-content-background: var(--ux-light);
-      --ux-content-color: var(--ux-light-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
-    }
-
-    .ux-content--dark {
-      --ux-content-background: var(--ux-dark);
-      --ux-content-color: var(--ux-dark-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
-    }
-
-    .ux-content--medium {
-      --ux-content-background: var(--ux-medium);
-      --ux-content-color: var(--ux-medium-contrast);
-      background-color: var(--ux-content-background);
-      color: var(--ux-content-color);
     }
 
     /* ========================================
