@@ -26604,6 +26604,144 @@
     }
 
     /* ========================================
+       Cards View (user selectable)
+       Same as force-responsive but with explicit class
+    ======================================== */
+
+    .ux-datatable--cards .ux-datatable__table,
+    .ux-datatable--cards .ux-datatable__thead,
+    .ux-datatable--cards .ux-datatable__tbody,
+    .ux-datatable--cards .ux-datatable__th,
+    .ux-datatable--cards .ux-datatable__tr,
+    .ux-datatable--cards .ux-datatable__td {
+      display: block;
+    }
+
+    .ux-datatable--cards .ux-datatable__thead {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      visibility: hidden;
+    }
+
+    .ux-datatable--cards .ux-datatable__tr {
+      margin-bottom: var(--ux-space-md);
+      background-color: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      border: 1px solid var(--ux-border-color);
+      overflow: hidden;
+    }
+
+    .ux-datatable--cards .ux-datatable__td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      text-align: right;
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+
+    .ux-datatable--cards .ux-datatable__tr .ux-datatable__td:last-child {
+      border-bottom: none;
+    }
+
+    .ux-datatable--cards .ux-datatable__td::before {
+      content: attr(data-label);
+      flex: 1;
+      font-weight: 600;
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-right: var(--ux-space-md);
+    }
+
+    /* Hide filters in cards view */
+    .ux-datatable--cards .ux-datatable__filters {
+      display: none;
+    }
+
+    /* ========================================
+       Table Forced (always table, even on mobile)
+    ======================================== */
+
+    .ux-datatable--table-forced .ux-datatable__table {
+      display: table !important;
+    }
+
+    .ux-datatable--table-forced .ux-datatable__thead {
+      display: table-header-group !important;
+      position: static !important;
+      visibility: visible !important;
+    }
+
+    .ux-datatable--table-forced .ux-datatable__tbody {
+      display: table-row-group !important;
+    }
+
+    .ux-datatable--table-forced .ux-datatable__tr {
+      display: table-row !important;
+      margin-bottom: 0 !important;
+      border: none !important;
+      border-radius: 0 !important;
+    }
+
+    .ux-datatable--table-forced .ux-datatable__th,
+    .ux-datatable--table-forced .ux-datatable__td {
+      display: table-cell !important;
+      text-align: left !important;
+    }
+
+    .ux-datatable--table-forced .ux-datatable__td::before {
+      content: none !important;
+    }
+
+    /* ========================================
+       View Toggle Button
+    ======================================== */
+
+    .ux-datatable__view-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      background: var(--ux-surface-secondary);
+      border-radius: var(--ux-radius-md);
+      padding: 2px;
+      border: 1px solid var(--ux-border-color);
+    }
+
+    .ux-datatable__view-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--ux-text-secondary);
+      cursor: pointer;
+      border-radius: var(--ux-radius-sm);
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-datatable__view-toggle-btn:hover {
+      color: var(--ux-text);
+      background: var(--ux-surface);
+    }
+
+    .ux-datatable__view-toggle-btn--active {
+      background: var(--ux-surface);
+      color: var(--ux-primary);
+      box-shadow: var(--ux-shadow-sm);
+    }
+
+    .ux-datatable__view-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
        Striped Rows
     ======================================== */
 
@@ -27393,7 +27531,7 @@
 
     // View mode (table, cards)
     viewMode: config.viewMode || 'table',
-    showViewToggle: config.showViewToggle || false,
+    showViewToggle: config.showViewToggle !== false,
 
     // Loading
     loading: config.loading || false,
@@ -27722,9 +27860,18 @@
 
     get viewModeClass() {
       if (this.viewMode === 'cards') {
-        return 'ux-datatable--force-responsive';
+        return 'ux-datatable--cards';
       }
+      if (this.viewMode === 'table') {
+        return 'ux-datatable--table-forced';
+      }
+      // Auto mode: responsive on mobile, table on desktop
       return this.responsive ? 'ux-datatable--responsive' : '';
+    },
+
+    toggleViewMode() {
+      this.viewMode = this.viewMode === 'table' ? 'cards' : 'table';
+      this.$dispatch('view-mode-change', { mode: this.viewMode });
     },
 
     // Selection

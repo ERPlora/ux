@@ -1373,14 +1373,28 @@ Data table with features.
 | `.ux-datatable--bordered` | Bordered cells |
 | `.ux-datatable--hover` | Hover effect |
 | `.ux-datatable--compact` | Compact spacing |
-| `.ux-datatable--responsive` | Responsive cards |
+| `.ux-datatable--responsive` | Auto cards on mobile |
+| `.ux-datatable--cards` | Force cards view (any screen) |
+| `.ux-datatable--table-forced` | Force table view (any screen) |
 | `.ux-datatable--resizable` | Resizable columns |
+
+**View Toggle Elements:**
+
+| Class | Description |
+|-------|-------------|
+| `.ux-datatable__view-toggle` | Toggle container |
+| `.ux-datatable__view-toggle-btn` | Toggle button |
+| `.ux-datatable__view-toggle-btn--active` | Active state |
 
 **Elements:** `__header`, `__body`, `__row`, `__cell`, `__sort`, `__checkbox`, `__expand`, `__empty`, `__pagination`, `__resize-handle`, `__column-toggle`
 
-**Features:** Sortable, filterable, selectable, expandable, sticky header, export, column resize, column visibility
+**Features:** Sortable, filterable, selectable, expandable, sticky header, export, column resize, column visibility, **view toggle (table/cards)**
 
 **Alpine Component:** `uxDatatable(options)`
+- `viewMode: 'table' | 'cards'` - Current view mode
+- `showViewToggle: true` - Show toggle buttons (default: true)
+- `setViewMode(mode)` - Set view mode
+- `toggleViewMode()` - Toggle between table and cards
 
 ---
 
