@@ -1024,9 +1024,36 @@ Application shell layout.
 | Class | Description |
 |-------|-------------|
 | `.ux-shell` | Shell wrapper |
-| `.ux-shell--sidebar-open` | Sidebar open |
+| `.ux-shell--sidebar` | Enable sidebar layout |
+| `.ux-shell--toolbar` | Enable toolbar layout |
+| `.ux-shell--bottom-nav` | Enable bottom navigation (mobile) |
+| `.ux-shell--sidebar-collapsed` | Collapsed sidebar (desktop) |
+| `.ux-shell--sidebar-open` | Sidebar open as drawer (mobile) |
+| `.ux-shell--glass` | Glass morphism variant |
 
-**Elements:** `__sidebar`, `__main`, `__navbar`, `__content`, `__footer`
+**Elements:**
+
+| Class | Description |
+|-------|-------------|
+| `.ux-shell__navbar` | Top navbar (56px) |
+| `.ux-shell__navbar-toggle` | Hamburger menu button |
+| `.ux-shell__navbar-brand` | Brand/logo text |
+| `.ux-shell__navbar-actions` | Right side actions |
+| `.ux-shell__toolbar` | Contextual toolbar (48px) |
+| `.ux-shell__sidebar` | Side navigation (250px / 56px collapsed) |
+| `.ux-shell__sidebar-header` | Header with logo and title |
+| `.ux-shell__sidebar-logo` | Logo (expands when collapsed) |
+| `.ux-shell__sidebar-title` | Title (hides when collapsed) |
+| `.ux-shell__sidebar-nav` | Navigation container |
+| `.ux-shell__sidebar-item` | Navigation item |
+| `.ux-shell__sidebar-item--active` | Active state |
+| `.ux-shell__sidebar-item-icon` | Item icon |
+| `.ux-shell__sidebar-item-text` | Item text |
+| `.ux-shell__sidebar-backdrop` | Overlay backdrop (mobile) |
+| `.ux-shell__main` | Main content area |
+| `.ux-shell__bottom-nav` | Bottom navigation (mobile only) |
+| `.ux-shell__bottom-nav-item` | Bottom nav item |
+| `.ux-shell__bottom-nav-item--active` | Active state |
 
 **Alpine Component:** `uxShell(options)`
 
