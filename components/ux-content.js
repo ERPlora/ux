@@ -37,6 +37,32 @@
       contain: layout style;
     }
 
+    /* Page with fixed navbar offset */
+    .ux-page--has-navbar {
+      height: calc(100% - var(--ux-navbar-height, 56px));
+      margin-top: var(--ux-navbar-height, 56px);
+    }
+
+    /* Page with fixed footer offset */
+    .ux-page--has-tabbar {
+      height: calc(100% - var(--ux-tabbar-height, 56px));
+      margin-bottom: var(--ux-tabbar-height, 56px);
+    }
+
+    /* Page with both navbar and tabbar */
+    .ux-page--has-navbar.ux-page--has-tabbar {
+      height: calc(100% - var(--ux-navbar-height, 56px) - var(--ux-tabbar-height, 56px));
+    }
+
+    /* Alternative: use padding instead of margin (keeps height: 100%) */
+    .ux-page--pad-navbar {
+      padding-top: var(--ux-navbar-height, 56px);
+    }
+
+    .ux-page--pad-tabbar {
+      padding-bottom: var(--ux-tabbar-height, 56px);
+    }
+
     .ux-page > .ux-header {
       grid-area: header;
     }
