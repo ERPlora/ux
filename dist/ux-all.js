@@ -24729,6 +24729,403 @@
         transition: none;
       }
     }
+
+    /* ========================================
+       DataTable Full Layout Components
+    ======================================== */
+
+    /* DataTable Toolbar (Responsive) */
+    .ux-datatable-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--ux-space-sm);
+      padding: var(--ux-space-md);
+      background: var(--ux-surface);
+      border-bottom: 1px solid var(--ux-border-color);
+      align-items: center;
+    }
+
+    .ux-datatable-toolbar__start {
+      display: flex;
+      gap: var(--ux-space-sm);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .ux-datatable-toolbar__end {
+      display: flex;
+      gap: var(--ux-space-sm);
+      align-items: center;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+
+    .ux-datatable-toolbar__divider {
+      width: 1px;
+      height: 24px;
+      background: var(--ux-border-color);
+      margin: 0 var(--ux-space-xs);
+    }
+
+    /* Mobile: stack toolbar */
+    @media (max-width: 767px) {
+      .ux-datatable-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--ux-space-md);
+      }
+      .ux-datatable-toolbar__start {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .ux-datatable-toolbar__end {
+        width: 100%;
+        margin-left: 0;
+        justify-content: space-between;
+      }
+      .ux-datatable-toolbar__divider {
+        display: none;
+      }
+      .ux-datatable-toolbar .ux-searchbar {
+        flex: 1;
+        width: auto !important;
+        min-width: 0;
+      }
+    }
+
+    /* ========================================
+       Icon Buttons for DataTable
+    ======================================== */
+    .ux-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--ux-text-secondary);
+      border-radius: var(--ux-radius-md);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast);
+      flex-shrink: 0;
+    }
+
+    .ux-icon-btn:hover {
+      background: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+
+    .ux-icon-btn:active {
+      transform: scale(0.95);
+    }
+
+    .ux-icon-btn--primary {
+      color: var(--ux-primary);
+    }
+
+    .ux-icon-btn--primary:hover {
+      background: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    .ux-icon-btn--success {
+      color: var(--ux-success);
+    }
+
+    .ux-icon-btn--success:hover {
+      background: rgba(var(--ux-success-rgb), 0.1);
+    }
+
+    .ux-icon-btn--warning {
+      color: var(--ux-warning);
+    }
+
+    .ux-icon-btn--warning:hover {
+      background: rgba(var(--ux-warning-rgb), 0.1);
+    }
+
+    .ux-icon-btn--danger {
+      color: var(--ux-danger);
+    }
+
+    .ux-icon-btn--danger:hover {
+      background: rgba(var(--ux-danger-rgb), 0.1);
+    }
+
+    .ux-icon-btn--active {
+      color: var(--ux-primary);
+      background: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    .ux-icon-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Small icon button */
+    .ux-icon-btn--sm {
+      width: 32px;
+      height: 32px;
+    }
+
+    .ux-icon-btn--sm svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       DataTable Container with Scroll
+    ======================================== */
+    .ux-datatable-container {
+      display: flex;
+      flex-direction: column;
+      max-height: 500px;
+    }
+
+    .ux-datatable-container .ux-datatable__body {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+    }
+
+    /* Variable height container */
+    .ux-datatable-container--auto {
+      max-height: none;
+    }
+
+    .ux-datatable-container--sm {
+      max-height: 300px;
+    }
+
+    .ux-datatable-container--lg {
+      max-height: 700px;
+    }
+
+    .ux-datatable-container--full {
+      max-height: calc(100vh - 200px);
+    }
+
+    /* ========================================
+       Actions Cell
+    ======================================== */
+    .ux-datatable-actions {
+      display: flex;
+      gap: var(--ux-space-xs);
+      justify-content: flex-end;
+    }
+
+    /* ========================================
+       Status Badge
+    ======================================== */
+    .ux-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ux-space-xs);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+    }
+
+    .ux-status-badge--active,
+    .ux-status-badge--success {
+      background: rgba(var(--ux-success-rgb), 0.15);
+      color: var(--ux-success);
+    }
+
+    .ux-status-badge--inactive,
+    .ux-status-badge--danger {
+      background: rgba(var(--ux-danger-rgb), 0.15);
+      color: var(--ux-danger);
+    }
+
+    .ux-status-badge--warning {
+      background: rgba(var(--ux-warning-rgb), 0.15);
+      color: var(--ux-warning);
+    }
+
+    .ux-status-badge--info,
+    .ux-status-badge--primary {
+      background: rgba(var(--ux-primary-rgb), 0.15);
+      color: var(--ux-primary);
+    }
+
+    .ux-status-badge__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ========================================
+       Bulk Actions Bar
+    ======================================== */
+    .ux-datatable-bulk {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      background: rgba(var(--ux-primary-rgb), 0.1);
+      border-bottom: 1px solid rgba(var(--ux-primary-rgb), 0.2);
+    }
+
+    .ux-datatable-bulk__count {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-primary);
+    }
+
+    .ux-datatable-bulk__buttons {
+      display: flex;
+      gap: var(--ux-space-xs);
+      margin-left: auto;
+    }
+
+    /* ========================================
+       DataTable Footer (Responsive Pagination)
+    ======================================== */
+    .ux-datatable-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--ux-space-md);
+      padding: var(--ux-space-md);
+      background: var(--ux-surface);
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    .ux-datatable-footer__info {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-datatable-footer__per-page {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+    }
+
+    .ux-datatable-footer__pagination {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: auto;
+    }
+
+    .ux-datatable-footer__page-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 32px;
+      padding: 0 var(--ux-space-xs);
+      border: none;
+      background: transparent;
+      color: var(--ux-text-secondary);
+      font-size: var(--ux-font-size-sm);
+      border-radius: var(--ux-radius-sm);
+      cursor: pointer;
+      transition: all var(--ux-transition-fast);
+    }
+
+    .ux-datatable-footer__page-btn:hover:not(:disabled) {
+      background: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+
+    .ux-datatable-footer__page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .ux-datatable-footer__page-btn--active {
+      background: var(--ux-primary);
+      color: white;
+    }
+
+    .ux-datatable-footer__page-btn--active:hover {
+      background: var(--ux-primary-shade);
+      color: white;
+    }
+
+    /* Mobile: compact pagination */
+    @media (max-width: 767px) {
+      .ux-datatable-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--ux-space-sm);
+      }
+      .ux-datatable-footer__info {
+        text-align: center;
+      }
+      .ux-datatable-footer__per-page {
+        justify-content: center;
+      }
+      .ux-datatable-footer__pagination {
+        margin-left: 0;
+        justify-content: center;
+      }
+      /* Hide page numbers on mobile, keep arrows */
+      .ux-datatable-footer__page-btn--number {
+        display: none;
+      }
+      .ux-datatable-footer__page-btn--ellipsis {
+        display: none;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .ux-datatable-footer__per-page {
+        margin-left: auto;
+      }
+      .ux-datatable-footer__pagination {
+        margin-left: 0;
+      }
+    }
+
+    /* ========================================
+       Sheet Form (for side sheets)
+    ======================================== */
+    .ux-sheet-form {
+      padding: var(--ux-space-lg);
+    }
+
+    .ux-sheet-form .ux-input,
+    .ux-sheet-form .ux-select,
+    .ux-sheet-form .ux-textarea {
+      margin-bottom: var(--ux-space-md);
+    }
+
+    .ux-sheet-form__actions {
+      display: flex;
+      gap: var(--ux-space-sm);
+      margin-top: var(--ux-space-lg);
+      padding-top: var(--ux-space-lg);
+      border-top: 1px solid var(--ux-border-color);
+    }
+
+    /* ========================================
+       Filter Panel (for filter sheets)
+    ======================================== */
+    .ux-filter-panel {
+      padding: var(--ux-space-lg);
+    }
+
+    .ux-filter-panel__section {
+      margin-bottom: var(--ux-space-lg);
+    }
+
+    .ux-filter-panel__title {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 600;
+      color: var(--ux-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--ux-space-sm);
+    }
   `;
 
   // Icons
