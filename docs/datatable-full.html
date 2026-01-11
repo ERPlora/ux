@@ -25,367 +25,11 @@
   <script src="../components/ux-card.js"></script>
   <script src="../components/ux-code-block.js"></script>
   <style>
+    /* Demo page styles only - all datatable classes come from ux-datatable.js */
     .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
     .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
     .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
     .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); margin-bottom: var(--ux-space-md); overflow: hidden; }
-
-    /* ========================================
-       DataTable Toolbar (Responsive)
-    ======================================== */
-    .datatable-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--ux-space-sm);
-      padding: var(--ux-space-md);
-      background: var(--ux-surface);
-      border-bottom: 1px solid var(--ux-border-color);
-      align-items: center;
-    }
-
-    .datatable-toolbar__start {
-      display: flex;
-      gap: var(--ux-space-sm);
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .datatable-toolbar__end {
-      display: flex;
-      gap: var(--ux-space-sm);
-      align-items: center;
-      margin-left: auto;
-      flex-wrap: wrap;
-    }
-
-    .datatable-toolbar__divider {
-      width: 1px;
-      height: 24px;
-      background: var(--ux-border-color);
-      margin: 0 var(--ux-space-xs);
-    }
-
-    /* Mobile: stack toolbar */
-    @media (max-width: 767px) {
-      .datatable-toolbar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--ux-space-md);
-      }
-      .datatable-toolbar__start {
-        width: 100%;
-        justify-content: flex-start;
-      }
-      .datatable-toolbar__end {
-        width: 100%;
-        margin-left: 0;
-        justify-content: space-between;
-      }
-      .datatable-toolbar__divider {
-        display: none;
-      }
-      .datatable-toolbar .ux-searchbar {
-        flex: 1;
-        width: auto !important;
-        min-width: 0;
-      }
-    }
-
-    /* ========================================
-       Icon Buttons
-    ======================================== */
-    .icon-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      padding: 0;
-      border: none;
-      background: transparent;
-      color: var(--ux-text-secondary);
-      border-radius: var(--ux-radius-md);
-      cursor: pointer;
-      transition: all var(--ux-transition-fast);
-      flex-shrink: 0;
-    }
-
-    .icon-btn:hover {
-      background: var(--ux-surface-secondary);
-      color: var(--ux-text);
-    }
-
-    .icon-btn:active {
-      transform: scale(0.95);
-    }
-
-    .icon-btn--primary {
-      color: var(--ux-primary);
-    }
-
-    .icon-btn--primary:hover {
-      background: rgba(var(--ux-primary-rgb), 0.1);
-    }
-
-    .icon-btn--success {
-      color: var(--ux-success);
-    }
-
-    .icon-btn--success:hover {
-      background: rgba(var(--ux-success-rgb), 0.1);
-    }
-
-    .icon-btn--danger {
-      color: var(--ux-danger);
-    }
-
-    .icon-btn--danger:hover {
-      background: rgba(var(--ux-danger-rgb), 0.1);
-    }
-
-    .icon-btn--active {
-      color: var(--ux-primary);
-      background: rgba(var(--ux-primary-rgb), 0.1);
-    }
-
-    .icon-btn svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* Small icon button */
-    .icon-btn--sm {
-      width: 32px;
-      height: 32px;
-    }
-
-    .icon-btn--sm svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* ========================================
-       DataTable Container with Scroll
-    ======================================== */
-    .datatable-container {
-      display: flex;
-      flex-direction: column;
-      max-height: 500px;
-    }
-
-    .datatable-container .ux-datatable__body {
-      flex: 1;
-      overflow: auto;
-      min-height: 0;
-    }
-
-    /* ========================================
-       Actions Cell
-    ======================================== */
-    .actions-cell {
-      display: flex;
-      gap: var(--ux-space-xs);
-      justify-content: flex-end;
-    }
-
-    /* ========================================
-       Sheet Form
-    ======================================== */
-    .sheet-form {
-      padding: var(--ux-space-lg);
-    }
-
-    .sheet-form .ux-input,
-    .sheet-form .ux-select,
-    .sheet-form .ux-textarea {
-      margin-bottom: var(--ux-space-md);
-    }
-
-    .sheet-form__actions {
-      display: flex;
-      gap: var(--ux-space-sm);
-      margin-top: var(--ux-space-lg);
-      padding-top: var(--ux-space-lg);
-      border-top: 1px solid var(--ux-border-color);
-    }
-
-    /* ========================================
-       Filter Panel
-    ======================================== */
-    .filter-panel {
-      padding: var(--ux-space-lg);
-    }
-
-    .filter-panel__section {
-      margin-bottom: var(--ux-space-lg);
-    }
-
-    .filter-panel__title {
-      font-size: var(--ux-font-size-sm);
-      font-weight: 600;
-      color: var(--ux-text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: var(--ux-space-sm);
-    }
-
-    /* ========================================
-       Status Badge
-    ======================================== */
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--ux-space-xs);
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: var(--ux-font-size-sm);
-      font-weight: 500;
-    }
-
-    .status-badge--active {
-      background: rgba(var(--ux-success-rgb), 0.15);
-      color: var(--ux-success);
-    }
-
-    .status-badge--inactive {
-      background: rgba(var(--ux-danger-rgb), 0.15);
-      color: var(--ux-danger);
-    }
-
-    .status-badge__dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-
-    /* ========================================
-       Bulk Actions Bar
-    ======================================== */
-    .bulk-actions {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-md);
-      padding: var(--ux-space-sm) var(--ux-space-md);
-      background: rgba(var(--ux-primary-rgb), 0.1);
-      border-bottom: 1px solid rgba(var(--ux-primary-rgb), 0.2);
-    }
-
-    .bulk-actions__count {
-      font-size: var(--ux-font-size-sm);
-      font-weight: 500;
-      color: var(--ux-primary);
-    }
-
-    .bulk-actions__buttons {
-      display: flex;
-      gap: var(--ux-space-xs);
-      margin-left: auto;
-    }
-
-    /* ========================================
-       Responsive Pagination
-    ======================================== */
-    .datatable-footer {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: var(--ux-space-md);
-      padding: var(--ux-space-md);
-      background: var(--ux-surface);
-      border-top: 1px solid var(--ux-border-color);
-    }
-
-    .datatable-footer__info {
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    .datatable-footer__per-page {
-      display: flex;
-      align-items: center;
-      gap: var(--ux-space-sm);
-      font-size: var(--ux-font-size-sm);
-      color: var(--ux-text-secondary);
-    }
-
-    .datatable-footer__pagination {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      margin-left: auto;
-    }
-
-    .datatable-footer__page-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 32px;
-      height: 32px;
-      padding: 0 var(--ux-space-xs);
-      border: none;
-      background: transparent;
-      color: var(--ux-text-secondary);
-      font-size: var(--ux-font-size-sm);
-      border-radius: var(--ux-radius-sm);
-      cursor: pointer;
-      transition: all var(--ux-transition-fast);
-    }
-
-    .datatable-footer__page-btn:hover:not(:disabled) {
-      background: var(--ux-surface-secondary);
-      color: var(--ux-text);
-    }
-
-    .datatable-footer__page-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .datatable-footer__page-btn--active {
-      background: var(--ux-primary);
-      color: white;
-    }
-
-    .datatable-footer__page-btn--active:hover {
-      background: var(--ux-primary-shade);
-      color: white;
-    }
-
-    /* Mobile: compact pagination */
-    @media (max-width: 767px) {
-      .datatable-footer {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--ux-space-sm);
-      }
-      .datatable-footer__info {
-        text-align: center;
-      }
-      .datatable-footer__per-page {
-        justify-content: center;
-      }
-      .datatable-footer__pagination {
-        margin-left: 0;
-        justify-content: center;
-      }
-      /* Hide page numbers on mobile, keep arrows */
-      .datatable-footer__page-btn--number {
-        display: none;
-      }
-      .datatable-footer__page-btn--ellipsis {
-        display: none;
-      }
-    }
-
-    @media (min-width: 768px) {
-      .datatable-footer__per-page {
-        margin-left: auto;
-      }
-      .datatable-footer__pagination {
-        margin-left: 0;
-      }
-    }
   </style>
 </head>
 <body class="ux-app">
@@ -397,8 +41,8 @@
 
     <div class="demo-box" x-data="datatableApp()">
       <!-- Toolbar -->
-      <div class="datatable-toolbar">
-        <div class="datatable-toolbar__start">
+      <div class="ux-datatable-toolbar">
+        <div class="ux-datatable-toolbar__start">
           <!-- Add New -->
           <button type="button" class="ux-button ux-color-primary" @click="openSheet('add')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -407,17 +51,17 @@
             <span>Nuevo</span>
           </button>
 
-          <span class="datatable-toolbar__divider"></span>
+          <span class="ux-datatable-toolbar__divider"></span>
 
           <!-- Import/Export -->
-          <button type="button" class="icon-btn" title="Importar Excel" @click="openSheet('import')">
+          <button type="button" class="ux-icon-btn" title="Importar Excel" @click="openSheet('import')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="17 8 12 3 7 8"/>
               <line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
           </button>
-          <button type="button" class="icon-btn" title="Exportar Excel" @click="openSheet('export')">
+          <button type="button" class="ux-icon-btn" title="Exportar Excel" @click="openSheet('export')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
@@ -425,17 +69,17 @@
             </svg>
           </button>
 
-          <span class="datatable-toolbar__divider"></span>
+          <span class="ux-datatable-toolbar__divider"></span>
 
           <!-- Filters -->
-          <button type="button" class="icon-btn" :class="{ 'icon-btn--active': hasActiveFilters }" title="Filtros" @click="openSheet('filters')">
+          <button type="button" class="ux-icon-btn" :class="{ 'ux-icon-btn--active': hasActiveFilters }" title="Filtros" @click="openSheet('filters')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
             </svg>
           </button>
         </div>
 
-        <div class="datatable-toolbar__end">
+        <div class="ux-datatable-toolbar__end">
           <!-- Search -->
           <div class="ux-searchbar" style="width: 250px;">
             <svg class="ux-searchbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -465,9 +109,9 @@
       </div>
 
       <!-- Bulk Actions (shown when items selected) -->
-      <div class="bulk-actions" x-show="selectedRows.length > 0" x-cloak>
-        <span class="bulk-actions__count" x-text="selectedRows.length + ' seleccionados'"></span>
-        <div class="bulk-actions__buttons">
+      <div class="ux-datatable-bulk" x-show="selectedRows.length > 0" x-cloak>
+        <span class="ux-datatable-bulk__count" x-text="selectedRows.length + ' seleccionados'"></span>
+        <div class="ux-datatable-bulk__buttons">
           <button type="button" class="ux-button ux-button--sm ux-button--outline" @click="openSheet('bulkEdit')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -482,7 +126,7 @@
             </svg>
             Eliminar
           </button>
-          <button type="button" class="icon-btn icon-btn--sm" @click="selectedRows = []" title="Deseleccionar todo">
+          <button type="button" class="ux-icon-btn ux-icon-btn--sm" @click="selectedRows = []" title="Deseleccionar todo">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 6 6 18M6 6l12 12"/>
             </svg>
@@ -491,7 +135,7 @@
       </div>
 
       <!-- Table Container with Scroll -->
-      <div class="datatable-container">
+      <div class="ux-datatable-container">
         <div class="ux-datatable__body" :class="{ 'ux-datatable--cards': viewMode === 'cards' }">
           <table class="ux-datatable__table">
             <thead class="ux-datatable__thead">
@@ -538,26 +182,26 @@
                   <td class="ux-datatable__td" data-label="Email" x-text="row.email"></td>
                   <td class="ux-datatable__td" data-label="Rol" x-text="row.role"></td>
                   <td class="ux-datatable__td" data-label="Estado">
-                    <span class="status-badge" :class="row.status === 'Activo' ? 'status-badge--active' : 'status-badge--inactive'">
-                      <span class="status-badge__dot"></span>
+                    <span class="ux-status-badge" :class="row.status === 'Activo' ? 'ux-status-badge--active' : 'ux-status-badge--inactive'">
+                      <span class="ux-status-badge__dot"></span>
                       <span x-text="row.status"></span>
                     </span>
                   </td>
                   <td class="ux-datatable__td" data-label="Acciones">
-                    <div class="actions-cell">
-                      <button type="button" class="icon-btn icon-btn--sm" title="Ver detalles" @click="openSheet('view', row)">
+                    <div class="ux-datatable-actions">
+                      <button type="button" class="ux-icon-btn ux-icon-btn--sm" title="Ver detalles" @click="openSheet('view', row)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                           <circle cx="12" cy="12" r="3"/>
                         </svg>
                       </button>
-                      <button type="button" class="icon-btn icon-btn--sm icon-btn--primary" title="Editar" @click="openSheet('edit', row)">
+                      <button type="button" class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--primary" title="Editar" @click="openSheet('edit', row)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
                       </button>
-                      <button type="button" class="icon-btn icon-btn--sm icon-btn--danger" title="Eliminar" @click="openSheet('delete', row)">
+                      <button type="button" class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--danger" title="Eliminar" @click="openSheet('delete', row)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <polyline points="3 6 5 6 21 6"/>
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -575,11 +219,11 @@
       </div>
 
       <!-- Footer with Responsive Pagination -->
-      <div class="datatable-footer">
-        <div class="datatable-footer__info">
+      <div class="ux-datatable-footer">
+        <div class="ux-datatable-footer__info">
           Mostrando <span x-text="((currentPage - 1) * perPage) + 1"></span> a <span x-text="Math.min(currentPage * perPage, filteredData.length)"></span> de <span x-text="filteredData.length"></span>
         </div>
-        <div class="datatable-footer__per-page">
+        <div class="ux-datatable-footer__per-page">
           <span>Mostrar</span>
           <div class="ux-select ux-select--sm" style="width: 75px;">
             <select x-model.number="perPage" @change="currentPage = 1">
@@ -590,36 +234,36 @@
             </select>
           </div>
         </div>
-        <div class="datatable-footer__pagination">
-          <button class="datatable-footer__page-btn" @click="currentPage = 1" :disabled="currentPage === 1" title="Primera">
+        <div class="ux-datatable-footer__pagination">
+          <button class="ux-datatable-footer__page-btn" @click="currentPage = 1" :disabled="currentPage === 1" title="Primera">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/>
             </svg>
           </button>
-          <button class="datatable-footer__page-btn" @click="currentPage--" :disabled="currentPage === 1" title="Anterior">
+          <button class="ux-datatable-footer__page-btn" @click="currentPage--" :disabled="currentPage === 1" title="Anterior">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
           </button>
           <template x-for="page in visiblePages" :key="page">
             <button
-              class="datatable-footer__page-btn"
+              class="ux-datatable-footer__page-btn"
               :class="{
-                'datatable-footer__page-btn--active': page === currentPage,
-                'datatable-footer__page-btn--number': typeof page === 'number',
-                'datatable-footer__page-btn--ellipsis': page === '...'
+                'ux-datatable-footer__page-btn--active': page === currentPage,
+                'ux-datatable-footer__page-btn--number': typeof page === 'number',
+                'ux-datatable-footer__page-btn--ellipsis': page === '...'
               }"
               @click="typeof page === 'number' && (currentPage = page)"
               :disabled="page === '...'"
               x-text="page">
             </button>
           </template>
-          <button class="datatable-footer__page-btn" @click="currentPage++" :disabled="currentPage === totalPages" title="Siguiente">
+          <button class="ux-datatable-footer__page-btn" @click="currentPage++" :disabled="currentPage === totalPages" title="Siguiente">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 18l6-6-6-6"/>
             </svg>
           </button>
-          <button class="datatable-footer__page-btn" @click="currentPage = totalPages" :disabled="currentPage === totalPages" title="Ultima">
+          <button class="ux-datatable-footer__page-btn" @click="currentPage = totalPages" :disabled="currentPage === totalPages" title="Ultima">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M13 7l5 5-5 5M6 7l5 5-5 5"/>
             </svg>
@@ -644,7 +288,7 @@
             </button>
           </div>
           <div class="ux-side-sheet__content">
-            <form class="sheet-form" @submit.prevent="saveUser()">
+            <form class="ux-sheet-form" @submit.prevent="saveUser()">
               <div class="ux-input">
                 <input type="text" x-model="formData.name" required>
                 <label>Nombre</label>
@@ -669,7 +313,7 @@
                 </select>
                 <label>Estado</label>
               </div>
-              <div class="sheet-form__actions">
+              <div class="ux-sheet-form__actions">
                 <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cancelar</button>
                 <button type="submit" class="ux-button ux-color-primary" x-text="sheetType === 'add' ? 'Crear Usuario' : 'Guardar Cambios'"></button>
               </div>
@@ -707,13 +351,13 @@
               </li>
               <li class="ux-list__item">
                 <span class="ux-list__label">Estado</span>
-                <span class="status-badge" :class="currentRow?.status === 'Activo' ? 'status-badge--active' : 'status-badge--inactive'">
-                  <span class="status-badge__dot"></span>
+                <span class="ux-status-badge" :class="currentRow?.status === 'Activo' ? 'ux-status-badge--active' : 'ux-status-badge--inactive'">
+                  <span class="ux-status-badge__dot"></span>
                   <span x-text="currentRow?.status"></span>
                 </span>
               </li>
             </ul>
-            <div class="sheet-form__actions">
+            <div class="ux-sheet-form__actions">
               <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cerrar</button>
               <button type="button" class="ux-button ux-color-primary" @click="openSheet('edit', currentRow)">Editar</button>
             </div>
@@ -741,7 +385,7 @@
               <h4 style="margin-bottom: var(--ux-space-sm);">¿Eliminar este usuario?</h4>
               <p style="color: var(--ux-text-secondary);">Esta accion no se puede deshacer. El usuario <strong x-text="currentRow?.name"></strong> sera eliminado permanentemente.</p>
             </div>
-            <div class="sheet-form__actions">
+            <div class="ux-sheet-form__actions">
               <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cancelar</button>
               <button type="button" class="ux-button ux-color-danger" @click="deleteUser()">Eliminar</button>
             </div>
@@ -769,7 +413,7 @@
               <h4 style="margin-bottom: var(--ux-space-sm);">¿Eliminar <span x-text="selectedRows.length"></span> usuarios?</h4>
               <p style="color: var(--ux-text-secondary);">Esta accion no se puede deshacer. Los usuarios seleccionados seran eliminados permanentemente.</p>
             </div>
-            <div class="sheet-form__actions">
+            <div class="ux-sheet-form__actions">
               <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cancelar</button>
               <button type="button" class="ux-button ux-color-danger" @click="bulkDelete()">Eliminar Todos</button>
             </div>
@@ -788,7 +432,7 @@
           </div>
           <div class="ux-side-sheet__content">
             <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-lg);">Los cambios se aplicaran a todos los usuarios seleccionados. Deja en blanco los campos que no quieras modificar.</p>
-            <form class="sheet-form" @submit.prevent="bulkEdit()">
+            <form class="ux-sheet-form" @submit.prevent="bulkEdit()">
               <div class="ux-select">
                 <select x-model="bulkFormData.role">
                   <option value="">Sin cambios</option>
@@ -806,7 +450,7 @@
                 </select>
                 <label>Cambiar Estado</label>
               </div>
-              <div class="sheet-form__actions">
+              <div class="ux-sheet-form__actions">
                 <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cancelar</button>
                 <button type="submit" class="ux-button ux-color-primary">Aplicar Cambios</button>
               </div>
@@ -825,9 +469,9 @@
             </button>
           </div>
           <div class="ux-side-sheet__content">
-            <div class="filter-panel">
-              <div class="filter-panel__section">
-                <div class="filter-panel__title">Rol</div>
+            <div class="ux-filter-panel">
+              <div class="ux-filter-panel__section">
+                <div class="ux-filter-panel__title">Rol</div>
                 <label class="ux-checkbox">
                   <input type="checkbox" value="Admin" x-model="filters.roles">
                   <span class="ux-checkbox__checkmark"></span>
@@ -845,8 +489,8 @@
                 </label>
               </div>
 
-              <div class="filter-panel__section">
-                <div class="filter-panel__title">Estado</div>
+              <div class="ux-filter-panel__section">
+                <div class="ux-filter-panel__title">Estado</div>
                 <label class="ux-checkbox">
                   <input type="checkbox" value="Activo" x-model="filters.statuses">
                   <span class="ux-checkbox__checkmark"></span>
@@ -859,7 +503,7 @@
                 </label>
               </div>
             </div>
-            <div class="sheet-form__actions">
+            <div class="ux-sheet-form__actions">
               <button type="button" class="ux-button ux-button--outline" @click="clearFilters()">Limpiar</button>
               <button type="button" class="ux-button ux-color-primary" @click="applyFilters()">Aplicar Filtros</button>
             </div>
@@ -887,7 +531,7 @@
               <button type="button" class="ux-button ux-button--outline">Seleccionar Archivo</button>
             </div>
             <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-tertiary);">Formatos soportados: .xlsx, .xls, .csv</p>
-            <div class="sheet-form__actions">
+            <div class="ux-sheet-form__actions">
               <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cancelar</button>
               <button type="button" class="ux-button ux-color-primary" disabled>Importar</button>
             </div>
@@ -905,9 +549,9 @@
             </button>
           </div>
           <div class="ux-side-sheet__content">
-            <div class="filter-panel">
-              <div class="filter-panel__section">
-                <div class="filter-panel__title">Formato</div>
+            <div class="ux-filter-panel">
+              <div class="ux-filter-panel__section">
+                <div class="ux-filter-panel__title">Formato</div>
                 <label class="ux-radio">
                   <input type="radio" name="export-format" value="xlsx" checked>
                   <span class="ux-radio__checkmark"></span>
@@ -920,8 +564,8 @@
                 </label>
               </div>
 
-              <div class="filter-panel__section">
-                <div class="filter-panel__title">Datos a exportar</div>
+              <div class="ux-filter-panel__section">
+                <div class="ux-filter-panel__title">Datos a exportar</div>
                 <label class="ux-radio">
                   <input type="radio" name="export-data" value="all" checked>
                   <span class="ux-radio__checkmark"></span>
@@ -939,8 +583,8 @@
                 </label>
               </div>
 
-              <div class="filter-panel__section">
-                <div class="filter-panel__title">Columnas</div>
+              <div class="ux-filter-panel__section">
+                <div class="ux-filter-panel__title">Columnas</div>
                 <label class="ux-checkbox">
                   <input type="checkbox" checked>
                   <span class="ux-checkbox__checkmark"></span>
@@ -968,7 +612,7 @@
                 </label>
               </div>
             </div>
-            <div class="sheet-form__actions">
+            <div class="ux-sheet-form__actions">
               <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cancelar</button>
               <button type="button" class="ux-button ux-color-primary" @click="exportData()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1017,14 +661,14 @@
   <!-- Code Example -->
   <div class="demo-section">
     <h3>Estructura del Toolbar</h3>
-    <pre class="ux-code-block" data-lang="html">&lt;div class="datatable-toolbar"&gt;
-  &lt;div class="datatable-toolbar__start"&gt;
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-datatable-toolbar"&gt;
+  &lt;div class="ux-datatable-toolbar__start"&gt;
     &lt;button class="ux-button ux-color-primary"&gt;Nuevo&lt;/button&gt;
-    &lt;span class="datatable-toolbar__divider"&gt;&lt;/span&gt;
-    &lt;button class="icon-btn"&gt;...&lt;/button&gt;
-    &lt;button class="icon-btn icon-btn--active"&gt;...&lt;/button&gt;
+    &lt;span class="ux-datatable-toolbar__divider"&gt;&lt;/span&gt;
+    &lt;button class="ux-icon-btn"&gt;...&lt;/button&gt;
+    &lt;button class="ux-icon-btn ux-icon-btn--active"&gt;...&lt;/button&gt;
   &lt;/div&gt;
-  &lt;div class="datatable-toolbar__end"&gt;
+  &lt;div class="ux-datatable-toolbar__end"&gt;
     &lt;div class="ux-searchbar"&gt;...&lt;/div&gt;
     &lt;div class="ux-datatable__view-toggle"&gt;...&lt;/div&gt;
   &lt;/div&gt;
@@ -1033,16 +677,16 @@
 
   <div class="demo-section">
     <h3>Acciones por Fila</h3>
-    <pre class="ux-code-block" data-lang="html">&lt;div class="actions-cell"&gt;
-  &lt;button class="icon-btn icon-btn--sm"&gt;Ver&lt;/button&gt;
-  &lt;button class="icon-btn icon-btn--sm icon-btn--primary"&gt;Editar&lt;/button&gt;
-  &lt;button class="icon-btn icon-btn--sm icon-btn--danger"&gt;Eliminar&lt;/button&gt;
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-datatable-actions"&gt;
+  &lt;button class="ux-icon-btn ux-icon-btn--sm"&gt;Ver&lt;/button&gt;
+  &lt;button class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--primary"&gt;Editar&lt;/button&gt;
+  &lt;button class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--danger"&gt;Eliminar&lt;/button&gt;
 &lt;/div&gt;</pre>
   </div>
 
   <div class="demo-section">
     <h3>Contenedor con Scroll</h3>
-    <pre class="ux-code-block" data-lang="html">&lt;div class="datatable-container"&gt;
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-datatable-container"&gt;
   &lt;div class="ux-datatable__body"&gt;
     &lt;table class="ux-datatable__table"&gt;...&lt;/table&gt;
   &lt;/div&gt;
@@ -1051,12 +695,12 @@
 
   <div class="demo-section">
     <h3>Paginacion Responsive</h3>
-    <pre class="ux-code-block" data-lang="html">&lt;div class="datatable-footer"&gt;
-  &lt;div class="datatable-footer__info"&gt;Mostrando 1 a 10 de 100&lt;/div&gt;
-  &lt;div class="datatable-footer__per-page"&gt;...&lt;/div&gt;
-  &lt;div class="datatable-footer__pagination"&gt;
-    &lt;button class="datatable-footer__page-btn"&gt;&lt;/button&gt;
-    &lt;button class="datatable-footer__page-btn datatable-footer__page-btn--active"&gt;1&lt;/button&gt;
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-datatable-footer"&gt;
+  &lt;div class="ux-datatable-footer__info"&gt;Mostrando 1 a 10 de 100&lt;/div&gt;
+  &lt;div class="ux-datatable-footer__per-page"&gt;...&lt;/div&gt;
+  &lt;div class="ux-datatable-footer__pagination"&gt;
+    &lt;button class="ux-datatable-footer__page-btn"&gt;&lt;/button&gt;
+    &lt;button class="ux-datatable-footer__page-btn datatable-footer__page-btn--active"&gt;1&lt;/button&gt;
   &lt;/div&gt;
 &lt;/div&gt;</pre>
   </div>
