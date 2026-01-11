@@ -2,16 +2,18 @@
 
 Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Optimized for HTMX and Alpine.js.
 
-**[Live Demo](https://erplora.github.io/ux/)** | [Documentación en Español](docs/index.html) | [English Documentation](docs/index.html?lang=en)
+**[Live Demo](https://erplora.github.io/ux/)** | [Documentation](docs/index.html)
 
 ## Features
 
 - **Zero Build** - No compilation needed, works directly in browsers
 - **Self-contained** - Each component includes CSS + JS in one file
+- **145 Components** - Comprehensive library for any application
 - **Universal** - Works on Web, Mobile browsers & PWA
 - **HTMX Compatible** - Works seamlessly with HTMX
 - **Touch-First** - Optimized for mobile (44px touch targets, gestures)
 - **iOS Style** - Pixel-perfect iOS/Ionic design patterns
+- **Glass Morphism** - iOS 26 Liquid Glass effect on all components
 - **Accessible** - ARIA attributes for screen readers
 - **Dark Mode** - Built-in light and dark themes
 - **12 Color Themes** - Ocean, Emerald, Purple, Sunset, Rose, Teal, Amber, Slate, Indigo, Cyan, Crimson, Forest
@@ -24,21 +26,24 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 <!-- Bootstrap Grid (external, for grid system) -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
 
-<!-- Full library (all components) -->
+<!-- Alpine.js (required for interactive components) -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<!-- Full library (all 145 components) -->
 <script src="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/ux.min.js"></script>
 
-<!-- Or core only -->
+<!-- Or core only (basic components) -->
 <script src="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/ux-core.min.js"></script>
 ```
 
-> **Note:** UX Library uses Bootstrap Grid externally. Load `bootstrap-grid.min.css` before `ux-core.js`. UX automatically overrides Bootstrap's gutter variables to match Ionic spacing (12px vs 24px).
+> **Note:** UX Library uses Bootstrap Grid externally. Load `bootstrap-grid.min.css` before `ux-core.js`. UX automatically overrides Bootstrap's gutter variables to match Ionic spacing.
 
 ### Bundle Sizes
 
 | Bundle | Size | Gzipped |
 |--------|------|---------|
-| ux.min.js | ~586 KB | ~80 KB |
-| ux-core.min.js | ~53 KB | ~10 KB |
+| ux.min.js | ~1.7 MB | ~294 KB |
+| ux-core.min.js | ~60 KB | ~11 KB |
 
 ### Local Installation
 
@@ -50,7 +55,7 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://unpkg.com/htmx.org@1.x.x"></script>
 
-<!-- Core (required) - overrides Bootstrap gutter variables -->
+<!-- Core (required) -->
 <script src="components/ux-core.js"></script>
 
 <!-- Load only what you need -->
@@ -58,30 +63,83 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 <script src="components/ux-modal.js"></script>
 
 <!-- Or load everything -->
-<script src="ux-all.js"></script>
+<script src="dist/ux.min.js"></script>
 ```
 
-## Components (47)
+## Components (145)
 
-| Category | Components |
-|----------|------------|
-| **Basic** | button, badge, chip, spinner, progress, avatar, img |
-| **Forms** | input, checkbox, radio, toggle, range, select, searchbar, textarea |
-| **Layout** | card, list, content, page-header |
-| **Navigation** | navbar, toolbar, tabs, segment, breadcrumbs, menu, back-button |
-| **Overlay** | modal, sheet, alert, toast, popover, loading, picker |
-| **Feedback** | skeleton, fab |
-| **Interactive** | accordion, datetime, infinite-scroll, refresher, reorder, rating, datatable, swipe, carousel |
-| **Admin** | shell, panel |
-| **PWA** | pwa (offline detection, install prompt, service worker) |
+### Basic (CSS-only)
+`avatar` · `badge` · `button` · `button-group` · `chip` · `divider` · `icon-button` · `img` · `progress` · `spacer` · `spinner` · `tag`
+
+### Forms
+`autocomplete` · `checkbox` · `color-picker` · `currency-input` · `form` · `form-wizard` · `input` · `otp-input` · `phone-input` · `radio` · `range` · `searchbar` · `select` · `signature-pad` · `tag-input` · `textarea` · `toggle` · `upload`
+
+### Layout
+`card` · `content` · `list` · `masonry` · `master-detail` · `section` · `split-pane-right`
+
+### Navigation
+`back-button` · `breadcrumbs` · `category-tabs` · `context-menu` · `dropdown` · `mega-menu` · `menu` · `navbar` · `pagination` · `segment` · `tabs` · `toolbar`
+
+### Overlay
+`alert` · `drawer` · `fullscreen-modal` · `lightbox` · `loading` · `modal` · `picker` · `popover` · `sheet` · `snackbar` · `toast` · `tooltip`
+
+### Feedback
+`banner` · `callout` · `fab` · `notifications` · `progress-circle` · `progress-steps` · `rating` · `skeleton` · `state` · `stats` · `status-indicator` · `stepper`
+
+### Interactive
+`accordion` · `calendar` · `calendar-views` · `carousel` · `command` · `datatable` · `date-range-picker` · `datetime` · `infinite-scroll` · `load-more` · `refresher` · `reorder` · `tree` · `virtual-list`
+
+### Gestures
+`swipe` (x-swipe, x-drag, x-pull-refresh, x-long-press, x-pinch, x-tap)
+
+### Media
+`audio-player` · `barcode-scanner` · `image-crop` · `image-gallery` · `image-zoom` · `lightbox` · `pdf-viewer` · `qr-code` · `video-player`
+
+### Data Visualization
+`code-block` · `diff-viewer` · `gauge` · `json-viewer` · `sparkline` · `table`
+
+### Admin/Shell
+`dashboard-grid` · `panel` · `shell`
+
+### POS/Retail
+`calculator` · `cart` · `numpad` · `payment` · `product-card` · `quantity-badge` · `quantity-stepper` · `receipt` · `variant-selector`
+
+### Manufacturing/ERP
+`batch-tracker` · `bom-tree` · `gantt` · `kanban` · `machine-status` · `order-ticket` · `org-chart` · `performance-meter` · `production-line` · `quality-check` · `scheduler` · `stock-indicator` · `timeline` · `work-order`
+
+### HR/Time
+`attendance-list` · `employee-card` · `event-card` · `leave-request` · `shift-calendar` · `time-clock`
+
+### Utilities
+`alpine-utils` · `app-icon` · `core` · `electron` · `keyboard` · `pwa` · `rich-text` · `scroll` · `utilities` · `virtual-keyboard`
 
 ## Usage
 
-### Buttons
+### Buttons with Color Composition
 ```html
-<button class="ux-button ux-button--primary">Primary</button>
-<button class="ux-button ux-button--secondary ux-button--lg">Large</button>
-<button class="ux-button ux-button--outline ux-button--sm">Small Outline</button>
+<!-- Filled buttons -->
+<button class="ux-button ux-color-primary">Primary</button>
+<button class="ux-button ux-color-success">Success</button>
+<button class="ux-button ux-color-danger">Danger</button>
+
+<!-- Outline variant -->
+<button class="ux-button ux-button--outline ux-color-primary--outline">Outline</button>
+
+<!-- Soft/tinted variant -->
+<button class="ux-button ux-button--soft ux-color-success--soft">Soft</button>
+
+<!-- Sizes -->
+<button class="ux-button ux-button--sm ux-color-primary">Small</button>
+<button class="ux-button ux-button--lg ux-color-primary">Large</button>
+```
+
+### Glass Morphism (iOS 26 Style)
+```html
+<!-- Any component with --glass modifier -->
+<div class="ux-card--glass">Glass card</div>
+<nav class="ux-navbar--glass">Glass navbar</nav>
+<div class="ux-modal--glass">Glass modal</div>
+<input class="ux-input--glass" placeholder="Glass input">
 ```
 
 ### Modal (Alpine.js)
@@ -106,20 +164,40 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 </div>
 ```
 
-### Carousel
+### DataTable
 ```html
-<div x-data="uxCarousel({ slidesPerView: 3 })"
-     class="ux-carousel ux-carousel--show-3 ux-carousel--gap-md">
-  <button class="ux-carousel__nav ux-carousel__nav--prev" @click="prev()">←</button>
-  <button class="ux-carousel__nav ux-carousel__nav--next" @click="next()">→</button>
-  <div class="ux-carousel__viewport" x-ref="viewport">
-    <div class="ux-carousel__track" x-ref="track"
-         :style="{ transform: `translateX(${translateX}%)` }">
-      <div class="ux-carousel__slide">1</div>
-      <div class="ux-carousel__slide">2</div>
-      <div class="ux-carousel__slide">3</div>
+<div x-data="uxDatatable({
+  data: [...],
+  columns: [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'email', label: 'Email' }
+  ]
+})">
+  <table class="ux-datatable">
+    <!-- Auto-generated content -->
+  </table>
+</div>
+```
+
+### Shell (Admin Layout)
+```html
+<div class="ux-shell" x-data="uxShell()">
+  <nav class="ux-shell__navbar">
+    <button @click="toggleSidebar()">Menu</button>
+    <div class="ux-shell__navbar-brand">My App</div>
+  </nav>
+
+  <aside class="ux-shell__sidebar">
+    <div class="ux-shell__sidebar-header">
+      <img src="logo.png" class="ux-shell__sidebar-logo">
+      <span class="ux-shell__sidebar-title">My App</span>
     </div>
-  </div>
+    <nav class="ux-shell__sidebar-nav">
+      <a href="#" class="ux-shell__sidebar-item">Dashboard</a>
+    </nav>
+  </aside>
+
+  <main class="ux-shell__main">Content</main>
 </div>
 ```
 
@@ -130,8 +208,11 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 </button>
 
 <form hx-post="/api/submit" hx-swap="outerHTML">
-  <input type="text" class="ux-input" name="email">
-  <button type="submit" class="ux-button ux-button--primary">Submit</button>
+  <div class="ux-input">
+    <input type="email" name="email">
+    <label>Email</label>
+  </div>
+  <button type="submit" class="ux-button ux-color-primary">Submit</button>
 </form>
 ```
 
@@ -139,22 +220,43 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 
 ### Dark Mode
 ```html
-<body x-data="uxTheme()" :class="{ 'ux-dark': darkMode }">
-  <button @click="toggleDarkMode()">Toggle</button>
+<!-- Automatic (follows system) -->
+<body>
+
+<!-- Force dark -->
+<body class="ux-dark">
+
+<!-- Force light -->
+<body class="ux-light">
+
+<!-- Toggle with Alpine -->
+<body x-data="{ dark: false }" :class="{ 'ux-dark': dark }">
+  <button @click="dark = !dark">Toggle</button>
 </body>
 ```
 
 ### Color Themes
 ```html
-<body class="ux-theme-emerald"><!-- or purple, sunset, rose, etc. --></body>
+<body class="ux-theme-ocean">    <!-- Default blue -->
+<body class="ux-theme-emerald">  <!-- Green -->
+<body class="ux-theme-purple">   <!-- Purple -->
+<body class="ux-theme-sunset">   <!-- Orange -->
+<body class="ux-theme-rose">     <!-- Pink -->
+<body class="ux-theme-teal">     <!-- Teal -->
+<body class="ux-theme-amber">    <!-- Amber -->
+<body class="ux-theme-slate">    <!-- Gray -->
+<body class="ux-theme-indigo">   <!-- Indigo -->
+<body class="ux-theme-cyan">     <!-- Cyan -->
+<body class="ux-theme-crimson">  <!-- Red -->
+<body class="ux-theme-forest">   <!-- Dark green -->
 ```
 
 ## Grid System
 
-UX Library uses **Bootstrap Grid** externally with Ionic-style spacing overrides:
+UX Library uses **Bootstrap Grid** externally:
 
 ```html
-<!-- Bootstrap Grid classes work as expected -->
+<!-- Bootstrap Grid classes -->
 <div class="container">
   <div class="row">
     <div class="col-12 col-md-6 col-lg-4">Column</div>
@@ -163,7 +265,7 @@ UX Library uses **Bootstrap Grid** externally with Ionic-style spacing overrides
   </div>
 </div>
 
-<!-- UX CSS Grid utilities (native CSS Grid) -->
+<!-- UX CSS Grid utilities -->
 <div class="ux-css-grid ux-css-grid--3 ux-gap-lg">
   <div>Item 1</div>
   <div>Item 2</div>
@@ -171,165 +273,37 @@ UX Library uses **Bootstrap Grid** externally with Ionic-style spacing overrides
 </div>
 ```
 
-| Class | Description |
-|-------|-------------|
-| `.ux-css-grid--{2,3,4,6,12}` | Fixed column grid |
-| `.ux-css-grid--auto-fit` | Auto-fit responsive grid |
-| `.ux-gap-{xs,sm,md,lg,xl}` | Gap utilities |
-
-## CSS Utilities
-
-```css
-/* Flex */
-.ux-flex .ux-flex-col .ux-items-center .ux-justify-between .ux-gap-md
-
-/* Responsive Spacing (scales with viewport) */
-.ux-padding .ux-margin .ux-padding-horizontal .ux-margin-vertical
-
-/* Fixed Spacing: xs, sm, md, lg, xl */
-.ux-p-md .ux-m-lg .ux-px-sm .ux-py-xl .ux-mt-md .ux-mb-lg
-
-/* Typography */
-.ux-text-sm .ux-text-lg .ux-text-center .ux-font-bold .ux-text-primary
-
-/* Display */
-.ux-hidden .ux-block .ux-rounded-lg .ux-shadow-md
-```
-
 ## CSS Variables
 
 ```css
 :root {
+  /* Colors */
   --ux-primary: #007aff;
   --ux-success: #34c759;
+  --ux-warning: #ff9500;
   --ux-danger: #ff3b30;
-  --ux-space-md: 16px;
-  --ux-border-radius: 8px;
+
+  /* Surfaces */
+  --ux-surface: #ffffff;
+  --ux-surface-secondary: #f2f2f7;
+  --ux-border-color: #c6c6c8;
+
+  /* Glass Morphism */
+  --ux-glass-blur: 20px;
+  --ux-glass-bg: rgba(255, 255, 255, 0.72);
+  --ux-glass-border: rgba(255, 255, 255, 0.18);
+
+  /* Spacing */
+  --ux-space-xs: 0.25rem;
+  --ux-space-sm: 0.5rem;
+  --ux-space-md: 1rem;
+  --ux-space-lg: 1.5rem;
+  --ux-space-xl: 2rem;
+
+  /* Touch */
   --ux-touch-target: 44px;
+  --ux-border-radius: 8px;
 }
-```
-
-## Component Sizing System (Ionic-based)
-
-All components use CSS variables for sizing, making it easy to customize globally or per-theme. Override these variables to create compact, large, or custom-sized themes.
-
-### Button Sizing
-```css
---ux-button-height: 3.1em;          /* Default height */
---ux-button-height-sm: 2.1em;       /* Small variant */
---ux-button-height-lg: 3.1em;       /* Large variant */
---ux-button-min-height: 36px;
---ux-button-padding-y: 13px;
---ux-button-padding-x: 1em;
---ux-button-border-radius: 14px;
---ux-button-font-size: 1rem;
-```
-
-### Input Sizing
-```css
---ux-input-height: 44px;            /* Standard iOS height */
---ux-input-height-sm: 36px;
---ux-input-height-lg: 52px;
---ux-input-padding-y: 10px;
---ux-input-padding-x: 16px;
---ux-input-font-size: 16px;         /* Prevents zoom on iOS */
-```
-
-### Other Component Variables
-```css
-/* Avatar */
---ux-avatar-size: 48px;
---ux-avatar-size-sm: 36px;
---ux-avatar-size-lg: 64px;
-
-/* FAB */
---ux-fab-size: 56px;
---ux-fab-size-sm: 40px;
---ux-fab-size-lg: 72px;
-
-/* Chip */
---ux-chip-height: 32px;
---ux-chip-height-sm: 24px;
---ux-chip-height-lg: 40px;
-
-/* Toggle (iOS-style) */
---ux-toggle-width: 51px;
---ux-toggle-height: 31px;
---ux-toggle-handle-size: 27px;
-
-/* Checkbox/Radio */
---ux-checkbox-size: 22px;
---ux-radio-size: 20px;
-
-/* Segment */
---ux-segment-min-height: 28px;
---ux-segment-border-radius: 7px;
-
-/* Modal/Sheet/Toast */
---ux-modal-max-width: 500px;
---ux-modal-border-radius: 14px;
---ux-toast-border-radius: 14px;
-```
-
-### Custom Theme Example
-```css
-/* Compact theme */
-.ux-theme-compact {
-  --ux-button-height: 2.5em;
-  --ux-button-min-height: 32px;
-  --ux-input-height: 36px;
-  --ux-avatar-size: 36px;
-  --ux-fab-size: 44px;
-}
-
-/* Large touch theme */
-.ux-theme-large {
-  --ux-button-height: 4em;
-  --ux-button-min-height: 52px;
-  --ux-input-height: 56px;
-  --ux-avatar-size: 64px;
-  --ux-fab-size: 72px;
-}
-```
-
-## Text Customization (i18n)
-
-All component text can be customized via config parameters. No hardcoded strings - pass your own translations.
-
-### Alert Dialogs
-```javascript
-// Default usage
-alert.confirm('Title', 'Message')
-
-// With custom button text
-alert.confirm('Título', 'Mensaje', {
-  cancelText: 'Cancelar',
-  okText: 'Aceptar'
-})
-
-alert.prompt('Título', 'Mensaje', {
-  cancelText: 'Cancelar',
-  okText: 'Aceptar',
-  placeholder: 'Escribe aquí...'
-})
-```
-
-### Other Components
-```html
-<!-- Picker -->
-<div x-data="uxPicker({ cancelText: 'Cancelar', confirmText: 'Hecho' })">
-
-<!-- Select -->
-<div x-data="uxSelect({ cancelText: 'Cancelar', okText: 'Aceptar' })">
-
-<!-- Back Button -->
-<div x-data="uxBackButton({ text: 'Atrás' })">
-
-<!-- Searchbar placeholder -->
-<input class="ux-searchbar" placeholder="Buscar...">
-
-<!-- Loading message -->
-<div x-data="uxLoading({ message: 'Cargando...' })">
 ```
 
 ## Browser Support
@@ -342,4 +316,4 @@ Open `docs/index.html` for full documentation with live examples.
 
 ## License
 
-MIT
+Apache 2.0
