@@ -190,6 +190,39 @@
       justify-content: center;
     }
 
+    /* Button color variants */
+    .ux-toolbar__button--primary {
+      color: var(--ux-primary);
+    }
+
+    .ux-toolbar__button--primary:hover {
+      background-color: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    .ux-toolbar__button--success {
+      color: var(--ux-success);
+    }
+
+    .ux-toolbar__button--success:hover {
+      background-color: rgba(var(--ux-success-rgb), 0.1);
+    }
+
+    .ux-toolbar__button--warning {
+      color: var(--ux-warning);
+    }
+
+    .ux-toolbar__button--warning:hover {
+      background-color: rgba(var(--ux-warning-rgb), 0.1);
+    }
+
+    .ux-toolbar__button--danger {
+      color: var(--ux-danger);
+    }
+
+    .ux-toolbar__button--danger:hover {
+      background-color: rgba(var(--ux-danger-rgb), 0.1);
+    }
+
     /* Primary button colors for colored toolbars */
     .ux-toolbar--primary .ux-toolbar__button,
     .ux-toolbar--dark .ux-toolbar__button {
