@@ -25126,6 +25126,131 @@
       letter-spacing: 0.5px;
       margin-bottom: var(--ux-space-sm);
     }
+
+    /* ========================================
+       DataTable Cards View (Grid Layout)
+    ======================================== */
+    .ux-datatable-cards {
+      background: var(--ux-surface-secondary);
+    }
+
+    .ux-datatable-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 0;
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+      transition: box-shadow var(--ux-transition-fast), border-color var(--ux-transition-fast);
+    }
+
+    .ux-datatable-card:hover {
+      box-shadow: var(--ux-shadow-md);
+    }
+
+    .ux-datatable-card--selected {
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 1px var(--ux-primary);
+    }
+
+    .ux-datatable-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      border-bottom: 1px solid var(--ux-border-color);
+      background: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-lg) var(--ux-border-radius-lg) 0 0;
+    }
+
+    .ux-datatable-card__body {
+      flex: 1;
+      padding: var(--ux-space-md);
+    }
+
+    .ux-datatable-card__title {
+      font-size: var(--ux-font-size-md);
+      font-weight: 600;
+      margin: 0 0 var(--ux-space-xs) 0;
+      color: var(--ux-text);
+    }
+
+    .ux-datatable-card__subtitle {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-secondary);
+      margin: 0 0 var(--ux-space-md) 0;
+    }
+
+    .ux-datatable-card__meta {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ux-space-sm);
+    }
+
+    .ux-datatable-card__meta-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ux-datatable-card__meta-label {
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text-tertiary);
+    }
+
+    .ux-datatable-card__meta-value {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+      color: var(--ux-text);
+    }
+
+    .ux-datatable-card__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      border-top: 1px solid var(--ux-border-color);
+      background: var(--ux-surface-secondary);
+      border-radius: 0 0 var(--ux-border-radius-lg) var(--ux-border-radius-lg);
+    }
+
+    /* Text color utilities for cards */
+    .ux-datatable-card .ux-text-primary { color: var(--ux-primary); }
+    .ux-datatable-card .ux-text-warning { color: var(--ux-warning); }
+    .ux-datatable-card .ux-text-success { color: var(--ux-success); }
+    .ux-datatable-card .ux-text-danger { color: var(--ux-danger); }
+
+    /* ========================================
+       DataTable Card - Liquid Glass Variant
+    ======================================== */
+    .ux-datatable-card--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+    }
+
+    .ux-datatable-card--glass:hover {
+      background: var(--ux-glass-bg-thick);
+      box-shadow: var(--ux-shadow-lg), var(--ux-glass-highlight);
+    }
+
+    .ux-datatable-card--glass .ux-datatable-card__header {
+      background: var(--ux-glass-bg-thin);
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-datatable-card--glass .ux-datatable-card__footer {
+      background: var(--ux-glass-bg-thin);
+      border-top-color: var(--ux-glass-border);
+    }
+
+    .ux-datatable-card--glass.ux-datatable-card--selected {
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 1px var(--ux-primary), var(--ux-glass-shadow);
+    }
   `;
 
   // Icons

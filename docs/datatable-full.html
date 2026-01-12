@@ -21,7 +21,9 @@
   <script src="../components/ux-toggle.js"></script>
   <script src="../components/ux-datatable.js"></script>
   <script src="../components/ux-sheet.js"></script>
+  <script src="../components/ux-alert.js"></script>
   <script src="../components/ux-list.js"></script>
+  <script src="../components/ux-icon-button.js"></script>
   <script src="../components/ux-card.js"></script>
   <script src="../components/ux-code-block.js"></script>
   <style>
@@ -135,8 +137,8 @@
       </div>
 
       <!-- Table Container with Scroll -->
-      <div class="ux-datatable-container">
-        <div class="ux-datatable__body" :class="{ 'ux-datatable--cards': viewMode === 'cards' }">
+      <div class="ux-datatable-container" x-show="viewMode === 'table'">
+        <div class="ux-datatable__body">
           <table class="ux-datatable__table">
             <thead class="ux-datatable__thead">
               <tr>
@@ -218,6 +220,70 @@
         </div>
       </div>
 
+      <!-- Cards View with Bootstrap Grid + Liquid Glass -->
+      <div class="ux-datatable-cards" x-show="viewMode === 'cards'" x-cloak>
+        <div class="row g-3 p-3">
+          <template x-for="row in paginatedData" :key="row.id">
+            <div class="col-12 col-sm-6 col-lg-3">
+              <div class="ux-datatable-card ux-datatable-card--glass" :class="{ 'ux-datatable-card--selected': selectedRows.includes(row.id) }">
+                <!-- Card Header: Toggle + Status -->
+                <div class="ux-datatable-card__header">
+                  <label class="ux-toggle ux-toggle--sm">
+                    <input type="checkbox" :value="row.id" x-model="selectedRows" :aria-label="'Seleccionar ' + row.name">
+                    <span class="ux-toggle__track">
+                      <span class="ux-toggle__thumb"></span>
+                    </span>
+                  </label>
+                  <span class="ux-status-badge" :class="row.status === 'Activo' ? 'ux-status-badge--active' : 'ux-status-badge--inactive'">
+                    <span class="ux-status-badge__dot"></span>
+                    <span x-text="row.status"></span>
+                  </span>
+                </div>
+
+                <!-- Card Body: User Info -->
+                <div class="ux-datatable-card__body">
+                  <h4 class="ux-datatable-card__title" x-text="row.name"></h4>
+                  <p class="ux-datatable-card__subtitle" x-text="'ID: ' + row.id + ' • ' + row.role"></p>
+
+                  <div class="ux-datatable-card__meta">
+                    <div class="ux-datatable-card__meta-item">
+                      <span class="ux-datatable-card__meta-label">Email</span>
+                      <span class="ux-datatable-card__meta-value" x-text="row.email"></span>
+                    </div>
+                    <div class="ux-datatable-card__meta-item">
+                      <span class="ux-datatable-card__meta-label">Rol</span>
+                      <span class="ux-datatable-card__meta-value" :class="row.role === 'Admin' ? 'ux-text-primary' : (row.role === 'Editor' ? 'ux-text-warning' : '')" x-text="row.role"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card Footer: Actions -->
+                <div class="ux-datatable-card__footer">
+                  <button type="button" class="ux-icon-btn ux-icon-btn--sm" title="Ver detalles" @click="openSheet('view', row)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--primary" title="Editar" @click="openSheet('edit', row)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--danger" title="Eliminar" @click="openSheet('delete', row)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
       <!-- Footer with Responsive Pagination -->
       <div class="ux-datatable-footer">
         <div class="ux-datatable-footer__info">
@@ -275,10 +341,15 @@
            SIDE SHEETS (Right Panel)
       ================================================= -->
 
-      <!-- Sheet Backdrop -->
-      <div class="ux-sheet-backdrop" :class="{ 'ux-sheet-backdrop--open': sheetOpen }" @click="closeSheet()">
+      <!-- Sheet Backdrop (no se usa para delete/bulkDelete, esos usan ux-alert) -->
+      <div class="ux-sheet-backdrop" :class="{ 'ux-sheet-backdrop--open': sheetOpen && sheetType !== 'delete' && sheetType !== 'bulkDelete' }" @click="closeSheet()">
+        <!-- Side Sheet Container with Responsive Columns -->
+        <div class="ux-side-sheet-container ux-side-sheet-container--right">
+          <div class="row">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+
         <!-- Add/Edit Form Sheet -->
-        <div class="ux-side-sheet ux-side-sheet--right ux-side-sheet--md" @click.stop x-show="sheetType === 'add' || sheetType === 'edit'" x-transition>
+        <div class="ux-side-sheet ux-side-sheet--grid" @click.stop x-show="sheetType === 'add' || sheetType === 'edit'" x-transition>
           <div class="ux-side-sheet__header">
             <h3 class="ux-side-sheet__title" x-text="sheetType === 'add' ? 'Nuevo Usuario' : 'Editar Usuario'"></h3>
             <button type="button" class="ux-side-sheet__close" @click="closeSheet()">
@@ -289,29 +360,35 @@
           </div>
           <div class="ux-side-sheet__content">
             <form class="ux-sheet-form" @submit.prevent="saveUser()">
-              <div class="ux-input">
-                <input type="text" x-model="formData.name" required>
-                <label>Nombre</label>
+              <div class="ux-input-group ux-input-group--floating ux-mb-md">
+                <input type="text" class="ux-input" x-model="formData.name" placeholder=" " required>
+                <label class="ux-input__label">Nombre</label>
               </div>
-              <div class="ux-input">
-                <input type="email" x-model="formData.email" required>
-                <label>Email</label>
+              <div class="ux-input-group ux-input-group--floating ux-mb-md">
+                <input type="email" class="ux-input" x-model="formData.email" placeholder=" " required>
+                <label class="ux-input__label">Email</label>
               </div>
-              <div class="ux-select">
-                <select x-model="formData.role">
+              <div class="ux-native-select ux-mb-md">
+                <label class="ux-select__label">Rol</label>
+                <select class="ux-native-select__field" x-model="formData.role">
                   <option value="">Seleccionar rol</option>
                   <option value="Admin">Admin</option>
                   <option value="Editor">Editor</option>
                   <option value="Usuario">Usuario</option>
                 </select>
-                <label>Rol</label>
+                <span class="ux-native-select__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
               </div>
-              <div class="ux-select">
-                <select x-model="formData.status">
+              <div class="ux-native-select ux-mb-md">
+                <label class="ux-select__label">Estado</label>
+                <select class="ux-native-select__field" x-model="formData.status">
                   <option value="Activo">Activo</option>
                   <option value="Inactivo">Inactivo</option>
                 </select>
-                <label>Estado</label>
+                <span class="ux-native-select__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
               </div>
               <div class="ux-sheet-form__actions">
                 <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cancelar</button>
@@ -322,7 +399,7 @@
         </div>
 
         <!-- View Details Sheet -->
-        <div class="ux-side-sheet ux-side-sheet--right ux-side-sheet--md" @click.stop x-show="sheetType === 'view'" x-transition>
+        <div class="ux-side-sheet ux-side-sheet--grid" @click.stop x-show="sheetType === 'view'" x-transition>
           <div class="ux-side-sheet__header">
             <h3 class="ux-side-sheet__title">Detalles del Usuario</h3>
             <button type="button" class="ux-side-sheet__close" @click="closeSheet()">
@@ -364,64 +441,8 @@
           </div>
         </div>
 
-        <!-- Delete Confirmation Sheet -->
-        <div class="ux-side-sheet ux-side-sheet--right ux-side-sheet--sm" @click.stop x-show="sheetType === 'delete'" x-transition>
-          <div class="ux-side-sheet__header">
-            <h3 class="ux-side-sheet__title">Eliminar Usuario</h3>
-            <button type="button" class="ux-side-sheet__close" @click="closeSheet()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 6 6 18M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-          <div class="ux-side-sheet__content">
-            <div style="text-align: center; padding: var(--ux-space-xl) 0;">
-              <div style="width: 64px; height: 64px; margin: 0 auto var(--ux-space-lg); background: rgba(var(--ux-danger-rgb), 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--ux-danger)" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                </svg>
-              </div>
-              <h4 style="margin-bottom: var(--ux-space-sm);">¿Eliminar este usuario?</h4>
-              <p style="color: var(--ux-text-secondary);">Esta accion no se puede deshacer. El usuario <strong x-text="currentRow?.name"></strong> sera eliminado permanentemente.</p>
-            </div>
-            <div class="ux-sheet-form__actions">
-              <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cancelar</button>
-              <button type="button" class="ux-button ux-color-danger" @click="deleteUser()">Eliminar</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bulk Delete Sheet -->
-        <div class="ux-side-sheet ux-side-sheet--right ux-side-sheet--sm" @click.stop x-show="sheetType === 'bulkDelete'" x-transition>
-          <div class="ux-side-sheet__header">
-            <h3 class="ux-side-sheet__title">Eliminar Usuarios</h3>
-            <button type="button" class="ux-side-sheet__close" @click="closeSheet()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 6 6 18M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-          <div class="ux-side-sheet__content">
-            <div style="text-align: center; padding: var(--ux-space-xl) 0;">
-              <div style="width: 64px; height: 64px; margin: 0 auto var(--ux-space-lg); background: rgba(var(--ux-danger-rgb), 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--ux-danger)" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                </svg>
-              </div>
-              <h4 style="margin-bottom: var(--ux-space-sm);">¿Eliminar <span x-text="selectedRows.length"></span> usuarios?</h4>
-              <p style="color: var(--ux-text-secondary);">Esta accion no se puede deshacer. Los usuarios seleccionados seran eliminados permanentemente.</p>
-            </div>
-            <div class="ux-sheet-form__actions">
-              <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cancelar</button>
-              <button type="button" class="ux-button ux-color-danger" @click="bulkDelete()">Eliminar Todos</button>
-            </div>
-          </div>
-        </div>
-
         <!-- Bulk Edit Sheet -->
-        <div class="ux-side-sheet ux-side-sheet--right ux-side-sheet--md" @click.stop x-show="sheetType === 'bulkEdit'" x-transition>
+        <div class="ux-side-sheet ux-side-sheet--grid" @click.stop x-show="sheetType === 'bulkEdit'" x-transition>
           <div class="ux-side-sheet__header">
             <h3 class="ux-side-sheet__title">Editar <span x-text="selectedRows.length"></span> Usuarios</h3>
             <button type="button" class="ux-side-sheet__close" @click="closeSheet()">
@@ -433,22 +454,28 @@
           <div class="ux-side-sheet__content">
             <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-lg);">Los cambios se aplicaran a todos los usuarios seleccionados. Deja en blanco los campos que no quieras modificar.</p>
             <form class="ux-sheet-form" @submit.prevent="bulkEdit()">
-              <div class="ux-select">
-                <select x-model="bulkFormData.role">
+              <div class="ux-native-select ux-mb-md">
+                <label class="ux-select__label">Cambiar Rol</label>
+                <select class="ux-native-select__field" x-model="bulkFormData.role">
                   <option value="">Sin cambios</option>
                   <option value="Admin">Admin</option>
                   <option value="Editor">Editor</option>
                   <option value="Usuario">Usuario</option>
                 </select>
-                <label>Cambiar Rol</label>
+                <span class="ux-native-select__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
               </div>
-              <div class="ux-select">
-                <select x-model="bulkFormData.status">
+              <div class="ux-native-select ux-mb-md">
+                <label class="ux-select__label">Cambiar Estado</label>
+                <select class="ux-native-select__field" x-model="bulkFormData.status">
                   <option value="">Sin cambios</option>
                   <option value="Activo">Activo</option>
                   <option value="Inactivo">Inactivo</option>
                 </select>
-                <label>Cambiar Estado</label>
+                <span class="ux-native-select__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
               </div>
               <div class="ux-sheet-form__actions">
                 <button type="button" class="ux-button ux-button--outline" @click="closeSheet()">Cancelar</button>
@@ -459,7 +486,7 @@
         </div>
 
         <!-- Filters Sheet -->
-        <div class="ux-side-sheet ux-side-sheet--right ux-side-sheet--md" @click.stop x-show="sheetType === 'filters'" x-transition>
+        <div class="ux-side-sheet ux-side-sheet--grid" @click.stop x-show="sheetType === 'filters'" x-transition>
           <div class="ux-side-sheet__header">
             <h3 class="ux-side-sheet__title">Filtros</h3>
             <button type="button" class="ux-side-sheet__close" @click="closeSheet()">
@@ -511,7 +538,7 @@
         </div>
 
         <!-- Import Sheet -->
-        <div class="ux-side-sheet ux-side-sheet--right ux-side-sheet--md" @click.stop x-show="sheetType === 'import'" x-transition>
+        <div class="ux-side-sheet ux-side-sheet--grid" @click.stop x-show="sheetType === 'import'" x-transition>
           <div class="ux-side-sheet__header">
             <h3 class="ux-side-sheet__title">Importar desde Excel</h3>
             <button type="button" class="ux-side-sheet__close" @click="closeSheet()">
@@ -539,7 +566,7 @@
         </div>
 
         <!-- Export Sheet -->
-        <div class="ux-side-sheet ux-side-sheet--right ux-side-sheet--md" @click.stop x-show="sheetType === 'export'" x-transition>
+        <div class="ux-side-sheet ux-side-sheet--grid" @click.stop x-show="sheetType === 'export'" x-transition>
           <div class="ux-side-sheet__header">
             <h3 class="ux-side-sheet__title">Exportar a Excel</h3>
             <button type="button" class="ux-side-sheet__close" @click="closeSheet()">
@@ -625,7 +652,44 @@
             </div>
           </div>
         </div>
+
+            </div><!-- /col -->
+          </div><!-- /row -->
+        </div><!-- /ux-side-sheet-container -->
+      </div><!-- /ux-sheet-backdrop -->
+
+      <!-- ================================================
+           DELETE ALERTS (usando ux-alert en vez de sheet)
+      ================================================= -->
+
+      <!-- Single Delete Alert -->
+      <div class="ux-alert-backdrop" :class="{ 'ux-alert-backdrop--open': sheetType === 'delete' }" @click.self="closeSheet()">
+        <div class="ux-alert">
+          <div class="ux-alert__content">
+            <h2 class="ux-alert__title">Eliminar Usuario</h2>
+            <p class="ux-alert__message">Esta accion no se puede deshacer. El usuario <strong x-text="currentRow?.name"></strong> sera eliminado permanentemente.</p>
+          </div>
+          <div class="ux-alert__buttons">
+            <button class="ux-alert__button ux-alert__button--cancel" @click="closeSheet()">Cancelar</button>
+            <button class="ux-alert__button ux-alert__button--destructive" @click="deleteUser()">Eliminar</button>
+          </div>
+        </div>
       </div>
+
+      <!-- Bulk Delete Alert -->
+      <div class="ux-alert-backdrop" :class="{ 'ux-alert-backdrop--open': sheetType === 'bulkDelete' }" @click.self="closeSheet()">
+        <div class="ux-alert">
+          <div class="ux-alert__content">
+            <h2 class="ux-alert__title">Eliminar <span x-text="selectedRows.length"></span> Usuarios</h2>
+            <p class="ux-alert__message">Esta accion no se puede deshacer. Los usuarios seleccionados seran eliminados permanentemente.</p>
+          </div>
+          <div class="ux-alert__buttons">
+            <button class="ux-alert__button ux-alert__button--cancel" @click="closeSheet()">Cancelar</button>
+            <button class="ux-alert__button ux-alert__button--destructive" @click="bulkDelete()">Eliminar Todos</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -658,51 +722,311 @@
     </div>
   </div>
 
-  <!-- Code Example -->
+  <!-- Full Code Example -->
   <div class="demo-section">
-    <h3>Estructura del Toolbar</h3>
-    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-datatable-toolbar"&gt;
-  &lt;div class="ux-datatable-toolbar__start"&gt;
-    &lt;button class="ux-button ux-color-primary"&gt;Nuevo&lt;/button&gt;
-    &lt;span class="ux-datatable-toolbar__divider"&gt;&lt;/span&gt;
-    &lt;button class="ux-icon-btn"&gt;...&lt;/button&gt;
-    &lt;button class="ux-icon-btn ux-icon-btn--active"&gt;...&lt;/button&gt;
+    <h3>Codigo Completo</h3>
+    <p>Copia este codigo para usar el DataTable completo con vista de tabla y cards. Todos los colores usan variables CSS del tema.</p>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Dependencies --&gt;
+&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css"&gt;
+&lt;script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"&gt;&lt;/script&gt;
+&lt;script src="ux-core.js"&gt;&lt;/script&gt;
+&lt;script src="ux-button.js"&gt;&lt;/script&gt;
+&lt;script src="ux-input.js"&gt;&lt;/script&gt;
+&lt;script src="ux-select.js"&gt;&lt;/script&gt;
+&lt;script src="ux-searchbar.js"&gt;&lt;/script&gt;
+&lt;script src="ux-checkbox.js"&gt;&lt;/script&gt;
+&lt;script src="ux-toggle.js"&gt;&lt;/script&gt;
+&lt;script src="ux-datatable.js"&gt;&lt;/script&gt;
+&lt;script src="ux-sheet.js"&gt;&lt;/script&gt;
+
+&lt;!-- DataTable Container --&gt;
+&lt;div x-data="datatableApp()"&gt;
+  &lt;!-- Toolbar --&gt;
+  &lt;div class="ux-datatable-toolbar"&gt;
+    &lt;div class="ux-datatable-toolbar__start"&gt;
+      &lt;button type="button" class="ux-button ux-color-primary" @click="openSheet('add')"&gt;
+        &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+          &lt;path d="M12 5v14M5 12h14"/&gt;
+        &lt;/svg&gt;
+        &lt;span&gt;Nuevo&lt;/span&gt;
+      &lt;/button&gt;
+      &lt;span class="ux-datatable-toolbar__divider"&gt;&lt;/span&gt;
+      &lt;button type="button" class="ux-icon-btn" title="Importar"&gt;...&lt;/button&gt;
+      &lt;button type="button" class="ux-icon-btn" title="Exportar"&gt;...&lt;/button&gt;
+      &lt;span class="ux-datatable-toolbar__divider"&gt;&lt;/span&gt;
+      &lt;button type="button" class="ux-icon-btn" :class="{ 'ux-icon-btn--active': hasActiveFilters }" @click="openSheet('filters')"&gt;...&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-datatable-toolbar__end"&gt;
+      &lt;div class="ux-searchbar" style="width: 250px;"&gt;
+        &lt;svg class="ux-searchbar__icon" viewBox="0 0 24 24"&gt;...&lt;/svg&gt;
+        &lt;input type="search" class="ux-searchbar__input" placeholder="Buscar..." x-model="searchQuery" @input.debounce.300ms="filterData()"&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-datatable__view-toggle"&gt;
+        &lt;button type="button" class="ux-datatable__view-toggle-btn" :class="{ 'ux-datatable__view-toggle-btn--active': viewMode === 'table' }" @click="viewMode = 'table'"&gt;...&lt;/button&gt;
+        &lt;button type="button" class="ux-datatable__view-toggle-btn" :class="{ 'ux-datatable__view-toggle-btn--active': viewMode === 'cards' }" @click="viewMode = 'cards'"&gt;...&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
   &lt;/div&gt;
-  &lt;div class="ux-datatable-toolbar__end"&gt;
-    &lt;div class="ux-searchbar"&gt;...&lt;/div&gt;
-    &lt;div class="ux-datatable__view-toggle"&gt;...&lt;/div&gt;
+
+  &lt;!-- Bulk Actions --&gt;
+  &lt;div class="ux-datatable-bulk" x-show="selectedRows.length &gt; 0" x-cloak&gt;
+    &lt;span class="ux-datatable-bulk__count" x-text="selectedRows.length + ' seleccionados'"&gt;&lt;/span&gt;
+    &lt;div class="ux-datatable-bulk__buttons"&gt;
+      &lt;button type="button" class="ux-button ux-button--sm ux-button--outline"&gt;Editar&lt;/button&gt;
+      &lt;button type="button" class="ux-button ux-button--sm ux-button--outline ux-color-danger--outline"&gt;Eliminar&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Table View --&gt;
+  &lt;div class="ux-datatable-container" x-show="viewMode === 'table'"&gt;
+    &lt;div class="ux-datatable__body"&gt;
+      &lt;table class="ux-datatable__table"&gt;
+        &lt;thead class="ux-datatable__thead"&gt;
+          &lt;tr&gt;
+            &lt;th class="ux-datatable__th" style="width: 40px;"&gt;
+              &lt;label class="ux-checkbox ux-checkbox--sm"&gt;
+                &lt;input type="checkbox" @change="toggleSelectAll($event)" :checked="isAllSelected"&gt;
+                &lt;span class="ux-checkbox__checkmark"&gt;&lt;/span&gt;
+              &lt;/label&gt;
+            &lt;/th&gt;
+            &lt;th class="ux-datatable__th ux-datatable__th--sortable" @click="sort('id')"&gt;ID&lt;/th&gt;
+            &lt;th class="ux-datatable__th ux-datatable__th--sortable" @click="sort('name')"&gt;Nombre&lt;/th&gt;
+            &lt;th class="ux-datatable__th"&gt;Email&lt;/th&gt;
+            &lt;th class="ux-datatable__th"&gt;Estado&lt;/th&gt;
+            &lt;th class="ux-datatable__th" style="text-align: right;"&gt;Acciones&lt;/th&gt;
+          &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody class="ux-datatable__tbody"&gt;
+          &lt;template x-for="row in paginatedData" :key="row.id"&gt;
+            &lt;tr class="ux-datatable__tr" :class="{ 'ux-datatable__tr--selected': selectedRows.includes(row.id) }"&gt;
+              &lt;td class="ux-datatable__td"&gt;
+                &lt;label class="ux-checkbox ux-checkbox--sm"&gt;
+                  &lt;input type="checkbox" :value="row.id" x-model="selectedRows"&gt;
+                  &lt;span class="ux-checkbox__checkmark"&gt;&lt;/span&gt;
+                &lt;/label&gt;
+              &lt;/td&gt;
+              &lt;td class="ux-datatable__td" x-text="row.id"&gt;&lt;/td&gt;
+              &lt;td class="ux-datatable__td" x-text="row.name"&gt;&lt;/td&gt;
+              &lt;td class="ux-datatable__td" x-text="row.email"&gt;&lt;/td&gt;
+              &lt;td class="ux-datatable__td"&gt;
+                &lt;span class="ux-status-badge" :class="row.status === 'Activo' ? 'ux-status-badge--active' : 'ux-status-badge--inactive'"&gt;
+                  &lt;span class="ux-status-badge__dot"&gt;&lt;/span&gt;
+                  &lt;span x-text="row.status"&gt;&lt;/span&gt;
+                &lt;/span&gt;
+              &lt;/td&gt;
+              &lt;td class="ux-datatable__td"&gt;
+                &lt;div class="ux-datatable-actions"&gt;
+                  &lt;button type="button" class="ux-icon-btn ux-icon-btn--sm" @click="openSheet('view', row)"&gt;...&lt;/button&gt;
+                  &lt;button type="button" class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--primary" @click="openSheet('edit', row)"&gt;...&lt;/button&gt;
+                  &lt;button type="button" class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--danger" @click="openSheet('delete', row)"&gt;...&lt;/button&gt;
+                &lt;/div&gt;
+              &lt;/td&gt;
+            &lt;/tr&gt;
+          &lt;/template&gt;
+        &lt;/tbody&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Cards View (Liquid Glass) --&gt;
+  &lt;div class="ux-datatable-cards" x-show="viewMode === 'cards'" x-cloak&gt;
+    &lt;div class="row g-3 p-3"&gt;
+      &lt;template x-for="row in paginatedData" :key="row.id"&gt;
+        &lt;div class="col-12 col-sm-6 col-lg-3"&gt;
+          &lt;div class="ux-datatable-card ux-datatable-card--glass" :class="{ 'ux-datatable-card--selected': selectedRows.includes(row.id) }"&gt;
+            &lt;div class="ux-datatable-card__header"&gt;
+              &lt;label class="ux-toggle ux-toggle--sm"&gt;
+                &lt;input type="checkbox" :value="row.id" x-model="selectedRows"&gt;
+                &lt;span class="ux-toggle__track"&gt;&lt;span class="ux-toggle__thumb"&gt;&lt;/span&gt;&lt;/span&gt;
+              &lt;/label&gt;
+              &lt;span class="ux-status-badge" :class="row.status === 'Activo' ? 'ux-status-badge--active' : 'ux-status-badge--inactive'"&gt;
+                &lt;span class="ux-status-badge__dot"&gt;&lt;/span&gt;
+                &lt;span x-text="row.status"&gt;&lt;/span&gt;
+              &lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="ux-datatable-card__body"&gt;
+              &lt;h4 class="ux-datatable-card__title" x-text="row.name"&gt;&lt;/h4&gt;
+              &lt;p class="ux-datatable-card__subtitle" x-text="'ID: ' + row.id"&gt;&lt;/p&gt;
+              &lt;div class="ux-datatable-card__meta"&gt;
+                &lt;div class="ux-datatable-card__meta-item"&gt;
+                  &lt;span class="ux-datatable-card__meta-label"&gt;Email&lt;/span&gt;
+                  &lt;span class="ux-datatable-card__meta-value" x-text="row.email"&gt;&lt;/span&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="ux-datatable-card__footer"&gt;
+              &lt;button type="button" class="ux-icon-btn ux-icon-btn--sm" @click="openSheet('view', row)"&gt;...&lt;/button&gt;
+              &lt;button type="button" class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--primary" @click="openSheet('edit', row)"&gt;...&lt;/button&gt;
+              &lt;button type="button" class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--danger" @click="openSheet('delete', row)"&gt;...&lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Footer Pagination --&gt;
+  &lt;div class="ux-datatable-footer"&gt;
+    &lt;div class="ux-datatable-footer__info"&gt;
+      Mostrando &lt;span x-text="((currentPage - 1) * perPage) + 1"&gt;&lt;/span&gt; a &lt;span x-text="Math.min(currentPage * perPage, filteredData.length)"&gt;&lt;/span&gt; de &lt;span x-text="filteredData.length"&gt;&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-datatable-footer__per-page"&gt;
+      &lt;span&gt;Mostrar&lt;/span&gt;
+      &lt;div class="ux-select ux-select--sm" style="width: 75px;"&gt;
+        &lt;select x-model.number="perPage" @change="currentPage = 1"&gt;
+          &lt;option value="5"&gt;5&lt;/option&gt;
+          &lt;option value="10"&gt;10&lt;/option&gt;
+          &lt;option value="25"&gt;25&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-datatable-footer__pagination"&gt;
+      &lt;button class="ux-datatable-footer__page-btn" @click="currentPage = 1" :disabled="currentPage === 1"&gt;&lt;&lt;&lt;/button&gt;
+      &lt;button class="ux-datatable-footer__page-btn" @click="currentPage--" :disabled="currentPage === 1"&gt;&lt;&lt;/button&gt;
+      &lt;template x-for="page in visiblePages" :key="page"&gt;
+        &lt;button class="ux-datatable-footer__page-btn" :class="{ 'ux-datatable-footer__page-btn--active': page === currentPage }" @click="typeof page === 'number' &amp;&amp; (currentPage = page)" x-text="page"&gt;&lt;/button&gt;
+      &lt;/template&gt;
+      &lt;button class="ux-datatable-footer__page-btn" @click="currentPage++" :disabled="currentPage === totalPages"&gt;&gt;&lt;/button&gt;
+      &lt;button class="ux-datatable-footer__page-btn" @click="currentPage = totalPages" :disabled="currentPage === totalPages"&gt;&gt;&gt;&lt;/button&gt;
+    &lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;</pre>
   </div>
 
+  <!-- Alpine.js Component Code -->
   <div class="demo-section">
-    <h3>Acciones por Fila</h3>
-    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-datatable-actions"&gt;
-  &lt;button class="ux-icon-btn ux-icon-btn--sm"&gt;Ver&lt;/button&gt;
-  &lt;button class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--primary"&gt;Editar&lt;/button&gt;
-  &lt;button class="ux-icon-btn ux-icon-btn--sm ux-icon-btn--danger"&gt;Eliminar&lt;/button&gt;
-&lt;/div&gt;</pre>
+    <h3>Componente Alpine.js</h3>
+    <p>Logica del DataTable con ordenamiento, filtros, paginacion y seleccion.</p>
+    <pre class="ux-code-block" data-lang="javascript">function datatableApp() {
+  return {
+    // Data
+    data: [
+      { id: 1, name: 'Juan Garcia', email: 'juan@example.com', role: 'Admin', status: 'Activo' },
+      // ... more rows
+    ],
+
+    // View state
+    viewMode: 'table',  // 'table' or 'cards'
+    searchQuery: '',
+    sortColumn: 'id',
+    sortDirection: 'asc',
+    currentPage: 1,
+    perPage: 5,
+
+    // Selection
+    selectedRows: [],
+
+    // Filters
+    filters: { roles: [], statuses: [] },
+
+    // Sheet state
+    sheetOpen: false,
+    sheetType: '',
+    currentRow: null,
+
+    // Computed properties
+    get filteredData() {
+      let result = [...this.data];
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        result = result.filter(row =&gt;
+          row.name.toLowerCase().includes(query) ||
+          row.email.toLowerCase().includes(query)
+        );
+      }
+      // Sort
+      result.sort((a, b) =&gt; {
+        let valA = a[this.sortColumn];
+        let valB = b[this.sortColumn];
+        if (valA &lt; valB) return this.sortDirection === 'asc' ? -1 : 1;
+        if (valA &gt; valB) return this.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+      return result;
+    },
+
+    get paginatedData() {
+      const start = (this.currentPage - 1) * this.perPage;
+      return this.filteredData.slice(start, start + this.perPage);
+    },
+
+    get totalPages() {
+      return Math.ceil(this.filteredData.length / this.perPage);
+    },
+
+    get isAllSelected() {
+      return this.paginatedData.every(row =&gt; this.selectedRows.includes(row.id));
+    },
+
+    // Methods
+    sort(column) {
+      if (this.sortColumn === column) {
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortColumn = column;
+        this.sortDirection = 'asc';
+      }
+    },
+
+    toggleSelectAll(event) {
+      if (event.target.checked) {
+        this.paginatedData.forEach(row =&gt; {
+          if (!this.selectedRows.includes(row.id)) this.selectedRows.push(row.id);
+        });
+      } else {
+        this.paginatedData.forEach(row =&gt; {
+          const idx = this.selectedRows.indexOf(row.id);
+          if (idx &gt; -1) this.selectedRows.splice(idx, 1);
+        });
+      }
+    },
+
+    openSheet(type, row = null) {
+      this.sheetType = type;
+      this.currentRow = row;
+      this.sheetOpen = true;
+    },
+
+    closeSheet() {
+      this.sheetOpen = false;
+      this.sheetType = '';
+      this.currentRow = null;
+    }
+  };
+}</pre>
   </div>
 
+  <!-- CSS Variables Reference -->
   <div class="demo-section">
-    <h3>Contenedor con Scroll</h3>
-    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-datatable-container"&gt;
-  &lt;div class="ux-datatable__body"&gt;
-    &lt;table class="ux-datatable__table"&gt;...&lt;/table&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</pre>
-  </div>
+    <h3>Variables CSS del Tema</h3>
+    <p>El DataTable usa estas variables CSS para adaptarse automaticamente al tema activo.</p>
+    <pre class="ux-code-block" data-lang="css">/* Colores principales */
+--ux-primary              /* Botones primarios, seleccion activa */
+--ux-success              /* Status activo */
+--ux-danger               /* Acciones de eliminar */
+--ux-warning              /* Alertas */
 
-  <div class="demo-section">
-    <h3>Paginacion Responsive</h3>
-    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-datatable-footer"&gt;
-  &lt;div class="ux-datatable-footer__info"&gt;Mostrando 1 a 10 de 100&lt;/div&gt;
-  &lt;div class="ux-datatable-footer__per-page"&gt;...&lt;/div&gt;
-  &lt;div class="ux-datatable-footer__pagination"&gt;
-    &lt;button class="ux-datatable-footer__page-btn"&gt;&lt;/button&gt;
-    &lt;button class="ux-datatable-footer__page-btn datatable-footer__page-btn--active"&gt;1&lt;/button&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</pre>
+/* Superficies */
+--ux-surface              /* Fondo de la tabla */
+--ux-surface-secondary    /* Fondo del toolbar y footer */
+--ux-border-color         /* Bordes de celdas */
+
+/* Texto */
+--ux-text                 /* Texto principal */
+--ux-text-secondary       /* Texto secundario */
+--ux-text-tertiary        /* Labels, hints */
+
+/* Glass Morphism (para cards) */
+--ux-glass-bg             /* Fondo glass */
+--ux-glass-blur           /* Blur del backdrop */
+--ux-glass-border         /* Borde glass */
+--ux-glass-shadow         /* Sombra glass */
+
+/* Espaciado */
+--ux-space-sm, --ux-space-md, --ux-space-lg
+
+/* Radios */
+--ux-border-radius, --ux-border-radius-lg</pre>
   </div>
 
   <script>
@@ -948,6 +1272,29 @@
           this.closeSheet();
         }
       };
+    }
+
+    // Listen for theme changes from parent (when loaded in iframe)
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'ux-theme') {
+        if (event.data.darkMode) {
+          document.documentElement.classList.add('ux-dark');
+        } else {
+          document.documentElement.classList.remove('ux-dark');
+        }
+      }
+    });
+
+    // Check if parent has dark mode on load
+    if (window.parent !== window) {
+      try {
+        const parentDark = window.parent.document.documentElement.classList.contains('ux-dark');
+        if (parentDark) {
+          document.documentElement.classList.add('ux-dark');
+        }
+      } catch(e) {
+        // Cross-origin, will receive via postMessage
+      }
     }
   </script>
 </body>
