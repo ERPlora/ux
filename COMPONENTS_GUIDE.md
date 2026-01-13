@@ -2,7 +2,7 @@
 
 > **Auto-generated guide** - Update this file when adding new components.
 >
-> Total Components: **140 documented** (141 JS files) | Last Updated: 2026-01-10
+> Total Components: **141 documented** (142 JS files) | Last Updated: 2026-01-13
 
 ---
 
@@ -2295,6 +2295,52 @@ Touch gesture directives.
 
 ---
 
+### ux-onscreen-keyboard.js
+Multi-language virtual keyboard for web applications, POS, and tablets.
+
+**Supported Languages:**
+- **Latin:** English, Spanish, French, German, Italian, Portuguese, Romanian, Dutch, Polish
+- **Nordic:** Swedish, Norwegian, Finnish
+- **Central European:** Czech, Slovak, Hungarian
+- **Cyrillic:** Russian, Ukrainian, Bulgarian, Serbian, Macedonian
+- **Greek:** Greek
+
+| Class | Description |
+|-------|-------------|
+| `.ux-onscreen-keyboard` | Base keyboard container |
+| `.ux-onscreen-keyboard--compact` | Smaller keys for mobile |
+| `.ux-onscreen-keyboard--lg` | Larger keys for tablets |
+| `.ux-onscreen-keyboard--glass` | iOS Liquid Glass effect |
+| `.ux-onscreen-keyboard--inline` | No border (for modals) |
+| `.ux-onscreen-keyboard__header` | Language selector header |
+| `.ux-onscreen-keyboard__row` | Row of keys |
+| `.ux-onscreen-keyboard__key` | Individual key button |
+| `.ux-onscreen-keyboard__key--special` | Special keys (shift, etc) |
+| `.ux-onscreen-keyboard__key--enter` | Enter key |
+| `.ux-onscreen-keyboard__key--backspace` | Backspace key |
+| `.ux-onscreen-keyboard__key--space` | Space bar |
+| `.ux-onscreen-keyboard__lang-picker` | Language dropdown |
+
+**Alpine Component:**
+```javascript
+x-data="uxOnscreenKeyboard({
+  languages: ['en', 'es', 'fr', 'de'],
+  defaultLanguage: 'en',
+  showLanguageSelector: true,
+  targetSelector: '#my-input',
+  onInput: (key) => {},
+  onEnter: (value) => {}
+})"
+```
+
+**Events:**
+- `@osk:input` - Character inserted
+- `@osk:enter` - Enter pressed
+- `@osk:backspace` - Backspace pressed
+- `@osk:language` - Language changed
+
+---
+
 ### ux-scroll.js
 Scroll-related Alpine components.
 
@@ -2324,8 +2370,8 @@ Scroll-related Alpine components.
 | POS / Retail | 12 |
 | HR / Employees | 7 |
 | Manufacturing | 7 |
-| Utilities | 4 |
-| **Total** | **140** |
+| Utilities | 5 |
+| **Total** | **141** |
 
 > **Note:** There are 141 JS files in `components/`, but `ux-scroll.js` only contains Alpine.js components (CSS is in `ux-content.js`).
 
