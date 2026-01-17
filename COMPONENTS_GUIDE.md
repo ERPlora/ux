@@ -2,7 +2,7 @@
 
 > **Auto-generated guide** - Update this file when adding new components.
 >
-> Total Components: **141 documented** (142 JS files) | Last Updated: 2026-01-13
+> Total Components: **142 documented** (143 JS files) | Last Updated: 2026-01-17
 
 ---
 
@@ -1427,6 +1427,44 @@ Sparkline chart.
 
 ---
 
+### ux-chart.js
+Wrapper for Chart.js with UX theme integration. Also supports external SVG charts (matplotlib).
+
+| Class | Description |
+|-------|-------------|
+| `.ux-chart` | Chart container |
+| `.ux-chart--bordered` | Adds border |
+| `.ux-chart--padded` | Adds internal padding |
+| `.ux-chart--sm` | Height 200px |
+| `.ux-chart--md` | Height 300px |
+| `.ux-chart--lg` | Height 400px |
+| `.ux-chart--xl` | Height 500px |
+| `.ux-chart--svg` | For external SVG charts (matplotlib) |
+
+**CSS Variables:**
+- `--ux-chart-1` through `--ux-chart-10`: Data series colors
+- `--ux-chart-bg`: Chart background
+- `--ux-chart-grid`: Grid lines color
+- `--ux-chart-text`: Text color
+
+**Alpine Component:** `uxChart(config)`
+- `config.type`: Chart type (line, bar, pie, doughnut, radar)
+- `config.data`: Chart.js data object
+- `config.options`: Chart.js options
+
+**Methods:**
+- `updateData(data)`: Update chart data reactively
+- `setConfig(config)`: Replace entire config
+- `destroy()`: Destroy Chart.js instance
+
+**Helpers:**
+- `UX.chart.getColors()`: Get theme color palette
+- `UX.chart.getDefaults()`: Get Chart.js defaults with UX theme
+
+**HTMX Integration:** Server returns `<script type="application/json">` with config + `<canvas>`
+
+---
+
 ### ux-progress.js
 Progress bar.
 
@@ -2364,16 +2402,16 @@ Scroll-related Alpine components.
 | Navigation | 14 |
 | Layout & Containers | 18 |
 | Overlays & Modals | 13 |
-| Data Display | 14 |
+| Data Display | 15 |
 | Multimedia | 11 |
 | Feedback & States | 7 |
 | POS / Retail | 12 |
 | HR / Employees | 7 |
 | Manufacturing | 7 |
 | Utilities | 5 |
-| **Total** | **141** |
+| **Total** | **142** |
 
-> **Note:** There are 141 JS files in `components/`, but `ux-scroll.js` only contains Alpine.js components (CSS is in `ux-content.js`).
+> **Note:** There are 143 JS files in `components/` (142 components + ux-core.js). `ux-scroll.js` only contains Alpine.js components (CSS is in `ux-content.js`).
 
 ---
 
