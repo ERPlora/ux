@@ -470,6 +470,361 @@
     document.head.appendChild(styleEl);
   }
 
+  // ============================================================================
+  // Vanilla JS Implementation
+  // ============================================================================
+
+  class UXDropdown {
+    constructor(element, options = {}) {
+      this.el = typeof element === 'string' ? document.querySelector(element) : element;
+      if (!this.el) return;
+
+      // Prevent double initialization
+      if (this.el._uxDropdown) return this.el._uxDropdown;
+
+      this.options = {
+        closeOnSelect: true,
+        closeOnClickOutside: true,
+        closeOnEscape: true,
+        triggerOnHover: false,
+        hoverDelay: 150,
+        ...options
+      };
+
+      this.isOpen = false;
+      this.activeIndex = -1;
+      this.items = [];
+      this._hoverTimer = null;
+      this._boundHandlers = {};
+
+      this._init();
+      this.el._uxDropdown = this;
+    }
+
+    _init() {
+      // Find trigger and menu
+      this.trigger = this.el.querySelector('.ux-dropdown__trigger');
+      this.menu = this.el.querySelector('.ux-dropdown__menu');
+
+      if (!this.trigger || !this.menu) return;
+
+      // Set initial ARIA attributes
+      this.trigger.setAttribute('aria-haspopup', 'true');
+      this.trigger.setAttribute('aria-expanded', 'false');
+      this.menu.setAttribute('role', 'menu');
+
+      // Get items
+      this._refreshItems();
+
+      // Bind event handlers
+      this._boundHandlers.triggerClick = (e) => {
+        e.stopPropagation();
+        this.toggle();
+      };
+
+      this._boundHandlers.triggerKeydown = (e) => this._handleKeydown(e);
+      this._boundHandlers.menuKeydown = (e) => this._handleKeydown(e);
+
+      this._boundHandlers.clickOutside = (e) => {
+        if (this.isOpen && !this.el.contains(e.target)) {
+          this.close();
+        }
+      };
+
+      this._boundHandlers.escapeKey = (e) => {
+        if (this.isOpen && e.key === 'Escape') {
+          this.close();
+          this.trigger.focus();
+        }
+      };
+
+      // Hover handlers
+      if (this.options.triggerOnHover) {
+        this._boundHandlers.mouseEnter = () => this._handleMouseEnter();
+        this._boundHandlers.mouseLeave = () => this._handleMouseLeave();
+        this.el.addEventListener('mouseenter', this._boundHandlers.mouseEnter);
+        this.el.addEventListener('mouseleave', this._boundHandlers.mouseLeave);
+      }
+
+      // Attach listeners
+      this.trigger.addEventListener('click', this._boundHandlers.triggerClick);
+      this.trigger.addEventListener('keydown', this._boundHandlers.triggerKeydown);
+      this.menu.addEventListener('keydown', this._boundHandlers.menuKeydown);
+
+      if (this.options.closeOnClickOutside) {
+        document.addEventListener('click', this._boundHandlers.clickOutside);
+      }
+
+      if (this.options.closeOnEscape) {
+        document.addEventListener('keydown', this._boundHandlers.escapeKey);
+      }
+
+      // Item click handlers
+      this._bindItemClicks();
+    }
+
+    _refreshItems() {
+      this.items = Array.from(this.el.querySelectorAll('.ux-dropdown__item:not(.ux-dropdown__item--disabled)'));
+      this.items.forEach((item, index) => {
+        item.setAttribute('role', 'menuitem');
+        item.setAttribute('tabindex', '-1');
+      });
+    }
+
+    _bindItemClicks() {
+      this.items.forEach((item) => {
+        item.addEventListener('click', (e) => {
+          const value = item.dataset.value || item.textContent.trim();
+          this.select(value);
+        });
+      });
+    }
+
+    open() {
+      if (this.isOpen) return;
+
+      this.isOpen = true;
+      this.activeIndex = -1;
+      this.el.classList.add('ux-dropdown--open');
+      this.trigger.setAttribute('aria-expanded', 'true');
+      this.menu.setAttribute('data-show', '');
+
+      // Refresh items in case DOM changed
+      this._refreshItems();
+
+      // Dispatch event
+      this.el.dispatchEvent(new CustomEvent('dropdown:open', { bubbles: true }));
+    }
+
+    close() {
+      if (!this.isOpen) return;
+
+      this.isOpen = false;
+      this.activeIndex = -1;
+      this.el.classList.remove('ux-dropdown--open');
+      this.trigger.setAttribute('aria-expanded', 'false');
+      this.menu.removeAttribute('data-show');
+
+      // Remove active class from items
+      this.items.forEach(item => item.classList.remove('ux-dropdown__item--active'));
+
+      // Dispatch event
+      this.el.dispatchEvent(new CustomEvent('dropdown:close', { bubbles: true }));
+    }
+
+    toggle() {
+      this.isOpen ? this.close() : this.open();
+    }
+
+    select(value) {
+      this.el.dispatchEvent(new CustomEvent('dropdown:select', {
+        bubbles: true,
+        detail: { value }
+      }));
+
+      if (this.options.closeOnSelect) {
+        this.close();
+        this.trigger.focus();
+      }
+    }
+
+    _focusItem(index) {
+      if (index < 0 || index >= this.items.length) return;
+
+      // Remove active from previous
+      if (this.activeIndex >= 0 && this.items[this.activeIndex]) {
+        this.items[this.activeIndex].classList.remove('ux-dropdown__item--active');
+      }
+
+      this.activeIndex = index;
+      this.items[index].classList.add('ux-dropdown__item--active');
+      this.items[index].focus();
+    }
+
+    _focusFirst() {
+      this._focusItem(0);
+    }
+
+    _focusLast() {
+      this._focusItem(this.items.length - 1);
+    }
+
+    _focusNext() {
+      const nextIndex = this.activeIndex < this.items.length - 1 ? this.activeIndex + 1 : 0;
+      this._focusItem(nextIndex);
+    }
+
+    _focusPrev() {
+      const prevIndex = this.activeIndex > 0 ? this.activeIndex - 1 : this.items.length - 1;
+      this._focusItem(prevIndex);
+    }
+
+    _handleKeydown(e) {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          if (!this.isOpen) {
+            this.open();
+            setTimeout(() => this._focusFirst(), 10);
+          } else {
+            this._focusNext();
+          }
+          break;
+
+        case 'ArrowUp':
+          e.preventDefault();
+          if (!this.isOpen) {
+            this.open();
+            setTimeout(() => this._focusLast(), 10);
+          } else {
+            this._focusPrev();
+          }
+          break;
+
+        case 'Home':
+          if (this.isOpen) {
+            e.preventDefault();
+            this._focusFirst();
+          }
+          break;
+
+        case 'End':
+          if (this.isOpen) {
+            e.preventDefault();
+            this._focusLast();
+          }
+          break;
+
+        case 'Enter':
+        case ' ':
+          if (this.isOpen && this.activeIndex >= 0) {
+            e.preventDefault();
+            this.items[this.activeIndex].click();
+          } else if (!this.isOpen) {
+            e.preventDefault();
+            this.open();
+          }
+          break;
+
+        case 'Tab':
+          if (this.isOpen) {
+            this.close();
+          }
+          break;
+      }
+    }
+
+    _handleMouseEnter() {
+      if (this._hoverTimer) {
+        clearTimeout(this._hoverTimer);
+      }
+      this._hoverTimer = setTimeout(() => this.open(), this.options.hoverDelay);
+    }
+
+    _handleMouseLeave() {
+      if (this._hoverTimer) {
+        clearTimeout(this._hoverTimer);
+      }
+      this._hoverTimer = setTimeout(() => this.close(), this.options.hoverDelay);
+    }
+
+    destroy() {
+      // Remove event listeners
+      this.trigger.removeEventListener('click', this._boundHandlers.triggerClick);
+      this.trigger.removeEventListener('keydown', this._boundHandlers.triggerKeydown);
+      this.menu.removeEventListener('keydown', this._boundHandlers.menuKeydown);
+
+      if (this.options.closeOnClickOutside) {
+        document.removeEventListener('click', this._boundHandlers.clickOutside);
+      }
+
+      if (this.options.closeOnEscape) {
+        document.removeEventListener('keydown', this._boundHandlers.escapeKey);
+      }
+
+      if (this.options.triggerOnHover) {
+        this.el.removeEventListener('mouseenter', this._boundHandlers.mouseEnter);
+        this.el.removeEventListener('mouseleave', this._boundHandlers.mouseLeave);
+      }
+
+      if (this._hoverTimer) {
+        clearTimeout(this._hoverTimer);
+      }
+
+      delete this.el._uxDropdown;
+    }
+
+    // Static methods
+    static getInstance(element) {
+      const el = typeof element === 'string' ? document.querySelector(element) : element;
+      return el?._uxDropdown || null;
+    }
+
+    static open(element) {
+      const instance = UXDropdown.getInstance(element);
+      if (instance) instance.open();
+    }
+
+    static close(element) {
+      const instance = UXDropdown.getInstance(element);
+      if (instance) instance.close();
+    }
+
+    static toggle(element) {
+      const instance = UXDropdown.getInstance(element);
+      if (instance) instance.toggle();
+    }
+  }
+
+  // Auto-initialize dropdowns with data-ux-dropdown attribute
+  function initDropdowns() {
+    document.querySelectorAll('[data-ux-dropdown]').forEach(el => {
+      if (!el._uxDropdown) {
+        const options = {};
+        if (el.dataset.closeOnSelect !== undefined) options.closeOnSelect = el.dataset.closeOnSelect !== 'false';
+        if (el.dataset.closeOnClickOutside !== undefined) options.closeOnClickOutside = el.dataset.closeOnClickOutside !== 'false';
+        if (el.dataset.closeOnEscape !== undefined) options.closeOnEscape = el.dataset.closeOnEscape !== 'false';
+        if (el.dataset.triggerOnHover !== undefined) options.triggerOnHover = el.dataset.triggerOnHover === 'true';
+        if (el.dataset.hoverDelay !== undefined) options.hoverDelay = parseInt(el.dataset.hoverDelay, 10);
+        new UXDropdown(el, options);
+      }
+    });
+  }
+
+  // Initialize on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDropdowns);
+  } else {
+    initDropdowns();
+  }
+
+  // Watch for dynamically added dropdowns
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          if (node.matches && node.matches('[data-ux-dropdown]') && !node._uxDropdown) {
+            new UXDropdown(node);
+          }
+          if (node.querySelectorAll) {
+            node.querySelectorAll('[data-ux-dropdown]').forEach(el => {
+              if (!el._uxDropdown) new UXDropdown(el);
+            });
+          }
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Export
+  window.UXDropdown = UXDropdown;
+
+  // ============================================================================
+  // Alpine.js Component (for backward compatibility)
+  // ============================================================================
+
   // Alpine.js component
   const dropdownComponent = (config = {}) => ({
     isOpen: false,

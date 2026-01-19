@@ -323,6 +323,189 @@
     document.head.appendChild(styleEl);
   }
 
+  // ============================================================================
+  // Vanilla JS Implementation
+  // ============================================================================
+
+  class UXTooltip {
+    constructor(element, options = {}) {
+      this.el = typeof element === 'string' ? document.querySelector(element) : element;
+      if (!this.el) return;
+
+      // Prevent double initialization
+      if (this.el._uxTooltip) return this.el._uxTooltip;
+
+      this.options = {
+        delay: 0,
+        position: 'top', // top, bottom, left, right
+        trigger: 'hover', // hover, click, manual
+        ...options
+      };
+
+      this.isOpen = false;
+      this._timeout = null;
+      this._boundHandlers = {};
+
+      this._init();
+      this.el._uxTooltip = this;
+    }
+
+    _init() {
+      // Find tooltip content
+      this.content = this.el.querySelector('.ux-tooltip__content');
+      if (!this.content) return;
+
+      // Bind handlers based on trigger type
+      if (this.options.trigger === 'hover') {
+        this._boundHandlers.mouseEnter = () => this.show();
+        this._boundHandlers.mouseLeave = () => this.hide();
+        this._boundHandlers.focusIn = () => this.show();
+        this._boundHandlers.focusOut = () => this.hide();
+
+        this.el.addEventListener('mouseenter', this._boundHandlers.mouseEnter);
+        this.el.addEventListener('mouseleave', this._boundHandlers.mouseLeave);
+        this.el.addEventListener('focusin', this._boundHandlers.focusIn);
+        this.el.addEventListener('focusout', this._boundHandlers.focusOut);
+      } else if (this.options.trigger === 'click') {
+        this._boundHandlers.click = (e) => {
+          e.stopPropagation();
+          this.toggle();
+        };
+        this._boundHandlers.clickOutside = (e) => {
+          if (this.isOpen && !this.el.contains(e.target)) {
+            this.hide();
+          }
+        };
+
+        this.el.addEventListener('click', this._boundHandlers.click);
+        document.addEventListener('click', this._boundHandlers.clickOutside);
+      }
+      // 'manual' trigger requires programmatic control via show/hide/toggle
+    }
+
+    show() {
+      if (this._timeout) {
+        clearTimeout(this._timeout);
+        this._timeout = null;
+      }
+
+      if (this.options.delay > 0) {
+        this._timeout = setTimeout(() => {
+          this._doShow();
+        }, this.options.delay);
+      } else {
+        this._doShow();
+      }
+    }
+
+    _doShow() {
+      this.isOpen = true;
+      this.el.classList.add('ux-tooltip--open');
+      this.el.dispatchEvent(new CustomEvent('tooltip:show', { bubbles: true }));
+    }
+
+    hide() {
+      if (this._timeout) {
+        clearTimeout(this._timeout);
+        this._timeout = null;
+      }
+
+      this.isOpen = false;
+      this.el.classList.remove('ux-tooltip--open');
+      this.el.dispatchEvent(new CustomEvent('tooltip:hide', { bubbles: true }));
+    }
+
+    toggle() {
+      this.isOpen ? this.hide() : this.show();
+    }
+
+    destroy() {
+      if (this._timeout) {
+        clearTimeout(this._timeout);
+      }
+
+      if (this.options.trigger === 'hover') {
+        this.el.removeEventListener('mouseenter', this._boundHandlers.mouseEnter);
+        this.el.removeEventListener('mouseleave', this._boundHandlers.mouseLeave);
+        this.el.removeEventListener('focusin', this._boundHandlers.focusIn);
+        this.el.removeEventListener('focusout', this._boundHandlers.focusOut);
+      } else if (this.options.trigger === 'click') {
+        this.el.removeEventListener('click', this._boundHandlers.click);
+        document.removeEventListener('click', this._boundHandlers.clickOutside);
+      }
+
+      delete this.el._uxTooltip;
+    }
+
+    // Static methods
+    static getInstance(element) {
+      const el = typeof element === 'string' ? document.querySelector(element) : element;
+      return el?._uxTooltip || null;
+    }
+
+    static show(element) {
+      const instance = UXTooltip.getInstance(element);
+      if (instance) instance.show();
+    }
+
+    static hide(element) {
+      const instance = UXTooltip.getInstance(element);
+      if (instance) instance.hide();
+    }
+
+    static toggle(element) {
+      const instance = UXTooltip.getInstance(element);
+      if (instance) instance.toggle();
+    }
+  }
+
+  // Auto-initialize tooltips with data-ux-tooltip attribute
+  function initTooltips() {
+    document.querySelectorAll('[data-ux-tooltip]').forEach(el => {
+      if (!el._uxTooltip) {
+        const options = {};
+        if (el.dataset.delay !== undefined) options.delay = parseInt(el.dataset.delay, 10);
+        if (el.dataset.position !== undefined) options.position = el.dataset.position;
+        if (el.dataset.trigger !== undefined) options.trigger = el.dataset.trigger;
+        new UXTooltip(el, options);
+      }
+    });
+  }
+
+  // Initialize on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTooltips);
+  } else {
+    initTooltips();
+  }
+
+  // Watch for dynamically added tooltips
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          if (node.matches && node.matches('[data-ux-tooltip]') && !node._uxTooltip) {
+            new UXTooltip(node);
+          }
+          if (node.querySelectorAll) {
+            node.querySelectorAll('[data-ux-tooltip]').forEach(el => {
+              if (!el._uxTooltip) new UXTooltip(el);
+            });
+          }
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Export
+  window.UXTooltip = UXTooltip;
+
+  // ============================================================================
+  // Alpine.js Component (for backward compatibility)
+  // ============================================================================
+
   // Alpine component for programmatic tooltip control
   const tooltipComponent = (config = {}) => ({
     isOpen: config.open || false,
