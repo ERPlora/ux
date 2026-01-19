@@ -1,6 +1,7 @@
 /**
  * UX Modal Component
  * Modal centrado con soporte Bootstrap Grid
+ * Funciona con JavaScript puro o Alpine.js
  * @requires ux-core.js
  */
 (function() {
@@ -481,17 +482,295 @@
     document.head.appendChild(styleEl);
   }
 
-  // Alpine component for modal
-  // ARIA: role="dialog", aria-modal="true", aria-labelledby, aria-describedby
+  // ========================================
+  // Vanilla JS Modal Class
+  // ========================================
+
+  class UXModal {
+    constructor(element, options = {}) {
+      this.el = typeof element === 'string' ? document.querySelector(element) : element;
+      if (!this.el) return;
+
+      this.options = {
+        closeOnBackdrop: this.el.dataset.closeOnBackdrop !== 'false',
+        closeOnEscape: this.el.dataset.closeOnEscape !== 'false',
+        ...options
+      };
+
+      this.backdrop = this.el;
+      this.modal = this.el.querySelector('.ux-modal');
+      this.modalId = this.el.id || 'ux-modal-' + Math.random().toString(36).substring(2, 11);
+      this.isOpen = false;
+      this._previousActiveElement = null;
+      this._boundHandleKeydown = this._handleKeydown.bind(this);
+      this._boundHandleBackdropClick = this._handleBackdropClick.bind(this);
+
+      this._init();
+    }
+
+    _init() {
+      if (!this.modal) return;
+
+      // Set ARIA attributes
+      this.modal.setAttribute('role', 'dialog');
+      this.modal.setAttribute('aria-modal', 'true');
+
+      const title = this.modal.querySelector('.ux-modal__title');
+      if (title) {
+        const titleId = title.id || `${this.modalId}-title`;
+        title.id = titleId;
+        this.modal.setAttribute('aria-labelledby', titleId);
+      }
+
+      const content = this.modal.querySelector('.ux-modal__content');
+      if (content) {
+        const contentId = content.id || `${this.modalId}-content`;
+        content.id = contentId;
+        this.modal.setAttribute('aria-describedby', contentId);
+      }
+
+      // Find close buttons
+      const closeButtons = this.modal.querySelectorAll('[data-modal-close], .ux-modal__close');
+      closeButtons.forEach(btn => {
+        btn.addEventListener('click', () => this.close());
+      });
+
+      // Check if already open
+      if (this.backdrop.classList.contains('ux-modal-backdrop--open')) {
+        this.isOpen = true;
+        this._setupOpenState();
+      }
+
+      // Store instance
+      this.el._uxModal = this;
+    }
+
+    _getFocusableElements() {
+      if (!this.modal) return [];
+      const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])';
+      return Array.from(this.modal.querySelectorAll(selector)).filter(el => el.offsetParent !== null);
+    }
+
+    _setupOpenState() {
+      // Add event listeners
+      document.addEventListener('keydown', this._boundHandleKeydown);
+      this.backdrop.addEventListener('click', this._boundHandleBackdropClick);
+
+      // Lock scroll
+      if (window.UX?.lockScroll) {
+        window.UX.lockScroll();
+      } else {
+        document.body.style.overflow = 'hidden';
+      }
+
+      // Focus trap
+      if (this.modal && window.UX?.trapFocus) {
+        this._focusTrapCleanup = window.UX.trapFocus(this.modal);
+      } else {
+        // Focus first focusable element
+        const focusable = this._getFocusableElements();
+        if (focusable.length > 0) {
+          focusable[0].focus();
+        }
+      }
+    }
+
+    _cleanupOpenState() {
+      // Remove event listeners
+      document.removeEventListener('keydown', this._boundHandleKeydown);
+      this.backdrop.removeEventListener('click', this._boundHandleBackdropClick);
+
+      // Cleanup focus trap
+      if (this._focusTrapCleanup) {
+        this._focusTrapCleanup();
+        this._focusTrapCleanup = null;
+      }
+
+      // Unlock scroll
+      if (window.UX?.unlockScroll) {
+        window.UX.unlockScroll();
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+
+    _handleKeydown(event) {
+      if (event.key === 'Escape' && this.options.closeOnEscape) {
+        this.close();
+        return;
+      }
+
+      // Focus trap fallback
+      if (event.key === 'Tab' && !this._focusTrapCleanup) {
+        const focusable = this._getFocusableElements();
+        if (focusable.length === 0) return;
+
+        const firstElement = focusable[0];
+        const lastElement = focusable[focusable.length - 1];
+
+        if (event.shiftKey) {
+          if (document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    }
+
+    _handleBackdropClick(event) {
+      if (this.options.closeOnBackdrop && event.target === this.backdrop) {
+        this.close();
+      }
+    }
+
+    open() {
+      if (this.isOpen) return;
+
+      this._previousActiveElement = document.activeElement;
+      this.isOpen = true;
+      this.backdrop.classList.add('ux-modal-backdrop--open');
+
+      this._setupOpenState();
+
+      // Dispatch event
+      this.el.dispatchEvent(new CustomEvent('modal:open', { bubbles: true }));
+    }
+
+    close() {
+      if (!this.isOpen) return;
+
+      this.isOpen = false;
+      this.backdrop.classList.remove('ux-modal-backdrop--open');
+
+      this._cleanupOpenState();
+
+      // Restore focus
+      if (this._previousActiveElement?.focus) {
+        this._previousActiveElement.focus();
+      }
+
+      // Dispatch event
+      this.el.dispatchEvent(new CustomEvent('modal:close', { bubbles: true }));
+    }
+
+    toggle() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    }
+
+    destroy() {
+      this._cleanupOpenState();
+      delete this.el._uxModal;
+    }
+
+    static getInstance(element) {
+      const el = typeof element === 'string' ? document.querySelector(element) : element;
+      return el?._uxModal || null;
+    }
+
+    // Static method to open modal by ID
+    static open(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        const instance = UXModal.getInstance(el) || new UXModal(el);
+        instance.open();
+        return instance;
+      }
+      return null;
+    }
+
+    // Static method to close modal by ID
+    static close(id) {
+      const el = document.getElementById(id);
+      const instance = UXModal.getInstance(el);
+      if (instance) {
+        instance.close();
+      }
+    }
+  }
+
+  // ========================================
+  // Auto-initialize vanilla JS modals
+  // ========================================
+
+  function initModals() {
+    document.querySelectorAll('[data-ux-modal]').forEach(el => {
+      if (!el._uxModal) {
+        new UXModal(el);
+      }
+    });
+
+    // Setup trigger buttons
+    document.querySelectorAll('[data-modal-open]').forEach(btn => {
+      if (btn._uxModalTrigger) return;
+      btn._uxModalTrigger = true;
+
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.modalOpen;
+        UXModal.open(targetId);
+      });
+    });
+  }
+
+  // Auto-init on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initModals);
+  } else {
+    initModals();
+  }
+
+  // Observe for dynamically added modals
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          if (node.hasAttribute('data-ux-modal')) {
+            new UXModal(node);
+          }
+          if (node.hasAttribute('data-modal-open') && !node._uxModalTrigger) {
+            node._uxModalTrigger = true;
+            node.addEventListener('click', () => {
+              UXModal.open(node.dataset.modalOpen);
+            });
+          }
+          node.querySelectorAll?.('[data-ux-modal]').forEach(el => {
+            if (!el._uxModal) new UXModal(el);
+          });
+          node.querySelectorAll?.('[data-modal-open]').forEach(btn => {
+            if (!btn._uxModalTrigger) {
+              btn._uxModalTrigger = true;
+              btn.addEventListener('click', () => {
+                UXModal.open(btn.dataset.modalOpen);
+              });
+            }
+          });
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // ========================================
+  // Alpine.js Component (for backward compatibility)
+  // ========================================
+
   const modalComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
-    closeOnBackdrop: config.closeOnBackdrop !== false, // true by default
+    closeOnBackdrop: config.closeOnBackdrop !== false,
     closeOnEscape: config.closeOnEscape !== false,
-    modalId: config.id || 'ux-modal-' + Math.random().toString(36).substr(2, 9),
+    modalId: config.id || 'ux-modal-' + Math.random().toString(36).substring(2, 11),
     _previousActiveElement: null,
     _focusTrapCleanup: null,
 
-    // ARIA attributes for the modal
     get ariaAttrs() {
       return {
         'role': 'dialog',
@@ -509,7 +788,6 @@
       return this.modalId + '-content';
     },
 
-    // Get all focusable elements within modal
     _getFocusableElements() {
       const modal = this.$refs.modal || this.$el.querySelector('.ux-modal');
       if (!modal) return [];
@@ -518,32 +796,27 @@
     },
 
     open() {
-      // Store current focused element to restore on close
       this._previousActiveElement = document.activeElement;
       this.isOpen = true;
 
-      // Use global scroll lock (supports nested modals)
-      if (window.UX && window.UX.lockScroll) {
+      if (window.UX?.lockScroll) {
         window.UX.lockScroll();
       } else {
         document.body.style.overflow = 'hidden';
       }
 
-      // Setup focus trap and focus first element
       this.$nextTick(() => {
         const modal = this.$refs.modal || this.$el.querySelector('.ux-modal');
-        if (modal && window.UX && window.UX.trapFocus) {
+        if (modal && window.UX?.trapFocus) {
           this._focusTrapCleanup = window.UX.trapFocus(modal);
         } else {
-          // Fallback: focus first focusable element
           const focusable = this._getFocusableElements();
           if (focusable.length > 0) {
             focusable[0].focus();
           }
         }
 
-        // Announce modal opened for screen readers
-        if (window.UX && window.UX.announce) {
+        if (window.UX?.announce) {
           const title = this.$el.querySelector('[id$="-title"]');
           if (title) {
             window.UX.announce(title.textContent + ' dialog opened', 'assertive');
@@ -555,21 +828,18 @@
     close() {
       this.isOpen = false;
 
-      // Cleanup focus trap
       if (this._focusTrapCleanup) {
         this._focusTrapCleanup();
         this._focusTrapCleanup = null;
       }
 
-      // Use global scroll unlock
-      if (window.UX && window.UX.unlockScroll) {
+      if (window.UX?.unlockScroll) {
         window.UX.unlockScroll();
       } else {
         document.body.style.overflow = '';
       }
 
-      // Restore focus to previous element
-      if (this._previousActiveElement && this._previousActiveElement.focus) {
+      if (this._previousActiveElement?.focus) {
         this._previousActiveElement.focus();
       }
     },
@@ -594,7 +864,6 @@
         return;
       }
 
-      // Focus trap: Tab key cycles within modal (fallback if UX.trapFocus not used)
       if (event.key === 'Tab' && !this._focusTrapCleanup) {
         const focusable = this._getFocusableElements();
         if (focusable.length === 0) return;
@@ -603,13 +872,11 @@
         const lastElement = focusable[focusable.length - 1];
 
         if (event.shiftKey) {
-          // Shift+Tab: if on first element, go to last
           if (document.activeElement === firstElement) {
             event.preventDefault();
             lastElement.focus();
           }
         } else {
-          // Tab: if on last element, go to first
           if (document.activeElement === lastElement) {
             event.preventDefault();
             firstElement.focus();
@@ -619,11 +886,19 @@
     }
   });
 
+  // Register Alpine component
   if (window.UX) {
     window.UX.registerComponent('uxModal', modalComponent);
-  } else {
+  } else if (typeof Alpine !== 'undefined') {
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxModal', modalComponent);
     });
   }
+
+  // ========================================
+  // Export to global namespace
+  // ========================================
+
+  window.UXModal = UXModal;
+
 })();
