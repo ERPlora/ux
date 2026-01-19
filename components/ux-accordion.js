@@ -1,6 +1,7 @@
 /**
  * UX Accordion Component
  * Acordeones expandibles estilo iOS
+ * Funciona con JavaScript puro o Alpine.js
  * @requires ux-core.js
  */
 (function() {
@@ -275,6 +276,17 @@
     .ux-accordion--glass .ux-accordion-item__header:hover {
       background: var(--ux-glass-bg-thin);
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-accordion-item__body,
+      .ux-accordion-item__chevron {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -287,9 +299,338 @@
     document.head.appendChild(styleEl);
   }
 
-  // Alpine component for accordion
-  // ARIA: aria-expanded, aria-controls on headers; region role on panels
-  // Keyboard: Arrow Up/Down, Home/End, Enter/Space
+  // ========================================
+  // Vanilla JS Accordion Class
+  // ========================================
+
+  class UXAccordion {
+    constructor(element, options = {}) {
+      this.el = typeof element === 'string' ? document.querySelector(element) : element;
+      if (!this.el) return;
+
+      this.options = {
+        multiple: this.el.dataset.multiple === 'true' || options.multiple || false,
+        openItems: options.openItems || [],
+        ...options
+      };
+
+      this.items = [];
+      this.accordionId = this.el.id || 'ux-accordion-' + Math.random().toString(36).substr(2, 9);
+
+      this._init();
+    }
+
+    _init() {
+      // Find all accordion items
+      const itemElements = this.el.querySelectorAll(':scope > .ux-accordion-item');
+
+      itemElements.forEach((itemEl, index) => {
+        const header = itemEl.querySelector('.ux-accordion-item__header');
+        const body = itemEl.querySelector('.ux-accordion-item__body');
+
+        if (!header) return;
+
+        // Set ARIA attributes
+        const headerId = `${this.accordionId}-header-${index}`;
+        const panelId = `${this.accordionId}-panel-${index}`;
+
+        header.setAttribute('id', headerId);
+        header.setAttribute('aria-controls', panelId);
+        header.setAttribute('aria-expanded', 'false');
+
+        if (body) {
+          body.setAttribute('id', panelId);
+          body.setAttribute('role', 'region');
+          body.setAttribute('aria-labelledby', headerId);
+        }
+
+        // Store item reference
+        this.items.push({ el: itemEl, header, body, index });
+
+        // Add click handler
+        header.addEventListener('click', (e) => {
+          if (!itemEl.classList.contains('ux-accordion-item--disabled')) {
+            this.toggle(index);
+          }
+        });
+
+        // Add keyboard handler
+        header.addEventListener('keydown', (e) => this._handleKeydown(e, index));
+
+        // Check if item should be open initially
+        if (itemEl.classList.contains('ux-accordion-item--open') || this.options.openItems.includes(index)) {
+          this._openItem(index, false);
+        }
+      });
+
+      // Store instance on element
+      this.el._uxAccordion = this;
+    }
+
+    _handleKeydown(event, index) {
+      const total = this.items.length;
+
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          this._focusItem((index + 1) % total);
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          this._focusItem((index - 1 + total) % total);
+          break;
+        case 'Home':
+          event.preventDefault();
+          this._focusItem(0);
+          break;
+        case 'End':
+          event.preventDefault();
+          this._focusItem(total - 1);
+          break;
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          this.toggle(index);
+          break;
+      }
+    }
+
+    _focusItem(index) {
+      if (this.items[index] && this.items[index].header) {
+        this.items[index].header.focus();
+      }
+    }
+
+    _openItem(index, dispatch = true) {
+      const item = this.items[index];
+      if (!item) return;
+
+      item.el.classList.add('ux-accordion-item--open');
+      item.header.setAttribute('aria-expanded', 'true');
+
+      if (dispatch) {
+        this.el.dispatchEvent(new CustomEvent('accordion:open', {
+          detail: { index, item: item.el },
+          bubbles: true
+        }));
+      }
+    }
+
+    _closeItem(index, dispatch = true) {
+      const item = this.items[index];
+      if (!item) return;
+
+      item.el.classList.remove('ux-accordion-item--open');
+      item.header.setAttribute('aria-expanded', 'false');
+
+      if (dispatch) {
+        this.el.dispatchEvent(new CustomEvent('accordion:close', {
+          detail: { index, item: item.el },
+          bubbles: true
+        }));
+      }
+    }
+
+    isOpen(index) {
+      const item = this.items[index];
+      return item ? item.el.classList.contains('ux-accordion-item--open') : false;
+    }
+
+    toggle(index) {
+      if (this.isOpen(index)) {
+        this.close(index);
+      } else {
+        this.open(index);
+      }
+    }
+
+    open(index) {
+      // If not multiple, close all others first
+      if (!this.options.multiple) {
+        this.items.forEach((item, i) => {
+          if (i !== index && this.isOpen(i)) {
+            this._closeItem(i);
+          }
+        });
+      }
+      this._openItem(index);
+    }
+
+    close(index) {
+      this._closeItem(index);
+    }
+
+    openAll() {
+      this.items.forEach((_, i) => this._openItem(i));
+    }
+
+    closeAll() {
+      this.items.forEach((_, i) => this._closeItem(i));
+    }
+
+    destroy() {
+      delete this.el._uxAccordion;
+    }
+
+    // Static method to get or create instance
+    static getInstance(element) {
+      const el = typeof element === 'string' ? document.querySelector(element) : element;
+      return el?._uxAccordion || null;
+    }
+  }
+
+  // ========================================
+  // Vanilla JS Single Accordion Item Class
+  // ========================================
+
+  class UXAccordionItem {
+    constructor(element, options = {}) {
+      this.el = typeof element === 'string' ? document.querySelector(element) : element;
+      if (!this.el) return;
+
+      this.options = {
+        isOpen: this.el.classList.contains('ux-accordion-item--open') || options.isOpen || false,
+        ...options
+      };
+
+      this.itemId = this.el.id || 'ux-accordion-item-' + Math.random().toString(36).substr(2, 9);
+      this.header = this.el.querySelector('.ux-accordion-item__header');
+      this.body = this.el.querySelector('.ux-accordion-item__body');
+
+      this._init();
+    }
+
+    _init() {
+      if (!this.header) return;
+
+      // Set ARIA attributes
+      const headerId = `${this.itemId}-header`;
+      const panelId = `${this.itemId}-panel`;
+
+      this.header.setAttribute('id', headerId);
+      this.header.setAttribute('aria-controls', panelId);
+      this.header.setAttribute('aria-expanded', this.options.isOpen ? 'true' : 'false');
+
+      if (this.body) {
+        this.body.setAttribute('id', panelId);
+        this.body.setAttribute('role', 'region');
+        this.body.setAttribute('aria-labelledby', headerId);
+      }
+
+      // Set initial state
+      if (this.options.isOpen) {
+        this.el.classList.add('ux-accordion-item--open');
+      }
+
+      // Add click handler
+      this.header.addEventListener('click', () => {
+        if (!this.el.classList.contains('ux-accordion-item--disabled')) {
+          this.toggle();
+        }
+      });
+
+      // Add keyboard handler
+      this.header.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.toggle();
+        }
+      });
+
+      // Store instance
+      this.el._uxAccordionItem = this;
+    }
+
+    get isOpen() {
+      return this.el.classList.contains('ux-accordion-item--open');
+    }
+
+    toggle() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    }
+
+    open() {
+      this.el.classList.add('ux-accordion-item--open');
+      this.header?.setAttribute('aria-expanded', 'true');
+      this.el.dispatchEvent(new CustomEvent('accordion-item:open', { bubbles: true }));
+    }
+
+    close() {
+      this.el.classList.remove('ux-accordion-item--open');
+      this.header?.setAttribute('aria-expanded', 'false');
+      this.el.dispatchEvent(new CustomEvent('accordion-item:close', { bubbles: true }));
+    }
+
+    destroy() {
+      delete this.el._uxAccordionItem;
+    }
+
+    static getInstance(element) {
+      const el = typeof element === 'string' ? document.querySelector(element) : element;
+      return el?._uxAccordionItem || null;
+    }
+  }
+
+  // ========================================
+  // Auto-initialize vanilla JS accordions
+  // ========================================
+
+  function initAccordions() {
+    // Initialize accordions with data-ux-accordion attribute
+    document.querySelectorAll('[data-ux-accordion]').forEach(el => {
+      if (!el._uxAccordion) {
+        new UXAccordion(el);
+      }
+    });
+
+    // Initialize standalone items with data-ux-accordion-item attribute
+    document.querySelectorAll('[data-ux-accordion-item]').forEach(el => {
+      if (!el._uxAccordionItem) {
+        new UXAccordionItem(el);
+      }
+    });
+  }
+
+  // Auto-init on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAccordions);
+  } else {
+    initAccordions();
+  }
+
+  // Observe for dynamically added accordions
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          if (node.hasAttribute('data-ux-accordion')) {
+            new UXAccordion(node);
+          }
+          if (node.hasAttribute('data-ux-accordion-item')) {
+            new UXAccordionItem(node);
+          }
+          // Check children
+          node.querySelectorAll?.('[data-ux-accordion]').forEach(el => {
+            if (!el._uxAccordion) new UXAccordion(el);
+          });
+          node.querySelectorAll?.('[data-ux-accordion-item]').forEach(el => {
+            if (!el._uxAccordionItem) new UXAccordionItem(el);
+          });
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // ========================================
+  // Alpine.js Components (for backward compatibility)
+  // ========================================
+
   const accordionComponent = (config = {}) => ({
     openItems: config.openItems || [],
     multiple: config.multiple || false,
@@ -302,7 +643,6 @@
       return this.openItems.includes(index);
     },
 
-    // ARIA attributes for accordion header button
     getHeaderAriaAttrs(index) {
       return {
         'aria-expanded': this.isOpen(index) ? 'true' : 'false',
@@ -311,7 +651,6 @@
       };
     },
 
-    // ARIA attributes for accordion panel
     getPanelAriaAttrs(index) {
       return {
         'role': 'region',
@@ -322,7 +661,6 @@
 
     toggle(index) {
       if (this.disabled) return;
-
       if (this.isOpen(index)) {
         this.close(index);
       } else {
@@ -353,7 +691,6 @@
       this.openItems = [];
     },
 
-    // Keyboard navigation handler
     handleKeydown(event, index) {
       const headers = this.$el.querySelectorAll('.ux-accordion-item__header');
       const total = headers.length;
@@ -391,23 +728,11 @@
     }
   });
 
-  if (window.UX) {
-    window.UX.registerComponent('uxAccordion', accordionComponent);
-  } else {
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('uxAccordion', accordionComponent);
-    });
-  }
-
-  // Alpine component for single accordion item
-  // ARIA: aria-expanded on header
-  // Keyboard: Enter/Space to toggle
   const accordionItemComponent = (config = {}) => ({
     isOpen: config.isOpen || false,
     disabled: config.disabled || false,
     itemId: config.id || 'ux-accordion-item-' + Math.random().toString(36).substr(2, 9),
 
-    // ARIA attributes for header
     get headerAriaAttrs() {
       return {
         'aria-expanded': this.isOpen ? 'true' : 'false',
@@ -416,7 +741,6 @@
       };
     },
 
-    // ARIA attributes for panel
     get panelAriaAttrs() {
       return {
         'role': 'region',
@@ -441,7 +765,6 @@
       this.isOpen = false;
     },
 
-    // Keyboard handler for Enter/Space
     handleKeydown(event) {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
@@ -450,11 +773,22 @@
     }
   });
 
+  // Register Alpine components
   if (window.UX) {
+    window.UX.registerComponent('uxAccordion', accordionComponent);
     window.UX.registerComponent('uxAccordionItem', accordionItemComponent);
-  } else {
+  } else if (typeof Alpine !== 'undefined') {
     document.addEventListener('alpine:init', () => {
+      Alpine.data('uxAccordion', accordionComponent);
       Alpine.data('uxAccordionItem', accordionItemComponent);
     });
   }
+
+  // ========================================
+  // Export to global namespace
+  // ========================================
+
+  window.UXAccordion = UXAccordion;
+  window.UXAccordionItem = UXAccordionItem;
+
 })();

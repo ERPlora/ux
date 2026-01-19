@@ -1,6 +1,7 @@
 /**
  * UX Tabs Component
  * Sistema de tabs estilo iOS/Ionic
+ * Funciona con JavaScript puro o Alpine.js
  * @requires ux-core.js
  */
 (function() {
@@ -484,6 +485,17 @@
       width: 28px;
       height: 28px;
     }
+
+    /* ========================================
+       Reduced Motion
+    ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ux-tab-bar__indicator,
+      .ux-tab-content--animated .ux-tab-panel {
+        transition: none;
+      }
+    }
   `;
 
   // Inject styles
@@ -496,16 +508,346 @@
     document.head.appendChild(styleEl);
   }
 
-  // Alpine component for tabs
-  // ARIA: role="tablist" on bar, role="tab" on buttons, role="tabpanel" on panels
+  // ========================================
+  // Vanilla JS Tabs Class
+  // ========================================
+
+  class UXTabs {
+    constructor(element, options = {}) {
+      this.el = typeof element === 'string' ? document.querySelector(element) : element;
+      if (!this.el) return;
+
+      this.options = {
+        activeTab: parseInt(this.el.dataset.activeTab) || options.activeTab || 0,
+        animated: this.el.dataset.animated === 'true' || options.animated || false,
+        ...options
+      };
+
+      this.tabsId = this.el.id || 'ux-tabs-' + Math.random().toString(36).substring(2, 11);
+      this.tabBar = null;
+      this.tabContent = null;
+      this.tabs = [];
+      this.panels = [];
+      this.indicator = null;
+      this.activeTab = this.options.activeTab;
+
+      this._init();
+    }
+
+    _init() {
+      this.tabBar = this.el.querySelector('.ux-tab-bar');
+      this.tabContent = this.el.querySelector('.ux-tab-content');
+
+      if (!this.tabBar) return;
+
+      // Find all tab buttons
+      const buttons = this.tabBar.querySelectorAll('.ux-tab-button');
+      buttons.forEach((btn, index) => {
+        this.tabs.push(btn);
+
+        // Set ARIA attributes
+        const tabId = `${this.tabsId}-tab-${index}`;
+        const panelId = `${this.tabsId}-panel-${index}`;
+
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('id', tabId);
+        btn.setAttribute('aria-controls', panelId);
+        btn.setAttribute('aria-selected', index === this.activeTab ? 'true' : 'false');
+        btn.setAttribute('tabindex', index === this.activeTab ? '0' : '-1');
+
+        // Add click handler
+        btn.addEventListener('click', () => {
+          if (!btn.classList.contains('ux-tab-button--disabled')) {
+            this.select(index);
+          }
+        });
+
+        // Add keyboard handler
+        btn.addEventListener('keydown', (e) => this._handleKeydown(e, index));
+      });
+
+      // Set tablist role on tab bar
+      this.tabBar.setAttribute('role', 'tablist');
+
+      // Find all tab panels
+      if (this.tabContent) {
+        const panels = this.tabContent.querySelectorAll('.ux-tab-panel');
+        panels.forEach((panel, index) => {
+          this.panels.push(panel);
+
+          const panelId = `${this.tabsId}-panel-${index}`;
+          const tabId = `${this.tabsId}-tab-${index}`;
+
+          panel.setAttribute('role', 'tabpanel');
+          panel.setAttribute('id', panelId);
+          panel.setAttribute('aria-labelledby', tabId);
+          panel.setAttribute('tabindex', '0');
+        });
+      }
+
+      // Find indicator
+      this.indicator = this.tabBar.querySelector('.ux-tab-bar__indicator');
+
+      // Set initial state
+      this._updateState();
+
+      // Store instance
+      this.el._uxTabs = this;
+    }
+
+    _handleKeydown(event, index) {
+      const total = this.tabs.length;
+
+      switch (event.key) {
+        case 'ArrowRight':
+        case 'ArrowDown':
+          event.preventDefault();
+          this._focusTab((index + 1) % total);
+          break;
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          event.preventDefault();
+          this._focusTab((index - 1 + total) % total);
+          break;
+        case 'Home':
+          event.preventDefault();
+          this._focusTab(0);
+          break;
+        case 'End':
+          event.preventDefault();
+          this._focusTab(total - 1);
+          break;
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          this.select(index);
+          break;
+      }
+    }
+
+    _focusTab(index) {
+      if (this.tabs[index]) {
+        this.tabs[index].focus();
+      }
+    }
+
+    _updateState() {
+      // Update tab buttons
+      this.tabs.forEach((tab, index) => {
+        const isActive = index === this.activeTab;
+        tab.classList.toggle('ux-tab-button--selected', isActive);
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        tab.setAttribute('tabindex', isActive ? '0' : '-1');
+      });
+
+      // Update panels
+      this.panels.forEach((panel, index) => {
+        panel.classList.toggle('ux-tab-panel--active', index === this.activeTab);
+      });
+
+      // Update indicator
+      this._updateIndicator();
+    }
+
+    _updateIndicator() {
+      if (!this.indicator || !this.tabs[this.activeTab]) return;
+
+      const activeButton = this.tabs[this.activeTab];
+      this.indicator.style.left = activeButton.offsetLeft + 'px';
+      this.indicator.style.width = activeButton.offsetWidth + 'px';
+    }
+
+    select(index) {
+      if (index === this.activeTab) return;
+      if (index < 0 || index >= this.tabs.length) return;
+      if (this.tabs[index]?.classList.contains('ux-tab-button--disabled')) return;
+
+      const previousTab = this.activeTab;
+      this.activeTab = index;
+      this._updateState();
+
+      // Dispatch event
+      this.el.dispatchEvent(new CustomEvent('tabs:change', {
+        detail: { index, previousIndex: previousTab, tab: this.tabs[index] },
+        bubbles: true
+      }));
+    }
+
+    next() {
+      const nextIndex = (this.activeTab + 1) % this.tabs.length;
+      this.select(nextIndex);
+    }
+
+    prev() {
+      const prevIndex = (this.activeTab - 1 + this.tabs.length) % this.tabs.length;
+      this.select(prevIndex);
+    }
+
+    destroy() {
+      delete this.el._uxTabs;
+    }
+
+    static getInstance(element) {
+      const el = typeof element === 'string' ? document.querySelector(element) : element;
+      return el?._uxTabs || null;
+    }
+  }
+
+  // ========================================
+  // Vanilla JS Scrollable Tab Bar Class
+  // ========================================
+
+  class UXScrollableTabBar {
+    constructor(element, options = {}) {
+      this.el = typeof element === 'string' ? document.querySelector(element) : element;
+      if (!this.el) return;
+
+      this.options = {
+        scrollAmount: parseInt(this.el.dataset.scrollAmount) || options.scrollAmount || 200,
+        ...options
+      };
+
+      this.scrollContainer = null;
+      this.startArrow = null;
+      this.endArrow = null;
+
+      this._init();
+    }
+
+    _init() {
+      this.scrollContainer = this.el.querySelector('.ux-tab-bar__scroll');
+      this.startArrow = this.el.querySelector('.ux-tab-bar__arrow--start');
+      this.endArrow = this.el.querySelector('.ux-tab-bar__arrow--end');
+
+      if (!this.scrollContainer) return;
+
+      // Bind methods
+      this._checkArrows = this._checkArrows.bind(this);
+
+      // Add event listeners
+      this.scrollContainer.addEventListener('scroll', this._checkArrows);
+      window.addEventListener('resize', this._checkArrows);
+
+      // Arrow click handlers
+      if (this.startArrow) {
+        this.startArrow.addEventListener('click', () => this.scrollStart());
+      }
+      if (this.endArrow) {
+        this.endArrow.addEventListener('click', () => this.scrollEnd());
+      }
+
+      // Initial check
+      this._checkArrows();
+
+      // Store instance
+      this.el._uxScrollableTabBar = this;
+    }
+
+    _checkArrows() {
+      if (!this.scrollContainer) return;
+
+      const { scrollLeft, scrollWidth, clientWidth } = this.scrollContainer;
+
+      if (this.startArrow) {
+        this.startArrow.classList.toggle('ux-tab-bar__arrow--visible', scrollLeft > 5);
+      }
+      if (this.endArrow) {
+        this.endArrow.classList.toggle('ux-tab-bar__arrow--visible', scrollLeft < scrollWidth - clientWidth - 5);
+      }
+    }
+
+    scrollStart() {
+      if (!this.scrollContainer) return;
+      this.scrollContainer.scrollBy({ left: -this.options.scrollAmount, behavior: 'smooth' });
+    }
+
+    scrollEnd() {
+      if (!this.scrollContainer) return;
+      this.scrollContainer.scrollBy({ left: this.options.scrollAmount, behavior: 'smooth' });
+    }
+
+    scrollToTab(index) {
+      if (!this.scrollContainer) return;
+      const tabs = this.scrollContainer.querySelectorAll('.ux-tab-button');
+      if (tabs[index]) {
+        tabs[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+
+    destroy() {
+      if (this.scrollContainer) {
+        this.scrollContainer.removeEventListener('scroll', this._checkArrows);
+      }
+      window.removeEventListener('resize', this._checkArrows);
+      delete this.el._uxScrollableTabBar;
+    }
+
+    static getInstance(element) {
+      const el = typeof element === 'string' ? document.querySelector(element) : element;
+      return el?._uxScrollableTabBar || null;
+    }
+  }
+
+  // ========================================
+  // Auto-initialize vanilla JS tabs
+  // ========================================
+
+  function initTabs() {
+    document.querySelectorAll('[data-ux-tabs]').forEach(el => {
+      if (!el._uxTabs) {
+        new UXTabs(el);
+      }
+    });
+
+    document.querySelectorAll('[data-ux-scrollable-tab-bar]').forEach(el => {
+      if (!el._uxScrollableTabBar) {
+        new UXScrollableTabBar(el);
+      }
+    });
+  }
+
+  // Auto-init on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTabs);
+  } else {
+    initTabs();
+  }
+
+  // Observe for dynamically added tabs
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          if (node.hasAttribute('data-ux-tabs')) {
+            new UXTabs(node);
+          }
+          if (node.hasAttribute('data-ux-scrollable-tab-bar')) {
+            new UXScrollableTabBar(node);
+          }
+          node.querySelectorAll?.('[data-ux-tabs]').forEach(el => {
+            if (!el._uxTabs) new UXTabs(el);
+          });
+          node.querySelectorAll?.('[data-ux-scrollable-tab-bar]').forEach(el => {
+            if (!el._uxScrollableTabBar) new UXScrollableTabBar(el);
+          });
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // ========================================
+  // Alpine.js Components (for backward compatibility)
+  // ========================================
+
   const tabsComponent = (config = {}) => ({
     activeTab: config.activeTab || 0,
     tabs: config.tabs || [],
     animated: config.animated || false,
     indicatorStyle: {},
-    tabsId: config.id || 'ux-tabs-' + Math.random().toString(36).substr(2, 9),
+    tabsId: config.id || 'ux-tabs-' + Math.random().toString(36).substring(2, 11),
 
-    // ARIA attributes for the tab bar (tablist)
     get tablistAriaAttrs() {
       return {
         'role': 'tablist',
@@ -513,7 +855,6 @@
       };
     },
 
-    // ARIA attributes for each tab button
     getTabAriaAttrs(index) {
       return {
         'role': 'tab',
@@ -524,7 +865,6 @@
       };
     },
 
-    // ARIA attributes for each tab panel
     getPanelAriaAttrs(index) {
       return {
         'role': 'tabpanel',
@@ -589,7 +929,6 @@
     }
   });
 
-  // Scrollable Tab Bar Component
   const scrollableTabBarComponent = (config = {}) => ({
     showStartArrow: false,
     showEndArrow: false,
@@ -640,13 +979,22 @@
     }
   });
 
+  // Register Alpine components
   if (window.UX) {
     window.UX.registerComponent('uxTabs', tabsComponent);
     window.UX.registerComponent('uxScrollableTabBar', scrollableTabBarComponent);
-  } else {
+  } else if (typeof Alpine !== 'undefined') {
     document.addEventListener('alpine:init', () => {
       Alpine.data('uxTabs', tabsComponent);
       Alpine.data('uxScrollableTabBar', scrollableTabBarComponent);
     });
   }
+
+  // ========================================
+  // Export to global namespace
+  // ========================================
+
+  window.UXTabs = UXTabs;
+  window.UXScrollableTabBar = UXScrollableTabBar;
+
 })();
