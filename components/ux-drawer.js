@@ -337,6 +337,233 @@
     document.head.appendChild(styleEl);
   }
 
+  // ============================================================================
+  // Vanilla JS Implementation
+  // ============================================================================
+
+  class UXDrawer {
+    constructor(element, options = {}) {
+      this.el = typeof element === 'string' ? document.querySelector(element) : element;
+      if (!this.el) return;
+
+      // Prevent double initialization
+      if (this.el._uxDrawer) return this.el._uxDrawer;
+
+      this.options = {
+        closeOnBackdrop: true,
+        closeOnEscape: true,
+        lockScroll: true,
+        position: 'left', // 'left' | 'right'
+        ...options
+      };
+
+      this.isOpen = false;
+      this._boundHandlers = {};
+
+      this._init();
+      this.el._uxDrawer = this;
+    }
+
+    _init() {
+      // Find drawer panel
+      this.drawer = this.el.querySelector('.ux-drawer');
+      if (!this.drawer) {
+        // If this element IS the drawer, find backdrop parent or create structure
+        if (this.el.classList.contains('ux-drawer')) {
+          this.drawer = this.el;
+        }
+      }
+
+      // Set position class if needed
+      if (this.options.position === 'right' && this.drawer) {
+        this.drawer.classList.add('ux-drawer--right');
+      }
+
+      // Set ARIA attributes
+      this.el.setAttribute('role', 'dialog');
+      this.el.setAttribute('aria-modal', 'true');
+
+      // Backdrop click handler
+      if (this.options.closeOnBackdrop) {
+        this._boundHandlers.backdropClick = (e) => {
+          // Only close if clicking the backdrop itself (not the drawer content)
+          if (e.target === this.el || e.target.classList.contains('ux-drawer-backdrop')) {
+            this.close();
+          }
+        };
+        this.el.addEventListener('click', this._boundHandlers.backdropClick);
+      }
+
+      // Escape key handler
+      if (this.options.closeOnEscape) {
+        this._boundHandlers.escapeKey = (e) => {
+          if (this.isOpen && e.key === 'Escape') {
+            this.close();
+          }
+        };
+        document.addEventListener('keydown', this._boundHandlers.escapeKey);
+      }
+
+      // Close button handler
+      const closeBtn = this.el.querySelector('.ux-drawer__close, [data-drawer-close]');
+      if (closeBtn) {
+        this._boundHandlers.closeClick = () => this.close();
+        closeBtn.addEventListener('click', this._boundHandlers.closeClick);
+        this._closeBtn = closeBtn;
+      }
+
+      // Trigger buttons
+      this._setupTriggers();
+    }
+
+    _setupTriggers() {
+      const id = this.el.id;
+      if (!id) return;
+
+      document.querySelectorAll(`[data-drawer-open="${id}"]`).forEach(trigger => {
+        trigger.addEventListener('click', () => this.open());
+      });
+
+      document.querySelectorAll(`[data-drawer-toggle="${id}"]`).forEach(trigger => {
+        trigger.addEventListener('click', () => this.toggle());
+      });
+    }
+
+    open() {
+      if (this.isOpen) return;
+
+      this.isOpen = true;
+      this.el.classList.add('ux-drawer-backdrop--open');
+
+      // Lock scroll
+      if (this.options.lockScroll && window.UX) {
+        window.UX.lockScroll();
+      }
+
+      // Focus trap
+      if (window.UX && this.drawer) {
+        setTimeout(() => {
+          window.UX.trapFocus(this.drawer);
+        }, 10);
+      }
+
+      // Dispatch event
+      this.el.dispatchEvent(new CustomEvent('drawer:open', { bubbles: true }));
+    }
+
+    close() {
+      if (!this.isOpen) return;
+
+      this.isOpen = false;
+      this.el.classList.remove('ux-drawer-backdrop--open');
+
+      // Unlock scroll
+      if (this.options.lockScroll && window.UX) {
+        window.UX.unlockScroll();
+      }
+
+      // Dispatch event
+      this.el.dispatchEvent(new CustomEvent('drawer:close', { bubbles: true }));
+    }
+
+    toggle() {
+      this.isOpen ? this.close() : this.open();
+    }
+
+    destroy() {
+      if (this.options.closeOnBackdrop && this._boundHandlers.backdropClick) {
+        this.el.removeEventListener('click', this._boundHandlers.backdropClick);
+      }
+
+      if (this.options.closeOnEscape && this._boundHandlers.escapeKey) {
+        document.removeEventListener('keydown', this._boundHandlers.escapeKey);
+      }
+
+      if (this._closeBtn && this._boundHandlers.closeClick) {
+        this._closeBtn.removeEventListener('click', this._boundHandlers.closeClick);
+      }
+
+      // Ensure scroll is unlocked
+      if (this.isOpen && this.options.lockScroll && window.UX) {
+        window.UX.unlockScroll();
+      }
+
+      delete this.el._uxDrawer;
+    }
+
+    // Static methods
+    static getInstance(element) {
+      const el = typeof element === 'string' ? document.querySelector(element) : element;
+      return el?._uxDrawer || null;
+    }
+
+    static open(id) {
+      const el = typeof id === 'string' ? document.getElementById(id) : id;
+      const instance = UXDrawer.getInstance(el);
+      if (instance) instance.open();
+    }
+
+    static close(id) {
+      const el = typeof id === 'string' ? document.getElementById(id) : id;
+      const instance = UXDrawer.getInstance(el);
+      if (instance) instance.close();
+    }
+
+    static toggle(id) {
+      const el = typeof id === 'string' ? document.getElementById(id) : id;
+      const instance = UXDrawer.getInstance(el);
+      if (instance) instance.toggle();
+    }
+  }
+
+  // Auto-initialize drawers with data-ux-drawer attribute
+  function initDrawers() {
+    document.querySelectorAll('[data-ux-drawer]').forEach(el => {
+      if (!el._uxDrawer) {
+        const options = {};
+        if (el.dataset.closeOnBackdrop !== undefined) options.closeOnBackdrop = el.dataset.closeOnBackdrop !== 'false';
+        if (el.dataset.closeOnEscape !== undefined) options.closeOnEscape = el.dataset.closeOnEscape !== 'false';
+        if (el.dataset.lockScroll !== undefined) options.lockScroll = el.dataset.lockScroll !== 'false';
+        if (el.dataset.position !== undefined) options.position = el.dataset.position;
+        new UXDrawer(el, options);
+      }
+    });
+  }
+
+  // Initialize on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDrawers);
+  } else {
+    initDrawers();
+  }
+
+  // Watch for dynamically added drawers
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          if (node.matches && node.matches('[data-ux-drawer]') && !node._uxDrawer) {
+            new UXDrawer(node);
+          }
+          if (node.querySelectorAll) {
+            node.querySelectorAll('[data-ux-drawer]').forEach(el => {
+              if (!el._uxDrawer) new UXDrawer(el);
+            });
+          }
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Export
+  window.UXDrawer = UXDrawer;
+
+  // ============================================================================
+  // Alpine.js Component (for backward compatibility)
+  // ============================================================================
+
   // Alpine.js component
   const drawerData = (options = {}) => ({
     isOpen: options.isOpen ?? false,
