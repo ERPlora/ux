@@ -672,6 +672,323 @@
     document.head.appendChild(styleEl);
   }
 
+  // ============================================================================
+  // Web Component Implementation (HTMX-friendly)
+  // ============================================================================
+
+  class UXSheetElement extends HTMLElement {
+    static get observedAttributes() {
+      return ['open', 'size', 'close-on-backdrop', 'close-on-escape', 'draggable'];
+    }
+
+    constructor() {
+      super();
+      this._isOpen = false;
+      this._previousActiveElement = null;
+      this._boundHandlers = {};
+      this._startY = 0;
+      this._currentY = 0;
+      this._isDragging = false;
+    }
+
+    connectedCallback() {
+      // Setup structure if not present
+      if (!this.querySelector('.ux-sheet-backdrop')) {
+        this._createStructure();
+      }
+
+      this._backdrop = this.querySelector('.ux-sheet-backdrop');
+      this._sheet = this.querySelector('.ux-sheet');
+      this._handle = this.querySelector('.ux-sheet__handle');
+
+      // Listen for custom events (HTMX integration)
+      this.addEventListener('ux:open', () => this.open());
+      this.addEventListener('ux:close', () => this.close());
+      this.addEventListener('ux:toggle', () => this.toggle());
+
+      // Setup event handlers
+      this._boundHandlers.keydown = (e) => this._handleKeydown(e);
+      this._boundHandlers.backdropClick = (e) => this._handleBackdropClick(e);
+
+      // Setup close buttons
+      this.querySelectorAll('[data-close], .ux-sheet__close').forEach(btn => {
+        btn.addEventListener('click', () => this.close());
+      });
+
+      // Setup draggable handle
+      if (this.draggable && this._handle) {
+        this._setupDrag();
+      }
+
+      // Check initial state
+      if (this.hasAttribute('open')) {
+        this._open();
+      }
+    }
+
+    disconnectedCallback() {
+      this._cleanup();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (oldValue === newValue) return;
+
+      switch (name) {
+        case 'open':
+          if (newValue !== null) {
+            this._open();
+          } else {
+            this._close();
+          }
+          break;
+      }
+    }
+
+    // ========================================
+    // Properties
+    // ========================================
+
+    get closeOnBackdrop() {
+      return this.getAttribute('close-on-backdrop') !== 'false';
+    }
+
+    get closeOnEscape() {
+      return this.getAttribute('close-on-escape') !== 'false';
+    }
+
+    get draggable() {
+      return this.getAttribute('draggable') !== 'false';
+    }
+
+    get size() {
+      return this.getAttribute('size') || 'auto';
+    }
+
+    set size(value) {
+      this.setAttribute('size', value);
+      this._updateSize();
+    }
+
+    // ========================================
+    // Public API
+    // ========================================
+
+    open() {
+      if (this._isOpen) return;
+      this.setAttribute('open', '');
+    }
+
+    close() {
+      if (!this._isOpen) return;
+      this.removeAttribute('open');
+    }
+
+    toggle() {
+      if (this._isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    }
+
+    // ========================================
+    // Private Methods
+    // ========================================
+
+    _createStructure() {
+      const content = this.innerHTML;
+      const size = this.size;
+      const sizeClass = size !== 'auto' ? `ux-sheet--${size}` : '';
+
+      this.innerHTML = `
+        <div class="ux-sheet-backdrop">
+          <div class="ux-sheet ${sizeClass}" role="dialog" aria-modal="true">
+            <div class="ux-sheet__handle">
+              <div class="ux-sheet__handle-bar"></div>
+            </div>
+            ${content}
+          </div>
+        </div>
+      `;
+    }
+
+    _updateSize() {
+      if (this._sheet) {
+        this._sheet.className = this._sheet.className.replace(/ux-sheet--(sm|md|lg|full|auto)/g, '');
+        if (this.size !== 'auto') {
+          this._sheet.classList.add(`ux-sheet--${this.size}`);
+        }
+      }
+    }
+
+    _open() {
+      if (this._isOpen) return;
+
+      this._isOpen = true;
+      this._previousActiveElement = document.activeElement;
+
+      if (this._backdrop) {
+        this._backdrop.classList.add('ux-sheet-backdrop--open');
+      }
+
+      // Add event listeners
+      document.addEventListener('keydown', this._boundHandlers.keydown);
+      if (this._backdrop) {
+        this._backdrop.addEventListener('click', this._boundHandlers.backdropClick);
+      }
+
+      // Lock scroll
+      if (window.UX?.lockScroll) {
+        window.UX.lockScroll();
+      } else {
+        document.body.style.overflow = 'hidden';
+      }
+
+      // Focus trap
+      setTimeout(() => {
+        if (this._sheet && window.UX?.trapFocus) {
+          this._focusTrapCleanup = window.UX.trapFocus(this._sheet);
+        } else {
+          const firstFocusable = this._sheet?.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (firstFocusable) firstFocusable.focus();
+        }
+      }, 10);
+
+      // Dispatch event
+      this.dispatchEvent(new CustomEvent('ux:opened', {
+        bubbles: true,
+        composed: true
+      }));
+    }
+
+    _close() {
+      if (!this._isOpen) return;
+
+      this._isOpen = false;
+
+      if (this._backdrop) {
+        this._backdrop.classList.remove('ux-sheet-backdrop--open');
+      }
+
+      this._cleanup();
+
+      // Restore focus
+      if (this._previousActiveElement?.focus) {
+        this._previousActiveElement.focus();
+      }
+
+      // Dispatch event
+      this.dispatchEvent(new CustomEvent('ux:closed', {
+        bubbles: true,
+        composed: true
+      }));
+    }
+
+    _cleanup() {
+      document.removeEventListener('keydown', this._boundHandlers.keydown);
+      if (this._backdrop) {
+        this._backdrop.removeEventListener('click', this._boundHandlers.backdropClick);
+      }
+
+      if (this._focusTrapCleanup) {
+        this._focusTrapCleanup();
+        this._focusTrapCleanup = null;
+      }
+
+      if (window.UX?.unlockScroll) {
+        window.UX.unlockScroll();
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+
+    _handleKeydown(e) {
+      if (e.key === 'Escape' && this.closeOnEscape) {
+        this.close();
+      }
+    }
+
+    _handleBackdropClick(e) {
+      if (this.closeOnBackdrop && e.target === this._backdrop) {
+        this.close();
+      }
+    }
+
+    _setupDrag() {
+      let startY = 0;
+      let currentY = 0;
+      let touchStartTime = 0;
+
+      const handleStart = (e) => {
+        startY = e.touches ? e.touches[0].clientY : e.clientY;
+        touchStartTime = Date.now();
+        this._sheet.classList.add('ux-sheet--dragging');
+      };
+
+      const handleMove = (e) => {
+        if (!touchStartTime) return;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        currentY = clientY - startY;
+        if (currentY < 0) currentY = 0;
+        this._sheet.style.transform = `translateY(${currentY}px)`;
+      };
+
+      const handleEnd = () => {
+        if (!touchStartTime) return;
+        this._sheet.classList.remove('ux-sheet--dragging');
+        this._sheet.style.transform = '';
+
+        const duration = Date.now() - touchStartTime;
+        const velocity = currentY / duration;
+
+        if (velocity > 0.5 || currentY > 100) {
+          this.close();
+        }
+
+        startY = 0;
+        currentY = 0;
+        touchStartTime = 0;
+      };
+
+      this._handle.addEventListener('touchstart', handleStart, { passive: true });
+      this._handle.addEventListener('touchmove', handleMove, { passive: true });
+      this._handle.addEventListener('touchend', handleEnd);
+      this._handle.addEventListener('mousedown', handleStart);
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleEnd);
+    }
+
+    // ========================================
+    // Static Methods
+    // ========================================
+
+    static open(id) {
+      const el = document.getElementById(id);
+      if (el && el instanceof UXSheetElement) {
+        el.open();
+      }
+    }
+
+    static close(id) {
+      const el = document.getElementById(id);
+      if (el && el instanceof UXSheetElement) {
+        el.close();
+      }
+    }
+  }
+
+  // Register Web Component
+  if (!customElements.get('ux-sheet')) {
+    customElements.define('ux-sheet', UXSheetElement);
+  }
+
+  // Export
+  window.UXSheet = UXSheetElement;
+
+  // ============================================================================
+  // Alpine.js Components (for backward compatibility)
+  // ============================================================================
+
   // Alpine component for bottom sheet
   // ARIA: role="dialog", aria-modal="true", aria-labelledby
   // Features: snap points (detents), velocity-based gestures, focus trap

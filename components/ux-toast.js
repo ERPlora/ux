@@ -516,6 +516,316 @@
     document.head.appendChild(styleEl);
   }
 
+  // ============================================================================
+  // Web Component Implementation (HTMX-friendly)
+  // ============================================================================
+
+  class UXToastElement extends HTMLElement {
+    static get observedAttributes() {
+      return ['message', 'title', 'type', 'duration', 'position', 'show-progress'];
+    }
+
+    constructor() {
+      super();
+      this._toasts = [];
+      this._toastId = 0;
+    }
+
+    connectedCallback() {
+      // Create container
+      this._createContainer();
+
+      // Listen for custom events (HTMX integration)
+      this.addEventListener('ux:toast', (e) => this._handleToastEvent(e));
+      this.addEventListener('ux:success', (e) => this.success(e.detail?.message, e.detail));
+      this.addEventListener('ux:warning', (e) => this.warning(e.detail?.message, e.detail));
+      this.addEventListener('ux:danger', (e) => this.danger(e.detail?.message, e.detail));
+      this.addEventListener('ux:error', (e) => this.danger(e.detail?.message, e.detail));
+      this.addEventListener('ux:info', (e) => this.info(e.detail?.message, e.detail));
+      this.addEventListener('ux:clear', () => this.clear());
+    }
+
+    // ========================================
+    // Properties
+    // ========================================
+
+    get position() {
+      return this.getAttribute('position') || 'bottom';
+    }
+
+    set position(value) {
+      this.setAttribute('position', value);
+      this._updateContainerPosition();
+    }
+
+    get maxToasts() {
+      return parseInt(this.getAttribute('max-toasts'), 10) || 5;
+    }
+
+    // ========================================
+    // Public API
+    // ========================================
+
+    /**
+     * Show a toast
+     * @param {Object} options - { message, title, type, duration, showProgress }
+     * @returns {number} Toast ID
+     */
+    show(options = {}) {
+      const id = ++this._toastId;
+      const duration = options.duration ?? 3000;
+
+      const toast = {
+        id,
+        message: options.message || '',
+        title: options.title || '',
+        type: options.type || '', // success, warning, danger, info, light, glass
+        duration,
+        showProgress: options.showProgress || false
+      };
+
+      // Create toast element
+      const toastEl = this._createToastElement(toast);
+      this._container.appendChild(toastEl);
+
+      // Store reference
+      this._toasts.push({ ...toast, element: toastEl });
+
+      // Limit max toasts
+      while (this._toasts.length > this.maxToasts) {
+        const oldest = this._toasts.shift();
+        this._removeToastElement(oldest.element);
+      }
+
+      // Show with animation
+      requestAnimationFrame(() => {
+        toastEl.classList.add('ux-toast--visible');
+      });
+
+      // Auto dismiss
+      if (duration > 0) {
+        setTimeout(() => this.dismiss(id), duration);
+      }
+
+      // Dispatch event
+      this.dispatchEvent(new CustomEvent('ux:shown', {
+        bubbles: true,
+        composed: true,
+        detail: { id, ...options }
+      }));
+
+      return id;
+    }
+
+    /**
+     * Dismiss a toast by ID
+     */
+    dismiss(id) {
+      const index = this._toasts.findIndex(t => t.id === id);
+      if (index === -1) return;
+
+      const toast = this._toasts[index];
+      this._toasts.splice(index, 1);
+      this._removeToastElement(toast.element);
+
+      // Dispatch event
+      this.dispatchEvent(new CustomEvent('ux:dismissed', {
+        bubbles: true,
+        composed: true,
+        detail: { id }
+      }));
+    }
+
+    /**
+     * Clear all toasts
+     */
+    clear() {
+      this._toasts.forEach(toast => {
+        this._removeToastElement(toast.element);
+      });
+      this._toasts = [];
+    }
+
+    // Convenience methods
+    success(message, options = {}) {
+      return this.show({ ...options, message, type: 'success' });
+    }
+
+    warning(message, options = {}) {
+      return this.show({ ...options, message, type: 'warning' });
+    }
+
+    danger(message, options = {}) {
+      return this.show({ ...options, message, type: 'danger' });
+    }
+
+    error(message, options = {}) {
+      return this.danger(message, options);
+    }
+
+    info(message, options = {}) {
+      return this.show({ ...options, message, type: '' });
+    }
+
+    // ========================================
+    // Private Methods
+    // ========================================
+
+    _createContainer() {
+      this._container = document.createElement('div');
+      this._container.className = `ux-toast-container ux-toast-container--${this.position}`;
+      this._container.setAttribute('aria-live', 'polite');
+      this._container.setAttribute('aria-atomic', 'false');
+      this.appendChild(this._container);
+    }
+
+    _updateContainerPosition() {
+      if (this._container) {
+        this._container.className = `ux-toast-container ux-toast-container--${this.position}`;
+      }
+    }
+
+    _createToastElement(toast) {
+      const el = document.createElement('div');
+      el.className = 'ux-toast';
+      if (toast.type) el.classList.add(`ux-toast--${toast.type}`);
+      el.setAttribute('role', toast.type === 'danger' || toast.type === 'warning' ? 'alert' : 'status');
+
+      const icon = this._getIcon(toast.type);
+
+      el.innerHTML = `
+        ${icon ? `<div class="ux-toast__icon ux-toast__icon--${toast.type || 'info'}">${icon}</div>` : ''}
+        <div class="ux-toast__content">
+          ${toast.title ? `<div class="ux-toast__title">${this._escapeHtml(toast.title)}</div>` : ''}
+          <div class="ux-toast__message">${this._escapeHtml(toast.message)}</div>
+        </div>
+        <button class="ux-toast__close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+        ${toast.showProgress ? `
+          <div class="ux-toast__progress">
+            <div class="ux-toast__progress-bar" style="width: 100%; transition: width ${toast.duration}ms linear;"></div>
+          </div>
+        ` : ''}
+      `;
+
+      // Close button handler
+      el.querySelector('.ux-toast__close').addEventListener('click', () => {
+        this.dismiss(toast.id);
+      });
+
+      // Start progress animation
+      if (toast.showProgress) {
+        requestAnimationFrame(() => {
+          const bar = el.querySelector('.ux-toast__progress-bar');
+          if (bar) bar.style.width = '0%';
+        });
+      }
+
+      return el;
+    }
+
+    _removeToastElement(el) {
+      if (!el) return;
+      el.classList.remove('ux-toast--visible');
+      setTimeout(() => el.remove(), 300);
+    }
+
+    _getIcon(type) {
+      const icons = {
+        success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>`,
+        warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>`,
+        danger: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>`,
+        info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>`
+      };
+      return icons[type] || icons.info;
+    }
+
+    _escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    _handleToastEvent(e) {
+      const { message, title, type, duration, showProgress } = e.detail || {};
+      this.show({ message, title, type, duration, showProgress });
+    }
+
+    // ========================================
+    // Static Methods (Global Toast)
+    // ========================================
+
+    static _getGlobalInstance() {
+      let el = document.querySelector('ux-toast#ux-toast-global');
+      if (!el) {
+        el = document.createElement('ux-toast');
+        el.id = 'ux-toast-global';
+        el.setAttribute('position', 'bottom');
+        document.body.appendChild(el);
+      }
+      return el;
+    }
+
+    static show(message, options = {}) {
+      return UXToastElement._getGlobalInstance().show({ message, ...options });
+    }
+
+    static success(message, options = {}) {
+      return UXToastElement._getGlobalInstance().success(message, options);
+    }
+
+    static warning(message, options = {}) {
+      return UXToastElement._getGlobalInstance().warning(message, options);
+    }
+
+    static danger(message, options = {}) {
+      return UXToastElement._getGlobalInstance().danger(message, options);
+    }
+
+    static error(message, options = {}) {
+      return UXToastElement._getGlobalInstance().danger(message, options);
+    }
+
+    static info(message, options = {}) {
+      return UXToastElement._getGlobalInstance().info(message, options);
+    }
+
+    static clear() {
+      UXToastElement._getGlobalInstance().clear();
+    }
+  }
+
+  // Register Web Component
+  if (!customElements.get('ux-toast')) {
+    customElements.define('ux-toast', UXToastElement);
+  }
+
+  // Export for programmatic use
+  window.UXToast = UXToastElement;
+
+  // ============================================================================
+  // Alpine.js Components (for backward compatibility)
+  // ============================================================================
+
   // Alpine component for toast
   // ARIA: role="status" or "alert", aria-live for announcements
   const toastComponent = (config = {}) => ({
