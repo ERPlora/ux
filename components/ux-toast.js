@@ -517,7 +517,8 @@
   }
 
   // ============================================================================
-  // Web Component Implementation (HTMX-friendly)
+  // Web Component Implementation (Universal - works with React, Vue, HTMX, vanilla JS)
+  // Uses Shadow DOM for encapsulation while preserving UX CSS variable system
   // ============================================================================
 
   class UXToastElement extends HTMLElement {
@@ -527,15 +528,30 @@
 
     constructor() {
       super();
+
+      // Create Shadow DOM for encapsulation
+      this.attachShadow({ mode: 'open' });
+
       this._toasts = [];
       this._toastId = 0;
     }
 
     connectedCallback() {
-      // Create container
+      // Inject styles into Shadow DOM
+      this.shadowRoot.innerHTML = `
+        <style>
+          :host {
+            display: contents;
+          }
+          ${styles}
+        </style>
+      `;
+
+      // Create container inside Shadow DOM
       this._createContainer();
 
       // Listen for custom events (HTMX integration)
+      // Events with composed: true cross shadow boundary
       this.addEventListener('ux:toast', (e) => this._handleToastEvent(e));
       this.addEventListener('ux:success', (e) => this.success(e.detail?.message, e.detail));
       this.addEventListener('ux:warning', (e) => this.warning(e.detail?.message, e.detail));
@@ -676,7 +692,7 @@
       this._container.className = `ux-toast-container ux-toast-container--${this.position}`;
       this._container.setAttribute('aria-live', 'polite');
       this._container.setAttribute('aria-atomic', 'false');
-      this.appendChild(this._container);
+      this.shadowRoot.appendChild(this._container);
     }
 
     _updateContainerPosition() {

@@ -483,7 +483,8 @@
   }
 
   // ============================================================================
-  // Web Component Implementation (HTMX-friendly)
+  // Web Component Implementation (Universal - works with React, Vue, HTMX, vanilla JS)
+  // Uses Shadow DOM for encapsulation while preserving UX CSS variable system
   // ============================================================================
 
   class UXModalElement extends HTMLElement {
@@ -493,21 +494,48 @@
 
     constructor() {
       super();
+
+      // Create Shadow DOM for encapsulation
+      this.attachShadow({ mode: 'open' });
+
       this._isOpen = false;
       this._previousActiveElement = null;
       this._boundHandlers = {};
     }
 
     connectedCallback() {
-      // Setup structure if not already present
-      if (!this.querySelector('.ux-modal-backdrop')) {
-        this._createStructure();
-      }
+      // Inject styles and structure into Shadow DOM
+      const content = this.innerHTML;
+      this.innerHTML = ''; // Clear light DOM
 
-      this._backdrop = this.querySelector('.ux-modal-backdrop');
-      this._modal = this.querySelector('.ux-modal');
+      this.shadowRoot.innerHTML = `
+        <style>
+          :host {
+            display: contents;
+          }
+          ${styles}
+        </style>
+        <div class="ux-modal-backdrop">
+          <div class="container">
+            <div class="row justify-content-center align-items-center min-vh-100">
+              <div class="col-12 col-md-8 col-lg-6">
+                <div class="ux-modal" role="dialog" aria-modal="true">
+                  <slot></slot>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Restore content to light DOM (for slot)
+      this.innerHTML = content;
+
+      this._backdrop = this.shadowRoot.querySelector('.ux-modal-backdrop');
+      this._modal = this.shadowRoot.querySelector('.ux-modal');
 
       // Listen for custom events (HTMX integration)
+      // composed: true makes events cross shadow boundary
       this.addEventListener('ux:open', () => this.open());
       this.addEventListener('ux:close', () => this.close());
       this.addEventListener('ux:toggle', () => this.toggle());
@@ -516,7 +544,10 @@
       this._boundHandlers.keydown = (e) => this._handleKeydown(e);
       this._boundHandlers.backdropClick = (e) => this._handleBackdropClick(e);
 
-      // Setup close buttons
+      // Setup close buttons (both in shadow and light DOM)
+      this.shadowRoot.querySelectorAll('[data-close], .ux-modal__close').forEach(btn => {
+        btn.addEventListener('click', () => this.close());
+      });
       this.querySelectorAll('[data-close], .ux-modal__close').forEach(btn => {
         btn.addEventListener('click', () => this.close());
       });
@@ -600,21 +631,8 @@
     // ========================================
 
     _createStructure() {
-      // Wrap existing content in modal structure
-      const content = this.innerHTML;
-      this.innerHTML = `
-        <div class="ux-modal-backdrop">
-          <div class="container">
-            <div class="row justify-content-center align-items-center min-vh-100">
-              <div class="col-12 col-md-8 col-lg-6">
-                <div class="ux-modal" role="dialog" aria-modal="true">
-                  ${content}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+      // Structure is created in connectedCallback with Shadow DOM
+      // This method kept for backward compatibility
     }
 
     _open() {
