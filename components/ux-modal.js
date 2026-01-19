@@ -482,8 +482,260 @@
     document.head.appendChild(styleEl);
   }
 
+  // ============================================================================
+  // Web Component Implementation (HTMX-friendly)
+  // ============================================================================
+
+  class UXModalElement extends HTMLElement {
+    static get observedAttributes() {
+      return ['open', 'title', 'close-on-backdrop', 'close-on-escape'];
+    }
+
+    constructor() {
+      super();
+      this._isOpen = false;
+      this._previousActiveElement = null;
+      this._boundHandlers = {};
+    }
+
+    connectedCallback() {
+      // Setup structure if not already present
+      if (!this.querySelector('.ux-modal-backdrop')) {
+        this._createStructure();
+      }
+
+      this._backdrop = this.querySelector('.ux-modal-backdrop');
+      this._modal = this.querySelector('.ux-modal');
+
+      // Listen for custom events (HTMX integration)
+      this.addEventListener('ux:open', () => this.open());
+      this.addEventListener('ux:close', () => this.close());
+      this.addEventListener('ux:toggle', () => this.toggle());
+
+      // Setup event handlers
+      this._boundHandlers.keydown = (e) => this._handleKeydown(e);
+      this._boundHandlers.backdropClick = (e) => this._handleBackdropClick(e);
+
+      // Setup close buttons
+      this.querySelectorAll('[data-close], .ux-modal__close').forEach(btn => {
+        btn.addEventListener('click', () => this.close());
+      });
+
+      // Check initial open state
+      if (this.hasAttribute('open')) {
+        this._open();
+      }
+    }
+
+    disconnectedCallback() {
+      this._cleanup();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (oldValue === newValue) return;
+
+      switch (name) {
+        case 'open':
+          if (newValue !== null) {
+            this._open();
+          } else {
+            this._close();
+          }
+          break;
+      }
+    }
+
+    // ========================================
+    // Properties
+    // ========================================
+
+    get closeOnBackdrop() {
+      return this.getAttribute('close-on-backdrop') !== 'false';
+    }
+
+    set closeOnBackdrop(value) {
+      if (value) {
+        this.removeAttribute('close-on-backdrop');
+      } else {
+        this.setAttribute('close-on-backdrop', 'false');
+      }
+    }
+
+    get closeOnEscape() {
+      return this.getAttribute('close-on-escape') !== 'false';
+    }
+
+    set closeOnEscape(value) {
+      if (value) {
+        this.removeAttribute('close-on-escape');
+      } else {
+        this.setAttribute('close-on-escape', 'false');
+      }
+    }
+
+    // ========================================
+    // Public API
+    // ========================================
+
+    open() {
+      if (this._isOpen) return;
+      this.setAttribute('open', '');
+    }
+
+    close() {
+      if (!this._isOpen) return;
+      this.removeAttribute('open');
+    }
+
+    toggle() {
+      if (this._isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    }
+
+    // ========================================
+    // Private Methods
+    // ========================================
+
+    _createStructure() {
+      // Wrap existing content in modal structure
+      const content = this.innerHTML;
+      this.innerHTML = `
+        <div class="ux-modal-backdrop">
+          <div class="container">
+            <div class="row justify-content-center align-items-center min-vh-100">
+              <div class="col-12 col-md-8 col-lg-6">
+                <div class="ux-modal" role="dialog" aria-modal="true">
+                  ${content}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    _open() {
+      if (this._isOpen) return;
+
+      this._isOpen = true;
+      this._previousActiveElement = document.activeElement;
+
+      if (this._backdrop) {
+        this._backdrop.classList.add('ux-modal-backdrop--open');
+      }
+
+      // Add event listeners
+      document.addEventListener('keydown', this._boundHandlers.keydown);
+      if (this._backdrop) {
+        this._backdrop.addEventListener('click', this._boundHandlers.backdropClick);
+      }
+
+      // Lock scroll
+      if (window.UX?.lockScroll) {
+        window.UX.lockScroll();
+      } else {
+        document.body.style.overflow = 'hidden';
+      }
+
+      // Focus trap
+      setTimeout(() => {
+        if (this._modal && window.UX?.trapFocus) {
+          this._focusTrapCleanup = window.UX.trapFocus(this._modal);
+        } else {
+          const firstFocusable = this._modal?.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (firstFocusable) firstFocusable.focus();
+        }
+      }, 10);
+
+      // Dispatch event (for HTMX)
+      this.dispatchEvent(new CustomEvent('ux:opened', {
+        bubbles: true,
+        composed: true
+      }));
+    }
+
+    _close() {
+      if (!this._isOpen) return;
+
+      this._isOpen = false;
+
+      if (this._backdrop) {
+        this._backdrop.classList.remove('ux-modal-backdrop--open');
+      }
+
+      this._cleanup();
+
+      // Restore focus
+      if (this._previousActiveElement?.focus) {
+        this._previousActiveElement.focus();
+      }
+
+      // Dispatch event (for HTMX)
+      this.dispatchEvent(new CustomEvent('ux:closed', {
+        bubbles: true,
+        composed: true
+      }));
+    }
+
+    _cleanup() {
+      document.removeEventListener('keydown', this._boundHandlers.keydown);
+      if (this._backdrop) {
+        this._backdrop.removeEventListener('click', this._boundHandlers.backdropClick);
+      }
+
+      if (this._focusTrapCleanup) {
+        this._focusTrapCleanup();
+        this._focusTrapCleanup = null;
+      }
+
+      if (window.UX?.unlockScroll) {
+        window.UX.unlockScroll();
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+
+    _handleKeydown(e) {
+      if (e.key === 'Escape' && this.closeOnEscape) {
+        this.close();
+      }
+    }
+
+    _handleBackdropClick(e) {
+      if (this.closeOnBackdrop && e.target === this._backdrop) {
+        this.close();
+      }
+    }
+
+    // ========================================
+    // Static Methods
+    // ========================================
+
+    static open(id) {
+      const el = document.getElementById(id);
+      if (el && el instanceof UXModalElement) {
+        el.open();
+      }
+    }
+
+    static close(id) {
+      const el = document.getElementById(id);
+      if (el && el instanceof UXModalElement) {
+        el.close();
+      }
+    }
+  }
+
+  // Register Web Component
+  if (!customElements.get('ux-modal')) {
+    customElements.define('ux-modal', UXModalElement);
+  }
+
   // ========================================
-  // Vanilla JS Modal Class
+  // Vanilla JS Modal Class (existing implementation)
   // ========================================
 
   class UXModal {
