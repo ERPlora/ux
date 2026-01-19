@@ -413,6 +413,452 @@
     document.head.appendChild(styleEl);
   }
 
+  // ============================================================================
+  // Web Component Implementation (HTMX-friendly)
+  // ============================================================================
+
+  class UXAlertElement extends HTMLElement {
+    static get observedAttributes() {
+      return ['title', 'message', 'type', 'buttons', 'open'];
+    }
+
+    constructor() {
+      super();
+      this._isOpen = false;
+      this._resolver = null;
+      this._title = '';
+      this._message = '';
+      this._type = 'info'; // info, success, warning, danger
+      this._buttons = [];
+      this._inputs = [];
+      this._inputValues = {};
+    }
+
+    connectedCallback() {
+      // Create backdrop container
+      this._backdrop = document.createElement('div');
+      this._backdrop.className = 'ux-alert-backdrop';
+      this._backdrop.setAttribute('role', 'alertdialog');
+      this._backdrop.setAttribute('aria-modal', 'true');
+      this._backdrop.innerHTML = this._renderAlert();
+      this.appendChild(this._backdrop);
+
+      // Listen for custom events (HTMX integration)
+      this.addEventListener('ux:alert', (e) => this._handleAlertEvent(e));
+      this.addEventListener('ux:confirm', (e) => this._handleConfirmEvent(e));
+      this.addEventListener('ux:prompt', (e) => this._handlePromptEvent(e));
+      this.addEventListener('ux:close', () => this.close());
+
+      // Backdrop click to close
+      this._backdrop.addEventListener('click', (e) => {
+        if (e.target === this._backdrop) {
+          this.close(false);
+        }
+      });
+
+      // Escape key
+      this._escapeHandler = (e) => {
+        if (this._isOpen && e.key === 'Escape') {
+          this.close(false);
+        }
+      };
+      document.addEventListener('keydown', this._escapeHandler);
+    }
+
+    disconnectedCallback() {
+      document.removeEventListener('keydown', this._escapeHandler);
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (oldValue === newValue) return;
+
+      switch (name) {
+        case 'title':
+          this._title = newValue || '';
+          break;
+        case 'message':
+          this._message = newValue || '';
+          break;
+        case 'type':
+          this._type = newValue || 'info';
+          break;
+        case 'open':
+          if (newValue !== null) {
+            this.open();
+          } else {
+            this.close();
+          }
+          break;
+      }
+    }
+
+    // ========================================
+    // Public API
+    // ========================================
+
+    /**
+     * Show alert with options
+     * @param {Object} options - { title, message, type, buttons, inputs }
+     * @returns {Promise} Resolves with button result or input values
+     */
+    alert(options = {}) {
+      return new Promise((resolve) => {
+        this._resolver = resolve;
+        this._title = options.title || this._title || '';
+        this._message = options.message || this._message || '';
+        this._type = options.type || this._type || 'info';
+        this._buttons = options.buttons || [{ text: 'OK', role: 'confirm', primary: true }];
+        this._inputs = options.inputs || [];
+        this._inputValues = {};
+
+        if (this._inputs.length) {
+          this._inputs.forEach((input, i) => {
+            this._inputValues[input.name || `input${i}`] = input.value || '';
+          });
+        }
+
+        this._render();
+        this._open();
+      });
+    }
+
+    /**
+     * Show confirmation dialog
+     * @param {string} title
+     * @param {string} message
+     * @param {Object} options - { cancelText, okText, destructive }
+     * @returns {Promise<boolean>}
+     */
+    confirm(title, message, options = {}) {
+      return this.alert({
+        title,
+        message,
+        type: options.destructive ? 'danger' : 'info',
+        buttons: [
+          { text: options.cancelText || 'Cancel', role: 'cancel' },
+          {
+            text: options.okText || 'OK',
+            role: 'confirm',
+            primary: true,
+            destructive: options.destructive
+          }
+        ]
+      }).then(result => result === true);
+    }
+
+    /**
+     * Show prompt dialog
+     * @param {string} title
+     * @param {string} message
+     * @param {Object} options - { cancelText, okText, placeholder, type, value }
+     * @returns {Promise<string|null>}
+     */
+    prompt(title, message, options = {}) {
+      return this.alert({
+        title,
+        message,
+        inputs: [{
+          name: 'value',
+          type: options.type || 'text',
+          placeholder: options.placeholder || '',
+          value: options.value || ''
+        }],
+        buttons: [
+          { text: options.cancelText || 'Cancel', role: 'cancel' },
+          { text: options.okText || 'OK', role: 'confirm', primary: true }
+        ]
+      }).then(result => {
+        if (result === false) return null;
+        return this._inputValues.value;
+      });
+    }
+
+    /**
+     * Open the alert
+     */
+    open() {
+      this._open();
+    }
+
+    /**
+     * Close the alert
+     * @param {*} result - Value to resolve promise with
+     */
+    close(result = false) {
+      if (!this._isOpen) return;
+
+      this._isOpen = false;
+      this._backdrop.classList.remove('ux-alert-backdrop--open');
+
+      // Unlock scroll
+      if (window.UX) {
+        window.UX.unlockScroll();
+      } else {
+        document.body.style.overflow = '';
+      }
+
+      // Dispatch close event (for HTMX)
+      this.dispatchEvent(new CustomEvent('ux:closed', {
+        bubbles: true,
+        composed: true,
+        detail: { result }
+      }));
+
+      // Resolve promise
+      if (this._resolver) {
+        this._resolver(result);
+        this._resolver = null;
+      }
+    }
+
+    // ========================================
+    // Private Methods
+    // ========================================
+
+    _open() {
+      if (this._isOpen) return;
+
+      this._isOpen = true;
+      this._backdrop.classList.add('ux-alert-backdrop--open');
+
+      // Lock scroll
+      if (window.UX) {
+        window.UX.lockScroll();
+      } else {
+        document.body.style.overflow = 'hidden';
+      }
+
+      // Focus first button or input
+      setTimeout(() => {
+        const firstFocusable = this._backdrop.querySelector('input, button');
+        if (firstFocusable) firstFocusable.focus();
+      }, 100);
+
+      // Dispatch open event (for HTMX)
+      this.dispatchEvent(new CustomEvent('ux:opened', {
+        bubbles: true,
+        composed: true
+      }));
+    }
+
+    _render() {
+      const alertEl = this._backdrop.querySelector('.ux-alert');
+      if (alertEl) {
+        alertEl.outerHTML = this._renderAlertContent();
+      }
+      this._bindButtons();
+    }
+
+    _renderAlert() {
+      return this._renderAlertContent();
+    }
+
+    _renderAlertContent() {
+      const iconSvg = this._getIcon();
+      const inputsHtml = this._inputs.length ? this._renderInputs() : '';
+      const buttonsHtml = this._renderButtons();
+
+      return `
+        <div class="ux-alert">
+          <div class="ux-alert__content">
+            ${iconSvg ? `<div class="ux-alert__icon ux-alert__icon--${this._type}">${iconSvg}</div>` : ''}
+            ${this._title ? `<h2 class="ux-alert__title">${this._escapeHtml(this._title)}</h2>` : ''}
+            ${this._message ? `<p class="ux-alert__message">${this._escapeHtml(this._message)}</p>` : ''}
+          </div>
+          ${inputsHtml}
+          <div class="ux-alert__buttons">
+            ${buttonsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    _renderInputs() {
+      return `
+        <div class="ux-alert__inputs">
+          ${this._inputs.map((input, i) => `
+            <input
+              class="ux-alert__input"
+              type="${input.type || 'text'}"
+              name="${input.name || `input${i}`}"
+              placeholder="${this._escapeHtml(input.placeholder || '')}"
+              value="${this._escapeHtml(input.value || '')}"
+            >
+          `).join('')}
+        </div>
+      `;
+    }
+
+    _renderButtons() {
+      return this._buttons.map((btn, i) => {
+        const classes = ['ux-alert__button'];
+        if (btn.primary) classes.push('ux-alert__button--primary');
+        if (btn.destructive) classes.push('ux-alert__button--destructive');
+        if (btn.role === 'cancel') classes.push('ux-alert__button--cancel');
+
+        return `
+          <button
+            class="${classes.join(' ')}"
+            data-role="${btn.role || 'button'}"
+            data-index="${i}"
+          >${this._escapeHtml(btn.text)}</button>
+        `;
+      }).join('');
+    }
+
+    _bindButtons() {
+      this._backdrop.querySelectorAll('.ux-alert__button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const role = btn.dataset.role;
+          const index = parseInt(btn.dataset.index, 10);
+          const buttonConfig = this._buttons[index];
+
+          // Update input values
+          this._backdrop.querySelectorAll('.ux-alert__input').forEach((input) => {
+            this._inputValues[input.name] = input.value;
+          });
+
+          // Call custom handler if provided
+          if (buttonConfig && typeof buttonConfig.handler === 'function') {
+            buttonConfig.handler(this._inputValues);
+          }
+
+          // Dispatch button event (for HTMX)
+          this.dispatchEvent(new CustomEvent('ux:button', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              role,
+              index,
+              values: { ...this._inputValues }
+            }
+          }));
+
+          // Close with result
+          const result = role === 'confirm' || role === 'ok' ? true : false;
+          this.close(result);
+        });
+      });
+
+      // Enter key in inputs
+      this._backdrop.querySelectorAll('.ux-alert__input').forEach((input) => {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const confirmBtn = this._backdrop.querySelector('[data-role="confirm"]');
+            if (confirmBtn) confirmBtn.click();
+          }
+        });
+        input.addEventListener('input', (e) => {
+          this._inputValues[e.target.name] = e.target.value;
+        });
+      });
+    }
+
+    _getIcon() {
+      const icons = {
+        success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>`,
+        warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>`,
+        danger: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>`,
+        info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>`
+      };
+      return icons[this._type] || '';
+    }
+
+    _escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ========================================
+    // HTMX Event Handlers
+    // ========================================
+
+    _handleAlertEvent(e) {
+      const { title, message, type, buttons } = e.detail || {};
+      this.alert({ title, message, type, buttons });
+    }
+
+    _handleConfirmEvent(e) {
+      const { title, message, cancelText, okText, destructive } = e.detail || {};
+      this.confirm(title, message, { cancelText, okText, destructive });
+    }
+
+    _handlePromptEvent(e) {
+      const { title, message, placeholder, cancelText, okText } = e.detail || {};
+      this.prompt(title, message, { placeholder, cancelText, okText });
+    }
+
+    // ========================================
+    // Static Factory Methods
+    // ========================================
+
+    /**
+     * Show a quick alert (creates temporary element)
+     */
+    static alert(title, message, type = 'info') {
+      return UXAlertElement._showTemporary('alert', { title, message, type });
+    }
+
+    /**
+     * Show a quick confirm (creates temporary element)
+     */
+    static confirm(title, message, options = {}) {
+      return UXAlertElement._showTemporary('confirm', { title, message, ...options });
+    }
+
+    /**
+     * Show a quick prompt (creates temporary element)
+     */
+    static prompt(title, message, options = {}) {
+      return UXAlertElement._showTemporary('prompt', { title, message, ...options });
+    }
+
+    static _showTemporary(method, options) {
+      let alertEl = document.querySelector('ux-alert#ux-alert-global');
+      if (!alertEl) {
+        alertEl = document.createElement('ux-alert');
+        alertEl.id = 'ux-alert-global';
+        document.body.appendChild(alertEl);
+      }
+
+      if (method === 'alert') {
+        return alertEl.alert(options);
+      } else if (method === 'confirm') {
+        return alertEl.confirm(options.title, options.message, options);
+      } else if (method === 'prompt') {
+        return alertEl.prompt(options.title, options.message, options);
+      }
+    }
+  }
+
+  // Register Web Component
+  if (!customElements.get('ux-alert')) {
+    customElements.define('ux-alert', UXAlertElement);
+  }
+
+  // Export for programmatic use
+  window.UXAlert = UXAlertElement;
+
+  // ============================================================================
+  // Alpine.js Component (for backward compatibility)
+  // ============================================================================
+
   // Alpine component for alert dialog
   // ARIA: role="alertdialog", aria-modal="true", aria-labelledby, aria-describedby
   const alertComponent = (config = {}) => ({
