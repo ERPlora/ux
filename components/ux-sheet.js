@@ -673,7 +673,8 @@
   }
 
   // ============================================================================
-  // Web Component Implementation (HTMX-friendly)
+  // Web Component Implementation (Universal - works with React, Vue, HTMX, vanilla JS)
+  // Uses Shadow DOM for encapsulation while preserving UX CSS variable system
   // ============================================================================
 
   class UXSheetElement extends HTMLElement {
@@ -683,6 +684,10 @@
 
     constructor() {
       super();
+
+      // Create Shadow DOM for encapsulation
+      this.attachShadow({ mode: 'open' });
+
       this._isOpen = false;
       this._previousActiveElement = null;
       this._boundHandlers = {};
@@ -692,16 +697,40 @@
     }
 
     connectedCallback() {
-      // Setup structure if not present
-      if (!this.querySelector('.ux-sheet-backdrop')) {
-        this._createStructure();
-      }
+      // Get light DOM content before setting up
+      const content = this.innerHTML;
+      this.innerHTML = ''; // Clear light DOM
 
-      this._backdrop = this.querySelector('.ux-sheet-backdrop');
-      this._sheet = this.querySelector('.ux-sheet');
-      this._handle = this.querySelector('.ux-sheet__handle');
+      const size = this.size;
+      const sizeClass = size !== 'auto' ? `ux-sheet--${size}` : '';
+
+      // Inject styles and structure into Shadow DOM
+      this.shadowRoot.innerHTML = `
+        <style>
+          :host {
+            display: contents;
+          }
+          ${styles}
+        </style>
+        <div class="ux-sheet-backdrop">
+          <div class="ux-sheet ${sizeClass}" role="dialog" aria-modal="true">
+            <div class="ux-sheet__handle">
+              <div class="ux-sheet__handle-bar"></div>
+            </div>
+            <slot></slot>
+          </div>
+        </div>
+      `;
+
+      // Restore content to light DOM (for slot)
+      this.innerHTML = content;
+
+      this._backdrop = this.shadowRoot.querySelector('.ux-sheet-backdrop');
+      this._sheet = this.shadowRoot.querySelector('.ux-sheet');
+      this._handle = this.shadowRoot.querySelector('.ux-sheet__handle');
 
       // Listen for custom events (HTMX integration)
+      // Events with composed: true cross shadow boundary
       this.addEventListener('ux:open', () => this.open());
       this.addEventListener('ux:close', () => this.close());
       this.addEventListener('ux:toggle', () => this.toggle());
@@ -710,7 +739,10 @@
       this._boundHandlers.keydown = (e) => this._handleKeydown(e);
       this._boundHandlers.backdropClick = (e) => this._handleBackdropClick(e);
 
-      // Setup close buttons
+      // Setup close buttons in both shadow and light DOM
+      this.shadowRoot.querySelectorAll('[data-close], .ux-sheet__close').forEach(btn => {
+        btn.addEventListener('click', () => this.close());
+      });
       this.querySelectorAll('[data-close], .ux-sheet__close').forEach(btn => {
         btn.addEventListener('click', () => this.close());
       });
@@ -796,20 +828,8 @@
     // ========================================
 
     _createStructure() {
-      const content = this.innerHTML;
-      const size = this.size;
-      const sizeClass = size !== 'auto' ? `ux-sheet--${size}` : '';
-
-      this.innerHTML = `
-        <div class="ux-sheet-backdrop">
-          <div class="ux-sheet ${sizeClass}" role="dialog" aria-modal="true">
-            <div class="ux-sheet__handle">
-              <div class="ux-sheet__handle-bar"></div>
-            </div>
-            ${content}
-          </div>
-        </div>
-      `;
+      // Structure is created in connectedCallback with Shadow DOM
+      // This method kept for backward compatibility
     }
 
     _updateSize() {

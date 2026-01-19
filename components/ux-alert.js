@@ -414,7 +414,8 @@
   }
 
   // ============================================================================
-  // Web Component Implementation (HTMX-friendly)
+  // Web Component Implementation (Universal - works with React, Vue, HTMX, vanilla JS)
+  // Uses Shadow DOM for encapsulation while preserving UX CSS variable system
   // ============================================================================
 
   class UXAlertElement extends HTMLElement {
@@ -424,6 +425,10 @@
 
     constructor() {
       super();
+
+      // Create Shadow DOM for encapsulation
+      this.attachShadow({ mode: 'open' });
+
       this._isOpen = false;
       this._resolver = null;
       this._title = '';
@@ -435,15 +440,24 @@
     }
 
     connectedCallback() {
-      // Create backdrop container
-      this._backdrop = document.createElement('div');
-      this._backdrop.className = 'ux-alert-backdrop';
-      this._backdrop.setAttribute('role', 'alertdialog');
-      this._backdrop.setAttribute('aria-modal', 'true');
-      this._backdrop.innerHTML = this._renderAlert();
-      this.appendChild(this._backdrop);
+      // Inject styles into Shadow DOM (uses existing CSS)
+      this.shadowRoot.innerHTML = `
+        <style>
+          /* Import UX CSS variables through shadow boundary */
+          :host {
+            display: contents;
+          }
+
+          /* All existing styles work because they use CSS variables */
+          ${styles}
+        </style>
+        ${this._renderAlert()}
+      `;
+
+      this._backdrop = this.shadowRoot.querySelector('.ux-alert-backdrop');
 
       // Listen for custom events (HTMX integration)
+      // Events with composed: true cross shadow boundary
       this.addEventListener('ux:alert', (e) => this._handleAlertEvent(e));
       this.addEventListener('ux:confirm', (e) => this._handleConfirmEvent(e));
       this.addEventListener('ux:prompt', (e) => this._handlePromptEvent(e));
@@ -650,7 +664,7 @@
     }
 
     _renderAlert() {
-      return this._renderAlertContent();
+      return `<div class="ux-alert-backdrop" role="alertdialog" aria-modal="true">${this._renderAlertContent()}</div>`;
     }
 
     _renderAlertContent() {
