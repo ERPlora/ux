@@ -1,0 +1,414 @@
+@use '../core/mixins' as *;
+
+/**
+ * UX Menubar Component
+ * Part of the UX CSS Library
+ *
+ * Horizontal menu bar with dropdown menus (like desktop app menus).
+ * Works with any framework: HTMX, React, Vue, vanilla JS.
+ *
+ * Usage:
+ * <nav class="ux-menubar">
+ *   <div class="ux-menubar__menu">
+ *     <button class="ux-menubar__trigger">File</button>
+ *     <div class="ux-menubar__content">
+ *       <button class="ux-menubar__item">New</button>
+ *       <button class="ux-menubar__item">Open</button>
+ *     </div>
+ *   </div>
+ * </nav>
+ */
+
+/* ========================================
+   UX Menubar
+   ======================================== */
+
+.ux-menubar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ux-space-2xs);
+  height: 36px;
+  padding: var(--ux-space-2xs);
+  background-color: var(--ux-surface);
+  border: 1px solid var(--ux-border-color);
+  border-radius: var(--ux-border-radius);
+  box-shadow: var(--ux-shadow-xs);
+
+  /* ========================================
+     Menu Container
+     ======================================== */
+
+  &__menu {
+    position: relative;
+  }
+
+  /* ========================================
+     Trigger Button
+     ======================================== */
+
+  &__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ux-space-xs) var(--ux-space-sm);
+    font-size: var(--ux-font-size-sm);
+    font-weight: 500;
+    color: var(--ux-text);
+    background: transparent;
+    border: none;
+    border-radius: var(--ux-border-radius-sm);
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+
+    &[data-state="open"],
+    &[aria-expanded="true"],
+    &.is-active {
+      background-color: var(--ux-surface-secondary);
+      color: var(--ux-text);
+    }
+  }
+
+  /* ========================================
+     Dropdown Content
+     ======================================== */
+
+  &__content {
+    position: absolute;
+    top: 100%;
+    left: -4px;
+    z-index: var(--ux-z-dropdown);
+    min-width: 192px;
+    margin-top: var(--ux-space-sm);
+    padding: var(--ux-space-2xs);
+    background-color: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-border-radius);
+    box-shadow: var(--ux-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transform-origin: top left;
+    transition:
+      opacity var(--ux-transition-fast) var(--ux-ease),
+      visibility var(--ux-transition-fast) var(--ux-ease),
+      transform var(--ux-transition-fast) var(--ux-ease-spring);
+
+    /* Open state */
+    &[data-state="open"],
+    .ux-menubar__menu:focus-within > &,
+    .ux-menubar__trigger[data-state="open"] + &,
+    .ux-menubar__trigger[aria-expanded="true"] + & {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+  }
+
+  /* ========================================
+     Menu Item
+     ======================================== */
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    width: 100%;
+    padding: var(--ux-space-xs) var(--ux-space-sm);
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text);
+    background: transparent;
+    border: none;
+    border-radius: var(--ux-border-radius-sm);
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    text-align: left;
+    transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    &[disabled],
+    &--disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* Destructive variant */
+    &--destructive {
+      color: var(--ux-danger);
+
+      &:hover,
+      &:focus-visible {
+        background-color: rgba(var(--ux-danger-rgb), 0.1);
+      }
+    }
+
+    /* Inset for items with icons in checkbox/radio position */
+    &--inset {
+      padding-left: calc(var(--ux-space-sm) + 20px);
+    }
+  }
+
+  /* ========================================
+     Item Icon
+     ======================================== */
+
+  &__icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: var(--ux-text-secondary);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__item:hover &__icon,
+  &__item:focus-visible &__icon {
+    color: var(--ux-text);
+  }
+
+  &__item--destructive &__icon {
+    color: var(--ux-danger);
+  }
+
+  /* ========================================
+     Shortcut
+     ======================================== */
+
+  &__shortcut {
+    margin-left: auto;
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-text-tertiary);
+    letter-spacing: 0.05em;
+  }
+
+  /* ========================================
+     Checkbox & Radio Items
+     ======================================== */
+
+  &__checkbox,
+  &__radio {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    width: 100%;
+    padding: var(--ux-space-xs) var(--ux-space-sm);
+    padding-left: calc(var(--ux-space-sm) + 20px);
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text);
+    background: transparent;
+    border: none;
+    border-radius: var(--ux-border-radius-sm);
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    text-align: left;
+    position: relative;
+    transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--ux-surface-secondary);
+    }
+  }
+
+  &__indicator {
+    position: absolute;
+    left: var(--ux-space-sm);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ux-text);
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* ========================================
+     Label (Section header)
+     ======================================== */
+
+  &__label {
+    padding: var(--ux-space-xs) var(--ux-space-sm);
+    font-size: var(--ux-font-size-sm);
+    font-weight: 500;
+    color: var(--ux-text);
+
+    &--inset {
+      padding-left: calc(var(--ux-space-sm) + 20px);
+    }
+  }
+
+  /* ========================================
+     Separator
+     ======================================== */
+
+  &__separator {
+    height: 1px;
+    margin: var(--ux-space-2xs) calc(var(--ux-space-2xs) * -1);
+    background-color: var(--ux-border-color);
+  }
+
+  /* ========================================
+     Submenu
+     ======================================== */
+
+  &__sub {
+    position: relative;
+  }
+
+  &__sub-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    width: 100%;
+    padding: var(--ux-space-xs) var(--ux-space-sm);
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text);
+    background: transparent;
+    border: none;
+    border-radius: var(--ux-border-radius-sm);
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    text-align: left;
+    transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    &[data-state="open"],
+    &[aria-expanded="true"] {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    &--inset {
+      padding-left: calc(var(--ux-space-sm) + 20px);
+    }
+  }
+
+  &__sub-arrow {
+    margin-left: auto;
+    width: 16px;
+    height: 16px;
+    color: var(--ux-text-secondary);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__sub-content {
+    position: absolute;
+    top: -4px;
+    left: 100%;
+    z-index: var(--ux-z-dropdown);
+    min-width: 128px;
+    margin-left: var(--ux-space-2xs);
+    padding: var(--ux-space-2xs);
+    background-color: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-border-radius);
+    box-shadow: var(--ux-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transform-origin: top left;
+    transition:
+      opacity var(--ux-transition-fast) var(--ux-ease),
+      visibility var(--ux-transition-fast) var(--ux-ease),
+      transform var(--ux-transition-fast) var(--ux-ease-spring);
+
+    &[data-state="open"],
+    .ux-menubar__sub:hover > &,
+    .ux-menubar__sub:focus-within > & {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+  }
+
+  /* ========================================
+     Glass Variant
+     ======================================== */
+
+  &--glass {
+    background-color: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    border-color: var(--ux-glass-border);
+    box-shadow: var(--ux-glass-shadow);
+  }
+
+  &--glass &__content,
+  &--glass &__sub-content {
+    background-color: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    border-color: var(--ux-glass-border);
+    box-shadow: var(--ux-glass-shadow);
+  }
+
+  /* ========================================
+     Compact Variant
+     ======================================== */
+
+  &--compact {
+    height: 32px;
+    padding: 2px;
+
+    .ux-menubar__trigger {
+      padding: var(--ux-space-2xs) var(--ux-space-xs);
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-menubar__item,
+    .ux-menubar__checkbox,
+    .ux-menubar__radio,
+    .ux-menubar__sub-trigger {
+      padding: var(--ux-space-2xs) var(--ux-space-xs);
+      font-size: var(--ux-font-size-xs);
+    }
+  }
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-menubar__content,
+  .ux-menubar__sub-content {
+    transition: opacity 0.1s ease, visibility 0.1s ease;
+    transform: none;
+  }
+
+  .ux-menubar__content[data-state="open"],
+  .ux-menubar__menu:focus-within > .ux-menubar__content,
+  .ux-menubar__sub-content[data-state="open"],
+  .ux-menubar__sub:hover > .ux-menubar__sub-content,
+  .ux-menubar__sub:focus-within > .ux-menubar__sub-content {
+    transform: none;
+  }
+}

@@ -1,0 +1,359 @@
+@use '../core/mixins' as *;
+
+/**
+ * UX Scroll Area Component
+ * Part of the UX CSS Library
+ *
+ * Custom scrollbar styling for scrollable areas.
+ * Works with any framework: HTMX, React, Vue, vanilla JS.
+ *
+ * Usage:
+ * <div class="ux-scroll-area">
+ *   <div class="ux-scroll-area__viewport">
+ *     <!-- Scrollable content -->
+ *   </div>
+ * </div>
+ */
+
+/* ========================================
+   CSS Variables
+   ======================================== */
+
+:root {
+  --ux-scrollbar-size: 10px;
+  --ux-scrollbar-size-sm: 6px;
+  --ux-scrollbar-track-color: transparent;
+  --ux-scrollbar-thumb-color: var(--ux-gray-300);
+  --ux-scrollbar-thumb-hover-color: var(--ux-gray-400);
+  --ux-scrollbar-thumb-radius: 9999px;
+}
+
+/* ========================================
+   UX Scroll Area
+   ======================================== */
+
+.ux-scroll-area {
+  position: relative;
+  overflow: hidden;
+
+  /* ========================================
+     Viewport
+     ======================================== */
+
+  &__viewport {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    border-radius: inherit;
+
+    /* Hide native scrollbar for webkit */
+    &::-webkit-scrollbar {
+      width: var(--ux-scrollbar-size);
+      height: var(--ux-scrollbar-size);
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--ux-scrollbar-track-color);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--ux-scrollbar-thumb-color);
+      border-radius: var(--ux-scrollbar-thumb-radius);
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: var(--ux-scrollbar-thumb-hover-color);
+    }
+
+    &::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: var(--ux-scrollbar-thumb-color) var(--ux-scrollbar-track-color);
+
+    /* Focus ring */
+    &:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: -2px;
+    }
+  }
+
+  /* ========================================
+     Custom Scrollbar (overlay style)
+     ======================================== */
+
+  &__scrollbar {
+    position: absolute;
+    display: flex;
+    touch-action: none;
+    user-select: none;
+    padding: 1px;
+    transition: opacity var(--ux-transition-normal) var(--ux-ease);
+
+    /* Vertical scrollbar */
+    &--vertical {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: var(--ux-scrollbar-size);
+      border-left: 1px solid transparent;
+    }
+
+    /* Horizontal scrollbar */
+    &--horizontal {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: var(--ux-scrollbar-size);
+      flex-direction: column;
+      border-top: 1px solid transparent;
+    }
+  }
+
+  &__thumb {
+    position: relative;
+    flex: 1;
+    background-color: var(--ux-scrollbar-thumb-color);
+    border-radius: var(--ux-scrollbar-thumb-radius);
+    transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background-color: var(--ux-scrollbar-thumb-hover-color);
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      min-width: 44px;
+      min-height: 44px;
+    }
+  }
+
+  /* ========================================
+     Sizes
+     ======================================== */
+
+  &--sm {
+    --ux-scrollbar-size: var(--ux-scrollbar-size-sm);
+
+    .ux-scroll-area__scrollbar--vertical {
+      width: var(--ux-scrollbar-size-sm);
+    }
+
+    .ux-scroll-area__scrollbar--horizontal {
+      height: var(--ux-scrollbar-size-sm);
+    }
+  }
+
+  &--lg {
+    --ux-scrollbar-size: 14px;
+
+    .ux-scroll-area__scrollbar--vertical {
+      width: 14px;
+    }
+
+    .ux-scroll-area__scrollbar--horizontal {
+      height: 14px;
+    }
+  }
+
+  /* ========================================
+     Auto-hide Scrollbar
+     ======================================== */
+
+  &--auto-hide &__scrollbar {
+    opacity: 0;
+  }
+
+  &--auto-hide:hover &__scrollbar,
+  &--auto-hide:focus-within &__scrollbar,
+  &--auto-hide &__scrollbar[data-dragging="true"] {
+    opacity: 1;
+  }
+
+  /* ========================================
+     Always Visible
+     ======================================== */
+
+  &--always-visible &__scrollbar {
+    opacity: 1;
+  }
+
+  /* ========================================
+     Inset Scrollbar
+     ======================================== */
+
+  &--inset &__scrollbar--vertical {
+    right: 4px;
+    top: 4px;
+    bottom: 4px;
+  }
+
+  &--inset &__scrollbar--horizontal {
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+  }
+
+  /* ========================================
+     Track Visible
+     ======================================== */
+
+  &--track-visible &__scrollbar--vertical {
+    background-color: var(--ux-surface-secondary);
+    border-left: 1px solid var(--ux-border-color);
+  }
+
+  &--track-visible &__scrollbar--horizontal {
+    background-color: var(--ux-surface-secondary);
+    border-top: 1px solid var(--ux-border-color);
+  }
+
+  /* ========================================
+     Scroll Snap
+     ======================================== */
+
+  &--snap-x &__viewport {
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+
+    > * {
+      scroll-snap-align: start;
+    }
+  }
+
+  &--snap-y &__viewport {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+
+    > * {
+      scroll-snap-align: start;
+    }
+  }
+
+  /* ========================================
+     Scroll Direction Lock
+     ======================================== */
+
+  &--horizontal-only &__viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  &--vertical-only &__viewport {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* ========================================
+     Glass Variant
+     ======================================== */
+
+  &--glass &__thumb {
+    background-color: var(--ux-glass-border);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  /* ========================================
+     Dark Theme Scrollbar
+     ======================================== */
+
+  &--dark {
+    --ux-scrollbar-thumb-color: var(--ux-gray-600);
+    --ux-scrollbar-thumb-hover-color: var(--ux-gray-500);
+  }
+}
+
+/* ========================================
+   Global Dark Mode
+   ======================================== */
+
+.ux-dark .ux-scroll-area {
+  --ux-scrollbar-thumb-color: var(--ux-gray-600);
+  --ux-scrollbar-thumb-hover-color: var(--ux-gray-500);
+}
+
+@media (prefers-color-scheme: dark) {
+  .ux-scroll-area {
+    --ux-scrollbar-thumb-color: var(--ux-gray-600);
+    --ux-scrollbar-thumb-hover-color: var(--ux-gray-500);
+  }
+}
+
+/* ========================================
+   Utility Classes for Native Scrollbar
+   ======================================== */
+
+/* Apply to any element */
+.ux-scrollbar {
+  &::-webkit-scrollbar {
+    width: var(--ux-scrollbar-size, 10px);
+    height: var(--ux-scrollbar-size, 10px);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--ux-scrollbar-track-color, transparent);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--ux-scrollbar-thumb-color, var(--ux-gray-300));
+    border-radius: var(--ux-scrollbar-thumb-radius, 9999px);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--ux-scrollbar-thumb-hover-color, var(--ux-gray-400));
+  }
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--ux-scrollbar-thumb-color, var(--ux-gray-300)) var(--ux-scrollbar-track-color, transparent);
+}
+
+/* Thin scrollbar */
+.ux-scrollbar--thin {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  scrollbar-width: thin;
+}
+
+/* Hide scrollbar but keep functionality */
+.ux-scrollbar--hidden {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-scroll-area__scrollbar,
+  .ux-scroll-area__thumb {
+    transition: none;
+  }
+
+  .ux-scroll-area--snap-x .ux-scroll-area__viewport,
+  .ux-scroll-area--snap-y .ux-scroll-area__viewport {
+    scroll-behavior: auto;
+  }
+}
