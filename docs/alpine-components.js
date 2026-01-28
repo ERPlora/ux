@@ -6356,9 +6356,334 @@ function uxBomTree(options = {}) {
 // Gantt Component
 function uxGantt(options = {}) {
   return {
+    // Data
     tasks: options.tasks || [],
-    startDate: options.startDate || new Date(),
-    endDate: options.endDate || new Date()
+    zoom: options.zoom || 'week',
+    taskPanelWidth: options.taskPanelWidth || 280,
+    readonly: options.readonly || false,
+    showToday: options.showToday !== false,
+    expandedGroups: new Set(options.expandedGroups || []),
+
+    // State
+    selectedTask: null,
+    isResizing: false,
+    isDragging: false,
+    dragTask: null,
+    dragType: null,
+    tooltip: { visible: false, task: null, x: 0, y: 0 },
+
+    // Computed dates
+    _startDate: null,
+    _endDate: null,
+
+    init() {
+      this.calculateDateRange();
+      // Sync scroll between task panel and chart
+      this.$nextTick(() => {
+        const tasksBody = this.$refs.tasksBody;
+        const chartScroll = this.$refs.chartScroll;
+        if (tasksBody && chartScroll) {
+          chartScroll.addEventListener('scroll', () => {
+            tasksBody.scrollTop = chartScroll.scrollTop;
+          });
+          tasksBody.addEventListener('scroll', () => {
+            chartScroll.scrollTop = tasksBody.scrollTop;
+          });
+        }
+      });
+    },
+
+    calculateDateRange() {
+      let minDate = null;
+      let maxDate = null;
+
+      const processTask = (task) => {
+        if (task.type === 'milestone' && task.date) {
+          const d = new Date(task.date);
+          if (!minDate || d < minDate) minDate = d;
+          if (!maxDate || d > maxDate) maxDate = d;
+        } else if (task.start && task.end) {
+          const s = new Date(task.start);
+          const e = new Date(task.end);
+          if (!minDate || s < minDate) minDate = s;
+          if (!maxDate || e > maxDate) maxDate = e;
+        }
+        if (task.children) {
+          task.children.forEach(processTask);
+        }
+      };
+
+      this.tasks.forEach(processTask);
+
+      // Add padding
+      if (minDate && maxDate) {
+        this._startDate = new Date(minDate);
+        this._startDate.setDate(this._startDate.getDate() - 7);
+        this._endDate = new Date(maxDate);
+        this._endDate.setDate(this._endDate.getDate() + 14);
+      } else {
+        this._startDate = new Date();
+        this._endDate = new Date();
+        this._endDate.setMonth(this._endDate.getMonth() + 2);
+      }
+    },
+
+    get flattenedTasks() {
+      const result = [];
+      const flatten = (tasks, level = 0) => {
+        tasks.forEach(task => {
+          const hasChildren = task.children && task.children.length > 0;
+          result.push({
+            ...task,
+            _level: level,
+            _hasChildren: hasChildren
+          });
+          if (hasChildren && this.expandedGroups.has(task.id)) {
+            flatten(task.children, level + 1);
+          }
+        });
+      };
+      flatten(this.tasks);
+      return result;
+    },
+
+    get cellWidth() {
+      switch (this.zoom) {
+        case 'day': return 40;
+        case 'week': return 100;
+        case 'month': return 120;
+        default: return 100;
+      }
+    },
+
+    get timelineDates() {
+      const dates = [];
+      const current = new Date(this._startDate);
+      while (current <= this._endDate) {
+        dates.push(new Date(current));
+        if (this.zoom === 'day') {
+          current.setDate(current.getDate() + 1);
+        } else if (this.zoom === 'week') {
+          current.setDate(current.getDate() + 7);
+        } else {
+          current.setMonth(current.getMonth() + 1);
+        }
+      }
+      return dates;
+    },
+
+    get chartWidth() {
+      return this.timelineDates.length * this.cellWidth;
+    },
+
+    get todayPosition() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (today < this._startDate || today > this._endDate) return null;
+      const daysDiff = Math.floor((today - this._startDate) / (1000 * 60 * 60 * 24));
+      const totalDays = Math.floor((this._endDate - this._startDate) / (1000 * 60 * 60 * 24));
+      return (daysDiff / totalDays) * this.chartWidth;
+    },
+
+    setZoom(level) {
+      this.zoom = level;
+      this.calculateDateRange();
+      this.$dispatch('gantt:zoom', { zoom: level });
+    },
+
+    scrollToToday() {
+      if (this.todayPosition !== null && this.$refs.chartScroll) {
+        const scrollLeft = this.todayPosition - (this.$refs.chartScroll.clientWidth / 2);
+        this.$refs.chartScroll.scrollLeft = Math.max(0, scrollLeft);
+      }
+    },
+
+    navigate(direction) {
+      if (!this.$refs.chartScroll) return;
+      const amount = this.cellWidth * 3;
+      if (direction === 'prev') {
+        this.$refs.chartScroll.scrollLeft -= amount;
+      } else {
+        this.$refs.chartScroll.scrollLeft += amount;
+      }
+    },
+
+    toggleGroup(taskId) {
+      if (this.expandedGroups.has(taskId)) {
+        this.expandedGroups.delete(taskId);
+      } else {
+        this.expandedGroups.add(taskId);
+      }
+      this.$dispatch('gantt:toggle-group', { taskId, expanded: this.expandedGroups.has(taskId) });
+    },
+
+    selectTask(task) {
+      this.selectedTask = task.id;
+      this.$dispatch('gantt:select', { task });
+    },
+
+    formatHeaderDate(date, isPrimary) {
+      if (isPrimary) {
+        if (this.zoom === 'day') {
+          return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        } else if (this.zoom === 'week') {
+          return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        } else {
+          return date.getFullYear().toString();
+        }
+      } else {
+        if (this.zoom === 'day') {
+          return date.getDate().toString();
+        } else if (this.zoom === 'week') {
+          return 'W' + this.getWeekNumber(date);
+        } else {
+          return date.toLocaleDateString('en-US', { month: 'short' });
+        }
+      }
+    },
+
+    getWeekNumber(date) {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    },
+
+    formatDate(dateStr) {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    },
+
+    isToday(date) {
+      const today = new Date();
+      return date.getDate() === today.getDate() &&
+             date.getMonth() === today.getMonth() &&
+             date.getFullYear() === today.getFullYear();
+    },
+
+    isWeekend(date) {
+      const day = date.getDay();
+      return day === 0 || day === 6;
+    },
+
+    getBarStyle(task) {
+      let startDate, endDate;
+      if (task.type === 'milestone') {
+        startDate = endDate = new Date(task.date);
+      } else {
+        startDate = new Date(task.start);
+        endDate = new Date(task.end);
+      }
+
+      const totalDays = Math.floor((this._endDate - this._startDate) / (1000 * 60 * 60 * 24));
+      const startDays = Math.floor((startDate - this._startDate) / (1000 * 60 * 60 * 24));
+      const durationDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+      const left = (startDays / totalDays) * this.chartWidth;
+      const width = task.type === 'milestone' ? 16 : (durationDays / totalDays) * this.chartWidth;
+
+      return {
+        left: left + 'px',
+        width: width + 'px'
+      };
+    },
+
+    getBarClass(task) {
+      const classes = ['ux-gantt__bar'];
+      if (this.selectedTask === task.id) classes.push('ux-gantt__bar--selected');
+      if (task.type === 'group') classes.push('ux-gantt__bar--group');
+      if (task.status) classes.push(`ux-gantt__bar--${task.status}`);
+      if (task.category) classes.push(`ux-gantt__bar--category-${task.category}`);
+      return classes.join(' ');
+    },
+
+    showTooltip(task, event) {
+      this.tooltip = {
+        visible: true,
+        task: task,
+        x: event.clientX + 10,
+        y: event.clientY + 10
+      };
+    },
+
+    hideTooltip() {
+      this.tooltip.visible = false;
+    },
+
+    startResize(event) {
+      if (this.readonly) return;
+      this.isResizing = true;
+      const startX = event.clientX;
+      const startWidth = this.taskPanelWidth;
+
+      const onMouseMove = (e) => {
+        const diff = e.clientX - startX;
+        this.taskPanelWidth = Math.max(150, Math.min(500, startWidth + diff));
+      };
+
+      const onMouseUp = () => {
+        this.isResizing = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      };
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    },
+
+    startDrag(task, type, event) {
+      if (this.readonly || task.type === 'group') return;
+      // Drag implementation would go here
+    },
+
+    getDependencyPaths() {
+      // Returns SVG path data for dependency arrows
+      const paths = [];
+      const taskMap = new Map();
+      this.flattenedTasks.forEach((task, index) => {
+        taskMap.set(task.id, { task, index });
+      });
+
+      this.flattenedTasks.forEach((task, toIndex) => {
+        if (task.dependencies) {
+          task.dependencies.forEach(depId => {
+            const from = taskMap.get(depId);
+            if (from) {
+              const fromIndex = from.index;
+              const fromTask = from.task;
+
+              // Calculate positions
+              const totalDays = Math.floor((this._endDate - this._startDate) / (1000 * 60 * 60 * 24));
+              const fromEnd = fromTask.type === 'milestone'
+                ? new Date(fromTask.date)
+                : new Date(fromTask.end);
+              const toStart = task.type === 'milestone'
+                ? new Date(task.date)
+                : new Date(task.start);
+
+              const fromX = ((fromEnd - this._startDate) / (1000 * 60 * 60 * 24) / totalDays) * this.chartWidth;
+              const toX = ((toStart - this._startDate) / (1000 * 60 * 60 * 24) / totalDays) * this.chartWidth;
+              const fromY = fromIndex * 40 + 20;
+              const toY = toIndex * 40 + 20;
+
+              // Create curved path
+              const midX = fromX + (toX - fromX) / 2;
+              const path = `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`;
+
+              paths.push({
+                path,
+                arrowX: toX,
+                arrowY: toY
+              });
+            }
+          });
+        }
+      });
+
+      return paths;
+    }
   };
 }
 
