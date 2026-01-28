@@ -1,0 +1,443 @@
+@use '../core/mixins' as *;
+
+/**
+ * UX Panel Component
+ * Part of the UX CSS Library
+ */
+
+/* ========================================
+   UX Panel
+   ======================================== */
+
+:root {
+  --ux-panel-border-radius: var(--ux-radius-lg);
+  --ux-panel-padding: var(--ux-space-md);
+  --ux-panel-header-padding: var(--ux-space-md);
+  --ux-panel-gap: var(--ux-space-md);
+  --ux-panel-transition: var(--ux-transition-normal);
+}
+
+.ux-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--ux-surface);
+  border: 1px solid var(--ux-border-color);
+  border-radius: var(--ux-panel-border-radius);
+  overflow: hidden;
+  font-family: var(--ux-font-family);
+
+  /* ========================================
+     States
+     ======================================== */
+
+  &--open {
+    .ux-panel__toggle {
+      transform: rotate(180deg);
+    }
+
+    .ux-panel__body {
+      grid-template-rows: 1fr;
+    }
+
+    .ux-panel__footer {
+      display: flex;
+    }
+  }
+
+  &:not(.ux-panel--open) .ux-panel__footer {
+    display: none;
+  }
+
+  /* Disabled */
+  &--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+
+    .ux-panel__header {
+      cursor: not-allowed;
+    }
+  }
+
+  /* Loading */
+  &--loading .ux-panel__content-inner {
+    position: relative;
+    min-height: 100px;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      margin: -12px 0 0 -12px;
+      border: 2px solid var(--ux-border-color);
+      border-top-color: var(--ux-primary);
+      border-radius: 50%;
+      animation: ux-panel-spin 0.8s linear infinite;
+    }
+  }
+
+  /* ========================================
+     Variants
+     ======================================== */
+
+  /* No border on header when open */
+  &--flush {
+    .ux-panel__header {
+      background: transparent;
+      border-bottom-color: transparent;
+    }
+
+    &.ux-panel--open .ux-panel__header {
+      border-bottom-color: var(--ux-border-color);
+    }
+  }
+
+  /* Outline variant */
+  &--outline {
+    background: transparent;
+
+    .ux-panel__header {
+      background: transparent;
+
+      &:hover {
+        background: var(--ux-surface-secondary);
+      }
+    }
+  }
+
+  /* Filled variant */
+  &--filled {
+    border: none;
+
+    .ux-panel__header {
+      background: var(--ux-surface-tertiary);
+
+      &:hover {
+        background: var(--ux-gray-200);
+      }
+    }
+  }
+
+  /* Borderless */
+  &--borderless {
+    border: none;
+    border-radius: 0;
+
+    .ux-panel__header {
+      border-bottom: none;
+      background: transparent;
+    }
+  }
+
+  /* ========================================
+     Sizes
+     ======================================== */
+
+  &--sm {
+    --ux-panel-border-radius: var(--ux-radius-md);
+    --ux-panel-padding: var(--ux-space-sm);
+    --ux-panel-header-padding: var(--ux-space-sm);
+
+    .ux-panel__title {
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-panel__toggle,
+    .ux-panel__icon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &--lg {
+    --ux-panel-border-radius: var(--ux-radius-xl);
+    --ux-panel-padding: var(--ux-space-lg);
+    --ux-panel-header-padding: var(--ux-space-lg);
+
+    .ux-panel__title {
+      font-size: var(--ux-font-size-lg);
+    }
+
+    .ux-panel__toggle,
+    .ux-panel__icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  /* ========================================
+     Color Variants
+     ======================================== */
+
+  &--primary .ux-panel__header {
+    background: rgba(var(--ux-primary-rgb), 0.1);
+    border-bottom-color: rgba(var(--ux-primary-rgb), 0.2);
+  }
+
+  &--primary .ux-panel__title {
+    color: var(--ux-primary);
+  }
+
+  &--success .ux-panel__header {
+    background: rgba(var(--ux-success-rgb), 0.1);
+    border-bottom-color: rgba(var(--ux-success-rgb), 0.2);
+  }
+
+  &--success .ux-panel__title {
+    color: var(--ux-success);
+  }
+
+  &--warning .ux-panel__header {
+    background: rgba(var(--ux-warning-rgb), 0.1);
+    border-bottom-color: rgba(var(--ux-warning-rgb), 0.2);
+  }
+
+  &--warning .ux-panel__title {
+    color: var(--ux-warning-shade);
+  }
+
+  &--danger .ux-panel__header {
+    background: rgba(var(--ux-danger-rgb), 0.1);
+    border-bottom-color: rgba(var(--ux-danger-rgb), 0.2);
+  }
+
+  &--danger .ux-panel__title {
+    color: var(--ux-danger);
+  }
+
+  /* ========================================
+     Glass Variant
+     ======================================== */
+
+  &--glass {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    border-color: var(--ux-glass-border);
+
+    .ux-panel__header {
+      background: rgba(255, 255, 255, 0.3);
+      border-bottom-color: var(--ux-glass-border);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.4);
+      }
+    }
+
+    .ux-panel__footer {
+      background: rgba(255, 255, 255, 0.2);
+      border-top-color: var(--ux-glass-border);
+    }
+  }
+
+  /* ========================================
+     Panel Header
+     ======================================== */
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ux-space-sm);
+    padding: var(--ux-panel-header-padding);
+    background: var(--ux-surface-secondary);
+    border-bottom: 1px solid var(--ux-border-color);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--ux-panel-transition);
+
+    &:hover {
+      background: var(--ux-surface-tertiary);
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: -2px;
+    }
+  }
+
+  /* Header content */
+  &__header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: var(--ux-text-secondary);
+  }
+
+  &__title {
+    font-size: var(--ux-font-size-md);
+    font-weight: 600;
+    color: var(--ux-text);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__subtitle {
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text-secondary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Header actions */
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs);
+    flex-shrink: 0;
+  }
+
+  /* Toggle indicator */
+  &__toggle {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: var(--ux-text-tertiary);
+    transition: transform var(--ux-panel-transition);
+  }
+
+  /* ========================================
+     Panel Content
+     ======================================== */
+
+  &__body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--ux-panel-transition) var(--ux-ease-default);
+  }
+
+  &__content {
+    overflow: hidden;
+  }
+
+  &__content-inner {
+    padding: var(--ux-panel-padding);
+  }
+
+  /* ========================================
+     Panel Footer
+     ======================================== */
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ux-space-sm);
+    padding: var(--ux-space-sm) var(--ux-panel-padding);
+    border-top: 1px solid var(--ux-border-color);
+    background: var(--ux-surface-secondary);
+  }
+}
+
+@keyframes ux-panel-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========================================
+   Panel Group
+   ======================================== */
+
+.ux-panel-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ux-panel-gap);
+
+  /* Accordion style (connected panels) */
+  &--accordion {
+    gap: 0;
+
+    .ux-panel {
+      border-radius: 0;
+      margin-top: -1px;
+
+      &:first-child {
+        border-radius: var(--ux-panel-border-radius) var(--ux-panel-border-radius) 0 0;
+        margin-top: 0;
+      }
+
+      &:last-child {
+        border-radius: 0 0 var(--ux-panel-border-radius) var(--ux-panel-border-radius);
+      }
+
+      &:only-child {
+        border-radius: var(--ux-panel-border-radius);
+      }
+    }
+  }
+}
+
+/* ========================================
+   Dark Mode
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  .ux-panel--glass .ux-panel__header {
+    background: rgba(255, 255, 255, 0.05);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .ux-panel--glass .ux-panel__footer {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .ux-panel--filled .ux-panel__header:hover {
+    background: var(--ux-gray-700);
+  }
+}
+
+.ux-dark {
+  .ux-panel--glass .ux-panel__header {
+    background: rgba(255, 255, 255, 0.05);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .ux-panel--glass .ux-panel__footer {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .ux-panel--filled .ux-panel__header:hover {
+    background: var(--ux-gray-700);
+  }
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-panel__body {
+    transition: none;
+  }
+
+  .ux-panel__toggle {
+    transition: none;
+  }
+
+  .ux-panel--loading .ux-panel__content-inner::after {
+    animation: none;
+  }
+}

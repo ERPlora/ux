@@ -1,0 +1,464 @@
+/**
+ * UX Diff-viewer Component
+ * Part of the UX CSS Library
+ */
+
+// ========================================
+// UX Diff Viewer - Base
+// ========================================
+
+.ux-diff {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  background: var(--ux-surface);
+  border: 1px solid var(--ux-border-color);
+  border-radius: var(--ux-radius-lg);
+  overflow: hidden;
+
+  // ========================================
+  // Header
+  // ========================================
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--ux-surface-secondary);
+    border-bottom: 1px solid var(--ux-border-color);
+  }
+
+  &__title {
+    font-family: var(--ux-font-family);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ux-text);
+  }
+
+  &__stats {
+    display: flex;
+    gap: 0.75rem;
+    font-family: var(--ux-font-family);
+    font-size: 0.75rem;
+  }
+
+  &__stat {
+    &--added {
+      color: var(--ux-success);
+    }
+
+    &--removed {
+      color: var(--ux-danger);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &__action {
+    padding: 0.375rem 0.75rem;
+    font-family: var(--ux-font-family);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ux-text-secondary);
+    background: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-radius-sm);
+    cursor: pointer;
+    transition: all var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background: var(--ux-surface-tertiary);
+    }
+
+    &--active {
+      background: var(--ux-primary);
+      color: white;
+      border-color: var(--ux-primary);
+    }
+  }
+
+  // ========================================
+  // Content
+  // ========================================
+
+  &__content {
+    overflow-x: auto;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  // ========================================
+  // Unified View
+  // ========================================
+
+  &--unified &__line {
+    display: flex;
+  }
+
+  &__gutter {
+    flex-shrink: 0;
+    width: 3.5rem;
+    padding: 0 0.5rem;
+    text-align: right;
+    color: var(--ux-text-tertiary);
+    background: var(--ux-surface-secondary);
+    border-right: 1px solid var(--ux-border-color);
+    user-select: none;
+
+    &--old {
+      width: 3rem;
+    }
+
+    &--new {
+      width: 3rem;
+    }
+  }
+
+  &__code {
+    flex: 1;
+    padding: 0 1rem;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  &__marker {
+    flex-shrink: 0;
+    width: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+    user-select: none;
+  }
+
+  // Line Types
+  &__line {
+    &--added {
+      background: rgba(var(--ux-success-rgb), 0.1);
+
+      .ux-diff__marker {
+        color: var(--ux-success);
+      }
+
+      .ux-diff__gutter {
+        background: rgba(var(--ux-success-rgb), 0.15);
+      }
+    }
+
+    &--removed {
+      background: rgba(var(--ux-danger-rgb), 0.1);
+
+      .ux-diff__marker {
+        color: var(--ux-danger);
+      }
+
+      .ux-diff__gutter {
+        background: rgba(var(--ux-danger-rgb), 0.15);
+      }
+    }
+
+    &--context {
+      background: var(--ux-surface);
+    }
+
+    &--header {
+      background: var(--ux-surface-tertiary);
+      color: var(--ux-text-secondary);
+      font-style: italic;
+    }
+  }
+
+  // Inline Highlights
+  &__highlight {
+    &--added {
+      background: rgba(var(--ux-success-rgb), 0.3);
+      border-radius: 2px;
+    }
+
+    &--removed {
+      background: rgba(var(--ux-danger-rgb), 0.3);
+      border-radius: 2px;
+    }
+  }
+
+  // ========================================
+  // Split View
+  // ========================================
+
+  &--split &__content {
+    display: flex;
+  }
+
+  &--split &__pane {
+    flex: 1;
+    min-width: 0;
+
+    &--old {
+      border-right: 1px solid var(--ux-border-color);
+    }
+  }
+
+  &--split &__pane-header {
+    padding: 0.5rem 1rem;
+    font-family: var(--ux-font-family);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ux-text-secondary);
+    background: var(--ux-surface-secondary);
+    border-bottom: 1px solid var(--ux-border-color);
+
+    &--old {
+      color: var(--ux-danger);
+    }
+
+    &--new {
+      color: var(--ux-success);
+    }
+  }
+
+  &--split &__line {
+    display: flex;
+    min-height: 1.5em;
+  }
+
+  &--split &__gutter {
+    width: 3rem;
+  }
+
+  &--split &__code {
+    padding: 0 0.75rem;
+  }
+
+  &--split &__line--empty {
+    background: var(--ux-surface-secondary);
+
+    .ux-diff__code {
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 4px,
+        var(--ux-border-color) 4px,
+        var(--ux-border-color) 5px
+      );
+    }
+  }
+
+  // ========================================
+  // Expandable Sections
+  // ========================================
+
+  &__expand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 1rem;
+    background: var(--ux-surface-secondary);
+    border-top: 1px solid var(--ux-border-color);
+    border-bottom: 1px solid var(--ux-border-color);
+    cursor: pointer;
+    transition: background var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background: var(--ux-surface-tertiary);
+    }
+  }
+
+  &__expand-text {
+    font-family: var(--ux-font-family);
+    font-size: 0.75rem;
+    color: var(--ux-primary);
+  }
+
+  &__expand-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 0.5rem;
+    color: var(--ux-primary);
+  }
+
+  // ========================================
+  // Word Diff Mode
+  // ========================================
+
+  &--word &__word {
+    &--added {
+      background: rgba(var(--ux-success-rgb), 0.25);
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
+    &--removed {
+      background: rgba(var(--ux-danger-rgb), 0.25);
+      text-decoration: line-through;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+  }
+
+  // ========================================
+  // File Info
+  // ========================================
+
+  &__file {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--ux-surface-secondary);
+    border-bottom: 1px solid var(--ux-border-color);
+  }
+
+  &__file-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--ux-text-secondary);
+  }
+
+  &__file-name {
+    font-family: var(--ux-font-family);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--ux-text);
+  }
+
+  &__file-status {
+    padding: 0.125rem 0.5rem;
+    font-family: var(--ux-font-family);
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: var(--ux-radius-sm);
+
+    &--modified {
+      background: rgba(var(--ux-warning-rgb), 0.15);
+      color: var(--ux-warning);
+    }
+
+    &--added {
+      background: rgba(var(--ux-success-rgb), 0.15);
+      color: var(--ux-success);
+    }
+
+    &--deleted {
+      background: rgba(var(--ux-danger-rgb), 0.15);
+      color: var(--ux-danger);
+    }
+
+    &--renamed {
+      background: rgba(var(--ux-primary-rgb), 0.15);
+      color: var(--ux-primary);
+    }
+  }
+
+  // ========================================
+  // Empty State
+  // ========================================
+
+  &__empty {
+    padding: 3rem 2rem;
+    text-align: center;
+    font-family: var(--ux-font-family);
+  }
+
+  &__empty-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1rem;
+    color: var(--ux-text-tertiary);
+  }
+
+  &__empty-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ux-text);
+    margin-bottom: 0.5rem;
+  }
+
+  &__empty-text {
+    font-size: 0.875rem;
+    color: var(--ux-text-secondary);
+  }
+
+  // ========================================
+  // Size Variants
+  // ========================================
+
+  &--sm {
+    font-size: 0.75rem;
+
+    .ux-diff__gutter {
+      width: 2.5rem;
+      padding: 0 0.375rem;
+    }
+
+    .ux-diff__code {
+      padding: 0 0.75rem;
+    }
+  }
+
+  &--lg {
+    font-size: 0.875rem;
+
+    .ux-diff__gutter {
+      width: 4rem;
+    }
+  }
+
+  // ========================================
+  // Line Numbers Only
+  // ========================================
+
+  &--no-gutter &__gutter {
+    display: none;
+  }
+}
+
+// ========================================
+// Dark Mode
+// ========================================
+
+@media (prefers-color-scheme: dark) {
+  .ux-diff {
+    background: var(--ux-surface);
+    border-color: var(--ux-border-color);
+  }
+
+  .ux-diff__line--added {
+    background: rgba(var(--ux-success-rgb), 0.15);
+  }
+
+  .ux-diff__line--removed {
+    background: rgba(var(--ux-danger-rgb), 0.15);
+  }
+}
+
+.ux-dark {
+  .ux-diff {
+    background: var(--ux-surface);
+    border-color: var(--ux-border-color);
+  }
+
+  .ux-diff__line--added {
+    background: rgba(var(--ux-success-rgb), 0.15);
+  }
+
+  .ux-diff__line--removed {
+    background: rgba(var(--ux-danger-rgb), 0.15);
+  }
+}
+
+// ========================================
+// Reduced Motion
+// ========================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-diff__action,
+  .ux-diff__expand {
+    transition: none;
+  }
+}

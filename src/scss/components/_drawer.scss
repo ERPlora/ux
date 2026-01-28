@@ -1,0 +1,325 @@
+/**
+ * UX Drawer Component
+ * Part of the UX CSS Library
+ */
+
+@use '../core/mixins' as *;
+
+// ==========================================================
+// Drawer Backdrop
+// ==========================================================
+
+.ux-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: var(--ux-z-modal-backdrop);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 350ms var(--ux-ease-ios),
+              visibility 350ms var(--ux-ease-ios);
+
+  &--open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 300ms var(--ux-ease-ios),
+                visibility 300ms var(--ux-ease-ios);
+
+    .ux-drawer {
+      transform: translateX(0);
+      transition: transform 400ms var(--ux-ease-ios);
+    }
+
+    .ux-drawer--right {
+      transform: translateX(0);
+    }
+  }
+}
+
+// ==========================================================
+// Drawer
+// ==========================================================
+
+.ux-drawer {
+  --ux-drawer-width: 320px;
+
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--ux-drawer-width);
+  max-width: calc(100vw - 56px);
+  background-color: var(--ux-surface);
+  display: flex;
+  flex-direction: column;
+  z-index: var(--ux-z-modal);
+  transform: translateX(-100%);
+  transition: transform 350ms var(--ux-ease-ios);
+  will-change: transform;
+  box-shadow: var(--ux-shadow-xl);
+
+  // ==========================================================
+  // Header
+  // ==========================================================
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--ux-space-md) var(--ux-space-lg);
+    border-bottom: 1px solid var(--ux-border-color);
+    flex-shrink: 0;
+    min-height: 56px;
+    padding-top: calc(var(--ux-space-md) + env(safe-area-inset-top));
+
+    &--no-border {
+      border-bottom: none;
+    }
+  }
+
+  &__title {
+    font-size: var(--ux-font-size-lg);
+    font-weight: 600;
+    color: var(--ux-text);
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text-secondary);
+    margin: 0;
+    margin-top: 2px;
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--ux-text-secondary);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    &:active {
+      background-color: var(--ux-surface-tertiary);
+    }
+  }
+
+  &__close-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  // ==========================================================
+  // Content
+  // ==========================================================
+
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+
+    &--padded {
+      padding: var(--ux-space-lg);
+    }
+  }
+
+  // ==========================================================
+  // Footer
+  // ==========================================================
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    padding: var(--ux-space-md) var(--ux-space-lg);
+    border-top: 1px solid var(--ux-border-color);
+    flex-shrink: 0;
+    padding-bottom: calc(var(--ux-space-md) + env(safe-area-inset-bottom));
+
+    &--no-border {
+      border-top: none;
+    }
+
+    &--sticky {
+      position: sticky;
+      bottom: 0;
+      background-color: var(--ux-surface);
+    }
+  }
+
+  // ==========================================================
+  // Right Position
+  // ==========================================================
+
+  &--right {
+    left: auto;
+    right: 0;
+    transform: translateX(100%);
+  }
+
+  // ==========================================================
+  // Width Variants
+  // ==========================================================
+
+  &--sm {
+    --ux-drawer-width: 280px;
+  }
+
+  &--lg {
+    --ux-drawer-width: 400px;
+  }
+
+  &--xl {
+    --ux-drawer-width: 500px;
+  }
+
+  &--full {
+    --ux-drawer-width: 100vw;
+    max-width: 100vw;
+  }
+
+  // ==========================================================
+  // Glass Variant
+  // ==========================================================
+
+  &--glass {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+    border-right: 0.5px solid var(--ux-glass-border);
+
+    &.ux-drawer--right {
+      border-right: none;
+      border-left: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-drawer__header {
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-drawer__footer {
+      border-top-color: var(--ux-glass-border);
+      background: transparent;
+    }
+  }
+
+  // ==========================================================
+  // Push Mode
+  // ==========================================================
+
+  &--push {
+    box-shadow: none;
+  }
+
+  // ==========================================================
+  // Persistent (no backdrop, stays open)
+  // ==========================================================
+
+  &--persistent {
+    position: relative;
+    transform: translateX(0);
+    box-shadow: none;
+    z-index: auto;
+
+    &.ux-drawer--collapsed {
+      transform: translateX(-100%);
+      margin-left: calc(var(--ux-drawer-width) * -1);
+    }
+
+    &.ux-drawer--right.ux-drawer--collapsed {
+      transform: translateX(100%);
+      margin-right: calc(var(--ux-drawer-width) * -1);
+      margin-left: 0;
+    }
+  }
+
+  // ==========================================================
+  // Mini Variant (collapsed to icons)
+  // ==========================================================
+
+  &--mini {
+    --ux-drawer-mini-width: 64px;
+
+    &.ux-drawer--collapsed {
+      width: var(--ux-drawer-mini-width);
+      transform: translateX(0);
+      margin-left: 0;
+
+      .ux-drawer__header {
+        padding: var(--ux-space-md) var(--ux-space-sm);
+        justify-content: center;
+      }
+
+      .ux-drawer__title,
+      .ux-drawer__subtitle {
+        display: none;
+      }
+    }
+  }
+}
+
+// ==========================================================
+// Responsive
+// ==========================================================
+
+@media (max-width: 767px) {
+  .ux-drawer {
+    max-width: calc(100vw - 48px);
+
+    &--lg,
+    &--xl {
+      --ux-drawer-width: calc(100vw - 48px);
+    }
+  }
+}
+
+// ==========================================================
+// Dark Mode
+// ==========================================================
+
+@media (prefers-color-scheme: dark) {
+  .ux-drawer {
+    background-color: var(--ux-surface);
+
+    &--glass {
+      background: var(--ux-glass-bg);
+    }
+  }
+}
+
+.ux-dark {
+  .ux-drawer {
+    background-color: var(--ux-surface);
+
+    &--glass {
+      background: var(--ux-glass-bg);
+    }
+  }
+}
+
+// ==========================================================
+// Reduced Motion
+// ==========================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-drawer,
+  .ux-drawer-backdrop {
+    transition: none;
+  }
+
+  .ux-drawer-backdrop--open .ux-drawer {
+    transition: none;
+  }
+}

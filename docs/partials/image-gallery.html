@@ -1,0 +1,548 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text);
+    }
+    .demo-section p {
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+    }
+  </style>
+
+<section class="demo-section">
+      <h3>Grid Basico</h3>
+      <p>Galeria de imagenes con grid de 3 columnas y lightbox.</p>
+      <div class="demo-box">
+        <div class="ux-gallery ux-gallery--cols-3"
+             x-data="uxImageGallery({
+               images: [
+                 { src: 'https://picsum.photos/800/800?random=1', title: 'Imagen 1' },
+                 { src: 'https://picsum.photos/800/800?random=2', title: 'Imagen 2' },
+                 { src: 'https://picsum.photos/800/800?random=3', title: 'Imagen 3' },
+                 { src: 'https://picsum.photos/800/800?random=4', title: 'Imagen 4' },
+                 { src: 'https://picsum.photos/800/800?random=5', title: 'Imagen 5' },
+                 { src: 'https://picsum.photos/800/800?random=6', title: 'Imagen 6' }
+               ]
+             })">
+          <div class="ux-gallery__grid">
+            <template x-for="(image, index) in visibleImages" :key="index">
+              <div class="ux-gallery__item" @click="openLightbox(index)" tabindex="0" @keydown.enter="openLightbox(index)">
+                <img :src="image.src" :alt="image.title || 'Image ' + (index + 1)" loading="lazy">
+                <div class="ux-gallery__item-overlay">
+                  <span x-html="icons.zoom" class="ux-gallery__item-icon"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <template x-teleport="body">
+            <div class="ux-gallery-lightbox" :class="{ 'ux-gallery-lightbox--open': lightboxOpen }" @click.self="closeLightbox()">
+              <div class="ux-gallery-lightbox__header">
+                <span class="ux-gallery-lightbox__counter" x-text="(currentIndex + 1) + ' / ' + images.length"></span>
+                <div class="ux-gallery-lightbox__actions">
+                  <button class="ux-gallery-lightbox__action" @click="closeLightbox()" title="Cerrar">
+                    <span x-html="icons.close"></span>
+                  </button>
+                </div>
+              </div>
+              <div class="ux-gallery-lightbox__content">
+                <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--prev" @click="prev()" :disabled="!canPrev">
+                  <span x-html="icons.prev"></span>
+                </button>
+                <img class="ux-gallery-lightbox__image" :src="currentImage.src" :alt="currentImage.title" @click="toggleZoom()">
+                <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--next" @click="next()" :disabled="!canNext">
+                  <span x-html="icons.next"></span>
+                </button>
+              </div>
+              <div class="ux-gallery-lightbox__caption" x-show="currentImage.title">
+                <div class="ux-gallery-lightbox__title" x-text="currentImage.title"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-gallery ux-gallery--cols-3"
+     x-data="uxImageGallery({ images: [...] })"&gt;
+  &lt;div class="ux-gallery__grid"&gt;
+    &lt;template x-for="(image, index) in visibleImages"&gt;
+      &lt;div class="ux-gallery__item" @click="openLightbox(index)"&gt;
+        &lt;img :src="image.src"&gt;
+      &lt;/div&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>4 Columnas</h3>
+      <p>Grid con 4 columnas para mas imagenes.</p>
+      <div class="demo-box">
+        <div class="ux-gallery ux-gallery--cols-4"
+             x-data="uxImageGallery({
+               images: [
+                 { src: 'https://picsum.photos/600/600?random=10' },
+                 { src: 'https://picsum.photos/600/600?random=11' },
+                 { src: 'https://picsum.photos/600/600?random=12' },
+                 { src: 'https://picsum.photos/600/600?random=13' },
+                 { src: 'https://picsum.photos/600/600?random=14' },
+                 { src: 'https://picsum.photos/600/600?random=15' },
+                 { src: 'https://picsum.photos/600/600?random=16' },
+                 { src: 'https://picsum.photos/600/600?random=17' }
+               ]
+             })">
+          <div class="ux-gallery__grid">
+            <template x-for="(image, index) in images" :key="index">
+              <div class="ux-gallery__item" @click="openLightbox(index)">
+                <img :src="image.src" loading="lazy">
+              </div>
+            </template>
+          </div>
+
+          <template x-teleport="body">
+            <div class="ux-gallery-lightbox" :class="{ 'ux-gallery-lightbox--open': lightboxOpen }" @click.self="closeLightbox()">
+              <div class="ux-gallery-lightbox__header">
+                <span class="ux-gallery-lightbox__counter" x-text="(currentIndex + 1) + ' / ' + images.length"></span>
+                <button class="ux-gallery-lightbox__action" @click="closeLightbox()">
+                  <span x-html="icons.close"></span>
+                </button>
+              </div>
+              <div class="ux-gallery-lightbox__content">
+                <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--prev" @click="prev()">
+                  <span x-html="icons.prev"></span>
+                </button>
+                <img class="ux-gallery-lightbox__image" :src="currentImage.src">
+                <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--next" @click="next()">
+                  <span x-html="icons.next"></span>
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-gallery ux-gallery--cols-4"&gt;...&lt;/div&gt;</pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Con Limite (+X mas)</h3>
+      <p>Mostrar solo algunas imagenes con indicador de cuantas mas hay.</p>
+      <div class="demo-box">
+        <div class="ux-gallery ux-gallery--cols-4"
+             x-data="uxImageGallery({
+               images: [
+                 { src: 'https://picsum.photos/600/600?random=20' },
+                 { src: 'https://picsum.photos/600/600?random=21' },
+                 { src: 'https://picsum.photos/600/600?random=22' },
+                 { src: 'https://picsum.photos/600/600?random=23' },
+                 { src: 'https://picsum.photos/600/600?random=24' },
+                 { src: 'https://picsum.photos/600/600?random=25' },
+                 { src: 'https://picsum.photos/600/600?random=26' },
+                 { src: 'https://picsum.photos/600/600?random=27' }
+               ],
+               maxVisible: 4
+             })">
+          <div class="ux-gallery__grid">
+            <template x-for="(image, index) in visibleImages" :key="index">
+              <div class="ux-gallery__item" @click="openLightbox(index)">
+                <img :src="image.src" loading="lazy">
+                <template x-if="index === visibleImages.length - 1 && remainingCount > 0">
+                  <div class="ux-gallery__more">+<span x-text="remainingCount"></span></div>
+                </template>
+              </div>
+            </template>
+          </div>
+
+          <template x-teleport="body">
+            <div class="ux-gallery-lightbox" :class="{ 'ux-gallery-lightbox--open': lightboxOpen }" @click.self="closeLightbox()">
+              <div class="ux-gallery-lightbox__header">
+                <span class="ux-gallery-lightbox__counter" x-text="(currentIndex + 1) + ' / ' + images.length"></span>
+                <button class="ux-gallery-lightbox__action" @click="closeLightbox()">
+                  <span x-html="icons.close"></span>
+                </button>
+              </div>
+              <div class="ux-gallery-lightbox__content">
+                <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--prev" @click="prev()">
+                  <span x-html="icons.prev"></span>
+                </button>
+                <img class="ux-gallery-lightbox__image" :src="currentImage.src">
+                <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--next" @click="next()">
+                  <span x-html="icons.next"></span>
+                </button>
+              </div>
+              <div class="ux-gallery-lightbox__thumbs">
+                <template x-for="(image, index) in images" :key="'thumb-' + index">
+                  <div class="ux-gallery-lightbox__thumb" :class="{ 'ux-gallery-lightbox__thumb--active': index === currentIndex }" @click="goTo(index)">
+                    <img :src="image.src">
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxImageGallery({ images: [...], maxVisible: 4 })"&gt;
+  &lt;!-- La ultima imagen visible muestra +X --&gt;
+  &lt;div class="ux-gallery__more"&gt;+&lt;span x-text="remainingCount"&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Aspecto Paisaje</h3>
+      <p>Imagenes con aspecto 16:9.</p>
+      <div class="demo-box">
+        <div class="ux-gallery ux-gallery--cols-2 ux-gallery--wide"
+             x-data="uxImageGallery({
+               images: [
+                 { src: 'https://picsum.photos/1200/675?random=30', title: 'Paisaje 1' },
+                 { src: 'https://picsum.photos/1200/675?random=31', title: 'Paisaje 2' },
+                 { src: 'https://picsum.photos/1200/675?random=32', title: 'Paisaje 3' },
+                 { src: 'https://picsum.photos/1200/675?random=33', title: 'Paisaje 4' }
+               ]
+             })">
+          <div class="ux-gallery__grid">
+            <template x-for="(image, index) in images" :key="index">
+              <div class="ux-gallery__item" @click="openLightbox(index)">
+                <img :src="image.src" :alt="image.title" loading="lazy">
+              </div>
+            </template>
+          </div>
+
+          <template x-teleport="body">
+            <div class="ux-gallery-lightbox" :class="{ 'ux-gallery-lightbox--open': lightboxOpen }" @click.self="closeLightbox()">
+              <div class="ux-gallery-lightbox__header">
+                <span class="ux-gallery-lightbox__counter" x-text="(currentIndex + 1) + ' / ' + images.length"></span>
+                <button class="ux-gallery-lightbox__action" @click="closeLightbox()">
+                  <span x-html="icons.close"></span>
+                </button>
+              </div>
+              <div class="ux-gallery-lightbox__content">
+                <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--prev" @click="prev()">
+                  <span x-html="icons.prev"></span>
+                </button>
+                <img class="ux-gallery-lightbox__image" :src="currentImage.src" :alt="currentImage.title">
+                <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--next" @click="next()">
+                  <span x-html="icons.next"></span>
+                </button>
+              </div>
+              <div class="ux-gallery-lightbox__caption" x-show="currentImage.title">
+                <div class="ux-gallery-lightbox__title" x-text="currentImage.title"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-gallery ux-gallery--cols-2 ux-gallery--wide"&gt;...&lt;/div&gt;</pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Layout Masonry</h3>
+      <p>Imagenes con diferentes alturas en formato masonry.</p>
+      <div class="demo-box">
+        <div class="ux-gallery ux-gallery--masonry ux-gallery--cols-3"
+             x-data="uxImageGallery({
+               images: [
+                 { src: 'https://picsum.photos/400/600?random=50' },
+                 { src: 'https://picsum.photos/400/300?random=51' },
+                 { src: 'https://picsum.photos/400/500?random=52' },
+                 { src: 'https://picsum.photos/400/400?random=53' },
+                 { src: 'https://picsum.photos/400/350?random=54' },
+                 { src: 'https://picsum.photos/400/550?random=55' }
+               ]
+             })">
+          <div class="ux-gallery__grid">
+            <template x-for="(image, index) in images" :key="index">
+              <div class="ux-gallery__item" @click="openLightbox(index)">
+                <img :src="image.src" loading="lazy">
+              </div>
+            </template>
+          </div>
+
+          <template x-teleport="body">
+            <div class="ux-gallery-lightbox" :class="{ 'ux-gallery-lightbox--open': lightboxOpen }" @click.self="closeLightbox()">
+              <div class="ux-gallery-lightbox__header">
+                <span class="ux-gallery-lightbox__counter" x-text="(currentIndex + 1) + ' / ' + images.length"></span>
+                <button class="ux-gallery-lightbox__action" @click="closeLightbox()">
+                  <span x-html="icons.close"></span>
+                </button>
+              </div>
+              <div class="ux-gallery-lightbox__content">
+                <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--prev" @click="prev()">
+                  <span x-html="icons.prev"></span>
+                </button>
+                <img class="ux-gallery-lightbox__image" :src="currentImage.src">
+                <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--next" @click="next()">
+                  <span x-html="icons.next"></span>
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-gallery ux-gallery--masonry ux-gallery--cols-3"&gt;...&lt;/div&gt;</pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Opciones</h3>
+      <p>Configuracion disponible para el componente.</p>
+      <div class="demo-box">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm);">Opcion</th>
+              <th style="padding: var(--ux-space-sm);">Tipo</th>
+              <th style="padding: var(--ux-space-sm);">Default</th>
+              <th style="padding: var(--ux-space-sm);">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>images</code></td>
+              <td style="padding: var(--ux-space-sm);">Array</td>
+              <td style="padding: var(--ux-space-sm);">[]</td>
+              <td style="padding: var(--ux-space-sm);">Array de {src, thumb, title, description}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>maxVisible</code></td>
+              <td style="padding: var(--ux-space-sm);">Number</td>
+              <td style="padding: var(--ux-space-sm);">0</td>
+              <td style="padding: var(--ux-space-sm);">Maximo de imagenes visibles (0 = todas)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>showThumbs</code></td>
+              <td style="padding: var(--ux-space-sm);">Boolean</td>
+              <td style="padding: var(--ux-space-sm);">true</td>
+              <td style="padding: var(--ux-space-sm);">Mostrar miniaturas en lightbox</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>enableZoom</code></td>
+              <td style="padding: var(--ux-space-sm);">Boolean</td>
+              <td style="padding: var(--ux-space-sm);">true</td>
+              <td style="padding: var(--ux-space-sm);">Permitir zoom en lightbox</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>loop</code></td>
+              <td style="padding: var(--ux-space-sm);">Boolean</td>
+              <td style="padding: var(--ux-space-sm);">true</td>
+              <td style="padding: var(--ux-space-sm);">Loop al final de la galeria</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Clases CSS</h3>
+      <p>Clases disponibles para personalizar la galeria.</p>
+      <div class="demo-box">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm);">Clase</th>
+              <th style="padding: var(--ux-space-sm);">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-gallery--cols-2/3/4/5</code></td>
+              <td style="padding: var(--ux-space-sm);">Numero de columnas</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-gallery--cols-auto</code></td>
+              <td style="padding: var(--ux-space-sm);">Columnas automaticas (min 200px)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-gallery--masonry</code></td>
+              <td style="padding: var(--ux-space-sm);">Layout masonry</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-gallery--featured</code></td>
+              <td style="padding: var(--ux-space-sm);">Primera imagen destacada</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-gallery--wide</code></td>
+              <td style="padding: var(--ux-space-sm);">Aspecto 16:9</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h3>Eventos</h3>
+      <p>Eventos emitidos por el componente.</p>
+      <div class="demo-box">
+        <ul style="margin: 0; padding-left: var(--ux-space-lg);">
+          <li><code>gallery:open</code> - Lightbox abierto ({ index, image })</li>
+          <li><code>gallery:close</code> - Lightbox cerrado</li>
+          <li><code>gallery:change</code> - Imagen cambiada ({ index, image })</li>
+        </ul>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxImageGallery({ images: [...] })"
+     @gallery:open="console.log('Abierto:', $event.detail.index)"
+     @gallery:change="trackView($event.detail.image)"&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Integracion con Django para cargar imagenes dinamicamente desde el servidor.</p>
+
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm); font-weight: 600;">Template Django (galeria.html)</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Renderiza la galeria con imagenes desde el modelo.</p>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/galeria.html --&gt;
+&lt;div class="ux-gallery ux-gallery--cols-3"
+     x-data="uxImageGallery({
+       images: [
+         {% for imagen in producto.imagenes.all %}
+         {
+           src: '{{ imagen.imagen.url }}',
+           thumb: '{{ imagen.thumbnail.url }}',
+           title: '{{ imagen.titulo|escapejs }}'
+         }{% if not forloop.last %},{% endif %}
+         {% endfor %}
+       ],
+       maxVisible: 4
+     })"&gt;
+  &lt;div class="ux-gallery__grid"&gt;
+    &lt;template x-for="(image, index) in visibleImages" :key="index"&gt;
+      &lt;div class="ux-gallery__item" @click="openLightbox(index)"&gt;
+        &lt;img :src="image.thumb || image.src" loading="lazy"&gt;
+        &lt;template x-if="index === visibleImages.length - 1 &amp;&amp; remainingCount &gt; 0"&gt;
+          &lt;div class="ux-gallery__more"&gt;+&lt;span x-text="remainingCount"&gt;&lt;/span&gt;&lt;/div&gt;
+        &lt;/template&gt;
+      &lt;/div&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Lightbox template... --&gt;
+&lt;/div&gt;</pre>
+
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm); font-weight: 600;">Carga dinamica con HTMX</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Carga la galeria de un producto sin recargar la pagina.</p>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Lista de productos con carga de galeria --&gt;
+&lt;div class="ux-card"
+     hx-get="/productos/{{ producto.id }}/galeria/"
+     hx-trigger="click"
+     hx-target="#galeria-modal .ux-modal__content"
+     hx-swap="innerHTML"
+     @htmx:after-swap="$dispatch('modal:open')"&gt;
+  &lt;img src="{{ producto.imagen_principal.thumbnail.url }}" alt="{{ producto.nombre }}"&gt;
+  &lt;h4&gt;{{ producto.nombre }}&lt;/h4&gt;
+  &lt;p&gt;{{ producto.imagenes.count }} imagenes&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;!-- Modal para mostrar galeria --&gt;
+&lt;div id="galeria-modal"
+     x-data="uxModal()"
+     @modal:open.window="open()"&gt;
+  &lt;div class="ux-modal" x-show="isOpen"&gt;
+    &lt;div class="ux-modal__header"&gt;
+      &lt;h3&gt;Galeria de Imagenes&lt;/h3&gt;
+      &lt;button @click="close()"&gt;&times;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-modal__content"&gt;
+      &lt;!-- Contenido cargado via HTMX --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm); font-weight: 600;">Vista Django</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Endpoint que retorna el fragmento HTML de la galeria.</p>
+      </div>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
+
+def producto_galeria(request, producto_id):
+    producto = get_object_or_404(Producto, id=producto_id)
+    return TemplateResponse(request, 'partials/galeria.html', {
+        'producto': producto
+    })</pre>
+
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm); font-weight: 600;">Modelo Django</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Modelo de imagen con soporte para thumbnails.</p>
+      </div>
+      <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
+
+class Producto(models.Model):
+    nombre = models.CharField(max_length=200)
+
+    @property
+    def imagen_principal(self):
+        return self.imagenes.first()
+
+class ImagenProducto(models.Model):
+    producto = models.ForeignKey(
+        Producto,
+        related_name='imagenes',
+        on_delete=models.CASCADE
+    )
+    imagen = models.ImageField(upload_to='productos/')
+    titulo = models.CharField(max_length=100, blank=True)
+    orden = models.PositiveIntegerField(default=0)
+
+    # Thumbnail automatico con django-imagekit
+    thumbnail = ImageSpecField(
+        source='imagen',
+        processors=[ResizeToFill(300, 300)],
+        format='JPEG',
+        options={'quality': 80}
+    )
+
+    class Meta:
+        ordering = ['orden']</pre>
+
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm); font-weight: 600;">Galeria con Infinite Scroll</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Cargar mas imagenes al hacer scroll.</p>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Galeria con paginacion HTMX --&gt;
+&lt;div id="galeria-container"
+     x-data="uxImageGallery({ images: [] })"
+     x-init="$watch('images', () =&gt; $el.dispatchEvent(new CustomEvent('gallery:updated')))"&gt;
+
+  &lt;div class="ux-gallery ux-gallery--cols-4"&gt;
+    &lt;div class="ux-gallery__grid"
+         hx-get="/api/imagenes/?page=1"
+         hx-trigger="load"
+         hx-swap="innerHTML"&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Trigger para cargar mas --&gt;
+  &lt;div hx-get="/api/imagenes/?page={{ next_page }}"
+       hx-trigger="revealed"
+       hx-swap="beforeend"
+       hx-target=".ux-gallery__grid"
+       class="ux-spinner"&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Partial que retorna Django (partials/imagen_item.html) --&gt;
+{% for imagen in imagenes %}
+&lt;div class="ux-gallery__item"
+     @click="openLightbox({{ forloop.counter0 }})"
+     x-init="images.push({ src: '{{ imagen.url }}', title: '{{ imagen.titulo }}' })"&gt;
+  &lt;img src="{{ imagen.thumbnail.url }}" loading="lazy"&gt;
+&lt;/div&gt;
+{% endfor %}</pre>
+
+    </section>

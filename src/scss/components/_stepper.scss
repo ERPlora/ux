@@ -1,0 +1,463 @@
+/**
+ * UX Stepper Component
+ * Part of the UX CSS Library
+ */
+
+@use '../core/mixins' as *;
+
+// ========================================
+// UX Stepper
+// ========================================
+
+.ux-stepper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  // ========================================
+  // Stepper Header (Steps Indicator)
+  // ========================================
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--ux-space-xl);
+    position: relative;
+
+    // Progress line behind steps
+    &::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 40px;
+      right: 40px;
+      height: 2px;
+      background-color: var(--ux-border-color);
+      z-index: 0;
+    }
+  }
+
+  // ========================================
+  // Step Item
+  // ========================================
+
+  &__step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    cursor: pointer;
+
+    &--disabled {
+      cursor: not-allowed;
+      pointer-events: none;
+
+      .ux-stepper__circle {
+        opacity: 0.5;
+      }
+
+      .ux-stepper__label {
+        opacity: 0.5;
+      }
+    }
+
+    &:hover .ux-stepper__circle {
+      border-color: var(--ux-primary);
+      transform: scale(1.05);
+    }
+
+    // Active Step
+    &--active {
+      .ux-stepper__circle {
+        background-color: var(--ux-primary);
+        border-color: var(--ux-primary);
+        color: var(--ux-primary-contrast);
+      }
+
+      .ux-stepper__label {
+        color: var(--ux-primary);
+      }
+    }
+
+    // Completed Step
+    &--completed {
+      .ux-stepper__circle {
+        background-color: var(--ux-success);
+        border-color: var(--ux-success);
+        color: white;
+      }
+
+      .ux-stepper__label {
+        color: var(--ux-success);
+      }
+    }
+
+    // Error Step
+    &--error {
+      .ux-stepper__circle {
+        background-color: var(--ux-danger);
+        border-color: var(--ux-danger);
+        color: white;
+      }
+
+      .ux-stepper__label {
+        color: var(--ux-danger);
+      }
+    }
+  }
+
+  // Step Circle
+  &__circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--ux-surface);
+    border: 2px solid var(--ux-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--ux-font-size-md);
+    font-weight: 600;
+    color: var(--ux-text-secondary);
+    transition:
+      background-color var(--ux-transition-fast) var(--ux-ease),
+      border-color var(--ux-transition-fast) var(--ux-ease),
+      color var(--ux-transition-fast) var(--ux-ease),
+      transform var(--ux-transition-fast) var(--ux-ease-spring);
+  }
+
+  // Step Label
+  &__label {
+    margin-top: var(--ux-space-sm);
+    font-size: var(--ux-font-size-sm);
+    font-weight: 500;
+    color: var(--ux-text-secondary);
+    text-align: center;
+    max-width: 100px;
+    transition: color var(--ux-transition-fast) var(--ux-ease);
+  }
+
+  // Step Description
+  &__description {
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-text-tertiary);
+    text-align: center;
+    max-width: 120px;
+    margin-top: var(--ux-space-xs);
+  }
+
+  // Checkmark icon for completed
+  &__check {
+    width: 20px;
+    height: 20px;
+  }
+
+  // ========================================
+  // Progress Line (Completed Portion)
+  // ========================================
+
+  &__progress {
+    position: absolute;
+    top: 20px;
+    left: 40px;
+    height: 2px;
+    background-color: var(--ux-success);
+    z-index: 0;
+    transition: width var(--ux-transition-base) var(--ux-ease);
+  }
+
+  // ========================================
+  // Stepper Content
+  // ========================================
+
+  &__content {
+    flex: 1;
+    min-height: 200px;
+  }
+
+  &__panel {
+    display: none;
+    animation: uxStepperFadeIn var(--ux-transition-base) var(--ux-ease);
+
+    &--active {
+      display: block;
+    }
+  }
+
+  // ========================================
+  // Stepper Actions
+  // ========================================
+
+  &__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--ux-space-xl);
+    padding-top: var(--ux-space-lg);
+    border-top: 1px solid var(--ux-border-color);
+    gap: var(--ux-space-md);
+  }
+
+  &__actions-start {
+    display: flex;
+    gap: var(--ux-space-sm);
+  }
+
+  &__actions-end {
+    display: flex;
+    gap: var(--ux-space-sm);
+  }
+
+  // ========================================
+  // Vertical Stepper
+  // ========================================
+
+  &--vertical {
+    flex-direction: row;
+
+    .ux-stepper__header {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 0;
+      margin-right: var(--ux-space-xl);
+      min-width: 200px;
+
+      &::before {
+        top: 40px;
+        bottom: 40px;
+        left: 19px;
+        right: auto;
+        width: 2px;
+        height: auto;
+      }
+    }
+
+    .ux-stepper__progress {
+      top: 40px;
+      left: 19px;
+      width: 2px !important;
+      height: 0;
+    }
+
+    .ux-stepper__step {
+      flex-direction: row;
+      align-items: center;
+      margin-bottom: var(--ux-space-xl);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .ux-stepper__label {
+      margin-top: 0;
+      margin-left: var(--ux-space-md);
+      text-align: left;
+      max-width: none;
+    }
+
+    .ux-stepper__description {
+      text-align: left;
+      margin-left: var(--ux-space-md);
+      margin-top: var(--ux-space-xs);
+      max-width: none;
+    }
+
+    .ux-stepper__content {
+      flex: 1;
+      border-left: 1px solid var(--ux-border-color);
+      padding-left: var(--ux-space-xl);
+    }
+  }
+
+  // ========================================
+  // Compact Stepper
+  // ========================================
+
+  &--compact {
+    .ux-stepper__circle {
+      width: 32px;
+      height: 32px;
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-stepper__header::before {
+      top: 16px;
+    }
+
+    .ux-stepper__progress {
+      top: 16px;
+    }
+
+    .ux-stepper__label {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-stepper__check {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  // ========================================
+  // Dot Stepper (Minimal)
+  // ========================================
+
+  &--dots {
+    .ux-stepper__circle {
+      width: 12px;
+      height: 12px;
+      padding: 0;
+
+      span {
+        display: none;
+      }
+    }
+
+    .ux-stepper__check {
+      display: none;
+    }
+
+    .ux-stepper__header::before {
+      top: 6px;
+    }
+
+    .ux-stepper__progress {
+      top: 6px;
+    }
+  }
+
+  // ========================================
+  // Numbered Progress Bar
+  // ========================================
+
+  &--progress-bar {
+    .ux-stepper__header {
+      flex-direction: column;
+      gap: var(--ux-space-sm);
+
+      &::before {
+        display: none;
+      }
+    }
+
+    .ux-stepper__progress-track {
+      width: 100%;
+      height: 4px;
+      background-color: var(--ux-border-color);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .ux-stepper__progress-fill {
+      height: 100%;
+      background-color: var(--ux-primary);
+      border-radius: 2px;
+      transition: width var(--ux-transition-base) var(--ux-ease);
+    }
+
+    .ux-stepper__steps-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .ux-stepper__step {
+      flex: none;
+    }
+
+    .ux-stepper__circle {
+      display: none;
+    }
+  }
+
+  // ========================================
+  // Color Variants
+  // ========================================
+
+  &.ux-color-success {
+    .ux-stepper__step--active .ux-stepper__circle {
+      background-color: var(--ux-success);
+      border-color: var(--ux-success);
+    }
+
+    .ux-stepper__step--active .ux-stepper__label {
+      color: var(--ux-success);
+    }
+  }
+
+  &.ux-color-warning {
+    .ux-stepper__step--active .ux-stepper__circle {
+      background-color: var(--ux-warning);
+      border-color: var(--ux-warning);
+    }
+
+    .ux-stepper__step--active .ux-stepper__label {
+      color: var(--ux-warning);
+    }
+  }
+}
+
+@keyframes uxStepperFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// ========================================
+// Responsive
+// ========================================
+
+@media (max-width: 767px) {
+  .ux-stepper {
+    &__header {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: var(--ux-space-sm);
+    }
+
+    &__label {
+      display: none;
+    }
+
+    &__step--active &__label {
+      display: block;
+    }
+
+    &--vertical {
+      flex-direction: column;
+
+      .ux-stepper__header {
+        flex-direction: row;
+        margin-right: 0;
+        margin-bottom: var(--ux-space-xl);
+        min-width: auto;
+      }
+
+      .ux-stepper__content {
+        border-left: none;
+        padding-left: 0;
+      }
+    }
+  }
+}
+
+// ========================================
+// Reduced Motion
+// ========================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-stepper__circle,
+  .ux-stepper__progress,
+  .ux-stepper__panel {
+    transition: none;
+    animation: none;
+  }
+}

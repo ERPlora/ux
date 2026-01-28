@@ -1,0 +1,359 @@
+/**
+ * UX Modal Component
+ * Part of the UX CSS Library
+ */
+
+@use '../core/mixins' as *;
+
+// ==========================================================
+// Modal Backdrop
+// ==========================================================
+
+.ux-modal-backdrop {
+  @include fixed-fill;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ux-space-lg);
+  background: var(--ux-modal-backdrop);
+  z-index: var(--ux-z-modal-backdrop);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--ux-transition-normal) var(--ux-ease),
+              visibility var(--ux-transition-normal) var(--ux-ease);
+
+  // Open state (multiple selectors for compatibility)
+  &--open,
+  &[data-state="open"],
+  &[aria-hidden="false"],
+  &.is-open {
+    opacity: 1;
+    visibility: visible;
+
+    .ux-modal {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  // Mobile: align to bottom
+  @include mobile {
+    align-items: flex-end;
+    padding: 0;
+  }
+}
+
+// ==========================================================
+// Modal Container
+// ==========================================================
+
+.ux-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--ux-modal-max-width);
+  max-height: var(--ux-modal-max-height);
+  background: var(--ux-modal-bg);
+  border-radius: var(--ux-modal-border-radius);
+  box-shadow: var(--ux-shadow-xl);
+  overflow: hidden;
+  transform: scale(0.9);
+  opacity: 0;
+  transition: transform var(--ux-transition-normal) var(--ux-ease-ios-spring),
+              opacity var(--ux-transition-fast) var(--ux-ease);
+
+  // Mobile: sheet-style from bottom
+  @include mobile {
+    max-width: none;
+    max-height: 90dvh;
+    border-radius: var(--ux-modal-border-radius) var(--ux-modal-border-radius) 0 0;
+    transform: translateY(100%);
+
+    .ux-modal-backdrop--open &,
+    .ux-modal-backdrop[data-state="open"] &,
+    .ux-modal-backdrop[aria-hidden="false"] &,
+    .ux-modal-backdrop.is-open & {
+      transform: translateY(0);
+    }
+  }
+}
+
+// ==========================================================
+// Modal Header
+// ==========================================================
+
+.ux-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ux-modal-padding);
+  border-bottom: 1px solid var(--ux-border-color);
+  flex-shrink: 0;
+}
+
+.ux-modal__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ux-text);
+}
+
+.ux-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--ux-surface-secondary);
+  border: none;
+  border-radius: 50%;
+  color: var(--ux-text-secondary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background-color var(--ux-transition-fast) var(--ux-ease),
+              color var(--ux-transition-fast) var(--ux-ease);
+
+  &:hover {
+    background: var(--ux-surface-tertiary);
+    color: var(--ux-text);
+  }
+}
+
+// ==========================================================
+// Modal Content
+// ==========================================================
+
+.ux-modal__content {
+  flex: 1;
+  padding: var(--ux-modal-padding);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+// ==========================================================
+// Modal Footer
+// ==========================================================
+
+.ux-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ux-space-sm);
+  padding: var(--ux-modal-padding);
+  border-top: 1px solid var(--ux-border-color);
+  flex-shrink: 0;
+}
+
+// ==========================================================
+// Modal Handle (drag indicator)
+// ==========================================================
+
+.ux-modal__handle {
+  display: none;
+  width: var(--ux-handle-width);
+  height: var(--ux-handle-height);
+  margin: 8px auto;
+  background: var(--ux-handle-color);
+  border-radius: var(--ux-handle-radius);
+  flex-shrink: 0;
+
+  @include mobile {
+    display: block;
+  }
+}
+
+// ==========================================================
+// Size Modifiers
+// ==========================================================
+
+.ux-modal--sm {
+  max-width: 400px;
+}
+
+.ux-modal--lg {
+  max-width: 800px;
+}
+
+.ux-modal--xl {
+  max-width: 1140px;
+}
+
+.ux-modal--fullscreen {
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+
+  @include mobile {
+    border-radius: 0;
+  }
+}
+
+// ==========================================================
+// Style Modifiers
+// ==========================================================
+
+// Glass variant
+.ux-modal--glass {
+  @include glass(var(--ux-glass-bg-thick));
+  border: 0.5px solid var(--ux-glass-border);
+}
+
+// No padding (for custom content)
+.ux-modal--flush {
+  .ux-modal__content {
+    padding: 0;
+  }
+}
+
+// Centered content
+.ux-modal--centered {
+  .ux-modal__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+// Full height modal
+.ux-modal--full-height {
+  height: calc(100dvh - var(--ux-space-xl) * 2);
+  max-height: none;
+
+  @include mobile {
+    height: 100dvh;
+    border-radius: 0;
+  }
+}
+
+// ==========================================================
+// Side Modal (Lateral Panels)
+// ==========================================================
+
+// Backdrop for side modals - removes centering
+.ux-modal-backdrop--side {
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+
+  @include mobile {
+    align-items: stretch;
+  }
+}
+
+// Left alignment for backdrop
+.ux-modal-backdrop--left {
+  justify-content: flex-start;
+}
+
+// Right alignment for backdrop
+.ux-modal-backdrop--right {
+  justify-content: flex-end;
+}
+
+// Left side modal
+.ux-modal--left {
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  transform: translateX(-100%);
+
+  .ux-modal-backdrop--open &,
+  .ux-modal-backdrop[data-state="open"] &,
+  .ux-modal-backdrop[aria-hidden="false"] &,
+  .ux-modal-backdrop.is-open & {
+    transform: translateX(0);
+  }
+
+  @include mobile {
+    border-radius: 0;
+    transform: translateX(-100%);
+
+    .ux-modal-backdrop--open &,
+    .ux-modal-backdrop[data-state="open"] &,
+    .ux-modal-backdrop[aria-hidden="false"] &,
+    .ux-modal-backdrop.is-open & {
+      transform: translateX(0);
+    }
+  }
+}
+
+// Right side modal
+.ux-modal--right {
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  transform: translateX(100%);
+
+  .ux-modal-backdrop--open &,
+  .ux-modal-backdrop[data-state="open"] &,
+  .ux-modal-backdrop[aria-hidden="false"] &,
+  .ux-modal-backdrop.is-open & {
+    transform: translateX(0);
+  }
+
+  @include mobile {
+    border-radius: 0;
+    transform: translateX(100%);
+
+    .ux-modal-backdrop--open &,
+    .ux-modal-backdrop[data-state="open"] &,
+    .ux-modal-backdrop[aria-hidden="false"] &,
+    .ux-modal-backdrop.is-open & {
+      transform: translateX(0);
+    }
+  }
+}
+
+// Centered content modifier (for alerts/confirmations)
+.ux-modal__content--centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+// ==========================================================
+// CSS Only (Checkbox Hack)
+// ==========================================================
+
+.ux-modal-toggle {
+  display: none;
+
+  &:checked + label + .ux-modal-backdrop,
+  &:checked ~ .ux-modal-backdrop {
+    opacity: 1;
+    visibility: visible;
+
+    .ux-modal {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    &.ux-modal-backdrop--side {
+      .ux-modal--left {
+        transform: translateX(0);
+      }
+
+      .ux-modal--right {
+        transform: translateX(0);
+      }
+    }
+  }
+}
+
+// ==========================================================
+// Reduced Motion
+// ==========================================================
+
+@include reduced-motion {
+  .ux-modal-backdrop,
+  .ux-modal {
+    transition: none;
+  }
+}

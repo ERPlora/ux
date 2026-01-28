@@ -1,0 +1,488 @@
+/**
+ * UX Dropdown Component
+ * Part of the UX CSS Library
+ */
+
+@use '../core/mixins' as *;
+
+// ==========================================================
+// Variables
+// ==========================================================
+
+:root {
+  --ux-dropdown-min-width: 180px;
+  --ux-dropdown-max-width: 320px;
+  --ux-dropdown-padding: var(--ux-space-xs);
+  --ux-dropdown-border-radius: var(--ux-border-radius-lg);
+  --ux-dropdown-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.1);
+  --ux-dropdown-item-height: 44px;
+  --ux-dropdown-item-padding: 0 var(--ux-space-md);
+  --ux-dropdown-item-gap: var(--ux-space-sm);
+  --ux-dropdown-divider-margin: var(--ux-space-xs);
+  --ux-dropdown-header-padding: var(--ux-space-sm) var(--ux-space-md);
+}
+
+// ==========================================================
+// Dropdown Container
+// ==========================================================
+
+.ux-dropdown {
+  position: relative;
+  display: inline-block;
+
+  // ==========================================================
+  // Trigger
+  // ==========================================================
+
+  &__trigger {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ux-space-xs);
+
+    &[aria-expanded="true"] .ux-dropdown__caret {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__caret {
+    width: 16px;
+    height: 16px;
+    transition: transform var(--ux-transition-fast) var(--ux-ease-ios);
+    opacity: 0.6;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  // ==========================================================
+  // Menu
+  // ==========================================================
+
+  &__menu {
+    position: absolute;
+    z-index: var(--ux-z-dropdown);
+    min-width: var(--ux-dropdown-min-width);
+    max-width: var(--ux-dropdown-max-width);
+    max-height: 320px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--ux-dropdown-padding);
+    background: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-dropdown-border-radius);
+    box-shadow: var(--ux-dropdown-shadow);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95) translateY(-8px);
+    transform-origin: top left;
+    transition: opacity var(--ux-transition-fast) var(--ux-ease-ios),
+                transform var(--ux-transition-fast) var(--ux-ease-ios),
+                visibility var(--ux-transition-fast);
+
+    // Position variants
+    &--top {
+      bottom: 100%;
+      top: auto;
+      margin-bottom: var(--ux-space-xs);
+      transform-origin: bottom left;
+      transform: scale(0.95) translateY(8px);
+    }
+
+    &--right {
+      right: 0;
+      left: auto;
+      transform-origin: top right;
+    }
+
+    &--top.ux-dropdown__menu--right {
+      transform-origin: bottom right;
+    }
+
+    &--left {
+      left: 0;
+      right: auto;
+    }
+
+    &--center {
+      left: 50%;
+      transform: scale(0.95) translateY(-8px) translateX(-50%);
+      transform-origin: top center;
+    }
+
+    // Glass variant
+    &--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-color: var(--ux-glass-border);
+
+      .ux-dropdown__item:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .ux-dropdown__item:active {
+        background: rgba(255, 255, 255, 0.25);
+      }
+    }
+
+    // Compact variant
+    &--compact {
+      --ux-dropdown-item-height: 36px;
+      --ux-dropdown-padding: 4px;
+
+      .ux-dropdown__item {
+        font-size: var(--ux-font-size-sm);
+      }
+    }
+
+    // Wide variant
+    &--wide {
+      --ux-dropdown-min-width: 240px;
+    }
+
+    &--full {
+      width: 100%;
+      max-width: none;
+    }
+  }
+
+  // ==========================================================
+  // Item
+  // ==========================================================
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-dropdown-item-gap);
+    min-height: var(--ux-dropdown-item-height);
+    padding: var(--ux-dropdown-item-padding);
+    font-size: var(--ux-font-size-md);
+    color: var(--ux-text);
+    text-decoration: none;
+    border-radius: var(--ux-border-radius);
+    cursor: pointer;
+    transition: background-color var(--ux-transition-fast) var(--ux-ease-ios);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover,
+    &:focus {
+      background: var(--ux-surface-secondary);
+      outline: none;
+    }
+
+    &:active {
+      background: var(--ux-surface-tertiary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: -2px;
+    }
+
+    // Item icon
+    &-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      opacity: 0.7;
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    // Item text
+    &-text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    // Item shortcut
+    &-shortcut {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      margin-left: auto;
+      padding-left: var(--ux-space-md);
+    }
+
+    // Item badge
+    &-badge {
+      font-size: var(--ux-font-size-xs);
+      background: var(--ux-primary);
+      color: white;
+      padding: 2px 6px;
+      border-radius: var(--ux-border-radius-pill);
+      margin-left: auto;
+    }
+
+    // Item check
+    &-check {
+      width: 16px;
+      height: 16px;
+      margin-left: auto;
+      opacity: 0;
+      color: var(--ux-primary);
+      transition: opacity var(--ux-transition-fast);
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    // Danger item
+    &--danger {
+      color: var(--ux-danger);
+
+      &:hover,
+      &:focus {
+        background: rgba(var(--ux-danger-rgb), 0.1);
+      }
+
+      .ux-dropdown__item-icon {
+        opacity: 1;
+      }
+    }
+
+    // Disabled item
+    &--disabled,
+    &:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    // Selected item
+    &--selected {
+      color: var(--ux-primary);
+      font-weight: 500;
+
+      .ux-dropdown__item-check {
+        opacity: 1;
+      }
+    }
+
+    // Active item (keyboard navigation)
+    &--active {
+      background: var(--ux-surface-secondary);
+    }
+  }
+
+  // ==========================================================
+  // Divider
+  // ==========================================================
+
+  &__divider {
+    height: 1px;
+    background: var(--ux-border-color);
+    margin: var(--ux-dropdown-divider-margin) 0;
+  }
+
+  // ==========================================================
+  // Header
+  // ==========================================================
+
+  &__header {
+    padding: var(--ux-dropdown-header-padding);
+    font-size: var(--ux-font-size-xs);
+    font-weight: 600;
+    color: var(--ux-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  // ==========================================================
+  // Group
+  // ==========================================================
+
+  &__group {
+    padding: var(--ux-space-xs) 0;
+
+    &:first-child {
+      padding-top: 0;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+
+    & + & {
+      border-top: 1px solid var(--ux-border-color);
+    }
+  }
+
+  // ==========================================================
+  // Submenu
+  // ==========================================================
+
+  &__submenu {
+    position: relative;
+
+    > .ux-dropdown__item::after {
+      content: '';
+      width: 16px;
+      height: 16px;
+      margin-left: auto;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.5;
+    }
+
+    .ux-dropdown__menu {
+      left: 100%;
+      top: 0;
+      margin-left: var(--ux-space-xs);
+      transform-origin: left top;
+    }
+
+    &:hover > .ux-dropdown__menu {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  // ==========================================================
+  // Glass Variant (on container)
+  // ==========================================================
+
+  &--glass .ux-dropdown__menu {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    border-color: var(--ux-glass-border);
+  }
+
+  &--glass .ux-dropdown__item:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  &--glass .ux-dropdown__item:active {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  // ==========================================================
+  // Open State
+  // ==========================================================
+
+  &--open,
+  &[data-state="open"],
+  &[aria-expanded="true"],
+  &.is-open {
+    .ux-dropdown__menu {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+
+    .ux-dropdown__menu--top {
+      transform: scale(1) translateY(0);
+    }
+
+    .ux-dropdown__menu--center {
+      transform: scale(1) translateY(0) translateX(-50%);
+    }
+  }
+}
+
+// Data show attribute (for Popper.js compatibility)
+.ux-dropdown__menu[data-show] {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1) translateY(0);
+}
+
+.ux-dropdown__menu--top[data-show] {
+  transform: scale(1) translateY(0);
+}
+
+.ux-dropdown__menu--center[data-show] {
+  transform: scale(1) translateY(0) translateX(-50%);
+}
+
+// ==========================================================
+// Dark Mode
+// ==========================================================
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.ux-light) {
+    --ux-dropdown-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  :root:not(.ux-light) .ux-dropdown__menu--glass .ux-dropdown__item:hover,
+  :root:not(.ux-light) .ux-dropdown--glass .ux-dropdown__item:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.ux-dark {
+  --ux-dropdown-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.3);
+
+  .ux-dropdown__menu--glass .ux-dropdown__item:hover,
+  .ux-dropdown--glass .ux-dropdown__item:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// ==========================================================
+// Reduced Motion
+// ==========================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-dropdown__menu {
+    transition: opacity var(--ux-transition-fast), visibility var(--ux-transition-fast);
+    transform: none !important;
+  }
+
+  .ux-dropdown--open .ux-dropdown__menu,
+  .ux-dropdown[data-state="open"] .ux-dropdown__menu,
+  .ux-dropdown[aria-expanded="true"] .ux-dropdown__menu,
+  .ux-dropdown.is-open .ux-dropdown__menu,
+  .ux-dropdown__menu[data-show] {
+    transform: none !important;
+  }
+}
+
+// ==========================================================
+// Mobile Styles
+// ==========================================================
+
+@media (max-width: 767px) {
+  .ux-dropdown__menu {
+    --ux-dropdown-item-height: 48px;
+  }
+
+  .ux-dropdown--mobile-full {
+    .ux-dropdown__menu {
+      position: fixed;
+      left: var(--ux-space-md) !important;
+      right: var(--ux-space-md) !important;
+      bottom: var(--ux-space-md);
+      top: auto !important;
+      max-width: none;
+      width: auto;
+      border-radius: var(--ux-border-radius-xl);
+      transform-origin: bottom center;
+      transform: scale(0.95) translateY(20px);
+    }
+
+    &.ux-dropdown--open .ux-dropdown__menu,
+    &.ux-dropdown[data-state="open"] .ux-dropdown__menu,
+    &.ux-dropdown[aria-expanded="true"] .ux-dropdown__menu,
+    &.ux-dropdown.is-open .ux-dropdown__menu {
+      transform: scale(1) translateY(0);
+    }
+  }
+}

@@ -1,0 +1,483 @@
+@use '../core/mixins' as *;
+
+/**
+ * UX Autocomplete Component
+ * Part of the UX CSS Library
+ */
+
+// ========================================
+// Autocomplete Variables
+// ========================================
+
+:root {
+  --ux-autocomplete-min-width: 200px;
+  --ux-autocomplete-max-height: 300px;
+  --ux-autocomplete-item-height: 44px;
+  --ux-autocomplete-radius: var(--ux-radius-lg);
+}
+
+// ========================================
+// Autocomplete Container
+// ========================================
+
+.ux-autocomplete {
+  position: relative;
+  width: 100%;
+  min-width: var(--ux-autocomplete-min-width);
+
+  // ========================================
+  // Input
+  // ========================================
+
+  &__input {
+    width: 100%;
+    height: var(--ux-input-height);
+    padding: 0 var(--ux-space-md);
+    padding-right: 2.5rem;
+    font-size: 1rem;
+    color: var(--ux-text);
+    background: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-autocomplete-radius);
+    outline: none;
+    transition: border-color var(--ux-transition-fast), box-shadow var(--ux-transition-fast);
+
+    &:focus {
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
+    }
+
+    &::placeholder {
+      color: var(--ux-text-tertiary);
+    }
+
+    &--loading {
+      background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 24 24' xmlns='http:");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 20px;
+    }
+  }
+
+  // ========================================
+  // Clear Button
+  // ========================================
+
+  &__clear {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--ux-surface-tertiary);
+    border: none;
+    border-radius: 50%;
+    color: var(--ux-text-secondary);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--ux-transition-fast), background var(--ux-transition-fast);
+
+    &:hover {
+      background: var(--ux-gray-300);
+    }
+
+    &--hidden {
+      display: none;
+    }
+  }
+
+  &:focus-within .ux-autocomplete__clear,
+  &__input:not(:placeholder-shown) ~ .ux-autocomplete__clear {
+    opacity: 1;
+  }
+
+  // ========================================
+  // Dropdown
+  // ========================================
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: var(--ux-z-dropdown);
+    max-height: var(--ux-autocomplete-max-height);
+    background: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-autocomplete-radius);
+    box-shadow: var(--ux-shadow-lg);
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all var(--ux-transition-fast) var(--ux-ease-out);
+
+    &--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    &--above {
+      top: auto;
+      bottom: calc(100% + 4px);
+      transform: translateY(8px);
+
+      &.ux-autocomplete__dropdown--open {
+        transform: translateY(0);
+      }
+    }
+  }
+
+  // ========================================
+  // List
+  // ========================================
+
+  &__list {
+    max-height: var(--ux-autocomplete-max-height);
+    margin: 0;
+    padding: var(--ux-space-xs);
+    list-style: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    min-height: var(--ux-autocomplete-item-height);
+    padding: var(--ux-space-sm) var(--ux-space-md);
+    font-size: 0.9375rem;
+    color: var(--ux-text);
+    border-radius: var(--ux-radius-md);
+    cursor: pointer;
+    transition: background var(--ux-transition-fast);
+
+    &:hover,
+    &--active {
+      background: var(--ux-surface-secondary);
+    }
+
+    &--selected {
+      background: var(--ux-primary-tint);
+      color: var(--ux-primary);
+    }
+
+    &--disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+
+  &__item-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: var(--ux-text-secondary);
+  }
+
+  &__item-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__item-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__item-description {
+    font-size: 0.8125rem;
+    color: var(--ux-text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Highlight match
+  &__highlight {
+    background: var(--ux-warning-tint);
+    color: inherit;
+    font-weight: 600;
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  // ========================================
+  // Groups
+  // ========================================
+
+  &__group {
+    padding-top: var(--ux-space-sm);
+
+    &:first-child {
+      padding-top: 0;
+    }
+  }
+
+  &__group-label {
+    padding: var(--ux-space-sm) var(--ux-space-md);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--ux-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  // ========================================
+  // Empty State
+  // ========================================
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ux-space-xl);
+    text-align: center;
+    color: var(--ux-text-secondary);
+  }
+
+  &__empty-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--ux-space-sm);
+    color: var(--ux-text-tertiary);
+    opacity: 0.5;
+  }
+
+  &__empty-text {
+    font-size: 0.9375rem;
+  }
+
+  // ========================================
+  // Loading State
+  // ========================================
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ux-space-lg);
+  }
+
+  &__loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--ux-border-color);
+    border-top-color: var(--ux-primary);
+    border-radius: 50%;
+    animation: ux-autocomplete-spin 0.8s linear infinite;
+  }
+
+  // ========================================
+  // Footer
+  // ========================================
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--ux-space-sm) var(--ux-space-md);
+    font-size: 0.75rem;
+    color: var(--ux-text-tertiary);
+    background: var(--ux-surface-secondary);
+    border-top: 1px solid var(--ux-border-color);
+  }
+
+  &__footer-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs);
+
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 18px;
+      padding: 0 4px;
+      font-size: 0.6875rem;
+      font-family: inherit;
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: 4px;
+      box-shadow: 0 1px 0 var(--ux-border-color);
+    }
+  }
+
+  // ========================================
+  // Variants
+  // ========================================
+
+  // Small
+  &--sm {
+    .ux-autocomplete__input {
+      height: 36px;
+      font-size: 0.875rem;
+    }
+
+    .ux-autocomplete__item {
+      min-height: 36px;
+      font-size: 0.875rem;
+    }
+  }
+
+  // Large
+  &--lg {
+    .ux-autocomplete__input {
+      height: 52px;
+      font-size: 1.0625rem;
+    }
+
+    .ux-autocomplete__item {
+      min-height: 52px;
+      font-size: 1rem;
+    }
+  }
+
+  // Glass
+  &--glass {
+    .ux-autocomplete__input {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-autocomplete__dropdown {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+    }
+  }
+
+  // Inline (no border)
+  &--inline {
+    .ux-autocomplete__input {
+      border-color: transparent;
+      background: transparent;
+
+      &:focus {
+        border-color: transparent;
+        box-shadow: none;
+      }
+    }
+  }
+
+  // ========================================
+  // Multi-select Tags
+  // ========================================
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ux-space-xs);
+    padding: var(--ux-space-xs);
+    min-height: var(--ux-input-height);
+    background: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-autocomplete-radius);
+    cursor: text;
+    transition: border-color var(--ux-transition-fast);
+
+    &:focus-within {
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
+    }
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    font-size: 0.8125rem;
+    background: var(--ux-primary-tint);
+    color: var(--ux-primary);
+    border-radius: var(--ux-radius-full);
+  }
+
+  &__tag-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity var(--ux-transition-fast);
+
+    &:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  &__tags-input {
+    flex: 1;
+    min-width: 80px;
+    height: 28px;
+    padding: 0 var(--ux-space-xs);
+    font-size: 0.9375rem;
+    color: var(--ux-text);
+    background: transparent;
+    border: none;
+    outline: none;
+
+    &::placeholder {
+      color: var(--ux-text-tertiary);
+    }
+  }
+}
+
+// ========================================
+// Keyframes
+// ========================================
+
+@keyframes ux-autocomplete-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ========================================
+// Dark Mode
+// ========================================
+
+@media (prefers-color-scheme: dark) {
+  .ux-autocomplete__highlight {
+    background: rgba(var(--ux-warning-rgb), 0.3);
+  }
+}
+
+.ux-dark .ux-autocomplete__highlight {
+  background: rgba(var(--ux-warning-rgb), 0.3);
+}
+
+// ========================================
+// Reduced Motion
+// ========================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-autocomplete__dropdown {
+    transition: opacity var(--ux-transition-fast);
+    transform: none;
+  }
+
+  .ux-autocomplete__loading-spinner {
+    animation: none;
+  }
+}

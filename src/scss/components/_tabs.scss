@@ -1,0 +1,482 @@
+/**
+ * UX Tabs Component
+ * Part of the UX CSS Library
+ * https://github.com/user/ux
+ */
+
+/* ========================================
+   UX Tabs
+   ======================================== */
+
+.ux-tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* ========================================
+   Tab Bar
+   ======================================== */
+
+.ux-tab-bar {
+  display: flex;
+  align-items: stretch;
+  background-color: var(--ux-surface);
+  border-bottom: 1px solid var(--ux-border-color);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Tab Bar Variants */
+  &--translucent {
+    background-color: rgba(var(--ux-surface-rgb, 255, 255, 255), 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Glass (iOS 26 Liquid Glass) */
+  &--glass {
+    box-shadow: var(--ux-glass-highlight);
+    border-top: 0.5px solid var(--ux-glass-border);
+  }
+
+  &--primary {
+    background-color: var(--ux-primary);
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+
+    .ux-tab-button {
+      color: rgba(255, 255, 255, 0.7);
+
+      &:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      &--selected,
+      &[data-state="selected"],
+      &[aria-selected="true"],
+      &.is-selected {
+        color: white;
+      }
+    }
+
+    .ux-tab-bar__indicator {
+      background-color: white;
+    }
+  }
+
+  &--dark {
+    background-color: var(--ux-dark);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+
+    .ux-tab-button {
+      color: rgba(255, 255, 255, 0.6);
+
+      &:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      &--selected,
+      &[data-state="selected"],
+      &[aria-selected="true"],
+      &.is-selected {
+        color: white;
+      }
+    }
+  }
+
+  /* Scrollable Tab Bar with Navigation Arrows */
+  &--scrollable {
+    position: relative;
+
+    .ux-tab-bar__scroll {
+      display: flex;
+      align-items: stretch;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-behavior: smooth;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    .ux-tab-button {
+      flex: 0 0 auto;
+      min-width: auto;
+      padding: var(--ux-space-sm) var(--ux-space-lg);
+    }
+  }
+
+  /* Tab Bar with Indicator */
+  &--indicator {
+    position: relative;
+  }
+
+  /* Pill Style Tab Bar */
+  &--pills {
+    gap: var(--ux-space-xs);
+    padding: var(--ux-space-sm);
+    background-color: var(--ux-surface-secondary);
+    border-bottom: none;
+    border-radius: var(--ux-border-radius-lg);
+    margin: var(--ux-space-sm);
+
+    .ux-tab-button {
+      border-radius: var(--ux-border-radius);
+      min-height: 36px;
+
+      &--selected,
+      &[data-state="selected"],
+      &[aria-selected="true"],
+      &.is-selected {
+        background-color: var(--ux-surface);
+        box-shadow: var(--ux-shadow-sm);
+        color: var(--ux-text);
+      }
+    }
+  }
+
+  /* Sizes */
+  &--sm {
+    .ux-tab-button {
+      min-height: 40px;
+      padding: var(--ux-space-xs) var(--ux-space-md);
+      font-size: var(--ux-font-size-xs);
+
+      &__icon {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  &--lg {
+    .ux-tab-button {
+      min-height: 56px;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      font-size: var(--ux-font-size-md);
+
+      &__icon {
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+
+  /* Bottom Tab Bar (iOS style) - Glass effect by default */
+  &--bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    min-height: 49px;
+    border-bottom: none;
+    background-color: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    border-top: 0.5px solid var(--ux-glass-border);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 100;
+
+    .ux-tab-button {
+      min-height: 49px;
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+
+      &__icon {
+        width: 28px;
+        height: 28px;
+      }
+
+      &__label {
+        font-size: 10px;
+      }
+    }
+  }
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(1px)) {
+  .ux-tab-bar--bottom {
+    background-color: var(--ux-surface);
+  }
+}
+
+/* Navigation Arrows */
+.ux-tab-bar__arrow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--ux-transition-fast), visibility var(--ux-transition-fast);
+
+  &--visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &--start {
+    left: 0;
+    background: linear-gradient(to right,
+      var(--ux-glass-bg-thick) 0%,
+      var(--ux-glass-bg) 50%,
+      transparent 100%);
+    backdrop-filter: blur(var(--ux-glass-blur));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+  }
+
+  &--end {
+    right: 0;
+    background: linear-gradient(to left,
+      var(--ux-glass-bg-thick) 0%,
+      var(--ux-glass-bg) 50%,
+      transparent 100%);
+    backdrop-filter: blur(var(--ux-glass-blur));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+    color: var(--ux-text-secondary);
+    transition: color var(--ux-transition-fast), transform var(--ux-transition-fast);
+  }
+
+  &:hover svg {
+    color: var(--ux-text);
+    transform: scale(1.1);
+  }
+
+  &:active svg {
+    transform: scale(0.95);
+  }
+}
+
+/* Dark mode arrows */
+@media (prefers-color-scheme: dark) {
+  :root:not(.ux-light) .ux-tab-bar__arrow--start {
+    background: linear-gradient(to right,
+      var(--ux-glass-bg-thick) 0%,
+      var(--ux-glass-bg) 50%,
+      transparent 100%);
+  }
+
+  :root:not(.ux-light) .ux-tab-bar__arrow--end {
+    background: linear-gradient(to left,
+      var(--ux-glass-bg-thick) 0%,
+      var(--ux-glass-bg) 50%,
+      transparent 100%);
+  }
+}
+
+.ux-dark .ux-tab-bar__arrow--start {
+  background: linear-gradient(to right,
+    var(--ux-glass-bg-thick) 0%,
+    var(--ux-glass-bg) 50%,
+    transparent 100%);
+}
+
+.ux-dark .ux-tab-bar__arrow--end {
+  background: linear-gradient(to left,
+    var(--ux-glass-bg-thick) 0%,
+    var(--ux-glass-bg) 50%,
+    transparent 100%);
+}
+
+/* ========================================
+   Tab Button
+   ======================================== */
+
+.ux-tab-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: var(--ux-tab-min-width);
+  min-height: var(--ux-tabs-height);
+  padding: var(--ux-space-sm) var(--ux-space-md);
+  background: none;
+  border: none;
+  color: var(--ux-text-secondary);
+  font-size: var(--ux-tab-font-size);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--ux-transition-fast) var(--ux-ease),
+    background-color var(--ux-transition-fast) var(--ux-ease);
+
+  &:hover {
+    color: var(--ux-text);
+    background-color: var(--ux-surface-secondary);
+  }
+
+  &:active {
+    background-color: var(--ux-light);
+  }
+
+  &--selected,
+  &[data-state="selected"],
+  &[aria-selected="true"],
+  &.is-selected {
+    color: var(--ux-primary);
+  }
+
+  &--disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* Tab Button Layout */
+  &--layout-icon-top {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &--layout-icon-start {
+    flex-direction: row;
+    gap: var(--ux-space-xs);
+  }
+
+  &--layout-icon-end {
+    flex-direction: row-reverse;
+    gap: var(--ux-space-xs);
+  }
+
+  &--layout-icon-only .ux-tab-button__label {
+    display: none;
+  }
+
+  &--layout-label-only .ux-tab-button__icon {
+    display: none;
+  }
+
+  &__icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__badge {
+    position: absolute;
+    top: 4px;
+    right: calc(50% - 20px);
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background-color: var(--ux-danger);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &--dot {
+      min-width: 8px;
+      width: 8px;
+      height: 8px;
+      padding: 0;
+      right: calc(50% - 16px);
+    }
+  }
+}
+
+/* ========================================
+   Tab Indicator
+   ======================================== */
+
+.ux-tab-bar__indicator {
+  position: absolute;
+  bottom: 0;
+  height: var(--ux-tab-indicator-height, 3px);
+  background-color: var(--ux-primary);
+  border-radius: var(--ux-tab-indicator-radius, 1.5px) var(--ux-tab-indicator-radius, 1.5px) 0 0;
+  transition:
+    left var(--ux-transition-base) var(--ux-ease),
+    width var(--ux-transition-base) var(--ux-ease);
+}
+
+/* ========================================
+   Tab Content
+   ======================================== */
+
+.ux-tab-content {
+  flex: 1;
+  overflow: hidden;
+
+  &--animated {
+    position: relative;
+
+    .ux-tab-panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0;
+      transform: translateX(20px);
+      transition:
+        opacity var(--ux-transition-base) var(--ux-ease),
+        transform var(--ux-transition-base) var(--ux-ease);
+
+      &--active {
+        position: relative;
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  }
+}
+
+.ux-tab-panel {
+  display: none;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  &--active {
+    display: block;
+  }
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-tab-bar__indicator,
+  .ux-tab-content--animated .ux-tab-panel {
+    transition: none;
+  }
+}

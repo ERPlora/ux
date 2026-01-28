@@ -1,0 +1,477 @@
+/**
+ * UX Time-clock Component
+ * Part of the UX CSS Library
+ * https://github.com/user/ux
+ */
+
+/* ========================================
+   UX Time Clock
+   ======================================== */
+
+:root {
+  --ux-time-clock-padding: var(--ux-space-lg);
+  --ux-time-clock-border-radius: var(--ux-border-radius-xl);
+  --ux-time-clock-time-size: 4rem;
+  --ux-time-clock-date-size: var(--ux-font-size-md);
+}
+
+.ux-time-clock {
+  background: var(--ux-surface);
+  border-radius: var(--ux-time-clock-border-radius);
+  overflow: hidden;
+  box-shadow: var(--ux-shadow-md);
+
+  /* ========================================
+     Time Clock Display
+     ======================================== */
+
+  &__display {
+    padding: var(--ux-space-2xl) var(--ux-time-clock-padding);
+    text-align: center;
+    background: linear-gradient(180deg, var(--ux-surface) 0%, var(--ux-surface-secondary) 100%);
+  }
+
+  &__time {
+    font-size: var(--ux-time-clock-time-size);
+    font-weight: 200;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--ux-text);
+    margin: 0;
+    line-height: 1.1;
+
+    &-seconds {
+      font-size: calc(var(--ux-time-clock-time-size) * 0.5);
+      color: var(--ux-text-secondary);
+      vertical-align: super;
+      margin-left: var(--ux-space-xs);
+    }
+  }
+
+  &__date {
+    font-size: var(--ux-time-clock-date-size);
+    color: var(--ux-text-secondary);
+    margin: var(--ux-space-sm) 0 0;
+  }
+
+  /* ========================================
+     Status Indicator
+     ======================================== */
+
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    padding: var(--ux-space-xs) var(--ux-space-md);
+    border-radius: var(--ux-border-radius-full);
+    font-size: var(--ux-font-size-sm);
+    font-weight: 500;
+    margin-top: var(--ux-space-md);
+    background: var(--ux-gray-100);
+    color: var(--ux-text-secondary);
+
+    &-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ux-gray-400);
+    }
+  }
+
+  /* Clocked In State */
+  &--clocked-in {
+    .ux-time-clock__status {
+      background: rgba(var(--ux-success-rgb), 0.15);
+      color: var(--ux-success);
+    }
+
+    .ux-time-clock__status-dot {
+      background: var(--ux-success);
+      animation: ux-time-clock-pulse 2s ease-in-out infinite;
+    }
+  }
+
+  /* On Break State */
+  &--on-break {
+    .ux-time-clock__status {
+      background: rgba(var(--ux-warning-rgb), 0.15);
+      color: var(--ux-warning);
+    }
+
+    .ux-time-clock__status-dot {
+      background: var(--ux-warning);
+      animation: ux-time-clock-pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  /* ========================================
+     Work Counter
+     ======================================== */
+
+  &__counter {
+    display: flex;
+    justify-content: center;
+    gap: var(--ux-space-xl);
+    padding: var(--ux-space-lg) var(--ux-time-clock-padding);
+    border-top: 1px solid var(--ux-border-color);
+    border-bottom: 1px solid var(--ux-border-color);
+
+    &-item {
+      text-align: center;
+    }
+
+    &-value {
+      font-size: var(--ux-font-size-2xl);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--ux-text);
+      line-height: 1.2;
+    }
+
+    &-label {
+      font-size: var(--ux-font-size-xs);
+      color: var(--ux-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: var(--ux-space-xs);
+    }
+  }
+
+  /* ========================================
+     Actions
+     ======================================== */
+
+  &__actions {
+    display: flex;
+    gap: var(--ux-space-md);
+    padding: var(--ux-time-clock-padding);
+
+    .ux-button {
+      flex: 1;
+    }
+
+    &--stacked {
+      flex-direction: column;
+    }
+  }
+
+  /* ========================================
+     History
+     ======================================== */
+
+  &__history {
+    padding: 0 var(--ux-time-clock-padding) var(--ux-time-clock-padding);
+
+    &-title {
+      font-size: var(--ux-font-size-sm);
+      font-weight: 600;
+      color: var(--ux-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 var(--ux-space-md);
+    }
+
+    &-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 200px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    &-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ux-space-sm) 0;
+      border-bottom: 1px solid var(--ux-border-color);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    &-type {
+      display: flex;
+      align-items: center;
+      gap: var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+      color: var(--ux-text);
+    }
+
+    &-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+
+      svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      &--clock-in {
+        background: rgba(var(--ux-success-rgb), 0.15);
+        color: var(--ux-success);
+      }
+
+      &--clock-out {
+        background: rgba(var(--ux-danger-rgb), 0.15);
+        color: var(--ux-danger);
+      }
+
+      &--break-start {
+        background: rgba(var(--ux-warning-rgb), 0.15);
+        color: var(--ux-warning);
+      }
+
+      &--break-end {
+        background: rgba(var(--ux-primary-rgb), 0.15);
+        color: var(--ux-primary);
+      }
+    }
+
+    &-time {
+      font-size: var(--ux-font-size-sm);
+      font-variant-numeric: tabular-nums;
+      color: var(--ux-text-secondary);
+    }
+
+    &-empty {
+      text-align: center;
+      padding: var(--ux-space-lg);
+      color: var(--ux-text-tertiary);
+      font-size: var(--ux-font-size-sm);
+    }
+  }
+
+  /* ========================================
+     Confirmation Dialog
+     ======================================== */
+
+  &__confirm {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: var(--ux-z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ux-space-xl);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--ux-transition-fast) var(--ux-ease),
+      visibility var(--ux-transition-fast) var(--ux-ease);
+
+    &--open {
+      opacity: 1;
+      visibility: visible;
+
+      .ux-time-clock__confirm-dialog {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    &-dialog {
+      width: 100%;
+      max-width: 300px;
+      background: var(--ux-glass-bg-thick);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      border-radius: var(--ux-glass-radius-md);
+      border: 0.5px solid var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+      overflow: hidden;
+      transform: scale(1.1);
+      opacity: 0;
+      transition:
+        transform var(--ux-transition-fast) var(--ux-ease-spring),
+        opacity var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    &-content {
+      padding: var(--ux-space-lg);
+      text-align: center;
+    }
+
+    &-title {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      color: var(--ux-text);
+      margin: 0 0 var(--ux-space-xs);
+    }
+
+    &-message {
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text-secondary);
+      margin: 0;
+    }
+
+    &-buttons {
+      display: flex;
+      border-top: 0.5px solid var(--ux-glass-border);
+    }
+
+    &-button {
+      flex: 1;
+      min-height: 44px;
+      padding: var(--ux-space-sm);
+      background: none;
+      border: none;
+      font-family: var(--ux-font-family);
+      font-size: var(--ux-font-size-lg);
+      color: var(--ux-primary);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+      &:first-child {
+        border-right: 0.5px solid var(--ux-glass-border);
+      }
+
+      &:hover {
+        background: rgba(var(--ux-primary-rgb), 0.05);
+      }
+
+      &:active {
+        background: rgba(var(--ux-primary-rgb), 0.1);
+      }
+
+      &--primary {
+        font-weight: 600;
+      }
+
+      &--danger {
+        color: var(--ux-danger);
+
+        &:hover {
+          background: rgba(var(--ux-danger-rgb), 0.05);
+        }
+      }
+    }
+  }
+
+  /* ========================================
+     Compact Variant
+     ======================================== */
+
+  &--compact {
+    .ux-time-clock__display {
+      padding: var(--ux-space-lg) var(--ux-time-clock-padding);
+    }
+
+    .ux-time-clock__time {
+      font-size: calc(var(--ux-time-clock-time-size) * 0.75);
+    }
+
+    .ux-time-clock__counter {
+      padding: var(--ux-space-md) var(--ux-time-clock-padding);
+    }
+  }
+
+  /* ========================================
+     Glass Variant (iOS 26 Liquid Glass)
+     ======================================== */
+
+  &--glass {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    border: 0.5px solid var(--ux-glass-border);
+    box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+
+    .ux-time-clock__display {
+      background: transparent;
+    }
+
+    .ux-time-clock__counter {
+      border-color: var(--ux-glass-border);
+    }
+
+    .ux-time-clock__history-item {
+      border-color: var(--ux-glass-border);
+    }
+  }
+}
+
+@keyframes ux-time-clock-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+/* ========================================
+   Dark Mode
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  .ux-time-clock {
+    box-shadow: var(--ux-shadow-lg);
+
+    &__display {
+      background: linear-gradient(180deg, var(--ux-surface) 0%, var(--ux-surface-secondary) 100%);
+    }
+
+    &__status {
+      background: var(--ux-gray-800);
+    }
+  }
+}
+
+.ux-dark .ux-time-clock {
+  box-shadow: var(--ux-shadow-lg);
+
+  &__display {
+    background: linear-gradient(180deg, var(--ux-surface) 0%, var(--ux-surface-secondary) 100%);
+  }
+
+  &__status {
+    background: var(--ux-gray-800);
+  }
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (max-width: 767px) {
+  :root {
+    --ux-time-clock-time-size: 3rem;
+  }
+
+  .ux-time-clock__counter {
+    gap: var(--ux-space-lg);
+  }
+
+  .ux-time-clock__actions {
+    flex-direction: column;
+  }
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-time-clock__status-dot {
+    animation: none;
+  }
+
+  .ux-time-clock__confirm {
+    transition: none;
+  }
+
+  .ux-time-clock__confirm-dialog {
+    transition: none;
+    transform: none;
+  }
+
+  .ux-time-clock__confirm--open .ux-time-clock__confirm-dialog {
+    transform: none;
+  }
+}

@@ -1,0 +1,1450 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-2xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section h4 { font-size: var(--ux-font-size-md); font-weight: 500; margin: var(--ux-space-lg) 0 var(--ux-space-sm); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box {
+      background: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+      border: 1px solid var(--ux-border-color);
+    }
+    .demo-frame {
+      background: var(--ux-surface);
+      border: 1px solid var(--ux-border-color);
+      border-radius: var(--ux-border-radius-lg);
+      overflow: hidden;
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-frame--tall {
+      height: 300px;
+    }
+    .placeholder-box {
+      background: rgba(var(--ux-primary-rgb), 0.1);
+      border: 2px dashed var(--ux-primary);
+      border-radius: var(--ux-border-radius);
+      padding: var(--ux-space-md);
+      text-align: center;
+      color: var(--ux-primary);
+      font-size: var(--ux-font-size-md);
+    }
+    .class-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--ux-font-size-md);
+    }
+    .class-table th, .class-table td {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      text-align: left;
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+    .class-table th {
+      background: var(--ux-surface-secondary);
+      font-weight: 600;
+    }
+    .class-table code {
+      background: var(--ux-surface-secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: var(--ux-font-size-md);
+    }
+  </style>
+
+<div>
+    <!-- Intro -->
+    <div class="demo-section">
+      <h3>Content</h3>
+      <p>Sistema de layout estilo Ionic con contenedores, secciones, divisores, scroll utilities y estructura de app completa.</p>
+    </div>
+
+    <!-- App Structure -->
+    <div class="demo-section">
+      <h3>Estructura de App (CSS Grid)</h3>
+      <p>Estructura basica con header sticky, content scrollable y footer sticky. Usa CSS Grid con <code>grid-template-rows: auto 1fr auto</code> para calcular automaticamente el espacio.</p>
+
+      <h4>Demo Interactivo</h4>
+      <p>Activa/desactiva header y footer para ver como el content se adapta automaticamente.</p>
+
+      <div class="demo-box" x-data="{ showHeader: true, showFooter: true }">
+        <div style="display: flex; gap: var(--ux-space-xl); margin-bottom: var(--ux-space-md); align-items: center;">
+          <label class="ux-toggle">
+            <input type="checkbox" x-model="showHeader" checked>
+            <span class="ux-toggle__track">
+              <span class="ux-toggle__thumb"></span>
+            </span>
+          </label>
+          <span>Header</span>
+
+          <label class="ux-toggle">
+            <input type="checkbox" x-model="showFooter" checked>
+            <span class="ux-toggle__track">
+              <span class="ux-toggle__thumb"></span>
+            </span>
+          </label>
+          <span>Footer</span>
+        </div>
+
+        <div class="demo-frame" style="height: 350px;">
+          <div class="ux-page" style="height: 100%;">
+            <header class="ux-header" x-show="showHeader" style="background: var(--ux-primary); color: var(--ux-primary-contrast);">
+              <nav class="ux-navbar">
+                <div class="ux-navbar__content">
+                  <span class="ux-navbar__title" style="color: var(--ux-primary-contrast);">.ux-header (sticky top)</span>
+                </div>
+              </nav>
+            </header>
+
+            <main class="ux-content" style="background: var(--ux-surface-secondary);">
+              <div class="ux-content__inner">
+                <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md);">.ux-content - Ocupa todo el espacio disponible</p>
+                <div style="height: 400px; background: rgba(var(--ux-primary-rgb), 0.05); border: 1px dashed var(--ux-border-color); border-radius: var(--ux-border-radius); padding: var(--ux-space-md);">
+                  <p>Contenido largo para probar scroll...</p>
+                  <p style="margin-top: 300px;">Final del contenido</p>
+                </div>
+              </div>
+            </main>
+
+            <footer class="ux-footer" x-show="showFooter">
+              <div style="padding: var(--ux-space-md); text-align: center; font-weight: 500;">
+                .ux-footer (sticky bottom)
+              </div>
+            </footer>
+          </div>
+        </div>
+      </div>
+
+      <h4>Como Funciona</h4>
+      <div class="demo-box">
+        <code>.ux-page</code> usa CSS Grid:<br>
+        <code>display: grid;</code><br>
+        <code>grid-template-rows: auto 1fr auto;</code><br><br>
+        <strong>auto</strong> = tamaño natural del elemento (0 si no existe)<br>
+        <strong>1fr</strong> = todo el espacio restante<br><br>
+        <code>.ux-header</code> y <code>.ux-footer</code> son <strong>sticky</strong> por defecto.
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;body class="ux-app"&gt;
+  &lt;div class="ux-page"&gt;
+    &lt;header class="ux-header"&gt;
+      &lt;nav class="ux-navbar"&gt;...&lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;main class="ux-content"&gt;
+      &lt;!-- Contenido scrollable --&gt;
+    &lt;/main&gt;
+
+    &lt;footer class="ux-footer"&gt;
+      &lt;!-- Footer content --&gt;
+    &lt;/footer&gt;
+  &lt;/div&gt;
+&lt;/body&gt;</code></pre>
+
+      <h4>Dentro de Split Pane</h4>
+      <p>El mismo layout funciona dentro de un panel del split-pane.</p>
+
+      <div class="demo-frame" style="height: 350px;" x-data="uxSplitPane()">
+        <div class="ux-split-pane" :class="containerClasses" style="height: 100%;">
+          <div class="ux-split-pane__backdrop" @click="close()"></div>
+
+          <aside class="ux-split-pane__side">
+            <div class="ux-page" style="height: 100%;">
+              <header class="ux-header" style="background: var(--ux-surface);">
+                <nav class="ux-navbar">
+                  <div class="ux-navbar__content">
+                    <span class="ux-navbar__title">Menu</span>
+                  </div>
+                </nav>
+              </header>
+              <main class="ux-content">
+                <div style="padding: var(--ux-space-md);">
+                  <div style="padding: var(--ux-space-sm) 0; color: var(--ux-text-secondary);">Item 1</div>
+                  <div style="padding: var(--ux-space-sm) 0; color: var(--ux-text-secondary);">Item 2</div>
+                  <div style="padding: var(--ux-space-sm) 0; color: var(--ux-text-secondary);">Item 3</div>
+                </div>
+              </main>
+            </div>
+          </aside>
+
+          <main class="ux-split-pane__main">
+            <div class="ux-page" style="height: 100%;">
+              <header class="ux-header" style="background: var(--ux-primary); color: var(--ux-primary-contrast);">
+                <nav class="ux-navbar">
+                  <div class="ux-navbar__content">
+                    <div class="ux-navbar__start">
+                      <button class="ux-split-pane__toggle" @click="toggle()" style="color: var(--ux-primary-contrast);">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                      </button>
+                    </div>
+                    <span class="ux-navbar__title" style="color: var(--ux-primary-contrast);">Main Content</span>
+                  </div>
+                </nav>
+              </header>
+              <main class="ux-content" style="background: var(--ux-surface-secondary);">
+                <div style="height: 400px; padding: var(--ux-space-lg);">
+                  <p>Contenido del panel principal con su propio header sticky.</p>
+                  <p style="margin-top: 300px;">Final del contenido</p>
+                </div>
+              </main>
+              <footer class="ux-footer">
+                <div style="padding: var(--ux-space-md); text-align: center;">Footer del panel</div>
+              </footer>
+            </div>
+          </main>
+        </div>
+      </div>
+
+      <h4>Split Pane Right (Carrito)</h4>
+      <p>Panel lateral derecho con <code>uxSplitPaneRight</code>. Visible en desktop (togglable), overlay en móvil.</p>
+
+      <div class="demo-frame" style="height: 400px;" x-data="uxSplitPaneRight()">
+        <div class="ux-split-pane-right" :class="containerClasses" style="height: 100%;">
+          <div class="ux-split-pane-right__backdrop" @click="close()"></div>
+
+          <!-- Main content -->
+          <main class="ux-split-pane-right__main">
+            <div class="ux-page" style="height: 100%;">
+              <header class="ux-header" style="background: var(--ux-primary); color: var(--ux-primary-contrast);">
+                <nav class="ux-navbar">
+                  <div class="ux-navbar__content">
+                    <span class="ux-navbar__title" style="color: var(--ux-primary-contrast);">Tienda</span>
+                    <div class="ux-navbar__end">
+                      <button class="ux-split-pane-right__toggle" @click="toggle()" style="color: var(--ux-primary-contrast); position: relative;" aria-label="Toggle carrito">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="9" cy="21" r="1"></circle>
+                          <circle cx="20" cy="21" r="1"></circle>
+                          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        <span style="position: absolute; top: -4px; right: -4px; background: var(--ux-danger); color: var(--ux-primary-contrast); font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">3</span>
+                      </button>
+                    </div>
+                  </div>
+                </nav>
+              </header>
+              <main class="ux-content" style="background: var(--ux-surface-secondary);">
+                <div style="padding: var(--ux-space-lg);">
+                  <p style="margin-bottom: var(--ux-space-md); color: var(--ux-text-secondary);">Productos disponibles</p>
+                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ux-space-md);">
+                    <div style="background: var(--ux-surface); padding: var(--ux-space-md); border-radius: var(--ux-border-radius); border: 1px solid var(--ux-border-color);">
+                      <div style="height: 60px; background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-sm); margin-bottom: var(--ux-space-sm);"></div>
+                      <div style="font-weight: 500; font-size: var(--ux-font-size-sm);">Producto 1</div>
+                      <div style="color: var(--ux-primary); font-size: var(--ux-font-size-sm);">$29.99</div>
+                    </div>
+                    <div style="background: var(--ux-surface); padding: var(--ux-space-md); border-radius: var(--ux-border-radius); border: 1px solid var(--ux-border-color);">
+                      <div style="height: 60px; background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-sm); margin-bottom: var(--ux-space-sm);"></div>
+                      <div style="font-weight: 500; font-size: var(--ux-font-size-sm);">Producto 2</div>
+                      <div style="color: var(--ux-primary); font-size: var(--ux-font-size-sm);">$49.99</div>
+                    </div>
+                    <div style="background: var(--ux-surface); padding: var(--ux-space-md); border-radius: var(--ux-border-radius); border: 1px solid var(--ux-border-color);">
+                      <div style="height: 60px; background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-sm); margin-bottom: var(--ux-space-sm);"></div>
+                      <div style="font-weight: 500; font-size: var(--ux-font-size-sm);">Producto 3</div>
+                      <div style="color: var(--ux-primary); font-size: var(--ux-font-size-sm);">$19.99</div>
+                    </div>
+                    <div style="background: var(--ux-surface); padding: var(--ux-space-md); border-radius: var(--ux-border-radius); border: 1px solid var(--ux-border-color);">
+                      <div style="height: 60px; background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-sm); margin-bottom: var(--ux-space-sm);"></div>
+                      <div style="font-weight: 500; font-size: var(--ux-font-size-sm);">Producto 4</div>
+                      <div style="color: var(--ux-primary); font-size: var(--ux-font-size-sm);">$39.99</div>
+                    </div>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </main>
+
+          <!-- Side panel (right) -->
+          <aside class="ux-split-pane-right__side" aria-label="Carrito de compras">
+            <div class="ux-page" style="height: 100%;">
+              <header class="ux-header" style="background: var(--ux-surface);">
+                <nav class="ux-navbar">
+                  <div class="ux-navbar__content">
+                    <span class="ux-navbar__title">Carrito</span>
+                    <div class="ux-navbar__end">
+                      <button @click="toggle()" style="background: none; border: none; cursor: pointer; color: var(--ux-text-secondary); padding: var(--ux-space-xs);" aria-label="Cerrar carrito">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                </nav>
+              </header>
+              <main class="ux-content">
+                <div style="padding: var(--ux-space-md);">
+                  <div style="display: flex; gap: var(--ux-space-sm); padding: var(--ux-space-sm) 0; border-bottom: 1px solid var(--ux-border-color);">
+                    <div style="width: 48px; height: 48px; background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-sm); flex-shrink: 0;"></div>
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-size: var(--ux-font-size-sm); font-weight: 500;">Producto 1</div>
+                      <div style="font-size: var(--ux-font-size-xs); color: var(--ux-text-secondary);">Cantidad: 2</div>
+                    </div>
+                    <div style="font-size: var(--ux-font-size-sm); font-weight: 600;">$59.98</div>
+                  </div>
+                  <div style="display: flex; gap: var(--ux-space-sm); padding: var(--ux-space-sm) 0; border-bottom: 1px solid var(--ux-border-color);">
+                    <div style="width: 48px; height: 48px; background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-sm); flex-shrink: 0;"></div>
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-size: var(--ux-font-size-sm); font-weight: 500;">Producto 3</div>
+                      <div style="font-size: var(--ux-font-size-xs); color: var(--ux-text-secondary);">Cantidad: 1</div>
+                    </div>
+                    <div style="font-size: var(--ux-font-size-sm); font-weight: 600;">$19.99</div>
+                  </div>
+                  <div style="margin-top: var(--ux-space-lg); padding-top: var(--ux-space-md); border-top: 2px solid var(--ux-border-color);">
+                    <div style="display: flex; justify-content: space-between; font-weight: 600;">
+                      <span>Total</span>
+                      <span>$79.97</span>
+                    </div>
+                  </div>
+                </div>
+              </main>
+              <footer class="ux-footer" style="padding: var(--ux-space-md);">
+                <button class="ux-button ux-color-primary" style="width: 100%;">Finalizar compra</button>
+              </footer>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Split Pane Right (carrito) --&gt;
+&lt;div class="ux-split-pane-right" x-data="uxSplitPaneRight()" :class="containerClasses"&gt;
+  &lt;div class="ux-split-pane-right__backdrop" @click="close()"&gt;&lt;/div&gt;
+
+  &lt;main class="ux-split-pane-right__main"&gt;
+    &lt;div class="ux-page"&gt;
+      &lt;header class="ux-header"&gt;
+        &lt;nav class="ux-navbar"&gt;
+          &lt;span class="ux-navbar__title"&gt;Tienda&lt;/span&gt;
+          &lt;div class="ux-navbar__end"&gt;
+            &lt;button class="ux-split-pane-right__toggle" @click="toggle()"&gt;
+              &lt;svg&gt;...carrito...&lt;/svg&gt;
+            &lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/nav&gt;
+      &lt;/header&gt;
+      &lt;main class="ux-content"&gt;...productos...&lt;/main&gt;
+    &lt;/div&gt;
+  &lt;/main&gt;
+
+  &lt;aside class="ux-split-pane-right__side"&gt;
+    &lt;div class="ux-page"&gt;
+      &lt;header class="ux-header"&gt;Carrito&lt;/header&gt;
+      &lt;main class="ux-content"&gt;...items...&lt;/main&gt;
+      &lt;footer class="ux-footer"&gt;
+        &lt;button&gt;Finalizar compra&lt;/button&gt;
+      &lt;/footer&gt;
+    &lt;/div&gt;
+  &lt;/aside&gt;
+&lt;/div&gt;
+
+&lt;!-- Opciones --&gt;
+uxSplitPaneRight({ collapsed: true })  // Iniciar oculto en desktop</code></pre>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Split Pane con ux-page en cada panel --&gt;
+&lt;div class="ux-split-pane" x-data="uxSplitPane()"&gt;
+  &lt;aside class="ux-split-pane__side"&gt;
+    &lt;div class="ux-page"&gt;
+      &lt;header class="ux-header"&gt;...&lt;/header&gt;
+      &lt;main class="ux-content"&gt;...&lt;/main&gt;
+    &lt;/div&gt;
+  &lt;/aside&gt;
+
+  &lt;main class="ux-split-pane__main"&gt;
+    &lt;div class="ux-page"&gt;
+      &lt;header class="ux-header"&gt;...&lt;/header&gt;
+      &lt;main class="ux-content"&gt;...&lt;/main&gt;
+      &lt;footer class="ux-footer"&gt;...&lt;/footer&gt;
+    &lt;/div&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Header Variants -->
+    <div class="demo-section">
+      <h3>Header</h3>
+      <p>Variantes de header: fixed, translucent y collapsible.</p>
+
+      <div class="demo-box">
+        <code>.ux-header</code> - Header basico<br>
+        <code>.ux-header--fixed</code> - Header fijo en top<br>
+        <code>.ux-header--translucent</code> - Efecto blur iOS<br>
+        <code>.ux-header--collapse</code> - Habilita animacion collapse<br>
+        <code>.ux-header--collapsed</code> - Estado colapsado (hidden)
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Header fijo con blur --&gt;
+&lt;header class="ux-header ux-header--fixed ux-header--translucent"&gt;
+  &lt;nav class="ux-navbar"&gt;...&lt;/nav&gt;
+&lt;/header&gt;
+
+&lt;!-- Content con offset para header fijo --&gt;
+&lt;main class="ux-content ux-content--has-header"&gt;
+  ...
+&lt;/main&gt;</code></pre>
+    </div>
+
+    <!-- Content Variants -->
+    <div class="demo-section">
+      <h3>Content</h3>
+      <p>El contenedor principal con opciones de scroll y safe areas.</p>
+
+      <div class="demo-box">
+        <code>.ux-content</code> - Contenedor principal con scroll<br>
+        <code>.ux-content--fullscreen</code> - Absolute fullscreen<br>
+        <code>.ux-content--scroll-y</code> - Forzar scroll vertical<br>
+        <code>.ux-content--no-scroll</code> - Deshabilitar scroll<br>
+        <code>.ux-content--has-header</code> - Padding top para header fijo<br>
+        <code>.ux-content--has-footer</code> - Padding bottom para footer fijo<br>
+        <code>.ux-content--safe-area</code> - Padding para safe areas iOS
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Content con padding para header y footer fijos --&gt;
+&lt;main class="ux-content ux-content--has-header ux-content--has-footer"&gt;
+  ...
+&lt;/main&gt;
+
+&lt;!-- Content con safe areas para iOS --&gt;
+&lt;main class="ux-content ux-content--safe-area"&gt;
+  ...
+&lt;/main&gt;</code></pre>
+
+      <h4>Content Inner</h4>
+      <p>Wrapper opcional para el contenido con padding.</p>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;main class="ux-content"&gt;
+  &lt;div class="ux-content__inner"&gt;
+    &lt;!-- Contenido con padding automatico --&gt;
+  &lt;/div&gt;
+&lt;/main&gt;
+
+&lt;!-- Contenido centrado --&gt;
+&lt;main class="ux-content"&gt;
+  &lt;div class="ux-content__inner ux-content__inner--centered"&gt;
+    &lt;!-- Contenido centrado vertical y horizontal --&gt;
+  &lt;/div&gt;
+&lt;/main&gt;</code></pre>
+    </div>
+
+    <!-- Footer -->
+    <div class="demo-section">
+      <h3>Footer</h3>
+      <p>Footer con soporte para fixed, translucent y safe areas.</p>
+
+      <div class="demo-box">
+        <code>.ux-footer</code> - Footer basico<br>
+        <code>.ux-footer--fixed</code> - Footer fijo en bottom<br>
+        <code>.ux-footer--translucent</code> - Efecto blur iOS<br>
+        <code>.ux-footer--safe-area</code> - Padding para safe area bottom
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;footer class="ux-footer ux-footer--fixed ux-footer--safe-area"&gt;
+  &lt;!-- Tab bar o acciones --&gt;
+&lt;/footer&gt;</code></pre>
+    </div>
+
+    <!-- Split Pane -->
+    <div class="demo-section">
+      <h3>Split Pane (iPad/Tablet Layout)</h3>
+      <p>Layout de dos columnas estilo Ionic. En pantallas pequenas funciona como overlay (drawer), en pantallas grandes >= 992px se muestra como push (redimensiona el contenido).</p>
+
+      <div class="demo-frame" style="height: 250px;" x-data="uxSplitPane()">
+        <div class="ux-split-pane" :class="containerClasses" style="height: 100%;">
+          <!-- Backdrop for mobile -->
+          <div class="ux-split-pane__backdrop" @click="close()"></div>
+
+          <!-- Sidebar -->
+          <aside class="ux-split-pane__side" style="padding: var(--ux-space-md);">
+            <div style="font-weight: 600; margin-bottom: var(--ux-space-md);">Menu</div>
+            <div style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">
+              <div style="padding: var(--ux-space-sm) 0;">Item 1</div>
+              <div style="padding: var(--ux-space-sm) 0;">Item 2</div>
+              <div style="padding: var(--ux-space-sm) 0;">Item 3</div>
+            </div>
+            <button class="ux-button ux-button--sm ux-button--outline" style="margin-top: auto;" @click="close()">Cerrar</button>
+          </aside>
+
+          <!-- Main content -->
+          <main class="ux-split-pane__main" style="background: var(--ux-surface-secondary);">
+            <div style="padding: var(--ux-space-md); display: flex; align-items: center; gap: var(--ux-space-sm);">
+              <button class="ux-split-pane__toggle" @click="toggle()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+              </button>
+              <span style="font-weight: 500;">Main Content</span>
+            </div>
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: var(--ux-text-secondary);">
+              <span x-text="isVisible ? 'Sidebar visible' : 'Click menu para abrir sidebar'"></span>
+            </div>
+          </main>
+        </div>
+      </div>
+
+      <h4>Uso Basico</h4>
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Split Pane con Alpine.js --&gt;
+&lt;div class="ux-split-pane" x-data="uxSplitPane()" :class="containerClasses"&gt;
+  &lt;!-- Backdrop (cierra al click en mobile) --&gt;
+  &lt;div class="ux-split-pane__backdrop" @click="close()"&gt;&lt;/div&gt;
+
+  &lt;!-- Sidebar --&gt;
+  &lt;aside class="ux-split-pane__side"&gt;
+    &lt;nav class="ux-menu"&gt;...&lt;/nav&gt;
+  &lt;/aside&gt;
+
+  &lt;!-- Main content --&gt;
+  &lt;main class="ux-split-pane__main"&gt;
+    &lt;!-- Toggle button (solo visible en mobile) --&gt;
+    &lt;button class="ux-split-pane__toggle" @click="toggle()"&gt;
+      &lt;svg&gt;...&lt;/svg&gt;
+    &lt;/button&gt;
+    &lt;!-- Contenido --&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4>Modos de Funcionamiento</h4>
+      <div class="demo-box">
+        <code>mode: 'auto'</code> - (Default) Overlay en mobile, push en desktop<br>
+        <code>mode: 'push'</code> - Siempre push (redimensiona contenido)<br>
+        <code>mode: 'overlay'</code> - Siempre overlay (drawer sobre contenido)<br>
+        <code>mode: 'visible'</code> - Siempre visible en ambos tamanos
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Siempre como drawer (overlay) --&gt;
+&lt;div x-data="uxSplitPane({ mode: 'overlay' })" :class="containerClasses"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- Siempre visible (sin toggle) --&gt;
+&lt;div x-data="uxSplitPane({ mode: 'visible' })" :class="containerClasses"&gt;
+  ...
+&lt;/div&gt;</code></pre>
+
+      <h4>Sidebar a la Derecha</h4>
+      <pre class="ux-code-block" data-lang="html"><code>&lt;div x-data="uxSplitPane({ side: 'end' })" :class="containerClasses"&gt;
+  &lt;aside class="ux-split-pane__side"&gt;...&lt;/aside&gt;
+  &lt;main class="ux-split-pane__main"&gt;...&lt;/main&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4>Variantes CSS</h4>
+      <div class="demo-box">
+        <code>.ux-split-pane--open</code> - Estado abierto (mobile)<br>
+        <code>.ux-split-pane--collapsed</code> - Colapsado en desktop<br>
+        <code>.ux-split-pane--end</code> - Sidebar a la derecha<br>
+        <code>.ux-split-pane--visible</code> - Siempre visible<br>
+        <code>.ux-split-pane--drawer</code> - Siempre overlay<br>
+        <code>.ux-split-pane__side--glass</code> - Sidebar con efecto glass
+      </div>
+
+      <h4>Alpine.js API: uxSplitPane(config)</h4>
+      <pre class="ux-code-block" data-lang="html"><code>x-data="uxSplitPane({
+  mode: 'auto',        // 'auto' | 'push' | 'overlay' | 'visible'
+  side: 'start',       // 'start' | 'end'
+  collapsed: false,    // Iniciar colapsado en desktop
+  breakpoint: 992,     // Breakpoint para push mode
+  closeOnBackdrop: true,
+  closeOnEscape: true
+})"
+
+// Propiedades
+isOpen       // Boolean - si esta abierto (overlay mode)
+isCollapsed  // Boolean - si esta colapsado (desktop)
+isVisible    // Boolean - si el sidebar es visible
+isOverlay    // Boolean - si esta en modo overlay
+
+// Metodos
+open()           // Abrir sidebar
+close()          // Cerrar sidebar
+toggle()         // Alternar open/close
+collapse()       // Colapsar en desktop
+expand()         // Expandir en desktop
+toggleCollapse() // Alternar collapse
+
+// Computed
+containerClasses  // Objeto de clases para :class
+
+// Eventos
+@splitpane-open      // Al abrir
+@splitpane-close     // Al cerrar
+@splitpane-collapse  // Al colapsar
+@splitpane-expand    // Al expandir
+@splitpane-breakpoint="e => e.detail.isLargeScreen" // Al cambiar de breakpoint</code></pre>
+
+      <h4>CSS Variables</h4>
+      <pre class="ux-code-block" data-lang="html"><code>:root {
+  --ux-split-pane-side-width: 270px;     /* Ancho del sidebar */
+  --ux-split-pane-side-min-width: 270px; /* Minimo en desktop */
+  --ux-split-pane-side-max-width: 28%;   /* Maximo en desktop */
+  --ux-split-pane-breakpoint: 992px;     /* Breakpoint push/overlay */
+}</code></pre>
+
+      <h4>Ejemplo Completo: App con Split Pane</h4>
+      <pre class="ux-code-block" data-lang="html"><code>&lt;body class="ux-app"&gt;
+  &lt;div class="ux-split-pane" x-data="uxSplitPane()" :class="containerClasses" style="height: 100vh;"&gt;
+    &lt;div class="ux-split-pane__backdrop" @click="close()"&gt;&lt;/div&gt;
+
+    &lt;aside class="ux-split-pane__side"&gt;
+      &lt;nav class="ux-navbar"&gt;
+        &lt;div class="ux-navbar__content"&gt;
+          &lt;span class="ux-navbar__title"&gt;Menu&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/nav&gt;
+      &lt;div class="ux-content"&gt;
+        &lt;ul class="ux-list"&gt;
+          &lt;li class="ux-list__item"&gt;Dashboard&lt;/li&gt;
+          &lt;li class="ux-list__item"&gt;Settings&lt;/li&gt;
+          &lt;li class="ux-list__item"&gt;Profile&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    &lt;/aside&gt;
+
+    &lt;main class="ux-split-pane__main"&gt;
+      &lt;nav class="ux-navbar"&gt;
+        &lt;div class="ux-navbar__content"&gt;
+          &lt;div class="ux-navbar__start"&gt;
+            &lt;button class="ux-split-pane__toggle" @click="toggle()"&gt;
+              &lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+                &lt;line x1="3" y1="12" x2="21" y2="12"&gt;&lt;/line&gt;
+                &lt;line x1="3" y1="6" x2="21" y2="6"&gt;&lt;/line&gt;
+                &lt;line x1="3" y1="18" x2="21" y2="18"&gt;&lt;/line&gt;
+              &lt;/svg&gt;
+            &lt;/button&gt;
+          &lt;/div&gt;
+          &lt;span class="ux-navbar__title"&gt;Dashboard&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/nav&gt;
+      &lt;div class="ux-content ux-p-lg"&gt;
+        &lt;!-- Page content --&gt;
+      &lt;/div&gt;
+    &lt;/main&gt;
+  &lt;/div&gt;
+&lt;/body&gt;</code></pre>
+    </div>
+
+    <!-- Container -->
+    <div class="demo-section">
+      <h3>Container</h3>
+      <p>Contenedor con max-width centrado.</p>
+
+      <div class="demo-frame" style="padding: var(--ux-space-md); background: var(--ux-surface-secondary);">
+        <div style="background: rgba(var(--ux-primary-rgb), 0.1); border: 2px dashed var(--ux-primary); padding: var(--ux-space-md); text-align: center; border-radius: var(--ux-border-radius); max-width: 400px; margin: 0 auto;">
+          .ux-container (max-width: 1200px)
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <code>.ux-container</code> - Default (max-width: 1200px)<br>
+        <code>.ux-container--fluid</code> - Sin max-width<br>
+        <code>.ux-container--narrow</code> - max-width: 680px<br>
+        <code>.ux-container--wide</code> - max-width: 1400px
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;div class="ux-container"&gt;
+  &lt;!-- Contenido centrado, max 1200px --&gt;
+&lt;/div&gt;
+
+&lt;div class="ux-container ux-container--narrow"&gt;
+  &lt;!-- Para articulos/blog, max 680px --&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Section -->
+    <div class="demo-section">
+      <h3>Section</h3>
+      <p>Secciones con padding vertical y header opcional.</p>
+
+      <div class="demo-frame" style="padding: 0;">
+        <div style="padding: var(--ux-space-xl) var(--ux-space-lg); border-bottom: 1px solid var(--ux-border-color);">
+          <div style="margin-bottom: var(--ux-space-sm); font-size: var(--ux-font-size-xl); font-weight: 700;">Section Title</div>
+          <div style="color: var(--ux-text-secondary);">Section subtitle or description</div>
+        </div>
+        <div style="padding: var(--ux-space-lg); background: var(--ux-surface-secondary); text-align: center; color: var(--ux-text-secondary);">
+          Section content...
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;section class="ux-section"&gt;
+  &lt;div class="ux-section__header"&gt;
+    &lt;h2 class="ux-section__title"&gt;Section Title&lt;/h2&gt;
+    &lt;p class="ux-section__subtitle"&gt;Optional description&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;!-- Section content --&gt;
+&lt;/section&gt;
+
+&lt;!-- Sizes --&gt;
+&lt;section class="ux-section ux-section--sm"&gt;...&lt;/section&gt;
+&lt;section class="ux-section ux-section--lg"&gt;...&lt;/section&gt;</code></pre>
+    </div>
+
+    <!-- Divider -->
+    <div class="demo-section">
+      <h3>Divider</h3>
+      <p>Lineas divisorias con diferentes estilos.</p>
+
+      <div class="demo-box">
+        <p style="margin-bottom: var(--ux-space-sm);">Default</p>
+        <div class="ux-divider"></div>
+
+        <p style="margin-bottom: var(--ux-space-sm); margin-top: var(--ux-space-lg);">Inset (con margenes)</p>
+        <div class="ux-divider ux-divider--inset"></div>
+
+        <p style="margin-bottom: var(--ux-space-sm); margin-top: var(--ux-space-lg);">Thick (separador de grupo)</p>
+        <div class="ux-divider ux-divider--thick"></div>
+
+        <p style="margin-bottom: var(--ux-space-sm); margin-top: var(--ux-space-lg);">Con texto</p>
+        <div class="ux-divider ux-divider--with-text">
+          <span class="ux-divider__text">O continuar con</span>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Divider simple --&gt;
+&lt;div class="ux-divider"&gt;&lt;/div&gt;
+
+&lt;!-- Divider con margenes --&gt;
+&lt;div class="ux-divider ux-divider--inset"&gt;&lt;/div&gt;
+
+&lt;!-- Divider grueso (separador de grupos) --&gt;
+&lt;div class="ux-divider ux-divider--thick"&gt;&lt;/div&gt;
+
+&lt;!-- Divider con texto --&gt;
+&lt;div class="ux-divider ux-divider--with-text"&gt;
+  &lt;span class="ux-divider__text"&gt;O continuar con&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Scroll Utilities -->
+    <div class="demo-section">
+      <h3>Scroll Utilities</h3>
+      <p>Clases para controlar el comportamiento de scroll.</p>
+
+      <h4>Scroll Horizontal</h4>
+      <div class="demo-frame" style="padding: var(--ux-space-md);">
+        <div class="ux-scroll--x ux-scroll--hidden" style="display: flex; gap: var(--ux-space-md); padding-bottom: var(--ux-space-sm);">
+          <div style="flex-shrink: 0; width: 150px; height: 100px; background: rgba(var(--ux-primary-rgb), 0.1); border-radius: var(--ux-border-radius); display: flex; align-items: center; justify-content: center;">Item 1</div>
+          <div style="flex-shrink: 0; width: 150px; height: 100px; background: rgba(var(--ux-primary-rgb), 0.1); border-radius: var(--ux-border-radius); display: flex; align-items: center; justify-content: center;">Item 2</div>
+          <div style="flex-shrink: 0; width: 150px; height: 100px; background: rgba(var(--ux-primary-rgb), 0.1); border-radius: var(--ux-border-radius); display: flex; align-items: center; justify-content: center;">Item 3</div>
+          <div style="flex-shrink: 0; width: 150px; height: 100px; background: rgba(var(--ux-primary-rgb), 0.1); border-radius: var(--ux-border-radius); display: flex; align-items: center; justify-content: center;">Item 4</div>
+          <div style="flex-shrink: 0; width: 150px; height: 100px; background: rgba(var(--ux-primary-rgb), 0.1); border-radius: var(--ux-border-radius); display: flex; align-items: center; justify-content: center;">Item 5</div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <code>.ux-scroll</code> - Scroll vertical con touch<br>
+        <code>.ux-scroll--x</code> - Scroll horizontal<br>
+        <code>.ux-scroll--hidden</code> - Ocultar scrollbar<br>
+        <code>.ux-scroll--snap-x</code> - Snap scroll horizontal<br>
+        <code>.ux-scroll--snap-y</code> - Snap scroll vertical<br>
+        <code>.ux-scroll__item--snap</code> - Snap al inicio<br>
+        <code>.ux-scroll__item--snap-center</code> - Snap al centro
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Scroll horizontal sin scrollbar --&gt;
+&lt;div class="ux-scroll--x ux-scroll--hidden"&gt;
+  &lt;div style="display: flex; gap: 1rem;"&gt;
+    &lt;div&gt;Item 1&lt;/div&gt;
+    &lt;div&gt;Item 2&lt;/div&gt;
+    ...
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Snap scroll (carrusel) --&gt;
+&lt;div class="ux-scroll--x ux-scroll--snap-x"&gt;
+  &lt;div class="ux-scroll__item--snap"&gt;Slide 1&lt;/div&gt;
+  &lt;div class="ux-scroll__item--snap"&gt;Slide 2&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Spacer -->
+    <div class="demo-section">
+      <h3>Spacer</h3>
+      <p>Espaciadores verticales y flex spacer.</p>
+
+      <div class="demo-box" style="display: flex; align-items: center; gap: var(--ux-space-md);">
+        <div style="padding: var(--ux-space-sm) var(--ux-space-md); background: var(--ux-primary); color: var(--ux-primary-contrast); border-radius: var(--ux-border-radius);">Left</div>
+        <div class="ux-spacer" style="background: rgba(var(--ux-primary-rgb), 0.1); height: 40px; border-radius: var(--ux-border-radius); display: flex; align-items: center; justify-content: center; color: var(--ux-primary); font-size: var(--ux-font-size-md);">.ux-spacer (flex: 1)</div>
+        <div style="padding: var(--ux-space-sm) var(--ux-space-md); background: var(--ux-primary); color: var(--ux-primary-contrast); border-radius: var(--ux-border-radius);">Right</div>
+      </div>
+
+      <div class="demo-box">
+        <code>.ux-spacer</code> - Flex spacer (flex: 1)<br>
+        <code>.ux-spacer-xs</code> - Altura 4px<br>
+        <code>.ux-spacer-sm</code> - Altura 8px<br>
+        <code>.ux-spacer-md</code> - Altura 12px<br>
+        <code>.ux-spacer-lg</code> - Altura 16px<br>
+        <code>.ux-spacer-xl</code> - Altura 24px<br>
+        <code>.ux-spacer-2xl</code> - Altura 32px
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Flex spacer (push elements apart) --&gt;
+&lt;div style="display: flex;"&gt;
+  &lt;button&gt;Cancel&lt;/button&gt;
+  &lt;div class="ux-spacer"&gt;&lt;/div&gt;
+  &lt;button&gt;Save&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Vertical spacing --&gt;
+&lt;div&gt;Content 1&lt;/div&gt;
+&lt;div class="ux-spacer-lg"&gt;&lt;/div&gt;
+&lt;div&gt;Content 2&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Scroll to Top -->
+    <div class="demo-section">
+      <h3>Scroll to Top Button</h3>
+      <p>Boton flotante para volver al inicio. Aparece automaticamente al hacer scroll.</p>
+
+      <div class="demo-box" style="position: relative; height: 100px;">
+        <div class="ux-scroll-top ux-scroll-top--visible" style="position: absolute; bottom: var(--ux-space-md); right: var(--ux-space-md);">
+          <span class="ux-scroll-top__icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Con Alpine.js --&gt;
+&lt;div x-data="uxScrollTop({ threshold: 300 })"
+     class="ux-scroll-top"
+     :class="{ 'ux-scroll-top--visible': visible }"
+     @click="scrollToTop()"&gt;
+  &lt;span class="ux-scroll-top__icon"&gt;
+    &lt;svg fill="none" stroke="currentColor" viewBox="0 0 24 24"&gt;
+      &lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M5 10l7-7m0 0l7 7m-7-7v18"/&gt;
+    &lt;/svg&gt;
+  &lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- Detectar scroll en content --&gt;
+&lt;main class="ux-content" @scroll="checkScroll($event.target.scrollTop)"&gt;
+  ...
+&lt;/main&gt;</code></pre>
+    </div>
+
+    <!-- Padding Utilities -->
+    <div class="demo-section">
+      <h3>Padding Utilities</h3>
+      <p>Clases para padding rapido.</p>
+
+      <div class="demo-box">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--ux-space-md);">
+          <div>
+            <strong>All sides:</strong><br>
+            <code>.ux-p-0</code> ... <code>.ux-p-xl</code>
+          </div>
+          <div>
+            <strong>Horizontal:</strong><br>
+            <code>.ux-px-0</code> ... <code>.ux-px-xl</code>
+          </div>
+          <div>
+            <strong>Vertical:</strong><br>
+            <code>.ux-py-0</code> ... <code>.ux-py-xl</code>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;div class="ux-p-lg"&gt;Padding 16px&lt;/div&gt;
+&lt;div class="ux-px-md ux-py-sm"&gt;Padding horizontal 12px, vertical 8px&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Margin Utilities -->
+    <div class="demo-section">
+      <h3>Margin Utilities</h3>
+      <p>Clases para margin rapido.</p>
+
+      <div class="demo-box">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--ux-space-md);">
+          <div>
+            <strong>All sides:</strong><br>
+            <code>.ux-m-0</code> ... <code>.ux-m-xl</code><br>
+            <code>.ux-m-auto</code>
+          </div>
+          <div>
+            <strong>Horizontal/Vertical auto:</strong><br>
+            <code>.ux-mx-auto</code><br>
+            <code>.ux-my-auto</code>
+          </div>
+          <div>
+            <strong>Top/Bottom:</strong><br>
+            <code>.ux-mt-0</code> ... <code>.ux-mt-xl</code><br>
+            <code>.ux-mb-0</code> ... <code>.ux-mb-xl</code>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;div class="ux-mx-auto" style="max-width: 400px;"&gt;Centered&lt;/div&gt;
+&lt;div class="ux-mt-lg ux-mb-md"&gt;Margin top 16px, bottom 12px&lt;/div&gt;</code></pre>
+    </div>
+
+    <!-- Fixed Slot -->
+    <div class="demo-section">
+      <h3>Fixed Slot</h3>
+      <p>Elementos fijos fuera del area de scroll, como botones flotantes.</p>
+
+      <div class="demo-frame demo-frame--tall" style="position: relative;">
+        <div class="ux-content__fixed">
+          <div class="ux-fixed-top" style="padding: var(--ux-space-md); background: rgba(var(--ux-primary-rgb), 0.1); text-align: center;">
+            .ux-fixed-top
+          </div>
+          <div class="ux-fixed-bottom-right" style="margin: var(--ux-space-md);">
+            <div style="width: 56px; height: 56px; background: var(--ux-primary); color: var(--ux-primary-contrast); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--ux-shadow-lg);">+</div>
+          </div>
+        </div>
+        <div style="height: 400px; background: var(--ux-surface-secondary); display: flex; align-items: center; justify-content: center; padding-top: 60px;">
+          <span style="color: var(--ux-text-secondary);">Contenido scrollable</span>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;main class="ux-content"&gt;
+  &lt;!-- Fixed slot - fuera del scroll --&gt;
+  &lt;div class="ux-content__fixed"&gt;
+    &lt;div class="ux-fixed-top"&gt;Fixed top bar&lt;/div&gt;
+    &lt;div class="ux-fixed-bottom-right"&gt;
+      &lt;button class="ux-fab"&gt;+&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Contenido scrollable --&gt;
+  &lt;div&gt;...&lt;/div&gt;
+&lt;/main&gt;</code></pre>
+
+      <h4>Posiciones Fijas</h4>
+      <div class="demo-box">
+        <code>.ux-fixed-top</code> - Top, full width<br>
+        <code>.ux-fixed-bottom</code> - Bottom, full width<br>
+        <code>.ux-fixed-top-left</code> - Esquina superior izquierda<br>
+        <code>.ux-fixed-top-right</code> - Esquina superior derecha<br>
+        <code>.ux-fixed-bottom-left</code> - Esquina inferior izquierda<br>
+        <code>.ux-fixed-bottom-right</code> - Esquina inferior derecha<br>
+        <code>.ux-fixed-center</code> - Centro absoluto
+      </div>
+    </div>
+
+    <!-- Color Variants -->
+    <div class="demo-section">
+      <h3>Variantes de Color</h3>
+      <p>Content con colores de fondo semanticos.</p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--ux-space-md); margin-bottom: var(--ux-space-md);">
+        <div class="ux-content--primary" style="padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg); text-align: center;">Primary</div>
+        <div class="ux-content--secondary" style="padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg); text-align: center;">Secondary</div>
+        <div class="ux-content--success" style="padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg); text-align: center;">Success</div>
+        <div class="ux-content--warning" style="padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg); text-align: center;">Warning</div>
+        <div class="ux-content--danger" style="padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg); text-align: center;">Danger</div>
+        <div class="ux-content--dark" style="padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg); text-align: center;">Dark</div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;main class="ux-content ux-content--primary"&gt;...&lt;/main&gt;
+&lt;main class="ux-content ux-content--success"&gt;...&lt;/main&gt;
+&lt;main class="ux-content ux-content--danger"&gt;...&lt;/main&gt;</code></pre>
+
+      <div class="demo-box">
+        <code>.ux-content--primary</code><br>
+        <code>.ux-content--secondary</code><br>
+        <code>.ux-content--tertiary</code><br>
+        <code>.ux-content--success</code><br>
+        <code>.ux-content--warning</code><br>
+        <code>.ux-content--danger</code><br>
+        <code>.ux-content--light</code><br>
+        <code>.ux-content--dark</code><br>
+        <code>.ux-content--medium</code>
+      </div>
+    </div>
+
+    <!-- Alpine Components -->
+    <div class="demo-section">
+      <h3>Alpine.js Components</h3>
+      <p>Componentes interactivos disponibles.</p>
+
+      <div class="demo-box">
+        <h4 style="margin-top: 0;">uxContent(config)</h4>
+        <p>Content con API de scroll completa estilo Ionic.</p>
+        <pre class="ux-code-block" data-lang="html"><code>x-data="uxContent({ scrollEvents: true })"
+
+// Propiedades reactivas
+scrollTop       // Posicion vertical actual
+scrollLeft      // Posicion horizontal actual
+scrollHeight    // Altura total del contenido
+clientHeight    // Altura visible
+isScrolling     // Boolean - si esta scrolling
+isAtTop         // Boolean - si esta en top
+isAtBottom      // Boolean - si esta en bottom
+scrollProgress  // Number 0-1 - progreso del scroll
+
+// Metodos
+scrollToTop(duration)              // Scroll al inicio
+scrollToBottom(duration)           // Scroll al final
+scrollToPoint(x, y, duration)      // Scroll a punto
+scrollByPoint(x, y, duration)      // Scroll relativo
+scrollToElement(selector, duration) // Scroll a elemento
+getScrollElement()                 // Obtener elemento
+
+// Eventos (si scrollEvents: true)
+@ux-scroll="..."        // Cada scroll
+@ux-scroll-start="..."  // Inicio de scroll
+@ux-scroll-end="..."    // Fin de scroll</code></pre>
+      </div>
+
+      <div class="demo-box">
+        <h4 style="margin-top: 0;">uxPage(config)</h4>
+        <p>Pagina con manejo de ciclo de vida.</p>
+        <pre class="ux-code-block" data-lang="html"><code>x-data="uxPage({ isActive: true })"
+
+// Propiedades
+pageId     // ID unico de pagina
+isActive   // Boolean - si esta activa
+
+// Metodos
+activate()    // Activar pagina
+deactivate()  // Desactivar pagina
+onEnter()     // Callback de entrada
+onLeave()     // Callback de salida
+
+// Eventos
+@ux-page-enter="..."  // Al entrar
+@ux-page-leave="..."  // Al salir</code></pre>
+      </div>
+
+      <div class="demo-box">
+        <h4 style="margin-top: 0;">uxScrollTop(config)</h4>
+        <p>Boton scroll-to-top con deteccion automatica.</p>
+        <pre class="ux-code-block" data-lang="html"><code>x-data="uxScrollTop({
+  threshold: 300  // Pixeles de scroll antes de mostrar
+})"
+
+// Propiedades
+visible    // Boolean - si el boton es visible
+
+// Metodos
+checkScroll(scrollTop)  // Verificar posicion de scroll
+scrollToTop()           // Scroll suave al inicio</code></pre>
+      </div>
+
+      <div class="demo-box">
+        <h4 style="margin-top: 0;">uxCollapsibleHeader(config)</h4>
+        <p>Header que se oculta al hacer scroll hacia abajo.</p>
+        <pre class="ux-code-block" data-lang="html"><code>x-data="uxCollapsibleHeader({
+  threshold: 50  // Pixeles minimos antes de colapsar
+})"
+
+// Propiedades
+collapsed  // Boolean - si el header esta colapsado
+
+// Metodos
+handleScroll(scrollTop)  // Manejar evento de scroll</code></pre>
+      </div>
+    </div>
+
+    <!-- Scroll Events Example -->
+    <div class="demo-section">
+      <h3>Ejemplo: Content con Scroll API</h3>
+      <p>Uso completo del componente uxContent con eventos y metodos.</p>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;main class="ux-content"
+      x-data="uxContent({ scrollEvents: true })"
+      x-ref="content"
+      @scroll="handleScroll($event)"
+      @ux-scroll-start="console.log('Scroll started', $event.detail)"
+      @ux-scroll-end="console.log('Scroll ended', $event.detail)"&gt;
+
+  &lt;!-- Progress bar --&gt;
+  &lt;div class="ux-content__fixed"&gt;
+    &lt;div class="ux-fixed-top"&gt;
+      &lt;div :style="{ width: (scrollProgress * 100) + '%', height: '3px', background: 'var(--ux-primary)' }"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Contenido --&gt;
+  &lt;div class="ux-p-lg"&gt;
+    &lt;button @click="scrollToTop()"&gt;Ir arriba&lt;/button&gt;
+    &lt;button @click="scrollToBottom()"&gt;Ir abajo&lt;/button&gt;
+    &lt;button @click="scrollToElement('#section-2')"&gt;Ir a seccion 2&lt;/button&gt;
+
+    &lt;section id="section-1"&gt;...&lt;/section&gt;
+    &lt;section id="section-2"&gt;...&lt;/section&gt;
+  &lt;/div&gt;
+&lt;/main&gt;</code></pre>
+    </div>
+
+    <!-- CSS Reference -->
+    <div class="demo-section">
+      <h3>Referencia de Clases CSS</h3>
+
+      <div style="overflow-x: auto;">
+        <table class="class-table">
+          <thead>
+            <tr>
+              <th>Clase</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">App Structure</td></tr>
+            <tr><td><code>.ux-app</code></td><td>Container principal de la app (min-height: 100vh)</td></tr>
+            <tr><td><code>.ux-page</code></td><td>Wrapper de pagina con contain</td></tr>
+            <tr><td><code>.ux-header</code></td><td>Header container</td></tr>
+            <tr><td><code>.ux-header--fixed</code></td><td>Header fijo en top</td></tr>
+            <tr><td><code>.ux-header--translucent</code></td><td>Header con blur iOS</td></tr>
+            <tr><td><code>.ux-header--collapse</code></td><td>Animacion de collapse</td></tr>
+            <tr><td><code>.ux-content</code></td><td>Main content area con scroll</td></tr>
+            <tr><td><code>.ux-content--fullscreen</code></td><td>Absolute fullscreen</td></tr>
+            <tr><td><code>.ux-content--has-header</code></td><td>Padding top para header fijo</td></tr>
+            <tr><td><code>.ux-content--has-footer</code></td><td>Padding bottom para footer fijo</td></tr>
+            <tr><td><code>.ux-content--safe-area</code></td><td>Padding para safe areas iOS</td></tr>
+            <tr><td><code>.ux-footer</code></td><td>Footer container</td></tr>
+            <tr><td><code>.ux-footer--fixed</code></td><td>Footer fijo en bottom</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Split Pane</td></tr>
+            <tr><td><code>.ux-split-pane</code></td><td>Container de dos columnas</td></tr>
+            <tr><td><code>.ux-split-pane__backdrop</code></td><td>Overlay oscuro (mobile)</td></tr>
+            <tr><td><code>.ux-split-pane__side</code></td><td>Sidebar/drawer</td></tr>
+            <tr><td><code>.ux-split-pane__main</code></td><td>Contenido principal</td></tr>
+            <tr><td><code>.ux-split-pane__toggle</code></td><td>Boton de menu</td></tr>
+            <tr><td><code>.ux-split-pane--open</code></td><td>Estado abierto (mobile)</td></tr>
+            <tr><td><code>.ux-split-pane--collapsed</code></td><td>Colapsado en desktop</td></tr>
+            <tr><td><code>.ux-split-pane--end</code></td><td>Sidebar a la derecha</td></tr>
+            <tr><td><code>.ux-split-pane--visible</code></td><td>Siempre visible</td></tr>
+            <tr><td><code>.ux-split-pane--drawer</code></td><td>Siempre overlay</td></tr>
+            <tr><td><code>.ux-split-pane__side--glass</code></td><td>Sidebar con efecto glass</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Container</td></tr>
+            <tr><td><code>.ux-container</code></td><td>Max-width 1200px centrado</td></tr>
+            <tr><td><code>.ux-container--fluid</code></td><td>Sin max-width</td></tr>
+            <tr><td><code>.ux-container--narrow</code></td><td>Max-width 680px</td></tr>
+            <tr><td><code>.ux-container--wide</code></td><td>Max-width 1400px</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Section</td></tr>
+            <tr><td><code>.ux-section</code></td><td>Seccion con padding vertical</td></tr>
+            <tr><td><code>.ux-section--sm</code></td><td>Padding pequeno</td></tr>
+            <tr><td><code>.ux-section--lg</code></td><td>Padding grande</td></tr>
+            <tr><td><code>.ux-section__header</code></td><td>Header de seccion</td></tr>
+            <tr><td><code>.ux-section__title</code></td><td>Titulo de seccion</td></tr>
+            <tr><td><code>.ux-section__subtitle</code></td><td>Subtitulo de seccion</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Divider</td></tr>
+            <tr><td><code>.ux-divider</code></td><td>Linea divisoria</td></tr>
+            <tr><td><code>.ux-divider--inset</code></td><td>Con margenes laterales</td></tr>
+            <tr><td><code>.ux-divider--thick</code></td><td>Grueso (8px)</td></tr>
+            <tr><td><code>.ux-divider--with-text</code></td><td>Con texto centrado</td></tr>
+            <tr><td><code>.ux-divider__text</code></td><td>Texto del divider</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Scroll</td></tr>
+            <tr><td><code>.ux-scroll</code></td><td>Scroll vertical touch-friendly</td></tr>
+            <tr><td><code>.ux-scroll--x</code></td><td>Scroll horizontal</td></tr>
+            <tr><td><code>.ux-scroll--hidden</code></td><td>Ocultar scrollbar</td></tr>
+            <tr><td><code>.ux-scroll--snap-x</code></td><td>Snap scroll horizontal</td></tr>
+            <tr><td><code>.ux-scroll--snap-y</code></td><td>Snap scroll vertical</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Spacer</td></tr>
+            <tr><td><code>.ux-spacer</code></td><td>Flex spacer (flex: 1)</td></tr>
+            <tr><td><code>.ux-spacer-{xs|sm|md|lg|xl|2xl}</code></td><td>Espaciador vertical fijo</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Fixed Slot</td></tr>
+            <tr><td><code>.ux-content__fixed</code></td><td>Contenedor para elementos fijos</td></tr>
+            <tr><td><code>.ux-fixed-top</code></td><td>Posicion fija arriba</td></tr>
+            <tr><td><code>.ux-fixed-bottom</code></td><td>Posicion fija abajo</td></tr>
+            <tr><td><code>.ux-fixed-top-left</code></td><td>Esquina superior izquierda</td></tr>
+            <tr><td><code>.ux-fixed-top-right</code></td><td>Esquina superior derecha</td></tr>
+            <tr><td><code>.ux-fixed-bottom-left</code></td><td>Esquina inferior izquierda</td></tr>
+            <tr><td><code>.ux-fixed-bottom-right</code></td><td>Esquina inferior derecha</td></tr>
+            <tr><td><code>.ux-fixed-center</code></td><td>Centro absoluto</td></tr>
+            <tr><td colspan="2" style="background: var(--ux-surface-secondary); font-weight: 600;">Color Variants</td></tr>
+            <tr><td><code>.ux-content--primary</code></td><td>Fondo primary</td></tr>
+            <tr><td><code>.ux-content--secondary</code></td><td>Fondo secondary</td></tr>
+            <tr><td><code>.ux-content--tertiary</code></td><td>Fondo tertiary</td></tr>
+            <tr><td><code>.ux-content--success</code></td><td>Fondo success</td></tr>
+            <tr><td><code>.ux-content--warning</code></td><td>Fondo warning</td></tr>
+            <tr><td><code>.ux-content--danger</code></td><td>Fondo danger</td></tr>
+            <tr><td><code>.ux-content--light</code></td><td>Fondo light</td></tr>
+            <tr><td><code>.ux-content--dark</code></td><td>Fondo dark</td></tr>
+            <tr><td><code>.ux-content--medium</code></td><td>Fondo medium</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- HTMX + Django -->
+    <div class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Ejemplos de contenido dinamico con HTMX integrado en el sistema de layout.</p>
+
+      <h4>Carga Dinamica de Contenido</h4>
+      <p>Reemplaza el contenido de una seccion sin recargar la pagina.</p>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Django template: base.html --&gt;
+&lt;body class="ux-app"&gt;
+  &lt;div class="ux-page"&gt;
+    &lt;header class="ux-header"&gt;
+      &lt;nav class="ux-navbar"&gt;
+        &lt;div class="ux-navbar__content"&gt;
+          &lt;span class="ux-navbar__title"&gt;Mi App&lt;/span&gt;
+          &lt;div class="ux-navbar__end"&gt;
+            &lt;!-- Navegacion con HTMX --&gt;
+            &lt;button class="ux-button ux-button--clear"
+                    hx-get="{% url 'dashboard' %}"
+                    hx-target="#main-content"
+                    hx-swap="innerHTML"
+                    hx-push-url="true"&gt;
+              Dashboard
+            &lt;/button&gt;
+            &lt;button class="ux-button ux-button--clear"
+                    hx-get="{% url 'settings' %}"
+                    hx-target="#main-content"
+                    hx-swap="innerHTML"
+                    hx-push-url="true"&gt;
+              Settings
+            &lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;main class="ux-content" id="main-content"&gt;
+      {% block content %}{% endblock %}
+    &lt;/main&gt;
+  &lt;/div&gt;
+&lt;/body&gt;</code></pre>
+
+      <h4>Split Pane con HTMX</h4>
+      <p>Master-detail pattern donde seleccionar un item carga el detalle dinamicamente.</p>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Django template: products.html --&gt;
+&lt;div class="ux-split-pane" x-data="uxSplitPane()" :class="containerClasses"&gt;
+  &lt;div class="ux-split-pane__backdrop" @click="close()"&gt;&lt;/div&gt;
+
+  &lt;!-- Lista de productos (sidebar) --&gt;
+  &lt;aside class="ux-split-pane__side"&gt;
+    &lt;div class="ux-page"&gt;
+      &lt;header class="ux-header"&gt;
+        &lt;nav class="ux-navbar"&gt;
+          &lt;span class="ux-navbar__title"&gt;Productos&lt;/span&gt;
+        &lt;/nav&gt;
+      &lt;/header&gt;
+      &lt;main class="ux-content"&gt;
+        &lt;ul class="ux-list"&gt;
+          {% for product in products %}
+          &lt;li class="ux-list__item"
+              hx-get="{% url 'product_detail' product.id %}"
+              hx-target="#product-detail"
+              hx-swap="innerHTML"
+              hx-indicator="#detail-spinner"&gt;
+            {{ product.name }}
+          &lt;/li&gt;
+          {% endfor %}
+        &lt;/ul&gt;
+      &lt;/main&gt;
+    &lt;/div&gt;
+  &lt;/aside&gt;
+
+  &lt;!-- Detalle del producto --&gt;
+  &lt;main class="ux-split-pane__main"&gt;
+    &lt;div class="ux-page"&gt;
+      &lt;header class="ux-header"&gt;
+        &lt;nav class="ux-navbar"&gt;
+          &lt;div class="ux-navbar__start"&gt;
+            &lt;button class="ux-split-pane__toggle" @click="toggle()"&gt;
+              &lt;svg&gt;...&lt;/svg&gt;
+            &lt;/button&gt;
+          &lt;/div&gt;
+          &lt;span class="ux-navbar__title"&gt;Detalle&lt;/span&gt;
+        &lt;/nav&gt;
+      &lt;/header&gt;
+      &lt;main class="ux-content" id="product-detail"&gt;
+        &lt;div class="ux-spinner" id="detail-spinner"&gt;&lt;/div&gt;
+        &lt;p class="ux-p-lg" style="color: var(--ux-text-secondary);"&gt;
+          Selecciona un producto
+        &lt;/p&gt;
+      &lt;/main&gt;
+    &lt;/div&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4>Infinite Scroll con Django</h4>
+      <p>Carga mas contenido automaticamente al llegar al final.</p>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Django template: posts.html --&gt;
+&lt;main class="ux-content" x-data="uxContent({ scrollEvents: true })"&gt;
+  &lt;div class="ux-container"&gt;
+    &lt;div id="posts-list"&gt;
+      {% for post in posts %}
+        {% include 'partials/post_card.html' %}
+      {% endfor %}
+    &lt;/div&gt;
+
+    &lt;!-- Trigger para cargar mas --&gt;
+    {% if has_next %}
+    &lt;div hx-get="{% url 'posts' %}?page={{ next_page }}"
+         hx-trigger="revealed"
+         hx-target="#posts-list"
+         hx-swap="beforeend"
+         hx-indicator="#load-spinner"&gt;
+      &lt;div class="ux-spinner" id="load-spinner"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    {% endif %}
+  &lt;/div&gt;
+&lt;/main&gt;
+
+&lt;!-- Django view --&gt;
+# views.py
+from django.core.paginator import Paginator
+
+def posts(request):
+    page = request.GET.get('page', 1)
+    posts = Post.objects.all()
+    paginator = Paginator(posts, 10)
+    page_obj = paginator.get_page(page)
+
+    # Si es peticion HTMX, solo devolver los items
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/posts_items.html', {
+            'posts': page_obj,
+            'has_next': page_obj.has_next(),
+            'next_page': page_obj.next_page_number() if page_obj.has_next() else None
+        })
+
+    return render(request, 'posts.html', {
+        'posts': page_obj,
+        'has_next': page_obj.has_next(),
+        'next_page': page_obj.next_page_number() if page_obj.has_next() else None
+    })</code></pre>
+
+      <h4>Formulario en Modal con HTMX</h4>
+      <p>Modal que carga y envia formularios dinamicamente.</p>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Boton para abrir modal --&gt;
+&lt;button class="ux-button ux-color-primary"
+        hx-get="{% url 'user_form' %}"
+        hx-target="#modal-content"
+        hx-swap="innerHTML"
+        @htmx:after-request="$dispatch('modal-open')"&gt;
+  Nuevo Usuario
+&lt;/button&gt;
+
+&lt;!-- Modal container --&gt;
+&lt;div x-data="uxModal()"
+     @modal-open.window="open()"
+     @htmx:after-swap="if ($event.detail.successful) close()"&gt;
+  &lt;template x-teleport="body"&gt;
+    &lt;div class="ux-modal-backdrop" x-show="isOpen" @click="close()"&gt;&lt;/div&gt;
+    &lt;div class="ux-modal" x-show="isOpen"&gt;
+      &lt;div class="ux-modal__header"&gt;
+        &lt;h2&gt;Formulario&lt;/h2&gt;
+        &lt;button @click="close()"&gt;&amp;times;&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-modal__content" id="modal-content"&gt;
+        &lt;!-- Formulario cargado via HTMX --&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/template&gt;
+&lt;/div&gt;
+
+&lt;!-- Django partial: user_form.html --&gt;
+&lt;form hx-post="{% url 'user_create' %}"
+      hx-target="#modal-content"
+      hx-swap="innerHTML"&gt;
+  {% csrf_token %}
+  &lt;div class="ux-input"&gt;
+    &lt;input type="text" name="name" required&gt;
+    &lt;label&gt;Nombre&lt;/label&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-input"&gt;
+    &lt;input type="email" name="email" required&gt;
+    &lt;label&gt;Email&lt;/label&gt;
+  &lt;/div&gt;
+  &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+    Guardar
+  &lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+      <h4>Actualizacion en Tiempo Real</h4>
+      <p>Polling para actualizar contenido periodicamente.</p>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Panel de notificaciones con polling --&gt;
+&lt;aside class="ux-split-pane-right__side"&gt;
+  &lt;div class="ux-page"&gt;
+    &lt;header class="ux-header"&gt;
+      &lt;nav class="ux-navbar"&gt;
+        &lt;span class="ux-navbar__title"&gt;Notificaciones&lt;/span&gt;
+        &lt;div class="ux-navbar__end"&gt;
+          &lt;span class="ux-badge ux-color-danger" id="notif-count"&gt;0&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/nav&gt;
+    &lt;/header&gt;
+    &lt;main class="ux-content"
+          id="notifications-list"
+          hx-get="{% url 'notifications' %}"
+          hx-trigger="load, every 30s"
+          hx-swap="innerHTML"&gt;
+      &lt;!-- Notificaciones cargadas via HTMX --&gt;
+    &lt;/main&gt;
+  &lt;/div&gt;
+&lt;/aside&gt;
+
+&lt;!-- Django view que devuelve parcial --&gt;
+# views.py
+def notifications(request):
+    notifications = Notification.objects.filter(
+        user=request.user,
+        read=False
+    ).order_by('-created_at')[:20]
+
+    return render(request, 'partials/notifications.html', {
+        'notifications': notifications,
+        'count': notifications.count()
+    })</code></pre>
+
+      <h4>Carrito con Split Pane Right</h4>
+      <p>Carrito de compras que se actualiza sin recargar la pagina.</p>
+
+      <pre class="ux-code-block" data-lang="html"><code>&lt;!-- Agregar al carrito --&gt;
+&lt;button class="ux-button ux-color-primary"
+        hx-post="{% url 'cart_add' product.id %}"
+        hx-target="#cart-items"
+        hx-swap="innerHTML"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'&gt;
+  Agregar al carrito
+&lt;/button&gt;
+
+&lt;!-- Panel del carrito --&gt;
+&lt;aside class="ux-split-pane-right__side"&gt;
+  &lt;div class="ux-page"&gt;
+    &lt;header class="ux-header"&gt;
+      &lt;nav class="ux-navbar"&gt;
+        &lt;span class="ux-navbar__title"&gt;Carrito&lt;/span&gt;
+      &lt;/nav&gt;
+    &lt;/header&gt;
+    &lt;main class="ux-content" id="cart-items"
+          hx-get="{% url 'cart_items' %}"
+          hx-trigger="load"&gt;
+      &lt;!-- Items del carrito --&gt;
+    &lt;/main&gt;
+    &lt;footer class="ux-footer"&gt;
+      &lt;div id="cart-total"
+           hx-get="{% url 'cart_total' %}"
+           hx-trigger="load, cart-updated from:body"&gt;
+        &lt;!-- Total actualizado via HTMX --&gt;
+      &lt;/div&gt;
+      &lt;button class="ux-button ux-color-primary"
+              hx-get="{% url 'checkout' %}"
+              hx-target="#main-content"
+              hx-push-url="true"&gt;
+        Finalizar compra
+      &lt;/button&gt;
+    &lt;/footer&gt;
+  &lt;/div&gt;
+&lt;/aside&gt;
+
+&lt;!-- Django: Trigger evento para actualizar total --&gt;
+# views.py
+def cart_add(request, product_id):
+    # ... logica de agregar al carrito ...
+    response = render(request, 'partials/cart_items.html', {'items': cart.items})
+    response['HX-Trigger'] = 'cart-updated'
+    return response</code></pre>
+
+      <div class="demo-box">
+        <h4 style="margin-top: 0;">Mejores Practicas HTMX + Django</h4>
+        <ul style="margin: 0; padding-left: var(--ux-space-lg); color: var(--ux-text-secondary);">
+          <li><code>hx-target</code> - Apunta a contenedores con ID para reemplazar contenido especifico</li>
+          <li><code>hx-swap="innerHTML"</code> - Reemplaza el contenido interno sin afectar el contenedor</li>
+          <li><code>hx-push-url="true"</code> - Actualiza la URL para navegacion SPA-like</li>
+          <li><code>hx-indicator</code> - Muestra un spinner durante la carga</li>
+          <li><code>hx-trigger="revealed"</code> - Carga cuando el elemento es visible (infinite scroll)</li>
+          <li><code>HX-Trigger</code> header - Dispara eventos desde el servidor</li>
+          <li>Detecta peticiones HTMX con <code>request.headers.get('HX-Request')</code></li>
+          <li>Usa templates parciales para respuestas HTMX (sin base template)</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="ux-padding" style="text-align: center; background: var(--ux-surface-secondary); color: var(--ux-text-secondary); font-size: var(--ux-font-size-md);">
+    <p>UX Library - Content Component</p>
+  </footer>

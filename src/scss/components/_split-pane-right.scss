@@ -1,0 +1,156 @@
+/**
+ * UX Split-pane-right Component
+ * Part of the UX CSS Library
+ */
+
+@use '../core/mixins' as *;
+
+// ========================================
+// Split Pane Right
+// Panel lateral derecho con toggle
+// - Desktop: visible, puede ocultarse
+// - Mobile: overlay desde la derecha
+// ========================================
+
+.ux-split-pane-right {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+
+  // Main content area
+  &__main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  // Side panel (right)
+  &__side {
+    width: var(--ux-split-pane-right-width, 320px);
+    max-width: 85vw;
+    flex-shrink: 0;
+    height: 100%;
+    background: var(--ux-surface);
+    border-left: 1px solid var(--ux-border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform var(--ux-transition-normal) var(--ux-ease-ios),
+                width var(--ux-transition-normal) var(--ux-ease-ios),
+                opacity var(--ux-transition-normal) var(--ux-ease-ios);
+
+    // Glass variant
+    &--glass {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+      border-left-color: var(--ux-glass-border);
+    }
+  }
+
+  // Backdrop for mobile
+  &__backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--ux-backdrop-color, rgba(0, 0, 0, 0.4));
+    z-index: var(--ux-z-modal-backdrop);
+    opacity: 0;
+    transition: opacity var(--ux-transition-normal) var(--ux-ease-ios);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  // Toggle button
+  &__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
+
+// ========================================
+// Desktop behavior (>= 992px)
+// ========================================
+
+@media (min-width: 992px) {
+  .ux-split-pane-right {
+    // Panel visible por defecto
+    &__side {
+      position: relative;
+      transform: translateX(0);
+    }
+
+    // Panel oculto en desktop
+    &--collapsed &__side {
+      width: 0;
+      border-left: none;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    // Ocultar backdrop en desktop
+    &__backdrop {
+      display: none !important;
+    }
+
+    // Hide toggle in desktop when panel is visible
+    &:not(&--collapsed) &__toggle--mobile-only {
+      display: none;
+    }
+  }
+}
+
+// ========================================
+// Mobile behavior (< 992px)
+// ========================================
+
+@media (max-width: 991px) {
+  .ux-split-pane-right {
+    // Panel como overlay
+    &__side {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: var(--ux-z-modal);
+      transform: translateX(100%);
+      box-shadow: var(--ux-shadow-xl);
+    }
+
+    // Panel visible en mobile
+    &--open &__side {
+      transform: translateX(0);
+    }
+
+    // Backdrop visible en mobile
+    &__backdrop {
+      display: block;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    &--open &__backdrop {
+      pointer-events: auto;
+      opacity: 1;
+    }
+  }
+}

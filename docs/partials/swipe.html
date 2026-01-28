@@ -1,0 +1,607 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .demo-box--no-padding { padding: 0; overflow: hidden; }
+    .swipe-demo-item { padding: var(--ux-space-md) var(--ux-space-lg); border-bottom: 1px solid var(--ux-border-color); }
+    .gesture-box { height: 200px; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--ux-border-color); border-radius: var(--ux-border-radius-lg); color: var(--ux-text-secondary); font-size: var(--ux-font-size-md); }
+    .gesture-result { margin-top: var(--ux-space-md); padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius); font-family: monospace; font-size: var(--ux-font-size-md); min-height: 44px; }
+  </style>
+
+<!-- Intro -->
+    <section class="demo-section">
+      <h3>Directivas de Gestos</h3>
+      <p>Directivas Alpine.js para gestos tactiles: swipe, drag, pull-to-refresh, long-press, pinch y tap.</p>
+    </section>
+
+    <!-- x-swipe -->
+    <section class="demo-section">
+      <h3>x-swipe</h3>
+      <p>Detecta swipes en cualquier direccion. Usa modificadores para filtrar direccion.</p>
+      <div class="demo-box" x-data="{ result: 'Desliza en cualquier direccion' }">
+        <div class="gesture-box"
+             x-swipe="(e) => result = `Swipe ${e.direction} (${Math.round(e.distance)}px)`"
+             style="touch-action: pan-y;">
+          Swipe aqui
+        </div>
+        <div class="gesture-result" x-text="result"></div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Detectar cualquier swipe --&gt;
+&lt;div x-swipe="handleSwipe"&gt;...&lt;/div&gt;
+
+&lt;!-- Solo swipe izquierda --&gt;
+&lt;div x-swipe.left="handleLeft"&gt;...&lt;/div&gt;
+
+&lt;!-- Solo swipe derecha --&gt;
+&lt;div x-swipe.right="handleRight"&gt;...&lt;/div&gt;
+
+&lt;!-- Callback recibe: { direction, distance, velocity, angle } --&gt;</pre>
+    </section>
+
+    <!-- x-swipe directions -->
+    <section class="demo-section">
+      <h3>Swipe por Direccion</h3>
+      <p>Usando modificadores .left, .right, .up, .down para filtrar.</p>
+      <div class="demo-box" x-data="{ result: 'Swipe izquierda o derecha' }">
+        <div class="gesture-box"
+             x-swipe.left="() => result = 'Swipe LEFT detectado!'"
+             x-swipe.right="() => result = 'Swipe RIGHT detectado!'"
+             style="touch-action: pan-y;">
+          Solo izquierda/derecha
+        </div>
+        <div class="gesture-result" x-text="result"></div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div
+     x-swipe.left="() => action = 'delete'"
+     x-swipe.right="() => action = 'archive'"&gt;
+  ...
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- Swipeable List Item -->
+    <section class="demo-section">
+      <h3>Swipeable List Item</h3>
+      <p>Componente para items de lista con acciones al deslizar (estilo iOS Mail).</p>
+      <div class="demo-box demo-box--no-padding">
+        <div x-data="uxSwipeItem({ endActionsWidth: 160 })" class="ux-swipe-container">
+          <!-- Acciones al final (derecha) -->
+          <div class="ux-swipe-actions ux-swipe-actions--end">
+            <button class="ux-swipe-action ux-swipe-action--more" @click="close()">
+              <span class="ux-swipe-action__icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+                </svg>
+              </span>
+            </button>
+            <button class="ux-swipe-action ux-swipe-action--delete" @click="close(); alert('Eliminado')">
+              <span class="ux-swipe-action__icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </span>
+            </button>
+          </div>
+
+          <!-- Contenido principal -->
+          <div class="ux-swipe-content swipe-demo-item"
+               :class="isSwiping && 'ux-swipe-content--swiping'"
+               :style="contentStyle"
+               x-swipe="(e) => { if(e.direction === 'left') handleSwipeMove(-e.distance); if(e.direction === 'right') handleSwipeMove(e.distance); }"
+               @touchstart="handleSwipeStart()"
+               @touchend="handleSwipeEnd()">
+            <div style="display: flex; align-items: center; gap: var(--ux-space-md);">
+              <div style="width: 44px; height: 44px; background: var(--ux-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--ux-primary-contrast); font-weight: 600;">JD</div>
+              <div>
+                <div style="font-weight: 500;">John Doe</div>
+                <div style="font-size: var(--ux-font-size-md); color: var(--ux-text-secondary);">Desliza para ver acciones</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxSwipeItem({ endActionsWidth: 160 })" class="ux-swipe-container"&gt;
+  &lt;!-- Acciones (se revelan al deslizar) --&gt;
+  &lt;div class="ux-swipe-actions ux-swipe-actions--end"&gt;
+    &lt;button class="ux-swipe-action ux-swipe-action--more"&gt;...&lt;/button&gt;
+    &lt;button class="ux-swipe-action ux-swipe-action--delete"&gt;...&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Contenido --&gt;
+  &lt;div class="ux-swipe-content" :style="contentStyle"&gt;
+    ...
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- x-long-press -->
+    <section class="demo-section">
+      <h3>x-long-press</h3>
+      <p>Detecta pulsacion larga. Por defecto 500ms, configurable con modificador.</p>
+      <div class="demo-box" x-data="{ result: 'Manten presionado...' }">
+        <div class="gesture-box"
+             x-long-press="() => result = 'Long press detectado!'"
+             style="cursor: pointer; user-select: none;">
+          Manten presionado
+        </div>
+        <div class="gesture-result" x-text="result"></div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Long press default (500ms) --&gt;
+&lt;div x-long-press="handleLongPress"&gt;...&lt;/div&gt;
+
+&lt;!-- Long press 800ms --&gt;
+&lt;div x-long-press.800ms="handleLongPress"&gt;...&lt;/div&gt;
+
+&lt;!-- Long press 1 segundo --&gt;
+&lt;div x-long-press.1000ms="handleLongPress"&gt;...&lt;/div&gt;</pre>
+    </section>
+
+    <!-- x-tap -->
+    <section class="demo-section">
+      <h3>x-tap</h3>
+      <p>Detecta taps simples o dobles. Diferente de click, es especifico para touch.</p>
+      <div class="demo-box" x-data="{ result: 'Toca una o dos veces' }">
+        <div class="gesture-box"
+             x-tap="() => result = 'Single tap!'"
+             x-tap.double="() => result = 'Double tap!'"
+             style="cursor: pointer;">
+          Tap / Double Tap
+        </div>
+        <div class="gesture-result" x-text="result"></div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Single tap --&gt;
+&lt;div x-tap="handleTap"&gt;...&lt;/div&gt;
+
+&lt;!-- Double tap --&gt;
+&lt;div x-tap.double="handleDoubleTap"&gt;...&lt;/div&gt;
+
+&lt;!-- Ambos --&gt;
+&lt;div x-tap="single" x-tap.double="double"&gt;...&lt;/div&gt;</pre>
+    </section>
+
+    <!-- x-drag -->
+    <section class="demo-section">
+      <h3>x-drag</h3>
+      <p>Permite arrastrar elementos. Recibe eventos start, move, end.</p>
+      <div class="demo-box" x-data="{ x: 0, y: 0, result: 'Arrastra el cuadro' }">
+        <div style="position: relative; height: 200px; border: 2px dashed var(--ux-border-color); border-radius: var(--ux-border-radius-lg); overflow: hidden;">
+          <div x-drag="(e) => {
+                 if(e.type === 'move') { x = e.delta.x; y = e.delta.y; }
+                 if(e.type === 'end') { result = `Movido: ${Math.round(e.delta.x)}px, ${Math.round(e.delta.y)}px`; x = 0; y = 0; }
+               }"
+               :style="`transform: translate(${x}px, ${y}px)`"
+               style="position: absolute; top: 50%; left: 50%; margin: -30px 0 0 -30px; width: 60px; height: 60px; background: var(--ux-primary); border-radius: var(--ux-border-radius); cursor: grab; display: flex; align-items: center; justify-content: center; color: var(--ux-primary-contrast); font-weight: 600;">
+            Drag
+          </div>
+        </div>
+        <div class="gesture-result" x-text="result"></div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-drag="handleDrag"&gt;...&lt;/div&gt;
+
+&lt;!-- Handler recibe: --&gt;
+// { type: 'start', startPos, offset, element }
+// { type: 'move', startPos, currentPos, delta: {x, y}, element }
+// { type: 'end', startPos, endPos, delta: {x, y}, element }</pre>
+    </section>
+
+    <!-- Drag Handle -->
+    <section class="demo-section">
+      <h3>Drag Handle</h3>
+      <p>Estilos para handle de arrastre en listas reordenables.</p>
+      <div class="demo-box demo-box--no-padding">
+        <div style="display: flex; align-items: center; padding: var(--ux-space-md) var(--ux-space-lg); border-bottom: 1px solid var(--ux-border-color);">
+          <div class="ux-drag-handle">
+            <svg class="ux-drag-handle__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+            </svg>
+          </div>
+          <span style="margin-left: var(--ux-space-md);">Item con drag handle</span>
+        </div>
+        <div style="display: flex; align-items: center; padding: var(--ux-space-md) var(--ux-space-lg); border-bottom: 1px solid var(--ux-border-color);">
+          <div class="ux-drag-handle">
+            <svg class="ux-drag-handle__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+            </svg>
+          </div>
+          <span style="margin-left: var(--ux-space-md);">Otro item</span>
+        </div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-drag-handle"&gt;
+  &lt;svg class="ux-drag-handle__icon"&gt;...&lt;/svg&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- x-pull-refresh -->
+    <section class="demo-section">
+      <h3>x-pull-refresh</h3>
+      <p>Pull to refresh para listas. Requiere contenedor con scroll.</p>
+      <div class="demo-box demo-box--no-padding">
+        <div x-data="{ items: ['Item 1', 'Item 2', 'Item 3'], loading: false }"
+             x-pull-refresh="async () => {
+               loading = true;
+               await new Promise(r => setTimeout(r, 1500));
+               items.unshift('Nuevo Item ' + (items.length + 1));
+               loading = false;
+             }"
+             style="height: 200px; overflow-y: auto;">
+          <div class="ux-pull-content">
+            <template x-for="item in items" :key="item">
+              <div style="padding: var(--ux-space-md) var(--ux-space-lg); border-bottom: 1px solid var(--ux-border-color);" x-text="item"></div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top: var(--ux-space-sm); font-size: var(--ux-font-size-md); color: var(--ux-text-tertiary);">Desliza hacia abajo desde el inicio de la lista para refrescar (mejor en movil)</p>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-pull-refresh="async () => await fetchData()"
+     style="height: 400px; overflow-y: auto;"&gt;
+  &lt;div class="ux-pull-content"&gt;
+    &lt;!-- Lista de items --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- x-pinch -->
+    <section class="demo-section">
+      <h3>x-pinch</h3>
+      <p>Detecta gesto de pinch (zoom) con dos dedos. Solo funciona en touch.</p>
+      <div class="demo-box" x-data="{ scale: 1, result: 'Usa dos dedos para pinch' }">
+        <div class="gesture-box"
+             x-pinch="(e) => { scale = Math.max(0.5, Math.min(3, e.scale)); result = `Scale: ${scale.toFixed(2)}`; }"
+             :style="`transform: scale(${scale})`"
+             style="transition: none;">
+          Pinch to Zoom
+        </div>
+        <div class="gesture-result" x-text="result"></div>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-pinch="handlePinch"&gt;...&lt;/div&gt;
+
+&lt;!-- Handler recibe: --&gt;
+// { type: 'pinch', scale, delta, center: {x, y} }</pre>
+    </section>
+
+    <!-- Swipe Action Classes -->
+    <section class="demo-section">
+      <h3>Clases de Swipe Actions</h3>
+      <p>Clases predefinidas para botones de accion.</p>
+      <div class="demo-box" style="display: flex; gap: var(--ux-space-sm);">
+        <div class="ux-swipe-action ux-swipe-action--delete" style="position: relative; border-radius: var(--ux-border-radius);">Delete</div>
+        <div class="ux-swipe-action ux-swipe-action--archive" style="position: relative; border-radius: var(--ux-border-radius);">Archive</div>
+        <div class="ux-swipe-action ux-swipe-action--pin" style="position: relative; border-radius: var(--ux-border-radius);">Pin</div>
+        <div class="ux-swipe-action ux-swipe-action--more" style="position: relative; border-radius: var(--ux-border-radius);">More</div>
+      </div>
+      <pre class="ux-code-block" data-lang="css">.ux-swipe-action--delete  /* Rojo (danger) */
+.ux-swipe-action--archive /* Amarillo (warning) */
+.ux-swipe-action--pin     /* Azul (primary) */
+.ux-swipe-action--more    /* Gris (medium) */</pre>
+    </section>
+
+    <!-- API Reference -->
+    <section class="demo-section">
+      <h3>API - Directivas Alpine</h3>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md);">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm); text-align: left;">Directiva</th>
+              <th style="padding: var(--ux-space-sm); text-align: left;">Modificadores</th>
+              <th style="padding: var(--ux-space-sm); text-align: left;">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>x-swipe</code></td>
+              <td style="padding: var(--ux-space-sm);"><code>.left</code> <code>.right</code> <code>.up</code> <code>.down</code></td>
+              <td style="padding: var(--ux-space-sm);">Detecta swipe en direccion</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>x-drag</code></td>
+              <td style="padding: var(--ux-space-sm);"><code>.handle:selector</code></td>
+              <td style="padding: var(--ux-space-sm);">Drag & drop con handle opcional</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>x-pull-refresh</code></td>
+              <td style="padding: var(--ux-space-sm);">-</td>
+              <td style="padding: var(--ux-space-sm);">Pull to refresh para listas</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>x-long-press</code></td>
+              <td style="padding: var(--ux-space-sm);"><code>.{n}ms</code></td>
+              <td style="padding: var(--ux-space-sm);">Long press con duracion configurable</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>x-pinch</code></td>
+              <td style="padding: var(--ux-space-sm);">-</td>
+              <td style="padding: var(--ux-space-sm);">Pinch zoom (solo touch)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>x-tap</code></td>
+              <td style="padding: var(--ux-space-sm);"><code>.double</code></td>
+              <td style="padding: var(--ux-space-sm);">Single o double tap</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CSS Classes -->
+    <section class="demo-section">
+      <h3>API - Clases CSS</h3>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md);">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm); text-align: left;">Clase</th>
+              <th style="padding: var(--ux-space-sm); text-align: left;">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-swipe-container</code></td>
+              <td style="padding: var(--ux-space-sm);">Contenedor para swipe item</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-swipe-content</code></td>
+              <td style="padding: var(--ux-space-sm);">Contenido principal que se desliza</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-swipe-actions</code></td>
+              <td style="padding: var(--ux-space-sm);">Contenedor de acciones</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-swipe-actions--start</code></td>
+              <td style="padding: var(--ux-space-sm);">Acciones al inicio (izquierda)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-swipe-actions--end</code></td>
+              <td style="padding: var(--ux-space-sm);">Acciones al final (derecha)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-swipe-action</code></td>
+              <td style="padding: var(--ux-space-sm);">Boton de accion individual</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-drag-handle</code></td>
+              <td style="padding: var(--ux-space-sm);">Handle para drag en listas</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-draggable</code></td>
+              <td style="padding: var(--ux-space-sm);">Elemento arrastrable</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-drop-zone</code></td>
+              <td style="padding: var(--ux-space-sm);">Zona de drop</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>.ux-pull-indicator</code></td>
+              <td style="padding: var(--ux-space-sm);">Indicador de pull refresh</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- uxSwipeItem Component -->
+    <section class="demo-section">
+      <h3>API - uxSwipeItem()</h3>
+      <p>Componente Alpine para swipeable list items.</p>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md);">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm); text-align: left;">Propiedad/Metodo</th>
+              <th style="padding: var(--ux-space-sm); text-align: left;">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>offset</code></td>
+              <td style="padding: var(--ux-space-sm);">Desplazamiento actual en px</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>isSwiping</code></td>
+              <td style="padding: var(--ux-space-sm);">true durante swipe activo</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>openSide</code></td>
+              <td style="padding: var(--ux-space-sm);">'start', 'end' o null</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>contentStyle</code></td>
+              <td style="padding: var(--ux-space-sm);">Getter para :style del contenido</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>openStart()</code></td>
+              <td style="padding: var(--ux-space-sm);">Abre acciones del inicio</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>openEnd()</code></td>
+              <td style="padding: var(--ux-space-sm);">Abre acciones del final</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>close()</code></td>
+              <td style="padding: var(--ux-space-sm);">Cierra las acciones</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <pre class="ux-code-block" data-lang="javascript">// Configuracion
+uxSwipeItem({
+  startActionsWidth: 160,  // Ancho acciones izquierda
+  endActionsWidth: 80,     // Ancho acciones derecha
+  threshold: 40            // Distancia para activar snap
+})</pre>
+    </section>
+
+    <!-- HTMX + Django -->
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Ejemplos de integracion con HTMX para eliminar items desde el servidor.</p>
+
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Lista con swipe para eliminar</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Lista de items con swipe-to-delete --&gt;
+&lt;div id="item-list"&gt;
+  {% for item in items %}
+  &lt;div x-data="uxSwipeItem({ endActionsWidth: 80 })"
+       class="ux-swipe-container"
+       id="item-{{ item.id }}"&gt;
+
+    &lt;!-- Accion de eliminar --&gt;
+    &lt;div class="ux-swipe-actions ux-swipe-actions--end"&gt;
+      &lt;button class="ux-swipe-action ux-swipe-action--delete"
+              hx-delete="/api/items/{{ item.id }}/"
+              hx-target="#item-{{ item.id }}"
+              hx-swap="outerHTML swap:200ms"
+              hx-confirm="Eliminar este item?"&gt;
+        &lt;span class="ux-swipe-action__icon"&gt;
+          &lt;svg fill="none" stroke="currentColor" viewBox="0 0 24 24"&gt;
+            &lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/&gt;
+          &lt;/svg&gt;
+        &lt;/span&gt;
+      &lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Contenido del item --&gt;
+    &lt;div class="ux-swipe-content ux-list__item"
+         :class="isSwiping &amp;&amp; 'ux-swipe-content--swiping'"
+         :style="contentStyle"
+         x-swipe="(e) =&gt; { if(e.direction === 'left') handleSwipeMove(-e.distance); }"
+         @touchstart="handleSwipeStart()"
+         @touchend="handleSwipeEnd()"&gt;
+      {{ item.name }}
+    &lt;/div&gt;
+  &lt;/div&gt;
+  {% endfor %}
+&lt;/div&gt;</pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Vista Django (views.py)</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
+from .models import Item
+
+@require_http_methods(["DELETE"])
+def delete_item(request, item_id):
+    try:
+        item = Item.objects.get(id=item_id)
+        item.delete()
+        # Retornar vacio para que HTMX elimine el elemento
+        return HttpResponse("")
+    except Item.DoesNotExist:
+        return HttpResponse("Item no encontrado", status=404)</pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin: var(--ux-space-lg) 0 var(--ux-space-sm);">URLs Django (urls.py)</h4>
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('api/items/&lt;int:item_id&gt;/', views.delete_item, name='delete_item'),
+]</pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Swipe con multiples acciones</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Swipe con archivar y eliminar --&gt;
+&lt;div x-data="uxSwipeItem({ startActionsWidth: 80, endActionsWidth: 160 })"
+     class="ux-swipe-container"
+     id="message-{{ message.id }}"&gt;
+
+  &lt;!-- Accion izquierda: Archivar --&gt;
+  &lt;div class="ux-swipe-actions ux-swipe-actions--start"&gt;
+    &lt;button class="ux-swipe-action ux-swipe-action--archive"
+            hx-post="/api/messages/{{ message.id }}/archive/"
+            hx-target="#message-{{ message.id }}"
+            hx-swap="outerHTML"&gt;
+      Archivar
+    &lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Acciones derecha: Mas + Eliminar --&gt;
+  &lt;div class="ux-swipe-actions ux-swipe-actions--end"&gt;
+    &lt;button class="ux-swipe-action ux-swipe-action--more"
+            @click="close(); $dispatch('show-options', { id: {{ message.id }} })"&gt;
+      Mas
+    &lt;/button&gt;
+    &lt;button class="ux-swipe-action ux-swipe-action--delete"
+            hx-delete="/api/messages/{{ message.id }}/"
+            hx-target="#message-{{ message.id }}"
+            hx-swap="outerHTML swap:200ms"&gt;
+      Eliminar
+    &lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Contenido --&gt;
+  &lt;div class="ux-swipe-content ux-list__item"
+       :class="isSwiping &amp;&amp; 'ux-swipe-content--swiping'"
+       :style="contentStyle"
+       x-swipe="(e) =&gt; {
+         if(e.direction === 'left') handleSwipeMove(-e.distance);
+         if(e.direction === 'right') handleSwipeMove(e.distance);
+       }"
+       @touchstart="handleSwipeStart()"
+       @touchend="handleSwipeEnd()"&gt;
+    &lt;strong&gt;{{ message.subject }}&lt;/strong&gt;
+    &lt;p&gt;{{ message.preview }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Eliminar con animacion de salida</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- CSS para animacion de salida --&gt;
+&lt;style&gt;
+  .ux-swipe-container.htmx-swapping {
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: all 200ms ease-out;
+  }
+&lt;/style&gt;
+
+&lt;!-- Item con animacion --&gt;
+&lt;div x-data="uxSwipeItem({ endActionsWidth: 80 })"
+     class="ux-swipe-container"
+     id="task-{{ task.id }}"&gt;
+  &lt;div class="ux-swipe-actions ux-swipe-actions--end"&gt;
+    &lt;button class="ux-swipe-action ux-swipe-action--delete"
+            hx-delete="/api/tasks/{{ task.id }}/"
+            hx-target="closest .ux-swipe-container"
+            hx-swap="outerHTML swap:200ms"&gt;
+      Eliminar
+    &lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-swipe-content" :style="contentStyle"&gt;
+    {{ task.title }}
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Atributos HTMX utiles</h4>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md);">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm); text-align: left;">Atributo</th>
+              <th style="padding: var(--ux-space-sm); text-align: left;">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>hx-delete</code></td>
+              <td style="padding: var(--ux-space-sm);">Envia DELETE request al endpoint</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>hx-target</code></td>
+              <td style="padding: var(--ux-space-sm);">Elemento a reemplazar con la respuesta</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>hx-swap="outerHTML"</code></td>
+              <td style="padding: var(--ux-space-sm);">Reemplaza el elemento completo (ideal para eliminar)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>hx-swap="outerHTML swap:200ms"</code></td>
+              <td style="padding: var(--ux-space-sm);">Espera 200ms antes de swap (para animaciones)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>hx-confirm</code></td>
+              <td style="padding: var(--ux-space-sm);">Muestra dialogo de confirmacion antes de enviar</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>

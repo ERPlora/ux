@@ -6,20 +6,42 @@
   <title>UX - Universal eXtensions</title>
   <!-- Bootstrap Grid -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
+  <!-- UX CSS Library (served from public/ without Vite transformation) -->
+  <link rel="stylesheet" href="/ux.css">
+  <!-- UX JS Helpers (optional) -->
+  <script src="/ux.js"></script>
+  <!-- HTMX for fragment loading -->
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <!-- Alpine.js Components (must load before Alpine) -->
+  <script src="alpine-components.js"></script>
   <!-- Alpine.js -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <!-- UX Components -->
-  <script src="../components/ux-core.js"></script>
-  <script src="../components/ux-content.js"></script>
-  <script src="../components/ux-button.js"></script>
-  <script src="../components/ux-list.js"></script>
-  <script src="../components/ux-navbar.js"></script>
-  <script src="../components/ux-badge.js"></script>
-  <script src="../components/ux-searchbar.js"></script>
-  <script src="../components/ux-menu.js"></script>
-  <script src="../components/ux-card.js"></script>
-  <script src="../components/ux-code-block.js"></script>
-  <link rel="stylesheet" href="../css/themes.css">
+  <style>
+    /* Hide elements until Alpine is ready */
+    [x-cloak] { display: none !important; }
+    /* Loading indicator for HTMX */
+    .htmx-request .htmx-indicator {
+      display: inline-block;
+    }
+    .htmx-indicator {
+      display: none;
+    }
+    /* Smooth transition for content loading */
+    #page-content.htmx-request {
+      opacity: 0.5;
+    }
+    /* Page content needs explicit height to scroll */
+    #page-content {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    /* Component content needs to be block, not flex */
+    #component-content {
+      display: block;
+    }
+  </style>
 </head>
 <body class="ux-app" x-data="docsApp()">
   <div class="ux-split-pane" :class="{ 'ux-split-pane--open': sidebarOpen, 'ux-split-pane--collapsed': sidebarCollapsed }">
@@ -27,14 +49,14 @@
     <div class="ux-split-pane__backdrop" @click="sidebarOpen = false"></div>
 
     <!-- Sidebar -->
-    <aside class="ux-split-pane__side" aria-label="Menu de navegacion">
+    <aside class="ux-split-pane__side ux-split-pane__side--glass" aria-label="Menu de navegacion">
       <!-- Sidebar Header -->
-      <div class="ux-navbar">
+      <div class="ux-navbar ux-navbar--glass">
         <div class="ux-navbar__content">
           <div class="ux-navbar__center">
-            <a href="index.html" class="ux-navbar__title">
+            <a href="#" @click.prevent="loadPage('home', 'Home')" class="ux-navbar__title">
               UX
-              <span class="ux-badge ux-color-primary ux-ml-sm">v1.0</span>
+              <span class="ux-badge ux-color-primary ux-ml-sm">v2.0</span>
             </a>
           </div>
         </div>
@@ -64,7 +86,8 @@
           <li>
             <a class="ux-menu__item"
                :class="{ 'ux-menu__item--selected': currentPage === 'home' }"
-               @click="loadPage('home', 'Home')">
+               href="#"
+               @click.prevent="loadPage('home', 'Home')">
               <span class="ux-menu__item-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -83,7 +106,8 @@
                   <li>
                     <a class="ux-menu__item"
                        :class="{ 'ux-menu__item--selected': currentPage === item.page }"
-                       @click="loadPage(item.page, item.name)">
+                       href="#"
+                       @click.prevent="loadPage(item.page, item.name)">
                       <span class="ux-menu__item-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" x-html="item.icon"></svg>
                       </span>
@@ -101,7 +125,7 @@
     <!-- Main Content -->
     <main class="ux-split-pane__main">
       <!-- Top Navbar -->
-      <nav class="ux-navbar ux-navbar--sticky" aria-label="Barra de navegacion">
+      <nav class="ux-navbar ux-navbar--sticky ux-navbar--glass" aria-label="Barra de navegacion">
         <div class="ux-navbar__content">
           <div class="ux-navbar__start">
             <button class="ux-navbar__button" @click="window.innerWidth >= 992 ? toggleSidebar() : sidebarOpen = true">
@@ -116,31 +140,38 @@
           </div>
           <div class="ux-navbar__center">
             <span class="ux-navbar__title" x-text="pageTitle"></span>
+            <span class="ux-spinner ux-spinner--sm htmx-indicator" style="margin-left: 8px;"></span>
           </div>
           <div class="ux-navbar__end">
-            <button class="ux-navbar__button" @click="toggleDarkMode()">
-              <svg x-show="darkMode" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-              </svg>
-              <svg x-show="!darkMode" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-              </svg>
+            <button class="ux-navbar__button" @click="toggleDarkMode()" title="Toggle dark mode">
+              <template x-if="darkMode">
+                <!-- Sun icon (shown in dark mode) -->
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+              </template>
+              <template x-if="!darkMode">
+                <!-- Moon icon (shown in light mode) -->
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+              </template>
             </button>
           </div>
         </div>
       </nav>
 
       <!-- Page Content -->
-      <div class="ux-content">
-        <!-- Home Page -->
-        <div x-show="currentPage === 'home'" class="ux-p-xl">
+      <div id="page-content" class="ux-content ux-scroll">
+        <!-- Home Page (inline) -->
+        <div x-show="currentPage === 'home'" x-cloak class="ux-p-xl">
           <div class="container-fluid">
             <div class="row justify-content-center">
               <div class="col-12 col-lg-10 col-xl-8">
                 <!-- Header -->
                 <h1 class="ux-text-2xl ux-font-bold ux-mb-md">UX - Universal eXtensions</h1>
                 <p class="ux-text-lg ux-text-secondary ux-mb-xl">
-                  Componentes iOS-style para web, optimizados para HTMX y Alpine.js. Zero-build, touch-first, y completamente autocontenidos.
+                  Zero-dependency, framework-agnostic CSS component library con estilo iOS. Funciona con HTMX, React, Vue, o JavaScript vanilla.
                 </p>
 
                 <!-- Quick Start Card -->
@@ -149,18 +180,19 @@
                     <h2 class="ux-card__title">Quick Start</h2>
                   </div>
                   <div class="ux-card__content">
-                    <pre class="ux-code-block" data-lang="html">&lt;!-- Core (requerido) --&gt;
-&lt;script src="components/ux-core.js"&gt;&lt;/script&gt;
+                    <pre class="ux-code-block" data-lang="html">&lt;!-- CSS (requerido) --&gt;
+&lt;link rel="stylesheet" href="dist/ux.min.css"&gt;
 
-&lt;!-- Componentes individuales --&gt;
-&lt;script src="components/ux-button.js"&gt;&lt;/script&gt;
-&lt;script src="components/ux-modal.js"&gt;&lt;/script&gt;
-
-&lt;!-- O cargar todos --&gt;
+&lt;!-- JS Helpers (opcional) --&gt;
 &lt;script src="dist/ux.min.js"&gt;&lt;/script&gt;
 
-&lt;!-- Dependencias opcionales --&gt;
-&lt;script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"&gt;&lt;/script&gt;</pre>
+&lt;!-- Uso basico --&gt;
+&lt;button class="ux-button ux-color-primary"&gt;Button&lt;/button&gt;
+
+&lt;!-- Modal con data-state --&gt;
+&lt;div class="ux-modal-backdrop" data-state="closed"&gt;
+  &lt;div class="ux-modal"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
                   </div>
                 </div>
 
@@ -170,11 +202,14 @@
                     <h2 class="ux-card__title">Bootstrap Grid</h2>
                   </div>
                   <div class="ux-card__content">
-                    <p class="ux-text-secondary ux-mb-md">UX usa Bootstrap Grid 5.3 para el sistema de layout. Cargar antes de ux-core.js:</p>
+                    <p class="ux-text-secondary ux-mb-md">UX usa Bootstrap Grid 5.3 para el sistema de layout (opcional):</p>
                     <pre class="ux-code-block" data-lang="html">&lt;!-- Bootstrap Grid (solo grid, sin componentes) --&gt;
 &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet"&gt;
 
-&lt;!-- Luego cargar UX --&gt;
+&lt;!-- UX CSS --&gt;
+&lt;link rel="stylesheet" href="dist/ux.min.css"&gt;
+
+&lt;!-- UX JS (opcional) --&gt;
 &lt;script src="dist/ux.min.js"&gt;&lt;/script&gt;</pre>
                     <p class="ux-text-secondary ux-mt-md">Uso del grid:</p>
                     <pre class="ux-code-block" data-lang="html">&lt;div class="container"&gt;
@@ -243,9 +278,9 @@
   &lt;meta charset="UTF-8"&gt;
   &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
   &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet"&gt;
+  &lt;link rel="stylesheet" href="{% static 'css/ux.min.css' %}"&gt;
   &lt;script src="{% static 'js/ux.min.js' %}"&gt;&lt;/script&gt;
   &lt;script src="https://unpkg.com/htmx.org@2.0.4"&gt;&lt;/script&gt;
-  &lt;script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body class="ux-app" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'&gt;
   {% block content %}{% endblock %}
@@ -305,8 +340,8 @@ def lista_usuarios(request):
                     <div class="ux-card">
                       <div class="ux-card__content ux-text-center">
                         <div class="ux-text-2xl ux-mb-sm">&#9889;</div>
-                        <div class="ux-font-semibold">Zero Build</div>
-                        <div class="ux-text-sm ux-text-secondary">Sin compilacion</div>
+                        <div class="ux-font-semibold">CSS-First</div>
+                        <div class="ux-text-sm ux-text-secondary">JS opcional</div>
                       </div>
                     </div>
                   </div>
@@ -314,8 +349,8 @@ def lista_usuarios(request):
                     <div class="ux-card">
                       <div class="ux-card__content ux-text-center">
                         <div class="ux-text-2xl ux-mb-sm">&#128230;</div>
-                        <div class="ux-font-semibold">Autocontenido</div>
-                        <div class="ux-text-sm ux-text-secondary">CSS + JS en uno</div>
+                        <div class="ux-font-semibold">Zero Deps</div>
+                        <div class="ux-text-sm ux-text-secondary">Framework-agnostic</div>
                       </div>
                     </div>
                   </div>
@@ -369,12 +404,10 @@ def lista_usuarios(request):
           </div>
         </div>
 
-        <!-- Component Pages (iframe) -->
-        <iframe x-show="currentPage !== 'home'"
-                :src="currentPage !== 'home' ? currentPage + '.html' : ''"
-                class="ux-frame"
-                title="Component documentation"
-                @load="loading = false; syncThemeToIframe()"></iframe>
+        <!-- Component Pages (loaded via HTMX) -->
+        <div x-show="currentPage !== 'home'" x-cloak id="component-content" style="padding: var(--ux-space-lg);">
+          <!-- Content will be loaded here via HTMX -->
+        </div>
       </div>
     </main>
   </div>
@@ -389,6 +422,10 @@ def lista_usuarios(request):
         pageTitle: 'Home',
         loading: false,
         searchQuery: '',
+
+        // Toast system for demo pages
+        toasts: [],
+        toastPosition: 'bottom',
 
         menu: [
           {
@@ -421,7 +458,6 @@ def lista_usuarios(request):
               { name: 'Range', page: 'range', icon: '<path d="M4 12h16" stroke-width="2"/><circle cx="14" cy="12" r="3" fill="currentColor"/>' },
               { name: 'Upload', page: 'upload', icon: '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke-width="2"/><polyline points="17 8 12 3 7 8" stroke-width="2"/><line x1="12" y1="3" x2="12" y2="15" stroke-width="2"/>' },
               { name: 'Form', page: 'form', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M7 8h10M7 12h6" stroke-width="2"/><circle cx="17" cy="16" r="2" stroke-width="2"/>' },
-              { name: 'Form Wizard', page: 'form-wizard', icon: '<circle cx="6" cy="12" r="3" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/><circle cx="18" cy="12" r="3" stroke-width="2"/><path d="M9 12h3M15 12h3" stroke-width="2"/>' },
               { name: 'Autocomplete', page: 'autocomplete', icon: '<rect x="3" y="6" width="18" height="12" rx="2" stroke-width="2"/><circle cx="9" cy="12" r="3" stroke-width="2"/><path d="M14 10l4 4M14 14l4-4" stroke-width="1.5"/>' },
               { name: 'Tag Input', page: 'tag-input', icon: '<rect x="2" y="8" width="20" height="8" rx="4" stroke-width="2"/><circle cx="7" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M17 10v4" stroke-width="2"/>' },
               { name: 'OTP Input', page: 'otp-input', icon: '<rect x="2" y="8" width="5" height="8" rx="1" stroke-width="2"/><rect x="9" y="8" width="5" height="8" rx="1" stroke-width="2"/><rect x="16" y="8" width="5" height="8" rx="1" stroke-width="2"/>' },
@@ -430,12 +466,12 @@ def lista_usuarios(request):
               { name: 'Color Picker', page: 'color-picker', icon: '<circle cx="12" cy="12" r="8" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/>' },
               { name: 'Signature Pad', page: 'signature-pad', icon: '<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/><path d="M6 16c2-4 4-2 6-6s4-2 6 2" stroke-width="2"/>' },
               { name: 'Quantity Stepper', page: 'quantity-stepper', icon: '<rect x="3" y="8" width="18" height="8" rx="2" stroke-width="2"/><path d="M7 12h2M15 12h2M16 10v4" stroke-width="2"/>' },
-              { name: 'Rich Text Editor', page: 'rich-text', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M7 7h10M7 11h6M7 15h8" stroke-width="2"/>' },
             ]
           },
           {
             name: 'Layout',
             items: [
+              { name: 'Layout System', page: 'layout', icon: '<rect x="2" y="2" width="20" height="20" rx="2" stroke-width="2"/><path d="M2 7h20M2 17h20" stroke-width="2"/>' },
               { name: 'Card', page: 'card', icon: '<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/>' },
               { name: 'List', page: 'list', icon: '<path d="M4 6h16M4 12h16M4 18h16" stroke-width="2"/>' },
               { name: 'Content', page: 'content', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M3 9h18" stroke-width="2"/>' },
@@ -445,13 +481,10 @@ def lista_usuarios(request):
               { name: 'Divider', page: 'divider', icon: '<path d="M4 12h16" stroke-width="2"/>' },
               { name: 'Spacer', page: 'spacer', icon: '<path d="M12 4v16M8 8l4-4 4 4M8 16l4 4 4-4" stroke-width="2"/>' },
               { name: 'Master-Detail', page: 'master-detail', icon: '<rect x="2" y="3" width="7" height="18" rx="1" stroke-width="2"/><rect x="11" y="3" width="11" height="18" rx="1" stroke-width="2"/>' },
-              { name: 'Split Pane Right', page: 'split-pane-right', icon: '<rect x="2" y="3" width="11" height="18" rx="1" stroke-width="2"/><rect x="15" y="3" width="7" height="18" rx="1" stroke-width="2"/>' },
               { name: 'Shell', page: 'shell', icon: '<rect x="2" y="2" width="20" height="20" rx="2" stroke-width="2"/><path d="M2 7h20M7 7v15" stroke-width="2"/>' },
               { name: 'Dashboard Grid', page: 'dashboard-grid', icon: '<rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/>' },
               { name: 'Kanban', page: 'kanban', icon: '<rect x="2" y="3" width="6" height="18" rx="1" stroke-width="2"/><rect x="9" y="3" width="6" height="12" rx="1" stroke-width="2"/><rect x="16" y="3" width="6" height="15" rx="1" stroke-width="2"/>' },
-              { name: 'Masonry', page: 'masonry', icon: '<rect x="3" y="3" width="7" height="10" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="6" rx="1" stroke-width="2"/><rect x="3" y="15" width="7" height="6" rx="1" stroke-width="2"/><rect x="14" y="11" width="7" height="10" rx="1" stroke-width="2"/>' },
               { name: 'Timeline', page: 'timeline', icon: '<path d="M12 4v16" stroke-width="2"/><circle cx="12" cy="6" r="2" stroke-width="2"/><circle cx="12" cy="12" r="2" stroke-width="2"/><circle cx="12" cy="18" r="2" stroke-width="2"/>' },
-              { name: 'Virtual List', page: 'virtual-list', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M7 7h10M7 11h10M7 15h10" stroke-width="2" opacity="0.5"/>' },
             ]
           },
           {
@@ -496,7 +529,6 @@ def lista_usuarios(request):
               { name: 'Rating', page: 'rating', icon: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="2"/>' },
               { name: 'Progress Circle', page: 'progress-circle', icon: '<circle cx="12" cy="12" r="9" stroke-width="2" opacity="0.3"/><path d="M12 3a9 9 0 0 1 9 9" stroke-width="2" stroke-linecap="round"/>' },
               { name: 'Progress Steps', page: 'progress-steps', icon: '<circle cx="5" cy="12" r="3" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="19" cy="12" r="3" stroke-width="2"/><path d="M8 12h1M15 12h1" stroke-width="2"/>' },
-              { name: 'State', page: 'state', icon: '<circle cx="12" cy="12" r="9" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2"/>' },
               { name: 'Stats', page: 'stats', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M7 14v3M12 10v7M17 7v10" stroke-width="2"/>' },
               { name: 'Banner', page: 'banner', icon: '<rect x="2" y="6" width="20" height="12" rx="2" stroke-width="2"/><path d="M6 12h8M18 9l-2 3 2 3" stroke-width="2"/>' },
               { name: 'Callout', page: 'callout', icon: '<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/><path d="M7 8h.01M10 8h7M7 12h10M7 16h5" stroke-width="2"/>' },
@@ -510,12 +542,9 @@ def lista_usuarios(request):
               { name: 'Calendar', page: 'calendar', icon: '<rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/><rect x="7" y="14" width="3" height="3" rx="0.5" fill="currentColor"/>' },
               { name: 'Datetime', page: 'datetime', icon: '<rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/>' },
               { name: 'Calendar Views', page: 'calendar-views', icon: '<rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/><rect x="6" y="13" width="3" height="3" fill="currentColor"/>' },
-              { name: 'Scheduler', page: 'scheduler', icon: '<rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M3 9h18M8 4v18" stroke-width="2"/><rect x="10" y="11" width="4" height="3" rx="0.5" fill="currentColor"/>' },
-              { name: 'Event Card', page: 'event-card', icon: '<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/><circle cx="7" cy="8" r="2" fill="currentColor"/><path d="M11 8h6M7 13h10" stroke-width="2"/>' },
               { name: 'Datatable', page: 'datatable', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M3 9h18M3 15h18M9 9v12M15 9v12" stroke-width="2"/>' },
               { name: 'Datatable Full', page: 'datatable-full', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M3 9h18M3 15h18M9 9v12M15 9v12" stroke-width="2"/><circle cx="18" cy="18" r="3" fill="currentColor"/>' },
               { name: 'Tree View', page: 'tree', icon: '<path d="M12 3v6M12 15v6M5 9h14M5 9a3 3 0 100-6 3 3 0 000 6zM19 21a3 3 0 100-6 3 3 0 000 6zM5 21a3 3 0 100-6 3 3 0 000 6z" stroke-width="2"/>' },
-              { name: 'Date Range Picker', page: 'date-range-picker', icon: '<rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/><rect x="6" y="13" width="4" height="3" rx="0.5" fill="currentColor"/><rect x="14" y="13" width="4" height="3" rx="0.5" fill="currentColor"/>' },
             ]
           },
           {
@@ -532,16 +561,11 @@ def lista_usuarios(request):
             name: 'POS / Retail',
             items: [
               { name: 'Product Card', page: 'product-card', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M3 9h18M8.5 6.5h.01" stroke-width="2"/><circle cx="8.5" cy="6.5" r="1" fill="currentColor"/>' },
-              { name: 'Category Tabs', page: 'category-tabs', icon: '<rect x="2" y="8" width="6" height="8" rx="2" stroke-width="2"/><rect x="9" y="8" width="6" height="8" rx="2" stroke-width="2"/><rect x="16" y="8" width="6" height="8" rx="2" stroke-width="2"/>' },
               { name: 'Cart', page: 'cart', icon: '<circle cx="9" cy="21" r="1" stroke-width="2"/><circle cx="20" cy="21" r="1" stroke-width="2"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" stroke-width="2"/>' },
-              { name: 'Order Ticket', page: 'order-ticket', icon: '<rect x="5" y="2" width="14" height="20" rx="2" stroke-width="2"/><path d="M9 6h6M9 10h6M9 14h4" stroke-width="2"/>' },
               { name: 'Payment', page: 'payment', icon: '<rect x="2" y="6" width="20" height="12" rx="2" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/><path d="M6 12h.01M18 12h.01" stroke-width="2"/>' },
               { name: 'Receipt', page: 'receipt', icon: '<path d="M14 2H6a2 2 0 00-2 2v16l3-2 3 2 3-2 3 2V4a2 2 0 00-2-2z" stroke-width="2"/><path d="M8 6h8M8 10h8M8 14h4" stroke-width="2"/>' },
               { name: 'Numpad', page: 'numpad', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M7 7h2M11 7h2M15 7h2M7 11h2M11 11h2M15 11h2M7 15h2M11 15h2M15 15h2" stroke-width="2"/>' },
               { name: 'Calculator', page: 'calculator', icon: '<rect x="4" y="2" width="16" height="20" rx="2" stroke-width="2"/><rect x="6" y="4" width="12" height="4" rx="1" stroke-width="2"/><path d="M7 11h2M11 11h2M15 11h2M7 15h2M11 15h2M15 15h2M7 19h2M11 19h2M15 19h2" stroke-width="2"/>' },
-              { name: 'Quantity Badge', page: 'quantity-badge', icon: '<circle cx="18" cy="6" r="4" stroke-width="2"/><rect x="3" y="8" width="16" height="12" rx="2" stroke-width="2"/>' },
-              { name: 'Stock Indicator', page: 'stock-indicator', icon: '<rect x="3" y="10" width="18" height="4" rx="2" stroke-width="2"/><path d="M3 12h12" stroke-width="2" stroke-linecap="round"/>' },
-              { name: 'Variant Selector', page: 'variant-selector', icon: '<rect x="3" y="3" width="6" height="6" rx="1" stroke-width="2"/><rect x="15" y="3" width="6" height="6" rx="1" stroke-width="2"/><rect x="3" y="15" width="6" height="6" rx="1" stroke-width="2"/><rect x="15" y="15" width="6" height="6" rx="1" stroke-width="2"/>' },
             ]
           },
           {
@@ -549,7 +573,6 @@ def lista_usuarios(request):
             items: [
               { name: 'JSON Viewer', page: 'json-viewer', icon: '<path d="M8 3H5a2 2 0 00-2 2v14a2 2 0 002 2h3" stroke-width="2"/><path d="M16 3h3a2 2 0 012 2v14a2 2 0 01-2 2h-3" stroke-width="2"/><path d="M12 8v8" stroke-width="2"/>' },
               { name: 'Code Block', page: 'code-block', icon: '<polyline points="16 18 22 12 16 6" stroke-width="2"/><polyline points="8 6 2 12 8 18" stroke-width="2"/>' },
-              { name: 'Diff Viewer', page: 'diff-viewer', icon: '<path d="M12 3v18M3 12h18" stroke-width="2"/><rect x="3" y="3" width="7" height="7" stroke-width="2"/><rect x="14" y="14" width="7" height="7" stroke-width="2"/>' },
               { name: 'Sparkline', page: 'sparkline', icon: '<path d="M3 16l4-4 4 4 4-8 4 8 3-4" stroke-width="2" fill="none"/>' },
               { name: 'Chart', page: 'chart', icon: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke-width="2" fill="none"/>' },
               { name: 'Gauge', page: 'gauge', icon: '<circle cx="12" cy="14" r="8" stroke-width="2"/><path d="M12 14l4-6" stroke-width="2"/>' },
@@ -560,13 +583,11 @@ def lista_usuarios(request):
             name: 'Media',
             items: [
               { name: 'Image Gallery', page: 'image-gallery', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><rect x="7" y="7" width="3" height="3" stroke-width="2"/><rect x="14" y="7" width="3" height="3" stroke-width="2"/><rect x="7" y="14" width="3" height="3" stroke-width="2"/><rect x="14" y="14" width="3" height="3" stroke-width="2"/>' },
-              { name: 'Image Crop', page: 'image-crop', icon: '<rect x="6" y="6" width="12" height="12" stroke-width="2"/><path d="M6 2v4M18 18v4M2 6h4M18 18h4" stroke-width="2"/>' },
               { name: 'Image Zoom', page: 'image-zoom', icon: '<circle cx="11" cy="11" r="7" stroke-width="2"/><path d="M21 21l-4-4M11 8v6M8 11h6" stroke-width="2"/>' },
               { name: 'Video Player', page: 'video-player', icon: '<rect x="2" y="4" width="20" height="16" rx="2" stroke-width="2"/><polygon points="10,8 16,12 10,16" fill="currentColor"/>' },
               { name: 'Audio Player', page: 'audio-player', icon: '<rect x="2" y="6" width="20" height="12" rx="2" stroke-width="2"/><circle cx="8" cy="12" r="2" stroke-width="2"/><path d="M14 9v6M17 7v10M20 10v4" stroke-width="2"/>' },
               { name: 'QR Code', page: 'qr-code', icon: '<rect x="3" y="3" width="7" height="7" stroke-width="2"/><rect x="14" y="3" width="7" height="7" stroke-width="2"/><rect x="3" y="14" width="7" height="7" stroke-width="2"/><rect x="14" y="14" width="3" height="3" stroke-width="2"/><rect x="18" y="18" width="3" height="3" stroke-width="2"/>' },
               { name: 'PDF Viewer', page: 'pdf-viewer', icon: '<rect x="4" y="2" width="16" height="20" rx="2" stroke-width="2"/><path d="M8 6h8M8 10h8M8 14h5" stroke-width="2"/>' },
-              { name: 'Barcode Scanner', page: 'barcode-scanner', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8" stroke-width="2"/>' },
             ]
           },
           {
@@ -575,9 +596,6 @@ def lista_usuarios(request):
               { name: 'Employee Card', page: 'employee-card', icon: '<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/><circle cx="9" cy="10" r="3" stroke-width="2"/><path d="M15 8h3M15 12h3M6 16h12" stroke-width="2"/>' },
               { name: 'Time Clock', page: 'time-clock', icon: '<circle cx="12" cy="12" r="9" stroke-width="2"/><path d="M12 6v6l4 2" stroke-width="2"/>' },
               { name: 'Shift Calendar', page: 'shift-calendar', icon: '<rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M3 10h18M8 4v3M16 4v3" stroke-width="2"/><rect x="5" y="13" width="4" height="2" rx="0.5" fill="currentColor"/><rect x="11" y="13" width="4" height="2" rx="0.5" fill="currentColor"/>' },
-              { name: 'Attendance List', page: 'attendance-list', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M7 8h10M7 12h10M7 16h6" stroke-width="2"/><circle cx="17" cy="16" r="1" fill="currentColor"/>' },
-              { name: 'Leave Request', page: 'leave-request', icon: '<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/><path d="M7 8h10M7 12h6" stroke-width="2"/><path d="M14 14l2 2 4-4" stroke-width="2"/>' },
-              { name: 'Org Chart', page: 'org-chart', icon: '<rect x="8" y="2" width="8" height="4" rx="1" stroke-width="2"/><rect x="2" y="14" width="6" height="4" rx="1" stroke-width="2"/><rect x="9" y="14" width="6" height="4" rx="1" stroke-width="2"/><rect x="16" y="14" width="6" height="4" rx="1" stroke-width="2"/><path d="M12 6v4M5 10h14M5 10v4M12 10v4M19 10v4" stroke-width="2"/>' },
               { name: 'Performance Meter', page: 'performance-meter', icon: '<circle cx="12" cy="14" r="8" stroke-width="2"/><path d="M12 14l5-5" stroke-width="2"/><path d="M8 6l4 2 4-2" stroke-width="2"/>' },
             ]
           },
@@ -588,8 +606,6 @@ def lista_usuarios(request):
               { name: 'Machine Status', page: 'machine-status', icon: '<rect x="4" y="4" width="16" height="12" rx="2" stroke-width="2"/><path d="M8 20h8" stroke-width="2"/><path d="M12 16v4" stroke-width="2"/><circle cx="12" cy="10" r="3" fill="currentColor"/>' },
               { name: 'Production Line', page: 'production-line', icon: '<rect x="2" y="8" width="4" height="8" rx="1" stroke-width="2"/><rect x="8" y="8" width="4" height="8" rx="1" stroke-width="2"/><rect x="14" y="8" width="4" height="8" rx="1" stroke-width="2"/><path d="M6 12h2M12 12h2M18 12h4" stroke-width="2"/>' },
               { name: 'Quality Check', page: 'quality-check', icon: '<rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><path d="M7 10l3 3 7-7" stroke-width="2"/><path d="M7 16h10" stroke-width="2"/>' },
-              { name: 'Batch Tracker', page: 'batch-tracker', icon: '<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2"/><path d="M3 10h18" stroke-width="2"/><path d="M7 7h.01M11 7h.01M15 7h.01" stroke-width="2"/>' },
-              { name: 'BOM Tree', page: 'bom-tree', icon: '<circle cx="12" cy="5" r="2" stroke-width="2"/><circle cx="6" cy="12" r="2" stroke-width="2"/><circle cx="18" cy="12" r="2" stroke-width="2"/><circle cx="4" cy="19" r="2" stroke-width="2"/><circle cx="10" cy="19" r="2" stroke-width="2"/><path d="M12 7v3M8 11l-2 1M16 11l2 1M6 14v3M7 18l3 1" stroke-width="2"/>' },
             ]
           },
           {
@@ -597,11 +613,10 @@ def lista_usuarios(request):
             items: [
               { name: 'Command Palette', page: 'command', icon: '<path d="M18 3a3 3 0 00-3 3v12a3 3 0 003 3 3 3 0 003-3 3 3 0 00-3-3H6a3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3V6a3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3h12a3 3 0 003-3 3 3 0 00-3-3z" stroke-width="2"/>' },
               { name: 'Notifications', page: 'notifications', icon: '<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke-width="2"/>' },
-              { name: 'PWA', page: 'pwa', icon: '<rect x="5" y="2" width="14" height="20" rx="2" stroke-width="2"/><path d="M12 18h.01" stroke-width="2"/>' },
               { name: 'Virtual Keyboard', page: 'virtual-keyboard', icon: '<rect x="2" y="4" width="20" height="16" rx="2" stroke-width="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8" stroke-width="2"/>' },
               { name: 'Onscreen Keyboard', page: 'onscreen-keyboard', icon: '<rect x="2" y="4" width="20" height="16" rx="2" stroke-width="2"/><path d="M5 8h2M9 8h2M13 8h2M17 8h2M5 12h2M9 12h2M13 12h2M17 12h2M7 16h10" stroke-width="2"/>' },
-              { name: 'Utilities', page: 'utilities', icon: '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" stroke-width="2"/>' },
               { name: 'Alpine Utils', page: 'alpine-utils', icon: '<path d="M12 2L2 7l10 5 10-5-10-5z" stroke-width="2"/><path d="M2 17l10 5 10-5" stroke-width="2"/><path d="M2 12l10 5 10-5" stroke-width="2"/>' },
+              { name: 'Web Components', page: 'web-components', icon: '<polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="3" stroke-width="2"/>' },
             ]
           },
         ],
@@ -626,6 +641,32 @@ def lista_usuarios(request):
               this.loadPage(item.page, item.name);
             }
           }
+
+          // Listen for hash changes
+          window.addEventListener('hashchange', () => {
+            const page = window.location.hash.slice(1);
+            if (page && page !== this.currentPage) {
+              const item = this.findMenuItem(page);
+              if (item) {
+                this.loadPage(item.page, item.name, false);
+              }
+            }
+          });
+
+          // Listen for HTMX after swap to reinitialize components
+          document.body.addEventListener('htmx:afterSwap', (event) => {
+            if (event.detail.target.id === 'component-content') {
+              // Reinitialize UX JavaScript components (password toggles, modals, etc)
+              if (window.UX && typeof window.UX.init === 'function') {
+                window.UX.init();
+              }
+              // Alpine will automatically initialize new components
+              this.$nextTick(() => {
+                // Scroll to top of content area
+                document.getElementById('page-content').scrollTop = 0;
+              });
+            }
+          });
         },
 
         findMenuItem(page) {
@@ -636,16 +677,26 @@ def lista_usuarios(request):
           return null;
         },
 
-        loadPage(page, title) {
+        loadPage(page, title, updateHash = true) {
           this.currentPage = page;
           this.pageTitle = title;
-          this.loading = true;
           this.sidebarOpen = false;
 
+          if (updateHash) {
+            if (page !== 'home') {
+              window.location.hash = page;
+            } else {
+              history.pushState(null, '', window.location.pathname);
+            }
+          }
+
+          // Load component page via HTMX
           if (page !== 'home') {
-            window.location.hash = page;
-          } else {
-            window.location.hash = '';
+            const contentEl = document.getElementById('component-content');
+            htmx.ajax('GET', `partials/${page}.html`, {
+              target: '#component-content',
+              swap: 'innerHTML'
+            });
           }
         },
 
@@ -667,24 +718,10 @@ def lista_usuarios(request):
             .filter(section => section.items.length > 0);
         },
 
-        syncThemeToIframe() {
-          const iframe = document.querySelector('.ux-frame');
-          if (iframe && iframe.contentWindow) {
-            iframe.contentWindow.postMessage({ type: 'ux-theme', darkMode: this.darkMode }, '*');
-          }
-        },
-
         toggleDarkMode() {
           this.darkMode = !this.darkMode;
-          localStorage.setItem('ux-dark-mode', this.darkMode);
-
-          if (this.darkMode) {
-            document.documentElement.classList.add('ux-dark');
-          } else {
-            document.documentElement.classList.remove('ux-dark');
-          }
-
-          this.syncThemeToIframe();
+          localStorage.setItem('ux-dark-mode', this.darkMode ? 'true' : 'false');
+          document.documentElement.classList.toggle('ux-dark', this.darkMode);
         },
 
         toggleSidebar() {

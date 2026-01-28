@@ -1,0 +1,859 @@
+/**
+ * UX Video-player Component
+ * Part of the UX CSS Library
+ * https://github.com/user/ux
+ */
+
+/* ========================================
+   UX Video Player
+   ======================================== */
+
+.ux-video-player {
+  --ux-video-controls-height: 44px;
+  --ux-video-progress-height: 4px;
+  --ux-video-progress-height-active: 6px;
+  --ux-video-btn-size: 44px;
+  --ux-video-btn-size-sm: 36px;
+  --ux-video-slider-thumb: 14px;
+  --ux-video-controls-bg: rgba(0, 0, 0, 0.6);
+  --ux-video-controls-color: #ffffff;
+  --ux-video-progress-bg: rgba(255, 255, 255, 0.3);
+  --ux-video-progress-fill: var(--ux-primary, #0ea5e9);
+  --ux-video-progress-buffer: rgba(255, 255, 255, 0.5);
+
+  position: relative;
+  width: 100%;
+  background-color: #000;
+  border-radius: var(--ux-border-radius-lg, 12px);
+  overflow: hidden;
+  line-height: 0;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &:focus-within {
+    outline: 2px solid var(--ux-primary, #0ea5e9);
+    outline-offset: 2px;
+  }
+
+  /* ========================================
+     Video Element
+     ======================================== */
+
+  &__video {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    background-color: #000;
+  }
+
+  &--cover &__video {
+    object-fit: cover;
+  }
+
+  &--16-9 {
+    aspect-ratio: 16 / 9;
+  }
+
+  &--4-3 {
+    aspect-ratio: 4 / 3;
+  }
+
+  &--1-1 {
+    aspect-ratio: 1 / 1;
+  }
+
+  &--16-9 &__video,
+  &--4-3 &__video,
+  &--1-1 &__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ========================================
+     Poster Overlay
+     ======================================== */
+
+  &__poster {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+    background-color: #000;
+    cursor: pointer;
+    z-index: 5;
+    transition: opacity var(--ux-transition-normal, 200ms) var(--ux-ease, ease);
+
+    &--hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  &__poster-play {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    cursor: pointer;
+    transition:
+      transform var(--ux-transition-fast, 150ms) var(--ux-ease, ease),
+      background-color var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+
+    &:hover {
+      transform: scale(1.1);
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    svg {
+      width: 32px;
+      height: 32px;
+      margin-left: 4px;
+    }
+  }
+
+  /* ========================================
+     Loading Overlay
+     ======================================== */
+
+  &__loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--ux-transition-fast, 150ms) var(--ux-ease, ease),
+      visibility var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+  }
+
+  &--loading &__loading {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &__spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: ux-video-spin 0.8s linear infinite;
+  }
+
+  /* ========================================
+     Controls Wrapper
+     ======================================== */
+
+  &__controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    padding: var(--ux-space-lg, 1.5rem) var(--ux-space-md, 1rem) var(--ux-space-sm, 0.5rem);
+    z-index: 15;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--ux-transition-normal, 200ms) var(--ux-ease, ease),
+      visibility var(--ux-transition-normal, 200ms) var(--ux-ease, ease);
+  }
+
+  &:hover &__controls,
+  &--controls-visible &__controls,
+  &:focus-within &__controls {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &--controls-always &__controls {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    background: var(--ux-surface-secondary, #f3f4f6);
+    padding: var(--ux-space-sm, 0.5rem) var(--ux-space-md, 1rem);
+  }
+
+  /* ========================================
+     Progress Bar
+     ======================================== */
+
+  &__progress-wrapper {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    touch-action: none;
+
+    &:hover,
+    &:active {
+      .ux-video-player__progress {
+        height: var(--ux-video-progress-height-active);
+      }
+
+      .ux-video-player__progress-thumb {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+  }
+
+  &__progress {
+    position: relative;
+    width: 100%;
+    height: var(--ux-video-progress-height);
+    background: var(--ux-video-progress-bg);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: height var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+  }
+
+  &__progress-buffer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--ux-video-progress-buffer);
+    border-radius: 2px;
+  }
+
+  &__progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--ux-video-progress-fill);
+    border-radius: 2px;
+    transition: width 0.1s linear;
+  }
+
+  &__progress-thumb {
+    position: absolute;
+    top: 50%;
+    width: var(--ux-video-slider-thumb);
+    height: var(--ux-video-slider-thumb);
+    background: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: transform var(--ux-transition-fast, 150ms) cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  /* ========================================
+     Controls Bar
+     ======================================== */
+
+  &__controls-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs, 0.25rem);
+    margin-top: var(--ux-space-xs, 0.25rem);
+  }
+
+  &__controls-left {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs, 0.25rem);
+  }
+
+  &__controls-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__controls-right {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs, 0.25rem);
+  }
+
+  /* ========================================
+     Control Buttons
+     ======================================== */
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ux-video-btn-size);
+    height: var(--ux-video-btn-size);
+    min-width: var(--ux-video-btn-size);
+    background: transparent;
+    border: none;
+    border-radius: var(--ux-border-radius, 8px);
+    color: var(--ux-video-controls-color);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--ux-transition-fast, 150ms) var(--ux-ease, ease),
+      transform var(--ux-transition-fast, 150ms) var(--ux-ease, ease),
+      opacity var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ux-primary, #0ea5e9);
+      outline-offset: 2px;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    &--sm {
+      width: var(--ux-video-btn-size-sm);
+      height: var(--ux-video-btn-size-sm);
+      min-width: var(--ux-video-btn-size-sm);
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  /* ========================================
+     Time Display
+     ======================================== */
+
+  &__time {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--ux-font-size-sm, 0.875rem);
+    font-weight: 500;
+    color: var(--ux-video-controls-color);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    padding: 0 var(--ux-space-xs, 0.25rem);
+
+    &-separator {
+      opacity: 0.6;
+    }
+  }
+
+  /* ========================================
+     Volume Control
+     ======================================== */
+
+  &__volume {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs, 0.25rem);
+
+    &-slider-wrapper {
+      width: 0;
+      overflow: hidden;
+      transition: width var(--ux-transition-normal, 200ms) var(--ux-ease, ease);
+    }
+
+    &:hover &-slider-wrapper,
+    &-slider-wrapper:focus-within {
+      width: 80px;
+    }
+
+    &-slider {
+      width: 80px;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--ux-video-progress-bg);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+
+      &::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+
+  /* ========================================
+     Speed Control
+     ======================================== */
+
+  &__speed {
+    position: relative;
+
+    &-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      height: var(--ux-video-btn-size);
+      padding: 0 var(--ux-space-sm, 0.5rem);
+      background: transparent;
+      border: none;
+      border-radius: var(--ux-border-radius, 8px);
+      color: var(--ux-video-controls-color);
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        background-color var(--ux-transition-fast, 150ms) var(--ux-ease, ease),
+        opacity var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    &-menu {
+      position: absolute;
+      bottom: calc(100% + var(--ux-space-xs, 0.25rem));
+      right: 0;
+      min-width: 100px;
+      background: var(--ux-video-controls-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--ux-border-radius-lg, 12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: var(--ux-space-xs, 0.25rem);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition:
+        opacity var(--ux-transition-fast, 150ms) var(--ux-ease, ease),
+        visibility var(--ux-transition-fast, 150ms) var(--ux-ease, ease),
+        transform var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+      z-index: 20;
+
+      &--open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+    }
+
+    &-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: var(--ux-space-sm, 0.5rem) var(--ux-space-md, 1rem);
+      background: transparent;
+      border: none;
+      border-radius: var(--ux-border-radius, 8px);
+      color: var(--ux-video-controls-color);
+      font-size: var(--ux-font-size-sm, 0.875rem);
+      text-align: left;
+      cursor: pointer;
+      transition: background-color var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      &--active {
+        color: var(--ux-primary, #0ea5e9);
+
+        &::after {
+          content: '';
+          width: 8px;
+          height: 8px;
+          background: var(--ux-primary, #0ea5e9);
+          border-radius: 50%;
+        }
+      }
+    }
+  }
+
+  /* ========================================
+     Fullscreen
+     ======================================== */
+
+  &--fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    border-radius: 0;
+    background: #000;
+
+    .ux-video-player__video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  /* ========================================
+     Picture-in-Picture Indicator
+     ======================================== */
+
+  &__pip-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ux-space-sm, 0.5rem);
+    padding: var(--ux-space-md, 1rem) var(--ux-space-lg, 1.5rem);
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: var(--ux-border-radius-lg, 12px);
+    color: #fff;
+    font-size: var(--ux-font-size-md, 1rem);
+    z-index: 20;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  /* ========================================
+     Center Play Overlay
+     ======================================== */
+
+  &__center-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 8;
+
+    &-btn {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      cursor: pointer;
+      opacity: 0;
+      transform: scale(0.8);
+      transition:
+        opacity var(--ux-transition-fast, 150ms) var(--ux-ease, ease),
+        transform var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+
+      &:hover {
+        transform: scale(1.1);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      svg {
+        width: 36px;
+        height: 36px;
+        margin-left: 4px;
+      }
+    }
+  }
+
+  &:hover &__center-play-btn,
+  &--paused &__center-play-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  &--playing &__center-play {
+    display: none;
+  }
+
+  /* ========================================
+     Tooltip
+     ======================================== */
+
+  &__tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    padding: var(--ux-space-xs, 0.25rem) var(--ux-space-sm, 0.5rem);
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: var(--ux-border-radius, 8px);
+    color: #fff;
+    font-size: var(--ux-font-size-xs, 0.75rem);
+    font-weight: 500;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--ux-transition-fast, 150ms) var(--ux-ease, ease),
+      visibility var(--ux-transition-fast, 150ms) var(--ux-ease, ease);
+  }
+
+  &__progress-wrapper:hover &__tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* ========================================
+     Size Variants
+     ======================================== */
+
+  &--sm {
+    --ux-video-btn-size: 36px;
+    --ux-video-btn-size-sm: 32px;
+  }
+
+  &--lg {
+    --ux-video-btn-size: 52px;
+    --ux-video-btn-size-sm: 44px;
+  }
+
+  /* ========================================
+     Minimal Variant
+     ======================================== */
+
+  &--minimal {
+    .ux-video-player__controls-bar {
+      display: none;
+    }
+
+    .ux-video-player__controls {
+      padding: var(--ux-space-sm, 0.5rem);
+    }
+  }
+
+  /* ========================================
+     Glass Variant
+     ======================================== */
+
+  &--glass {
+    .ux-video-player__controls {
+      background: linear-gradient(
+        transparent,
+        var(--ux-glass-bg, rgba(255, 255, 255, 0.72))
+      );
+      backdrop-filter: blur(var(--ux-glass-blur, 20px)) saturate(var(--ux-glass-saturation, 180%));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur, 20px)) saturate(var(--ux-glass-saturation, 180%));
+    }
+
+    .ux-video-player__controls-bar {
+      color: var(--ux-text, #111827);
+    }
+
+    .ux-video-player__btn {
+      color: var(--ux-text, #111827);
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .ux-video-player__time {
+      color: var(--ux-text, #111827);
+    }
+
+    .ux-video-player__progress {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .ux-video-player__progress-buffer {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .ux-video-player__progress-thumb {
+      background: var(--ux-primary, #0ea5e9);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .ux-video-player__speed-menu {
+      background: var(--ux-glass-bg, rgba(255, 255, 255, 0.72));
+      backdrop-filter: blur(var(--ux-glass-blur, 20px)) saturate(var(--ux-glass-saturation, 180%));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur, 20px)) saturate(var(--ux-glass-saturation, 180%));
+      border-color: var(--ux-glass-border, rgba(255, 255, 255, 0.18));
+    }
+
+    .ux-video-player__speed-btn,
+    .ux-video-player__speed-option {
+      color: var(--ux-text, #111827);
+    }
+
+    .ux-video-player__speed-option:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+@keyframes ux-video-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Dark mode glass */
+.ux-dark .ux-video-player--glass {
+  .ux-video-player__controls {
+    background: linear-gradient(
+      transparent,
+      rgba(30, 30, 30, 0.72)
+    );
+  }
+
+  .ux-video-player__controls-bar,
+  .ux-video-player__btn,
+  .ux-video-player__time,
+  .ux-video-player__speed-btn,
+  .ux-video-player__speed-option {
+    color: #fff;
+  }
+
+  .ux-video-player__btn:hover,
+  .ux-video-player__speed-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .ux-video-player__progress {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .ux-video-player__progress-buffer {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .ux-video-player--glass {
+    .ux-video-player__controls {
+      background: linear-gradient(
+        transparent,
+        rgba(30, 30, 30, 0.72)
+      );
+    }
+
+    .ux-video-player__controls-bar,
+    .ux-video-player__btn,
+    .ux-video-player__time,
+    .ux-video-player__speed-btn,
+    .ux-video-player__speed-option {
+      color: #fff;
+    }
+
+    .ux-video-player__btn:hover,
+    .ux-video-player__speed-option:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .ux-video-player__progress {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .ux-video-player__progress-buffer {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+/* ========================================
+   Mobile Adjustments
+   ======================================== */
+
+@media (max-width: 767px) {
+  .ux-video-player__controls {
+    padding: var(--ux-space-md, 1rem) var(--ux-space-sm, 0.5rem) var(--ux-space-xs, 0.25rem);
+  }
+
+  .ux-video-player__btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .ux-video-player__time {
+    font-size: var(--ux-font-size-xs, 0.75rem);
+  }
+
+  .ux-video-player__volume-slider-wrapper {
+    display: none;
+  }
+
+  .ux-video-player__center-play-btn {
+    width: 64px;
+    height: 64px;
+
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+  }
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-video-player__controls,
+  .ux-video-player__poster,
+  .ux-video-player__loading,
+  .ux-video-player__poster-play,
+  .ux-video-player__btn,
+  .ux-video-player__progress,
+  .ux-video-player__progress-thumb,
+  .ux-video-player__speed-menu,
+  .ux-video-player__tooltip,
+  .ux-video-player__center-play-btn {
+    transition: none;
+  }
+
+  .ux-video-player__spinner {
+    animation: none;
+  }
+}

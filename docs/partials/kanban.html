@@ -1,0 +1,777 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); margin-bottom: var(--ux-space-md); overflow: hidden; }
+  </style>
+
+<!-- Basic Kanban -->
+  <div class="demo-section">
+    <h3>Kanban Basico</h3>
+    <p>Tablero kanban con columnas y tarjetas arrastrables. Drag and drop entre columnas.</p>
+
+    <div class="demo-box" x-data="uxKanban({
+      columns: [
+        { id: 'todo', title: 'Por hacer', color: 'var(--ux-gray-500)', cards: [] },
+        { id: 'progress', title: 'En progreso', color: 'var(--ux-blue-500)', cards: [] },
+        { id: 'review', title: 'En revision', color: 'var(--ux-amber-500)', cards: [] },
+        { id: 'done', title: 'Completado', color: 'var(--ux-green-500)', cards: [] }
+      ],
+      cards: [
+        { id: 1, columnId: 'todo', title: 'Disenar mockups de la nueva feature' },
+        { id: 2, columnId: 'todo', title: 'Revisar documentacion del API' },
+        { id: 3, columnId: 'progress', title: 'Implementar login con OAuth' },
+        { id: 4, columnId: 'progress', title: 'Crear tests unitarios' },
+        { id: 5, columnId: 'review', title: 'Refactorizar modulo de pagos' },
+        { id: 6, columnId: 'done', title: 'Configurar CI/CD pipeline' },
+        { id: 7, columnId: 'done', title: 'Actualizar dependencias' }
+      ]
+    })" class="ux-kanban"
+       @kanban:move.window="console.log('Card moved:', $event.detail)">
+
+      <template x-for="column in columns" :key="column.id">
+        <div class="ux-kanban__column"
+             :class="{ 'ux-kanban__column--drag-over': isColumnDragOver(column.id) }"
+             @dragover="onDragOver(column.id, $event)"
+             @dragleave="onDragLeave(column.id, $event)"
+             @drop="onDrop(column.id, null, $event)">
+
+          <!-- Column Header -->
+          <div class="ux-kanban__column-header">
+            <div class="ux-kanban__column-header-start">
+              <div class="ux-kanban__column-color" :style="{ background: column.color }"></div>
+              <h4 class="ux-kanban__column-title" x-text="column.title"></h4>
+              <span class="ux-kanban__column-count" x-text="getColumnCount(column.id)"></span>
+            </div>
+            <div class="ux-kanban__column-actions">
+              <button class="ux-kanban__column-btn" title="Mas opciones">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="1"/>
+                  <circle cx="12" cy="5" r="1"/>
+                  <circle cx="12" cy="19" r="1"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Column Body -->
+          <div class="ux-kanban__column-body" :data-empty-text="emptyText">
+            <template x-for="card in column.cards" :key="card.id">
+              <div class="ux-kanban__card"
+                   draggable="true"
+                   @dragstart="onDragStart(card, column.id, $event)"
+                   @dragend="onDragEnd($event)"
+                   @click="onCardClick(card, column.id, $event)">
+                <h5 class="ux-kanban__card-title" x-text="card.title"></h5>
+              </div>
+            </template>
+          </div>
+
+          <!-- Column Footer -->
+          <div class="ux-kanban__column-footer" x-show="allowAddCards">
+            <button class="ux-kanban__add-btn" @click="addCard(column.id, { title: 'Nueva tarea' })">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              Agregar tarjeta
+            </button>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxKanban({
+  columns: [
+    { id: 'todo', title: 'Por hacer', cards: [] },
+    { id: 'progress', title: 'En progreso', cards: [] },
+    { id: 'done', title: 'Completado', cards: [] }
+  ],
+  cards: [
+    { id: 1, columnId: 'todo', title: 'Tarea 1' },
+    { id: 2, columnId: 'progress', title: 'Tarea 2' }
+  ]
+})" class="ux-kanban"&gt;
+  &lt;template x-for="column in columns"&gt;
+    &lt;div class="ux-kanban__column"&gt;
+      &lt;!-- Column content --&gt;
+    &lt;/div&gt;
+  &lt;/template&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- Rich Cards -->
+  <div class="demo-section">
+    <h3>Tarjetas con Detalles</h3>
+    <p>Tarjetas con etiquetas, asignados, fechas y prioridad.</p>
+
+    <div class="demo-box">
+      <div class="ux-kanban" x-data="{
+        columns: [
+          { id: 'backlog', title: 'Backlog', color: 'var(--ux-gray-500)' },
+          { id: 'sprint', title: 'Sprint Actual', color: 'var(--ux-blue-500)' },
+          { id: 'testing', title: 'Testing', color: 'var(--ux-violet-500)' }
+        ]
+      }">
+        <!-- Backlog Column -->
+        <div class="ux-kanban__column ux-kanban__column--todo">
+          <div class="ux-kanban__column-header">
+            <div class="ux-kanban__column-header-start">
+              <div class="ux-kanban__column-color"></div>
+              <h4 class="ux-kanban__column-title">Backlog</h4>
+              <span class="ux-kanban__column-count">3</span>
+            </div>
+          </div>
+          <div class="ux-kanban__column-body">
+            <!-- Card with labels -->
+            <div class="ux-kanban__card ux-kanban__card--color ux-kanban__card--color-danger">
+              <div class="ux-kanban__card-labels">
+                <span class="ux-kanban__card-label ux-kanban__card-label--danger">Bug</span>
+                <span class="ux-kanban__card-label ux-kanban__card-label--primary">Frontend</span>
+              </div>
+              <h5 class="ux-kanban__card-title">Error en formulario de registro</h5>
+              <p class="ux-kanban__card-body">El boton de submit no funciona en Safari</p>
+              <div class="ux-kanban__card-footer">
+                <div class="ux-kanban__card-meta">
+                  <span class="ux-kanban__card-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2"/>
+                      <path d="M16 2v4M8 2v4M3 10h18"/>
+                    </svg>
+                    15 Ene
+                  </span>
+                  <span class="ux-kanban__card-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    </svg>
+                    3
+                  </span>
+                </div>
+                <div class="ux-kanban__card-priority ux-kanban__card-priority--high" title="Prioridad alta">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card with assignees -->
+            <div class="ux-kanban__card">
+              <div class="ux-kanban__card-header">
+                <span class="ux-kanban__card-id">#PROJ-142</span>
+              </div>
+              <h5 class="ux-kanban__card-title">Implementar dark mode</h5>
+              <div class="ux-kanban__card-footer">
+                <div class="ux-kanban__card-meta">
+                  <span class="ux-kanban__card-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2"/>
+                      <path d="M16 2v4M8 2v4M3 10h18"/>
+                    </svg>
+                    20 Ene
+                  </span>
+                </div>
+                <div class="ux-kanban__card-assignees">
+                  <div class="ux-kanban__card-assignee">
+                    <img src="https://i.pravatar.cc/48?img=1" alt="Avatar">
+                  </div>
+                  <div class="ux-kanban__card-assignee">
+                    <img src="https://i.pravatar.cc/48?img=2" alt="Avatar">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Simple card -->
+            <div class="ux-kanban__card">
+              <h5 class="ux-kanban__card-title">Actualizar documentacion del API</h5>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sprint Column -->
+        <div class="ux-kanban__column ux-kanban__column--progress">
+          <div class="ux-kanban__column-header">
+            <div class="ux-kanban__column-header-start">
+              <div class="ux-kanban__column-color"></div>
+              <h4 class="ux-kanban__column-title">Sprint Actual</h4>
+              <span class="ux-kanban__column-count">2</span>
+            </div>
+          </div>
+          <div class="ux-kanban__column-body">
+            <div class="ux-kanban__card ux-kanban__card--color ux-kanban__card--color-primary">
+              <div class="ux-kanban__card-labels">
+                <span class="ux-kanban__card-label ux-kanban__card-label--success">Feature</span>
+              </div>
+              <h5 class="ux-kanban__card-title">Sistema de notificaciones push</h5>
+              <p class="ux-kanban__card-body">Integrar Firebase Cloud Messaging para notificaciones en tiempo real</p>
+              <div class="ux-kanban__card-footer">
+                <div class="ux-kanban__card-meta">
+                  <span class="ux-kanban__card-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                      <path d="M22 4L12 14.01l-3-3"/>
+                    </svg>
+                    60%
+                  </span>
+                </div>
+                <div class="ux-kanban__card-assignees">
+                  <div class="ux-kanban__card-assignee">
+                    <img src="https://i.pravatar.cc/48?img=3" alt="Avatar">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ux-kanban__card">
+              <div class="ux-kanban__card-labels">
+                <span class="ux-kanban__card-label ux-kanban__card-label--warning">UX</span>
+              </div>
+              <h5 class="ux-kanban__card-title">Redisenar pagina de perfil</h5>
+              <div class="ux-kanban__card-footer">
+                <div class="ux-kanban__card-priority ux-kanban__card-priority--medium" title="Prioridad media">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testing Column -->
+        <div class="ux-kanban__column ux-kanban__column--review">
+          <div class="ux-kanban__column-header">
+            <div class="ux-kanban__column-header-start">
+              <div class="ux-kanban__column-color"></div>
+              <h4 class="ux-kanban__column-title">Testing</h4>
+              <span class="ux-kanban__column-count">1</span>
+            </div>
+          </div>
+          <div class="ux-kanban__column-body">
+            <div class="ux-kanban__card ux-kanban__card--color ux-kanban__card--color-success">
+              <h5 class="ux-kanban__card-title">Optimizar queries de base de datos</h5>
+              <p class="ux-kanban__card-body">Reducir tiempo de carga del dashboard de 3s a 500ms</p>
+              <div class="ux-kanban__card-footer">
+                <div class="ux-kanban__card-meta">
+                  <span class="ux-kanban__card-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 11l3 3L22 4"/>
+                      <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                    </svg>
+                    8/10
+                  </span>
+                </div>
+                <div class="ux-kanban__card-assignees">
+                  <div class="ux-kanban__card-assignee">
+                    <img src="https://i.pravatar.cc/48?img=4" alt="Avatar">
+                  </div>
+                  <div class="ux-kanban__card-assignee">
+                    <img src="https://i.pravatar.cc/48?img=5" alt="Avatar">
+                  </div>
+                  <div class="ux-kanban__card-assignee ux-kanban__card-assignee--more">+2</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSS-Only Static Board -->
+  <div class="demo-section">
+    <h3>Kanban Estatico (CSS-only)</h3>
+    <p>Tablero kanban sin interactividad, solo con CSS.</p>
+
+    <div class="demo-box">
+      <div class="ux-kanban">
+        <div class="ux-kanban__column">
+          <div class="ux-kanban__column-header">
+            <div class="ux-kanban__column-header-start">
+              <div class="ux-kanban__column-color" style="background: var(--ux-red-500);"></div>
+              <h4 class="ux-kanban__column-title">Urgente</h4>
+              <span class="ux-kanban__column-count">2</span>
+            </div>
+          </div>
+          <div class="ux-kanban__column-body">
+            <div class="ux-kanban__card ux-kanban__card--color ux-kanban__card--color-danger">
+              <h5 class="ux-kanban__card-title">Servidor caido en produccion</h5>
+              <p class="ux-kanban__card-body">El servicio principal no responde</p>
+            </div>
+            <div class="ux-kanban__card">
+              <h5 class="ux-kanban__card-title">Corregir error critico de seguridad</h5>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-kanban__column">
+          <div class="ux-kanban__column-header">
+            <div class="ux-kanban__column-header-start">
+              <div class="ux-kanban__column-color" style="background: var(--ux-amber-500);"></div>
+              <h4 class="ux-kanban__column-title">En revision</h4>
+              <span class="ux-kanban__column-count">1</span>
+            </div>
+          </div>
+          <div class="ux-kanban__column-body">
+            <div class="ux-kanban__card">
+              <h5 class="ux-kanban__card-title">Pull request #234</h5>
+              <p class="ux-kanban__card-body">Esperando aprobacion del equipo</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-kanban__column">
+          <div class="ux-kanban__column-header">
+            <div class="ux-kanban__column-header-start">
+              <div class="ux-kanban__column-color" style="background: var(--ux-emerald-500);"></div>
+              <h4 class="ux-kanban__column-title">Resuelto</h4>
+              <span class="ux-kanban__column-count">3</span>
+            </div>
+          </div>
+          <div class="ux-kanban__column-body">
+            <div class="ux-kanban__card ux-kanban__card--completed">
+              <h5 class="ux-kanban__card-title">Actualizar certificado SSL</h5>
+            </div>
+            <div class="ux-kanban__card ux-kanban__card--completed">
+              <h5 class="ux-kanban__card-title">Backup de base de datos</h5>
+            </div>
+            <div class="ux-kanban__card ux-kanban__card--completed">
+              <h5 class="ux-kanban__card-title">Monitoreo de rendimiento</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-kanban"&gt;
+  &lt;div class="ux-kanban__column"&gt;
+    &lt;div class="ux-kanban__column-header"&gt;
+      &lt;div class="ux-kanban__column-header-start"&gt;
+        &lt;div class="ux-kanban__column-color" style="background: #ef4444;"&gt;&lt;/div&gt;
+        &lt;h4 class="ux-kanban__column-title"&gt;Urgente&lt;/h4&gt;
+        &lt;span class="ux-kanban__column-count"&gt;2&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-kanban__column-body"&gt;
+      &lt;div class="ux-kanban__card"&gt;
+        &lt;h5 class="ux-kanban__card-title"&gt;Tarea 1&lt;/h5&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <!-- HTMX + Django -->
+  <div class="demo-section">
+    <h3>HTMX + Django</h3>
+    <p>Integracion del tablero kanban con Django y HTMX para persistencia en tiempo real.</p>
+
+    <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Modelo Django</h4>
+    <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+
+class KanbanColumn(models.Model):
+    title = models.CharField(max_length=100)
+    color = models.CharField(max_length=7, default='#6b7280')
+    position = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['position']
+
+    def __str__(self):
+        return self.title
+
+class KanbanCard(models.Model):
+    PRIORITY_CHOICES = [
+        ('low', 'Baja'),
+        ('medium', 'Media'),
+        ('high', 'Alta'),
+    ]
+
+    column = models.ForeignKey(KanbanColumn, on_delete=models.CASCADE, related_name='cards')
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    position = models.PositiveIntegerField(default=0)
+    assignees = models.ManyToManyField('auth.User', blank=True, related_name='assigned_cards')
+    due_date = models.DateField(null=True, blank=True)
+    completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['position']
+
+    def __str__(self):
+        return self.title</pre>
+
+    <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Vistas Django</h4>
+    <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+from .models import KanbanColumn, KanbanCard
+
+def kanban_board(request):
+    """Renderiza el tablero kanban completo."""
+    columns = KanbanColumn.objects.prefetch_related('cards__assignees').all()
+    return render(request, 'kanban/board.html', {'columns': columns})
+
+def kanban_column(request, column_id):
+    """Renderiza una columna individual (para actualizaciones parciales)."""
+    column = get_object_or_404(KanbanColumn.objects.prefetch_related('cards'), pk=column_id)
+    return render(request, 'kanban/partials/column.html', {'column': column})
+
+@require_POST
+def move_card(request):
+    """Mueve una tarjeta a otra columna via HTMX."""
+    card_id = request.POST.get('card_id')
+    target_column_id = request.POST.get('column_id')
+    position = request.POST.get('position', 0)
+
+    card = get_object_or_404(KanbanCard, pk=card_id)
+    old_column = card.column
+    new_column = get_object_or_404(KanbanColumn, pk=target_column_id)
+
+    # Actualizar posicion
+    card.column = new_column
+    card.position = int(position)
+    card.save()
+
+    # Reordenar tarjetas en ambas columnas
+    _reorder_cards(old_column)
+    if old_column != new_column:
+        _reorder_cards(new_column)
+
+    # Retornar ambas columnas actualizadas
+    response = render(request, 'kanban/partials/column.html', {'column': new_column})
+
+    # Trigger para actualizar la columna origen
+    if old_column != new_column:
+        response['HX-Trigger'] = f'{{"refreshColumn": "{old_column.id}"}}'
+
+    return response
+
+@require_POST
+def add_card(request, column_id):
+    """Agrega una nueva tarjeta a una columna."""
+    column = get_object_or_404(KanbanColumn, pk=column_id)
+    title = request.POST.get('title', 'Nueva tarea')
+
+    card = KanbanCard.objects.create(
+        column=column,
+        title=title,
+        position=column.cards.count()
+    )
+
+    return render(request, 'kanban/partials/card.html', {'card': card})
+
+@require_POST
+def delete_card(request, card_id):
+    """Elimina una tarjeta."""
+    card = get_object_or_404(KanbanCard, pk=card_id)
+    column = card.column
+    card.delete()
+    _reorder_cards(column)
+    return HttpResponse('')
+
+def _reorder_cards(column):
+    """Reordena las tarjetas de una columna."""
+    for i, card in enumerate(column.cards.all()):
+        if card.position != i:
+            card.position = i
+            card.save(update_fields=['position'])</pre>
+
+    <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">URLs</h4>
+    <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('kanban/', views.kanban_board, name='kanban_board'),
+    path('kanban/column/&lt;int:column_id&gt;/', views.kanban_column, name='kanban_column'),
+    path('kanban/move/', views.move_card, name='kanban_move_card'),
+    path('kanban/column/&lt;int:column_id&gt;/add/', views.add_card, name='kanban_add_card'),
+    path('kanban/card/&lt;int:card_id&gt;/delete/', views.delete_card, name='kanban_delete_card'),
+]</pre>
+
+    <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Template Principal (board.html)</h4>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- templates/kanban/board.html --&gt;
+{% load static %}
+
+&lt;div class="ux-kanban"
+     hx-trigger="refreshColumn from:body"
+     hx-get="{% url 'kanban_board' %}"
+     hx-select=".ux-kanban"
+     hx-swap="outerHTML"&gt;
+
+  {% for column in columns %}
+    &lt;div class="ux-kanban__column"
+         id="column-{{ column.id }}"
+         hx-post="{% url 'kanban_move_card' %}"
+         hx-trigger="drop"
+         hx-vals='{"column_id": "{{ column.id }}"}'
+         hx-target="#column-{{ column.id }}"
+         hx-swap="outerHTML"
+         @dragover.prevent
+         @drop="$event.target.closest('.ux-kanban__column').dispatchEvent(new Event('drop'))"&gt;
+
+      &lt;div class="ux-kanban__column-header"&gt;
+        &lt;div class="ux-kanban__column-header-start"&gt;
+          &lt;div class="ux-kanban__column-color" style="background: {{ column.color }};"&gt;&lt;/div&gt;
+          &lt;h4 class="ux-kanban__column-title"&gt;{{ column.title }}&lt;/h4&gt;
+          &lt;span class="ux-kanban__column-count"&gt;{{ column.cards.count }}&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div class="ux-kanban__column-body"&gt;
+        {% for card in column.cards.all %}
+          {% include 'kanban/partials/card.html' with card=card %}
+        {% empty %}
+          &lt;p class="ux-kanban__empty"&gt;No hay tarjetas&lt;/p&gt;
+        {% endfor %}
+      &lt;/div&gt;
+
+      &lt;div class="ux-kanban__column-footer"&gt;
+        &lt;button class="ux-kanban__add-btn"
+                hx-post="{% url 'kanban_add_card' column.id %}"
+                hx-target="#column-{{ column.id }} .ux-kanban__column-body"
+                hx-swap="beforeend"&gt;
+          &lt;svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+            &lt;path d="M12 5v14M5 12h14"/&gt;
+          &lt;/svg&gt;
+          Agregar tarjeta
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  {% endfor %}
+&lt;/div&gt;</pre>
+
+    <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Partial de Tarjeta (card.html)</h4>
+    <pre class="ux-code-block" data-lang="html">&lt;!-- templates/kanban/partials/card.html --&gt;
+&lt;div class="ux-kanban__card {% if card.completed %}ux-kanban__card--completed{% endif %}"
+     id="card-{{ card.id }}"
+     draggable="true"
+     @dragstart="event.dataTransfer.setData('text/plain', '{{ card.id }}')"&gt;
+
+  {% if card.priority == 'high' %}
+    &lt;div class="ux-kanban__card-labels"&gt;
+      &lt;span class="ux-kanban__card-label ux-kanban__card-label--danger"&gt;Urgente&lt;/span&gt;
+    &lt;/div&gt;
+  {% endif %}
+
+  &lt;h5 class="ux-kanban__card-title"&gt;{{ card.title }}&lt;/h5&gt;
+
+  {% if card.description %}
+    &lt;p class="ux-kanban__card-body"&gt;{{ card.description|truncatewords:15 }}&lt;/p&gt;
+  {% endif %}
+
+  &lt;div class="ux-kanban__card-footer"&gt;
+    &lt;div class="ux-kanban__card-meta"&gt;
+      {% if card.due_date %}
+        &lt;span class="ux-kanban__card-meta-item"&gt;
+          &lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+            &lt;rect x="3" y="4" width="18" height="18" rx="2"/&gt;
+            &lt;path d="M16 2v4M8 2v4M3 10h18"/&gt;
+          &lt;/svg&gt;
+          {{ card.due_date|date:"d M" }}
+        &lt;/span&gt;
+      {% endif %}
+    &lt;/div&gt;
+
+    {% if card.assignees.exists %}
+      &lt;div class="ux-kanban__card-assignees"&gt;
+        {% for user in card.assignees.all|slice:":3" %}
+          &lt;div class="ux-kanban__card-assignee"&gt;
+            &lt;img src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ user.get_full_name|urlencode }}&amp;size=48{% endif %}" alt="{{ user.get_full_name }}"&gt;
+          &lt;/div&gt;
+        {% endfor %}
+        {% if card.assignees.count > 3 %}
+          &lt;div class="ux-kanban__card-assignee ux-kanban__card-assignee--more"&gt;+{{ card.assignees.count|add:"-3" }}&lt;/div&gt;
+        {% endif %}
+      &lt;/div&gt;
+    {% endif %}
+  &lt;/div&gt;
+
+  &lt;!-- Hidden input para HTMX --&gt;
+  &lt;input type="hidden" name="card_id" value="{{ card.id }}"&gt;
+&lt;/div&gt;</pre>
+
+    <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">JavaScript para Drag & Drop con HTMX</h4>
+    <pre class="ux-code-block" data-lang="javascript">// Capturar el ID de la tarjeta arrastrada
+document.addEventListener('dragstart', (e) => {
+  if (e.target.classList.contains('ux-kanban__card')) {
+    e.dataTransfer.setData('text/plain', e.target.id.replace('card-', ''));
+    e.target.classList.add('ux-kanban__card--dragging');
+  }
+});
+
+document.addEventListener('dragend', (e) => {
+  if (e.target.classList.contains('ux-kanban__card')) {
+    e.target.classList.remove('ux-kanban__card--dragging');
+  }
+});
+
+// Manejar el drop con HTMX
+document.addEventListener('drop', (e) => {
+  const column = e.target.closest('.ux-kanban__column');
+  if (!column) return;
+
+  e.preventDefault();
+  const cardId = e.dataTransfer.getData('text/plain');
+
+  // Calcular posicion basada en donde se solto
+  const cards = column.querySelectorAll('.ux-kanban__card');
+  let position = cards.length;
+
+  // Agregar card_id a los valores de HTMX
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'card_id';
+  input.value = cardId;
+  column.appendChild(input);
+
+  const posInput = document.createElement('input');
+  posInput.type = 'hidden';
+  posInput.name = 'position';
+  posInput.value = position;
+  column.appendChild(posInput);
+
+  // Trigger HTMX request
+  htmx.trigger(column, 'drop');
+
+  // Limpiar inputs temporales
+  setTimeout(() => {
+    input.remove();
+    posInput.remove();
+  }, 100);
+});
+
+// Indicador visual de drag over
+document.addEventListener('dragover', (e) => {
+  const column = e.target.closest('.ux-kanban__column');
+  if (column) {
+    e.preventDefault();
+    column.classList.add('ux-kanban__column--drag-over');
+  }
+});
+
+document.addEventListener('dragleave', (e) => {
+  const column = e.target.closest('.ux-kanban__column');
+  if (column && !column.contains(e.relatedTarget)) {
+    column.classList.remove('ux-kanban__column--drag-over');
+  }
+});</pre>
+  </div>
+
+  <!-- CSS Classes -->
+  <div class="demo-section">
+    <h3>Clases CSS</h3>
+    <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="css">/* Board */
+.ux-kanban                        // Container principal
+.ux-kanban--compact               // Espaciado reducido
+.ux-kanban--glass                 // Glass morphism
+
+/* Columns */
+.ux-kanban__column                // Columna
+.ux-kanban__column--collapsed     // Columna colapsada
+.ux-kanban__column--drag-over     // Arrastrando sobre columna
+.ux-kanban__column--todo          // Color: por hacer
+.ux-kanban__column--progress      // Color: en progreso
+.ux-kanban__column--review        // Color: en revision
+.ux-kanban__column--done          // Color: completado
+
+/* Column Parts */
+.ux-kanban__column-header         // Header de columna
+.ux-kanban__column-title          // Titulo
+.ux-kanban__column-count          // Contador de tarjetas
+.ux-kanban__column-color          // Indicador de color
+.ux-kanban__column-body           // Contenedor de tarjetas
+.ux-kanban__column-footer         // Footer con boton agregar
+
+/* Cards */
+.ux-kanban__card                  // Tarjeta
+.ux-kanban__card--dragging        // Mientras se arrastra
+.ux-kanban__card--ghost           // Placeholder
+.ux-kanban__card--completed       // Tarea completada
+.ux-kanban__card--color           // Con borde de color
+.ux-kanban__card--color-primary   // Color primario
+.ux-kanban__card--color-success   // Color exito
+.ux-kanban__card--color-warning   // Color advertencia
+.ux-kanban__card--color-danger    // Color peligro
+
+/* Card Parts */
+.ux-kanban__card-header           // Header de tarjeta
+.ux-kanban__card-title            // Titulo
+.ux-kanban__card-id               // ID o referencia
+.ux-kanban__card-body             // Descripcion
+.ux-kanban__card-labels           // Contenedor etiquetas
+.ux-kanban__card-label            // Etiqueta individual
+.ux-kanban__card-footer           // Footer con meta
+.ux-kanban__card-meta             // Metadatos (fecha, comentarios)
+.ux-kanban__card-assignees        // Avatares asignados
+.ux-kanban__card-priority         // Indicador prioridad</pre>
+    </div>
+  </div>
+
+  <!-- Alpine Component -->
+  <div class="demo-section">
+    <h3>Componente Alpine.js</h3>
+    <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="javascript">// Configuracion
+uxKanban({
+  columns: [
+    { id: 'todo', title: 'Por hacer', color: '#6b7280', cards: [] }
+  ],
+  cards: [
+    { id: 1, columnId: 'todo', title: 'Tarea' }
+  ],
+  allowAddCards: true,       // Permitir agregar tarjetas
+  allowAddColumns: false,    // Permitir agregar columnas
+  emptyText: 'No hay tarjetas'
+})
+
+// Estructura de tarjeta
+{
+  id: 'card-1',
+  columnId: 'todo',
+  title: 'Titulo de la tarea',
+  description: 'Descripcion opcional',
+  labels: ['Bug', 'Frontend'],
+  assignees: ['user1', 'user2'],
+  dueDate: '2024-01-15',
+  priority: 'high',       // high, medium, low
+  completed: false
+}
+
+// Metodos
+getColumnCards(columnId)              // Obtener tarjetas de columna
+getColumnCount(columnId)              // Contar tarjetas
+addCard(columnId, cardData)           // Agregar tarjeta
+removeCard(cardId, columnId)          // Eliminar tarjeta
+updateCard(cardId, columnId, updates) // Actualizar tarjeta
+addColumn(columnData)                 // Agregar columna
+removeColumn(columnId)                // Eliminar columna
+moveCard(cardId, from, to, index)     // Mover tarjeta
+getAllCards()                         // Todas las tarjetas
+isColumnDragOver(columnId)            // Check drag over
+
+// Eventos de drag
+onDragStart(card, columnId, event)
+onDragEnd(event)
+onDragOver(columnId, event)
+onDragLeave(columnId, event)
+onDrop(columnId, index, event)
+onCardClick(card, columnId, event)
+
+// Eventos emitidos
+@kanban:move          // { card, fromColumn, toColumn, toIndex }
+@kanban:add           // { card, columnId }
+@kanban:remove        // { card, columnId }
+@kanban:update        // { card, columnId, updates }
+@kanban:addcolumn     // { column }
+@kanban:removecolumn  // { column }
+@kanban:click         // { card, columnId, event }
+@kanban:dragstart     // { card, columnId }
+@kanban:dragend       // {}</pre>
+    </div>
+  </div>

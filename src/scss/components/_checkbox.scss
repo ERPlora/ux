@@ -1,0 +1,299 @@
+/**
+ * UX Checkbox Component
+ * Part of the UX CSS Library
+ */
+
+@use '../core/mixins' as *;
+
+// ==========================================================
+// Checkbox Base
+// ==========================================================
+
+.ux-checkbox {
+  --ux-checkbox-color: var(--ux-variant-bg, var(--ux-primary));
+
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--ux-space-md);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  min-height: var(--ux-touch-target);
+  padding: var(--ux-space-sm) 0;
+
+  // ==========================================================
+  // Hidden Input
+  // ==========================================================
+
+  &__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    // Checked State
+    &:checked + .ux-checkbox__box {
+      background-color: var(--ux-checkbox-color);
+      border-color: var(--ux-checkbox-color);
+
+      .ux-checkbox__checkmark {
+        display: block;
+        animation: ux-checkbox-check 0.2s var(--ux-ease-spring);
+      }
+    }
+
+    // Focus State
+    &:focus-visible + .ux-checkbox__box {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: 2px;
+    }
+
+    // Indeterminate State
+    &:indeterminate + .ux-checkbox__box {
+      background-color: var(--ux-primary);
+      border-color: var(--ux-primary);
+
+      .ux-checkbox__checkmark {
+        display: none;
+      }
+
+      &::after {
+        content: '';
+        width: 12px;
+        height: 2px;
+        background-color: white;
+        border-radius: 1px;
+      }
+    }
+  }
+
+  // ==========================================================
+  // Box
+  // ==========================================================
+
+  &__box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ux-checkbox-size);
+    height: var(--ux-checkbox-size);
+    background-color: transparent;
+    border: 2px solid var(--ux-medium);
+    border-radius: var(--ux-checkbox-border-radius);
+    transition: background-color var(--ux-transition-fast) var(--ux-ease),
+                border-color var(--ux-transition-fast) var(--ux-ease),
+                transform var(--ux-transition-fast) var(--ux-ease-spring);
+    flex-shrink: 0;
+
+    // Expanded touch target for accessibility (44px minimum)
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -10px;
+      z-index: 1;
+    }
+  }
+
+  // ==========================================================
+  // Checkmark
+  // ==========================================================
+
+  &__checkmark {
+    display: none;
+    width: 14px;
+    height: 14px;
+    color: white;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  // ==========================================================
+  // Label
+  // ==========================================================
+
+  &__label {
+    font-size: var(--ux-font-size-md);
+    color: var(--ux-text);
+    line-height: 1.4;
+    padding-top: 2px;
+  }
+
+  &__description {
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text-secondary);
+    margin-top: var(--ux-space-xs);
+  }
+
+  // ==========================================================
+  // States
+  // ==========================================================
+
+  // Hover State
+  &:hover .ux-checkbox__box {
+    border-color: var(--ux-primary);
+  }
+
+  // Active State
+  &:active .ux-checkbox__box {
+    transform: scale(0.9);
+  }
+
+  // Disabled State
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &__input:disabled + .ux-checkbox__box {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  // ==========================================================
+  // Sizes
+  // ==========================================================
+
+  &--sm {
+    .ux-checkbox__box {
+      width: var(--ux-checkbox-size-sm);
+      height: var(--ux-checkbox-size-sm);
+    }
+
+    .ux-checkbox__checkmark {
+      width: calc(var(--ux-checkbox-size-sm) * 0.55);
+      height: calc(var(--ux-checkbox-size-sm) * 0.55);
+    }
+  }
+
+  &--lg {
+    .ux-checkbox__box {
+      width: var(--ux-checkbox-size-lg);
+      height: var(--ux-checkbox-size-lg);
+    }
+
+    .ux-checkbox__checkmark {
+      width: calc(var(--ux-checkbox-size-lg) * 0.65);
+      height: calc(var(--ux-checkbox-size-lg) * 0.65);
+    }
+  }
+
+  // ==========================================================
+  // Round Variant
+  // ==========================================================
+
+  &--round .ux-checkbox__box {
+    border-radius: 50%;
+  }
+
+  // ==========================================================
+  // Glass Variant
+  // ==========================================================
+
+  &--glass {
+    .ux-checkbox__box {
+      background: var(--ux-glass-bg-thin);
+      border: 0.5px solid var(--ux-glass-border);
+    }
+
+    .ux-checkbox__input:checked + .ux-checkbox__box {
+      background: var(--ux-checkbox-color, var(--ux-primary));
+      border-color: var(--ux-checkbox-color, var(--ux-primary));
+    }
+  }
+}
+
+// ==========================================================
+// Checkbox Group
+// ==========================================================
+
+.ux-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ux-space-sm);
+
+  &--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--ux-space-lg);
+  }
+
+  &__label {
+    font-size: var(--ux-font-size-sm);
+    font-weight: 500;
+    color: var(--ux-text-secondary);
+    margin-bottom: var(--ux-space-sm);
+  }
+}
+
+// ==========================================================
+// Checkbox List Item
+// ==========================================================
+
+.ux-checkbox-item {
+  display: flex;
+  align-items: center;
+  padding: var(--ux-space-md) var(--ux-space-lg);
+  background-color: var(--ux-surface);
+  border-bottom: 1px solid var(--ux-border-color);
+  cursor: pointer;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
+    background-color: var(--ux-surface-secondary);
+  }
+
+  &__content {
+    flex: 1;
+    margin-left: var(--ux-space-md);
+  }
+
+  &__title {
+    font-size: var(--ux-font-size-md);
+    color: var(--ux-text);
+  }
+
+  &__subtitle {
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text-secondary);
+    margin-top: var(--ux-space-xs);
+  }
+}
+
+// ==========================================================
+// Keyframes
+// ==========================================================
+
+@keyframes ux-checkbox-check {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// ==========================================================
+// Reduced Motion
+// ==========================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-checkbox__box {
+    transition: none;
+  }
+
+  .ux-checkbox__input:checked + .ux-checkbox__box .ux-checkbox__checkmark {
+    animation: none;
+  }
+}

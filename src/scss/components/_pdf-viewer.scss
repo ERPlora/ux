@@ -1,0 +1,364 @@
+@use '../core/mixins' as *;
+
+/**
+ * UX Pdf-viewer Component
+ * Part of the UX CSS Library
+ */
+
+:root {
+  --ux-pdf-viewer-bg: var(--ux-gray-100);
+  --ux-pdf-viewer-toolbar-bg: var(--ux-surface);
+  --ux-pdf-viewer-toolbar-height: 48px;
+  --ux-pdf-viewer-page-bg: var(--ux-surface);
+  --ux-pdf-viewer-page-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --ux-pdf-viewer-border-radius: var(--ux-radius-lg);
+}
+
+.ux-pdf-viewer {
+  display: flex;
+  flex-direction: column;
+  background: var(--ux-pdf-viewer-bg);
+  border-radius: var(--ux-pdf-viewer-border-radius);
+  overflow: hidden;
+  height: 600px;
+  position: relative;
+
+  &--fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: var(--ux-z-modal);
+    height: 100dvh;
+    border-radius: 0;
+  }
+
+  /* Toolbar */
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    padding: 0 var(--ux-space-md);
+    height: var(--ux-pdf-viewer-toolbar-height);
+    background: var(--ux-pdf-viewer-toolbar-bg);
+    border-bottom: 1px solid var(--ux-border-color);
+    flex-shrink: 0;
+  }
+
+  &__toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs);
+  }
+
+  &__toolbar-separator {
+    width: 1px;
+    height: 24px;
+    background: var(--ux-border-color);
+    margin: 0 var(--ux-space-xs);
+  }
+
+  &__toolbar-spacer {
+    flex: 1;
+  }
+
+  /* Toolbar buttons */
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: var(--ux-radius-md);
+    color: var(--ux-text);
+    cursor: pointer;
+    transition: background var(--ux-transition-fast);
+
+    &:hover {
+      background: var(--ux-gray-100);
+    }
+
+    &:active {
+      background: var(--ux-gray-200);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  /* Page input */
+  &__page-input {
+    width: 48px;
+    height: 32px;
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-radius-sm);
+    text-align: center;
+    font-size: var(--ux-font-size-sm);
+    background: var(--ux-surface);
+    color: var(--ux-text);
+  }
+
+  &__page-total {
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text-secondary);
+  }
+
+  /* Zoom select */
+  &__zoom-select {
+    height: 32px;
+    padding: 0 var(--ux-space-sm);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-radius-sm);
+    background: var(--ux-surface);
+    color: var(--ux-text);
+    font-size: var(--ux-font-size-sm);
+    cursor: pointer;
+  }
+
+  /* Container */
+  &__container {
+    flex: 1;
+    overflow: auto;
+    padding: var(--ux-space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ux-space-md);
+  }
+
+  /* Page */
+  &__page {
+    background: var(--ux-pdf-viewer-page-bg);
+    box-shadow: var(--ux-pdf-viewer-page-shadow);
+    position: relative;
+
+    canvas {
+      display: block;
+    }
+  }
+
+  /* Loading */
+  &__loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ux-space-md);
+    background: var(--ux-pdf-viewer-bg);
+  }
+
+  &__loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--ux-border-color);
+    border-top-color: var(--ux-primary);
+    border-radius: 50%;
+    animation: ux-pdf-spin 0.8s linear infinite;
+  }
+
+  &__loading-text {
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text-secondary);
+  }
+
+  /* Error */
+  &__error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ux-space-md);
+    background: var(--ux-pdf-viewer-bg);
+    padding: var(--ux-space-xl);
+    text-align: center;
+  }
+
+  &__error-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--ux-danger);
+  }
+
+  &__error-text {
+    font-size: var(--ux-font-size-md);
+    color: var(--ux-text);
+  }
+
+  /* Thumbnail sidebar */
+  &--with-thumbnails {
+    flex-direction: row;
+
+    .ux-pdf-viewer__main {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__thumbnails {
+    width: 160px;
+    background: var(--ux-surface);
+    border-right: 1px solid var(--ux-border-color);
+    overflow-y: auto;
+    padding: var(--ux-space-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ux-space-sm);
+    flex-shrink: 0;
+  }
+
+  &__thumbnail {
+    border: 2px solid transparent;
+    border-radius: var(--ux-radius-sm);
+    cursor: pointer;
+    padding: var(--ux-space-xs);
+    transition: border-color var(--ux-transition-fast);
+
+    &:hover {
+      border-color: var(--ux-gray-300);
+    }
+
+    &--active {
+      border-color: var(--ux-primary);
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+  }
+
+  &__thumbnail-label {
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-text-secondary);
+    text-align: center;
+    margin-top: var(--ux-space-xs);
+  }
+
+  /* Search bar */
+  &__search {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs);
+  }
+
+  &__search-input {
+    width: 160px;
+    height: 32px;
+    padding: 0 var(--ux-space-sm);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-radius-sm);
+    font-size: var(--ux-font-size-sm);
+    background: var(--ux-surface);
+    color: var(--ux-text);
+  }
+
+  &__search-count {
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-text-secondary);
+    min-width: 60px;
+  }
+
+  /* Annotations */
+  &__annotation {
+    position: absolute;
+    background: rgba(255, 235, 59, 0.3);
+    border: 1px solid rgba(255, 235, 59, 0.6);
+    cursor: pointer;
+  }
+
+  /* Glass variant */
+  &--glass {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+
+    .ux-pdf-viewer__toolbar {
+      background: var(--ux-glass-bg-thin);
+      border-color: var(--ux-glass-border);
+    }
+  }
+}
+
+@keyframes ux-pdf-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ux-pdf-viewer-bg: var(--ux-gray-900);
+    --ux-pdf-viewer-toolbar-bg: var(--ux-gray-800);
+    --ux-pdf-viewer-page-bg: var(--ux-gray-800);
+    --ux-pdf-viewer-page-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.ux-dark {
+  --ux-pdf-viewer-bg: var(--ux-gray-900);
+  --ux-pdf-viewer-toolbar-bg: var(--ux-gray-800);
+  --ux-pdf-viewer-page-bg: var(--ux-gray-800);
+  --ux-pdf-viewer-page-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .ux-pdf-viewer__thumbnails {
+    display: none;
+  }
+
+  .ux-pdf-viewer__toolbar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: var(--ux-space-sm);
+    gap: var(--ux-space-xs);
+  }
+
+  .ux-pdf-viewer__search {
+    width: 100%;
+    order: 10;
+    margin-top: var(--ux-space-xs);
+  }
+
+  .ux-pdf-viewer__search-input {
+    flex: 1;
+  }
+}
+
+/* Print */
+@media print {
+  .ux-pdf-viewer__toolbar,
+  .ux-pdf-viewer__thumbnails {
+    display: none !important;
+  }
+
+  .ux-pdf-viewer {
+    height: auto !important;
+    background: none !important;
+  }
+
+  .ux-pdf-viewer__page {
+    box-shadow: none !important;
+    page-break-after: always;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ux-pdf-viewer__loading-spinner {
+    animation: none;
+  }
+}
