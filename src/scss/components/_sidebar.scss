@@ -1,0 +1,614 @@
+@use '../core/mixins' as *;
+
+/**
+ * UX Sidebar Component
+ * Part of the UX CSS Library
+ *
+ * Complex sidebar navigation with collapsible states.
+ * Works with any framework: HTMX, React, Vue, vanilla JS.
+ *
+ * Usage:
+ * <div class="ux-sidebar-wrapper">
+ *   <aside class="ux-sidebar">
+ *     <div class="ux-sidebar__header">...</div>
+ *     <div class="ux-sidebar__content">
+ *       <nav class="ux-sidebar__menu">...</nav>
+ *     </div>
+ *     <div class="ux-sidebar__footer">...</div>
+ *   </aside>
+ *   <main class="ux-sidebar-inset">...</main>
+ * </div>
+ */
+
+/* ========================================
+   CSS Variables
+   ======================================== */
+
+:root {
+  --ux-sidebar-width: 256px;
+  --ux-sidebar-width-mobile: 288px;
+  --ux-sidebar-width-icon: 48px;
+  --ux-sidebar-bg: var(--ux-surface);
+  --ux-sidebar-border-color: var(--ux-border-color);
+  --ux-sidebar-text: var(--ux-text);
+  --ux-sidebar-text-secondary: var(--ux-text-secondary);
+  --ux-sidebar-accent: var(--ux-primary);
+  --ux-sidebar-accent-text: var(--ux-primary-contrast);
+  --ux-sidebar-hover-bg: var(--ux-surface-secondary);
+}
+
+/* ========================================
+   Sidebar Wrapper
+   ======================================== */
+
+.ux-sidebar-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+
+  /* CSS variable for dynamic sidebar width */
+  --_sidebar-width: var(--ux-sidebar-width);
+}
+
+/* ========================================
+   Main Sidebar
+   ======================================== */
+
+.ux-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--ux-z-fixed);
+  display: flex;
+  flex-direction: column;
+  width: var(--_sidebar-width, var(--ux-sidebar-width));
+  height: 100vh;
+  height: 100dvh;
+  background-color: var(--ux-sidebar-bg);
+  border-right: 1px solid var(--ux-sidebar-border-color);
+  transition:
+    width var(--ux-transition-normal) var(--ux-ease),
+    transform var(--ux-transition-normal) var(--ux-ease);
+
+  /* Right side variant */
+  &--right {
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 1px solid var(--ux-sidebar-border-color);
+  }
+
+  /* ========================================
+     Collapsed State (Icon only)
+     ======================================== */
+
+  &[data-state="collapsed"],
+  &.is-collapsed {
+    --_sidebar-width: var(--ux-sidebar-width-icon);
+
+    .ux-sidebar__label,
+    .ux-sidebar__badge,
+    .ux-sidebar__group-label,
+    .ux-sidebar__user-info {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+
+    .ux-sidebar__menu-button {
+      justify-content: center;
+      padding: var(--ux-space-sm);
+    }
+
+    .ux-sidebar__menu-button__icon {
+      margin-right: 0;
+    }
+
+    .ux-sidebar__header,
+    .ux-sidebar__footer {
+      padding: var(--ux-space-sm);
+    }
+  }
+
+  /* ========================================
+     Offcanvas State (Hidden)
+     ======================================== */
+
+  &[data-collapsible="offcanvas"] {
+    transform: translateX(-100%);
+
+    &.is-open,
+    &[data-state="expanded"] {
+      transform: translateX(0);
+    }
+  }
+
+  &--right[data-collapsible="offcanvas"] {
+    transform: translateX(100%);
+
+    &.is-open,
+    &[data-state="expanded"] {
+      transform: translateX(0);
+    }
+  }
+
+  /* ========================================
+     Floating Variant
+     ======================================== */
+
+  &--floating {
+    top: var(--ux-space-sm);
+    left: var(--ux-space-sm);
+    height: calc(100vh - var(--ux-space-md));
+    height: calc(100dvh - var(--ux-space-md));
+    border-radius: var(--ux-border-radius-lg);
+    border: 1px solid var(--ux-sidebar-border-color);
+    box-shadow: var(--ux-shadow-lg);
+  }
+
+  &--floating.ux-sidebar--right {
+    left: auto;
+    right: var(--ux-space-sm);
+  }
+
+  /* ========================================
+     Inset Variant
+     ======================================== */
+
+  &--inset {
+    position: relative;
+    height: auto;
+    min-height: 100%;
+  }
+
+  /* ========================================
+     Header
+     ======================================== */
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    padding: var(--ux-space-md);
+    border-bottom: 1px solid var(--ux-sidebar-border-color);
+    flex-shrink: 0;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    font-weight: 600;
+    font-size: var(--ux-font-size-lg);
+    color: var(--ux-sidebar-text);
+    text-decoration: none;
+
+    img,
+    svg {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+  }
+
+  /* ========================================
+     Content
+     ======================================== */
+
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--ux-space-sm);
+
+    /* Custom scrollbar */
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--ux-gray-300);
+      border-radius: 3px;
+    }
+  }
+
+  /* ========================================
+     Footer
+     ======================================== */
+
+  &__footer {
+    padding: var(--ux-space-md);
+    border-top: 1px solid var(--ux-sidebar-border-color);
+    flex-shrink: 0;
+  }
+
+  /* ========================================
+     Menu Group
+     ======================================== */
+
+  &__group {
+    margin-bottom: var(--ux-space-md);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__group-label {
+    display: flex;
+    align-items: center;
+    padding: var(--ux-space-xs) var(--ux-space-sm);
+    font-size: var(--ux-font-size-xs);
+    font-weight: 500;
+    color: var(--ux-sidebar-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity var(--ux-transition-fast) var(--ux-ease);
+  }
+
+  /* ========================================
+     Menu
+     ======================================== */
+
+  &__menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ux-space-2xs);
+  }
+
+  &__menu-item {
+    position: relative;
+  }
+
+  &__menu-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--ux-space-sm) var(--ux-space-sm);
+    font-size: var(--ux-font-size-sm);
+    font-weight: 500;
+    color: var(--ux-sidebar-text);
+    background: transparent;
+    border: none;
+    border-radius: var(--ux-border-radius);
+    cursor: pointer;
+    text-decoration: none;
+    text-align: left;
+    transition:
+      background-color var(--ux-transition-fast) var(--ux-ease),
+      color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background-color: var(--ux-sidebar-hover-bg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ux-sidebar-accent);
+      outline-offset: -2px;
+    }
+
+    /* Active state */
+    &.is-active,
+    &[data-active="true"],
+    &[aria-current="page"] {
+      background-color: var(--ux-sidebar-accent);
+      color: var(--ux-sidebar-accent-text);
+
+      .ux-sidebar__icon {
+        color: var(--ux-sidebar-accent-text);
+      }
+    }
+
+    /* Disabled state */
+    &[disabled],
+    &.is-disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-right: var(--ux-space-sm);
+    color: var(--ux-sidebar-text-secondary);
+    transition: margin var(--ux-transition-fast) var(--ux-ease);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity var(--ux-transition-fast) var(--ux-ease);
+  }
+
+  &__badge {
+    flex-shrink: 0;
+    padding: 2px 6px;
+    font-size: var(--ux-font-size-xs);
+    font-weight: 500;
+    background-color: var(--ux-sidebar-accent);
+    color: var(--ux-sidebar-accent-text);
+    border-radius: var(--ux-border-radius-full);
+    transition: opacity var(--ux-transition-fast) var(--ux-ease);
+  }
+
+  &__chevron {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: var(--ux-sidebar-text-secondary);
+    transition: transform var(--ux-transition-fast) var(--ux-ease);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  /* ========================================
+     Submenu
+     ======================================== */
+
+  &__submenu {
+    display: none;
+    flex-direction: column;
+    gap: var(--ux-space-2xs);
+    padding-left: calc(var(--ux-space-sm) + 20px);
+    margin-top: var(--ux-space-2xs);
+
+    .ux-sidebar__menu-item[data-state="open"] > &,
+    .ux-sidebar__menu-item.is-open > & {
+      display: flex;
+    }
+  }
+
+  &__menu-item[data-state="open"] > &__menu-button &__chevron,
+  &__menu-item.is-open > &__menu-button &__chevron {
+    transform: rotate(90deg);
+  }
+
+  /* ========================================
+     Separator
+     ======================================== */
+
+  &__separator {
+    height: 1px;
+    margin: var(--ux-space-sm) 0;
+    background-color: var(--ux-sidebar-border-color);
+  }
+
+  /* ========================================
+     User Section
+     ======================================== */
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    padding: var(--ux-space-sm);
+    border-radius: var(--ux-border-radius);
+    cursor: pointer;
+    transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background-color: var(--ux-sidebar-hover-bg);
+    }
+  }
+
+  &__user-avatar {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--ux-surface-secondary);
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__user-info {
+    flex: 1;
+    min-width: 0;
+    transition: opacity var(--ux-transition-fast) var(--ux-ease);
+  }
+
+  &__user-name {
+    font-size: var(--ux-font-size-sm);
+    font-weight: 500;
+    color: var(--ux-sidebar-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__user-email {
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-sidebar-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ========================================
+     Rail (Toggle Handle)
+     ======================================== */
+
+  &__rail {
+    position: absolute;
+    top: 0;
+    right: -8px;
+    width: 16px;
+    height: 100%;
+    cursor: ew-resize;
+    z-index: 1;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 2px;
+      height: 100%;
+      background-color: transparent;
+      transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    }
+
+    &:hover::after {
+      background-color: var(--ux-sidebar-border-color);
+    }
+  }
+
+  &--right &__rail {
+    right: auto;
+    left: -8px;
+  }
+
+  /* ========================================
+     Glass Variant
+     ======================================== */
+
+  &--glass {
+    background-color: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    border-color: var(--ux-glass-border);
+
+    --ux-sidebar-border-color: var(--ux-glass-border);
+    --ux-sidebar-hover-bg: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* ========================================
+   Sidebar Gap (Spacer for content)
+   ======================================== */
+
+.ux-sidebar-gap {
+  flex-shrink: 0;
+  width: var(--_sidebar-width, var(--ux-sidebar-width));
+  transition: width var(--ux-transition-normal) var(--ux-ease);
+
+  .ux-sidebar-wrapper:has(.ux-sidebar[data-state="collapsed"]) &,
+  .ux-sidebar-wrapper:has(.ux-sidebar.is-collapsed) & {
+    width: var(--ux-sidebar-width-icon);
+  }
+
+  .ux-sidebar-wrapper:has(.ux-sidebar[data-collapsible="offcanvas"]) & {
+    width: 0;
+  }
+}
+
+/* ========================================
+   Sidebar Inset (Main content)
+   ======================================== */
+
+.ux-sidebar-inset {
+  flex: 1;
+  min-width: 0;
+  background-color: var(--ux-surface-secondary);
+}
+
+/* ========================================
+   Sidebar Trigger Button
+   ======================================== */
+
+.ux-sidebar-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--ux-border-radius-sm);
+  color: var(--ux-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+  &:hover {
+    background-color: var(--ux-surface-secondary);
+    color: var(--ux-text);
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ========================================
+   Mobile Responsive
+   ======================================== */
+
+@media (max-width: 767px) {
+  .ux-sidebar {
+    position: fixed;
+    width: var(--ux-sidebar-width-mobile);
+    transform: translateX(-100%);
+
+    &.is-open,
+    &[data-state="open"] {
+      transform: translateX(0);
+    }
+
+    &--right {
+      transform: translateX(100%);
+
+      &.is-open,
+      &[data-state="open"] {
+        transform: translateX(0);
+      }
+    }
+  }
+
+  .ux-sidebar-gap {
+    display: none;
+  }
+
+  /* Backdrop */
+  .ux-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--ux-z-fixed) - 1);
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--ux-transition-normal) var(--ux-ease),
+      visibility var(--ux-transition-normal) var(--ux-ease);
+
+    .ux-sidebar-wrapper:has(.ux-sidebar.is-open) &,
+    .ux-sidebar-wrapper:has(.ux-sidebar[data-state="open"]) & {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-sidebar,
+  .ux-sidebar-gap,
+  .ux-sidebar__menu-button,
+  .ux-sidebar__chevron,
+  .ux-sidebar__rail::after {
+    transition: none;
+  }
+}

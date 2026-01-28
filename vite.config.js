@@ -51,6 +51,9 @@ export default defineConfig(() => {
       fs: {
         allow: ['.'],
       },
+      hmr: {
+        overlay: false, // Disable error overlay to prevent false positives
+      },
     },
 
     resolve: {

@@ -2,7 +2,7 @@
 
 > **Zero-dependency CSS component library** - Works with any framework.
 >
-> Total Components: **146 CSS files** | Last Updated: 2026-01-23
+> Total Components: **153 CSS files** | Last Updated: 2026-01-28
 >
 > **Architecture:**
 > - **Pure CSS** - No JavaScript required
@@ -540,6 +540,33 @@ Group of buttons.
 
 ---
 
+### ux-toggle-group.css
+Group of toggle buttons.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-toggle-group` | Toggle group wrapper |
+| `.ux-toggle-group--outline` | Outline style |
+| `.ux-toggle-group--sm` | Small |
+| `.ux-toggle-group--lg` | Large |
+| `.ux-toggle-group--full` | Full width |
+| `.ux-toggle-group--vertical` | Vertical layout |
+| `.ux-toggle-group--spaced` | Gap between items |
+| `.ux-toggle-group--primary` | Primary color active |
+| `.ux-toggle-group--soft` | Soft color active |
+| `.ux-toggle-group--glass` | Glass effect |
+| `.ux-toggle-group--icon-only` | Icon-only items |
+| `.ux-toggle-group--equal` | Equal width items |
+| `.ux-toggle-group--segment` | iOS segment style |
+| `.ux-toggle-group__item` | Toggle item |
+| `.ux-toggle-group__icon` | Item icon |
+
+**State:** `data-state="on"`, `aria-pressed="true"`, `.is-active`
+
+**Data attributes:** `data-type="single|multiple"`
+
+---
+
 ### ux-split-button.css
 Button with dropdown.
 
@@ -875,6 +902,35 @@ Load more button.
 
 ---
 
+### ux-menubar.css
+Horizontal menu bar with dropdowns (desktop app style).
+
+| Class | Description |
+|-------|-------------|
+| `.ux-menubar` | Menu bar wrapper |
+| `.ux-menubar--glass` | Glass effect |
+| `.ux-menubar--compact` | Compact size |
+| `.ux-menubar__menu` | Menu container |
+| `.ux-menubar__trigger` | Menu trigger button |
+| `.ux-menubar__content` | Dropdown content |
+| `.ux-menubar__item` | Menu item |
+| `.ux-menubar__item--destructive` | Destructive style |
+| `.ux-menubar__item--inset` | Inset padding |
+| `.ux-menubar__checkbox` | Checkbox item |
+| `.ux-menubar__radio` | Radio item |
+| `.ux-menubar__indicator` | Check indicator |
+| `.ux-menubar__label` | Section label |
+| `.ux-menubar__separator` | Separator line |
+| `.ux-menubar__sub` | Submenu container |
+| `.ux-menubar__sub-trigger` | Submenu trigger |
+| `.ux-menubar__sub-content` | Submenu content |
+| `.ux-menubar__shortcut` | Keyboard shortcut |
+| `.ux-menubar__icon` | Item icon |
+
+**State:** `data-state="open"`, `aria-expanded="true"`, `.is-active`
+
+---
+
 ## 7. Layout & Containers
 
 ### ux-card.css
@@ -1199,6 +1255,96 @@ Masonry grid layout.
 
 ---
 
+### ux-aspect-ratio.css
+Maintains aspect ratio for content.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-aspect-ratio` | Base wrapper |
+| `.ux-aspect-ratio--square` | 1:1 ratio |
+| `.ux-aspect-ratio--video` | 16:9 ratio |
+| `.ux-aspect-ratio--16-9` | 16:9 ratio |
+| `.ux-aspect-ratio--4-3` | 4:3 ratio |
+| `.ux-aspect-ratio--3-2` | 3:2 ratio |
+| `.ux-aspect-ratio--21-9` | 21:9 ratio |
+| `.ux-aspect-ratio--portrait` | 3:4 ratio |
+| `.ux-aspect-ratio--golden` | Golden ratio |
+| `.ux-aspect-ratio--custom` | Custom via `--ux-aspect-ratio` |
+| `.ux-aspect-ratio--contain` | Object-fit contain |
+| `.ux-aspect-ratio--fill` | Object-fit fill |
+
+**Elements:** `__content`
+
+---
+
+### ux-resizable.css
+Resizable panels with drag handles.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-resizable` | Panel group |
+| `.ux-resizable--vertical` | Vertical layout |
+| `.ux-resizable--sm` | Small handle |
+| `.ux-resizable--lg` | Large handle |
+| `.ux-resizable--glass` | Glass effect |
+| `.ux-resizable--disabled` | Disabled state |
+| `.ux-resizable__panel` | Panel |
+| `.ux-resizable__handle` | Drag handle |
+| `.ux-resizable__handle--hidden` | Invisible handle |
+| `.ux-resizable__handle--bordered` | Border style |
+| `.ux-resizable__handle--dotted` | Dotted style |
+| `.ux-resizable__grip` | Visual grip icon |
+| `.ux-resizable__collapse-button` | Collapse button |
+
+---
+
+### ux-scroll-area.css
+Custom scrollbar styling.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-scroll-area` | Scroll container |
+| `.ux-scroll-area--sm` | Small scrollbar |
+| `.ux-scroll-area--lg` | Large scrollbar |
+| `.ux-scroll-area--auto-hide` | Auto-hide scrollbar |
+| `.ux-scroll-area--always-visible` | Always show scrollbar |
+| `.ux-scroll-area--inset` | Inset scrollbar |
+| `.ux-scroll-area--track-visible` | Visible track |
+| `.ux-scroll-area--snap-x` | Horizontal snap |
+| `.ux-scroll-area--snap-y` | Vertical snap |
+| `.ux-scroll-area--horizontal-only` | Horizontal scroll only |
+| `.ux-scroll-area--vertical-only` | Vertical scroll only |
+| `.ux-scroll-area--glass` | Glass effect |
+| `.ux-scrollbar` | Utility for any element |
+| `.ux-scrollbar--thin` | Thin scrollbar |
+| `.ux-scrollbar--hidden` | Hidden scrollbar |
+
+**Elements:** `__viewport`, `__scrollbar`, `__thumb`
+
+---
+
+### ux-sidebar.css
+Complex sidebar navigation.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-sidebar-wrapper` | Layout wrapper |
+| `.ux-sidebar` | Sidebar component |
+| `.ux-sidebar--right` | Right side |
+| `.ux-sidebar--floating` | Floating style |
+| `.ux-sidebar--inset` | Inset style |
+| `.ux-sidebar--glass` | Glass effect |
+| `.ux-sidebar-gap` | Content spacer |
+| `.ux-sidebar-inset` | Main content area |
+| `.ux-sidebar-trigger` | Toggle button |
+| `.ux-sidebar-backdrop` | Mobile backdrop |
+
+**State:** `data-state="collapsed|expanded"`, `.is-collapsed`
+
+**Elements:** `__header`, `__logo`, `__content`, `__footer`, `__group`, `__group-label`, `__menu`, `__menu-item`, `__menu-button`, `__icon`, `__label`, `__badge`, `__chevron`, `__submenu`, `__separator`, `__user`, `__user-avatar`, `__user-info`, `__user-name`, `__user-email`, `__rail`
+
+---
+
 ## 8. Overlays & Modals
 
 ### ux-modal.css
@@ -1315,6 +1461,38 @@ Popover and dropdown.
 **Elements:** `__arrow`, `__content`
 
 **Alpine Component:** `uxPopover(options)`
+
+---
+
+### ux-hover-card.css
+Card that appears on hover over trigger.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-hover-card` | Wrapper |
+| `.ux-hover-card--top` | Top position |
+| `.ux-hover-card--left` | Left position |
+| `.ux-hover-card--right` | Right position |
+| `.ux-hover-card--align-start` | Start alignment |
+| `.ux-hover-card--align-end` | End alignment |
+| `.ux-hover-card--sm` | Small size |
+| `.ux-hover-card--lg` | Large size |
+| `.ux-hover-card--glass` | Glass effect |
+| `.ux-hover-card--delay` | Delayed show |
+| `.ux-hover-card--instant` | No animation |
+| `.ux-hover-card__trigger` | Hover trigger |
+| `.ux-hover-card__content` | Card content |
+| `.ux-hover-card__header` | Card header |
+| `.ux-hover-card__avatar` | Avatar image |
+| `.ux-hover-card__info` | Info wrapper |
+| `.ux-hover-card__title` | Title |
+| `.ux-hover-card__subtitle` | Subtitle |
+| `.ux-hover-card__description` | Description |
+| `.ux-hover-card__footer` | Footer |
+| `.ux-hover-card__meta` | Meta info |
+| `.ux-hover-card__arrow` | Arrow pointer |
+
+**State:** `data-state="open"`, `.ux-hover-card--open`, `:hover`
 
 ---
 
