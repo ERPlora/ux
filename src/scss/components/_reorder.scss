@@ -1,0 +1,281 @@
+/**
+ * UX Reorder Component
+ * Part of the UX CSS Library
+ * https://github.com/user/ux
+ */
+
+/* ========================================
+   UX Reorder Group
+   ======================================== */
+
+.ux-reorder-group {
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &--disabled {
+    pointer-events: none;
+  }
+
+  // ========================================
+  // Reorder Group Variants
+  // ========================================
+
+  // Inset
+  &--inset {
+    margin: var(--ux-space-lg);
+    border-radius: var(--ux-border-radius-lg);
+    overflow: hidden;
+    background-color: var(--ux-surface);
+
+    .ux-reorder-item {
+      border-bottom: 1px solid var(--ux-border-color);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
+  // Cards
+  &--cards {
+    .ux-reorder-item {
+      margin-bottom: var(--ux-space-sm);
+      border-radius: var(--ux-border-radius);
+      box-shadow: var(--ux-shadow-sm);
+
+      &--dragging {
+        box-shadow: var(--ux-shadow-xl);
+      }
+    }
+  }
+
+  // ========================================
+  // Edit Mode Styles
+  // ========================================
+
+  &--editing {
+    .ux-reorder-item {
+      padding-left: 0;
+    }
+
+    .ux-reorder-handle {
+      animation: ux-reorder-handle-appear 0.3s var(--ux-ease);
+    }
+
+    .ux-reorder-delete {
+      width: var(--ux-touch-target);
+    }
+  }
+
+  &:not(.ux-reorder-group--editing) .ux-reorder-handle {
+    display: none;
+  }
+
+  // ========================================
+  // Horizontal Reorder
+  // ========================================
+
+  &--horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ux-space-sm);
+
+    .ux-reorder-item {
+      flex: 0 0 auto;
+    }
+
+    .ux-reorder-indicator {
+      width: 2px;
+      height: auto;
+      top: 0;
+      bottom: 0;
+
+      &--left {
+        left: -1px;
+        right: auto;
+      }
+
+      &--right {
+        right: -1px;
+        left: auto;
+      }
+    }
+  }
+}
+
+// ========================================
+// Reorder Item
+// ========================================
+
+.ux-reorder-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: var(--ux-surface);
+  transition:
+    transform var(--ux-transition-fast) var(--ux-ease),
+    box-shadow var(--ux-transition-fast) var(--ux-ease),
+    opacity var(--ux-transition-fast) var(--ux-ease);
+  will-change: transform;
+
+  &--dragging {
+    z-index: 100;
+    box-shadow: var(--ux-shadow-xl);
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+
+  &--ghost {
+    opacity: 0.3;
+  }
+
+  &--disabled .ux-reorder-handle {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  &--moving-up {
+    animation: ux-reorder-move-up var(--ux-transition-fast) var(--ux-ease);
+  }
+
+  &--moving-down {
+    animation: ux-reorder-move-down var(--ux-transition-fast) var(--ux-ease);
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// ========================================
+// Reorder Handle
+// ========================================
+
+.ux-reorder-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ux-touch-target);
+  height: var(--ux-touch-target);
+  padding: var(--ux-space-md);
+  color: var(--ux-text-tertiary);
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &__icon {
+    width: 20px;
+    height: 20px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  // Handle lines pattern
+  &--lines {
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  &__line {
+    width: 16px;
+    height: 2px;
+    background-color: var(--ux-text-tertiary);
+    border-radius: 1px;
+  }
+}
+
+// ========================================
+// Drop Indicator
+// ========================================
+
+.ux-reorder-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--ux-primary);
+  transform: scaleX(0);
+  transition: transform var(--ux-transition-fast) var(--ux-ease);
+
+  &--top {
+    top: -1px;
+  }
+
+  &--bottom {
+    bottom: -1px;
+  }
+
+  &--active {
+    transform: scaleX(1);
+  }
+}
+
+// ========================================
+// Delete Button (iOS style)
+// ========================================
+
+.ux-reorder-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0;
+  height: 100%;
+  background-color: var(--ux-danger);
+  color: white;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition: width var(--ux-transition-fast) var(--ux-ease);
+
+  &__icon {
+    width: 20px;
+    height: 20px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+// ========================================
+// Reorder Animations
+// ========================================
+
+@keyframes ux-reorder-move-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes ux-reorder-move-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes ux-reorder-handle-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

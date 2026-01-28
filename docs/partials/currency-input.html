@@ -1,0 +1,779 @@
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--ux-surface-secondary);
+      
+      
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--ux-text);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .demo-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    .result-display {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--ux-surface-secondary);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .demo-glass-bg {
+      background: linear-gradient(135deg, var(--ux-emerald-500), var(--ux-teal-500));
+      
+      border-radius: 16px;
+    }
+  </style>
+
+<h1 style="margin-bottom: 0.5rem;">Currency Input</h1>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+    Campo de entrada monetaria con formato automático, símbolos de moneda y soporte para múltiples locales.
+  </p>
+
+  <!-- Basic Currency Input -->
+  <section class="demo-section">
+    <h2>Currency Input Básico</h2>
+
+    <div class="demo-grid">
+      <div>
+        <div class="demo-box">
+          <div class="ux-currency-field">
+            <label class="ux-currency-field__label">Precio USD</label>
+            <div x-data="uxCurrencyInput({ currency: 'USD', value: 1234.56 })"
+                 @currency:change="result = $event.detail"
+                 class="ux-currency"
+                 :class="getPositionClass()">
+              <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+              <input type="text"
+                     inputmode="decimal"
+                     class="ux-input"
+                     :value="displayValue"
+                     :disabled="disabled"
+                     :readonly="readonly"
+                     @input="onInput($event)"
+                     @focus="onFocus($event)"
+                     @blur="onBlur()"
+                     @keydown="onKeyDown($event)">
+            </div>
+            <div class="result-display">
+              Valor: <strong x-text="typeof result !== 'undefined' ? result.formatted : '$1,234.56'"></strong>
+            </div>
+          </div>
+        </div>
+
+        <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxCurrencyInput({ currency: 'USD', value: 1234.56 })"
+     class="ux-currency"
+     :class="getPositionClass()"&gt;
+  &lt;span class="ux-currency__symbol ux-currency__symbol--prefix"&gt;$&lt;/span&gt;
+  &lt;input type="text"
+         class="ux-input"
+         :value="displayValue"
+         @input="onInput($event)"&gt;
+&lt;/div&gt;</pre>
+      </div>
+
+      <div>
+        <div class="demo-box">
+          <div class="ux-currency-field">
+            <label class="ux-currency-field__label">Precio EUR</label>
+            <div x-data="uxCurrencyInput({ currency: 'EUR', value: 999.99 })"
+                 class="ux-currency"
+                 :class="getPositionClass()">
+              <input type="text"
+                     inputmode="decimal"
+                     class="ux-input"
+                     :value="displayValue"
+                     @input="onInput($event)"
+                     @focus="onFocus($event)"
+                     @blur="onBlur()"
+                     @keydown="onKeyDown($event)">
+              <span class="ux-currency__symbol ux-currency__symbol--suffix" x-text="symbol"></span>
+            </div>
+            <span class="ux-currency-field__helper">El euro se muestra con símbolo al final</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Multiple Currencies -->
+  <section class="demo-section">
+    <h2>Múltiples Monedas</h2>
+
+    <div class="demo-grid">
+      <div class="demo-box">
+        <div class="ux-currency-field" style="margin-bottom: 1rem;">
+          <label class="ux-currency-field__label">Dólares USD</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 1500 })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+
+        <div class="ux-currency-field" style="margin-bottom: 1rem;">
+          <label class="ux-currency-field__label">Euros EUR</label>
+          <div x-data="uxCurrencyInput({ currency: 'EUR', value: 1500 })"
+               class="ux-currency ux-currency--suffix">
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+            <span class="ux-currency__symbol ux-currency__symbol--suffix" x-text="symbol"></span>
+          </div>
+        </div>
+
+        <div class="ux-currency-field" style="margin-bottom: 1rem;">
+          <label class="ux-currency-field__label">Libras GBP</label>
+          <div x-data="uxCurrencyInput({ currency: 'GBP', value: 1500 })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Yenes JPY (sin decimales)</label>
+          <div x-data="uxCurrencyInput({ currency: 'JPY', value: 150000 })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="ux-currency-field" style="margin-bottom: 1rem;">
+          <label class="ux-currency-field__label">Pesos Mexicanos MXN</label>
+          <div x-data="uxCurrencyInput({ currency: 'MXN', value: 25000 })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+
+        <div class="ux-currency-field" style="margin-bottom: 1rem;">
+          <label class="ux-currency-field__label">Reales Brasileños BRL</label>
+          <div x-data="uxCurrencyInput({ currency: 'BRL', value: 7500 })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+
+        <div class="ux-currency-field" style="margin-bottom: 1rem;">
+          <label class="ux-currency-field__label">Rupias Indias INR</label>
+          <div x-data="uxCurrencyInput({ currency: 'INR', value: 125000 })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Francos Suizos CHF</label>
+          <div x-data="uxCurrencyInput({ currency: 'CHF', value: 1500 })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sizes -->
+  <section class="demo-section">
+    <h2>Tamaños</h2>
+
+    <div class="demo-box">
+      <div class="demo-flex">
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Small</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 99.99 })"
+               class="ux-currency ux-currency--prefix ux-currency--sm">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Default</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 99.99 })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Large</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 99.99 })"
+               class="ux-currency ux-currency--prefix ux-currency--lg">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- With Min/Max -->
+  <section class="demo-section">
+    <h2>Con Mínimo y Máximo</h2>
+
+    <div class="demo-grid">
+      <div class="demo-box">
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Cantidad (min: 10, max: 1000)</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 100, min: 10, max: 1000 })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+          <span class="ux-currency-field__helper">Usa ↑↓ para incrementar/decrementar</span>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Descuento (max: 500, step: 25)</label>
+          <div x-data="uxCurrencyInput({ currency: 'EUR', value: 100, min: 0, max: 500, step: 25 })"
+               class="ux-currency ux-currency--suffix">
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+            <span class="ux-currency__symbol ux-currency__symbol--suffix" x-text="symbol"></span>
+          </div>
+          <span class="ux-currency-field__helper">Step de 25€ con las flechas</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- States -->
+  <section class="demo-section">
+    <h2>Estados</h2>
+
+    <div class="demo-grid">
+      <div class="demo-box">
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Error</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 0 })"
+               class="ux-currency ux-currency--prefix ux-currency--error">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+          <span class="ux-currency-field__helper ux-currency-field__helper--error">El importe es requerido</span>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Success</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 250 })"
+               class="ux-currency ux-currency--prefix ux-currency--success">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+          <span class="ux-currency-field__helper" style="color: var(--ux-success);">✓ Importe válido</span>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Disabled</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 500, disabled: true })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue" disabled>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Readonly</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 750, readonly: true })"
+               class="ux-currency ux-currency--prefix">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Display Mode -->
+  <section class="demo-section">
+    <h2>Modo Display (Solo Lectura Grande)</h2>
+
+    <div class="demo-box" style="text-align: center;">
+      <p style="margin-bottom: 1rem; color: var(--ux-text-secondary);">Total a Pagar</p>
+      <div x-data="uxCurrencyInput({ currency: 'USD', value: 1299.99, readonly: true })"
+           class="ux-currency ux-currency--prefix ux-currency--display"
+           style="justify-content: center;">
+        <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+        <input type="text" class="ux-input" :value="displayValue" readonly style="width: auto;">
+      </div>
+    </div>
+  </section>
+
+  <!-- Text Alignment -->
+  <section class="demo-section">
+    <h2>Alineación de Texto</h2>
+
+    <div class="demo-grid">
+      <div class="demo-box">
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Alineado a la izquierda (default)</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 1234.56 })"
+               class="ux-currency ux-currency--prefix ux-currency--align-left">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Alineado al centro</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 1234.56 })"
+               class="ux-currency ux-currency--prefix ux-currency--align-center">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="ux-currency-field">
+          <label class="ux-currency-field__label">Alineado a la derecha</label>
+          <div x-data="uxCurrencyInput({ currency: 'USD', value: 1234.56 })"
+               class="ux-currency ux-currency--prefix ux-currency--align-right">
+            <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+            <input type="text" inputmode="decimal" class="ux-input"
+                   :value="displayValue"
+                   @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Glass Variant -->
+  <section class="demo-section">
+    <h2>Variante Glass</h2>
+
+    <div class="demo-glass-bg">
+      <div class="ux-currency-field" style="max-width: 300px;">
+        <label class="ux-currency-field__label" style="color: var(--ux-primary-contrast);">Importe</label>
+        <div x-data="uxCurrencyInput({ currency: 'USD', value: 500 })"
+             class="ux-currency ux-currency--prefix ux-currency--glass">
+          <span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"></span>
+          <input type="text" inputmode="decimal" class="ux-input"
+                 :value="displayValue"
+                 @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur()" @keydown="onKeyDown($event)">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CSS Classes Reference -->
+  <section class="demo-section">
+    <h2>Referencia de Clases CSS</h2>
+
+    <div class="demo-box">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: 0.75rem;">Clase</th>
+            <th style="text-align: left; padding: 0.75rem;">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-currency</code></td>
+            <td style="padding: 0.75rem;">Contenedor principal (wrapper)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-input</code></td>
+            <td style="padding: 0.75rem;">Clase del input (usa estilos estándar de ux-input)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-currency--prefix</code></td>
+            <td style="padding: 0.75rem;">Símbolo al inicio ($100)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-currency--suffix</code></td>
+            <td style="padding: 0.75rem;">Símbolo al final (100€)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-currency--sm</code></td>
+            <td style="padding: 0.75rem;">Tamaño pequeño</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-currency--lg</code></td>
+            <td style="padding: 0.75rem;">Tamaño grande</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-currency--error</code></td>
+            <td style="padding: 0.75rem;">Estado de error</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-currency--success</code></td>
+            <td style="padding: 0.75rem;">Estado de éxito</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-currency--glass</code></td>
+            <td style="padding: 0.75rem;">Variante glass morphism</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-currency--display</code></td>
+            <td style="padding: 0.75rem;">Modo display (solo lectura grande)</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem;"><code>.ux-currency--align-*</code></td>
+            <td style="padding: 0.75rem;">Alineación: left, center, right</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Alpine.js Options -->
+  <section class="demo-section">
+    <h2>Opciones Alpine.js</h2>
+
+    <div class="demo-box">
+      <pre class="ux-code-block" data-lang="javascript">uxCurrencyInput({
+  currency: 'USD',        // Código de moneda (USD, EUR, GBP, JPY, etc.)
+  value: 0,               // Valor inicial
+  symbol: null,           // Símbolo personalizado (auto si null)
+  position: null,         // 'prefix' o 'suffix' (auto si null)
+  locale: null,           // Locale para formato (auto si null)
+  decimals: 2,            // Número de decimales
+  min: null,              // Valor mínimo
+  max: null,              // Valor máximo
+  step: 1,                // Incremento con flechas
+  disabled: false,        // Deshabilitar input
+  readonly: false         // Solo lectura
+})
+
+// Monedas soportadas
+// USD, EUR, GBP, JPY, CNY, MXN, BRL, ARS, CLP, COP, PEN, INR, KRW, CAD, AUD, CHF
+
+// Métodos
+getValue()                // Obtener valor numérico
+setValue(value)           // Establecer valor
+getFormattedValue()       // Obtener valor formateado con símbolo
+clear()                   // Limpiar valor
+increment()               // Incrementar por step
+decrement()               // Decrementar por step
+
+// Eventos
+@currency:change          // Se dispara al cambiar el valor
+                          // detail: { value, formatted, display }</pre>
+    </div>
+  </section>
+
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1.5rem;">
+      Ejemplos de integración con HTMX y Django para conversión de monedas en tiempo real.
+    </p>
+
+    <div class="demo-grid">
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Conversión de Moneda con HTMX</h3>
+        <div class="demo-box">
+          <pre class="ux-code-block" data-lang="html">&lt;!-- Formulario de conversión de moneda --&gt;
+&lt;form hx-post="/api/convert/"
+      hx-trigger="input delay:500ms from:#amount-input"
+      hx-target="#conversion-result"
+      hx-swap="innerHTML"&gt;
+
+  &lt;div class="ux-currency-field"&gt;
+    &lt;label class="ux-currency-field__label"&gt;Cantidad USD&lt;/label&gt;
+    &lt;div x-data="uxCurrencyInput({ currency: 'USD', value: 100 })"
+         class="ux-currency ux-currency--prefix"
+         @currency:change="$refs.hiddenInput.value = $event.detail.value"&gt;
+      &lt;span class="ux-currency__symbol ux-currency__symbol--prefix" x-text="symbol"&gt;&lt;/span&gt;
+      &lt;input type="text" id="amount-input"
+             inputmode="decimal" class="ux-input"
+             :value="displayValue"
+             @input="onInput($event)"
+             @focus="onFocus($event)"
+             @blur="onBlur()"&gt;
+      &lt;input type="hidden" name="amount" x-ref="hiddenInput" :value="getValue()"&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;input type="hidden" name="from_currency" value="USD"&gt;
+  &lt;input type="hidden" name="to_currency" value="EUR"&gt;
+&lt;/form&gt;
+
+&lt;!-- Resultado de la conversión --&gt;
+&lt;div id="conversion-result" class="result-display"&gt;
+  Resultado: &lt;strong&gt;0.00 EUR&lt;/strong&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Vista Django (views.py)</h3>
+        <div class="demo-box">
+          <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+from decimal import Decimal
+import requests
+
+# Tasas de cambio (en producción usar API externa)
+EXCHANGE_RATES = {
+    'USD': {'EUR': Decimal('0.92'), 'GBP': Decimal('0.79'), 'MXN': Decimal('17.15')},
+    'EUR': {'USD': Decimal('1.09'), 'GBP': Decimal('0.86'), 'MXN': Decimal('18.65')},
+    'GBP': {'USD': Decimal('1.27'), 'EUR': Decimal('1.16'), 'MXN': Decimal('21.75')},
+}
+
+@require_POST
+def convert_currency(request):
+    amount = Decimal(request.POST.get('amount', '0'))
+    from_currency = request.POST.get('from_currency', 'USD')
+    to_currency = request.POST.get('to_currency', 'EUR')
+
+    rate = EXCHANGE_RATES.get(from_currency, {}).get(to_currency, Decimal('1'))
+    converted = amount * rate
+
+    # Formatear con locale
+    symbols = {'USD': '$', 'EUR': '€', 'GBP': '£', 'MXN': '$'}
+    symbol = symbols.get(to_currency, '')
+
+    return HttpResponse(f'''
+        Resultado: &lt;strong&gt;{symbol}{converted:,.2f} {to_currency}&lt;/strong&gt;
+    ''')</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-grid" style="margin-top: 1.5rem;">
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Selector de Moneda con Conversión</h3>
+        <div class="demo-box">
+          <pre class="ux-code-block" data-lang="html">&lt;!-- Selector con conversión bidireccional --&gt;
+&lt;div x-data="{
+    fromCurrency: 'USD',
+    toCurrency: 'EUR',
+    amount: 100
+}"&gt;
+  &lt;div class="row g-3"&gt;
+    &lt;div class="col-5"&gt;
+      &lt;select class="ux-select" x-model="fromCurrency"
+              hx-get="/api/convert/"
+              hx-include="[name='amount'],[name='to_currency']"
+              hx-target="#result"&gt;
+        &lt;option value="USD"&gt;USD - Dólar&lt;/option&gt;
+        &lt;option value="EUR"&gt;EUR - Euro&lt;/option&gt;
+        &lt;option value="GBP"&gt;GBP - Libra&lt;/option&gt;
+        &lt;option value="MXN"&gt;MXN - Peso&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+
+    &lt;div class="col-2 text-center"&gt;
+      &lt;button class="ux-button ux-button--clear"
+              @click="[fromCurrency, toCurrency] = [toCurrency, fromCurrency]"&gt;
+        ⇄
+      &lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;div class="col-5"&gt;
+      &lt;select class="ux-select" x-model="toCurrency" name="to_currency"&gt;
+        &lt;option value="USD"&gt;USD - Dólar&lt;/option&gt;
+        &lt;option value="EUR"&gt;EUR - Euro&lt;/option&gt;
+        &lt;option value="GBP"&gt;GBP - Libra&lt;/option&gt;
+        &lt;option value="MXN"&gt;MXN - Peso&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div id="result" class="result-display mt-3"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Modelo Django con Campo de Moneda</h3>
+        <div class="demo-box">
+          <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+from decimal import Decimal
+
+class Product(models.Model):
+    name = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+
+    def get_price_in(self, target_currency):
+        """Convierte el precio a otra moneda."""
+        if self.currency == target_currency:
+            return self.price
+        rate = get_exchange_rate(self.currency, target_currency)
+        return self.price * rate
+
+# forms.py
+from django import forms
+
+class PriceForm(forms.Form):
+    amount = forms.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        min_value=Decimal('0.01'),
+        widget=forms.NumberInput(attrs={
+            'class': 'ux-input',
+            'inputmode': 'decimal',
+            'step': '0.01'
+        })
+    )
+    currency = forms.ChoiceField(choices=[
+        ('USD', 'USD'), ('EUR', 'EUR'),
+        ('GBP', 'GBP'), ('MXN', 'MXN')
+    ])</pre>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">API de Conversión con Tasas en Tiempo Real</h3>
+      <div class="demo-box">
+        <pre class="ux-code-block" data-lang="python"># services.py - Servicio de conversión con cache
+from django.core.cache import cache
+from decimal import Decimal
+import requests
+
+class CurrencyService:
+    CACHE_KEY = 'exchange_rates'
+    CACHE_TIMEOUT = 3600  # 1 hora
+
+    @classmethod
+    def get_rates(cls):
+        """Obtiene tasas de cambio con cache."""
+        rates = cache.get(cls.CACHE_KEY)
+        if rates is None:
+            # Usar API externa (ej: exchangerate-api.com)
+            response = requests.get(
+                'https://api.exchangerate-api.com/v4/latest/USD',
+                timeout=5
+            )
+            if response.ok:
+                data = response.json()
+                rates = data.get('rates', {})
+                cache.set(cls.CACHE_KEY, rates, cls.CACHE_TIMEOUT)
+        return rates or {}
+
+    @classmethod
+    def convert(cls, amount, from_currency, to_currency):
+        """Convierte una cantidad entre monedas."""
+        if from_currency == to_currency:
+            return Decimal(str(amount))
+
+        rates = cls.get_rates()
+        # Convertir a USD primero, luego a moneda destino
+        usd_rate = Decimal(str(rates.get(from_currency, 1)))
+        target_rate = Decimal(str(rates.get(to_currency, 1)))
+
+        usd_amount = Decimal(str(amount)) / usd_rate
+        return usd_amount * target_rate
+
+# views.py - Endpoint HTMX
+from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["GET", "POST"])
+def convert_api(request):
+    amount = request.GET.get('amount') or request.POST.get('amount', '0')
+    from_curr = request.GET.get('from_currency') or request.POST.get('from_currency', 'USD')
+    to_curr = request.GET.get('to_currency') or request.POST.get('to_currency', 'EUR')
+
+    try:
+        result = CurrencyService.convert(Decimal(amount), from_curr, to_curr)
+        formatted = f"{result:,.2f}"
+        return HttpResponse(f'''
+            &lt;div class="ux-currency ux-currency--prefix ux-currency--display" style="justify-content: center;"&gt;
+                &lt;span class="ux-currency__symbol ux-currency__symbol--prefix"&gt;
+                    {get_symbol(to_curr)}
+                &lt;/span&gt;
+                &lt;span style="font-size: 2rem; font-weight: 600;"&gt;{formatted}&lt;/span&gt;
+                &lt;span style="margin-left: 0.5rem; color: var(--ux-text-secondary);"&gt;{to_curr}&lt;/span&gt;
+            &lt;/div&gt;
+        ''')
+    except Exception as e:
+        return HttpResponse(f'&lt;span class="ux-text--danger"&gt;Error: {str(e)}&lt;/span&gt;', status=400)</pre>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">URLs Django</h3>
+      <div class="demo-box">
+        <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('api/convert/', views.convert_api, name='currency_convert'),
+]</pre>
+      </div>
+    </div>
+  </section>

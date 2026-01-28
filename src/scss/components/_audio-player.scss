@@ -1,0 +1,689 @@
+/**
+ * UX Audio-player Component
+ * Part of the UX CSS Library
+ * https://github.com/user/ux
+ */
+
+/* ========================================
+   UX Audio Player Container
+   ======================================== */
+
+:root {
+  --ux-audio-player-height: auto;
+  --ux-audio-player-padding: var(--ux-space-md);
+  --ux-audio-player-border-radius: var(--ux-radius-lg, 12px);
+  --ux-audio-player-bg: var(--ux-surface);
+  --ux-audio-player-progress-height: 4px;
+  --ux-audio-player-progress-bg: var(--ux-medium);
+  --ux-audio-player-progress-fill: var(--ux-primary);
+  --ux-audio-player-waveform-height: 48px;
+  --ux-audio-player-thumb-size: 14px;
+}
+
+.ux-audio-player {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: var(--ux-audio-player-padding);
+  background: var(--ux-audio-player-bg);
+  border-radius: var(--ux-audio-player-border-radius);
+  border: 1px solid var(--ux-border-color);
+  box-shadow: var(--ux-shadow-sm);
+
+  /* ========================================
+     Track Info Section
+     ======================================== */
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-md);
+    margin-bottom: var(--ux-space-md);
+  }
+
+  &__artwork {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--ux-radius-md, 8px);
+    background: var(--ux-surface-secondary);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    svg {
+      width: 32px;
+      height: 32px;
+      color: var(--ux-text-tertiary);
+    }
+  }
+
+  &__meta {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: var(--ux-font-size-md);
+    font-weight: 600;
+    color: var(--ux-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0 0 var(--ux-space-xs) 0;
+  }
+
+  &__artist {
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+  }
+
+  /* ========================================
+     Waveform Visualization
+     ======================================== */
+
+  &__waveform {
+    position: relative;
+    width: 100%;
+    height: var(--ux-audio-player-waveform-height);
+    margin-bottom: var(--ux-space-md);
+    cursor: pointer;
+    border-radius: var(--ux-radius-sm, 4px);
+    overflow: hidden;
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  &__waveform-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--ux-primary);
+    opacity: 0.3;
+    pointer-events: none;
+    transition: width 0.05s linear;
+  }
+
+  /* ========================================
+     Progress Bar
+     ======================================== */
+
+  &__progress {
+    position: relative;
+    width: 100%;
+    height: var(--ux-audio-player-progress-height);
+    margin-bottom: var(--ux-space-sm);
+    cursor: pointer;
+
+    &:hover .ux-audio-player__progress-thumb,
+    &:active .ux-audio-player__progress-thumb {
+      opacity: 1;
+    }
+
+    &:active .ux-audio-player__progress-thumb {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+  }
+
+  &__progress-track {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: var(--ux-audio-player-progress-bg);
+    border-radius: calc(var(--ux-audio-player-progress-height) / 2);
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    position: absolute;
+    height: 100%;
+    background: var(--ux-audio-player-progress-fill);
+    border-radius: calc(var(--ux-audio-player-progress-height) / 2);
+    transition: width 0.05s linear;
+  }
+
+  &__progress-buffer {
+    position: absolute;
+    height: 100%;
+    background: var(--ux-audio-player-progress-bg);
+    opacity: 0.5;
+    border-radius: calc(var(--ux-audio-player-progress-height) / 2);
+  }
+
+  &__progress-thumb {
+    position: absolute;
+    top: 50%;
+    width: var(--ux-audio-player-thumb-size);
+    height: var(--ux-audio-player-thumb-size);
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition:
+      opacity var(--ux-transition-fast) var(--ux-ease),
+      transform var(--ux-transition-fast) var(--ux-ease);
+    z-index: 1;
+  }
+
+  /* ========================================
+     Time Display
+     ======================================== */
+
+  &__time {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-text-tertiary);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: var(--ux-space-md);
+  }
+
+  &__time-current,
+  &__time-duration {
+    min-width: 40px;
+  }
+
+  &__time-current {
+    text-align: left;
+  }
+
+  &__time-duration {
+    text-align: right;
+  }
+
+  /* ========================================
+     Controls
+     ======================================== */
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ux-space-sm);
+  }
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--ux-text);
+    border-radius: 50%;
+    cursor: pointer;
+    transition:
+      background-color var(--ux-transition-fast) var(--ux-ease),
+      transform var(--ux-transition-fast) var(--ux-ease),
+      color var(--ux-transition-fast) var(--ux-ease);
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    &--sm {
+      width: 36px;
+      height: 36px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    &--play {
+      width: 56px;
+      height: 56px;
+      background: var(--ux-primary);
+      color: var(--ux-primary-contrast, white);
+
+      &:hover {
+        background: var(--ux-primary-shade);
+      }
+
+      svg {
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+
+  /* ========================================
+     Secondary Controls (Volume, Speed)
+     ======================================== */
+
+  &__secondary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--ux-space-md);
+    padding-top: var(--ux-space-md);
+    border-top: 1px solid var(--ux-border-color);
+  }
+
+  &__volume {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs);
+    flex: 1;
+    max-width: 150px;
+  }
+
+  &__volume-slider {
+    flex: 1;
+    height: 4px;
+    background: var(--ux-medium);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  &__volume-fill {
+    position: absolute;
+    height: 100%;
+    background: var(--ux-text-secondary);
+    border-radius: 2px;
+    transition: width 0.05s linear;
+  }
+
+  &__volume-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+
+  &__speed {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs);
+  }
+
+  &__speed-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 32px;
+    padding: 0 var(--ux-space-sm);
+    border: 1px solid var(--ux-border-color);
+    background: var(--ux-surface);
+    color: var(--ux-text-secondary);
+    font-size: var(--ux-font-size-xs);
+    font-weight: 500;
+    border-radius: var(--ux-radius-sm, 4px);
+    cursor: pointer;
+    transition:
+      background-color var(--ux-transition-fast) var(--ux-ease),
+      border-color var(--ux-transition-fast) var(--ux-ease);
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    &--active {
+      background: var(--ux-primary);
+      border-color: var(--ux-primary);
+      color: var(--ux-primary-contrast, white);
+    }
+  }
+
+  /* ========================================
+     Playlist
+     ======================================== */
+
+  &__playlist {
+    margin-top: var(--ux-space-md);
+    padding-top: var(--ux-space-md);
+    border-top: 1px solid var(--ux-border-color);
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  &__playlist-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--ux-space-sm);
+  }
+
+  &__playlist-title {
+    font-size: var(--ux-font-size-sm);
+    font-weight: 600;
+    color: var(--ux-text);
+    margin: 0;
+  }
+
+  &__playlist-count {
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-text-tertiary);
+  }
+
+  &__playlist-item {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    padding: var(--ux-space-sm);
+    border-radius: var(--ux-radius-sm, 4px);
+    cursor: pointer;
+    transition: background-color var(--ux-transition-fast) var(--ux-ease);
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    &--active {
+      background: var(--ux-primary);
+      color: var(--ux-primary-contrast, white);
+
+      &:hover {
+        background: var(--ux-primary-shade);
+      }
+
+      .ux-audio-player__playlist-item-index {
+        color: inherit;
+      }
+
+      .ux-audio-player__playlist-item-duration {
+        color: inherit;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  &__playlist-item-index {
+    width: 24px;
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-text-tertiary);
+    text-align: center;
+  }
+
+  &__playlist-item-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__playlist-item-title {
+    font-size: var(--ux-font-size-sm);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__playlist-item-duration {
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-text-tertiary);
+  }
+
+  /* ========================================
+     Mini Player Variant
+     ======================================== */
+
+  &--mini {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--ux-space-sm) var(--ux-space-md);
+    gap: var(--ux-space-md);
+
+    .ux-audio-player__artwork {
+      width: 48px;
+      height: 48px;
+    }
+
+    .ux-audio-player__info {
+      margin-bottom: 0;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ux-audio-player__meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ux-audio-player__title {
+      font-size: var(--ux-font-size-sm);
+    }
+
+    .ux-audio-player__artist {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-audio-player__progress,
+    .ux-audio-player__time,
+    .ux-audio-player__secondary,
+    .ux-audio-player__waveform,
+    .ux-audio-player__playlist {
+      display: none;
+    }
+
+    .ux-audio-player__controls {
+      margin: 0;
+      gap: var(--ux-space-xs);
+    }
+
+    .ux-audio-player__btn--play {
+      width: 44px;
+      height: 44px;
+
+      svg {
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    /* Mini progress bar below */
+    .ux-audio-player__mini-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--ux-medium);
+    }
+
+    .ux-audio-player__mini-progress-fill {
+      height: 100%;
+      background: var(--ux-primary);
+      transition: width 0.1s linear;
+    }
+  }
+
+  /* ========================================
+     Compact Variant
+     ======================================== */
+
+  &--compact {
+    padding: var(--ux-space-sm) var(--ux-space-md);
+
+    .ux-audio-player__info {
+      margin-bottom: var(--ux-space-sm);
+    }
+
+    .ux-audio-player__artwork {
+      width: 48px;
+      height: 48px;
+    }
+
+    .ux-audio-player__secondary {
+      display: none;
+    }
+  }
+
+  /* ========================================
+     Loading State
+     ======================================== */
+
+  &--loading .ux-audio-player__btn--play {
+    position: relative;
+    color: transparent;
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--ux-primary-contrast, white);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: ux-audio-player-spin 0.8s linear infinite;
+    }
+  }
+
+  /* ========================================
+     Error State
+     ======================================== */
+
+  &--error {
+    border-color: var(--ux-danger);
+  }
+
+  &__error {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    padding: var(--ux-space-sm);
+    background: rgba(var(--ux-danger-rgb, 239, 68, 68), 0.1);
+    border-radius: var(--ux-radius-sm, 4px);
+    color: var(--ux-danger);
+    font-size: var(--ux-font-size-sm);
+    margin-bottom: var(--ux-space-md);
+
+    svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+  }
+
+  /* ========================================
+     Glass Variant (iOS 26 Liquid Glass)
+     ======================================== */
+
+  &--glass {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    border: 0.5px solid var(--ux-glass-border);
+    box-shadow: var(--ux-glass-shadow);
+
+    .ux-audio-player__secondary,
+    .ux-audio-player__playlist {
+      border-top-color: var(--ux-glass-border);
+    }
+
+    .ux-audio-player__speed-btn {
+      background: var(--ux-glass-bg-thin);
+      border-color: var(--ux-glass-border);
+
+      &:hover {
+        background: var(--ux-glass-bg);
+      }
+    }
+  }
+}
+
+@keyframes ux-audio-player-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========================================
+   Dark Mode
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  .ux-audio-player {
+    --ux-audio-player-bg: var(--ux-surface);
+
+    &__progress-thumb {
+      background: var(--ux-text);
+    }
+  }
+}
+
+.ux-dark .ux-audio-player {
+  --ux-audio-player-bg: var(--ux-surface);
+
+  &__progress-thumb {
+    background: var(--ux-text);
+  }
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-audio-player {
+    &__progress-fill,
+    &__progress-thumb,
+    &__volume-fill,
+    &__btn,
+    &__waveform-overlay {
+      transition: none;
+    }
+
+    &--loading .ux-audio-player__btn--play::after {
+      animation: none;
+    }
+  }
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (max-width: 767px) {
+  .ux-audio-player__secondary {
+    flex-direction: column;
+    gap: var(--ux-space-md);
+  }
+
+  .ux-audio-player__volume {
+    max-width: 100%;
+    width: 100%;
+  }
+}

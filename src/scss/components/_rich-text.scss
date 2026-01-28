@@ -1,0 +1,531 @@
+/**
+ * UX Rich-text Component
+ * Part of the UX CSS Library
+ * https://github.com/user/ux
+ */
+
+/* ========================================
+   CSS Variables
+   ======================================== */
+
+:root {
+  --ux-rich-text-min-height: 200px;
+  --ux-rich-text-max-height: none;
+  --ux-rich-text-border-radius: var(--ux-border-radius);
+  --ux-rich-text-toolbar-bg: var(--ux-surface-secondary);
+  --ux-rich-text-toolbar-btn-size: 44px;
+  --ux-rich-text-toolbar-btn-size-sm: 36px;
+  --ux-rich-text-content-padding: var(--ux-space-lg);
+  --ux-rich-text-font-size: 16px;
+}
+
+/* ========================================
+   Container
+   ======================================== */
+
+.ux-rich-text {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: var(--ux-surface);
+  border: 1px solid var(--ux-border-color);
+  border-radius: var(--ux-rich-text-border-radius);
+  overflow: hidden;
+  transition:
+    border-color var(--ux-transition-fast) var(--ux-ease),
+    box-shadow var(--ux-transition-fast) var(--ux-ease);
+
+  &:focus-within {
+    border-color: var(--ux-primary);
+    box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
+  }
+
+  // ========================================
+  // Toolbar
+  // ========================================
+
+  &__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ux-space-xs);
+    padding: var(--ux-space-sm) var(--ux-space-md);
+    background-color: var(--ux-rich-text-toolbar-bg);
+    border-bottom: 1px solid var(--ux-border-color);
+    min-height: 52px;
+  }
+
+  &__toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--ux-border-color);
+    margin: 0 var(--ux-space-sm);
+    flex-shrink: 0;
+  }
+
+  // ========================================
+  // Toolbar Buttons
+  // ========================================
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--ux-rich-text-toolbar-btn-size);
+    min-height: var(--ux-rich-text-toolbar-btn-size);
+    padding: var(--ux-space-xs);
+    background: transparent;
+    border: none;
+    border-radius: var(--ux-border-radius-sm);
+    color: var(--ux-text-secondary);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--ux-transition-fast) var(--ux-ease),
+      color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background-color: var(--ux-light);
+      color: var(--ux-text);
+    }
+
+    &:active {
+      background-color: var(--ux-light-shade);
+    }
+
+    &--active {
+      background-color: rgba(var(--ux-primary-rgb), 0.15);
+      color: var(--ux-primary);
+
+      &:hover {
+        background-color: rgba(var(--ux-primary-rgb), 0.2);
+        color: var(--ux-primary);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    // Dropdown button
+    &--dropdown {
+      gap: var(--ux-space-xs);
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      font-size: var(--ux-font-size-sm);
+      font-weight: 500;
+
+      svg:last-child {
+        width: 12px;
+        height: 12px;
+      }
+    }
+  }
+
+  // ========================================
+  // Dropdown Menu
+  // ========================================
+
+  &__dropdown {
+    position: relative;
+  }
+
+  &__dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: var(--ux-z-dropdown);
+    min-width: 150px;
+    margin-top: var(--ux-space-xs);
+    padding: var(--ux-space-xs);
+    background-color: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-border-radius);
+    box-shadow: var(--ux-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition:
+      opacity var(--ux-transition-fast) var(--ux-ease),
+      visibility var(--ux-transition-fast) var(--ux-ease),
+      transform var(--ux-transition-fast) var(--ux-ease);
+
+    &--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+
+  &__dropdown-item {
+    display: block;
+    width: 100%;
+    padding: var(--ux-space-sm) var(--ux-space-md);
+    background: none;
+    border: none;
+    border-radius: var(--ux-border-radius-sm);
+    text-align: left;
+    color: var(--ux-text);
+    cursor: pointer;
+    transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background-color: var(--ux-surface-secondary);
+    }
+
+    &--h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    &--h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    &--h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+  }
+
+  // ========================================
+  // Editor Content Area
+  // ========================================
+
+  &__editor {
+    flex: 1;
+    min-height: var(--ux-rich-text-min-height);
+    max-height: var(--ux-rich-text-max-height);
+    padding: var(--ux-rich-text-content-padding);
+    font-family: var(--ux-font-family);
+    font-size: var(--ux-rich-text-font-size);
+    line-height: 1.6;
+    color: var(--ux-text);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    outline: none;
+
+    &:empty::before {
+      content: attr(data-placeholder);
+      color: var(--ux-text-tertiary);
+      pointer-events: none;
+    }
+
+    // Editor content styles
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 var(--ux-space-md);
+      line-height: 1.3;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 var(--ux-space-md);
+      line-height: 1.3;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 var(--ux-space-md);
+      line-height: 1.3;
+    }
+
+    p {
+      margin: 0 0 var(--ux-space-md);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    ul,
+    ol {
+      margin: 0 0 var(--ux-space-md);
+      padding-left: var(--ux-space-xl);
+    }
+
+    li {
+      margin-bottom: var(--ux-space-xs);
+    }
+
+    a {
+      color: var(--ux-primary);
+      text-decoration: underline;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--ux-border-radius);
+      margin: var(--ux-space-md) 0;
+    }
+
+    blockquote {
+      margin: 0 0 var(--ux-space-md);
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      background-color: var(--ux-surface-secondary);
+      border-left: 4px solid var(--ux-primary);
+      border-radius: 0 var(--ux-border-radius) var(--ux-border-radius) 0;
+    }
+
+    code {
+      padding: 2px 6px;
+      background-color: var(--ux-surface-secondary);
+      border-radius: var(--ux-border-radius-sm);
+      font-family: var(--ux-font-family-mono, monospace);
+      font-size: 0.9em;
+    }
+
+    pre {
+      margin: 0 0 var(--ux-space-md);
+      padding: var(--ux-space-md);
+      background-color: var(--ux-gray-900);
+      border-radius: var(--ux-border-radius);
+      overflow-x: auto;
+
+      code {
+        padding: 0;
+        background: none;
+        color: var(--ux-gray-100);
+      }
+    }
+
+    hr {
+      margin: var(--ux-space-lg) 0;
+      border: none;
+      border-top: 1px solid var(--ux-border-color);
+    }
+  }
+
+  // ========================================
+  // Source View (HTML)
+  // ========================================
+
+  &__source {
+    display: none;
+    flex: 1;
+    min-height: var(--ux-rich-text-min-height);
+    max-height: var(--ux-rich-text-max-height);
+    padding: var(--ux-rich-text-content-padding);
+    font-family: var(--ux-font-family-mono, monospace);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ux-text);
+    background-color: var(--ux-surface);
+    border: none;
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+  }
+
+  &--source-view {
+    .ux-rich-text__editor {
+      display: none;
+    }
+
+    .ux-rich-text__source {
+      display: block;
+    }
+  }
+
+  // ========================================
+  // Footer (Counter)
+  // ========================================
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--ux-space-sm) var(--ux-space-md);
+    background-color: var(--ux-surface-secondary);
+    border-top: 1px solid var(--ux-border-color);
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-text-tertiary);
+  }
+
+  &__counter {
+    display: flex;
+    gap: var(--ux-space-md);
+
+    span {
+      white-space: nowrap;
+    }
+  }
+
+  // ========================================
+  // States
+  // ========================================
+
+  // Error
+  &--error {
+    border-color: var(--ux-danger);
+
+    &:focus-within {
+      box-shadow: 0 0 0 3px rgba(var(--ux-danger-rgb), 0.15);
+    }
+  }
+
+  // Disabled
+  &--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+
+    .ux-rich-text__editor {
+      background-color: var(--ux-light);
+    }
+  }
+
+  // Read-only
+  &--readonly {
+    .ux-rich-text__toolbar {
+      display: none;
+    }
+
+    .ux-rich-text__editor {
+      background-color: var(--ux-light);
+    }
+
+    .ux-rich-text__footer {
+      display: none;
+    }
+  }
+
+  // ========================================
+  // Sizes
+  // ========================================
+
+  &--sm {
+    --ux-rich-text-min-height: 120px;
+    --ux-rich-text-toolbar-btn-size: 36px;
+    --ux-rich-text-content-padding: var(--ux-space-md);
+    --ux-rich-text-font-size: 14px;
+
+    .ux-rich-text__btn svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &--lg {
+    --ux-rich-text-min-height: 300px;
+    --ux-rich-text-content-padding: var(--ux-space-xl);
+    --ux-rich-text-font-size: 18px;
+  }
+
+  // ========================================
+  // Glass Variant (iOS 26 Liquid Glass)
+  // ========================================
+
+  &--glass {
+    background: var(--ux-glass-bg);
+    border: 0.5px solid var(--ux-glass-border);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+
+    &:focus-within {
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-highlight);
+    }
+
+    .ux-rich-text__toolbar {
+      background: var(--ux-glass-bg-thin);
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-rich-text__editor {
+      background: transparent;
+    }
+
+    .ux-rich-text__source {
+      background: transparent;
+    }
+
+    .ux-rich-text__footer {
+      background: var(--ux-glass-bg-thin);
+      border-top-color: var(--ux-glass-border);
+    }
+
+    .ux-rich-text__btn:hover {
+      background-color: var(--ux-glass-bg);
+    }
+
+    .ux-rich-text__dropdown-menu {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+      backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+    }
+  }
+}
+
+// ========================================
+// Compact Toolbar (mobile)
+// ========================================
+
+@media (max-width: 767px) {
+  .ux-rich-text__toolbar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .ux-rich-text__toolbar-group {
+    flex-shrink: 0;
+  }
+}
+
+// ========================================
+// Dark Mode
+// ========================================
+
+@media (prefers-color-scheme: dark) {
+  .ux-rich-text__toolbar {
+    background-color: var(--ux-surface-secondary);
+  }
+
+  .ux-rich-text__footer {
+    background-color: var(--ux-surface-secondary);
+  }
+}
+
+.ux-dark .ux-rich-text__toolbar {
+  background-color: var(--ux-surface-secondary);
+}
+
+.ux-dark .ux-rich-text__footer {
+  background-color: var(--ux-surface-secondary);
+}
+
+// ========================================
+// Reduced Motion
+// ========================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-rich-text,
+  .ux-rich-text__btn,
+  .ux-rich-text__dropdown-menu {
+    transition: none;
+  }
+}

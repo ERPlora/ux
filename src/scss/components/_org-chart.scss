@@ -1,0 +1,624 @@
+@use '../core/mixins' as *;
+
+/**
+ * UX Org-chart Component
+ * Part of the UX CSS Library
+ */
+
+/* ==========================================================================
+   Org Chart - Container
+   ========================================================================== */
+
+:root {
+  --ux-org-chart-node-width: 180px;
+  --ux-org-chart-node-min-height: 80px;
+  --ux-org-chart-node-padding: var(--ux-space-md);
+  --ux-org-chart-node-gap: var(--ux-space-xl);
+  --ux-org-chart-level-gap: 60px;
+  --ux-org-chart-connector-width: 2px;
+  --ux-org-chart-connector-color: var(--ux-border-color);
+  --ux-org-chart-node-radius: var(--ux-radius-lg);
+  --ux-org-chart-transition: var(--ux-transition-normal);
+}
+
+.ux-org-chart {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  overflow: hidden;
+  font-family: var(--ux-font-family);
+  background: var(--ux-surface-secondary);
+  border-radius: var(--ux-radius-lg);
+  user-select: none;
+
+  &__viewport {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__canvas {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--ux-space-2xl);
+    transform-origin: center center;
+    transition: transform var(--ux-org-chart-transition) var(--ux-ease-out);
+    min-width: 100%;
+    min-height: 100%;
+
+    &--dragging {
+      transition: none;
+    }
+  }
+
+  /* ==========================================================================
+     Org Chart - Controls
+     ========================================================================== */
+
+  &__controls {
+    position: absolute;
+    bottom: var(--ux-space-lg);
+    right: var(--ux-space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ux-space-xs);
+    z-index: 10;
+  }
+
+  &__control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: var(--ux-radius-md);
+    background: var(--ux-surface);
+    color: var(--ux-text);
+    cursor: pointer;
+    box-shadow: var(--ux-shadow-md);
+    transition: all var(--ux-transition-fast) var(--ux-ease-out);
+
+    &:hover {
+      background: var(--ux-surface-secondary);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__zoom-level {
+    font-size: var(--ux-font-size-xs);
+    text-align: center;
+    padding: var(--ux-space-xs);
+    background: var(--ux-surface);
+    border-radius: var(--ux-radius-sm);
+    box-shadow: var(--ux-shadow-sm);
+    min-width: 40px;
+  }
+
+  /* ==========================================================================
+     Org Chart - Search
+     ========================================================================== */
+
+  &__search {
+    position: absolute;
+    top: var(--ux-space-lg);
+    left: var(--ux-space-lg);
+    z-index: 10;
+    width: 280px;
+    max-width: calc(100% - var(--ux-space-xl) * 2);
+  }
+
+  &__search-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--ux-space-md) 0 40px;
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-radius-lg);
+    background: var(--ux-surface);
+    font-size: var(--ux-font-size-sm);
+    color: var(--ux-text);
+    box-shadow: var(--ux-shadow-md);
+    outline: none;
+    transition: border-color var(--ux-transition-fast), box-shadow var(--ux-transition-fast);
+
+    &:focus {
+      border-color: var(--ux-primary);
+      box-shadow: var(--ux-shadow-md), 0 0 0 3px var(--ux-primary-tint);
+    }
+
+    &::placeholder {
+      color: var(--ux-text-tertiary);
+    }
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--ux-text-tertiary);
+    pointer-events: none;
+  }
+
+  /* ==========================================================================
+     Org Chart - Tree Structure
+     ========================================================================== */
+
+  &__tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+
+    /* Vertical line from horizontal bar to child */
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: var(--ux-org-chart-connector-width);
+      height: calc(var(--ux-org-chart-level-gap) / 2);
+      background: var(--ux-org-chart-connector-color);
+      transform: translateX(-50%);
+    }
+  }
+
+  /* First branch - hide the line going up */
+  &__tree > &__branch::before {
+    display: none;
+  }
+
+  &__children {
+    display: flex;
+    gap: var(--ux-org-chart-node-gap);
+    position: relative;
+    padding-top: var(--ux-org-chart-level-gap);
+
+    &--collapsed {
+      display: none;
+    }
+  }
+
+  /* ==========================================================================
+     Org Chart - Node
+     ========================================================================== */
+
+  &__node {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: var(--ux-org-chart-node-width);
+    min-height: var(--ux-org-chart-node-min-height);
+    padding: var(--ux-org-chart-node-padding);
+    background: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-org-chart-node-radius);
+    box-shadow: var(--ux-shadow-sm);
+    cursor: pointer;
+    transition: all var(--ux-transition-fast) var(--ux-ease-out);
+    text-align: center;
+
+    &:hover {
+      border-color: var(--ux-primary);
+      box-shadow: var(--ux-shadow-md);
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    &--selected {
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 3px var(--ux-primary-tint), var(--ux-shadow-md);
+    }
+
+    &--highlighted {
+      border-color: var(--ux-warning);
+      box-shadow: 0 0 0 3px var(--ux-warning-tint), var(--ux-shadow-md);
+      animation: ux-org-chart-pulse 1.5s ease-in-out infinite;
+    }
+
+    &--collapsed {
+      opacity: 0.7;
+    }
+  }
+
+  /* Node Avatar */
+  &__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: var(--ux-space-sm);
+    flex-shrink: 0;
+    background: var(--ux-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ux-medium-contrast);
+    font-size: var(--ux-font-size-lg);
+    font-weight: 600;
+    text-transform: uppercase;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  /* Node Info */
+  &__name {
+    font-size: var(--ux-font-size-sm);
+    font-weight: 600;
+    color: var(--ux-text);
+    line-height: 1.3;
+    margin-bottom: var(--ux-space-xs);
+    word-break: break-word;
+  }
+
+  &__title {
+    font-size: var(--ux-font-size-xs);
+    color: var(--ux-text-secondary);
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  &__department {
+    font-size: 10px;
+    color: var(--ux-text-tertiary);
+    margin-top: var(--ux-space-xs);
+    padding: 2px 8px;
+    background: var(--ux-surface-secondary);
+    border-radius: var(--ux-radius-sm);
+  }
+
+  /* Expand/Collapse Toggle */
+  &__toggle {
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--ux-border-color);
+    border-radius: 50%;
+    background: var(--ux-surface);
+    color: var(--ux-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--ux-transition-fast);
+    z-index: 5;
+
+    &:hover {
+      border-color: var(--ux-primary);
+      color: var(--ux-primary);
+      transform: translateX(-50%) scale(1.1);
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+      transition: transform var(--ux-transition-fast);
+    }
+
+    &--collapsed svg {
+      transform: rotate(-90deg);
+    }
+  }
+
+  /* Child count badge */
+  &__count {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: var(--ux-primary);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--ux-shadow-sm);
+  }
+
+  /* ==========================================================================
+     Org Chart - Connectors (CSS-drawn lines)
+     ========================================================================== */
+
+  &__connector {
+    position: absolute;
+    pointer-events: none;
+
+    /* Vertical line from parent to horizontal bar */
+    &--vertical {
+      left: 50%;
+      top: 100%;
+      width: var(--ux-org-chart-connector-width);
+      height: calc(var(--ux-org-chart-level-gap) / 2);
+      background: var(--ux-org-chart-connector-color);
+      transform: translateX(-50%);
+    }
+
+    /* Horizontal bar connecting children */
+    &--horizontal {
+      position: absolute;
+      top: calc(var(--ux-org-chart-level-gap) / 2);
+      height: var(--ux-org-chart-connector-width);
+      background: var(--ux-org-chart-connector-color);
+      transform: translateY(-50%);
+    }
+  }
+
+  /* ==========================================================================
+     Org Chart - Horizontal Layout
+     ========================================================================== */
+
+  &--horizontal {
+    .ux-org-chart__tree {
+      flex-direction: row;
+    }
+
+    .ux-org-chart__branch {
+      flex-direction: row;
+
+      &::before {
+        top: 50%;
+        left: 0;
+        width: calc(var(--ux-org-chart-level-gap) / 2);
+        height: var(--ux-org-chart-connector-width);
+        transform: translateY(-50%);
+      }
+    }
+
+    .ux-org-chart__children {
+      flex-direction: column;
+      padding-top: 0;
+      padding-left: var(--ux-org-chart-level-gap);
+    }
+
+    .ux-org-chart__connector--vertical {
+      top: 50%;
+      left: 100%;
+      width: calc(var(--ux-org-chart-level-gap) / 2);
+      height: var(--ux-org-chart-connector-width);
+      transform: translateY(-50%);
+    }
+
+    .ux-org-chart__connector--horizontal {
+      left: calc(var(--ux-org-chart-level-gap) / 2);
+      top: 0;
+      width: var(--ux-org-chart-connector-width);
+      transform: translateX(-50%);
+    }
+
+    .ux-org-chart__toggle {
+      bottom: auto;
+      left: auto;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+
+      &:hover {
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      svg {
+        transform: rotate(90deg);
+      }
+
+      &--collapsed svg {
+        transform: rotate(0deg);
+      }
+    }
+  }
+
+  /* ==========================================================================
+     Org Chart - Glass Variant
+     ========================================================================== */
+
+  &--glass {
+    background: var(--ux-glass-bg-thin);
+    backdrop-filter: blur(var(--ux-glass-blur));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+
+    .ux-org-chart__node {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border-color: var(--ux-glass-border);
+      box-shadow: var(--ux-glass-shadow);
+
+      &:hover {
+        box-shadow: var(--ux-glass-shadow), 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .ux-org-chart__control,
+    .ux-org-chart__search-input,
+    .ux-org-chart__zoom-level {
+      background: var(--ux-glass-bg);
+      backdrop-filter: blur(var(--ux-glass-blur));
+      -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+      border: 1px solid var(--ux-glass-border);
+    }
+
+    .ux-org-chart__toggle {
+      background: var(--ux-glass-bg);
+      border-color: var(--ux-glass-border);
+    }
+  }
+
+  /* ==========================================================================
+     Org Chart - Compact Mode
+     ========================================================================== */
+
+  &--compact {
+    --ux-org-chart-node-width: 140px;
+    --ux-org-chart-node-min-height: 60px;
+    --ux-org-chart-node-padding: var(--ux-space-sm);
+    --ux-org-chart-node-gap: var(--ux-space-md);
+    --ux-org-chart-level-gap: 40px;
+
+    .ux-org-chart__avatar {
+      width: 36px;
+      height: 36px;
+      margin-bottom: var(--ux-space-xs);
+    }
+
+    .ux-org-chart__name {
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-org-chart__title {
+      font-size: 10px;
+    }
+
+    .ux-org-chart__toggle {
+      width: 20px;
+      height: 20px;
+      bottom: -10px;
+
+      svg {
+        width: 12px;
+        height: 12px;
+      }
+    }
+  }
+
+  /* ==========================================================================
+     Org Chart - Size Variants
+     ========================================================================== */
+
+  &--sm {
+    --ux-org-chart-node-width: 120px;
+    --ux-org-chart-node-min-height: 50px;
+    --ux-org-chart-node-gap: var(--ux-space-sm);
+    --ux-org-chart-level-gap: 30px;
+  }
+
+  &--lg {
+    --ux-org-chart-node-width: 220px;
+    --ux-org-chart-node-min-height: 100px;
+    --ux-org-chart-node-gap: var(--ux-space-2xl);
+    --ux-org-chart-level-gap: 80px;
+  }
+}
+
+/* ==========================================================================
+   Keyframe Animations
+   ========================================================================== */
+
+@keyframes ux-org-chart-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--ux-warning-tint), var(--ux-shadow-md); }
+  50% { box-shadow: 0 0 0 6px var(--ux-warning-tint), var(--ux-shadow-lg); }
+}
+
+/* ==========================================================================
+   Dark Mode
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  .ux-org-chart {
+    background: var(--ux-surface);
+  }
+
+  .ux-org-chart__node {
+    background: var(--ux-surface-secondary);
+    border-color: var(--ux-border-color);
+  }
+
+  .ux-org-chart--glass .ux-org-chart__node:hover {
+    box-shadow: var(--ux-glass-shadow), 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.ux-dark .ux-org-chart {
+  background: var(--ux-surface);
+}
+
+.ux-dark .ux-org-chart__node {
+  background: var(--ux-surface-secondary);
+  border-color: var(--ux-border-color);
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-org-chart__canvas {
+    transition: none;
+  }
+
+  .ux-org-chart__node,
+  .ux-org-chart__control,
+  .ux-org-chart__toggle {
+    transition: none;
+  }
+
+  .ux-org-chart__node--highlighted {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+  .ux-org-chart {
+    overflow: visible;
+    height: auto;
+    min-height: auto;
+  }
+
+  .ux-org-chart__controls,
+  .ux-org-chart__search {
+    display: none;
+  }
+
+  .ux-org-chart__canvas {
+    position: static;
+    transform: none !important;
+  }
+}

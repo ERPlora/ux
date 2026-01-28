@@ -1,0 +1,697 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section > h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section > p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-lg); margin-bottom: var(--ux-space-md); overflow: hidden; }
+    .form-row { margin-bottom: var(--ux-space-md); }
+  </style>
+
+<h2 style="margin-bottom: var(--ux-space-lg);">Form Wizard</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xl);">Wizard de formulario multi-paso con indicador de progreso y validacion.</p>
+
+    <section class="demo-section">
+      <h3>Basico</h3>
+      <div class="demo-box">
+        <div class="ux-form-wizard" x-data="uxFormWizard({ totalSteps: 4 })">
+          <div class="ux-form-wizard__steps">
+            <div class="ux-form-wizard__progress-line" :style="{ width: progressWidth }"></div>
+
+            <div class="ux-form-wizard__step" :class="getStepClasses(0)" @click="goToStep(0)">
+              <div class="ux-form-wizard__step-indicator">
+                <template x-if="getStepIcon(0)"><span x-html="getStepIcon(0)"></span></template>
+                <template x-if="!getStepIcon(0)">1</template>
+              </div>
+              <span class="ux-form-wizard__step-label">Account</span>
+            </div>
+
+            <div class="ux-form-wizard__step" :class="getStepClasses(1)" @click="goToStep(1)">
+              <div class="ux-form-wizard__step-indicator">
+                <template x-if="getStepIcon(1)"><span x-html="getStepIcon(1)"></span></template>
+                <template x-if="!getStepIcon(1)">2</template>
+              </div>
+              <span class="ux-form-wizard__step-label">Personal</span>
+            </div>
+
+            <div class="ux-form-wizard__step" :class="getStepClasses(2)" @click="goToStep(2)">
+              <div class="ux-form-wizard__step-indicator">
+                <template x-if="getStepIcon(2)"><span x-html="getStepIcon(2)"></span></template>
+                <template x-if="!getStepIcon(2)">3</template>
+              </div>
+              <span class="ux-form-wizard__step-label">Payment</span>
+            </div>
+
+            <div class="ux-form-wizard__step" :class="getStepClasses(3)" @click="goToStep(3)">
+              <div class="ux-form-wizard__step-indicator">
+                <template x-if="getStepIcon(3)"><span x-html="getStepIcon(3)"></span></template>
+                <template x-if="!getStepIcon(3)">4</template>
+              </div>
+              <span class="ux-form-wizard__step-label">Confirm</span>
+            </div>
+          </div>
+
+          <div class="ux-form-wizard__content">
+            <div class="ux-form-wizard__panel" :class="{ 'ux-form-wizard__panel--active': currentStep === 0 }">
+              <div class="ux-form-wizard__panel-header">
+                <h3 class="ux-form-wizard__panel-title">Account Information</h3>
+                <p class="ux-form-wizard__panel-subtitle">Enter your email and password</p>
+              </div>
+              <div class="ux-form-wizard__panel-body">
+                <div class="form-row">
+                  <div class="ux-input-group ux-input-group--floating">
+                    <input type="email" class="ux-input" placeholder=" " id="email">
+                    <label class="ux-input__label" for="email">Email</label>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="ux-input-group ux-input-group--floating">
+                    <input type="password" class="ux-input" placeholder=" " id="password">
+                    <label class="ux-input__label" for="password">Password</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ux-form-wizard__panel" :class="{ 'ux-form-wizard__panel--active': currentStep === 1 }">
+              <div class="ux-form-wizard__panel-header">
+                <h3 class="ux-form-wizard__panel-title">Personal Information</h3>
+                <p class="ux-form-wizard__panel-subtitle">Tell us about yourself</p>
+              </div>
+              <div class="ux-form-wizard__panel-body">
+                <div class="form-row">
+                  <div class="ux-input-group ux-input-group--floating">
+                    <input type="text" class="ux-input" placeholder=" " id="name">
+                    <label class="ux-input__label" for="name">Full Name</label>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="ux-input-group ux-input-group--floating">
+                    <input type="tel" class="ux-input" placeholder=" " id="phone">
+                    <label class="ux-input__label" for="phone">Phone</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ux-form-wizard__panel" :class="{ 'ux-form-wizard__panel--active': currentStep === 2 }">
+              <div class="ux-form-wizard__panel-header">
+                <h3 class="ux-form-wizard__panel-title">Payment Details</h3>
+                <p class="ux-form-wizard__panel-subtitle">Add your payment method</p>
+              </div>
+              <div class="ux-form-wizard__panel-body">
+                <div class="form-row">
+                  <div class="ux-input-group ux-input-group--floating">
+                    <input type="text" class="ux-input" placeholder=" " id="card">
+                    <label class="ux-input__label" for="card">Card Number</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ux-form-wizard__panel" :class="{ 'ux-form-wizard__panel--active': currentStep === 3 }">
+              <div class="ux-form-wizard__panel-header">
+                <h3 class="ux-form-wizard__panel-title">Confirm</h3>
+                <p class="ux-form-wizard__panel-subtitle">Review and submit</p>
+              </div>
+              <div class="ux-form-wizard__panel-body">
+                <p style="color: var(--ux-text-secondary);">Please review your information before submitting.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="ux-form-wizard__actions">
+            <div class="ux-form-wizard__actions-start">
+              <button class="ux-button" :disabled="isFirst" @click="prevStep()">Back</button>
+            </div>
+            <span class="ux-form-wizard__progress-text" x-text="progressText"></span>
+            <div class="ux-form-wizard__actions-end">
+              <template x-if="!isLast">
+                <button class="ux-button ux-color-primary" @click="nextStep()">Continue</button>
+              </template>
+              <template x-if="isLast">
+                <button class="ux-button ux-color-success" @click="submit()">Submit</button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">
+&lt;div class="ux-form-wizard" x-data="uxFormWizard({ totalSteps: 4 })"&gt;
+  &lt;div class="ux-form-wizard__steps"&gt;
+    &lt;div class="ux-form-wizard__progress-line" :style="{ width: progressWidth }"&gt;&lt;/div&gt;
+
+    &lt;div class="ux-form-wizard__step" :class="getStepClasses(0)" @click="goToStep(0)"&gt;
+      &lt;div class="ux-form-wizard__step-indicator"&gt;
+        &lt;template x-if="getStepIcon(0)"&gt;&lt;span x-html="getStepIcon(0)"&gt;&lt;/span&gt;&lt;/template&gt;
+        &lt;template x-if="!getStepIcon(0)"&gt;1&lt;/template&gt;
+      &lt;/div&gt;
+      &lt;span class="ux-form-wizard__step-label"&gt;Account&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;!-- Repeat for each step... --&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-form-wizard__content"&gt;
+    &lt;div class="ux-form-wizard__panel" :class="{ 'ux-form-wizard__panel--active': currentStep === 0 }"&gt;
+      &lt;div class="ux-form-wizard__panel-header"&gt;
+        &lt;h3 class="ux-form-wizard__panel-title"&gt;Account Information&lt;/h3&gt;
+        &lt;p class="ux-form-wizard__panel-subtitle"&gt;Enter your email and password&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-form-wizard__panel-body"&gt;
+        &lt;div class="form-row"&gt;
+          &lt;div class="ux-input-group ux-input-group--floating"&gt;
+            &lt;input type="email" class="ux-input" placeholder=" " id="email"&gt;
+            &lt;label class="ux-input__label" for="email"&gt;Email&lt;/label&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-form-wizard__actions"&gt;
+    &lt;div class="ux-form-wizard__actions-start"&gt;
+      &lt;button class="ux-button" :disabled="isFirst" @click="prevStep()"&gt;Back&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;span class="ux-form-wizard__progress-text" x-text="progressText"&gt;&lt;/span&gt;
+    &lt;div class="ux-form-wizard__actions-end"&gt;
+      &lt;template x-if="!isLast"&gt;
+        &lt;button class="ux-button ux-color-primary" @click="nextStep()"&gt;Continue&lt;/button&gt;
+      &lt;/template&gt;
+      &lt;template x-if="isLast"&gt;
+        &lt;button class="ux-button ux-color-success" @click="submit()"&gt;Submit&lt;/button&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+      </pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Dots Variant (Minimal)</h3>
+      <div class="demo-box">
+        <div class="ux-form-wizard ux-form-wizard--dots" x-data="uxFormWizard({ totalSteps: 4 })">
+          <div class="ux-form-wizard__steps">
+            <template x-for="step in totalSteps" :key="step">
+              <div class="ux-form-wizard__step" :class="getStepClasses(step - 1)" @click="goToStep(step - 1)">
+                <div class="ux-form-wizard__step-indicator"></div>
+              </div>
+            </template>
+          </div>
+
+          <div class="ux-form-wizard__content">
+            <div class="ux-form-wizard__panel ux-form-wizard__panel--active">
+              <div class="ux-form-wizard__panel-header">
+                <h3 class="ux-form-wizard__panel-title">Step <span x-text="currentStep + 1"></span> of <span x-text="totalSteps"></span></h3>
+              </div>
+              <div class="ux-form-wizard__panel-body">
+                <p style="color: var(--ux-text-secondary);">Minimal dot indicators for a cleaner look.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="ux-form-wizard__actions">
+            <div class="ux-form-wizard__actions-start">
+              <button class="ux-button" :disabled="isFirst" @click="prevStep()">Back</button>
+            </div>
+            <div class="ux-form-wizard__actions-end">
+              <button class="ux-button ux-color-primary" :disabled="isLast" @click="nextStep()">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">
+&lt;div class="ux-form-wizard ux-form-wizard--dots" x-data="uxFormWizard({ totalSteps: 4 })"&gt;
+  &lt;div class="ux-form-wizard__steps"&gt;
+    &lt;template x-for="step in totalSteps" :key="step"&gt;
+      &lt;div class="ux-form-wizard__step" :class="getStepClasses(step - 1)" @click="goToStep(step - 1)"&gt;
+        &lt;div class="ux-form-wizard__step-indicator"&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-form-wizard__content"&gt;
+    &lt;div class="ux-form-wizard__panel ux-form-wizard__panel--active"&gt;
+      &lt;!-- Panel content --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-form-wizard__actions"&gt;
+    &lt;div class="ux-form-wizard__actions-start"&gt;
+      &lt;button class="ux-button" :disabled="isFirst" @click="prevStep()"&gt;Back&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-form-wizard__actions-end"&gt;
+      &lt;button class="ux-button ux-color-primary" :disabled="isLast" @click="nextStep()"&gt;Next&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+      </pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Compact</h3>
+      <div class="demo-box">
+        <div class="ux-form-wizard ux-form-wizard--compact" x-data="uxFormWizard({ totalSteps: 3 })">
+          <div class="ux-form-wizard__steps">
+            <div class="ux-form-wizard__progress-line" :style="{ width: progressWidth }"></div>
+            <template x-for="step in totalSteps" :key="step">
+              <div class="ux-form-wizard__step" :class="getStepClasses(step - 1)" @click="goToStep(step - 1)">
+                <div class="ux-form-wizard__step-indicator">
+                  <template x-if="getStepIcon(step - 1)"><span x-html="getStepIcon(step - 1)"></span></template>
+                  <template x-if="!getStepIcon(step - 1)" x-text="step"></template>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <div class="ux-form-wizard__content">
+            <div class="ux-form-wizard__panel ux-form-wizard__panel--active">
+              <p style="color: var(--ux-text-secondary);">Compact wizard with smaller step indicators.</p>
+            </div>
+          </div>
+
+          <div class="ux-form-wizard__actions">
+            <button class="ux-button ux-button--sm" :disabled="isFirst" @click="prevStep()">Back</button>
+            <button class="ux-button ux-button--sm ux-color-primary" @click="nextStep()">Next</button>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">
+&lt;div class="ux-form-wizard ux-form-wizard--compact" x-data="uxFormWizard({ totalSteps: 3 })"&gt;
+  &lt;div class="ux-form-wizard__steps"&gt;
+    &lt;div class="ux-form-wizard__progress-line" :style="{ width: progressWidth }"&gt;&lt;/div&gt;
+    &lt;template x-for="step in totalSteps" :key="step"&gt;
+      &lt;div class="ux-form-wizard__step" :class="getStepClasses(step - 1)" @click="goToStep(step - 1)"&gt;
+        &lt;div class="ux-form-wizard__step-indicator" x-text="step"&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-form-wizard__content"&gt;
+    &lt;div class="ux-form-wizard__panel ux-form-wizard__panel--active"&gt;
+      &lt;!-- Panel content --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-form-wizard__actions"&gt;
+    &lt;button class="ux-button ux-button--sm" :disabled="isFirst" @click="prevStep()"&gt;Back&lt;/button&gt;
+    &lt;button class="ux-button ux-button--sm ux-color-primary" @click="nextStep()"&gt;Next&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+      </pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>Glass Variant</h3>
+      <div class="demo-box" style="background: var(--ux-demo-gradient); padding: var(--ux-space-xl);">
+        <div class="ux-form-wizard ux-form-wizard--glass" x-data="uxFormWizard({ totalSteps: 3 })">
+          <div class="ux-form-wizard__steps">
+            <div class="ux-form-wizard__progress-line" :style="{ width: progressWidth }"></div>
+            <template x-for="step in totalSteps" :key="step">
+              <div class="ux-form-wizard__step" :class="getStepClasses(step - 1)" @click="goToStep(step - 1)">
+                <div class="ux-form-wizard__step-indicator">
+                  <template x-if="getStepIcon(step - 1)"><span x-html="getStepIcon(step - 1)"></span></template>
+                  <template x-if="!getStepIcon(step - 1)" x-text="step"></template>
+                </div>
+                <span class="ux-form-wizard__step-label" x-text="'Step ' + step"></span>
+              </div>
+            </template>
+          </div>
+
+          <div class="ux-form-wizard__content">
+            <div class="ux-form-wizard__panel ux-form-wizard__panel--active">
+              <div class="ux-form-wizard__panel-header">
+                <h3 class="ux-form-wizard__panel-title">Glass Wizard</h3>
+              </div>
+              <p style="color: var(--ux-text-secondary);">With iOS 26 Liquid Glass effect.</p>
+            </div>
+          </div>
+
+          <div class="ux-form-wizard__actions">
+            <button class="ux-button" :disabled="isFirst" @click="prevStep()">Back</button>
+            <button class="ux-button ux-color-primary" @click="nextStep()">Next</button>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">
+&lt;!-- Wrap in a container with gradient background for glass effect --&gt;
+&lt;div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); "&gt;
+  &lt;div class="ux-form-wizard ux-form-wizard--glass" x-data="uxFormWizard({ totalSteps: 3 })"&gt;
+    &lt;div class="ux-form-wizard__steps"&gt;
+      &lt;div class="ux-form-wizard__progress-line" :style="{ width: progressWidth }"&gt;&lt;/div&gt;
+      &lt;template x-for="step in totalSteps" :key="step"&gt;
+        &lt;div class="ux-form-wizard__step" :class="getStepClasses(step - 1)" @click="goToStep(step - 1)"&gt;
+          &lt;div class="ux-form-wizard__step-indicator" x-text="step"&gt;&lt;/div&gt;
+          &lt;span class="ux-form-wizard__step-label" x-text="'Step ' + step"&gt;&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-form-wizard__content"&gt;
+      &lt;div class="ux-form-wizard__panel ux-form-wizard__panel--active"&gt;
+        &lt;!-- Panel content --&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="ux-form-wizard__actions"&gt;
+      &lt;button class="ux-button" :disabled="isFirst" @click="prevStep()"&gt;Back&lt;/button&gt;
+      &lt;button class="ux-button ux-color-primary" @click="nextStep()"&gt;Next&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+      </pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Integra el wizard con Django para manejar validacion y persistencia del lado del servidor.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Estructura del Wizard con HTMX</h4>
+      <p>Cada paso se carga dinamicamente desde el servidor, permitiendo validacion en tiempo real.</p>
+      <pre class="ux-code-block" data-lang="html">
+&lt;!-- Template base del wizard --&gt;
+&lt;div class="ux-form-wizard" id="registration-wizard"&gt;
+  &lt;div class="ux-form-wizard__steps"&gt;
+    &lt;div class="ux-form-wizard__progress-line" style="width: {{ progress_percent }}%"&gt;&lt;/div&gt;
+    {% for step in wizard_steps %}
+    &lt;div class="ux-form-wizard__step {% if step.number &lt; current_step %}ux-form-wizard__step--completed{% elif step.number == current_step %}ux-form-wizard__step--active{% endif %}"&gt;
+      &lt;div class="ux-form-wizard__step-indicator"&gt;
+        {% if step.number &lt; current_step %}
+          &lt;svg&gt;...checkmark...&lt;/svg&gt;
+        {% else %}
+          {{ step.number }}
+        {% endif %}
+      &lt;/div&gt;
+      &lt;span class="ux-form-wizard__step-label"&gt;{{ step.label }}&lt;/span&gt;
+    &lt;/div&gt;
+    {% endfor %}
+  &lt;/div&gt;
+
+  &lt;div class="ux-form-wizard__content" id="wizard-content"&gt;
+    {% include wizard_step_template %}
+  &lt;/div&gt;
+
+  &lt;div class="ux-form-wizard__actions"&gt;
+    &lt;div class="ux-form-wizard__actions-start"&gt;
+      &lt;button class="ux-button"
+              hx-get="{% url 'wizard_step' step=current_step|add:'-1' %}"
+              hx-target="#registration-wizard"
+              hx-swap="outerHTML"
+              {% if current_step == 1 %}disabled{% endif %}&gt;
+        Back
+      &lt;/button&gt;
+    &lt;/div&gt;
+    &lt;span class="ux-form-wizard__progress-text"&gt;Step {{ current_step }} of {{ total_steps }}&lt;/span&gt;
+    &lt;div class="ux-form-wizard__actions-end"&gt;
+      {% if current_step &lt; total_steps %}
+        &lt;button class="ux-button ux-color-primary"
+                hx-post="{% url 'wizard_validate' step=current_step %}"
+                hx-target="#registration-wizard"
+                hx-swap="outerHTML"&gt;
+          Continue
+        &lt;/button&gt;
+      {% else %}
+        &lt;button class="ux-button ux-color-success"
+                hx-post="{% url 'wizard_submit' %}"
+                hx-target="#registration-wizard"
+                hx-swap="outerHTML"&gt;
+          Submit
+        &lt;/button&gt;
+      {% endif %}
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+      </pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Vista Django con SessionWizardView</h4>
+      <p>Usa django-formtools para manejar el estado del wizard entre pasos.</p>
+      <pre class="ux-code-block" data-lang="python">
+# views.py
+from django.shortcuts import render
+from formtools.wizard.views import SessionWizardView
+
+WIZARD_FORMS = [
+    ("account", AccountForm),
+    ("personal", PersonalForm),
+    ("payment", PaymentForm),
+    ("confirm", ConfirmForm),
+]
+
+WIZARD_TEMPLATES = {
+    "account": "wizard/step_account.html",
+    "personal": "wizard/step_personal.html",
+    "payment": "wizard/step_payment.html",
+    "confirm": "wizard/step_confirm.html",
+}
+
+class RegistrationWizard(SessionWizardView):
+    def get_template_names(self):
+        return [WIZARD_TEMPLATES[self.steps.current]]
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form=form, **kwargs)
+        context.update({
+            'wizard_steps': [
+                {'number': i+1, 'label': name.title()}
+                for i, (name, _) in enumerate(WIZARD_FORMS)
+            ],
+            'current_step': self.steps.step1,
+            'total_steps': len(WIZARD_FORMS),
+            'progress_percent': (self.steps.step1 / len(WIZARD_FORMS)) * 100,
+        })
+        return context
+
+    def done(self, form_list, **kwargs):
+        # Procesar todos los formularios
+        data = {}
+        for form in form_list:
+            data.update(form.cleaned_data)
+
+        user = User.objects.create_user(**data)
+        return render(self.request, 'wizard/complete.html', {'user': user})
+      </pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">URLs de Django</h4>
+      <pre class="ux-code-block" data-lang="python">
+# urls.py
+from django.urls import path
+from .views import RegistrationWizard, WIZARD_FORMS
+
+urlpatterns = [
+    path('register/',
+         RegistrationWizard.as_view(WIZARD_FORMS),
+         name='registration_wizard'),
+
+    # Para HTMX: endpoints individuales por paso
+    path('register/step/&lt;int:step&gt;/',
+         wizard_step_view,
+         name='wizard_step'),
+
+    path('register/validate/&lt;int:step&gt;/',
+         wizard_validate_view,
+         name='wizard_validate'),
+
+    path('register/submit/',
+         wizard_submit_view,
+         name='wizard_submit'),
+]
+      </pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Vista HTMX para Validacion por Paso</h4>
+      <pre class="ux-code-block" data-lang="python">
+# views.py - Endpoints HTMX
+from django.http import HttpResponse
+
+def wizard_validate_view(request, step):
+    """Valida el paso actual y avanza o muestra errores."""
+    form_class = WIZARD_FORMS[step - 1][1]
+    form = form_class(request.POST)
+
+    if form.is_valid():
+        # Guardar datos en sesion
+        request.session[f'wizard_step_{step}'] = form.cleaned_data
+        # Renderizar siguiente paso
+        return render(request, 'wizard/wizard_base.html', {
+            'current_step': step + 1,
+            'total_steps': len(WIZARD_FORMS),
+            # ... resto del contexto
+        })
+
+    # Si hay errores, re-renderizar paso actual con errores
+    return render(request, 'wizard/wizard_base.html', {
+        'current_step': step,
+        'form': form,
+        'errors': form.errors,
+        # ... resto del contexto
+    })
+
+def wizard_step_view(request, step):
+    """Carga un paso especifico (para navegacion hacia atras)."""
+    # Recuperar datos guardados si existen
+    saved_data = request.session.get(f'wizard_step_{step}', {})
+    form_class = WIZARD_FORMS[step - 1][1]
+    form = form_class(initial=saved_data)
+
+    return render(request, 'wizard/wizard_base.html', {
+        'current_step': step,
+        'form': form,
+        # ... resto del contexto
+    })
+
+def wizard_submit_view(request):
+    """Procesa el formulario completo."""
+    # Recopilar datos de todos los pasos
+    all_data = {}
+    for i in range(1, len(WIZARD_FORMS) + 1):
+        step_data = request.session.get(f'wizard_step_{i}', {})
+        all_data.update(step_data)
+
+    # Crear usuario/registro
+    user = User.objects.create(**all_data)
+
+    # Limpiar sesion
+    for i in range(1, len(WIZARD_FORMS) + 1):
+        request.session.pop(f'wizard_step_{i}', None)
+
+    return render(request, 'wizard/complete.html', {'user': user})
+      </pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Template de Paso Individual</h4>
+      <pre class="ux-code-block" data-lang="html">
+&lt;!-- templates/wizard/step_account.html --&gt;
+&lt;div class="ux-form-wizard__panel ux-form-wizard__panel--active"&gt;
+  &lt;div class="ux-form-wizard__panel-header"&gt;
+    &lt;h3 class="ux-form-wizard__panel-title"&gt;Account Information&lt;/h3&gt;
+    &lt;p class="ux-form-wizard__panel-subtitle"&gt;Create your login credentials&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-form-wizard__panel-body"&gt;
+    &lt;div class="form-row"&gt;
+      &lt;div class="ux-input {% if form.email.errors %}ux-input--error{% endif %}"&gt;
+        &lt;input type="email"
+               name="email"
+               placeholder=" "
+               value="{{ form.email.value|default:'' }}"
+               hx-post="{% url 'validate_field' %}"
+               hx-trigger="blur"
+               hx-target="#email-error"
+               hx-swap="innerHTML"&gt;
+        &lt;label&gt;Email&lt;/label&gt;
+        &lt;span id="email-error" class="ux-input__error"&gt;{{ form.email.errors.0 }}&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="form-row"&gt;
+      &lt;div class="ux-input {% if form.password.errors %}ux-input--error{% endif %}"&gt;
+        &lt;input type="password"
+               name="password"
+               placeholder=" "
+               value="{{ form.password.value|default:'' }}"&gt;
+        &lt;label&gt;Password&lt;/label&gt;
+        &lt;span class="ux-input__error"&gt;{{ form.password.errors.0 }}&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="form-row"&gt;
+      &lt;div class="ux-input {% if form.password_confirm.errors %}ux-input--error{% endif %}"&gt;
+        &lt;input type="password"
+               name="password_confirm"
+               placeholder=" "&gt;
+        &lt;label&gt;Confirm Password&lt;/label&gt;
+        &lt;span class="ux-input__error"&gt;{{ form.password_confirm.errors.0 }}&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+      </pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Validacion de Campo en Tiempo Real</h4>
+      <pre class="ux-code-block" data-lang="python">
+# views.py - Validacion individual de campos
+from django.http import HttpResponse
+
+def validate_field(request):
+    """Valida un campo individual via HTMX."""
+    field_name = list(request.POST.keys())[0]
+    field_value = request.POST.get(field_name)
+
+    # Determinar que formulario usar basado en el campo
+    for step_name, form_class in WIZARD_FORMS:
+        if field_name in form_class.base_fields:
+            form = form_class({field_name: field_value})
+            form.is_valid()  # Trigger validation
+
+            if field_name in form.errors:
+                return HttpResponse(
+                    f'&lt;span class="ux-input__error"&gt;{form.errors[field_name][0]}&lt;/span&gt;'
+                )
+            return HttpResponse('')
+
+    return HttpResponse('')
+      </pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Indicador de Carga</h4>
+      <pre class="ux-code-block" data-lang="html">
+&lt;!-- Agregar indicador de carga durante transiciones --&gt;
+&lt;button class="ux-button ux-color-primary"
+        hx-post="{% url 'wizard_validate' step=current_step %}"
+        hx-target="#registration-wizard"
+        hx-swap="outerHTML"
+        hx-indicator="#wizard-loading"&gt;
+  &lt;span class="htmx-indicator" id="wizard-loading"&gt;
+    &lt;span class="ux-spinner ux-spinner--sm"&gt;&lt;/span&gt;
+  &lt;/span&gt;
+  &lt;span class="button-text"&gt;Continue&lt;/span&gt;
+&lt;/button&gt;
+
+&lt;style&gt;
+  .htmx-indicator { display: none; }
+  .htmx-request .htmx-indicator { display: inline-block; }
+  .htmx-request .button-text { display: none; }
+&lt;/style&gt;
+      </pre>
+    </section>
+
+    <section class="demo-section">
+      <h3>API</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+            <th style="padding: var(--ux-space-sm);">Propiedad</th>
+            <th style="padding: var(--ux-space-sm);">Tipo</th>
+            <th style="padding: var(--ux-space-sm);">Default</th>
+            <th style="padding: var(--ux-space-sm);">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody style="font-size: var(--ux-font-size-sm);">
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>totalSteps</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">3</td>
+            <td style="padding: var(--ux-space-sm);">Numero total de pasos</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>initialStep</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">0</td>
+            <td style="padding: var(--ux-space-sm);">Paso inicial (0-indexed)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>linear</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean</td>
+            <td style="padding: var(--ux-space-sm);">true</td>
+            <td style="padding: var(--ux-space-sm);">Navegacion secuencial obligatoria</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>validateOnNext</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean</td>
+            <td style="padding: var(--ux-space-sm);">true</td>
+            <td style="padding: var(--ux-space-sm);">Validar antes de avanzar</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--ux-space-sm);"><code>validateStep</code></td>
+            <td style="padding: var(--ux-space-sm);">Function</td>
+            <td style="padding: var(--ux-space-sm);">null</td>
+            <td style="padding: var(--ux-space-sm);">Callback de validacion</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>

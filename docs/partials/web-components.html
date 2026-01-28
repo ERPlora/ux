@@ -1,0 +1,617 @@
+<header class="ux-navbar ux-navbar--sticky">
+    <div class="container">
+      <div class="ux-navbar__start">
+        <a href="index.html" class="ux-back-button">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </a>
+      </div>
+      <div class="ux-navbar__center">
+        <h1 class="ux-navbar__title">Web Components</h1>
+      </div>
+      <div class="ux-navbar__end"></div>
+    </div>
+  </header>
+
+  <main class="ux-content__main">
+    <div class="container py-4">
+
+      <!-- Introduction -->
+      <section class="mb-5">
+        <h2>Universal Web Components</h2>
+        <p class="text-secondary">
+          UX Web Components work with any JavaScript framework: React, Vue, Angular, Svelte, HTMX, Alpine.js, or vanilla JavaScript.
+          They use Shadow DOM for style encapsulation and CustomEvents with <code>composed: true</code> for framework compatibility.
+        </p>
+
+        <div class="ux-alert-banner ux-alert-banner--info mb-4">
+          <div class="ux-alert-banner__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+          </div>
+          <div class="ux-alert-banner__content">
+            <h4 class="ux-alert-banner__title">Shadow DOM Benefits</h4>
+            <p class="ux-alert-banner__message">
+              Components are fully encapsulated - framework styles don't leak in, component styles don't leak out.
+              CSS variables from your theme still work because they inherit through the shadow boundary.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Available Components -->
+      <section class="mb-5">
+        <h3>Available Web Components</h3>
+        <div class="ux-list ux-list--inset">
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label">&lt;ux-alert&gt;</div>
+              <div class="ux-list__note">Dialogs, confirmations, prompts</div>
+            </div>
+          </div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label">&lt;ux-modal&gt;</div>
+              <div class="ux-list__note">Modal dialogs</div>
+            </div>
+          </div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label">&lt;ux-toast&gt;</div>
+              <div class="ux-list__note">Toast notifications</div>
+            </div>
+          </div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label">&lt;ux-sheet&gt;</div>
+              <div class="ux-list__note">Bottom sheets</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HTMX Integration -->
+      <section class="mb-5">
+        <h3>HTMX Integration</h3>
+        <p class="text-secondary">
+          Web Components work with HTMX through custom events. Dispatch events to control components,
+          and listen for <code>ux:opened</code>/<code>ux:closed</code> events with <code>hx-trigger</code>.
+        </p>
+
+        <div class="ux-card">
+          <div class="ux-card__header">
+            <h4 class="ux-card__title">Control via Events</h4>
+          </div>
+          <div class="ux-card__content">
+            <pre><code>&lt;!-- Dispatch ux:open event to control modal --&gt;
+&lt;button hx-on:click="$dispatch('ux:open')"
+        hx-target="#my-modal"&gt;
+  Open Modal
+&lt;/button&gt;
+
+&lt;ux-modal id="my-modal"&gt;
+  &lt;div class="ux-modal__header"&gt;
+    &lt;h2&gt;Modal Title&lt;/h2&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-modal__content"&gt;
+    Content here
+  &lt;/div&gt;
+&lt;/ux-modal&gt;</code></pre>
+          </div>
+        </div>
+
+        <div class="ux-card mt-3">
+          <div class="ux-card__header">
+            <h4 class="ux-card__title">React to Events</h4>
+          </div>
+          <div class="ux-card__content">
+            <pre><code>&lt;!-- Load content when modal opens --&gt;
+&lt;ux-modal id="user-modal"
+          hx-get="/api/user/profile"
+          hx-trigger="ux:opened"
+          hx-target="find .ux-modal__content"&gt;
+  &lt;div class="ux-modal__content"&gt;
+    Loading...
+  &lt;/div&gt;
+&lt;/ux-modal&gt;
+
+&lt;!-- Show toast after form submit --&gt;
+&lt;form hx-post="/api/save"
+      hx-on::after-request="UXToast.success('Saved!')"&gt;
+  ...
+&lt;/form&gt;</code></pre>
+          </div>
+        </div>
+
+        <div class="ux-card mt-3">
+          <div class="ux-card__header">
+            <h4 class="ux-card__title">Alert &amp; Confirm</h4>
+          </div>
+          <div class="ux-card__content">
+            <pre><code>&lt;!-- Confirmation before delete --&gt;
+&lt;button hx-delete="/api/item/123"
+        hx-confirm="Are you sure?"&gt;
+  Delete
+&lt;/button&gt;
+
+&lt;!-- Or use UXAlert directly --&gt;
+&lt;button onclick="confirmDelete()"&gt;Delete&lt;/button&gt;
+&lt;script&gt;
+async function confirmDelete() {
+  const ok = await UXAlert.confirm('Delete?', 'This cannot be undone.');
+  if (ok) {
+    // proceed with delete
+  }
+}
+&lt;/script&gt;</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- React Integration -->
+      <section class="mb-5">
+        <h3>React Integration</h3>
+        <p class="text-secondary">
+          Web Components work in React with some caveats. Use refs for imperative control
+          and register event listeners in useEffect.
+        </p>
+
+        <div class="ux-card">
+          <div class="ux-card__header">
+            <h4 class="ux-card__title">React Example</h4>
+          </div>
+          <div class="ux-card__content">
+            <pre><code>import { useRef, useEffect } from 'react';
+
+function MyComponent() {
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    const modal = modalRef.current;
+
+    const handleOpen = () => console.log('Modal opened');
+    const handleClose = () => console.log('Modal closed');
+
+    modal.addEventListener('ux:opened', handleOpen);
+    modal.addEventListener('ux:closed', handleClose);
+
+    return () => {
+      modal.removeEventListener('ux:opened', handleOpen);
+      modal.removeEventListener('ux:closed', handleClose);
+    };
+  }, []);
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() =&gt; modalRef.current.open()}&gt;
+        Open Modal
+      &lt;/button&gt;
+
+      &lt;ux-modal ref={modalRef}&gt;
+        &lt;div className="ux-modal__header"&gt;
+          &lt;h2&gt;Hello from React&lt;/h2&gt;
+        &lt;/div&gt;
+        &lt;div className="ux-modal__content"&gt;
+          &lt;p&gt;This modal works in React!&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div className="ux-modal__footer"&gt;
+          &lt;button
+            className="ux-button ux-color-primary"
+            onClick={() =&gt; modalRef.current.close()}&gt;
+            Close
+          &lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/ux-modal&gt;
+    &lt;/&gt;
+  );
+}
+
+// Toast notifications
+function showToast() {
+  UXToast.success('Item saved successfully!');
+}
+
+// Async confirm dialog
+async function handleDelete() {
+  const confirmed = await UXAlert.confirm(
+    'Delete Item',
+    'Are you sure you want to delete this item?',
+    { destructive: true }
+  );
+
+  if (confirmed) {
+    // Proceed with deletion
+  }
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vue Integration -->
+      <section class="mb-5">
+        <h3>Vue Integration</h3>
+        <p class="text-secondary">
+          Vue 3 has excellent Web Component support. Use template refs and <code>@ux:opened</code> syntax for events.
+        </p>
+
+        <div class="ux-card">
+          <div class="ux-card__header">
+            <h4 class="ux-card__title">Vue 3 Example</h4>
+          </div>
+          <div class="ux-card__content">
+            <pre><code>&lt;template&gt;
+  &lt;button @click="openModal"&gt;Open Modal&lt;/button&gt;
+
+  &lt;ux-modal
+    ref="modal"
+    @ux:opened="onModalOpen"
+    @ux:closed="onModalClose"&gt;
+    &lt;div class="ux-modal__header"&gt;
+      &lt;h2&gt;Hello from Vue&lt;/h2&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-modal__content"&gt;
+      &lt;p&gt;This modal works in Vue!&lt;/p&gt;
+      &lt;p&gt;Count: {{ count }}&lt;/p&gt;
+      &lt;button @click="count++"&gt;Increment&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-modal__footer"&gt;
+      &lt;button class="ux-button ux-color-primary" @click="closeModal"&gt;
+        Close
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/ux-modal&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { ref } from 'vue';
+
+const modal = ref(null);
+const count = ref(0);
+
+function openModal() {
+  modal.value.open();
+}
+
+function closeModal() {
+  modal.value.close();
+}
+
+function onModalOpen() {
+  console.log('Modal opened');
+}
+
+function onModalClose() {
+  console.log('Modal closed');
+}
+
+// Toast notifications
+function showToast() {
+  UXToast.success('Item saved!');
+}
+
+// Async confirm
+async function confirmAction() {
+  const ok = await UXAlert.confirm('Confirm', 'Are you sure?');
+  if (ok) {
+    // proceed
+  }
+}
+&lt;/script&gt;</code></pre>
+          </div>
+        </div>
+
+        <div class="ux-card mt-3">
+          <div class="ux-card__header">
+            <h4 class="ux-card__title">Vue Config (vite.config.js)</h4>
+          </div>
+          <div class="ux-card__content">
+            <pre><code>// Tell Vue to ignore ux-* custom elements
+export default defineConfig({
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.startsWith('ux-')
+        }
+      }
+    })
+  ]
+})</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vanilla JavaScript -->
+      <section class="mb-5">
+        <h3>Vanilla JavaScript</h3>
+        <p class="text-secondary">
+          Web Components work natively in vanilla JavaScript with the standard DOM API.
+        </p>
+
+        <div class="ux-card">
+          <div class="ux-card__header">
+            <h4 class="ux-card__title">Vanilla JS Example</h4>
+          </div>
+          <div class="ux-card__content">
+            <pre><code>// Open/close modal
+const modal = document.querySelector('ux-modal');
+modal.open();
+modal.close();
+modal.toggle();
+
+// Listen for events
+modal.addEventListener('ux:opened', () => {
+  console.log('Modal opened');
+});
+
+modal.addEventListener('ux:closed', () => {
+  console.log('Modal closed');
+});
+
+// Control via attributes
+modal.setAttribute('open', ''); // Opens
+modal.removeAttribute('open');  // Closes
+
+// Toast notifications (static methods)
+UXToast.success('Success message');
+UXToast.warning('Warning message');
+UXToast.danger('Error message');
+UXToast.info('Info message');
+
+// Alert dialogs (Promise-based)
+const result = await UXAlert.alert('Title', 'Message');
+
+// Confirm dialogs
+const confirmed = await UXAlert.confirm('Delete?', 'Are you sure?');
+if (confirmed) {
+  // User clicked OK
+}
+
+// Prompt dialogs
+const name = await UXAlert.prompt('Name', 'Enter your name:');
+if (name !== null) {
+  // User entered a value
+}
+
+// Sheet control
+const sheet = document.querySelector('ux-sheet');
+sheet.open();
+sheet.close();</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Events Reference -->
+      <section class="mb-5">
+        <h3>Events Reference</h3>
+
+        <div class="ux-list ux-list--inset">
+          <div class="ux-list__header">Control Events (dispatch to control)</div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label"><code>ux:open</code></div>
+              <div class="ux-list__note">Open the component</div>
+            </div>
+          </div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label"><code>ux:close</code></div>
+              <div class="ux-list__note">Close the component</div>
+            </div>
+          </div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label"><code>ux:toggle</code></div>
+              <div class="ux-list__note">Toggle open/close state</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-list ux-list--inset mt-3">
+          <div class="ux-list__header">State Events (listen for changes)</div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label"><code>ux:opened</code></div>
+              <div class="ux-list__note">Fired when component opens</div>
+            </div>
+          </div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label"><code>ux:closed</code></div>
+              <div class="ux-list__note">Fired when component closes</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-list ux-list--inset mt-3">
+          <div class="ux-list__header">Toast-specific Events</div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label"><code>ux:success</code>, <code>ux:warning</code>, <code>ux:danger</code>, <code>ux:info</code></div>
+              <div class="ux-list__note">Show typed toast (dispatch with detail.message)</div>
+            </div>
+          </div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label"><code>ux:shown</code></div>
+              <div class="ux-list__note">Fired when toast is shown</div>
+            </div>
+          </div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label"><code>ux:dismissed</code></div>
+              <div class="ux-list__note">Fired when toast is dismissed</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-list ux-list--inset mt-3">
+          <div class="ux-list__header">Alert-specific Events</div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label"><code>ux:alert</code>, <code>ux:confirm</code>, <code>ux:prompt</code></div>
+              <div class="ux-list__note">Show dialog (dispatch with detail options)</div>
+            </div>
+          </div>
+          <div class="ux-list__item">
+            <div class="ux-list__content">
+              <div class="ux-list__label"><code>ux:button</code></div>
+              <div class="ux-list__note">Fired when a button is clicked (detail: { role, index, values })</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Demos -->
+      <section class="mb-5">
+        <h3>Live Demos</h3>
+
+        <div class="ux-card">
+          <div class="ux-card__header">
+            <h4 class="ux-card__title">Toast Notifications</h4>
+          </div>
+          <div class="ux-card__content">
+            <div class="d-flex flex-wrap gap-2">
+              <button class="ux-button ux-color-success" onclick="UXToast.success('Operation completed!')">
+                Success Toast
+              </button>
+              <button class="ux-button ux-color-warning" onclick="UXToast.warning('Please review your input')">
+                Warning Toast
+              </button>
+              <button class="ux-button ux-color-danger" onclick="UXToast.danger('Something went wrong')">
+                Error Toast
+              </button>
+              <button class="ux-button" onclick="UXToast.info('New updates available')">
+                Info Toast
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-card mt-3">
+          <div class="ux-card__header">
+            <h4 class="ux-card__title">Alert Dialogs</h4>
+          </div>
+          <div class="ux-card__content">
+            <div class="d-flex flex-wrap gap-2">
+              <button class="ux-button ux-color-primary" onclick="UXAlert.alert('Welcome', 'Thanks for trying UX components!')">
+                Alert
+              </button>
+              <button class="ux-button ux-color-primary--outline" onclick="handleConfirm()">
+                Confirm
+              </button>
+              <button class="ux-button ux-color-primary--outline" onclick="handlePrompt()">
+                Prompt
+              </button>
+              <button class="ux-button ux-color-danger--outline" onclick="handleDestructive()">
+                Destructive Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-card mt-3">
+          <div class="ux-card__header">
+            <h4 class="ux-card__title">Modal &amp; Sheet</h4>
+          </div>
+          <div class="ux-card__content">
+            <div class="d-flex flex-wrap gap-2">
+              <button class="ux-button ux-color-primary" onclick="document.getElementById('demo-modal').open()">
+                Open Modal
+              </button>
+              <button class="ux-button ux-color-primary--outline" onclick="document.getElementById('demo-sheet').open()">
+                Open Sheet
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Demo Modal -->
+  <ux-modal id="demo-modal">
+    <div class="ux-modal__header">
+      <div class="ux-modal__header-start"></div>
+      <div class="ux-modal__header-center">
+        <h2 class="ux-modal__title">Web Component Modal</h2>
+      </div>
+      <div class="ux-modal__header-end">
+        <button class="ux-modal__close" data-close>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="ux-modal__content">
+      <p>This modal is a <code>&lt;ux-modal&gt;</code> Web Component with Shadow DOM encapsulation.</p>
+      <p>It works with React, Vue, HTMX, Alpine.js, and vanilla JavaScript!</p>
+    </div>
+    <div class="ux-modal__footer">
+      <button class="ux-button ux-color-primary" data-close>
+        Got it
+      </button>
+    </div>
+  </ux-modal>
+
+  <!-- Demo Sheet -->
+  <ux-sheet id="demo-sheet" size="md">
+    <div class="ux-sheet__header">
+      <h2 class="ux-sheet__title">Web Component Sheet</h2>
+      <button class="ux-sheet__close" data-close>
+        <span class="ux-sheet__close-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </span>
+      </button>
+    </div>
+    <div class="ux-sheet__content">
+      <p>This sheet is a <code>&lt;ux-sheet&gt;</code> Web Component.</p>
+      <p>Drag the handle down to close, or tap the backdrop.</p>
+    </div>
+    <div class="ux-sheet__footer">
+      <button class="ux-button ux-color-primary" data-close>
+        Done
+      </button>
+    </div>
+  </ux-sheet>
+
+  <script src="../dist/ux.js"></script>
+  <script>
+    // Demo handlers
+    async function handleConfirm() {
+      const result = await UXAlert.confirm('Confirm Action', 'Do you want to proceed?');
+      if (result) {
+        UXToast.success('You confirmed!');
+      } else {
+        UXToast.info('You cancelled');
+      }
+    }
+
+    async function handlePrompt() {
+      const name = await UXAlert.prompt('Your Name', 'Please enter your name:');
+      if (name) {
+        UXToast.success(`Hello, ${name}!`);
+      }
+    }
+
+    async function handleDestructive() {
+      const result = await UXAlert.confirm('Delete Item', 'This action cannot be undone.', {
+        destructive: true,
+        okText: 'Delete',
+        cancelText: 'Keep'
+      });
+      if (result) {
+        UXToast.danger('Item deleted');
+      }
+    }
+  </script>

@@ -1,0 +1,836 @@
+/**
+ * UX Scheduler Component
+ * Part of the UX CSS Library
+ * https://github.com/user/ux
+ */
+
+/* ========================================
+   UX Scheduler - Variables
+   ======================================== */
+
+:root {
+  --ux-scheduler-hour-height: 60px;
+  --ux-scheduler-time-width: 60px;
+  --ux-scheduler-header-height: 80px;
+  --ux-scheduler-resource-width: 200px;
+  --ux-scheduler-slot-min-height: 15px;
+}
+
+/* ========================================
+   UX Scheduler - Base
+   ======================================== */
+
+.ux-scheduler {
+  font-family: var(--ux-font-family);
+  background: var(--ux-surface);
+  border: 1px solid var(--ux-border-color);
+  border-radius: var(--ux-radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  // ========================================
+  // Header
+  // ========================================
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--ux-surface);
+    border-bottom: 1px solid var(--ux-border-color);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--ux-surface-secondary);
+    border: none;
+    border-radius: var(--ux-radius-md);
+    color: var(--ux-text);
+    cursor: pointer;
+    transition: all var(--ux-transition-fast) var(--ux-ease);
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      background: var(--ux-surface-tertiary);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--ux-text);
+  }
+
+  &__today-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ux-primary);
+    background: transparent;
+    border: 1px solid var(--ux-primary);
+    border-radius: var(--ux-radius-md);
+    cursor: pointer;
+    transition: all var(--ux-transition-fast) var(--ux-ease);
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      background: rgba(var(--ux-primary-rgb), 0.1);
+    }
+  }
+
+  &__view-toggle {
+    display: flex;
+    background: var(--ux-surface-secondary);
+    border-radius: var(--ux-radius-md);
+    padding: 0.25rem;
+  }
+
+  &__view-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--ux-text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: var(--ux-radius-sm);
+    cursor: pointer;
+    transition: all var(--ux-transition-fast) var(--ux-ease);
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      color: var(--ux-text);
+    }
+
+    &--active {
+      background: var(--ux-surface);
+      color: var(--ux-text);
+      box-shadow: var(--ux-shadow-sm);
+    }
+  }
+
+  // ========================================
+  // Resource Headers (for week view with resources)
+  // ========================================
+
+  &__resources-header {
+    display: flex;
+    border-bottom: 1px solid var(--ux-border-color);
+    position: sticky;
+    top: 0;
+    background: var(--ux-surface);
+    z-index: 15;
+  }
+
+  &__resources-corner {
+    width: var(--ux-scheduler-time-width);
+    min-width: var(--ux-scheduler-time-width);
+    border-right: 1px solid var(--ux-border-color);
+    flex-shrink: 0;
+  }
+
+  &__resource-header {
+    flex: 1;
+    min-width: var(--ux-scheduler-resource-width);
+    padding: 0.75rem;
+    text-align: center;
+    border-right: 1px solid var(--ux-border-color);
+    background: var(--ux-surface-secondary);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  &__resource-name {
+    font-weight: 600;
+    color: var(--ux-text);
+    font-size: 0.875rem;
+  }
+
+  &__resource-info {
+    font-size: 0.75rem;
+    color: var(--ux-text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  &__resource-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin: 0 auto 0.5rem;
+    background: var(--ux-surface-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--ux-text-secondary);
+    font-size: 0.75rem;
+
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  // ========================================
+  // Day Headers
+  // ========================================
+
+  &__day-headers {
+    display: flex;
+    border-bottom: 1px solid var(--ux-border-color);
+    position: sticky;
+    top: 0;
+    background: var(--ux-surface);
+    z-index: 10;
+  }
+
+  &__corner {
+    width: var(--ux-scheduler-time-width);
+    min-width: var(--ux-scheduler-time-width);
+    border-right: 1px solid var(--ux-border-color);
+    flex-shrink: 0;
+  }
+
+  &__day-header {
+    flex: 1;
+    min-width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    border-right: 1px solid var(--ux-border-color);
+    cursor: pointer;
+    transition: background var(--ux-transition-fast) var(--ux-ease);
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    &--today .ux-scheduler__day-number {
+      background: var(--ux-primary);
+      color: white;
+    }
+
+    &--selected {
+      background: rgba(var(--ux-primary-rgb), 0.05);
+    }
+
+    &--weekend {
+      background: var(--ux-surface-secondary);
+    }
+  }
+
+  &__day-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ux-text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  &__day-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ux-text);
+    border-radius: var(--ux-radius-full);
+  }
+
+  // ========================================
+  // Grid Container
+  // ========================================
+
+  &__body {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+  }
+
+  &__grid {
+    display: flex;
+    position: relative;
+    min-height: calc(var(--ux-scheduler-hour-height) * 24);
+  }
+
+  // ========================================
+  // Time Column
+  // ========================================
+
+  &__times {
+    width: var(--ux-scheduler-time-width);
+    min-width: var(--ux-scheduler-time-width);
+    border-right: 1px solid var(--ux-border-color);
+    flex-shrink: 0;
+    position: sticky;
+    left: 0;
+    background: var(--ux-surface);
+    z-index: 5;
+  }
+
+  &__time {
+    height: var(--ux-scheduler-hour-height);
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    color: var(--ux-text-tertiary);
+    transform: translateY(-0.5em);
+  }
+
+  // ========================================
+  // Day Columns
+  // ========================================
+
+  &__columns {
+    display: flex;
+    flex: 1;
+  }
+
+  &__day-column {
+    flex: 1;
+    min-width: 100px;
+    position: relative;
+    border-right: 1px solid var(--ux-border-color);
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &--weekend {
+      background: var(--ux-surface-secondary);
+    }
+  }
+
+  // ========================================
+  // Hour Slots
+  // ========================================
+
+  &__hour-slot {
+    height: var(--ux-scheduler-hour-height);
+    border-bottom: 1px solid var(--ux-border-color);
+    position: relative;
+    cursor: pointer;
+    transition: background var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background: rgba(var(--ux-primary-rgb), 0.03);
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    // Half hour line
+    &::after {
+      content: '';
+      display: block;
+      height: 50%;
+      border-bottom: 1px dashed var(--ux-gray-100);
+    }
+
+    &--business {
+      background: var(--ux-surface);
+    }
+
+    &--non-business {
+      background: var(--ux-surface-secondary);
+    }
+  }
+
+  // Quarter hour lines for 15min intervals
+  &--interval-15 .ux-scheduler__hour-slot {
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 25%;
+      border-bottom: 1px dotted var(--ux-gray-100);
+    }
+
+    &::after {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 75%;
+      height: auto;
+      border-bottom: 1px dotted var(--ux-gray-100);
+    }
+  }
+
+  // ========================================
+  // Current Time Indicator
+  // ========================================
+
+  &__now-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--ux-danger);
+    z-index: 8;
+    pointer-events: none;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      background: var(--ux-danger);
+      border-radius: 50%;
+    }
+  }
+
+  // ========================================
+  // Bookings / Events
+  // ========================================
+
+  &__booking {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--ux-radius-sm);
+    font-size: 0.75rem;
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 2;
+    transition: all var(--ux-transition-fast) var(--ux-ease);
+    border-left: 3px solid;
+    min-height: 20px;
+
+    &:hover {
+      z-index: 3;
+      box-shadow: var(--ux-shadow-md);
+      transform: scale(1.02);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &-title {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+
+    &-time {
+      font-size: 0.6875rem;
+      opacity: 0.85;
+      margin-top: 1px;
+    }
+
+    &-resource {
+      font-size: 0.6875rem;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+
+    // Booking Status Colors
+    &--confirmed {
+      background: rgba(var(--ux-success-rgb), 0.9);
+      color: white;
+      border-left-color: var(--ux-green-600);
+    }
+
+    &--pending {
+      background: rgba(var(--ux-warning-rgb), 0.9);
+      color: var(--ux-gray-900);
+      border-left-color: var(--ux-yellow-600);
+    }
+
+    &--cancelled {
+      background: rgba(var(--ux-gray-400-rgb, 156, 163, 175), 0.5);
+      color: var(--ux-text-secondary);
+      border-left-color: var(--ux-gray-500);
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    &--blocked {
+      background: var(--ux-gray-200);
+      color: var(--ux-text-secondary);
+      border-left-color: var(--ux-gray-400);
+      cursor: not-allowed;
+    }
+
+    &--primary {
+      background: rgba(var(--ux-primary-rgb), 0.9);
+      color: white;
+      border-left-color: var(--ux-primary-shade);
+    }
+
+    &--danger {
+      background: rgba(var(--ux-danger-rgb), 0.9);
+      color: white;
+      border-left-color: var(--ux-red-600);
+    }
+
+    // Conflict indicator
+    &--conflict {
+      box-shadow: 0 0 0 2px var(--ux-danger), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+
+      &::after {
+        content: '!';
+        position: absolute;
+        top: 2px;
+        right: 4px;
+        width: 14px;
+        height: 14px;
+        background: var(--ux-danger);
+        color: white;
+        border-radius: 50%;
+        font-size: 10px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+
+  // ========================================
+  // Drag to Create
+  // ========================================
+
+  &__drag-preview {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    background: rgba(var(--ux-primary-rgb), 0.3);
+    border: 2px dashed var(--ux-primary);
+    border-radius: var(--ux-radius-sm);
+    z-index: 6;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ux-primary);
+  }
+
+  // ========================================
+  // Month View
+  // ========================================
+
+  &__month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--ux-border-color);
+  }
+
+  &__month-header {
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ux-text-secondary);
+    text-transform: uppercase;
+    background: var(--ux-surface-secondary);
+    border-right: 1px solid var(--ux-border-color);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  &__month-day {
+    min-height: 100px;
+    padding: 0.5rem;
+    border-right: 1px solid var(--ux-border-color);
+    border-bottom: 1px solid var(--ux-border-color);
+    cursor: pointer;
+    transition: background var(--ux-transition-fast) var(--ux-ease);
+
+    &:nth-child(7n) {
+      border-right: none;
+    }
+
+    &:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    &--other {
+      background: var(--ux-surface-secondary);
+      opacity: 0.5;
+    }
+
+    &--today {
+      background: rgba(var(--ux-primary-rgb), 0.05);
+
+      .ux-scheduler__month-day-number {
+        background: var(--ux-primary);
+        color: white;
+      }
+    }
+
+    &--weekend {
+      background: var(--ux-surface-secondary);
+    }
+  }
+
+  &__month-day-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ux-text);
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+  }
+
+  &__month-booking {
+    padding: 2px 6px;
+    margin-bottom: 2px;
+    border-radius: var(--ux-radius-sm);
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+
+    &--confirmed {
+      background: rgba(var(--ux-success-rgb), 0.2);
+      color: var(--ux-green-700);
+    }
+
+    &--pending {
+      background: rgba(var(--ux-warning-rgb), 0.2);
+      color: var(--ux-amber-700);
+    }
+  }
+
+  &__month-more {
+    font-size: 0.6875rem;
+    color: var(--ux-primary);
+    cursor: pointer;
+    padding: 2px 6px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  // ========================================
+  // Empty State
+  // ========================================
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+    color: var(--ux-text-secondary);
+  }
+
+  &__empty-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    color: var(--ux-text-tertiary);
+  }
+
+  // ========================================
+  // Glass Variant
+  // ========================================
+
+  &--glass {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    border-color: var(--ux-glass-border);
+
+    .ux-scheduler__header {
+      background: var(--ux-glass-bg-thin);
+      border-bottom-color: var(--ux-glass-border);
+    }
+
+    .ux-scheduler__day-headers {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-scheduler__times {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-scheduler__resource-header {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-scheduler__booking {
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .ux-scheduler__nav-btn {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-scheduler__view-toggle {
+      background: var(--ux-glass-bg-thin);
+    }
+
+    .ux-scheduler__view-btn--active {
+      background: var(--ux-glass-bg-thick);
+    }
+  }
+}
+
+// ========================================
+// Dark Mode
+// ========================================
+
+@media (prefers-color-scheme: dark) {
+  .ux-scheduler {
+    background: var(--ux-surface);
+    border-color: var(--ux-border-color);
+  }
+
+  .ux-scheduler__hour-slot::after,
+  .ux-scheduler--interval-15 .ux-scheduler__hour-slot::before {
+    border-color: var(--ux-gray-800);
+  }
+
+  .ux-scheduler__booking--pending {
+    color: var(--ux-gray-900);
+  }
+}
+
+.ux-dark .ux-scheduler {
+  background: var(--ux-surface);
+  border-color: var(--ux-border-color);
+}
+
+.ux-dark .ux-scheduler__hour-slot::after,
+.ux-dark .ux-scheduler--interval-15 .ux-scheduler__hour-slot::before {
+  border-color: var(--ux-gray-800);
+}
+
+.ux-dark .ux-scheduler__booking--pending {
+  color: var(--ux-gray-900);
+}
+
+// ========================================
+// Responsive
+// ========================================
+
+@media (max-width: 767px) {
+  .ux-scheduler {
+    --ux-scheduler-time-width: 45px;
+    --ux-scheduler-hour-height: 50px;
+    --ux-scheduler-resource-width: 120px;
+  }
+
+  .ux-scheduler__header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .ux-scheduler__view-toggle {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ux-scheduler__day-header {
+    min-width: 60px;
+  }
+
+  .ux-scheduler__day-name {
+    font-size: 0.625rem;
+  }
+
+  .ux-scheduler__day-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+  }
+
+  .ux-scheduler__booking {
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.25rem;
+  }
+
+  .ux-scheduler__booking-time {
+    display: none;
+  }
+
+  .ux-scheduler__month-day {
+    min-height: 60px;
+    padding: 0.25rem;
+  }
+
+  .ux-scheduler__month-day-number {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+}
+
+// ========================================
+// Reduced Motion
+// ========================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-scheduler__nav-btn,
+  .ux-scheduler__today-btn,
+  .ux-scheduler__view-btn,
+  .ux-scheduler__booking,
+  .ux-scheduler__hour-slot,
+  .ux-scheduler__day-header {
+    transition: none;
+  }
+
+  .ux-scheduler__booking:hover {
+    transform: none;
+  }
+}

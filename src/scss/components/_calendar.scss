@@ -1,0 +1,413 @@
+@use '../core/mixins' as *;
+
+/**
+ * UX Calendar Component
+ * Part of the UX CSS Library
+ */
+
+/* ==========================================================================
+   Calendar Container
+   ========================================================================== */
+
+:root {
+  --ux-calendar-width: 320px;
+  --ux-calendar-cell-size: 40px;
+  --ux-calendar-gap: 2px;
+  --ux-calendar-radius: var(--ux-radius-xl);
+  --ux-calendar-padding: var(--ux-space-md);
+}
+
+.ux-calendar {
+  width: var(--ux-calendar-width);
+  background: var(--ux-surface);
+  border: 1px solid var(--ux-border-color);
+  border-radius: var(--ux-calendar-radius);
+  overflow: hidden;
+  user-select: none;
+
+  /* ==========================================================================
+     Size Variants
+     ========================================================================== */
+
+  &--sm {
+    --ux-calendar-width: 280px;
+    --ux-calendar-cell-size: 32px;
+  }
+
+  &--lg {
+    --ux-calendar-width: 380px;
+    --ux-calendar-cell-size: 48px;
+  }
+
+  &--full {
+    --ux-calendar-width: 100%;
+  }
+
+  /* ==========================================================================
+     Glass Variant
+     ========================================================================== */
+
+  &--glass {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur));
+    border-color: var(--ux-glass-border);
+
+    .ux-calendar__header,
+    .ux-calendar__footer {
+      background: transparent;
+    }
+
+    .ux-calendar__nav-btn {
+      background: rgba(255, 255, 255, 0.1);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+
+  /* ==========================================================================
+     Inline Variant (no border/shadow)
+     ========================================================================== */
+
+  &--inline {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+.ux-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ux-calendar-padding);
+  background: var(--ux-surface);
+}
+
+.ux-calendar__title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--ux-text);
+}
+
+.ux-calendar__nav {
+  display: flex;
+  gap: var(--ux-space-xs);
+}
+
+.ux-calendar__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--ux-surface-secondary);
+  border: none;
+  border-radius: var(--ux-radius-md);
+  color: var(--ux-text);
+  cursor: pointer;
+  transition: all var(--ux-transition-fast);
+
+  &:hover {
+    background: var(--ux-surface-tertiary);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ==========================================================================
+   Weekdays
+   ========================================================================== */
+
+.ux-calendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--ux-calendar-gap);
+  padding: 0 var(--ux-calendar-padding);
+  padding-bottom: var(--ux-space-xs);
+}
+
+.ux-calendar__weekday {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ux-text-tertiary);
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Days Grid
+   ========================================================================== */
+
+.ux-calendar__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--ux-calendar-gap);
+  padding: 0 var(--ux-calendar-padding);
+  padding-bottom: var(--ux-calendar-padding);
+}
+
+.ux-calendar__day {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ux-calendar-cell-size);
+  height: var(--ux-calendar-cell-size);
+  font-size: 0.9375rem;
+  color: var(--ux-text);
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--ux-transition-fast);
+
+  &:hover:not(.ux-calendar__day--disabled):not(.ux-calendar__day--selected) {
+    background: var(--ux-surface-secondary);
+  }
+
+  &:active:not(.ux-calendar__day--disabled) {
+    transform: scale(0.9);
+  }
+
+  /* Day States */
+  &--other-month {
+    color: var(--ux-text-tertiary);
+  }
+
+  &--today {
+    font-weight: 600;
+    color: var(--ux-primary);
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: var(--ux-primary);
+      border-radius: 50%;
+    }
+  }
+
+  &--selected {
+    background: var(--ux-primary);
+    color: var(--ux-primary-contrast);
+    font-weight: 500;
+
+    &::after {
+      display: none;
+    }
+  }
+
+  &--disabled {
+    color: var(--ux-text-tertiary);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--weekend {
+    color: var(--ux-danger);
+
+    &.ux-calendar__day--other-month {
+      color: var(--ux-text-tertiary);
+    }
+  }
+
+  /* Range Selection */
+  &--range-start {
+    background: var(--ux-primary);
+    color: var(--ux-primary-contrast);
+    border-radius: 50% 0 0 50%;
+  }
+
+  &--range-end {
+    background: var(--ux-primary);
+    color: var(--ux-primary-contrast);
+    border-radius: 0 50% 50% 0;
+  }
+
+  &--range-start.ux-calendar__day--range-end {
+    border-radius: 50%;
+  }
+
+  &--in-range {
+    background: var(--ux-primary-tint);
+    border-radius: 0;
+  }
+
+  &--range-hover {
+    background: var(--ux-primary-tint);
+  }
+}
+
+/* ==========================================================================
+   Event Indicators
+   ========================================================================== */
+
+.ux-calendar__day-events {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+}
+
+.ux-calendar__day-event {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ux-primary);
+
+  &--success {
+    background: var(--ux-success);
+  }
+
+  &--warning {
+    background: var(--ux-warning);
+  }
+
+  &--danger {
+    background: var(--ux-danger);
+  }
+}
+
+.ux-calendar__day--selected .ux-calendar__day-event {
+  background: var(--ux-primary-contrast);
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.ux-calendar__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ux-space-sm) var(--ux-calendar-padding);
+  background: var(--ux-surface-secondary);
+  border-top: 1px solid var(--ux-border-color);
+}
+
+.ux-calendar__today-btn {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ux-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--ux-space-xs) var(--ux-space-sm);
+  border-radius: var(--ux-radius-md);
+  transition: background var(--ux-transition-fast);
+
+  &:hover {
+    background: var(--ux-primary-tint);
+  }
+}
+
+.ux-calendar__clear-btn {
+  font-size: 0.875rem;
+  color: var(--ux-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--ux-space-xs) var(--ux-space-sm);
+  border-radius: var(--ux-radius-md);
+  transition: background var(--ux-transition-fast);
+
+  &:hover {
+    background: var(--ux-surface-tertiary);
+  }
+}
+
+/* ==========================================================================
+   Month/Year Picker
+   ========================================================================== */
+
+.ux-calendar__picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--ux-space-sm);
+  padding: var(--ux-calendar-padding);
+}
+
+.ux-calendar__picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  font-size: 0.9375rem;
+  color: var(--ux-text);
+  background: transparent;
+  border: none;
+  border-radius: var(--ux-radius-md);
+  cursor: pointer;
+  transition: all var(--ux-transition-fast);
+
+  &:hover {
+    background: var(--ux-surface-secondary);
+  }
+
+  &--selected {
+    background: var(--ux-primary);
+    color: var(--ux-primary-contrast);
+  }
+
+  &--current {
+    font-weight: 600;
+    color: var(--ux-primary);
+  }
+}
+
+/* ==========================================================================
+   Dark Mode
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  .ux-calendar--glass .ux-calendar__nav-btn {
+    background: rgba(255, 255, 255, 0.08);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+  }
+}
+
+.ux-dark .ux-calendar--glass .ux-calendar__nav-btn {
+  background: rgba(255, 255, 255, 0.08);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-calendar__day,
+  .ux-calendar__nav-btn,
+  .ux-calendar__picker-item {
+    transition: none;
+  }
+}

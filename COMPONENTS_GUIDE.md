@@ -1,8 +1,52 @@
 # UX Component Library - Complete Component Guide
 
-> **Auto-generated guide** - Update this file when adding new components.
+> **Zero-dependency CSS component library** - Works with any framework.
 >
-> Total Components: **142 documented** (143 JS files) | Last Updated: 2026-01-17
+> Total Components: **146 CSS files** | Last Updated: 2026-01-23
+>
+> **Architecture:**
+> - **Pure CSS** - No JavaScript required
+> - **Framework agnostic** - Works with HTMX, React, Vue, Radix UI, vanilla JS
+> - **State selectors** - Supports `data-state`, ARIA attributes, and `.is-*` classes
+> - **Optional JS helpers** - `js/ux-helpers.js` for convenience functions
+>
+> **Files:**
+> - `dist/ux.min.css` - Minified bundle (~1.1MB)
+> - `dist/ux.css` - Full bundle (~1.8MB)
+> - `js/ux-helpers.min.js` - Optional JS utilities
+
+---
+
+## Quick Start
+
+```html
+<!-- Just CSS - works with any framework -->
+<link rel="stylesheet" href="dist/ux.min.css">
+
+<!-- Optional: JS helpers -->
+<script src="js/ux-helpers.min.js"></script>
+```
+
+---
+
+## State Management
+
+Components use CSS selectors that respond to multiple state attributes:
+
+```html
+<!-- Any of these work to show the modal -->
+<div class="ux-modal-backdrop" data-state="open">      <!-- data-state -->
+<div class="ux-modal-backdrop" aria-hidden="false">    <!-- ARIA -->
+<div class="ux-modal-backdrop is-open">                <!-- class -->
+```
+
+**Common States:**
+| State | data-state | ARIA | Class |
+|-------|------------|------|-------|
+| Open | `open` | `aria-hidden="false"` | `.is-open` |
+| Closed | `closed` | `aria-hidden="true"` | - |
+| Expanded | `expanded` | `aria-expanded="true"` | `.is-open` |
+| Selected | `selected` | `aria-selected="true"` | `.is-selected` |
 
 ---
 
@@ -63,10 +107,9 @@ Components use a composition system for colors. Apply colors with utility classe
 
 ## 1. Core
 
-### ux-core.js
-The foundation file that must be loaded first. Provides:
+### css/core/variables.css
+Foundation CSS variables. Provides:
 - CSS Variables (colors, spacing, typography, z-index)
-- `window.UX` namespace with utilities
 - Color composition classes (`.ux-color-*`)
 - Glass morphism system
 - Dark mode support
@@ -80,11 +123,22 @@ The foundation file that must be loaded first. Provides:
 - `.ux-light` - Force light mode
 - `.ux-theme-{name}` - Apply theme (ocean, emerald, purple, sunset, rose, teal, amber, slate, indigo, cyan, crimson, forest)
 
+### css/core/utilities.css
+Utility classes for spacing, flexbox, text, and more.
+
+### js/ux-helpers.js (Optional)
+Lightweight JavaScript utilities:
+- `UX.setState(el, state)` - Set data-state
+- `UX.modal.open(selector)` / `UX.modal.close(selector)` - Modal control
+- `UX.lockScroll()` / `UX.unlockScroll()` - Scroll locking
+- `UX.trapFocus(element)` - Focus trap
+- `UX.announce(message)` - Screen reader announcements
+
 ---
 
 ## 2. Forms - Basic Inputs
 
-### ux-input.js
+### ux-input.css
 Text input fields with floating labels.
 
 | Class | Description |
@@ -110,7 +164,7 @@ Text input fields with floating labels.
 
 ---
 
-### ux-textarea.js
+### ux-textarea.css
 Multi-line text input.
 
 | Class | Description |
@@ -123,7 +177,7 @@ Multi-line text input.
 
 ---
 
-### ux-checkbox.js
+### ux-checkbox.css
 Checkbox input with custom styling.
 
 | Class | Description |
@@ -138,7 +192,7 @@ Checkbox input with custom styling.
 
 ---
 
-### ux-radio.js
+### ux-radio.css
 Radio button input.
 
 | Class | Description |
@@ -154,7 +208,7 @@ Radio button input.
 
 ---
 
-### ux-toggle.js
+### ux-toggle.css
 Toggle/switch input.
 
 | Class | Description |
@@ -169,7 +223,7 @@ Toggle/switch input.
 
 ---
 
-### ux-select.js
+### ux-select.css
 Native select dropdown with custom styling.
 
 | Class | Description |
@@ -184,7 +238,7 @@ Native select dropdown with custom styling.
 
 ---
 
-### ux-range.js
+### ux-range.css
 Range slider input.
 
 | Class | Description |
@@ -200,7 +254,7 @@ Range slider input.
 
 ---
 
-### ux-searchbar.js
+### ux-searchbar.css
 Search input with icon.
 
 | Class | Description |
@@ -215,7 +269,7 @@ Search input with icon.
 
 ---
 
-### ux-rating.js
+### ux-rating.css
 Star rating input.
 
 | Class | Description |
@@ -232,7 +286,7 @@ Star rating input.
 
 ## 3. Forms - Advanced Inputs
 
-### ux-datetime.js
+### ux-datetime.css
 Date and time picker.
 
 | Class | Description |
@@ -245,7 +299,7 @@ Date and time picker.
 
 ---
 
-### ux-color-picker.js
+### ux-color-picker.css
 Color selection input.
 
 | Class | Description |
@@ -260,7 +314,7 @@ Color selection input.
 
 ---
 
-### ux-autocomplete.js
+### ux-autocomplete.css
 Autocomplete/combobox input.
 
 | Class | Description |
@@ -275,7 +329,7 @@ Autocomplete/combobox input.
 
 ---
 
-### ux-tag-input.js
+### ux-tag-input.css
 Multi-select with chips/tags.
 
 | Class | Description |
@@ -289,7 +343,7 @@ Multi-select with chips/tags.
 
 ---
 
-### ux-otp-input.js
+### ux-otp-input.css
 OTP/verification code input.
 
 | Class | Description |
@@ -307,7 +361,7 @@ OTP/verification code input.
 
 ---
 
-### ux-currency-input.js
+### ux-currency-input.css
 Currency formatted input.
 
 | Class | Description |
@@ -321,7 +375,7 @@ Currency formatted input.
 
 ---
 
-### ux-phone-input.js
+### ux-phone-input.css
 Phone number with country code.
 
 | Class | Description |
@@ -335,7 +389,7 @@ Phone number with country code.
 
 ---
 
-### ux-signature-pad.js
+### ux-signature-pad.css
 Digital signature capture.
 
 | Class | Description |
@@ -349,7 +403,7 @@ Digital signature capture.
 
 ---
 
-### ux-quantity-stepper.js
+### ux-quantity-stepper.css
 Quantity with +/- buttons.
 
 | Class | Description |
@@ -364,7 +418,7 @@ Quantity with +/- buttons.
 
 ---
 
-### ux-rich-text.js
+### ux-rich-text.css
 WYSIWYG rich text editor.
 
 | Class | Description |
@@ -380,7 +434,7 @@ WYSIWYG rich text editor.
 
 ---
 
-### ux-upload.js
+### ux-upload.css
 File upload input.
 
 | Class | Description |
@@ -395,7 +449,7 @@ File upload input.
 
 ---
 
-### ux-date-range-picker.js
+### ux-date-range-picker.css
 Date range selection.
 
 | Class | Description |
@@ -409,7 +463,7 @@ Date range selection.
 
 ## 4. Forms - Structure
 
-### ux-form.js
+### ux-form.css
 Form layout and validation.
 
 | Class | Description |
@@ -423,7 +477,7 @@ Form layout and validation.
 
 ---
 
-### ux-form-wizard.js
+### ux-form-wizard.css
 Multi-step form wizard.
 
 | Class | Description |
@@ -440,7 +494,7 @@ Multi-step form wizard.
 
 ## 5. Buttons & Actions
 
-### ux-button.js
+### ux-button.css
 Button component with variants.
 
 | Class | Description |
@@ -461,7 +515,7 @@ Button component with variants.
 
 ---
 
-### ux-icon-button.js
+### ux-icon-button.css
 Icon-only button.
 
 | Class | Description |
@@ -473,7 +527,7 @@ Icon-only button.
 
 ---
 
-### ux-button-group.js
+### ux-button-group.css
 Group of buttons.
 
 | Class | Description |
@@ -486,7 +540,7 @@ Group of buttons.
 
 ---
 
-### ux-split-button.js
+### ux-split-button.css
 Button with dropdown.
 
 | Class | Description |
@@ -501,7 +555,7 @@ Button with dropdown.
 
 ---
 
-### ux-fab.js
+### ux-fab.css
 Floating action button.
 
 | Class | Description |
@@ -520,7 +574,7 @@ Floating action button.
 
 ---
 
-### ux-chip.js
+### ux-chip.css
 Chip/tag component.
 
 | Class | Description |
@@ -539,7 +593,7 @@ Chip/tag component.
 
 ---
 
-### ux-badge.js
+### ux-badge.css
 Badge/counter component.
 
 | Class | Description |
@@ -560,7 +614,7 @@ Badge/counter component.
 
 ---
 
-### ux-tag.js
+### ux-tag.css
 Removable tag.
 
 | Class | Description |
@@ -575,7 +629,7 @@ Removable tag.
 
 ---
 
-### ux-status-indicator.js
+### ux-status-indicator.css
 Status dot with label.
 
 | Class | Description |
@@ -594,7 +648,7 @@ Status dot with label.
 
 ## 6. Navigation
 
-### ux-navbar.js
+### ux-navbar.css
 Top navigation bar.
 
 | Class | Description |
@@ -618,7 +672,7 @@ Top navigation bar.
 
 ---
 
-### ux-toolbar.js
+### ux-toolbar.css
 Action toolbar.
 
 | Class | Description |
@@ -632,7 +686,7 @@ Action toolbar.
 
 ---
 
-### ux-tabs.js
+### ux-tabs.css
 Tab navigation.
 
 | Class | Description |
@@ -659,7 +713,7 @@ Tab navigation.
 
 ---
 
-### ux-segment.js
+### ux-segment.css
 Segment control (iOS style).
 
 | Class | Description |
@@ -676,7 +730,7 @@ Segment control (iOS style).
 
 ---
 
-### ux-breadcrumbs.js
+### ux-breadcrumbs.css
 Breadcrumb navigation.
 
 | Class | Description |
@@ -690,7 +744,7 @@ Breadcrumb navigation.
 
 ---
 
-### ux-back-button.js
+### ux-back-button.css
 Back navigation button.
 
 | Class | Description |
@@ -702,7 +756,7 @@ Back navigation button.
 
 ---
 
-### ux-menu.js
+### ux-menu.css
 Sidebar menu.
 
 | Class | Description |
@@ -720,7 +774,7 @@ Sidebar menu.
 
 ---
 
-### ux-dropdown.js
+### ux-dropdown.css
 Dropdown menu.
 
 | Class | Description |
@@ -736,7 +790,7 @@ Dropdown menu.
 
 ---
 
-### ux-context-menu.js
+### ux-context-menu.css
 Right-click context menu.
 
 | Class | Description |
@@ -751,7 +805,7 @@ Right-click context menu.
 
 ---
 
-### ux-command.js
+### ux-command.css
 Command palette (⌘K).
 
 | Class | Description |
@@ -765,7 +819,7 @@ Command palette (⌘K).
 
 ---
 
-### ux-mega-menu.js
+### ux-mega-menu.css
 Mega menu for complex navigation.
 
 | Class | Description |
@@ -779,7 +833,7 @@ Mega menu for complex navigation.
 
 ---
 
-### ux-pagination.js
+### ux-pagination.css
 Page navigation.
 
 | Class | Description |
@@ -795,7 +849,7 @@ Page navigation.
 
 ---
 
-### ux-infinite-scroll.js
+### ux-infinite-scroll.css
 Infinite scroll loading.
 
 | Class | Description |
@@ -808,7 +862,7 @@ Infinite scroll loading.
 
 ---
 
-### ux-load-more.js
+### ux-load-more.css
 Load more button.
 
 | Class | Description |
@@ -823,7 +877,7 @@ Load more button.
 
 ## 7. Layout & Containers
 
-### ux-card.js
+### ux-card.css
 Card container.
 
 | Class | Description |
@@ -846,7 +900,7 @@ Card container.
 
 ---
 
-### ux-content.js
+### ux-content.css
 Page content wrapper and scroll components.
 
 | Class | Description |
@@ -859,7 +913,7 @@ Page content wrapper and scroll components.
 
 ---
 
-### ux-section.js
+### ux-section.css
 Content section with header.
 
 | Class | Description |
@@ -872,7 +926,7 @@ Content section with header.
 
 ---
 
-### ux-panel.js
+### ux-panel.css
 Collapsible panel.
 
 | Class | Description |
@@ -887,7 +941,7 @@ Collapsible panel.
 
 ---
 
-### ux-accordion.js
+### ux-accordion.css
 Accordion component.
 
 | Class | Description |
@@ -903,7 +957,7 @@ Accordion component.
 
 ---
 
-### ux-divider.js
+### ux-divider.css
 Horizontal/vertical divider.
 
 | Class | Description |
@@ -915,7 +969,7 @@ Horizontal/vertical divider.
 
 ---
 
-### ux-spacer.js
+### ux-spacer.css
 Flexible spacer.
 
 | Class | Description |
@@ -929,7 +983,7 @@ Flexible spacer.
 
 ---
 
-### ux-table.js
+### ux-table.css
 Basic CSS table styles.
 
 | Class | Description |
@@ -950,7 +1004,7 @@ Basic CSS table styles.
 
 ---
 
-### ux-list.js
+### ux-list.css
 List component.
 
 | Class | Description |
@@ -969,7 +1023,7 @@ List component.
 
 ---
 
-### ux-virtual-list.js
+### ux-virtual-list.css
 Virtualized list for large datasets.
 
 | Class | Description |
@@ -980,7 +1034,7 @@ Virtualized list for large datasets.
 
 ---
 
-### ux-tree.js
+### ux-tree.css
 Hierarchical tree view.
 
 | Class | Description |
@@ -997,7 +1051,7 @@ Hierarchical tree view.
 
 ---
 
-### ux-reorder.js
+### ux-reorder.css
 Drag and drop reorder.
 
 | Class | Description |
@@ -1012,7 +1066,7 @@ Drag and drop reorder.
 
 ---
 
-### ux-master-detail.js
+### ux-master-detail.css
 Master-detail two-panel layout.
 
 | Class | Description |
@@ -1026,7 +1080,7 @@ Master-detail two-panel layout.
 
 ---
 
-### ux-split-pane-right.js
+### ux-split-pane-right.css
 Split pane with right panel.
 
 | Class | Description |
@@ -1039,7 +1093,7 @@ Split pane with right panel.
 
 ---
 
-### ux-shell.js
+### ux-shell.css
 Application shell layout.
 
 | Class | Description |
@@ -1080,7 +1134,7 @@ Application shell layout.
 
 ---
 
-### ux-dashboard-grid.js
+### ux-dashboard-grid.css
 Dashboard widget grid.
 
 | Class | Description |
@@ -1095,7 +1149,7 @@ Dashboard widget grid.
 
 ---
 
-### ux-kanban.js
+### ux-kanban.css
 Kanban board.
 
 | Class | Description |
@@ -1112,7 +1166,7 @@ Kanban board.
 
 ---
 
-### ux-timeline.js
+### ux-timeline.css
 Timeline layout.
 
 | Class | Description |
@@ -1129,7 +1183,7 @@ Timeline layout.
 
 ---
 
-### ux-masonry.js
+### ux-masonry.css
 Masonry grid layout.
 
 | Class | Description |
@@ -1147,7 +1201,7 @@ Masonry grid layout.
 
 ## 8. Overlays & Modals
 
-### ux-modal.js
+### ux-modal.css
 Modal dialog.
 
 | Class | Description |
@@ -1166,7 +1220,7 @@ Modal dialog.
 
 ---
 
-### ux-sheet.js
+### ux-sheet.css
 Bottom/side sheet.
 
 | Class | Description |
@@ -1183,7 +1237,7 @@ Bottom/side sheet.
 
 ---
 
-### ux-drawer.js
+### ux-drawer.css
 Sidebar drawer.
 
 | Class | Description |
@@ -1200,7 +1254,7 @@ Sidebar drawer.
 
 ---
 
-### ux-alert.js
+### ux-alert.css
 Alert dialog.
 
 | Class | Description |
@@ -1218,7 +1272,7 @@ Alert dialog.
 
 ---
 
-### ux-fullscreen-modal.js
+### ux-fullscreen-modal.css
 Fullscreen modal.
 
 | Class | Description |
@@ -1232,7 +1286,7 @@ Fullscreen modal.
 
 ---
 
-### ux-lightbox.js
+### ux-lightbox.css
 Image lightbox viewer.
 
 | Class | Description |
@@ -1245,7 +1299,7 @@ Image lightbox viewer.
 
 ---
 
-### ux-popover.js
+### ux-popover.css
 Popover and dropdown.
 
 | Class | Description |
@@ -1264,7 +1318,7 @@ Popover and dropdown.
 
 ---
 
-### ux-tooltip.js
+### ux-tooltip.css
 Tooltip component.
 
 | Class | Description |
@@ -1279,7 +1333,7 @@ Tooltip component.
 
 ---
 
-### ux-toast.js
+### ux-toast.css
 Toast notifications.
 
 | Class | Description |
@@ -1302,7 +1356,7 @@ Toast notifications.
 
 ---
 
-### ux-snackbar.js
+### ux-snackbar.css
 Snackbar with action.
 
 | Class | Description |
@@ -1316,7 +1370,7 @@ Snackbar with action.
 
 ---
 
-### ux-notifications.js
+### ux-notifications.css
 Notification center.
 
 | Class | Description |
@@ -1331,7 +1385,7 @@ Notification center.
 
 ---
 
-### ux-loading.js
+### ux-loading.css
 Loading overlay.
 
 | Class | Description |
@@ -1346,7 +1400,7 @@ Loading overlay.
 
 ---
 
-### ux-picker.js
+### ux-picker.css
 iOS-style picker.
 
 | Class | Description |
@@ -1362,7 +1416,7 @@ iOS-style picker.
 
 ## 9. Data Display
 
-### ux-datatable.js
+### ux-datatable.css
 Data table with features.
 
 | Class | Description |
@@ -1398,7 +1452,7 @@ Data table with features.
 
 ---
 
-### ux-stats.js
+### ux-stats.css
 Stats/KPI card.
 
 | Class | Description |
@@ -1413,7 +1467,7 @@ Stats/KPI card.
 
 ---
 
-### ux-sparkline.js
+### ux-sparkline.css
 Sparkline chart.
 
 | Class | Description |
@@ -1427,7 +1481,7 @@ Sparkline chart.
 
 ---
 
-### ux-chart.js
+### ux-chart.css
 Wrapper for Chart.js with UX theme integration. Also supports external SVG charts (matplotlib).
 
 | Class | Description |
@@ -1465,7 +1519,7 @@ Wrapper for Chart.js with UX theme integration. Also supports external SVG chart
 
 ---
 
-### ux-progress.js
+### ux-progress.css
 Progress bar.
 
 | Class | Description |
@@ -1481,7 +1535,7 @@ Progress bar.
 
 ---
 
-### ux-progress-circle.js
+### ux-progress-circle.css
 Circular progress.
 
 | Class | Description |
@@ -1497,7 +1551,7 @@ Circular progress.
 
 ---
 
-### ux-progress-steps.js
+### ux-progress-steps.css
 Step progress indicator.
 
 | Class | Description |
@@ -1513,7 +1567,7 @@ Step progress indicator.
 
 ---
 
-### ux-gauge.js
+### ux-gauge.css
 Gauge/meter component.
 
 | Class | Description |
@@ -1528,7 +1582,7 @@ Gauge/meter component.
 
 ---
 
-### ux-diff-viewer.js
+### ux-diff-viewer.css
 Diff comparison viewer.
 
 | Class | Description |
@@ -1544,7 +1598,7 @@ Diff comparison viewer.
 
 ---
 
-### ux-code-block.js
+### ux-code-block.css
 Code block with syntax highlighting.
 
 | Class | Description |
@@ -1559,7 +1613,7 @@ Code block with syntax highlighting.
 
 ---
 
-### ux-json-viewer.js
+### ux-json-viewer.css
 JSON tree viewer.
 
 | Class | Description |
@@ -1573,7 +1627,7 @@ JSON tree viewer.
 
 ---
 
-### ux-calendar.js
+### ux-calendar.css
 Calendar month view.
 
 | Class | Description |
@@ -1587,7 +1641,7 @@ Calendar month view.
 
 ---
 
-### ux-calendar-views.js
+### ux-calendar-views.css
 Calendar week/day views.
 
 | Class | Description |
@@ -1599,7 +1653,7 @@ Calendar week/day views.
 
 ---
 
-### ux-scheduler.js
+### ux-scheduler.css
 Scheduler/booking component.
 
 | Class | Description |
@@ -1613,7 +1667,7 @@ Scheduler/booking component.
 
 ---
 
-### ux-event-card.js
+### ux-event-card.css
 Event card for calendars.
 
 | Class | Description |
@@ -1630,7 +1684,7 @@ Event card for calendars.
 
 ## 10. Multimedia
 
-### ux-img.js
+### ux-img.css
 Image with lazy loading.
 
 | Class | Description |
@@ -1645,7 +1699,7 @@ Image with lazy loading.
 
 ---
 
-### ux-avatar.js
+### ux-avatar.css
 Avatar component.
 
 | Class | Description |
@@ -1666,7 +1720,7 @@ Avatar component.
 
 ---
 
-### ux-image-gallery.js
+### ux-image-gallery.css
 Image gallery grid.
 
 | Class | Description |
@@ -1680,7 +1734,7 @@ Image gallery grid.
 
 ---
 
-### ux-image-crop.js
+### ux-image-crop.css
 Image cropping tool.
 
 | Class | Description |
@@ -1694,7 +1748,7 @@ Image cropping tool.
 
 ---
 
-### ux-image-zoom.js
+### ux-image-zoom.css
 Image zoom with lens.
 
 | Class | Description |
@@ -1707,7 +1761,7 @@ Image zoom with lens.
 
 ---
 
-### ux-carousel.js
+### ux-carousel.css
 Carousel/slider.
 
 | Class | Description |
@@ -1722,7 +1776,7 @@ Carousel/slider.
 
 ---
 
-### ux-video-player.js
+### ux-video-player.css
 Video player with controls.
 
 | Class | Description |
@@ -1736,7 +1790,7 @@ Video player with controls.
 
 ---
 
-### ux-audio-player.js
+### ux-audio-player.css
 Audio player with playlist.
 
 | Class | Description |
@@ -1751,7 +1805,7 @@ Audio player with playlist.
 
 ---
 
-### ux-pdf-viewer.js
+### ux-pdf-viewer.css
 PDF document viewer.
 
 | Class | Description |
@@ -1765,7 +1819,7 @@ PDF document viewer.
 
 ---
 
-### ux-qr-code.js
+### ux-qr-code.css
 QR code generator.
 
 | Class | Description |
@@ -1778,7 +1832,7 @@ QR code generator.
 
 ---
 
-### ux-barcode-scanner.js
+### ux-barcode-scanner.css
 Camera barcode scanner.
 
 | Class | Description |
@@ -1793,7 +1847,7 @@ Camera barcode scanner.
 
 ## 11. Feedback & States
 
-### ux-spinner.js
+### ux-spinner.css
 Loading spinner.
 
 | Class | Description |
@@ -1805,7 +1859,7 @@ Loading spinner.
 
 ---
 
-### ux-skeleton.js
+### ux-skeleton.css
 Skeleton loader.
 
 | Class | Description |
@@ -1818,7 +1872,7 @@ Skeleton loader.
 
 ---
 
-### ux-refresher.js
+### ux-refresher.css
 Pull to refresh.
 
 | Class | Description |
@@ -1831,7 +1885,7 @@ Pull to refresh.
 
 ---
 
-### ux-state.js
+### ux-state.css
 Empty/error/success states.
 
 | Class | Description |
@@ -1846,7 +1900,7 @@ Empty/error/success states.
 
 ---
 
-### ux-banner.js
+### ux-banner.css
 Dismissable banner.
 
 | Class | Description |
@@ -1862,7 +1916,7 @@ Dismissable banner.
 
 ---
 
-### ux-callout.js
+### ux-callout.css
 Info callout box.
 
 | Class | Description |
@@ -1878,7 +1932,7 @@ Info callout box.
 
 ---
 
-### ux-pwa.js
+### ux-pwa.css
 PWA utilities.
 
 | Class | Description |
@@ -1892,7 +1946,7 @@ PWA utilities.
 
 ## 12. POS / Retail
 
-### ux-numpad.js
+### ux-numpad.css
 Numeric keypad.
 
 | Class | Description |
@@ -1907,7 +1961,7 @@ Numeric keypad.
 
 ---
 
-### ux-calculator.js
+### ux-calculator.css
 Calculator component.
 
 | Class | Description |
@@ -1921,7 +1975,7 @@ Calculator component.
 
 ---
 
-### ux-product-card.js
+### ux-product-card.css
 POS product card.
 
 | Class | Description |
@@ -1934,7 +1988,7 @@ POS product card.
 
 ---
 
-### ux-category-tabs.js
+### ux-category-tabs.css
 Horizontal scrolling category tabs.
 
 | Class | Description |
@@ -1948,7 +2002,7 @@ Horizontal scrolling category tabs.
 
 ---
 
-### ux-cart.js
+### ux-cart.css
 Shopping cart components.
 
 | Class | Description |
@@ -1962,7 +2016,7 @@ Shopping cart components.
 
 ---
 
-### ux-order-ticket.js
+### ux-order-ticket.css
 Order ticket display.
 
 | Class | Description |
@@ -1974,7 +2028,7 @@ Order ticket display.
 
 ---
 
-### ux-payment.js
+### ux-payment.css
 Payment method selector.
 
 | Class | Description |
@@ -1990,7 +2044,7 @@ Payment method selector.
 
 ---
 
-### ux-receipt.js
+### ux-receipt.css
 Receipt preview.
 
 | Class | Description |
@@ -2001,7 +2055,7 @@ Receipt preview.
 
 ---
 
-### ux-stock-indicator.js
+### ux-stock-indicator.css
 Stock level indicator.
 
 | Class | Description |
@@ -2015,7 +2069,7 @@ Stock level indicator.
 
 ---
 
-### ux-quantity-badge.js
+### ux-quantity-badge.css
 Quantity badge overlay.
 
 | Class | Description |
@@ -2026,7 +2080,7 @@ Quantity badge overlay.
 
 ---
 
-### ux-variant-selector.js
+### ux-variant-selector.css
 Product variant selector (size, color).
 
 | Class | Description |
@@ -2041,7 +2095,7 @@ Product variant selector (size, color).
 
 ---
 
-### ux-virtual-keyboard.js
+### ux-virtual-keyboard.css
 On-screen keyboard.
 
 | Class | Description |
@@ -2058,7 +2112,7 @@ On-screen keyboard.
 
 ## 13. HR / Employees
 
-### ux-employee-card.js
+### ux-employee-card.css
 Employee information card.
 
 | Class | Description |
@@ -2071,7 +2125,7 @@ Employee information card.
 
 ---
 
-### ux-time-clock.js
+### ux-time-clock.css
 Time clock for check-in/out.
 
 | Class | Description |
@@ -2085,7 +2139,7 @@ Time clock for check-in/out.
 
 ---
 
-### ux-shift-calendar.js
+### ux-shift-calendar.css
 Shift/schedule calendar.
 
 | Class | Description |
@@ -2099,7 +2153,7 @@ Shift/schedule calendar.
 
 ---
 
-### ux-attendance-list.js
+### ux-attendance-list.css
 Attendance list view.
 
 | Class | Description |
@@ -2117,7 +2171,7 @@ Attendance list view.
 
 ---
 
-### ux-leave-request.js
+### ux-leave-request.css
 Leave request card.
 
 | Class | Description |
@@ -2132,7 +2186,7 @@ Leave request card.
 
 ---
 
-### ux-org-chart.js
+### ux-org-chart.css
 Organization chart.
 
 | Class | Description |
@@ -2148,7 +2202,7 @@ Organization chart.
 
 ---
 
-### ux-performance-meter.js
+### ux-performance-meter.css
 Employee performance meter.
 
 | Class | Description |
@@ -2164,7 +2218,7 @@ Employee performance meter.
 
 ## 14. Manufacturing
 
-### ux-work-order.js
+### ux-work-order.css
 Work order card.
 
 | Class | Description |
@@ -2180,7 +2234,7 @@ Work order card.
 
 ---
 
-### ux-machine-status.js
+### ux-machine-status.css
 Machine status indicator.
 
 | Class | Description |
@@ -2196,7 +2250,7 @@ Machine status indicator.
 
 ---
 
-### ux-production-line.js
+### ux-production-line.css
 Production line status.
 
 | Class | Description |
@@ -2210,7 +2264,7 @@ Production line status.
 
 ---
 
-### ux-quality-check.js
+### ux-quality-check.css
 Quality check form.
 
 | Class | Description |
@@ -2224,7 +2278,7 @@ Quality check form.
 
 ---
 
-### ux-batch-tracker.js
+### ux-batch-tracker.css
 Batch/lot tracker.
 
 | Class | Description |
@@ -2238,7 +2292,7 @@ Batch/lot tracker.
 
 ---
 
-### ux-bom-tree.js
+### ux-bom-tree.css
 Bill of Materials tree.
 
 | Class | Description |
@@ -2254,7 +2308,7 @@ Bill of Materials tree.
 
 ---
 
-### ux-gantt.js
+### ux-gantt.css
 Gantt chart.
 
 | Class | Description |
@@ -2270,7 +2324,7 @@ Gantt chart.
 
 ## 15. Utilities
 
-### ux-utilities.js
+### ux-utilities.css
 CSS utility classes.
 
 **Spacing:**
@@ -2303,7 +2357,7 @@ CSS utility classes.
 
 ---
 
-### ux-alpine-utils.js
+### ux-alpine-utils.css
 Alpine.js utility plugins.
 
 **Directives:**
@@ -2319,7 +2373,7 @@ Alpine.js utility plugins.
 
 ---
 
-### ux-swipe.js
+### ux-swipe.css
 Touch gesture directives.
 
 **Directives:**
@@ -2333,7 +2387,7 @@ Touch gesture directives.
 
 ---
 
-### ux-onscreen-keyboard.js
+### ux-onscreen-keyboard.css
 Multi-language virtual keyboard for web applications, POS, and tablets.
 
 **Supported Languages:**
@@ -2379,7 +2433,7 @@ x-data="uxOnscreenKeyboard({
 
 ---
 
-### ux-scroll.js
+### ux-scroll.css
 Scroll-related Alpine components.
 
 **Components:**
@@ -2409,9 +2463,20 @@ Scroll-related Alpine components.
 | HR / Employees | 7 |
 | Manufacturing | 7 |
 | Utilities | 5 |
-| **Total** | **142** |
+| Other | 6 |
+| **Total** | **148** |
 
-> **Note:** There are 143 JS files in `components/` (142 components + ux-core.js). `ux-scroll.js` only contains Alpine.js components (CSS is in `ux-content.js`).
+### By Alpine.js Requirement
+
+| Type | Count | Components |
+|------|-------|------------|
+| **CSS-only** | 13 | avatar, badge, divider, icon-button, spacer, state, status-indicator, table, toolbar, app-icon, employee-card, event-card, machine-status |
+| **With vanilla JS** | 10 | accordion, alert, drawer, dropdown, element, modal, sheet, tabs, toast, tooltip |
+| **Alpine directives** | 3 | core, swipe, utilities |
+| **Alpine components** | 122 | All others |
+
+> **Note:** Components with vanilla JS classes (UXModal, UXSheet, etc.) can be used without Alpine.js.
+> `ux-scroll.js` only contains Alpine.js components (CSS is in `ux-content.js`).
 
 ---
 
@@ -2427,4 +2492,4 @@ When adding a new component:
 
 ---
 
-*Last Updated: 2026-01-10*
+*Last Updated: 2026-01-23*

@@ -1,0 +1,507 @@
+@use '../core/mixins' as *;
+
+/**
+ * UX Onscreen-keyboard Component
+ * Part of the UX CSS Library
+ */
+
+/* ==========================================================================
+   UX Onscreen Keyboard Container
+   ========================================================================== */
+
+.ux-onscreen-keyboard {
+  --ux-osk-bg: var(--ux-surface-secondary);
+  --ux-osk-key-bg: var(--ux-surface);
+  --ux-osk-key-color: var(--ux-text);
+  --ux-osk-key-height: 48px;
+  --ux-osk-key-radius: var(--ux-radius-md);
+  --ux-osk-gap: 6px;
+  --ux-osk-padding: 8px;
+  --ux-osk-special-bg: var(--ux-gray-200);
+  --ux-osk-active-bg: var(--ux-primary);
+  --ux-osk-active-color: var(--ux-primary-contrast);
+
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  background: var(--ux-osk-bg);
+  border-radius: var(--ux-radius-lg);
+  padding: var(--ux-osk-padding);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+
+  /* Inline variant (for sheets/modals) */
+  &--inline {
+    border-radius: 0;
+    background: transparent;
+  }
+
+  /* Compact variant */
+  &--compact {
+    --ux-osk-key-height: 40px;
+    --ux-osk-gap: 4px;
+    --ux-osk-padding: 6px;
+  }
+
+  /* Large variant (tablet/desktop) */
+  &--lg {
+    --ux-osk-key-height: 56px;
+    --ux-osk-gap: 8px;
+    --ux-osk-padding: 12px;
+  }
+
+  /* ==========================================================================
+     Keyboard Header (Language Selector)
+     ========================================================================== */
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--ux-space-xs) var(--ux-space-sm);
+    margin-bottom: var(--ux-space-xs);
+    border-bottom: 1px solid var(--ux-border-color);
+  }
+
+  &__lang-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-xs);
+    padding: var(--ux-space-xs) var(--ux-space-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ux-text);
+    background: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-radius-md);
+    cursor: pointer;
+    transition: all var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  &__lang-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+  }
+
+  &__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ux-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  /* ==========================================================================
+     Keyboard Rows
+     ========================================================================== */
+
+  &__row {
+    display: flex;
+    justify-content: center;
+    gap: var(--ux-osk-gap);
+    margin-bottom: var(--ux-osk-gap);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  /* ==========================================================================
+     Keyboard Keys
+     ========================================================================== */
+
+  &__key {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--ux-osk-key-height);
+    height: var(--ux-osk-key-height);
+    padding: 0 var(--ux-space-sm);
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--ux-osk-key-color);
+    background: var(--ux-osk-key-bg);
+    border: none;
+    border-radius: var(--ux-osk-key-radius);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: all var(--ux-transition-fast) var(--ux-ease);
+    flex: 1;
+    max-width: 60px;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+
+    /* Prevent focus stealing from input */
+    &:focus {
+      outline: none;
+    }
+
+    &:hover {
+      background: var(--ux-surface-tertiary);
+    }
+
+    &:active {
+      transform: scale(0.92);
+      background: var(--ux-osk-active-bg);
+      color: var(--ux-osk-active-color);
+    }
+
+    /* Special keys */
+    &--special {
+      background: var(--ux-osk-special-bg);
+      font-size: 0.875rem;
+      font-weight: 600;
+      max-width: none;
+      flex: 1.5;
+
+      &:hover {
+        background: var(--ux-gray-300);
+      }
+    }
+
+    /* Shift key */
+    &--shift {
+      flex: 1.5;
+
+      &.active {
+        background: var(--ux-osk-active-bg);
+        color: var(--ux-osk-active-color);
+      }
+
+      &.caps-lock {
+        background: var(--ux-primary);
+        color: var(--ux-primary-contrast);
+        box-shadow: 0 0 0 2px var(--ux-primary-shade);
+      }
+    }
+
+    /* Space key */
+    &--space {
+      flex: 5;
+      max-width: none;
+    }
+
+    /* Backspace key */
+    &--backspace {
+      flex: 1.5;
+    }
+
+    /* Enter key */
+    &--enter {
+      flex: 2;
+      background: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+
+      &:hover {
+        background: var(--ux-primary-shade);
+      }
+    }
+
+    /* Number toggle */
+    &--numbers {
+      flex: 1.25;
+    }
+
+    /* Key with secondary character */
+    &--has-alt {
+      position: relative;
+    }
+  }
+
+  &__key-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  &__key-alt {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    font-size: 0.625rem;
+    font-weight: 400;
+    color: var(--ux-text-tertiary);
+  }
+
+  /* ==========================================================================
+     Language Picker Dropdown
+     ========================================================================== */
+
+  &__lang-picker {
+    position: absolute;
+    top: 100%;
+    left: var(--ux-osk-padding);
+    right: var(--ux-osk-padding);
+    margin-top: var(--ux-space-xs);
+    background: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: var(--ux-radius-lg);
+    box-shadow: var(--ux-shadow-lg);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: var(--ux-z-dropdown);
+  }
+
+  &__lang-option {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+    padding: var(--ux-space-sm) var(--ux-space-md);
+    font-size: 0.9375rem;
+    color: var(--ux-text);
+    cursor: pointer;
+    transition: background var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background: var(--ux-surface-secondary);
+    }
+
+    &.active {
+      background: rgba(var(--ux-primary-rgb), 0.1);
+      color: var(--ux-primary);
+    }
+
+    &:first-child {
+      border-radius: var(--ux-radius-lg) var(--ux-radius-lg) 0 0;
+    }
+
+    &:last-child {
+      border-radius: 0 0 var(--ux-radius-lg) var(--ux-radius-lg);
+    }
+  }
+
+  /* ==========================================================================
+     Preview Popup (shows pressed key)
+     ========================================================================== */
+
+  &__preview {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 56px;
+    height: 56px;
+    padding: 0 var(--ux-space-md);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ux-text);
+    background: var(--ux-surface);
+    border-radius: var(--ux-radius-lg);
+    box-shadow: var(--ux-shadow-xl);
+    pointer-events: none;
+    z-index: var(--ux-z-tooltip);
+    transform: translate(-50%, -100%) translateY(-16px);
+  }
+
+  /* ==========================================================================
+     Glass Variant
+     ========================================================================== */
+
+  &--glass {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    border: 1px solid var(--ux-glass-border);
+
+    .ux-onscreen-keyboard__key {
+      background: rgba(255, 255, 255, 0.6);
+
+      &--special {
+        background: rgba(255, 255, 255, 0.4);
+      }
+    }
+  }
+}
+
+/* ==========================================================================
+   Sheet Container (for keyboard popup)
+   ========================================================================== */
+
+.ux-osk-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--ux-z-modal);
+  transform: translateY(100%);
+  transition: transform 300ms var(--ux-ease-out);
+  padding-bottom: env(safe-area-inset-bottom);
+  will-change: transform;
+
+  &--open {
+    transform: translateY(0);
+  }
+
+  &__container {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur-heavy)) saturate(var(--ux-glass-saturation));
+    border-radius: 16px 16px 0 0;
+    border-top: 0.5px solid var(--ux-glass-border);
+    box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.15);
+    max-width: 600px;
+    margin: 0 auto;
+
+    @media (min-width: 768px) {
+      margin: 0 auto;
+      border-radius: 16px 16px 0 0;
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--ux-space-sm) var(--ux-space-md);
+    border-bottom: 0.5px solid var(--ux-glass-border);
+  }
+
+  &__title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ux-text);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-sm);
+  }
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ux-space-xs) var(--ux-space-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ux-primary);
+    background: transparent;
+    border: none;
+    border-radius: var(--ux-radius-md);
+    cursor: pointer;
+    transition: background var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background: rgba(var(--ux-primary-rgb), 0.1);
+    }
+
+    &:active {
+      background: rgba(var(--ux-primary-rgb), 0.2);
+    }
+
+    &--close {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      color: var(--ux-text-secondary);
+      border-radius: 50%;
+
+      &:hover {
+        background: var(--ux-surface-secondary);
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  &__content {
+    padding: var(--ux-space-sm);
+  }
+
+  .ux-onscreen-keyboard {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+  }
+}
+
+/* Dark mode for sheet */
+.ux-dark .ux-osk-sheet__container {
+  background: rgba(30, 30, 30, 0.95);
+}
+
+@media (prefers-color-scheme: dark) {
+  .ux-osk-sheet__container {
+    background: rgba(30, 30, 30, 0.95);
+  }
+}
+
+/* ==========================================================================
+   Dark Mode
+   ========================================================================== */
+
+.ux-dark .ux-onscreen-keyboard {
+  --ux-osk-bg: var(--ux-gray-900);
+  --ux-osk-key-bg: var(--ux-gray-800);
+  --ux-osk-special-bg: var(--ux-gray-700);
+}
+
+@media (prefers-color-scheme: dark) {
+  .ux-onscreen-keyboard {
+    --ux-osk-bg: var(--ux-gray-900);
+    --ux-osk-key-bg: var(--ux-gray-800);
+    --ux-osk-special-bg: var(--ux-gray-700);
+  }
+}
+
+.ux-dark .ux-onscreen-keyboard__key {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  .ux-onscreen-keyboard__key {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.ux-dark .ux-onscreen-keyboard--glass .ux-onscreen-keyboard__key {
+  background: rgba(255, 255, 255, 0.1);
+
+  &--special {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 400px) {
+  .ux-onscreen-keyboard {
+    --ux-osk-key-height: 42px;
+    --ux-osk-gap: 4px;
+  }
+
+  .ux-onscreen-keyboard__key {
+    font-size: 1rem;
+  }
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-onscreen-keyboard__key {
+    transition: none;
+
+    &:active {
+      transform: none;
+    }
+  }
+}

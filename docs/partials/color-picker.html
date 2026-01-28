@@ -1,0 +1,806 @@
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--ux-surface-secondary);
+      
+      
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--ux-text);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .demo-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .result-display {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--ux-surface-secondary);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .demo-glass-bg {
+      background: linear-gradient(135deg, var(--ux-blue-400), var(--ux-purple-500));
+      
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .color-preview {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .color-swatch {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      border: 1px solid var(--ux-border-color);
+    }
+  </style>
+
+<h1 style="margin-bottom: 0.5rem;">Color Picker</h1>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+    Selector de color con espectro visual, sliders de hue/alpha, y soporte para formatos HEX, RGB y HSL.
+  </p>
+
+  <!-- Basic Color Picker -->
+  <section class="demo-section">
+    <h2>Color Picker Básico</h2>
+
+    <div class="demo-grid">
+      <div>
+        <div class="demo-box">
+          <div x-data="uxColorPicker({ value: '#3b82f6' })" @colorpicker:change="selected = $event.detail">
+            <button class="ux-color-picker__trigger" @click="toggle()">
+              <span class="ux-color-picker__swatch" :style="{ background: displayValue }"></span>
+              <span class="ux-color-picker__value" x-text="displayValue"></span>
+            </button>
+
+            <div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+              <!-- Spectrum -->
+              <div class="ux-color-picker__spectrum"
+                   :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+                   @mousedown="onSpectrumMouseDown"
+                   @touchstart.prevent="onSpectrumTouchStart">
+                <div class="ux-color-picker__spectrum-white"></div>
+                <div class="ux-color-picker__spectrum-black"></div>
+                <div class="ux-color-picker__spectrum-cursor"
+                     :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+              </div>
+
+              <!-- Hue Slider -->
+              <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+                   @mousedown="onHueMouseDown"
+                   @touchstart.prevent="onHueTouchStart">
+                <div class="ux-color-picker__slider-track"></div>
+                <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+              </div>
+
+              <!-- Input -->
+              <div class="ux-color-picker__input-group">
+                <input type="text" class="ux-color-picker__input" :value="displayValue" @change="setFromInput($event.target.value)">
+                <button class="ux-color-picker__format-btn" @click="cycleFormat()" x-text="format.toUpperCase()"></button>
+              </div>
+
+              <!-- Presets -->
+              <div class="ux-color-picker__presets" x-show="presets.length > 0">
+                <template x-for="preset in presets" :key="preset">
+                  <button class="ux-color-picker__preset"
+                          :style="{ background: preset }"
+                          :class="{ 'ux-color-picker__preset--active': value === preset }"
+                          @click="setValue(preset)"></button>
+                </template>
+              </div>
+            </div>
+
+            <div class="color-preview">
+              <div class="color-swatch" :style="{ background: displayValue }"></div>
+              <span x-text="displayValue"></span>
+            </div>
+          </div>
+        </div>
+
+        <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxColorPicker({ value: '#3b82f6' })"&gt;
+  &lt;button class="ux-color-picker__trigger" @click="toggle()"&gt;
+    &lt;span class="ux-color-picker__swatch" :style="{ background: displayValue }"&gt;&lt;/span&gt;
+    &lt;span class="ux-color-picker__value" x-text="displayValue"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;!-- Dropdown content... --&gt;
+&lt;/div&gt;</pre>
+      </div>
+
+      <div>
+        <div class="demo-box">
+          <h3 style="font-size: 1rem; margin-bottom: 1rem;">Con Presets Personalizados</h3>
+          <div x-data="uxColorPicker({
+            value: '#ef4444',
+            presets: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#000000', '#ffffff']
+          })">
+            <button class="ux-color-picker__trigger" @click="toggle()">
+              <span class="ux-color-picker__swatch" :style="{ background: displayValue }"></span>
+              <span class="ux-color-picker__value" x-text="displayValue"></span>
+            </button>
+
+            <div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+              <div class="ux-color-picker__spectrum"
+                   :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+                   @mousedown="onSpectrumMouseDown"
+                   @touchstart.prevent="onSpectrumTouchStart">
+                <div class="ux-color-picker__spectrum-white"></div>
+                <div class="ux-color-picker__spectrum-black"></div>
+                <div class="ux-color-picker__spectrum-cursor"
+                     :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+              </div>
+
+              <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+                   @mousedown="onHueMouseDown"
+                   @touchstart.prevent="onHueTouchStart">
+                <div class="ux-color-picker__slider-track"></div>
+                <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+              </div>
+
+              <div class="ux-color-picker__input-group">
+                <input type="text" class="ux-color-picker__input" :value="displayValue" @change="setFromInput($event.target.value)">
+                <button class="ux-color-picker__format-btn" @click="cycleFormat()" x-text="format.toUpperCase()"></button>
+              </div>
+
+              <div class="ux-color-picker__presets">
+                <template x-for="preset in presets" :key="preset">
+                  <button class="ux-color-picker__preset"
+                          :style="{ background: preset }"
+                          :class="{ 'ux-color-picker__preset--active': value === preset }"
+                          @click="setValue(preset)"></button>
+                </template>
+              </div>
+            </div>
+
+            <div class="color-preview">
+              <div class="color-swatch" :style="{ background: displayValue }"></div>
+              <span x-text="displayValue"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- With Alpha -->
+  <section class="demo-section">
+    <h2>Con Canal Alpha (Transparencia)</h2>
+
+    <div class="demo-box" style="max-width: 400px;">
+      <div x-data="uxColorPicker({ value: '#3b82f6', alpha: true, format: 'rgb' })">
+        <button class="ux-color-picker__trigger" @click="toggle()">
+          <span class="ux-color-picker__swatch ux-color-picker__swatch--alpha" :style="{ '--picker-color': displayValue }"></span>
+          <span class="ux-color-picker__value" x-text="displayValue"></span>
+        </button>
+
+        <div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+          <div class="ux-color-picker__spectrum"
+               :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+               @mousedown="onSpectrumMouseDown"
+               @touchstart.prevent="onSpectrumTouchStart">
+            <div class="ux-color-picker__spectrum-white"></div>
+            <div class="ux-color-picker__spectrum-black"></div>
+            <div class="ux-color-picker__spectrum-cursor"
+                 :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+          </div>
+
+          <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+               @mousedown="onHueMouseDown"
+               @touchstart.prevent="onHueTouchStart">
+            <div class="ux-color-picker__slider-track"></div>
+            <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+          </div>
+
+          <!-- Alpha Slider -->
+          <div class="ux-color-picker__slider ux-color-picker__slider--alpha"
+               :style="{ '--picker-color': `hsl(${hue}, ${saturation}%, ${lightness}%)` }"
+               @mousedown="onAlphaMouseDown"
+               @touchstart.prevent="onAlphaTouchStart">
+            <div class="ux-color-picker__slider-track"></div>
+            <div class="ux-color-picker__slider-thumb" :style="{ left: (alphaValue * 100) + '%' }"></div>
+          </div>
+
+          <div class="ux-color-picker__input-group">
+            <input type="text" class="ux-color-picker__input" :value="displayValue" @change="setFromInput($event.target.value)">
+            <button class="ux-color-picker__format-btn" @click="cycleFormat()" x-text="format.toUpperCase()"></button>
+          </div>
+
+          <div class="ux-color-picker__presets">
+            <template x-for="preset in presets" :key="preset">
+              <button class="ux-color-picker__preset"
+                      :style="{ background: preset }"
+                      @click="setValue(preset)"></button>
+            </template>
+          </div>
+        </div>
+
+        <div class="color-preview">
+          <div class="color-swatch" style="background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px;">
+            <div style="width: 100%; height: 100%; border-radius: 8px;" :style="{ background: displayValue }"></div>
+          </div>
+          <span x-text="displayValue"></span>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxColorPicker({ value: '#3b82f6', alpha: true, format: 'rgb' })"&gt;
+  &lt;!-- Alpha slider añadido --&gt;
+  &lt;div class="ux-color-picker__slider ux-color-picker__slider--alpha"
+       @mousedown="onAlphaMouseDown"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
+  </section>
+
+  <!-- Sizes -->
+  <section class="demo-section">
+    <h2>Tamaños</h2>
+
+    <div class="demo-box">
+      <div class="demo-flex">
+        <div x-data="uxColorPicker({ value: '#22c55e' })">
+          <button class="ux-color-picker__trigger ux-color-picker__trigger--sm" @click="toggle()">
+            <span class="ux-color-picker__swatch" :style="{ background: displayValue }"></span>
+            <span class="ux-color-picker__value" x-text="displayValue"></span>
+          </button>
+          <div class="ux-color-picker__dropdown ux-color-picker__dropdown--sm" x-show="isOpen" x-transition @click.outside="close()">
+            <div class="ux-color-picker__spectrum"
+                 :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+                 @mousedown="onSpectrumMouseDown">
+              <div class="ux-color-picker__spectrum-white"></div>
+              <div class="ux-color-picker__spectrum-black"></div>
+              <div class="ux-color-picker__spectrum-cursor"
+                   :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+                 @mousedown="onHueMouseDown">
+              <div class="ux-color-picker__slider-track"></div>
+              <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__presets">
+              <template x-for="preset in presets" :key="preset">
+                <button class="ux-color-picker__preset"
+                        :style="{ background: preset }"
+                        @click="setValue(preset)"></button>
+              </template>
+            </div>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--ux-text-secondary); margin-top: 0.5rem;">Small</p>
+        </div>
+
+        <div x-data="uxColorPicker({ value: '#3b82f6' })">
+          <button class="ux-color-picker__trigger" @click="toggle()">
+            <span class="ux-color-picker__swatch" :style="{ background: displayValue }"></span>
+            <span class="ux-color-picker__value" x-text="displayValue"></span>
+          </button>
+          <div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+            <div class="ux-color-picker__spectrum"
+                 :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+                 @mousedown="onSpectrumMouseDown">
+              <div class="ux-color-picker__spectrum-white"></div>
+              <div class="ux-color-picker__spectrum-black"></div>
+              <div class="ux-color-picker__spectrum-cursor"
+                   :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+                 @mousedown="onHueMouseDown">
+              <div class="ux-color-picker__slider-track"></div>
+              <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__presets">
+              <template x-for="preset in presets" :key="preset">
+                <button class="ux-color-picker__preset"
+                        :style="{ background: preset }"
+                        @click="setValue(preset)"></button>
+              </template>
+            </div>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--ux-text-secondary); margin-top: 0.5rem;">Default</p>
+        </div>
+
+        <div x-data="uxColorPicker({ value: '#8b5cf6' })">
+          <button class="ux-color-picker__trigger ux-color-picker__trigger--lg" @click="toggle()">
+            <span class="ux-color-picker__swatch" :style="{ background: displayValue }"></span>
+            <span class="ux-color-picker__value" x-text="displayValue"></span>
+          </button>
+          <div class="ux-color-picker__dropdown ux-color-picker__dropdown--lg" x-show="isOpen" x-transition @click.outside="close()">
+            <div class="ux-color-picker__spectrum"
+                 :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+                 @mousedown="onSpectrumMouseDown">
+              <div class="ux-color-picker__spectrum-white"></div>
+              <div class="ux-color-picker__spectrum-black"></div>
+              <div class="ux-color-picker__spectrum-cursor"
+                   :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+                 @mousedown="onHueMouseDown">
+              <div class="ux-color-picker__slider-track"></div>
+              <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__presets">
+              <template x-for="preset in presets" :key="preset">
+                <button class="ux-color-picker__preset"
+                        :style="{ background: preset }"
+                        @click="setValue(preset)"></button>
+              </template>
+            </div>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--ux-text-secondary); margin-top: 0.5rem;">Large</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Inline Mode -->
+  <section class="demo-section">
+    <h2>Modo Inline</h2>
+
+    <div class="demo-grid">
+      <div>
+        <div class="demo-box">
+          <div x-data="uxColorPicker({ value: '#f97316', inline: true })">
+            <div class="ux-color-picker ux-color-picker--inline">
+              <div class="ux-color-picker__spectrum"
+                   :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+                   @mousedown="onSpectrumMouseDown"
+                   @touchstart.prevent="onSpectrumTouchStart">
+                <div class="ux-color-picker__spectrum-white"></div>
+                <div class="ux-color-picker__spectrum-black"></div>
+                <div class="ux-color-picker__spectrum-cursor"
+                     :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+              </div>
+
+              <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+                   @mousedown="onHueMouseDown"
+                   @touchstart.prevent="onHueTouchStart">
+                <div class="ux-color-picker__slider-track"></div>
+                <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+              </div>
+
+              <div class="ux-color-picker__input-group">
+                <input type="text" class="ux-color-picker__input" :value="displayValue" @change="setFromInput($event.target.value)">
+                <button class="ux-color-picker__format-btn" @click="cycleFormat()" x-text="format.toUpperCase()"></button>
+              </div>
+
+              <div class="ux-color-picker__presets">
+                <template x-for="preset in presets" :key="preset">
+                  <button class="ux-color-picker__preset"
+                          :style="{ background: preset }"
+                          :class="{ 'ux-color-picker__preset--active': value === preset }"
+                          @click="setValue(preset)"></button>
+                </template>
+              </div>
+            </div>
+
+            <div class="color-preview">
+              <div class="color-swatch" :style="{ background: displayValue }"></div>
+              <span x-text="displayValue"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxColorPicker({ inline: true })"&gt;
+  &lt;div class="ux-color-picker ux-color-picker--inline"&gt;
+    &lt;!-- Spectrum, sliders, input, presets --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Glass Variant -->
+  <section class="demo-section">
+    <h2>Variante Glass</h2>
+
+    <div class="demo-glass-bg">
+      <div x-data="uxColorPicker({ value: '#ffffff', inline: true })">
+        <div class="ux-color-picker ux-color-picker--inline ux-color-picker--glass">
+          <div class="ux-color-picker__spectrum"
+               :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+               @mousedown="onSpectrumMouseDown"
+               @touchstart.prevent="onSpectrumTouchStart">
+            <div class="ux-color-picker__spectrum-white"></div>
+            <div class="ux-color-picker__spectrum-black"></div>
+            <div class="ux-color-picker__spectrum-cursor"
+                 :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+          </div>
+
+          <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+               @mousedown="onHueMouseDown"
+               @touchstart.prevent="onHueTouchStart">
+            <div class="ux-color-picker__slider-track"></div>
+            <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+          </div>
+
+          <div class="ux-color-picker__input-group">
+            <input type="text" class="ux-color-picker__input" :value="displayValue" @change="setFromInput($event.target.value)">
+            <button class="ux-color-picker__format-btn" @click="cycleFormat()" x-text="format.toUpperCase()"></button>
+          </div>
+
+          <div class="ux-color-picker__presets">
+            <template x-for="preset in presets" :key="preset">
+              <button class="ux-color-picker__preset"
+                      :style="{ background: preset }"
+                      @click="setValue(preset)"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Swatch Only -->
+  <section class="demo-section">
+    <h2>Solo Swatch (Sin Texto)</h2>
+
+    <div class="demo-box">
+      <div class="demo-flex">
+        <div x-data="uxColorPicker({ value: '#ef4444' })">
+          <button class="ux-color-picker__trigger ux-color-picker__trigger--swatch-only" @click="toggle()">
+            <span class="ux-color-picker__swatch" :style="{ background: displayValue }"></span>
+          </button>
+          <div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+            <div class="ux-color-picker__spectrum"
+                 :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+                 @mousedown="onSpectrumMouseDown">
+              <div class="ux-color-picker__spectrum-white"></div>
+              <div class="ux-color-picker__spectrum-black"></div>
+              <div class="ux-color-picker__spectrum-cursor"
+                   :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+                 @mousedown="onHueMouseDown">
+              <div class="ux-color-picker__slider-track"></div>
+              <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__presets">
+              <template x-for="preset in presets" :key="preset">
+                <button class="ux-color-picker__preset"
+                        :style="{ background: preset }"
+                        @click="setValue(preset)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <div x-data="uxColorPicker({ value: '#22c55e' })">
+          <button class="ux-color-picker__trigger ux-color-picker__trigger--swatch-only" @click="toggle()">
+            <span class="ux-color-picker__swatch" :style="{ background: displayValue }"></span>
+          </button>
+          <div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+            <div class="ux-color-picker__spectrum"
+                 :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+                 @mousedown="onSpectrumMouseDown">
+              <div class="ux-color-picker__spectrum-white"></div>
+              <div class="ux-color-picker__spectrum-black"></div>
+              <div class="ux-color-picker__spectrum-cursor"
+                   :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+                 @mousedown="onHueMouseDown">
+              <div class="ux-color-picker__slider-track"></div>
+              <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__presets">
+              <template x-for="preset in presets" :key="preset">
+                <button class="ux-color-picker__preset"
+                        :style="{ background: preset }"
+                        @click="setValue(preset)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <div x-data="uxColorPicker({ value: '#3b82f6' })">
+          <button class="ux-color-picker__trigger ux-color-picker__trigger--swatch-only" @click="toggle()">
+            <span class="ux-color-picker__swatch" :style="{ background: displayValue }"></span>
+          </button>
+          <div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+            <div class="ux-color-picker__spectrum"
+                 :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+                 @mousedown="onSpectrumMouseDown">
+              <div class="ux-color-picker__spectrum-white"></div>
+              <div class="ux-color-picker__spectrum-black"></div>
+              <div class="ux-color-picker__spectrum-cursor"
+                   :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+                 @mousedown="onHueMouseDown">
+              <div class="ux-color-picker__slider-track"></div>
+              <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+            </div>
+            <div class="ux-color-picker__presets">
+              <template x-for="preset in presets" :key="preset">
+                <button class="ux-color-picker__preset"
+                        :style="{ background: preset }"
+                        @click="setValue(preset)"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;button class="ux-color-picker__trigger ux-color-picker__trigger--swatch-only"&gt;
+  &lt;span class="ux-color-picker__swatch"&gt;&lt;/span&gt;
+&lt;/button&gt;</pre>
+  </section>
+
+  <!-- CSS Classes Reference -->
+  <section class="demo-section">
+    <h2>Referencia de Clases CSS</h2>
+
+    <div class="demo-box">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: 0.75rem;">Clase</th>
+            <th style="text-align: left; padding: 0.75rem;">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker</code></td>
+            <td style="padding: 0.75rem;">Contenedor principal</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker--inline</code></td>
+            <td style="padding: 0.75rem;">Modo inline (siempre visible)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker--glass</code></td>
+            <td style="padding: 0.75rem;">Variante glass morphism</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker__trigger</code></td>
+            <td style="padding: 0.75rem;">Botón trigger para abrir el picker</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker__trigger--sm</code></td>
+            <td style="padding: 0.75rem;">Trigger pequeño (36px)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker__trigger--lg</code></td>
+            <td style="padding: 0.75rem;">Trigger grande (52px)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker__trigger--swatch-only</code></td>
+            <td style="padding: 0.75rem;">Solo muestra el swatch sin texto</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker__dropdown</code></td>
+            <td style="padding: 0.75rem;">Panel dropdown del picker</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker__spectrum</code></td>
+            <td style="padding: 0.75rem;">Área de selección de saturación/luminosidad</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker__slider--hue</code></td>
+            <td style="padding: 0.75rem;">Slider de tono (0-360°)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-color-picker__slider--alpha</code></td>
+            <td style="padding: 0.75rem;">Slider de transparencia</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem;"><code>.ux-color-picker__presets</code></td>
+            <td style="padding: 0.75rem;">Grid de colores preestablecidos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Alpine.js Options -->
+  <section class="demo-section">
+    <h2>Opciones Alpine.js</h2>
+
+    <div class="demo-box">
+      <pre class="ux-code-block" data-lang="javascript">uxColorPicker({
+  value: '#3b82f6',       // Color inicial (HEX, RGB o HSL)
+  format: 'hex',          // Formato de salida: 'hex', 'rgb', 'hsl'
+  alpha: false,           // Habilitar canal alpha
+  inline: false,          // Modo inline (siempre visible)
+  presets: [...],         // Array de colores preestablecidos
+  closeOnSelect: false    // Cerrar al seleccionar preset
+})
+
+// Métodos
+toggle()                  // Alternar dropdown
+open()                    // Abrir dropdown
+close()                   // Cerrar dropdown
+setValue(color)           // Establecer color
+cycleFormat()             // Cambiar formato (hex → rgb → hsl)
+setFromInput(value)       // Establecer desde input de texto
+
+// Eventos
+@colorpicker:change       // Se dispara al cambiar el color
+@colorpicker:open         // Se dispara al abrir
+@colorpicker:close        // Se dispara al cerrar</pre>
+    </div>
+  </section>
+
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Guardar color seleccionado</h3>
+      <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+        Usa el evento <code>colorpicker:change</code> para enviar el color al servidor con HTMX.
+      </p>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Color picker con guardado automatico --&gt;
+&lt;div x-data="uxColorPicker({ value: '{{ user.theme_color }}' })"
+     @colorpicker:change="$refs.colorInput.value = $event.detail.hex; htmx.trigger($refs.colorInput, 'change')"&gt;
+
+  &lt;button class="ux-color-picker__trigger" @click="toggle()"&gt;
+    &lt;span class="ux-color-picker__swatch" :style="{ background: displayValue }"&gt;&lt;/span&gt;
+    &lt;span class="ux-color-picker__value" x-text="displayValue"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+
+  &lt;!-- Dropdown del picker... --&gt;
+
+  &lt;!-- Input oculto para HTMX --&gt;
+  &lt;input type="hidden"
+         name="theme_color"
+         x-ref="colorInput"
+         :value="displayValue"
+         hx-post="/api/user/theme-color/"
+         hx-trigger="change"
+         hx-swap="none"&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Formulario con color picker</h3>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Formulario de configuracion de producto --&gt;
+&lt;form hx-post="/api/products/{{ product.id }}/update/"
+      hx-target="#product-preview"
+      hx-indicator="#save-indicator"&gt;
+
+  &lt;div class="ux-input"&gt;
+    &lt;input type="text" name="name" value="{{ product.name }}"&gt;
+    &lt;label&gt;Nombre del producto&lt;/label&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Color picker para el color del producto --&gt;
+  &lt;div x-data="uxColorPicker({ value: '{{ product.color|default:'#3b82f6' }}' })"
+       style="margin: 1rem 0;"&gt;
+
+    &lt;label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--ux-text-secondary);"&gt;
+      Color del producto
+    &lt;/label&gt;
+
+    &lt;button type="button" class="ux-color-picker__trigger" @click="toggle()"&gt;
+      &lt;span class="ux-color-picker__swatch" :style="{ background: displayValue }"&gt;&lt;/span&gt;
+      &lt;span class="ux-color-picker__value" x-text="displayValue"&gt;&lt;/span&gt;
+    &lt;/button&gt;
+
+    &lt;div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()"&gt;
+      &lt;!-- Spectrum, sliders, presets... --&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Input oculto que se envia con el formulario --&gt;
+    &lt;input type="hidden" name="color" :value="displayValue"&gt;
+  &lt;/div&gt;
+
+  &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+    &lt;span class="ux-spinner" id="save-indicator"&gt;&lt;/span&gt;
+    Guardar cambios
+  &lt;/button&gt;
+&lt;/form&gt;</pre>
+    </div>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Vista Django</h3>
+
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+
+@require_POST
+def update_theme_color(request):
+    """Actualiza el color del tema del usuario."""
+    color = request.POST.get('theme_color', '#3b82f6')
+
+    # Validar formato HEX
+    if not color.startswith('#') or len(color) not in [4, 7, 9]:
+        return HttpResponse(status=400)
+
+    request.user.profile.theme_color = color
+    request.user.profile.save()
+
+    return HttpResponse(status=204)
+
+
+@require_POST
+def update_product(request, product_id):
+    """Actualiza un producto con su color."""
+    product = get_object_or_404(Product, id=product_id)
+
+    product.name = request.POST.get('name', product.name)
+    product.color = request.POST.get('color', product.color)
+    product.save()
+
+    # Retorna preview actualizado
+    return render(request, 'partials/product_preview.html', {
+        'product': product
+    })</pre>
+    </div>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">URLs Django</h3>
+
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('api/user/theme-color/', views.update_theme_color, name='update_theme_color'),
+    path('api/products/&lt;int:product_id&gt;/update/', views.update_product, name='update_product'),
+]</pre>
+    </div>
+
+    <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Preview en tiempo real</h3>
+      <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+        Actualiza un preview visual mientras el usuario selecciona el color.
+      </p>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Color picker con preview en tiempo real --&gt;
+&lt;div class="demo-grid"&gt;
+  &lt;div x-data="uxColorPicker({ value: '#3b82f6' })"&gt;
+    &lt;button class="ux-color-picker__trigger" @click="toggle()"&gt;
+      &lt;span class="ux-color-picker__swatch" :style="{ background: displayValue }"&gt;&lt;/span&gt;
+      &lt;span class="ux-color-picker__value" x-text="displayValue"&gt;&lt;/span&gt;
+    &lt;/button&gt;
+
+    &lt;div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()"&gt;
+      &lt;!-- Picker content... --&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Guardar con debounce para evitar demasiadas peticiones --&gt;
+    &lt;input type="hidden"
+           name="color"
+           x-ref="colorInput"
+           :value="displayValue"
+           hx-post="/api/preview/color/"
+           hx-trigger="change delay:500ms"
+           hx-target="#color-preview"&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Preview que se actualiza --&gt;
+  &lt;div id="color-preview"&gt;
+    &lt;div class="ux-card" style="background: var(--preview-color, #3b82f6);"&gt;
+      &lt;p style="color: var(--ux-primary-contrast);"&gt;Vista previa del color&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+  </section>

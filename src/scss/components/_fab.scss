@@ -1,0 +1,423 @@
+/**
+ * UX FAB (Floating Action Button) Component
+ * Part of the UX CSS Library
+ */
+
+@use '../core/mixins' as *;
+
+// ==========================================================
+// FAB Container
+// ==========================================================
+
+.ux-fab {
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ux-space-md);
+
+  // ==========================================================
+  // Positions
+  // ==========================================================
+
+  &--bottom-end {
+    bottom: var(--ux-space-lg);
+    right: var(--ux-space-lg);
+    bottom: calc(var(--ux-space-lg) + env(safe-area-inset-bottom));
+  }
+
+  &--bottom-start {
+    bottom: var(--ux-space-lg);
+    left: var(--ux-space-lg);
+    bottom: calc(var(--ux-space-lg) + env(safe-area-inset-bottom));
+  }
+
+  &--bottom-center {
+    bottom: var(--ux-space-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(var(--ux-space-lg) + env(safe-area-inset-bottom));
+  }
+
+  &--top-end {
+    top: var(--ux-space-lg);
+    right: var(--ux-space-lg);
+    top: calc(var(--ux-space-lg) + env(safe-area-inset-top));
+  }
+
+  &--top-start {
+    top: var(--ux-space-lg);
+    left: var(--ux-space-lg);
+    top: calc(var(--ux-space-lg) + env(safe-area-inset-top));
+  }
+
+  &--center-end {
+    top: 50%;
+    right: var(--ux-space-lg);
+    transform: translateY(-50%);
+  }
+
+  &--center-start {
+    top: 50%;
+    left: var(--ux-space-lg);
+    transform: translateY(-50%);
+  }
+
+  // ==========================================================
+  // FAB Button
+  // ==========================================================
+
+  &__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ux-fab-size);
+    height: var(--ux-fab-size);
+    padding: 0;
+    background-color: var(--ux-primary);
+    color: var(--ux-primary-contrast);
+    border: none;
+    border-radius: 50%;
+    box-shadow: var(--ux-shadow-lg);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform var(--ux-transition-fast) var(--ux-ease-spring),
+                box-shadow var(--ux-transition-fast) var(--ux-ease),
+                background-color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      box-shadow: var(--ux-shadow-xl);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ux-primary);
+      outline-offset: 2px;
+    }
+
+    // Sizes
+    &--sm {
+      width: var(--ux-fab-size-sm);
+      height: var(--ux-fab-size-sm);
+
+      .ux-fab__button-icon {
+        width: var(--ux-fab-icon-size-sm);
+        height: var(--ux-fab-icon-size-sm);
+      }
+    }
+
+    &--lg {
+      width: var(--ux-fab-size-lg);
+      height: var(--ux-fab-size-lg);
+
+      .ux-fab__button-icon {
+        width: var(--ux-fab-icon-size-lg);
+        height: var(--ux-fab-icon-size-lg);
+      }
+    }
+
+    // Colors
+    &--secondary {
+      background-color: var(--ux-secondary);
+      color: var(--ux-secondary-contrast);
+    }
+
+    &--tertiary {
+      background-color: var(--ux-tertiary);
+      color: var(--ux-tertiary-contrast);
+    }
+
+    &--success {
+      background-color: var(--ux-success);
+      color: var(--ux-success-contrast);
+    }
+
+    &--warning {
+      background-color: var(--ux-warning);
+      color: var(--ux-warning-contrast);
+    }
+
+    &--danger {
+      background-color: var(--ux-danger);
+      color: var(--ux-danger-contrast);
+    }
+
+    &--light {
+      background-color: var(--ux-surface);
+      color: var(--ux-text);
+    }
+
+    &--dark {
+      background-color: var(--ux-dark);
+      color: var(--ux-dark-contrast);
+    }
+
+    // Extended (with label)
+    &--extended {
+      width: auto;
+      height: 48px;
+      padding: 0 var(--ux-space-lg) 0 var(--ux-space-md);
+      border-radius: 24px;
+      gap: var(--ux-space-sm);
+    }
+
+    // Glass variant
+    &--glass {
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+      border: 0.5px solid var(--ux-glass-border);
+      color: var(--ux-text);
+
+      &:hover {
+        background: var(--ux-glass-bg-thick);
+      }
+    }
+  }
+
+  &__button-icon {
+    width: 24px;
+    height: 24px;
+    transition: transform var(--ux-transition-fast) var(--ux-ease);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__button-label {
+    font-size: var(--ux-font-size-sm);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  // Rotate icon when open
+  &--open .ux-fab__button-icon {
+    transform: rotate(45deg);
+  }
+
+  // ==========================================================
+  // FAB List (Speed Dial)
+  // ==========================================================
+
+  &__list {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: var(--ux-space-md);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--ux-transition-base) var(--ux-ease),
+                visibility var(--ux-transition-base) var(--ux-ease);
+  }
+
+  &--open .ux-fab__list {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &__list-item {
+    display: flex;
+    align-items: center;
+    gap: var(--ux-space-md);
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+    transition: opacity var(--ux-transition-fast) var(--ux-ease),
+                transform var(--ux-transition-fast) var(--ux-ease-spring);
+  }
+
+  &--open .ux-fab__list-item {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+
+    // Stagger animation
+    &:nth-child(1) { transition-delay: 0ms; }
+    &:nth-child(2) { transition-delay: 50ms; }
+    &:nth-child(3) { transition-delay: 100ms; }
+    &:nth-child(4) { transition-delay: 150ms; }
+    &:nth-child(5) { transition-delay: 200ms; }
+  }
+
+  &__list-label {
+    padding: var(--ux-space-xs) var(--ux-space-md);
+    background-color: var(--ux-dark);
+    color: var(--ux-dark-contrast);
+    font-size: var(--ux-font-size-sm);
+    font-weight: 500;
+    border-radius: var(--ux-border-radius);
+    white-space: nowrap;
+    box-shadow: var(--ux-shadow-sm);
+  }
+
+  // Label position
+  &--bottom-end .ux-fab__list-label,
+  &--center-end .ux-fab__list-label,
+  &--top-end .ux-fab__list-label {
+    order: -1;
+  }
+
+  // ==========================================================
+  // Mini FAB Button
+  // ==========================================================
+
+  &__mini-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background-color: var(--ux-surface);
+    color: var(--ux-text);
+    border: none;
+    border-radius: 50%;
+    box-shadow: var(--ux-shadow-md);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform var(--ux-transition-fast) var(--ux-ease),
+                box-shadow var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      box-shadow: var(--ux-shadow-lg);
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    // Colors
+    &--primary {
+      background-color: var(--ux-primary);
+      color: var(--ux-primary-contrast);
+    }
+
+    &--secondary {
+      background-color: var(--ux-secondary);
+      color: var(--ux-secondary-contrast);
+    }
+
+    &--success {
+      background-color: var(--ux-success);
+      color: var(--ux-success-contrast);
+    }
+
+    &--danger {
+      background-color: var(--ux-danger);
+      color: var(--ux-danger-contrast);
+    }
+  }
+
+  &__mini-button-icon {
+    width: 20px;
+    height: 20px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  // ==========================================================
+  // Horizontal Layout
+  // ==========================================================
+
+  &--horizontal {
+    .ux-fab__list {
+      flex-direction: row;
+    }
+
+    &.ux-fab--bottom-end .ux-fab__list,
+    &.ux-fab--top-end .ux-fab__list {
+      flex-direction: row-reverse;
+    }
+
+    .ux-fab__list-item {
+      flex-direction: column;
+      transform: translateX(20px) scale(0.8);
+    }
+
+    &.ux-fab--bottom-start .ux-fab__list-item,
+    &.ux-fab--top-start .ux-fab__list-item {
+      transform: translateX(-20px) scale(0.8);
+    }
+
+    &.ux-fab--open .ux-fab__list-item {
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  // ==========================================================
+  // Backdrop
+  // ==========================================================
+
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 99;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--ux-transition-base) var(--ux-ease),
+                visibility var(--ux-transition-base) var(--ux-ease);
+  }
+
+  &--open .ux-fab__backdrop {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  // ==========================================================
+  // Badge
+  // ==========================================================
+
+  &__badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background-color: var(--ux-danger);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // ==========================================================
+  // Scroll Behavior
+  // ==========================================================
+
+  &--hide-on-scroll {
+    transition: transform var(--ux-transition-base) var(--ux-ease),
+                opacity var(--ux-transition-base) var(--ux-ease);
+  }
+
+  &--hidden {
+    transform: translateY(100px);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &--bottom-center.ux-fab--hidden {
+    transform: translateX(-50%) translateY(100px);
+  }
+
+  // ==========================================================
+  // Action Glass Variant
+  // ==========================================================
+
+  &__action--glass {
+    box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+    border: 0.5px solid var(--ux-glass-border);
+    color: var(--ux-text);
+  }
+}

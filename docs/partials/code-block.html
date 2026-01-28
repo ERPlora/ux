@@ -1,0 +1,697 @@
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--ux-surface-secondary);
+      
+      
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--ux-text);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 1.5rem;
+    }
+    .demo-glass-bg {
+      background: linear-gradient(135deg, var(--ux-purple-500), var(--ux-pink-500));
+      
+      border-radius: 16px;
+    }
+  </style>
+
+<h1 style="margin-bottom: 0.5rem;">Code Block</h1>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+    Bloque de código con resaltado de sintaxis, números de línea y botón de copiar.
+  </p>
+
+  <!-- Basic Code Block -->
+  <section class="demo-section">
+    <h2>Code Block Básico</h2>
+
+    <div x-data="uxCodeBlock({
+      language: 'javascript',
+      filename: 'example.js',
+      code: `function greet(name) {
+  const message = \`Hello, \${name}!\`;
+  console.log(message);
+  return message;
+}
+
+// Call the function
+greet('World');`
+    })" class="ux-code-block">
+      <!-- Header -->
+      <div class="ux-code-block__header" x-show="showHeader">
+        <div class="ux-code-block__title">
+          <span x-text="filename" x-show="filename"></span>
+          <span class="ux-code-block__lang" x-text="languageDisplay"></span>
+        </div>
+        <div class="ux-code-block__actions">
+          <button class="ux-code-block__btn"
+                  :class="{ 'ux-code-block__btn--copied': copied }"
+                  @click="copyCode()"
+                  x-show="showCopy">
+            <span x-html="copied ? icons.check : icons.copy"></span>
+            <span x-text="copied ? 'Copiado' : 'Copiar'"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="ux-code-block__content">
+        <div class="ux-code-block__line-numbers" x-show="showLineNumbers">
+          <template x-for="line in getHighlightedLines()" :key="line.number">
+            <span class="ux-code-block__line-number"
+                  :class="{ 'ux-code-block__line-number--highlight': line.isHighlighted }"
+                  x-text="line.number"></span>
+          </template>
+        </div>
+        <pre class="ux-code-block__code"><template x-for="line in getHighlightedLines()" :key="line.number"><span class="ux-code-block__line" :class="{ 'ux-code-block__line--highlight': line.isHighlighted }" x-html="line.content"></span>
+</template></pre>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxCodeBlock({
+  language: 'javascript',
+  filename: 'example.js',
+  code: \`function greet(name) { ... }\`
+})" class="ux-code-block"&gt;
+  &lt;!-- Header with filename and copy button --&gt;
+  &lt;div class="ux-code-block__header"&gt;...&lt;/div&gt;
+  &lt;!-- Content with line numbers and code --&gt;
+  &lt;div class="ux-code-block__content"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
+  </section>
+
+  <!-- Different Languages -->
+  <section class="demo-section">
+    <h2>Diferentes Lenguajes</h2>
+
+    <div class="demo-grid">
+      <!-- HTML -->
+      <div x-data="uxCodeBlock({
+        language: 'html',
+        filename: 'index.html',
+        code: `<!DOCTYPE html>
+<html lang=\"es\">
+<head>
+  <meta charset=\"UTF-8\">
+  <title>Mi Página</title>
+  <link rel="stylesheet" href="../dist/ux.css">
+  <script src="../dist/ux.js"></script>
+</head>
+<body class="ux-app">
+  <h1>Hola Mundo</h1>
+  <p class=\"intro\">Bienvenido</p>
+</body>
+</html>`
+      })" class="ux-code-block">
+        <div class="ux-code-block__header">
+          <div class="ux-code-block__title">
+            <span x-text="filename"></span>
+            <span class="ux-code-block__lang" x-text="languageDisplay"></span>
+          </div>
+          <div class="ux-code-block__actions">
+            <button class="ux-code-block__btn" :class="{ 'ux-code-block__btn--copied': copied }" @click="copyCode()">
+              <span x-html="copied ? icons.check : icons.copy"></span>
+              <span x-text="copied ? 'Copiado' : 'Copiar'"></span>
+            </button>
+          </div>
+        </div>
+        <div class="ux-code-block__content">
+          <div class="ux-code-block__line-numbers">
+            <template x-for="line in getHighlightedLines()" :key="line.number">
+              <span class="ux-code-block__line-number" x-text="line.number"></span>
+            </template>
+          </div>
+          <pre class="ux-code-block__code"><template x-for="line in getHighlightedLines()" :key="line.number"><span class="ux-code-block__line" x-html="line.content"></span>
+</template></pre>
+        </div>
+      </div>
+
+      <!-- CSS -->
+      <div x-data="uxCodeBlock({
+        language: 'css',
+        filename: 'styles.css',
+        code: `.button {
+  display: inline-flex;
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: var(--ux-primary-contrast);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}`
+      })" class="ux-code-block">
+        <div class="ux-code-block__header">
+          <div class="ux-code-block__title">
+            <span x-text="filename"></span>
+            <span class="ux-code-block__lang" x-text="languageDisplay"></span>
+          </div>
+          <div class="ux-code-block__actions">
+            <button class="ux-code-block__btn" :class="{ 'ux-code-block__btn--copied': copied }" @click="copyCode()">
+              <span x-html="copied ? icons.check : icons.copy"></span>
+            </button>
+          </div>
+        </div>
+        <div class="ux-code-block__content">
+          <div class="ux-code-block__line-numbers">
+            <template x-for="line in getHighlightedLines()" :key="line.number">
+              <span class="ux-code-block__line-number" x-text="line.number"></span>
+            </template>
+          </div>
+          <pre class="ux-code-block__code"><template x-for="line in getHighlightedLines()" :key="line.number"><span class="ux-code-block__line" x-html="line.content"></span>
+</template></pre>
+        </div>
+      </div>
+
+      <!-- Python -->
+      <div x-data="uxCodeBlock({
+        language: 'python',
+        filename: 'app.py',
+        code: `def fibonacci(n):
+    \"\"\"Generate Fibonacci sequence.\"\"\"
+    if n <= 0:
+        return []
+    elif n == 1:
+        return [0]
+
+    sequence = [0, 1]
+    while len(sequence) < n:
+        next_val = sequence[-1] + sequence[-2]
+        sequence.append(next_val)
+
+    return sequence
+
+# Generate first 10 numbers
+print(fibonacci(10))`
+      })" class="ux-code-block">
+        <div class="ux-code-block__header">
+          <div class="ux-code-block__title">
+            <span x-text="filename"></span>
+            <span class="ux-code-block__lang" x-text="languageDisplay"></span>
+          </div>
+          <div class="ux-code-block__actions">
+            <button class="ux-code-block__btn" :class="{ 'ux-code-block__btn--copied': copied }" @click="copyCode()">
+              <span x-html="copied ? icons.check : icons.copy"></span>
+            </button>
+          </div>
+        </div>
+        <div class="ux-code-block__content">
+          <div class="ux-code-block__line-numbers">
+            <template x-for="line in getHighlightedLines()" :key="line.number">
+              <span class="ux-code-block__line-number" x-text="line.number"></span>
+            </template>
+          </div>
+          <pre class="ux-code-block__code"><template x-for="line in getHighlightedLines()" :key="line.number"><span class="ux-code-block__line" x-html="line.content"></span>
+</template></pre>
+        </div>
+      </div>
+
+      <!-- JSON -->
+      <div x-data="uxCodeBlock({
+        language: 'json',
+        filename: 'config.json',
+        code: `{
+  \"name\": \"my-project\",
+  \"version\": \"1.0.0\",
+  \"dependencies\": {
+    \"alpinejs\": \"^3.0.0\",
+    \"htmx\": \"^1.9.0\"
+  },
+  \"scripts\": {
+    \"dev\": \"vite\",
+    \"build\": \"vite build\"
+  },
+  \"private\": true
+}`
+      })" class="ux-code-block">
+        <div class="ux-code-block__header">
+          <div class="ux-code-block__title">
+            <span x-text="filename"></span>
+            <span class="ux-code-block__lang" x-text="languageDisplay"></span>
+          </div>
+          <div class="ux-code-block__actions">
+            <button class="ux-code-block__btn" :class="{ 'ux-code-block__btn--copied': copied }" @click="copyCode()">
+              <span x-html="copied ? icons.check : icons.copy"></span>
+            </button>
+          </div>
+        </div>
+        <div class="ux-code-block__content">
+          <div class="ux-code-block__line-numbers">
+            <template x-for="line in getHighlightedLines()" :key="line.number">
+              <span class="ux-code-block__line-number" x-text="line.number"></span>
+            </template>
+          </div>
+          <pre class="ux-code-block__code"><template x-for="line in getHighlightedLines()" :key="line.number"><span class="ux-code-block__line" x-html="line.content"></span>
+</template></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Highlighted Lines -->
+  <section class="demo-section">
+    <h2>Líneas Resaltadas</h2>
+
+    <div x-data="uxCodeBlock({
+      language: 'javascript',
+      filename: 'important.js',
+      highlightLines: [3, 4, 5],
+      code: `async function fetchUser(id) {
+  try {
+    // These lines are highlighted
+    const response = await fetch(\`/api/users/\${id}\`);
+    const user = await response.json();
+    return user;
+  } catch (error) {
+    console.error('Failed to fetch user:', error);
+    throw error;
+  }
+}`
+    })" class="ux-code-block">
+      <div class="ux-code-block__header">
+        <div class="ux-code-block__title">
+          <span x-text="filename"></span>
+          <span class="ux-code-block__lang" x-text="languageDisplay"></span>
+        </div>
+        <div class="ux-code-block__actions">
+          <button class="ux-code-block__btn" :class="{ 'ux-code-block__btn--copied': copied }" @click="copyCode()">
+            <span x-html="copied ? icons.check : icons.copy"></span>
+            <span x-text="copied ? 'Copiado' : 'Copiar'"></span>
+          </button>
+        </div>
+      </div>
+      <div class="ux-code-block__content">
+        <div class="ux-code-block__line-numbers">
+          <template x-for="line in getHighlightedLines()" :key="line.number">
+            <span class="ux-code-block__line-number"
+                  :class="{ 'ux-code-block__line-number--highlight': line.isHighlighted }"
+                  x-text="line.number"></span>
+          </template>
+        </div>
+        <pre class="ux-code-block__code"><template x-for="line in getHighlightedLines()" :key="line.number"><span class="ux-code-block__line" :class="{ 'ux-code-block__line--highlight': line.isHighlighted }" x-html="line.content"></span>
+</template></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Light Theme -->
+  <section class="demo-section">
+    <h2>Tema Claro</h2>
+
+    <div x-data="uxCodeBlock({
+      language: 'javascript',
+      filename: 'light-theme.js',
+      code: `const theme = 'light';
+
+function applyTheme(name) {
+  document.body.classList.add(\`theme-\${name}\`);
+  localStorage.setItem('theme', name);
+}
+
+applyTheme(theme);`
+    })" class="ux-code-block ux-code-block--light">
+      <div class="ux-code-block__header">
+        <div class="ux-code-block__title">
+          <span x-text="filename"></span>
+          <span class="ux-code-block__lang" x-text="languageDisplay"></span>
+        </div>
+        <div class="ux-code-block__actions">
+          <button class="ux-code-block__btn" :class="{ 'ux-code-block__btn--copied': copied }" @click="copyCode()">
+            <span x-html="copied ? icons.check : icons.copy"></span>
+            <span x-text="copied ? 'Copiado' : 'Copiar'"></span>
+          </button>
+        </div>
+      </div>
+      <div class="ux-code-block__content">
+        <div class="ux-code-block__line-numbers">
+          <template x-for="line in getHighlightedLines()" :key="line.number">
+            <span class="ux-code-block__line-number" x-text="line.number"></span>
+          </template>
+        </div>
+        <pre class="ux-code-block__code"><template x-for="line in getHighlightedLines()" :key="line.number"><span class="ux-code-block__line" x-html="line.content"></span>
+</template></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Without Line Numbers -->
+  <section class="demo-section">
+    <h2>Sin Números de Línea</h2>
+
+    <div x-data="uxCodeBlock({
+      language: 'bash',
+      filename: 'install.sh',
+      showLineNumbers: false,
+      code: `# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build`
+    })" class="ux-code-block">
+      <div class="ux-code-block__header">
+        <div class="ux-code-block__title">
+          <span x-text="filename"></span>
+          <span class="ux-code-block__lang" x-text="languageDisplay"></span>
+        </div>
+        <div class="ux-code-block__actions">
+          <button class="ux-code-block__btn" :class="{ 'ux-code-block__btn--copied': copied }" @click="copyCode()">
+            <span x-html="copied ? icons.check : icons.copy"></span>
+          </button>
+        </div>
+      </div>
+      <div class="ux-code-block__content">
+        <pre class="ux-code-block__code"><template x-for="line in getHighlightedLines()" :key="line.number"><span class="ux-code-block__line" x-html="line.content"></span>
+</template></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- No Header -->
+  <section class="demo-section">
+    <h2>Sin Header</h2>
+
+    <div x-data="uxCodeBlock({
+      language: 'javascript',
+      showHeader: false,
+      code: `const sum = (a, b) => a + b;
+console.log(sum(2, 3)); // 5`
+    })" class="ux-code-block ux-code-block--no-header">
+      <div class="ux-code-block__content">
+        <div class="ux-code-block__line-numbers">
+          <template x-for="line in getHighlightedLines()" :key="line.number">
+            <span class="ux-code-block__line-number" x-text="line.number"></span>
+          </template>
+        </div>
+        <pre class="ux-code-block__code"><template x-for="line in getHighlightedLines()" :key="line.number"><span class="ux-code-block__line" x-html="line.content"></span>
+</template></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Inline Code -->
+  <section class="demo-section">
+    <h2>Código Inline</h2>
+
+    <div class="demo-box">
+      <p style="line-height: 1.8;">
+        Para instalar las dependencias, ejecuta <code class="ux-code-inline">npm install</code> en tu terminal.
+        Luego puedes usar <code class="ux-code-inline">import { Component } from 'ux'</code> para importar componentes.
+        La variable <code class="ux-code-inline">process.env.NODE_ENV</code> indica el entorno actual.
+      </p>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;code class="ux-code-inline"&gt;npm install&lt;/code&gt;</pre>
+  </section>
+
+  <!-- Glass Variant -->
+  <section class="demo-section">
+    <h2>Variante Glass</h2>
+
+    <div class="demo-glass-bg">
+      <div x-data="uxCodeBlock({
+        language: 'javascript',
+        filename: 'glass.js',
+        code: `const config = {
+  theme: 'glass',
+  blur: 20,
+  opacity: 0.8
+};`
+      })" class="ux-code-block ux-code-block--glass" style="max-width: 500px;">
+        <div class="ux-code-block__header">
+          <div class="ux-code-block__title">
+            <span x-text="filename"></span>
+            <span class="ux-code-block__lang" x-text="languageDisplay"></span>
+          </div>
+          <div class="ux-code-block__actions">
+            <button class="ux-code-block__btn" :class="{ 'ux-code-block__btn--copied': copied }" @click="copyCode()">
+              <span x-html="copied ? icons.check : icons.copy"></span>
+            </button>
+          </div>
+        </div>
+        <div class="ux-code-block__content">
+          <div class="ux-code-block__line-numbers">
+            <template x-for="line in getHighlightedLines()" :key="line.number">
+              <span class="ux-code-block__line-number" x-text="line.number"></span>
+            </template>
+          </div>
+          <pre class="ux-code-block__code"><template x-for="line in getHighlightedLines()" :key="line.number"><span class="ux-code-block__line" x-html="line.content"></span>
+</template></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CSS Classes Reference -->
+  <section class="demo-section">
+    <h2>Referencia de Clases CSS</h2>
+
+    <div class="demo-box">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: 0.75rem;">Clase</th>
+            <th style="text-align: left; padding: 0.75rem;">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-code-block</code></td>
+            <td style="padding: 0.75rem;">Contenedor principal (tema oscuro por defecto)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-code-block--light</code></td>
+            <td style="padding: 0.75rem;">Tema claro</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-code-block--glass</code></td>
+            <td style="padding: 0.75rem;">Variante glass morphism</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-code-block--sm</code></td>
+            <td style="padding: 0.75rem;">Tamaño pequeño</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-code-block--lg</code></td>
+            <td style="padding: 0.75rem;">Tamaño grande</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-code-block--no-header</code></td>
+            <td style="padding: 0.75rem;">Ocultar header</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-code-block__line--highlight</code></td>
+            <td style="padding: 0.75rem;">Línea resaltada</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem;"><code>.ux-code-inline</code></td>
+            <td style="padding: 0.75rem;">Código inline</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Alpine.js Options -->
+  <section class="demo-section">
+    <h2>Opciones Alpine.js</h2>
+
+    <div class="demo-box">
+      <pre class="ux-code-block" data-lang="html">uxCodeBlock({
+  code: '',                 // Código a mostrar
+  language: 'javascript',   // Lenguaje: js, html, css, json, python, bash
+  filename: '',             // Nombre del archivo (opcional)
+  showLineNumbers: true,    // Mostrar números de línea
+  showHeader: true,         // Mostrar header con filename y botón
+  showCopy: true,           // Mostrar botón de copiar
+  highlightLines: [],       // Array de líneas a resaltar [3, 4, 5]
+  startLine: 1,             // Número de línea inicial
+  collapsible: false,       // Permitir colapsar código largo
+  collapsed: false          // Estado inicial colapsado
+})
+
+// Métodos
+copyCode()                  // Copiar código al portapapeles
+setCode(code, language)     // Cambiar código programáticamente
+
+// Eventos
+@codeblock:copy             // Se dispara al copiar código
+
+// Tokens de sintaxis disponibles
+.token-keyword              // Palabras clave (const, function, if)
+.token-string               // Strings y literales
+.token-number               // Números
+.token-comment              // Comentarios
+.token-function             // Nombres de funciones
+.token-class                // Nombres de clases
+.token-operator             // Operadores (+, -, =)
+.token-punctuation          // Puntuación ({, }, ;)
+.token-property             // Propiedades
+.token-tag                  // Tags HTML
+.token-attr-name            // Atributos HTML
+.token-attr-value           // Valores de atributos</pre>
+    </div>
+  </section>
+
+  <!-- HTMX + Django -->
+  <section class="demo-section">
+    <h2>HTMX + Django</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Carga bloques de codigo dinamicamente desde Django usando HTMX.
+    </p>
+
+    <div class="demo-grid">
+      <!-- Cargar codigo con HTMX -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Cargar codigo con HTMX</h3>
+        <pre class="ux-code-block" data-lang="html">&lt;!-- Boton que carga codigo desde Django --&gt;
+&lt;button class="ux-button ux-color-primary"
+        hx-get="/api/code/example/"
+        hx-target="#code-container"
+        hx-swap="innerHTML"&gt;
+  Ver codigo fuente
+&lt;/button&gt;
+
+&lt;!-- Contenedor donde se renderiza el codigo --&gt;
+&lt;div id="code-container"&gt;&lt;/div&gt;</pre>
+      </div>
+
+      <!-- Vista Django -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Vista Django</h3>
+        <pre class="ux-code-block" data-lang="html"># views.py
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+import html
+
+def code_example(request):
+    code = '''def hello_world():
+    print("Hello, World!")
+
+hello_world()'''
+
+    # Escapar HTML para mostrar correctamente
+    escaped_code = html.escape(code)
+
+    html_response = f'''
+    &lt;pre class="ux-code-block" data-lang="python"&gt;{escaped_code}&lt;/pre&gt;
+    '''
+    return HttpResponse(html_response)</pre>
+      </div>
+
+      <!-- Template Django con codigo -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Template Django</h3>
+        <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/code_snippet.html --&gt;
+{% load ux_tags %}
+
+&lt;pre class="ux-code-block" data-lang="{{ language }}"&gt;{{ code|escape }}&lt;/pre&gt;
+
+&lt;!-- Uso en vista --&gt;
+# views.py
+def get_code_snippet(request, snippet_id):
+    snippet = CodeSnippet.objects.get(id=snippet_id)
+    return render(request, 'partials/code_snippet.html', {
+        'code': snippet.content,
+        'language': snippet.language
+    })</pre>
+      </div>
+
+      <!-- Codigo desde modelo -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Modelo de Snippets</h3>
+        <pre class="ux-code-block" data-lang="html"># models.py
+from django.db import models
+
+class CodeSnippet(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    language = models.CharField(max_length=50, default='javascript')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+# urls.py
+urlpatterns = [
+    path('api/code/&lt;int:pk&gt;/',
+         views.get_snippet,
+         name='code_snippet'),
+]</pre>
+      </div>
+
+      <!-- Cargar multiples snippets -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Lista de Snippets con HTMX</h3>
+        <pre class="ux-code-block" data-lang="html">&lt;!-- Lista de snippets clickeables --&gt;
+&lt;ul class="ux-list"&gt;
+  {% for snippet in snippets %}
+  &lt;li class="ux-list__item"
+      hx-get="/api/code/{{ snippet.id }}/"
+      hx-target="#code-preview"
+      hx-swap="innerHTML"
+      style="cursor: pointer;"&gt;
+    {{ snippet.title }}
+    &lt;span class="ux-badge"&gt;{{ snippet.language }}&lt;/span&gt;
+  &lt;/li&gt;
+  {% endfor %}
+&lt;/ul&gt;
+
+&lt;!-- Preview del codigo seleccionado --&gt;
+&lt;div id="code-preview"&gt;
+  &lt;p class="ux-text-secondary"&gt;
+    Selecciona un snippet para ver el codigo
+  &lt;/p&gt;
+&lt;/div&gt;</pre>
+      </div>
+
+      <!-- Editar codigo inline -->
+      <div class="demo-box">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Editar codigo con HTMX</h3>
+        <pre class="ux-code-block" data-lang="html">&lt;!-- Formulario de edicion inline --&gt;
+&lt;form hx-post="/api/code/{{ snippet.id }}/update/"
+      hx-target="#code-display"
+      hx-swap="outerHTML"&gt;
+
+  &lt;div class="ux-input"&gt;
+    &lt;textarea name="content"
+              rows="10"
+              class="ux-textarea"&gt;{{ snippet.content }}&lt;/textarea&gt;
+    &lt;label&gt;Codigo&lt;/label&gt;
+  &lt;/div&gt;
+
+  &lt;select name="language" class="ux-select"&gt;
+    &lt;option value="javascript"&gt;JavaScript&lt;/option&gt;
+    &lt;option value="python"&gt;Python&lt;/option&gt;
+    &lt;option value="html"&gt;HTML&lt;/option&gt;
+    &lt;option value="css"&gt;CSS&lt;/option&gt;
+  &lt;/select&gt;
+
+  &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+    Guardar
+  &lt;/button&gt;
+&lt;/form&gt;</pre>
+      </div>
+    </div>
+  </section>

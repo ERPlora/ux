@@ -1,0 +1,314 @@
+@use '../core/mixins' as *;
+
+/**
+ * UX Img Component
+ * Part of the UX CSS Library
+ */
+
+/* ========================================
+   UX Img Container
+   ======================================== */
+
+.ux-img {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background-color: var(--ux-img-bg, var(--ux-light));
+
+  &--rounded {
+    border-radius: var(--ux-border-radius);
+  }
+
+  &--circle {
+    border-radius: 50%;
+  }
+
+  /* Object fit variants */
+  &--contain .ux-img__image {
+    object-fit: contain;
+  }
+
+  &--cover .ux-img__image {
+    object-fit: cover;
+  }
+
+  &--fill .ux-img__image {
+    object-fit: fill;
+  }
+
+  &--none .ux-img__image {
+    object-fit: none;
+  }
+
+  &--scale-down .ux-img__image {
+    object-fit: scale-down;
+  }
+
+  /* Loaded state */
+  &--loaded {
+    .ux-img__image {
+      opacity: 1;
+    }
+
+    .ux-img__skeleton,
+    .ux-img__lqip {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ux-img__placeholder {
+      display: none;
+    }
+  }
+
+  /* Error state */
+  &--error {
+    .ux-img__skeleton {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ux-img__error {
+      display: flex;
+    }
+  }
+
+  /* Aspect Ratios */
+  &--square {
+    aspect-ratio: 1 / 1;
+  }
+
+  &--video {
+    aspect-ratio: 16 / 9;
+  }
+
+  &--portrait {
+    aspect-ratio: 3 / 4;
+  }
+
+  &--landscape {
+    aspect-ratio: 4 / 3;
+  }
+
+  &--wide {
+    aspect-ratio: 21 / 9;
+  }
+
+  /* Sizes */
+  &--xs {
+    width: 32px;
+    height: 32px;
+  }
+
+  &--sm {
+    width: 48px;
+    height: 48px;
+
+    .ux-img__placeholder svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .ux-img__error-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ux-img__error-text {
+      display: none;
+    }
+  }
+
+  &--md {
+    width: 80px;
+    height: 80px;
+  }
+
+  &--lg {
+    width: 120px;
+    height: 120px;
+
+    .ux-img__placeholder svg {
+      width: 64px;
+      height: 64px;
+    }
+
+    .ux-img__error-icon {
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  &--xl {
+    width: 200px;
+    height: 200px;
+  }
+
+  /* Animation variants */
+  &--fade .ux-img__image {
+    transition: opacity 0.5s var(--ux-ease);
+  }
+
+  &--zoom .ux-img__image {
+    transform: scale(1.05);
+    transition: opacity 0.5s var(--ux-ease), transform 0.5s var(--ux-ease);
+  }
+
+  &--zoom.ux-img--loaded .ux-img__image {
+    transform: scale(1);
+  }
+}
+
+/* ========================================
+   Image Element
+   ======================================== */
+
+.ux-img__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: var(--ux-img-object-fit, cover);
+  object-position: var(--ux-img-object-position, center);
+  opacity: 0;
+  transition: opacity var(--ux-transition-base) var(--ux-ease);
+}
+
+/* ========================================
+   Skeleton / Placeholder
+   ======================================== */
+
+.ux-img__skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--ux-img-skeleton-bg, var(--ux-light));
+  overflow: hidden;
+  transition: opacity var(--ux-transition-base) var(--ux-ease);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: ux-img-shimmer 1.5s infinite;
+  }
+}
+
+@keyframes ux-img-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Placeholder icon */
+.ux-img__placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--ux-text-tertiary);
+  opacity: 0.5;
+
+  svg {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* ========================================
+   Error State
+   ======================================== */
+
+.ux-img__error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ux-space-sm);
+  background-color: var(--ux-surface-alt);
+  color: var(--ux-text-tertiary);
+}
+
+.ux-img__error-icon {
+  width: 32px;
+  height: 32px;
+  opacity: 0.5;
+}
+
+.ux-img__error-text {
+  font-size: var(--ux-font-size-xs);
+  text-align: center;
+  max-width: 80%;
+}
+
+/* ========================================
+   Blur-up / LQIP (Low Quality Image Placeholder)
+   ======================================== */
+
+.ux-img__lqip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px);
+  transform: scale(1.1);
+  transition: opacity var(--ux-transition-base) var(--ux-ease);
+}
+
+/* ========================================
+   Dark Mode
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  .ux-img {
+    --ux-img-bg: rgba(255, 255, 255, 0.1);
+    --ux-img-skeleton-bg: rgba(255, 255, 255, 0.1);
+  }
+
+  .ux-img__skeleton::after {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.15) 50%,
+      transparent 100%
+    );
+  }
+}
+
+.ux-dark {
+  .ux-img {
+    --ux-img-bg: rgba(255, 255, 255, 0.1);
+    --ux-img-skeleton-bg: rgba(255, 255, 255, 0.1);
+  }
+
+  .ux-img__skeleton::after {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.15) 50%,
+      transparent 100%
+    );
+  }
+}

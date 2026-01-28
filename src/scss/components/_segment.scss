@@ -1,0 +1,361 @@
+/**
+ * UX Segment Component
+ * Part of the UX CSS Library
+ * https://github.com/user/ux
+ */
+
+/* ========================================
+   UX Segment
+   ======================================== */
+
+.ux-segment {
+  display: inline-flex;
+  align-items: stretch;
+  background-color: var(--ux-segment-bg, rgba(118, 118, 128, 0.12));
+  border-radius: var(--ux-segment-border-radius);
+  padding: var(--ux-segment-padding);
+  position: relative;
+
+  &--block {
+    display: flex;
+    width: 100%;
+  }
+
+  // ========================================
+  // Segment Indicator (sliding background)
+  // Ionic-style animation with squish effect
+  // ========================================
+
+  &__indicator {
+    position: absolute;
+    top: var(--ux-segment-padding);
+    bottom: var(--ux-segment-padding);
+    background-color: var(--ux-surface);
+    border-radius: calc(var(--ux-segment-border-radius) - var(--ux-segment-padding));
+    box-shadow: var(--ux-shadow-sm);
+    transition:
+      left 300ms cubic-bezier(0.4, 0.0, 0.2, 1),
+      width 300ms cubic-bezier(0.4, 0.0, 0.2, 1),
+      transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
+    z-index: 0;
+    will-change: left, width, transform;
+
+    // Squish animation during transition
+    &--animating {
+      animation: ux-segment-squish 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+  }
+
+  // ========================================
+  // Segment Variants
+  // ========================================
+
+  // Primary
+  &--primary {
+    background-color: rgba(var(--ux-primary-rgb), 0.15);
+
+    .ux-segment__indicator {
+      background-color: var(--ux-primary);
+    }
+
+    .ux-segment-button--selected,
+    .ux-segment-button[data-state="selected"],
+    .ux-segment-button[aria-selected="true"],
+    .ux-segment-button.is-selected {
+      color: white;
+    }
+  }
+
+  // Outline
+  &--outline {
+    background-color: transparent;
+    border: 1px solid var(--ux-border-color);
+    padding: 0;
+
+    .ux-segment-button {
+      border-radius: 0;
+      border-right: 1px solid var(--ux-border-color);
+
+      &:first-child {
+        border-radius: calc(var(--ux-border-radius) - 1px) 0 0 calc(var(--ux-border-radius) - 1px);
+      }
+
+      &:last-child {
+        border-radius: 0 calc(var(--ux-border-radius) - 1px) calc(var(--ux-border-radius) - 1px) 0;
+        border-right: none;
+      }
+    }
+
+    .ux-segment__indicator {
+      top: 0;
+      bottom: 0;
+      border-radius: calc(var(--ux-border-radius) - 1px);
+      box-shadow: none;
+      background-color: var(--ux-primary);
+    }
+
+    .ux-segment-button--selected,
+    .ux-segment-button[data-state="selected"],
+    .ux-segment-button[aria-selected="true"],
+    .ux-segment-button.is-selected {
+      color: white;
+    }
+  }
+
+  // Rounded Pill
+  &--rounded {
+    border-radius: 100px;
+    padding: 3px;
+
+    .ux-segment-button {
+      border-radius: 100px;
+    }
+
+    .ux-segment__indicator {
+      border-radius: 100px;
+    }
+  }
+
+  // ========================================
+  // Color Variants
+  // ========================================
+
+  &--secondary {
+    .ux-segment__indicator {
+      background-color: var(--ux-secondary);
+    }
+
+    .ux-segment-button--selected,
+    .ux-segment-button[data-state="selected"],
+    .ux-segment-button[aria-selected="true"],
+    .ux-segment-button.is-selected {
+      color: var(--ux-secondary-contrast);
+    }
+  }
+
+  &--success {
+    .ux-segment__indicator {
+      background-color: var(--ux-success);
+    }
+
+    .ux-segment-button--selected,
+    .ux-segment-button[data-state="selected"],
+    .ux-segment-button[aria-selected="true"],
+    .ux-segment-button.is-selected {
+      color: var(--ux-success-contrast);
+    }
+  }
+
+  &--danger {
+    .ux-segment__indicator {
+      background-color: var(--ux-danger);
+    }
+
+    .ux-segment-button--selected,
+    .ux-segment-button[data-state="selected"],
+    .ux-segment-button[aria-selected="true"],
+    .ux-segment-button.is-selected {
+      color: var(--ux-danger-contrast);
+    }
+  }
+
+  // ========================================
+  // Sizes
+  // ========================================
+
+  &--sm {
+    padding: 2px;
+
+    .ux-segment-button {
+      min-height: 28px;
+      padding: var(--ux-space-xs) var(--ux-space-sm);
+      font-size: var(--ux-font-size-xs);
+    }
+
+    .ux-segment-button__icon {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &--lg {
+    padding: 3px;
+
+    .ux-segment-button {
+      min-height: 44px;
+      padding: var(--ux-space-md) var(--ux-space-lg);
+      font-size: var(--ux-font-size-md);
+    }
+
+    .ux-segment-button__icon {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  // ========================================
+  // Disabled State
+  // ========================================
+
+  &--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  // ========================================
+  // Scrollable Segment
+  // ========================================
+
+  &--scrollable {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ux-segment-button {
+      flex: 0 0 auto;
+    }
+  }
+
+  // ========================================
+  // Glass Variant (iOS 26 Liquid Glass)
+  // ========================================
+
+  // Note: backdrop-filter and glass background come from universal selector [class*="--glass"] in ux-core.js
+  &--glass {
+    background: var(--ux-glass-bg-thin);
+    border: 0.5px solid var(--ux-glass-border);
+
+    .ux-segment__indicator {
+      background: var(--ux-glass-bg-thick);
+      box-shadow: var(--ux-glass-shadow), var(--ux-glass-highlight);
+    }
+
+    .ux-segment-button--selected,
+    .ux-segment-button[data-state="selected"],
+    .ux-segment-button[aria-selected="true"],
+    .ux-segment-button.is-selected {
+      color: var(--ux-text);
+    }
+  }
+}
+
+// ========================================
+// Segment Button
+// ========================================
+
+.ux-segment-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: var(--ux-segment-min-width);
+  min-height: var(--ux-segment-min-height);
+  padding: var(--ux-space-sm) var(--ux-space-md);
+  background: transparent;
+  border: none;
+  color: var(--ux-text-secondary);
+  font-family: var(--ux-font-family);
+  font-size: var(--ux-segment-font-size);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  border-radius: calc(var(--ux-segment-border-radius) - var(--ux-segment-padding));
+  -webkit-tap-highlight-color: transparent;
+  z-index: 1;
+  transition:
+    color var(--ux-transition-fast) var(--ux-ease),
+    transform 150ms var(--ux-ease);
+
+  &:hover:not(.ux-segment-button--selected) {
+    color: var(--ux-text);
+  }
+
+  // Subtle press effect on buttons
+  &:active:not(.ux-segment-button--selected) {
+    transform: scale(0.96);
+  }
+
+  &--selected,
+  &[data-state="selected"],
+  &[aria-selected="true"],
+  &.is-selected {
+    color: var(--ux-text);
+  }
+
+  &--disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  // ========================================
+  // Segment Button Content
+  // ========================================
+
+  &__icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    + .ux-segment-button__label {
+      margin-left: var(--ux-space-xs);
+    }
+  }
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Icon only
+  &--icon-only {
+    padding: var(--ux-space-sm);
+
+    .ux-segment-button__icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// ========================================
+// In Toolbar
+// ========================================
+
+.ux-toolbar .ux-segment {
+  flex: 1;
+  max-width: 400px;
+}
+
+.ux-navbar .ux-segment {
+  flex: 0 1 auto;
+}
+
+// ========================================
+// Animation
+// ========================================
+
+@keyframes ux-segment-squish {
+  0% {
+    transform: scaleX(1) scaleY(1);
+  }
+  30% {
+    transform: scaleX(1.08) scaleY(0.92);
+  }
+  60% {
+    transform: scaleX(0.96) scaleY(1.02);
+  }
+  100% {
+    transform: scaleX(1) scaleY(1);
+  }
+}

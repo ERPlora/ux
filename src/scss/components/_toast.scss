@@ -1,0 +1,504 @@
+/**
+ * UX Toast Component
+ * Part of the UX CSS Library
+ * https://github.com/user/ux
+ */
+
+/* ========================================
+   UX Toast Container
+   ======================================== */
+
+.ux-toast-container {
+  position: fixed;
+  z-index: var(--ux-z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ux-space-sm);
+  pointer-events: none;
+  padding: var(--ux-space-md);
+
+  &--top {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-top: calc(var(--ux-space-md) + env(safe-area-inset-top));
+  }
+
+  &--bottom {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-bottom: calc(var(--ux-space-md) + env(safe-area-inset-bottom));
+  }
+
+  &--top-start {
+    top: 0;
+    left: 0;
+  }
+
+  &--top-end {
+    top: 0;
+    right: 0;
+  }
+
+  &--bottom-start {
+    bottom: 0;
+    left: 0;
+  }
+
+  &--bottom-end {
+    bottom: 0;
+    right: 0;
+    padding-bottom: calc(var(--ux-space-md) + env(safe-area-inset-bottom));
+  }
+
+  &--center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  &--center-start {
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+  }
+
+  &--center-end {
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
+
+  /* Stacked Toasts */
+  &--stacked {
+    align-items: center;
+
+    .ux-toast:nth-child(2) {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+
+    .ux-toast:nth-child(3) {
+      transform: scale(0.9);
+      opacity: 0.6;
+    }
+
+    .ux-toast:nth-child(n+4) {
+      display: none;
+    }
+  }
+}
+
+/* ========================================
+   UX Toast
+   ======================================== */
+
+.ux-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--ux-space-md);
+  min-height: var(--ux-toast-min-height);
+  min-width: 200px;
+  max-width: var(--ux-toast-max-width);
+  padding: var(--ux-toast-padding);
+  background-color: var(--ux-dark);
+  color: var(--ux-dark-contrast);
+  border-radius: var(--ux-toast-border-radius);
+  box-shadow: var(--ux-shadow-lg);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(-20px) scale(0.95);
+  will-change: transform, opacity;
+  transition:
+    opacity var(--ux-transition-base) var(--ux-ease),
+    transform var(--ux-transition-base) var(--ux-ease-spring);
+
+  &--visible,
+  &[data-state="visible"],
+  &[aria-hidden="false"],
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0) translateX(0) scale(1);
+    will-change: auto;
+  }
+
+  /* ========================================
+     Toast Content
+     ======================================== */
+
+  &__icon {
+    width: var(--ux-toast-icon-size, 22px);
+    height: var(--ux-toast-icon-size, 22px);
+    flex-shrink: 0;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__message {
+    font-size: var(--ux-font-size-sm);
+    line-height: 1.4;
+  }
+
+  &__title {
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  &__action {
+    flex-shrink: 0;
+    padding: var(--ux-space-xs) var(--ux-space-sm);
+    background: none;
+    border: none;
+    color: var(--ux-primary-tint);
+    font-family: var(--ux-font-family);
+    font-size: var(--ux-font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--ux-border-radius-sm);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--ux-transition-fast) var(--ux-ease);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      color: white;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  /* ========================================
+     Toast Colors
+     ======================================== */
+
+  &--success {
+    background-color: var(--ux-success);
+    color: var(--ux-success-contrast);
+
+    .ux-toast__icon {
+      color: var(--ux-success-contrast);
+    }
+
+    .ux-toast__action {
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+
+  &--warning {
+    background-color: var(--ux-warning);
+    color: var(--ux-warning-contrast);
+
+    .ux-toast__icon {
+      color: var(--ux-warning-contrast);
+    }
+
+    .ux-toast__action {
+      color: rgba(0, 0, 0, 0.7);
+    }
+  }
+
+  &--danger {
+    background-color: var(--ux-danger);
+    color: var(--ux-danger-contrast);
+
+    .ux-toast__icon {
+      color: var(--ux-danger-contrast);
+    }
+
+    .ux-toast__action {
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+
+  &--light {
+    background-color: var(--ux-surface);
+    color: var(--ux-text);
+    border: 1px solid var(--ux-border-color);
+
+    .ux-toast__action {
+      color: var(--ux-primary);
+    }
+
+    .ux-toast__close {
+      color: var(--ux-text-tertiary);
+
+      &:hover {
+        color: var(--ux-text);
+      }
+    }
+
+    .ux-toast__icon--success {
+      color: var(--ux-success);
+    }
+
+    .ux-toast__icon--warning {
+      color: var(--ux-warning);
+    }
+
+    .ux-toast__icon--danger {
+      color: var(--ux-danger);
+    }
+
+    .ux-toast__icon--info {
+      color: var(--ux-primary);
+    }
+
+    .ux-toast__progress {
+      background-color: var(--ux-light);
+    }
+
+    .ux-toast__progress-bar {
+      background-color: var(--ux-primary);
+    }
+  }
+
+  /* ========================================
+     Glass Toast (iOS 26 Liquid Glass)
+     ======================================== */
+
+  &--glass {
+    background: var(--ux-glass-bg);
+    backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    -webkit-backdrop-filter: blur(var(--ux-glass-blur)) saturate(var(--ux-glass-saturation));
+    color: var(--ux-text);
+    border: 0.5px solid var(--ux-glass-border);
+    border-radius: var(--ux-glass-radius-lg);
+    box-shadow:
+      var(--ux-glass-shadow),
+      var(--ux-glass-highlight);
+
+    .ux-toast__action {
+      color: var(--ux-primary);
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    }
+
+    .ux-toast__close {
+      color: var(--ux-text-tertiary);
+
+      &:hover {
+        color: var(--ux-text);
+      }
+    }
+
+    .ux-toast__icon--success {
+      color: var(--ux-success);
+    }
+
+    .ux-toast__icon--warning {
+      color: var(--ux-warning);
+    }
+
+    .ux-toast__icon--danger {
+      color: var(--ux-danger);
+    }
+
+    .ux-toast__icon--info {
+      color: var(--ux-primary);
+    }
+
+    .ux-toast__progress {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .ux-toast__progress-bar {
+      background-color: var(--ux-primary);
+    }
+  }
+
+  /* ========================================
+     Toast Progress Bar
+     ======================================== */
+
+  &__progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 var(--ux-border-radius-lg) var(--ux-border-radius-lg);
+    overflow: hidden;
+  }
+
+  &__progress-bar {
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    transition: width linear;
+  }
+
+  /* ========================================
+     Toast Sizes
+     ======================================== */
+
+  &--sm {
+    min-width: 150px;
+    padding: var(--ux-space-sm) var(--ux-space-md);
+
+    .ux-toast__message {
+      font-size: var(--ux-font-size-xs);
+    }
+  }
+
+  &--lg {
+    min-width: 300px;
+    padding: var(--ux-space-lg);
+  }
+
+  /* ========================================
+     Swipeable Toast
+     ======================================== */
+
+  &--swipeable {
+    cursor: grab;
+    user-select: none;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &--swiping {
+    transition: none;
+  }
+}
+
+/* Position-specific transforms */
+.ux-toast-container--bottom .ux-toast,
+.ux-toast-container--bottom-start .ux-toast,
+.ux-toast-container--bottom-end .ux-toast {
+  transform: translateY(20px) scale(0.95);
+}
+
+.ux-toast-container--center .ux-toast {
+  transform: scale(0.9);
+}
+
+.ux-toast-container--center-start .ux-toast,
+.ux-toast-container--top-start .ux-toast,
+.ux-toast-container--bottom-start .ux-toast {
+  transform: translateX(-20px) scale(0.95);
+}
+
+.ux-toast-container--center-end .ux-toast,
+.ux-toast-container--top-end .ux-toast,
+.ux-toast-container--bottom-end .ux-toast {
+  transform: translateX(20px) scale(0.95);
+}
+
+/* Dark mode glass toast */
+@media (prefers-color-scheme: dark) {
+  .ux-toast--glass .ux-toast__action:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .ux-toast--glass .ux-toast__progress {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.ux-dark .ux-toast--glass .ux-toast__action:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.ux-dark .ux-toast--glass .ux-toast__progress {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Fallback */
+@supports not (backdrop-filter: blur(1px)) {
+  .ux-toast--glass {
+    background-color: var(--ux-surface);
+  }
+}
+
+/* ========================================
+   Full Width Toast (mobile)
+   ======================================== */
+
+@media (max-width: 480px) {
+  .ux-toast-container--top,
+  .ux-toast-container--bottom {
+    left: 0;
+    right: 0;
+    transform: none;
+    padding-left: var(--ux-space-sm);
+    padding-right: var(--ux-space-sm);
+  }
+
+  .ux-toast {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-toast {
+    transition: opacity 0.1s ease;
+    transform: none !important;
+
+    &--visible,
+    &[data-state="visible"],
+    &[aria-hidden="false"],
+    &.is-visible {
+      transform: none;
+    }
+  }
+
+  .ux-toast__progress-bar {
+    transition: none;
+  }
+}

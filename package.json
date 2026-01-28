@@ -1,12 +1,39 @@
 {
-  "name": "ui",
-  "version": "1.0.0",
-  "description": "Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Optimized for HTMX and Alpine.js.",
-  "main": "build.js",
+  "name": "ux",
+  "version": "2.0.0",
+  "description": "Zero-dependency, framework-agnostic CSS component library with iOS-style design. Works with HTMX, React, Vue, or vanilla JavaScript.",
+  "main": "dist/ux.js",
+  "module": "dist/ux.esm.js",
+  "style": "dist/ux.css",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/ux.esm.js",
+      "require": "./dist/ux.js"
+    },
+    "./css": "./dist/ux.css",
+    "./css/min": "./dist/ux.min.css"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
   "directories": {
     "doc": "docs"
   },
   "scripts": {
+    "dev": "vite",
+    "build": "npm run build:clean && npm run build:esm && npm run build:iife && npm run build:minify && npm run build:copy",
+    "build:clean": "rm -rf dist && mkdir -p dist",
+    "build:esm": "vite build --config vite.config.esm.js",
+    "build:iife": "vite build --config vite.config.iife.js",
+    "build:minify": "npm run build:minify:css && npm run build:minify:js",
+    "build:minify:css": "lightningcss --minify dist/ux.css -o dist/ux.min.css",
+    "build:minify:js": "terser dist/ux.js -o dist/ux.min.js --compress --mangle",
+    "build:copy": "mkdir -p public && cp dist/ux.css dist/ux.min.css dist/ux.js dist/ux.min.js dist/ux.esm.js public/",
+    "build:legacy": "node build.js",
+    "preview": "vite preview",
+    "serve": "python3 -m http.server 8000",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
@@ -15,24 +42,33 @@
     "test:webkit": "playwright test --project=webkit",
     "test:mobile": "playwright test --project=mobile-chrome --project=mobile-safari",
     "test:debug": "playwright test --debug",
-    "test:report": "playwright show-report",
-    "serve": "python3 -m http.server 8000",
-    "build": "node build.js"
+    "test:report": "playwright show-report"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ERPlora/ux.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "keywords": [
+    "css",
+    "ui",
+    "components",
+    "ios",
+    "htmx",
+    "framework-agnostic",
+    "vanilla-js"
+  ],
+  "author": "ERPlora",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/ERPlora/ux/issues"
   },
   "homepage": "https://github.com/ERPlora/ux#readme",
   "devDependencies": {
     "@playwright/test": "^1.57.0",
-    "@types/node": "^25.0.3"
+    "@types/node": "^25.0.3",
+    "lightningcss-cli": "^1.30.1",
+    "sass": "^1.97.3",
+    "terser": "^5.46.0",
+    "vite": "^7.3.1"
   }
 }

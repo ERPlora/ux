@@ -1,0 +1,1124 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-row { display: flex; flex-wrap: wrap; gap: var(--ux-space-xl); align-items: center; margin-bottom: var(--ux-space-md); }
+    .demo-item { display: flex; flex-direction: column; gap: var(--ux-space-sm); }
+    .demo-label { font-size: var(--ux-font-size-xs); color: var(--ux-text-secondary); }
+    .stats-card { background: var(--ux-surface); border: 1px solid var(--ux-border-color); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-md) var(--ux-space-lg); min-width: 200px; }
+    .stats-card__title { font-size: var(--ux-font-size-xs); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-sm); }
+    .stats-card__value { font-size: var(--ux-font-size-2xl); font-weight: 600; color: var(--ux-text); margin-bottom: var(--ux-space-sm); }
+    .ux-table { width: 100%; border-collapse: collapse; margin-bottom: var(--ux-space-lg); }
+    .ux-table th, .ux-table td { padding: var(--ux-space-sm) var(--ux-space-md); text-align: left; border-bottom: 1px solid var(--ux-border-color); }
+    .ux-table th { font-weight: 600; color: var(--ux-text); background: var(--ux-surface-secondary); }
+    .ux-table td { color: var(--ux-text-secondary); }
+    .ux-table code { background: var(--ux-surface-secondary); padding: 2px 6px; border-radius: 4px; font-size: var(--ux-font-size-sm); }
+    .page-header { margin-bottom: var(--ux-space-xl); }
+    .page-header h1 { font-size: var(--ux-font-size-2xl); font-weight: 700; color: var(--ux-text); margin-bottom: var(--ux-space-sm); }
+    .page-header p { font-size: var(--ux-font-size-lg); color: var(--ux-text-secondary); }
+  </style>
+
+<div class="page-header">
+    <h1>Sparkline</h1>
+    <p>Gráficos en línea compactos para mostrar tendencias de datos.</p>
+  </div>
+
+    <!-- Basic Line Sparkline -->
+    <div class="demo-section">
+      <h3>Line Sparkline (Básico)</h3>
+      <div class="demo-row">
+        <div class="demo-item"
+             x-data="uxSparkline({
+               data: [5, 10, 5, 20, 8, 15, 12, 25, 18, 30],
+               width: 120,
+               height: 32
+             })">
+          <span class="demo-label">Tendencia de ventas</span>
+          <svg class="ux-sparkline__svg" :width="width" :height="height">
+            <defs>
+              <linearGradient id="sparklineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color: var(--ux-primary); stop-opacity: 0.4"/>
+                <stop offset="100%" style="stop-color: var(--ux-primary); stop-opacity: 0"/>
+              </linearGradient>
+            </defs>
+            <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            <template x-if="showLastDot && points.length > 0">
+              <circle class="ux-sparkline__dot--last"
+                      :cx="points[points.length - 1].x"
+                      :cy="points[points.length - 1].y"
+                      r="4"/>
+            </template>
+          </svg>
+        </div>
+
+        <div class="demo-item"
+             x-data="uxSparkline({
+               data: [30, 25, 35, 28, 32, 40, 38, 45, 42, 50],
+               width: 150,
+               height: 40,
+               showArea: true
+             })">
+          <span class="demo-label">Con área</span>
+          <svg class="ux-sparkline__svg" :width="width" :height="height">
+            <defs>
+              <linearGradient id="sparklineGradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color: var(--ux-primary); stop-opacity: 0.3"/>
+                <stop offset="100%" style="stop-color: var(--ux-primary); stop-opacity: 0"/>
+              </linearGradient>
+            </defs>
+            <path class="ux-sparkline__area" :d="areaPath" fill="url(#sparklineGradient2)"/>
+            <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            <circle class="ux-sparkline__dot--last"
+                    :cx="points[points.length - 1]?.x"
+                    :cy="points[points.length - 1]?.y"
+                    r="4"/>
+          </svg>
+        </div>
+
+        <div class="demo-item"
+             x-data="uxSparkline({
+               data: [12, 15, 13, 17, 14, 18, 16, 20, 19, 22],
+               width: 120,
+               height: 32,
+               showDots: true
+             })">
+          <span class="demo-label">Con todos los puntos</span>
+          <svg class="ux-sparkline__svg" :width="width" :height="height">
+            <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            <template x-for="(point, index) in points" :key="index">
+              <circle class="ux-sparkline__dot" :cx="point.x" :cy="point.y" r="3"/>
+            </template>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar Sparkline -->
+    <div class="demo-section">
+      <h3>Bar Sparkline</h3>
+      <div class="demo-row">
+        <div class="demo-item"
+             x-data="uxSparkline({
+               data: [5, 10, 15, 8, 12, 20, 18, 25, 22, 30],
+               type: 'bar',
+               width: 100,
+               height: 32,
+               barGap: 2
+             })">
+          <span class="demo-label">Ventas semanales</span>
+          <svg class="ux-sparkline__svg" :width="width" :height="height">
+            <template x-for="(bar, index) in bars" :key="index">
+              <rect class="ux-sparkline__bar"
+                    :class="{ 'ux-sparkline__bar--negative': bar.isNegative }"
+                    :x="bar.x"
+                    :y="bar.y"
+                    :width="bar.width"
+                    :height="bar.height"/>
+            </template>
+          </svg>
+        </div>
+
+        <div class="demo-item"
+             x-data="uxSparkline({
+               data: [10, -5, 15, -8, 20, 12, -3, 18, 25, -10],
+               type: 'bar',
+               width: 120,
+               height: 40,
+               barGap: 3
+             })">
+          <span class="demo-label">Con valores negativos</span>
+          <svg class="ux-sparkline__svg" :width="width" :height="height">
+            <template x-for="(bar, index) in bars" :key="index">
+              <rect class="ux-sparkline__bar"
+                    :class="{ 'ux-sparkline__bar--negative': bar.isNegative }"
+                    :x="bar.x"
+                    :y="bar.y"
+                    :width="bar.width"
+                    :height="bar.height"/>
+            </template>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color Variants -->
+    <div class="demo-section">
+      <h3>Variantes de Color</h3>
+      <div class="demo-row">
+        <div class="demo-item">
+          <span class="demo-label">Primary (default)</span>
+          <div class="ux-sparkline"
+               x-data="uxSparkline({
+                 data: [5, 12, 8, 20, 15, 25, 18, 30],
+                 width: 100,
+                 height: 28
+               })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="demo-item">
+          <span class="demo-label">Success</span>
+          <div class="ux-sparkline ux-sparkline--success"
+               x-data="uxSparkline({
+                 data: [10, 15, 12, 20, 18, 25, 22, 35],
+                 width: 100,
+                 height: 28
+               })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+              <circle class="ux-sparkline__dot--last"
+                      :cx="points[points.length - 1]?.x"
+                      :cy="points[points.length - 1]?.y"
+                      r="3"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="demo-item">
+          <span class="demo-label">Danger</span>
+          <div class="ux-sparkline ux-sparkline--danger"
+               x-data="uxSparkline({
+                 data: [30, 25, 28, 20, 22, 15, 18, 10],
+                 width: 100,
+                 height: 28
+               })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+              <circle class="ux-sparkline__dot--last"
+                      :cx="points[points.length - 1]?.x"
+                      :cy="points[points.length - 1]?.y"
+                      r="3"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="demo-item">
+          <span class="demo-label">Warning</span>
+          <div class="ux-sparkline ux-sparkline--warning"
+               x-data="uxSparkline({
+                 data: [15, 20, 18, 22, 25, 20, 28, 25],
+                 width: 100,
+                 height: 28
+               })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- With Value Display -->
+    <div class="demo-section">
+      <h3>Con Valor y Cambio</h3>
+      <div class="demo-row">
+        <div class="stats-card"
+             x-data="uxSparkline({
+               data: [1200, 1350, 1280, 1500, 1420, 1680, 1590, 1850],
+               width: 80,
+               height: 32,
+               showValue: true,
+               showChange: true
+             })">
+          <div class="stats-card__title">Ingresos</div>
+          <div class="stats-card__value" x-text="'€' + formatValue(currentValue)"></div>
+          <div class="ux-sparkline">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            </svg>
+            <span class="ux-sparkline__change"
+                  :class="'ux-sparkline__change--' + changeType"
+                  x-html="icons[changeType === 'positive' ? 'up' : changeType === 'negative' ? 'down' : 'neutral'] + formatChange(change)">
+            </span>
+          </div>
+        </div>
+
+        <div class="stats-card"
+             x-data="uxSparkline({
+               data: [450, 420, 380, 350, 320, 290, 260, 230],
+               width: 80,
+               height: 32,
+               showValue: true,
+               showChange: true
+             })">
+          <div class="stats-card__title">Costes</div>
+          <div class="stats-card__value" x-text="'€' + formatValue(currentValue)"></div>
+          <div class="ux-sparkline ux-sparkline--danger">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            </svg>
+            <span class="ux-sparkline__change"
+                  :class="'ux-sparkline__change--' + changeType"
+                  x-html="icons[changeType === 'positive' ? 'up' : changeType === 'negative' ? 'down' : 'neutral'] + formatChange(change)">
+            </span>
+          </div>
+        </div>
+
+        <div class="stats-card"
+             x-data="uxSparkline({
+               data: [85, 87, 86, 88, 87, 89, 88, 90],
+               width: 80,
+               height: 32,
+               showValue: true,
+               showChange: true
+             })">
+          <div class="stats-card__title">Satisfacción</div>
+          <div class="stats-card__value" x-text="currentValue + '%'"></div>
+          <div class="ux-sparkline ux-sparkline--success">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            </svg>
+            <span class="ux-sparkline__change"
+                  :class="'ux-sparkline__change--' + changeType"
+                  x-html="icons[changeType === 'positive' ? 'up' : changeType === 'negative' ? 'down' : 'neutral'] + formatChange(change)">
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- With Reference Line -->
+    <div class="demo-section">
+      <h3>Con Línea de Referencia</h3>
+      <div class="demo-row">
+        <div class="demo-item"
+             x-data="uxSparkline({
+               data: [15, 25, 18, 30, 22, 35, 28, 40, 32, 45],
+               width: 150,
+               height: 50,
+               showReference: true
+             })">
+          <span class="demo-label">Referencia: promedio</span>
+          <svg class="ux-sparkline__svg" :width="width" :height="height">
+            <line class="ux-sparkline__reference"
+                  x1="0" :y1="referenceY"
+                  :x2="width" :y2="referenceY"/>
+            <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            <circle class="ux-sparkline__dot--last"
+                    :cx="points[points.length - 1]?.x"
+                    :cy="points[points.length - 1]?.y"
+                    r="4"/>
+          </svg>
+        </div>
+
+        <div class="demo-item"
+             x-data="uxSparkline({
+               data: [60, 75, 65, 80, 70, 85, 78, 90, 82, 95],
+               width: 150,
+               height: 50,
+               showReference: true,
+               referenceValue: 75
+             })">
+          <span class="demo-label">Referencia: objetivo (75)</span>
+          <svg class="ux-sparkline__svg" :width="width" :height="height">
+            <line class="ux-sparkline__reference"
+                  x1="0" :y1="referenceY"
+                  :x2="width" :y2="referenceY"/>
+            <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sizes -->
+    <div class="demo-section">
+      <h3>Tamaños</h3>
+      <div class="demo-row">
+        <div class="demo-item">
+          <span class="demo-label">Small</span>
+          <div class="ux-sparkline ux-sparkline--sm"
+               x-data="uxSparkline({
+                 data: [5, 10, 8, 15, 12, 18],
+                 width: 60,
+                 height: 20
+               })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="demo-item">
+          <span class="demo-label">Default</span>
+          <div class="ux-sparkline"
+               x-data="uxSparkline({
+                 data: [5, 10, 8, 15, 12, 18, 14, 20],
+                 width: 100,
+                 height: 32
+               })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="demo-item">
+          <span class="demo-label">Large</span>
+          <div class="ux-sparkline ux-sparkline--lg"
+               x-data="uxSparkline({
+                 data: [5, 10, 8, 15, 12, 18, 14, 20, 16, 25],
+                 width: 150,
+                 height: 48
+               })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+              <circle class="ux-sparkline__dot--last"
+                      :cx="points[points.length - 1]?.x"
+                      :cy="points[points.length - 1]?.y"
+                      r="4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animated -->
+    <div class="demo-section">
+      <h3>Animado</h3>
+      <div class="demo-row">
+        <div class="demo-item">
+          <span class="demo-label">Con animación de dibujo</span>
+          <div class="ux-sparkline ux-sparkline--animated"
+               x-data="uxSparkline({
+                 data: [10, 25, 15, 35, 20, 40, 30, 50, 35, 55],
+                 width: 150,
+                 height: 40,
+                 animated: true
+               })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Smooth vs Linear -->
+    <div class="demo-section">
+      <h3>Curvas</h3>
+      <div class="demo-row">
+        <div class="demo-item"
+             x-data="uxSparkline({
+               data: [10, 25, 15, 35, 20, 40, 30, 45],
+               width: 120,
+               height: 40,
+               smooth: true
+             })">
+          <span class="demo-label">Suave (bezier)</span>
+          <svg class="ux-sparkline__svg" :width="width" :height="height">
+            <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+          </svg>
+        </div>
+
+        <div class="demo-item"
+             x-data="uxSparkline({
+               data: [10, 25, 15, 35, 20, 40, 30, 45],
+               width: 120,
+               height: 40,
+               smooth: false
+             })">
+          <span class="demo-label">Lineal</span>
+          <svg class="ux-sparkline__svg" :width="width" :height="height">
+            <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- HTMX Integration -->
+    <div class="demo-section">
+      <h3>Integracion con HTMX</h3>
+      <p>Los sparklines funcionan perfectamente con HTMX para cargar datos del servidor y actualizarlos en tiempo real.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Dashboard con Datos en Tiempo Real</h4>
+      <p>Cargar estadisticas con sparklines desde el servidor.</p>
+
+      <div class="demo-row" style="flex-wrap: wrap;">
+        <!-- Revenue Card - loads from server -->
+        <div class="stats-card"
+             hx-get="/api/stats/revenue"
+             hx-trigger="load, every 30s"
+             hx-swap="innerHTML">
+          <div class="stats-card__title">Ingresos</div>
+          <div class="stats-card__value">Cargando...</div>
+        </div>
+
+        <!-- Orders Card - loads from server -->
+        <div class="stats-card"
+             hx-get="/api/stats/orders"
+             hx-trigger="load, every 30s"
+             hx-swap="innerHTML">
+          <div class="stats-card__title">Pedidos</div>
+          <div class="stats-card__value">Cargando...</div>
+        </div>
+
+        <!-- Users Card - loads from server -->
+        <div class="stats-card"
+             hx-get="/api/stats/users"
+             hx-trigger="load, every 30s"
+             hx-swap="innerHTML">
+          <div class="stats-card__title">Usuarios</div>
+          <div class="stats-card__value">Cargando...</div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Dashboard card que carga datos del servidor --&gt;
+&lt;div class="stats-card"
+     hx-get="/api/stats/revenue"
+     hx-trigger="load, every 30s"
+     hx-swap="innerHTML"&gt;
+  Cargando...
+&lt;/div&gt;
+
+&lt;!-- Respuesta del servidor (HTML parcial): --&gt;
+&lt;div class="stats-card__title"&gt;Ingresos&lt;/div&gt;
+&lt;div class="stats-card__value"&gt;$12,450&lt;/div&gt;
+&lt;div class="ux-sparkline ux-sparkline--success"
+     x-data="uxSparkline({ data: [1200, 1350, 1500, 1420, 1680] })"&gt;
+  &lt;svg class="ux-sparkline__svg" :width="width" :height="height"&gt;
+    &lt;path class="ux-sparkline__line" :d="linePath" fill="none"/&gt;
+  &lt;/svg&gt;
+  &lt;span class="ux-sparkline__change ux-sparkline__change--positive"&gt;+12.5%&lt;/span&gt;
+&lt;/div&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Sparkline con Polling HTMX</h4>
+      <p>Actualizar grafico automaticamente cada pocos segundos.</p>
+
+      <div class="demo-row">
+        <div class="stats-card">
+          <div class="stats-card__title">Ventas en Tiempo Real</div>
+          <div id="live-sales-value"
+               class="stats-card__value"
+               hx-get="/api/sales/current"
+               hx-trigger="every 5s"
+               hx-swap="innerHTML">$0</div>
+          <div id="live-sales-chart"
+               hx-get="/api/sales/sparkline"
+               hx-trigger="every 5s"
+               hx-swap="innerHTML"
+               class="ux-sparkline ux-sparkline--success"
+               x-data="uxSparkline({ data: [100, 120, 115, 140, 135, 160, 155, 180], width: 100, height: 32 })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+              <circle class="ux-sparkline__dot--last"
+                      :cx="points[points.length - 1]?.x"
+                      :cy="points[points.length - 1]?.y"
+                      r="3"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Sparkline con polling cada 5 segundos --&gt;
+&lt;div id="live-chart"
+     hx-get="/api/sales/sparkline"
+     hx-trigger="every 5s"
+     hx-swap="innerHTML"&gt;
+  &lt;!-- El servidor devuelve el sparkline con datos actualizados --&gt;
+&lt;/div&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Seleccion de Periodo</h4>
+      <p>Cambiar datos del sparkline segun periodo seleccionado.</p>
+
+      <div class="demo-row" style="flex-direction: column; align-items: flex-start;">
+        <div class="ux-segment" style="margin-bottom: var(--ux-space-md);">
+          <button class="ux-segment__button ux-segment__button--active"
+                  hx-get="/api/stats/revenue?period=7d"
+                  hx-target="#period-sparkline"
+                  hx-swap="outerHTML">7 dias</button>
+          <button class="ux-segment__button"
+                  hx-get="/api/stats/revenue?period=30d"
+                  hx-target="#period-sparkline"
+                  hx-swap="outerHTML">30 dias</button>
+          <button class="ux-segment__button"
+                  hx-get="/api/stats/revenue?period=90d"
+                  hx-target="#period-sparkline"
+                  hx-swap="outerHTML">90 dias</button>
+          <button class="ux-segment__button"
+                  hx-get="/api/stats/revenue?period=1y"
+                  hx-target="#period-sparkline"
+                  hx-swap="outerHTML">1 ano</button>
+        </div>
+
+        <div class="stats-card" style="width: 300px;">
+          <div class="stats-card__title">Ingresos por Periodo</div>
+          <div class="stats-card__value">$8,450</div>
+          <div id="period-sparkline"
+               class="ux-sparkline ux-sparkline--success"
+               x-data="uxSparkline({
+                 data: [1200, 1350, 1280, 1500, 1420, 1680, 1590],
+                 width: 200,
+                 height: 40,
+                 showArea: true
+               })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <defs>
+                <linearGradient id="periodGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color: var(--ux-success); stop-opacity: 0.3"/>
+                  <stop offset="100%" style="stop-color: var(--ux-success); stop-opacity: 0"/>
+                </linearGradient>
+              </defs>
+              <path class="ux-sparkline__area" :d="areaPath" fill="url(#periodGradient)"/>
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+              <circle class="ux-sparkline__dot--last"
+                      :cx="points[points.length - 1]?.x"
+                      :cy="points[points.length - 1]?.y"
+                      r="4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Selector de periodo con HTMX --&gt;
+&lt;div class="ux-segment"&gt;
+  &lt;button hx-get="/api/stats/revenue?period=7d"
+          hx-target="#sparkline"
+          hx-swap="outerHTML"&gt;7 dias&lt;/button&gt;
+  &lt;button hx-get="/api/stats/revenue?period=30d"
+          hx-target="#sparkline"&gt;30 dias&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div id="sparkline" class="ux-sparkline"
+     x-data="uxSparkline({ data: [...] })"&gt;
+  ...
+&lt;/div&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Tabla de Productos con Sparklines</h4>
+      <p>Cargar tabla de productos con sparklines de ventas.</p>
+
+      <div class="demo-row" style="width: 100%; overflow-x: auto;">
+        <table class="ux-table"
+               id="products-table"
+               hx-get="/api/products/with-sparklines"
+               hx-trigger="load"
+               hx-swap="innerHTML">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Ventas (7d)</th>
+              <th>Total</th>
+              <th>Tendencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cafe Americano</td>
+              <td>
+                <div class="ux-sparkline ux-sparkline--success ux-sparkline--sm"
+                     x-data="uxSparkline({ data: [45, 52, 48, 60, 55, 70, 65], width: 60, height: 20 })">
+                  <svg class="ux-sparkline__svg" :width="width" :height="height">
+                    <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+                  </svg>
+                </div>
+              </td>
+              <td>$395</td>
+              <td><span style="color: var(--ux-success);">+15.2%</span></td>
+            </tr>
+            <tr>
+              <td>Cappuccino</td>
+              <td>
+                <div class="ux-sparkline ux-sparkline--sm"
+                     x-data="uxSparkline({ data: [30, 35, 32, 38, 36, 40, 38], width: 60, height: 20 })">
+                  <svg class="ux-sparkline__svg" :width="width" :height="height">
+                    <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+                  </svg>
+                </div>
+              </td>
+              <td>$249</td>
+              <td><span style="color: var(--ux-success);">+8.5%</span></td>
+            </tr>
+            <tr>
+              <td>Croissant</td>
+              <td>
+                <div class="ux-sparkline ux-sparkline--danger ux-sparkline--sm"
+                     x-data="uxSparkline({ data: [25, 22, 20, 18, 20, 17, 15], width: 60, height: 20 })">
+                  <svg class="ux-sparkline__svg" :width="width" :height="height">
+                    <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+                  </svg>
+                </div>
+              </td>
+              <td>$137</td>
+              <td><span style="color: var(--ux-danger);">-12.3%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Tabla con sparklines cargada via HTMX --&gt;
+&lt;table class="ux-table"
+       hx-get="/api/products/with-sparklines"
+       hx-trigger="load"
+       hx-swap="innerHTML"&gt;
+&lt;/table&gt;
+
+&lt;!-- Respuesta del servidor incluye filas con sparklines --&gt;
+&lt;tr&gt;
+  &lt;td&gt;Cafe Americano&lt;/td&gt;
+  &lt;td&gt;
+    &lt;div class="ux-sparkline ux-sparkline--success ux-sparkline--sm"
+         x-data="uxSparkline({ data: [45, 52, 48, 60, 55, 70, 65] })"&gt;
+      &lt;svg ...&gt;&lt;path :d="linePath"/&gt;&lt;/svg&gt;
+    &lt;/div&gt;
+  &lt;/td&gt;
+  &lt;td&gt;$395&lt;/td&gt;
+  &lt;td&gt;+15.2%&lt;/td&gt;
+&lt;/tr&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Click para Ver Detalle</h4>
+      <p>Click en sparkline para cargar grafico detallado.</p>
+
+      <div class="demo-row" style="flex-direction: column; align-items: flex-start;">
+        <div class="stats-card"
+             style="cursor: pointer;"
+             hx-get="/api/stats/revenue/detail"
+             hx-target="#detail-panel"
+             hx-swap="innerHTML">
+          <div class="stats-card__title">Click para ver detalle</div>
+          <div class="stats-card__value">$12,450</div>
+          <div class="ux-sparkline ux-sparkline--success"
+               x-data="uxSparkline({ data: [1200, 1350, 1280, 1500, 1420, 1680, 1590, 1850], width: 100, height: 32 })">
+            <svg class="ux-sparkline__svg" :width="width" :height="height">
+              <path class="ux-sparkline__line" :d="linePath" fill="none"/>
+            </svg>
+          </div>
+        </div>
+
+        <div id="detail-panel" style="padding: var(--ux-space-md); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius); min-height: 100px; width: 100%; max-width: 400px;">
+          <span style="color: var(--ux-text-secondary);">Haz click en el card para ver detalles...</span>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Card clickeable que carga detalle --&gt;
+&lt;div class="stats-card"
+     hx-get="/api/stats/revenue/detail"
+     hx-target="#detail-panel"
+     hx-swap="innerHTML"&gt;
+  &lt;div class="ux-sparkline" x-data="uxSparkline({...})"&gt;...&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="detail-panel"&gt;
+  &lt;!-- Se carga el grafico detallado aqui --&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <!-- Usage -->
+    <div class="demo-section">
+      <h3>Uso</h3>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Line Sparkline basico --&gt;
+&lt;div class="ux-sparkline"
+     x-data="uxSparkline({
+       data: [5, 10, 8, 15, 12, 20],
+       width: 100,
+       height: 32
+     })"&gt;
+  &lt;svg class="ux-sparkline__svg" :width="width" :height="height"&gt;
+    &lt;path class="ux-sparkline__line" :d="linePath" fill="none"/&gt;
+    &lt;circle class="ux-sparkline__dot--last"
+            :cx="points[points.length - 1]?.x"
+            :cy="points[points.length - 1]?.y"
+            r="4"/&gt;
+  &lt;/svg&gt;
+&lt;/div&gt;
+
+&lt;!-- Bar Sparkline --&gt;
+&lt;div x-data="uxSparkline({
+       data: [5, 10, 15, 8, 12],
+       type: 'bar',
+       width: 80,
+       height: 32
+     })"&gt;
+  &lt;svg class="ux-sparkline__svg" :width="width" :height="height"&gt;
+    &lt;template x-for="(bar, index) in bars" :key="index"&gt;
+      &lt;rect class="ux-sparkline__bar"
+            :x="bar.x" :y="bar.y"
+            :width="bar.width" :height="bar.height"/&gt;
+    &lt;/template&gt;
+  &lt;/svg&gt;
+&lt;/div&gt;
+
+&lt;!-- Con valor y cambio --&gt;
+&lt;div class="ux-sparkline ux-sparkline--success"
+     x-data="uxSparkline({
+       data: [100, 120, 110, 140, 130, 160],
+       showValue: true,
+       showChange: true
+     })"&gt;
+  &lt;svg class="ux-sparkline__svg" :width="width" :height="height"&gt;
+    &lt;path class="ux-sparkline__line" :d="linePath" fill="none"/&gt;
+  &lt;/svg&gt;
+  &lt;span class="ux-sparkline__value" x-text="formatValue(currentValue)"&gt;&lt;/span&gt;
+  &lt;span class="ux-sparkline__change"
+        :class="'ux-sparkline__change--' + changeType"
+        x-text="formatChange(change)"&gt;&lt;/span&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <!-- Options -->
+    <div class="demo-section">
+      <h3>Opciones</h3>
+      <table class="ux-table">
+        <thead>
+          <tr>
+            <th>Opción</th>
+            <th>Tipo</th>
+            <th>Default</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>data</td><td>Array</td><td>[]</td><td>Datos numéricos a visualizar</td></tr>
+          <tr><td>width</td><td>Number</td><td>100</td><td>Ancho del SVG en px</td></tr>
+          <tr><td>height</td><td>Number</td><td>30</td><td>Alto del SVG en px</td></tr>
+          <tr><td>type</td><td>String</td><td>'line'</td><td>Tipo: 'line', 'bar', 'area'</td></tr>
+          <tr><td>showDots</td><td>Boolean</td><td>false</td><td>Mostrar todos los puntos</td></tr>
+          <tr><td>showLastDot</td><td>Boolean</td><td>true</td><td>Mostrar punto del último valor</td></tr>
+          <tr><td>showArea</td><td>Boolean</td><td>false</td><td>Mostrar área bajo la línea</td></tr>
+          <tr><td>showReference</td><td>Boolean</td><td>false</td><td>Mostrar línea de referencia</td></tr>
+          <tr><td>referenceValue</td><td>Number</td><td>null</td><td>Valor de referencia (null = promedio)</td></tr>
+          <tr><td>smooth</td><td>Boolean</td><td>true</td><td>Usar curvas bezier suaves</td></tr>
+          <tr><td>animated</td><td>Boolean</td><td>false</td><td>Animar el dibujo de la línea</td></tr>
+          <tr><td>barGap</td><td>Number</td><td>2</td><td>Espacio entre barras (tipo bar)</td></tr>
+          <tr><td>padding</td><td>Number</td><td>4</td><td>Padding interno del SVG</td></tr>
+          <tr><td>showValue</td><td>Boolean</td><td>false</td><td>Mostrar valor actual</td></tr>
+          <tr><td>showChange</td><td>Boolean</td><td>false</td><td>Mostrar porcentaje de cambio</td></tr>
+          <tr><td>valueFormat</td><td>Function</td><td>null</td><td>Función para formatear el valor</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Computed Properties -->
+    <div class="demo-section">
+      <h3>Propiedades Computadas</h3>
+      <table class="ux-table">
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>points</td><td>Array de puntos {x, y, value} para línea/área</td></tr>
+          <tr><td>linePath</td><td>Path SVG para la línea</td></tr>
+          <tr><td>areaPath</td><td>Path SVG para el área</td></tr>
+          <tr><td>bars</td><td>Array de barras {x, y, width, height, value, isNegative}</td></tr>
+          <tr><td>currentValue</td><td>Último valor de los datos</td></tr>
+          <tr><td>firstValue</td><td>Primer valor de los datos</td></tr>
+          <tr><td>minValue</td><td>Valor mínimo</td></tr>
+          <tr><td>maxValue</td><td>Valor máximo</td></tr>
+          <tr><td>average</td><td>Promedio de los datos</td></tr>
+          <tr><td>change</td><td>Cambio porcentual (primero vs último)</td></tr>
+          <tr><td>changeType</td><td>'positive', 'negative', o 'neutral'</td></tr>
+          <tr><td>referenceY</td><td>Posición Y de la línea de referencia</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Methods -->
+    <div class="demo-section">
+      <h3>Métodos</h3>
+      <table class="ux-table">
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>setData(array)</td><td>Establece nuevos datos</td></tr>
+          <tr><td>addPoint(value)</td><td>Añade un punto al final</td></tr>
+          <tr><td>formatValue(value)</td><td>Formatea un valor para mostrar (1K, 1M, etc.)</td></tr>
+          <tr><td>formatChange(value)</td><td>Formatea el cambio porcentual (+5.2%)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CSS Classes -->
+    <div class="demo-section">
+      <h3>Clases CSS</h3>
+      <table class="ux-table">
+        <thead>
+          <tr>
+            <th>Clase</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>.ux-sparkline</td><td>Contenedor principal</td></tr>
+          <tr><td>.ux-sparkline--success</td><td>Color verde</td></tr>
+          <tr><td>.ux-sparkline--danger</td><td>Color rojo</td></tr>
+          <tr><td>.ux-sparkline--warning</td><td>Color amarillo</td></tr>
+          <tr><td>.ux-sparkline--sm</td><td>Tamaño pequeño (línea más fina)</td></tr>
+          <tr><td>.ux-sparkline--lg</td><td>Tamaño grande (línea más gruesa)</td></tr>
+          <tr><td>.ux-sparkline--animated</td><td>Animación de dibujo</td></tr>
+          <tr><td>.ux-sparkline--interactive</td><td>Cursor pointer y hover</td></tr>
+          <tr><td>.ux-sparkline__line</td><td>Línea del gráfico</td></tr>
+          <tr><td>.ux-sparkline__area</td><td>Área bajo la línea</td></tr>
+          <tr><td>.ux-sparkline__bar</td><td>Barra individual</td></tr>
+          <tr><td>.ux-sparkline__dot</td><td>Punto de datos</td></tr>
+          <tr><td>.ux-sparkline__dot--last</td><td>Punto del último valor</td></tr>
+          <tr><td>.ux-sparkline__reference</td><td>Línea de referencia</td></tr>
+          <tr><td>.ux-sparkline__value</td><td>Valor numérico mostrado</td></tr>
+          <tr><td>.ux-sparkline__change</td><td>Indicador de cambio</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- HTMX + Django -->
+    <div class="demo-section">
+      <h3>HTMX + Django</h3>
+      <p>Ejemplos de integracion con Django para sparklines con datos en tiempo real.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Vista Django para Estadisticas</h4>
+      <p>Endpoint que devuelve un sparkline con datos actualizados.</p>
+
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from .models import Sale
+
+def stats_revenue(request):
+    # Obtener datos de los ultimos 7 dias
+    sales = Sale.objects.order_by('-date')[:7]
+    data = [float(s.amount) for s in reversed(sales)]
+    total = sum(data)
+
+    # Calcular cambio porcentual
+    if len(data) >= 2 and data[0] != 0:
+        change = ((data[-1] - data[0]) / data[0]) * 100
+        change_type = 'positive' if change > 0 else 'negative' if change < 0 else 'neutral'
+    else:
+        change = 0
+        change_type = 'neutral'
+
+    context = {
+        'data': data,
+        'total': total,
+        'change': change,
+        'change_type': change_type,
+    }
+    return render(request, 'partials/sparkline_card.html', context)</pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Template Parcial Django</h4>
+      <p>Template que genera el HTML del sparkline con los datos del servidor.</p>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/sparkline_card.html --&gt;
+&lt;div class="stats-card__title"&gt;Ingresos&lt;/div&gt;
+&lt;div class="stats-card__value"&gt;${{ total|floatformat:0 }}&lt;/div&gt;
+&lt;div class="ux-sparkline ux-sparkline--{% if change_type == 'positive' %}success{% elif change_type == 'negative' %}danger{% else %}primary{% endif %}"
+     x-data="uxSparkline({
+       data: {{ data|safe }},
+       width: 100,
+       height: 32
+     })"&gt;
+  &lt;svg class="ux-sparkline__svg" :width="width" :height="height"&gt;
+    &lt;path class="ux-sparkline__line" :d="linePath" fill="none"/&gt;
+    &lt;circle class="ux-sparkline__dot--last"
+            :cx="points[points.length - 1]?.x"
+            :cy="points[points.length - 1]?.y"
+            r="3"/&gt;
+  &lt;/svg&gt;
+  &lt;span class="ux-sparkline__change ux-sparkline__change--{{ change_type }}"&gt;
+    {% if change &gt; 0 %}+{% endif %}{{ change|floatformat:1 }}%
+  &lt;/span&gt;
+&lt;/div&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">URLs Django</h4>
+
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('api/stats/revenue/', views.stats_revenue, name='stats_revenue'),
+    path('api/stats/orders/', views.stats_orders, name='stats_orders'),
+    path('api/stats/users/', views.stats_users, name='stats_users'),
+    path('api/sales/sparkline/', views.sales_sparkline, name='sales_sparkline'),
+]</pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Dashboard con Polling</h4>
+      <p>Vista principal que carga cards con polling automatico.</p>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/dashboard.html --&gt;
+{% extends "base.html" %}
+
+{% block content %}
+&lt;div class="demo-row"&gt;
+  &lt;!-- Card de Ingresos - actualiza cada 30s --&gt;
+  &lt;div class="stats-card"
+       hx-get="{% url 'stats_revenue' %}"
+       hx-trigger="load, every 30s"
+       hx-swap="innerHTML"&gt;
+    &lt;div class="stats-card__title"&gt;Cargando...&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Card de Pedidos --&gt;
+  &lt;div class="stats-card"
+       hx-get="{% url 'stats_orders' %}"
+       hx-trigger="load, every 30s"
+       hx-swap="innerHTML"&gt;
+    &lt;div class="stats-card__title"&gt;Cargando...&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Card de Usuarios Activos --&gt;
+  &lt;div class="stats-card"
+       hx-get="{% url 'stats_users' %}"
+       hx-trigger="load, every 60s"
+       hx-swap="innerHTML"&gt;
+    &lt;div class="stats-card__title"&gt;Cargando...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+{% endblock %}</pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Sparkline en Tiempo Real con SSE</h4>
+      <p>Para actualizaciones en tiempo real puedes usar Server-Sent Events.</p>
+
+      <pre class="ux-code-block" data-lang="python"># views.py - SSE endpoint
+import json
+from django.http import StreamingHttpResponse
+from time import sleep
+
+def sales_stream(request):
+    def event_stream():
+        while True:
+            # Obtener ultimos datos
+            sales = Sale.objects.order_by('-created')[:10]
+            data = [float(s.amount) for s in reversed(sales)]
+
+            # Enviar evento SSE
+            yield f"data: {json.dumps({'data': data})}\n\n"
+            sleep(5)  # Actualizar cada 5 segundos
+
+    response = StreamingHttpResponse(
+        event_stream(),
+        content_type='text/event-stream'
+    )
+    response['Cache-Control'] = 'no-cache'
+    return response</pre>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Cliente SSE con HTMX --&gt;
+&lt;div class="stats-card"&gt;
+  &lt;div class="stats-card__title"&gt;Ventas en Vivo&lt;/div&gt;
+  &lt;div class="stats-card__value" id="live-value"&gt;$0&lt;/div&gt;
+  &lt;div id="live-sparkline"
+       hx-ext="sse"
+       sse-connect="{% url 'sales_stream' %}"
+       sse-swap="message"
+       class="ux-sparkline ux-sparkline--success"
+       x-data="uxSparkline({ data: [], width: 120, height: 32 })"
+       @sse:message.window="setData(JSON.parse($event.detail.data).data)"&gt;
+    &lt;svg class="ux-sparkline__svg" :width="width" :height="height"&gt;
+      &lt;path class="ux-sparkline__line" :d="linePath" fill="none"/&gt;
+    &lt;/svg&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Tabla de Productos con Sparklines</h4>
+
+      <pre class="ux-code-block" data-lang="python"># views.py
+def products_with_sparklines(request):
+    products = Product.objects.all()[:10]
+
+    product_data = []
+    for product in products:
+        sales = product.sales.order_by('-date')[:7]
+        data = [float(s.quantity) for s in reversed(sales)]
+        total = sum(data)
+
+        # Determinar tendencia
+        if len(data) >= 2 and data[0] != 0:
+            change = ((data[-1] - data[0]) / data[0]) * 100
+        else:
+            change = 0
+
+        product_data.append({
+            'name': product.name,
+            'data': data,
+            'total': total,
+            'change': change,
+            'trend': 'success' if change > 0 else 'danger' if change < 0 else 'primary'
+        })
+
+    return render(request, 'partials/products_table.html', {'products': product_data})</pre>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/products_table.html --&gt;
+&lt;thead&gt;
+  &lt;tr&gt;
+    &lt;th&gt;Producto&lt;/th&gt;
+    &lt;th&gt;Ventas (7d)&lt;/th&gt;
+    &lt;th&gt;Total&lt;/th&gt;
+    &lt;th&gt;Tendencia&lt;/th&gt;
+  &lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+  {% for product in products %}
+  &lt;tr&gt;
+    &lt;td&gt;{{ product.name }}&lt;/td&gt;
+    &lt;td&gt;
+      &lt;div class="ux-sparkline ux-sparkline--{{ product.trend }} ux-sparkline--sm"
+           x-data="uxSparkline({ data: {{ product.data|safe }}, width: 60, height: 20 })"&gt;
+        &lt;svg class="ux-sparkline__svg" :width="width" :height="height"&gt;
+          &lt;path class="ux-sparkline__line" :d="linePath" fill="none"/&gt;
+        &lt;/svg&gt;
+      &lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td&gt;{{ product.total }}&lt;/td&gt;
+    &lt;td style="color: var(--ux-{{ product.trend }});"&gt;
+      {% if product.change &gt; 0 %}+{% endif %}{{ product.change|floatformat:1 }}%
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  {% endfor %}
+&lt;/tbody&gt;</pre>
+
+      <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Filtro por Periodo con HTMX</h4>
+
+      <pre class="ux-code-block" data-lang="python"># views.py
+def stats_revenue_period(request):
+    period = request.GET.get('period', '7d')
+
+    # Mapear periodo a dias
+    days_map = {'7d': 7, '30d': 30, '90d': 90, '1y': 365}
+    days = days_map.get(period, 7)
+
+    # Obtener datos del periodo
+    from datetime import timedelta
+    from django.utils import timezone
+
+    start_date = timezone.now() - timedelta(days=days)
+    sales = Sale.objects.filter(date__gte=start_date).order_by('date')
+
+    # Agrupar por dia/semana/mes segun periodo
+    data = aggregate_sales(sales, period)
+
+    return render(request, 'partials/revenue_sparkline.html', {
+        'data': data,
+        'period': period
+    })</pre>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Template con selector de periodo --&gt;
+&lt;div class="ux-segment"&gt;
+  &lt;button class="ux-segment__button {% if period == '7d' %}ux-segment__button--active{% endif %}"
+          hx-get="{% url 'stats_revenue_period' %}?period=7d"
+          hx-target="#revenue-sparkline"
+          hx-swap="outerHTML"&gt;7 dias&lt;/button&gt;
+  &lt;button class="ux-segment__button {% if period == '30d' %}ux-segment__button--active{% endif %}"
+          hx-get="{% url 'stats_revenue_period' %}?period=30d"
+          hx-target="#revenue-sparkline"
+          hx-swap="outerHTML"&gt;30 dias&lt;/button&gt;
+  &lt;button class="ux-segment__button {% if period == '90d' %}ux-segment__button--active{% endif %}"
+          hx-get="{% url 'stats_revenue_period' %}?period=90d"
+          hx-target="#revenue-sparkline"
+          hx-swap="outerHTML"&gt;90 dias&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div id="revenue-sparkline"
+     class="ux-sparkline ux-sparkline--success"
+     x-data="uxSparkline({ data: {{ data|safe }}, width: 200, height: 40, showArea: true })"&gt;
+  &lt;svg class="ux-sparkline__svg" :width="width" :height="height"&gt;
+    &lt;path class="ux-sparkline__area" :d="areaPath" fill="url(#areaGradient)"/&gt;
+    &lt;path class="ux-sparkline__line" :d="linePath" fill="none"/&gt;
+  &lt;/svg&gt;
+&lt;/div&gt;</pre>
+    </div>

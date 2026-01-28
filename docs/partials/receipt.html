@@ -1,0 +1,981 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .demo-controls { display: flex; gap: var(--ux-space-sm); margin-bottom: var(--ux-space-md); flex-wrap: wrap; justify-content: center; }
+  </style>
+
+<div class="demo-section">
+    <h3>Receipt Preview - Ticket Termico</h3>
+    <p>Vista previa de ticket en formato impresora termica de 80mm.</p>
+
+    <div class="demo-box" x-data="uxReceipt({
+      company: {
+        name: 'Cafeteria Central',
+        address: 'Calle Mayor 123, Madrid',
+        phone: 'Tel: 91 234 5678',
+        taxId: 'CIF: B12345678'
+      },
+      receipt: {
+        number: '001234',
+        date: '15/01/2024',
+        time: '14:32',
+        cashier: 'Maria',
+        terminal: 'Caja 01'
+      },
+      items: [
+        { name: 'Cafe Americano', qty: 2, price: 2.50 },
+        { name: 'Croissant', qty: 1, price: 1.80 },
+        { name: 'Zumo de Naranja Natural', qty: 1, price: 3.20 },
+        { name: 'Tostada con Tomate', qty: 2, price: 2.00 }
+      ],
+      subtotal: 14.00,
+      tax: 1.47,
+      taxRate: 10,
+      total: 15.47,
+      payments: [
+        { method: 'Efectivo', amount: 20.00 }
+      ],
+      change: 4.53,
+      footer: {
+        thanks: 'Gracias por su visita',
+        message: 'Conserve su ticket para cambios',
+        social: '@cafeteriacentral'
+      }
+    })">
+      <div class="demo-controls">
+        <button class="ux-button ux-button--outline ux-button--sm" @click="print()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          Imprimir
+        </button>
+      </div>
+
+      <div class="ux-receipt-preview">
+        <div class="ux-receipt">
+          <!-- Header -->
+          <div x-show="showHeader" class="ux-receipt__header">
+            <div x-show="company.logo" class="ux-receipt__logo">
+              <img :src="company.logo" alt="">
+            </div>
+            <div class="ux-receipt__company" x-text="company.name"></div>
+            <div x-show="company.address" class="ux-receipt__address" x-text="company.address"></div>
+            <div x-show="company.phone" class="ux-receipt__phone" x-text="company.phone"></div>
+            <div x-show="company.taxId" class="ux-receipt__tax-id" x-text="company.taxId"></div>
+          </div>
+
+          <!-- Receipt Info -->
+          <div class="ux-receipt__info">
+            <div class="ux-receipt__info-item">
+              <span class="ux-receipt__info-label">Ticket:</span>
+              <span class="ux-receipt__info-value" x-text="receipt.number"></span>
+            </div>
+            <div class="ux-receipt__info-item">
+              <span class="ux-receipt__info-label">Fecha:</span>
+              <span class="ux-receipt__info-value" x-text="receipt.date"></span>
+            </div>
+            <div class="ux-receipt__info-item">
+              <span class="ux-receipt__info-label">Hora:</span>
+              <span class="ux-receipt__info-value" x-text="receipt.time"></span>
+            </div>
+            <div x-show="receipt.cashier" class="ux-receipt__info-item">
+              <span class="ux-receipt__info-label">Cajero:</span>
+              <span class="ux-receipt__info-value" x-text="receipt.cashier"></span>
+            </div>
+          </div>
+
+          <!-- Items -->
+          <div class="ux-receipt__items">
+            <div x-show="showItemsHeader" class="ux-receipt__items-header">
+              <span>Producto</span>
+              <span>Importe</span>
+            </div>
+            <template x-for="item in items" :key="item.name">
+              <div class="ux-receipt__item">
+                <span class="ux-receipt__item-name" x-text="item.name"></span>
+                <span class="ux-receipt__item-qty" x-text="item.qty + 'x'"></span>
+                <span class="ux-receipt__item-price" x-text="formatPrice(item.price)"></span>
+                <span class="ux-receipt__item-total" x-text="formatPrice(item.price * item.qty)"></span>
+              </div>
+            </template>
+          </div>
+
+          <!-- Totals -->
+          <div class="ux-receipt__totals">
+            <div class="ux-receipt__total-row ux-receipt__total-row--subtotal">
+              <span class="ux-receipt__total-label">Subtotal</span>
+              <span class="ux-receipt__total-value" x-text="formatPrice(subtotal)"></span>
+            </div>
+            <div x-show="discount > 0" class="ux-receipt__total-row">
+              <span class="ux-receipt__total-label" x-text="discountLabel"></span>
+              <span class="ux-receipt__total-value" x-text="'-' + formatPrice(discount)"></span>
+            </div>
+            <div x-show="showTax && tax > 0" class="ux-receipt__total-row">
+              <span class="ux-receipt__total-label" x-text="taxLabel + (taxRate ? ' (' + taxRate + '%)' : '')"></span>
+              <span class="ux-receipt__total-value" x-text="formatPrice(tax)"></span>
+            </div>
+            <div class="ux-receipt__total-row ux-receipt__total-row--grand">
+              <span class="ux-receipt__total-label">TOTAL</span>
+              <span class="ux-receipt__total-value" x-text="formatPrice(total)"></span>
+            </div>
+          </div>
+
+          <!-- Payment -->
+          <div x-show="showPayment && payments.length > 0" class="ux-receipt__payment">
+            <div class="ux-receipt__payment-title">Forma de Pago</div>
+            <template x-for="payment in payments" :key="payment.method">
+              <div class="ux-receipt__payment-row">
+                <span class="ux-receipt__payment-method" x-text="payment.method"></span>
+                <span x-text="formatPrice(payment.amount)"></span>
+              </div>
+            </template>
+            <div x-show="change > 0" class="ux-receipt__payment-row ux-receipt__change">
+              <span>Cambio</span>
+              <span x-text="formatPrice(change)"></span>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div x-show="showFooter" class="ux-receipt__footer">
+            <div class="ux-receipt__thanks" x-text="footer.thanks"></div>
+            <div x-show="footer.message" class="ux-receipt__message" x-text="footer.message"></div>
+            <div x-show="footer.social" class="ux-receipt__social" x-text="footer.social"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxReceipt({
+  company: { name: 'Mi Empresa', address: '...', taxId: '...' },
+  receipt: { number: '001234', date: '15/01/2024', time: '14:32' },
+  items: [
+    { name: 'Producto', qty: 2, price: 10.00 }
+  ],
+  subtotal: 20.00,
+  tax: 4.20,
+  total: 24.20,
+  payments: [{ method: 'Efectivo', amount: 30.00 }],
+  change: 5.80
+})"&gt;
+  &lt;div class="ux-receipt"&gt;
+    &lt;!-- Receipt content --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Con Descuentos</h3>
+    <p>Ticket mostrando descuentos en items y total.</p>
+
+    <div class="demo-box">
+      <div class="ux-receipt-preview">
+        <div class="ux-receipt" x-data="uxReceipt({
+          company: { name: 'SuperMart', taxId: 'NIF: A98765432' },
+          receipt: { number: '0056789', date: '15/01/2024', time: '18:45' },
+          items: [
+            { name: 'Leche Entera 1L', qty: 2, price: 1.20 },
+            { name: 'Pan de Molde', qty: 1, price: 1.50 },
+            { name: 'Jamon Serrano 100g', qty: 1, price: 4.50 },
+            { name: 'Queso Manchego', qty: 1, price: 6.80 }
+          ],
+          subtotal: 15.40,
+          discount: 1.54,
+          discountLabel: 'Dto. Cliente VIP (10%)',
+          tax: 1.39,
+          taxRate: 10,
+          total: 15.25,
+          payments: [{ method: 'Tarjeta', amount: 15.25 }],
+          footer: { thanks: 'Gracias por comprar en SuperMart' }
+        })">
+          <div class="ux-receipt__header">
+            <div class="ux-receipt__company" x-text="company.name"></div>
+            <div class="ux-receipt__tax-id" x-text="company.taxId"></div>
+          </div>
+          <div class="ux-receipt__info">
+            <div class="ux-receipt__info-item">
+              <span class="ux-receipt__info-label">Ticket:</span>
+              <span class="ux-receipt__info-value" x-text="receipt.number"></span>
+            </div>
+            <div class="ux-receipt__info-item">
+              <span class="ux-receipt__info-value" x-text="receipt.date + ' ' + receipt.time"></span>
+            </div>
+          </div>
+          <div class="ux-receipt__items">
+            <template x-for="item in items" :key="item.name">
+              <div class="ux-receipt__item">
+                <span class="ux-receipt__item-name" x-text="item.name"></span>
+                <span class="ux-receipt__item-qty" x-text="item.qty + 'x'"></span>
+                <span class="ux-receipt__item-price" x-text="formatPrice(item.price)"></span>
+                <span class="ux-receipt__item-total" x-text="formatPrice(item.price * item.qty)"></span>
+              </div>
+            </template>
+          </div>
+          <div class="ux-receipt__totals">
+            <div class="ux-receipt__total-row">
+              <span class="ux-receipt__total-label">Subtotal</span>
+              <span class="ux-receipt__total-value" x-text="formatPrice(subtotal)"></span>
+            </div>
+            <div class="ux-receipt__total-row" style="color: var(--ux-danger);">
+              <span class="ux-receipt__total-label" x-text="discountLabel"></span>
+              <span class="ux-receipt__total-value" x-text="'-' + formatPrice(discount)"></span>
+            </div>
+            <div class="ux-receipt__total-row">
+              <span class="ux-receipt__total-label" x-text="'IVA (' + taxRate + '%)'"></span>
+              <span class="ux-receipt__total-value" x-text="formatPrice(tax)"></span>
+            </div>
+            <div class="ux-receipt__total-row ux-receipt__total-row--grand">
+              <span>TOTAL</span>
+              <span x-text="formatPrice(total)"></span>
+            </div>
+          </div>
+          <div class="ux-receipt__payment">
+            <div class="ux-receipt__payment-row">
+              <span>Pago con Tarjeta</span>
+              <span x-text="formatPrice(payments[0].amount)"></span>
+            </div>
+          </div>
+          <div class="ux-receipt__footer">
+            <div class="ux-receipt__thanks" x-text="footer.thanks"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>Tamano 58mm (Ticket Pequeno)</h3>
+    <p>Formato compacto para impresoras de 58mm.</p>
+
+    <div class="demo-box">
+      <div class="ux-receipt-preview">
+        <div class="ux-receipt ux-receipt--58mm" x-data="uxReceipt({
+          company: { name: 'Kiosko' },
+          receipt: { number: '0099', date: '15/01', time: '09:15' },
+          items: [
+            { name: 'Cafe', qty: 1, price: 1.20 },
+            { name: 'Donut', qty: 1, price: 1.00 }
+          ],
+          subtotal: 2.20,
+          total: 2.20,
+          showTax: false,
+          showPayment: false
+        })">
+          <div class="ux-receipt__header">
+            <div class="ux-receipt__company" x-text="company.name"></div>
+          </div>
+          <div class="ux-receipt__info" style="justify-content: center;">
+            <span x-text="receipt.number + ' - ' + receipt.date + ' ' + receipt.time"></span>
+          </div>
+          <hr class="ux-receipt__divider">
+          <div class="ux-receipt__items">
+            <template x-for="item in items" :key="item.name">
+              <div class="ux-receipt__item">
+                <span class="ux-receipt__item-name" x-text="item.name"></span>
+                <span class="ux-receipt__item-total" x-text="formatPrice(item.price)"></span>
+              </div>
+            </template>
+          </div>
+          <div class="ux-receipt__totals">
+            <div class="ux-receipt__total-row ux-receipt__total-row--grand">
+              <span>TOTAL</span>
+              <span x-text="formatPrice(total)"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-receipt ux-receipt--58mm"&gt;...&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>Con QR Code</h3>
+    <p>Ticket con codigo QR para factura electronica.</p>
+
+    <div class="demo-box">
+      <div class="ux-receipt-preview">
+        <div class="ux-receipt" x-data="uxReceipt({
+          company: { name: 'TechStore', address: 'Centro Comercial Plaza', taxId: 'CIF: B55555555' },
+          receipt: { number: 'F-2024-00123', date: '15/01/2024', time: '16:20' },
+          items: [
+            { name: 'Auriculares Bluetooth', qty: 1, price: 49.99 },
+            { name: 'Funda Movil', qty: 2, price: 9.99 }
+          ],
+          subtotal: 69.97,
+          tax: 14.69,
+          taxRate: 21,
+          total: 84.66,
+          payments: [{ method: 'Tarjeta', amount: 84.66 }],
+          showQR: true,
+          qrLabel: 'Escanea para ver tu factura'
+        })">
+          <div class="ux-receipt__header">
+            <div class="ux-receipt__company" x-text="company.name"></div>
+            <div class="ux-receipt__address" x-text="company.address"></div>
+            <div class="ux-receipt__tax-id" x-text="company.taxId"></div>
+          </div>
+          <div class="ux-receipt__info">
+            <div class="ux-receipt__info-item">
+              <span class="ux-receipt__info-label">Factura:</span>
+              <span class="ux-receipt__info-value" x-text="receipt.number"></span>
+            </div>
+            <div class="ux-receipt__info-item">
+              <span class="ux-receipt__info-value" x-text="receipt.date + ' ' + receipt.time"></span>
+            </div>
+          </div>
+          <div class="ux-receipt__items">
+            <template x-for="item in items" :key="item.name">
+              <div class="ux-receipt__item">
+                <span class="ux-receipt__item-name" x-text="item.name"></span>
+                <span class="ux-receipt__item-qty" x-text="item.qty + 'x'"></span>
+                <span class="ux-receipt__item-price" x-text="formatPrice(item.price)"></span>
+                <span class="ux-receipt__item-total" x-text="formatPrice(item.price * item.qty)"></span>
+              </div>
+            </template>
+          </div>
+          <div class="ux-receipt__totals">
+            <div class="ux-receipt__total-row">
+              <span class="ux-receipt__total-label">Base Imponible</span>
+              <span class="ux-receipt__total-value" x-text="formatPrice(subtotal)"></span>
+            </div>
+            <div class="ux-receipt__total-row">
+              <span class="ux-receipt__total-label" x-text="'IVA ' + taxRate + '%'"></span>
+              <span class="ux-receipt__total-value" x-text="formatPrice(tax)"></span>
+            </div>
+            <div class="ux-receipt__total-row ux-receipt__total-row--grand">
+              <span>TOTAL</span>
+              <span x-text="formatPrice(total)"></span>
+            </div>
+          </div>
+          <div class="ux-receipt__payment">
+            <div class="ux-receipt__payment-row">
+              <span>Pago con Tarjeta</span>
+              <span x-text="formatPrice(payments[0].amount)"></span>
+            </div>
+          </div>
+          <!-- QR Code -->
+          <div x-show="showQR" class="ux-receipt__qr">
+            <div class="ux-receipt__qr-code">
+              <svg viewBox="0 0 100 100" fill="currentColor">
+                <rect x="10" y="10" width="20" height="20"/>
+                <rect x="70" y="10" width="20" height="20"/>
+                <rect x="10" y="70" width="20" height="20"/>
+                <rect x="40" y="40" width="20" height="20"/>
+                <rect x="15" y="15" width="10" height="10" fill="white"/>
+                <rect x="75" y="15" width="10" height="10" fill="white"/>
+                <rect x="15" y="75" width="10" height="10" fill="white"/>
+                <rect x="35" y="10" width="5" height="5"/>
+                <rect x="45" y="10" width="5" height="5"/>
+                <rect x="55" y="10" width="5" height="5"/>
+                <rect x="35" y="20" width="5" height="5"/>
+                <rect x="55" y="20" width="5" height="5"/>
+                <rect x="10" y="35" width="5" height="5"/>
+                <rect x="20" y="45" width="5" height="5"/>
+                <rect x="70" y="45" width="5" height="5"/>
+                <rect x="80" y="55" width="5" height="5"/>
+                <rect x="45" y="70" width="5" height="5"/>
+                <rect x="55" y="80" width="5" height="5"/>
+              </svg>
+            </div>
+            <div class="ux-receipt__qr-label" x-text="qrLabel"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>Copia Comerciante</h3>
+    <p>Indicador de tipo de copia para distinguir entre cliente y comerciante.</p>
+
+    <div class="demo-box" style="display: flex; gap: var(--ux-space-lg); flex-wrap: wrap; justify-content: center;">
+      <!-- Customer copy -->
+      <div class="ux-receipt-preview" style="flex-shrink: 0;">
+        <div class="ux-receipt ux-receipt--58mm" x-data="uxReceipt({
+          company: { name: 'MiniMarket' },
+          receipt: { number: '0100' },
+          items: [{ name: 'Varios', qty: 1, price: 25.00 }],
+          total: 25.00,
+          showTax: false,
+          showPayment: false,
+          showFooter: false,
+          copyType: 'customer'
+        })">
+          <div class="ux-receipt__header">
+            <div class="ux-receipt__company" x-text="company.name"></div>
+          </div>
+          <div class="ux-receipt__totals">
+            <div class="ux-receipt__total-row ux-receipt__total-row--grand">
+              <span>TOTAL</span>
+              <span x-text="formatPrice(total)"></span>
+            </div>
+          </div>
+          <div class="ux-receipt__copy">Copia Cliente</div>
+        </div>
+      </div>
+
+      <!-- Merchant copy -->
+      <div class="ux-receipt-preview" style="flex-shrink: 0;">
+        <div class="ux-receipt ux-receipt--58mm" x-data="uxReceipt({
+          company: { name: 'MiniMarket' },
+          receipt: { number: '0100' },
+          items: [{ name: 'Varios', qty: 1, price: 25.00 }],
+          total: 25.00,
+          showTax: false,
+          showPayment: false,
+          showFooter: false,
+          copyType: 'merchant'
+        })">
+          <div class="ux-receipt__header">
+            <div class="ux-receipt__company" x-text="company.name"></div>
+          </div>
+          <div class="ux-receipt__totals">
+            <div class="ux-receipt__total-row ux-receipt__total-row--grand">
+              <span>TOTAL</span>
+              <span x-text="formatPrice(total)"></span>
+            </div>
+          </div>
+          <div class="ux-receipt__copy">Copia Comerciante</div>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html">&lt;div class="ux-receipt__copy"&gt;Copia Cliente&lt;/div&gt;
+&lt;div class="ux-receipt__copy"&gt;Copia Comerciante&lt;/div&gt;</pre>
+  </div>
+
+  <div class="demo-section">
+    <h3>API y Opciones</h3>
+    <div class="demo-box">
+      <pre class="ux-code-block" data-lang="javascript">// Opciones de configuracion
+uxReceipt({
+  // Datos de empresa
+  company: {
+    name: 'Mi Empresa',
+    address: 'Direccion',
+    phone: 'Telefono',
+    taxId: 'CIF/NIF',
+    logo: '/path/to/logo.png'
+  },
+
+  // Datos del ticket
+  receipt: {
+    number: '001234',
+    date: '15/01/2024',
+    time: '14:32',
+    cashier: 'Nombre',
+    terminal: 'Caja 01'
+  },
+
+  // Items
+  items: [
+    { name: 'Producto', qty: 2, price: 10.00, discount: 1.00 }
+  ],
+
+  // Totales
+  subtotal: 20.00,
+  discount: 2.00,
+  discountLabel: 'Descuento',
+  tax: 3.78,
+  taxLabel: 'IVA',
+  taxRate: 21,
+  total: 21.78,
+
+  // Pagos
+  payments: [
+    { method: 'Efectivo', amount: 25.00 },
+    { method: 'Tarjeta', amount: 0.00 }
+  ],
+  change: 3.22,
+
+  // Footer
+  footer: {
+    thanks: 'Gracias por su compra',
+    message: 'Conserve su ticket',
+    social: '@miempresa'
+  },
+
+  // QR/Barcode
+  qrCode: '/path/to/qr.png',
+  qrLabel: 'Escanea para ver factura',
+  barcode: '/path/to/barcode.png',
+  barcodeNumber: '123456789',
+
+  // Opciones
+  size: '80mm',           // '58mm', '80mm', 'a4'
+  showHeader: true,
+  showItemsHeader: true,
+  showTax: true,
+  showPayment: true,
+  showFooter: true,
+  showQR: false,
+  showBarcode: false,
+  copyType: null,         // 'customer', 'merchant'
+
+  // Moneda
+  currency: 'EUR',
+  currencyPosition: 'after'  // 'before', 'after'
+})
+
+// Metodos
+formatPrice(amount)       // Formatear precio con moneda
+calculateSubtotal()       // Calcular subtotal de items
+calculateTotal()          // Calcular total
+print()                   // Imprimir ticket
+downloadImage()           // Descargar como imagen (requiere html2canvas)
+getData()                 // Obtener datos como JSON
+
+// Eventos
+@receipt:print            // Ticket impreso
+@receipt:download         // Ticket descargado</pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>Clases CSS Disponibles</h3>
+    <div class="demo-box">
+      <pre class="ux-code-block" data-lang="css">/* Contenedor principal */
+.ux-receipt                     /* Ticket 80mm (default) */
+.ux-receipt--58mm               /* Ticket 58mm */
+.ux-receipt--80mm               /* Ticket 80mm */
+.ux-receipt--a4                 /* Formato A4 */
+
+/* Header */
+.ux-receipt__header             /* Cabecera */
+.ux-receipt__logo               /* Logo */
+.ux-receipt__company            /* Nombre empresa */
+.ux-receipt__address            /* Direccion */
+.ux-receipt__phone              /* Telefono */
+.ux-receipt__tax-id             /* CIF/NIF */
+
+/* Info */
+.ux-receipt__info               /* Contenedor info */
+.ux-receipt__info-item          /* Item de info */
+.ux-receipt__info-label         /* Etiqueta */
+.ux-receipt__info-value         /* Valor */
+
+/* Items */
+.ux-receipt__items              /* Lista de productos */
+.ux-receipt__items-header       /* Cabecera lista */
+.ux-receipt__item               /* Producto */
+.ux-receipt__item-name          /* Nombre */
+.ux-receipt__item-qty           /* Cantidad */
+.ux-receipt__item-price         /* Precio unitario */
+.ux-receipt__item-total         /* Total linea */
+.ux-receipt__item--discount     /* Linea de descuento */
+
+/* Totals */
+.ux-receipt__totals             /* Contenedor totales */
+.ux-receipt__total-row          /* Fila de total */
+.ux-receipt__total-row--subtotal
+.ux-receipt__total-row--grand   /* Total final */
+.ux-receipt__total-label
+.ux-receipt__total-value
+
+/* Payment */
+.ux-receipt__payment            /* Seccion pago */
+.ux-receipt__payment-title
+.ux-receipt__payment-row
+.ux-receipt__payment-method
+.ux-receipt__change             /* Cambio */
+
+/* Footer */
+.ux-receipt__footer
+.ux-receipt__thanks
+.ux-receipt__message
+.ux-receipt__social
+
+/* QR/Barcode */
+.ux-receipt__qr
+.ux-receipt__qr-code
+.ux-receipt__qr-label
+.ux-receipt__barcode
+.ux-receipt__barcode-image
+.ux-receipt__barcode-number
+
+/* Utilities */
+.ux-receipt__divider            /* Linea divisoria */
+.ux-receipt__divider--double    /* Linea doble */
+.ux-receipt__copy               /* Indicador de copia */
+
+/* Preview wrapper */
+.ux-receipt-preview             /* Contenedor preview */
+.ux-receipt-preview__toolbar    /* Toolbar con acciones */</pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h3>HTMX + Django</h3>
+    <p>Generacion de recibos con Django y HTMX para aplicaciones dinamicas.</p>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md);">Modelo Django</h4>
+      <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+from decimal import Decimal
+
+class Receipt(models.Model):
+    number = models.CharField(max_length=20, unique=True)
+    date = models.DateField(auto_now_add=True)
+    time = models.TimeField(auto_now_add=True)
+    cashier = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
+    terminal = models.CharField(max_length=20, blank=True)
+
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount_label = models.CharField(max_length=50, blank=True)
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=21)
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    change = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def calculate_totals(self):
+        self.subtotal = sum(item.total for item in self.items.all())
+        self.tax = (self.subtotal - self.discount) * (self.tax_rate / 100)
+        self.total = self.subtotal - self.discount + self.tax
+        self.save()
+
+
+class ReceiptItem(models.Model):
+    receipt = models.ForeignKey(Receipt, related_name='items', on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    @property
+    def total(self):
+        return self.quantity * self.price
+
+
+class ReceiptPayment(models.Model):
+    METHODS = [
+        ('cash', 'Efectivo'),
+        ('card', 'Tarjeta'),
+        ('transfer', 'Transferencia'),
+    ]
+    receipt = models.ForeignKey(Receipt, related_name='payments', on_delete=models.CASCADE)
+    method = models.CharField(max_length=20, choices=METHODS)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+class Company(models.Model):
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=200, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    tax_id = models.CharField(max_length=20, blank=True)
+    logo = models.ImageField(upload_to='company/', blank=True)
+    thanks_message = models.CharField(max_length=100, default='Gracias por su compra')
+    footer_message = models.CharField(max_length=100, blank=True)
+    social = models.CharField(max_length=50, blank=True)</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md);">Vista Django</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from .models import Receipt, Company
+
+def receipt_detail(request, pk):
+    """Vista para mostrar un recibo individual."""
+    receipt = get_object_or_404(Receipt, pk=pk)
+    company = Company.objects.first()
+
+    context = {
+        'receipt': receipt,
+        'company': company,
+    }
+
+    # Si es una peticion HTMX, devolver solo el fragmento
+    if request.headers.get('HX-Request'):
+        return render(request, 'receipts/partials/receipt_content.html', context)
+
+    return render(request, 'receipts/receipt_detail.html', context)
+
+
+def receipt_print(request, pk):
+    """Vista para imprimir recibo (formato optimizado)."""
+    receipt = get_object_or_404(Receipt, pk=pk)
+    company = Company.objects.first()
+
+    context = {
+        'receipt': receipt,
+        'company': company,
+        'print_mode': True,
+    }
+
+    return render(request, 'receipts/receipt_print.html', context)
+
+
+def receipt_list(request):
+    """Lista de recibos con carga HTMX."""
+    receipts = Receipt.objects.all()[:50]
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'receipts/partials/receipt_list.html', {'receipts': receipts})
+
+    return render(request, 'receipts/receipt_list.html', {'receipts': receipts})</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md);">Template Django con HTMX</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/receipts/receipt_detail.html --&gt;
+{% extends 'base.html' %}
+
+{% block content %}
+&lt;div class="demo-box"&gt;
+  &lt;div class="demo-controls"&gt;
+    &lt;button class="ux-button ux-button--outline ux-button--sm"
+            hx-get="{% url 'receipt_print' receipt.pk %}"
+            hx-target="#print-frame"
+            hx-swap="innerHTML"&gt;
+      Imprimir
+    &lt;/button&gt;
+    &lt;button class="ux-button ux-button--outline ux-button--sm"
+            hx-get="{% url 'receipt_pdf' receipt.pk %}"
+            hx-swap="none"&gt;
+      Descargar PDF
+    &lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;div class="ux-receipt-preview"&gt;
+    &lt;div class="ux-receipt"&gt;
+      &lt;!-- Header --&gt;
+      &lt;div class="ux-receipt__header"&gt;
+        {% if company.logo %}
+        &lt;div class="ux-receipt__logo"&gt;
+          &lt;img src="{{ company.logo.url }}" alt="{{ company.name }}"&gt;
+        &lt;/div&gt;
+        {% endif %}
+        &lt;div class="ux-receipt__company"&gt;{{ company.name }}&lt;/div&gt;
+        {% if company.address %}
+        &lt;div class="ux-receipt__address"&gt;{{ company.address }}&lt;/div&gt;
+        {% endif %}
+        {% if company.phone %}
+        &lt;div class="ux-receipt__phone"&gt;{{ company.phone }}&lt;/div&gt;
+        {% endif %}
+        {% if company.tax_id %}
+        &lt;div class="ux-receipt__tax-id"&gt;{{ company.tax_id }}&lt;/div&gt;
+        {% endif %}
+      &lt;/div&gt;
+
+      &lt;!-- Receipt Info --&gt;
+      &lt;div class="ux-receipt__info"&gt;
+        &lt;div class="ux-receipt__info-item"&gt;
+          &lt;span class="ux-receipt__info-label"&gt;Ticket:&lt;/span&gt;
+          &lt;span class="ux-receipt__info-value"&gt;{{ receipt.number }}&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class="ux-receipt__info-item"&gt;
+          &lt;span class="ux-receipt__info-label"&gt;Fecha:&lt;/span&gt;
+          &lt;span class="ux-receipt__info-value"&gt;{{ receipt.date|date:"d/m/Y" }}&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class="ux-receipt__info-item"&gt;
+          &lt;span class="ux-receipt__info-label"&gt;Hora:&lt;/span&gt;
+          &lt;span class="ux-receipt__info-value"&gt;{{ receipt.time|time:"H:i" }}&lt;/span&gt;
+        &lt;/div&gt;
+        {% if receipt.cashier %}
+        &lt;div class="ux-receipt__info-item"&gt;
+          &lt;span class="ux-receipt__info-label"&gt;Cajero:&lt;/span&gt;
+          &lt;span class="ux-receipt__info-value"&gt;{{ receipt.cashier.first_name }}&lt;/span&gt;
+        &lt;/div&gt;
+        {% endif %}
+      &lt;/div&gt;
+
+      &lt;!-- Items --&gt;
+      &lt;div class="ux-receipt__items"&gt;
+        &lt;div class="ux-receipt__items-header"&gt;
+          &lt;span&gt;Producto&lt;/span&gt;
+          &lt;span&gt;Importe&lt;/span&gt;
+        &lt;/div&gt;
+        {% for item in receipt.items.all %}
+        &lt;div class="ux-receipt__item"&gt;
+          &lt;span class="ux-receipt__item-name"&gt;{{ item.name }}&lt;/span&gt;
+          &lt;span class="ux-receipt__item-qty"&gt;{{ item.quantity }}x&lt;/span&gt;
+          &lt;span class="ux-receipt__item-price"&gt;{{ item.price|floatformat:2 }}EUR&lt;/span&gt;
+          &lt;span class="ux-receipt__item-total"&gt;{{ item.total|floatformat:2 }}EUR&lt;/span&gt;
+        &lt;/div&gt;
+        {% endfor %}
+      &lt;/div&gt;
+
+      &lt;!-- Totals --&gt;
+      &lt;div class="ux-receipt__totals"&gt;
+        &lt;div class="ux-receipt__total-row ux-receipt__total-row--subtotal"&gt;
+          &lt;span class="ux-receipt__total-label"&gt;Subtotal&lt;/span&gt;
+          &lt;span class="ux-receipt__total-value"&gt;{{ receipt.subtotal|floatformat:2 }}EUR&lt;/span&gt;
+        &lt;/div&gt;
+        {% if receipt.discount %}
+        &lt;div class="ux-receipt__total-row" style="color: #c00;"&gt;
+          &lt;span class="ux-receipt__total-label"&gt;{{ receipt.discount_label|default:"Descuento" }}&lt;/span&gt;
+          &lt;span class="ux-receipt__total-value"&gt;-{{ receipt.discount|floatformat:2 }}EUR&lt;/span&gt;
+        &lt;/div&gt;
+        {% endif %}
+        &lt;div class="ux-receipt__total-row"&gt;
+          &lt;span class="ux-receipt__total-label"&gt;IVA ({{ receipt.tax_rate }}%)&lt;/span&gt;
+          &lt;span class="ux-receipt__total-value"&gt;{{ receipt.tax|floatformat:2 }}EUR&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class="ux-receipt__total-row ux-receipt__total-row--grand"&gt;
+          &lt;span class="ux-receipt__total-label"&gt;TOTAL&lt;/span&gt;
+          &lt;span class="ux-receipt__total-value"&gt;{{ receipt.total|floatformat:2 }}EUR&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;!-- Payment --&gt;
+      {% if receipt.payments.exists %}
+      &lt;div class="ux-receipt__payment"&gt;
+        &lt;div class="ux-receipt__payment-title"&gt;Forma de Pago&lt;/div&gt;
+        {% for payment in receipt.payments.all %}
+        &lt;div class="ux-receipt__payment-row"&gt;
+          &lt;span class="ux-receipt__payment-method"&gt;{{ payment.get_method_display }}&lt;/span&gt;
+          &lt;span&gt;{{ payment.amount|floatformat:2 }}EUR&lt;/span&gt;
+        &lt;/div&gt;
+        {% endfor %}
+        {% if receipt.change %}
+        &lt;div class="ux-receipt__payment-row ux-receipt__change"&gt;
+          &lt;span&gt;Cambio&lt;/span&gt;
+          &lt;span&gt;{{ receipt.change|floatformat:2 }}EUR&lt;/span&gt;
+        &lt;/div&gt;
+        {% endif %}
+      &lt;/div&gt;
+      {% endif %}
+
+      &lt;!-- Footer --&gt;
+      &lt;div class="ux-receipt__footer"&gt;
+        &lt;div class="ux-receipt__thanks"&gt;{{ company.thanks_message }}&lt;/div&gt;
+        {% if company.footer_message %}
+        &lt;div class="ux-receipt__message"&gt;{{ company.footer_message }}&lt;/div&gt;
+        {% endif %}
+        {% if company.social %}
+        &lt;div class="ux-receipt__social"&gt;{{ company.social }}&lt;/div&gt;
+        {% endif %}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Hidden print frame --&gt;
+&lt;iframe id="print-frame" style="display: none;"&gt;&lt;/iframe&gt;
+{% endblock %}</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md);">URLs Django</h4>
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('receipts/', views.receipt_list, name='receipt_list'),
+    path('receipts/&lt;int:pk&gt;/', views.receipt_detail, name='receipt_detail'),
+    path('receipts/&lt;int:pk&gt;/print/', views.receipt_print, name='receipt_print'),
+]</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md);">Lista de Recibos con HTMX</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/receipts/receipt_list.html --&gt;
+{% extends 'base.html' %}
+
+{% block content %}
+&lt;div class="demo-section"&gt;
+  &lt;h3&gt;Historial de Recibos&lt;/h3&gt;
+
+  &lt;!-- Busqueda con HTMX --&gt;
+  &lt;div class="ux-input" style="margin-bottom: var(--ux-space-md);"&gt;
+    &lt;input type="search"
+           name="q"
+           placeholder="Buscar por numero de ticket..."
+           hx-get="{% url 'receipt_list' %}"
+           hx-trigger="keyup changed delay:300ms"
+           hx-target="#receipt-list"
+           hx-include="this"&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Lista de recibos --&gt;
+  &lt;div id="receipt-list" class="ux-list ux-list--inset"&gt;
+    {% for receipt in receipts %}
+    &lt;div class="ux-list__item"
+         hx-get="{% url 'receipt_detail' receipt.pk %}"
+         hx-target="#receipt-preview"
+         hx-swap="innerHTML"
+         style="cursor: pointer;"&gt;
+      &lt;div class="ux-list__content"&gt;
+        &lt;div class="ux-list__title"&gt;Ticket #{{ receipt.number }}&lt;/div&gt;
+        &lt;div class="ux-list__subtitle"&gt;{{ receipt.date|date:"d/m/Y" }} - {{ receipt.time|time:"H:i" }}&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-list__end"&gt;
+        &lt;strong&gt;{{ receipt.total|floatformat:2 }}EUR&lt;/strong&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    {% empty %}
+    &lt;div class="ux-list__item"&gt;
+      &lt;div class="ux-list__content"&gt;
+        &lt;div class="ux-list__title" style="color: var(--ux-text-secondary);"&gt;
+          No hay recibos
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    {% endfor %}
+  &lt;/div&gt;
+
+  &lt;!-- Preview del recibo seleccionado --&gt;
+  &lt;div id="receipt-preview" class="demo-box" style="margin-top: var(--ux-space-lg);"&gt;
+    &lt;p style="text-align: center; color: var(--ux-text-secondary);"&gt;
+      Selecciona un recibo para ver la vista previa
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+{% endblock %}</pre>
+    </div>
+
+    <div class="demo-box">
+      <h4 style="margin-bottom: var(--ux-space-md);">Generacion de PDF (WeasyPrint)</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py (adicional)
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML, CSS
+
+def receipt_pdf(request, pk):
+    """Generar PDF del recibo."""
+    receipt = get_object_or_404(Receipt, pk=pk)
+    company = Company.objects.first()
+
+    context = {
+        'receipt': receipt,
+        'company': company,
+    }
+
+    html_string = render_to_string('receipts/receipt_pdf.html', context)
+
+    # CSS para formato de ticket termico
+    css = CSS(string='''
+        @page {
+            size: 80mm auto;
+            margin: 5mm;
+        }
+        body {
+            font-family: monospace;
+            font-size: 10pt;
+        }
+        .ux-receipt {
+            width: 100%;
+        }
+    ''')
+
+    html = HTML(string=html_string)
+    pdf = html.write_pdf(stylesheets=[css])
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="ticket-{receipt.number}.pdf"'
+
+    return response</pre>
+    </div>
+  </div>
