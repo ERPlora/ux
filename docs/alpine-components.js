@@ -5531,17 +5531,30 @@ function uxChart(options = {}) {
     chartOptions: options.options || {},
     chart: null,
 
-    // UX color palette
-    colors: [
-      'rgb(var(--ux-primary-rgb, 59, 130, 246))',
-      'rgb(var(--ux-success-rgb, 34, 197, 94))',
-      'rgb(var(--ux-warning-rgb, 234, 179, 8))',
-      'rgb(var(--ux-danger-rgb, 239, 68, 68))',
-      'rgba(139, 92, 246, 1)',  // purple
-      'rgba(236, 72, 153, 1)',  // pink
-      'rgba(20, 184, 166, 1)',  // teal
-      'rgba(249, 115, 22, 1)'   // orange
-    ],
+    // Get theme colors from CSS custom properties
+    getThemeColors() {
+      const style = getComputedStyle(document.documentElement);
+
+      // Helper to get RGB value from CSS variable
+      const getRgb = (varName, fallback) => {
+        const value = style.getPropertyValue(varName).trim();
+        return value || fallback;
+      };
+
+      return [
+        `rgb(${getRgb('--ux-primary-rgb', '59, 130, 246')})`,
+        `rgb(${getRgb('--ux-success-rgb', '34, 197, 94')})`,
+        `rgb(${getRgb('--ux-warning-rgb', '234, 179, 8')})`,
+        `rgb(${getRgb('--ux-danger-rgb', '239, 68, 68')})`,
+        'rgba(139, 92, 246, 1)',  // purple
+        'rgba(236, 72, 153, 1)',  // pink
+        `rgb(${getRgb('--ux-cyan-500-rgb', '20, 184, 166')})`,  // teal/cyan
+        'rgba(249, 115, 22, 1)'   // orange
+      ];
+    },
+
+    // Colors will be populated on init
+    colors: [],
 
     init() {
       this.$nextTick(() => {
@@ -5557,6 +5570,9 @@ function uxChart(options = {}) {
           console.warn('No canvas element found in chart container');
           return;
         }
+
+        // Get theme colors from CSS custom properties
+        this.colors = this.getThemeColors();
 
         // Check for JSON config in script tag (HTMX pattern)
         const scriptTag = this.$el.querySelector('script[type="application/json"]');
