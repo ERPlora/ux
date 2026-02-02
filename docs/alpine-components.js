@@ -7487,28 +7487,97 @@ function uxStatsCard(options = {}) {
 // Video Player Component
 function uxVideoPlayer(options = {}) {
   return {
-    src: options.src || '',
-    playing: false,
+    // State
+    hasStarted: false,
+    isPlaying: false,
+    isPaused: true,
+    isBuffering: false,
+    isMuted: false,
+    isFullscreen: false,
+    isPiP: false,
+    showSpeedMenu: false,
+    controlsVisible: true,
+    controlsTimeout: null,
+
+    // Values
     currentTime: 0,
     duration: 0,
+    buffered: 0,
     volume: options.volume || 1,
-    muted: false,
-    fullscreen: false,
+    playbackRate: 1,
+    speeds: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+    poster: options.poster || '',
+    progress: 0,
+
+    // Computed
+    get bufferedPercent() {
+      return this.duration ? (this.buffered / this.duration) * 100 : 0;
+    },
+
+    get currentTimeFormatted() {
+      return this.formatTime(this.currentTime);
+    },
+
+    get durationFormatted() {
+      return this.formatTime(this.duration);
+    },
+
+    get volumeIcon() {
+      if (this.isMuted || this.volume === 0) return 'muted';
+      if (this.volume < 0.5) return 'low';
+      return 'high';
+    },
 
     init() {
       this.$nextTick(() => {
         const video = this.$refs.video;
-        if (video) {
-          video.addEventListener('loadedmetadata', () => {
-            this.duration = video.duration;
-          });
-          video.addEventListener('timeupdate', () => {
-            this.currentTime = video.currentTime;
-          });
-          video.addEventListener('ended', () => {
-            this.playing = false;
-          });
+        if (!video) return;
+
+        // Get poster from video element if not provided
+        if (!this.poster && video.poster) {
+          this.poster = video.poster;
         }
+
+        video.addEventListener('loadedmetadata', () => {
+          this.duration = video.duration;
+        });
+
+        video.addEventListener('timeupdate', () => {
+          this.currentTime = video.currentTime;
+          this.progress = this.duration ? (this.currentTime / this.duration) * 100 : 0;
+        });
+
+        video.addEventListener('progress', () => {
+          if (video.buffered.length > 0) {
+            this.buffered = video.buffered.end(video.buffered.length - 1);
+          }
+        });
+
+        video.addEventListener('waiting', () => {
+          this.isBuffering = true;
+        });
+
+        video.addEventListener('canplay', () => {
+          this.isBuffering = false;
+        });
+
+        video.addEventListener('ended', () => {
+          this.isPlaying = false;
+          this.isPaused = true;
+        });
+
+        video.addEventListener('enterpictureinpicture', () => {
+          this.isPiP = true;
+        });
+
+        video.addEventListener('leavepictureinpicture', () => {
+          this.isPiP = false;
+        });
+
+        // Fullscreen change
+        document.addEventListener('fullscreenchange', () => {
+          this.isFullscreen = !!document.fullscreenElement;
+        });
       });
     },
 
@@ -7516,7 +7585,9 @@ function uxVideoPlayer(options = {}) {
       const video = this.$refs.video;
       if (video) {
         video.play();
-        this.playing = true;
+        this.hasStarted = true;
+        this.isPlaying = true;
+        this.isPaused = false;
       }
     },
 
@@ -7524,47 +7595,100 @@ function uxVideoPlayer(options = {}) {
       const video = this.$refs.video;
       if (video) {
         video.pause();
-        this.playing = false;
+        this.isPlaying = false;
+        this.isPaused = true;
       }
     },
 
     toggle() {
-      this.playing ? this.pause() : this.play();
+      this.isPlaying ? this.pause() : this.play();
     },
 
-    seek(time) {
+    skip(seconds) {
       const video = this.$refs.video;
-      if (video) video.currentTime = time;
+      if (video) {
+        video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + seconds));
+      }
     },
 
     setVolume(vol) {
       this.volume = Math.min(1, Math.max(0, vol));
       const video = this.$refs.video;
-      if (video) video.volume = this.volume;
+      if (video) {
+        video.volume = this.volume;
+        if (this.volume > 0) this.isMuted = false;
+      }
     },
 
     toggleMute() {
-      this.muted = !this.muted;
+      this.isMuted = !this.isMuted;
       const video = this.$refs.video;
-      if (video) video.muted = this.muted;
+      if (video) video.muted = this.isMuted;
     },
 
     toggleFullscreen() {
       const container = this.$el;
       if (!document.fullscreenElement) {
-        container.requestFullscreen();
-        this.fullscreen = true;
+        container.requestFullscreen().catch(() => {});
       } else {
         document.exitFullscreen();
-        this.fullscreen = false;
       }
     },
 
-    get progress() {
-      return this.duration ? (this.currentTime / this.duration) * 100 : 0;
+    togglePiP() {
+      const video = this.$refs.video;
+      if (!video) return;
+
+      if (document.pictureInPictureElement) {
+        document.exitPictureInPicture();
+      } else if (document.pictureInPictureEnabled) {
+        video.requestPictureInPicture().catch(() => {});
+      }
+    },
+
+    toggleSpeedMenu() {
+      this.showSpeedMenu = !this.showSpeedMenu;
+    },
+
+    setSpeed(speed) {
+      this.playbackRate = speed;
+      const video = this.$refs.video;
+      if (video) video.playbackRate = speed;
+      this.showSpeedMenu = false;
+    },
+
+    handleProgressClick(event) {
+      const rect = this.$refs.progressWrapper.getBoundingClientRect();
+      const percent = (event.clientX - rect.left) / rect.width;
+      const video = this.$refs.video;
+      if (video) {
+        video.currentTime = percent * video.duration;
+      }
+    },
+
+    startProgressDrag(event) {
+      // Simple click handling - drag could be added if needed
+      this.handleProgressClick(event);
+    },
+
+    showControlsTemporarily() {
+      this.controlsVisible = true;
+      clearTimeout(this.controlsTimeout);
+      if (this.isPlaying) {
+        this.controlsTimeout = setTimeout(() => {
+          this.controlsVisible = false;
+        }, 3000);
+      }
+    },
+
+    hideControls() {
+      if (this.isPlaying) {
+        this.controlsVisible = false;
+      }
     },
 
     formatTime(seconds) {
+      if (isNaN(seconds)) return '0:00';
       const mins = Math.floor(seconds / 60);
       const secs = Math.floor(seconds % 60);
       return `${mins}:${secs.toString().padStart(2, '0')}`;
