@@ -4567,6 +4567,19 @@ function uxDatatable(options = {}) {
       this.$dispatch('selectionchange', { selected: this.selectedRows });
     },
 
+    // Alias for toggleAllSelection (used by some examples)
+    toggleSelectAll() {
+      this.toggleAllSelection();
+    },
+
+    // selectAll computed property for checkbox binding
+    get selectAll() {
+      return this.allSelected;
+    },
+    set selectAll(value) {
+      // Handled by toggleSelectAll
+    },
+
     isRowSelected(row) {
       const id = this.getRowId(row);
       return this.selectedRows.some(r => this.getRowId(r) === id);
@@ -4581,6 +4594,12 @@ function uxDatatable(options = {}) {
       this.originalRows = rows;
       this.rows = rows;
       this.currentPage = 1;
+    },
+
+    // Action handler for row actions
+    onAction(action, row, event) {
+      if (event) event.stopPropagation();
+      this.$dispatch('row-action', { action, row });
     }
   };
 }
