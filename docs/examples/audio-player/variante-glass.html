@@ -1,0 +1,74 @@
+<div x-data="uxAudioPlayer({
+          src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+          title: 'SoundHelix Song 5',
+          artist: 'T. Schurger',
+          artwork: 'https://picsum.photos/200/200?random=5'
+        })" class="ux-audio-player ux-audio-player--glass">
+
+          <!-- Track Info -->
+          <div class="ux-audio-player__info">
+            <div class="ux-audio-player__artwork">
+              <img :src="artwork" :alt="title">
+            </div>
+            <div class="ux-audio-player__meta">
+              <h4 class="ux-audio-player__title" x-text="title"></h4>
+              <p class="ux-audio-player__artist" x-text="artist"></p>
+            </div>
+          </div>
+
+          <!-- Progress -->
+          <div class="ux-audio-player__progress" @click="onProgressClick($event)">
+            <div class="ux-audio-player__progress-track">
+              <div class="ux-audio-player__progress-fill" :style="{ width: progress + '%' }"></div>
+            </div>
+            <div class="ux-audio-player__progress-thumb" :style="{ left: progress + '%' }"></div>
+          </div>
+
+          <!-- Time -->
+          <div class="ux-audio-player__time">
+            <span x-text="currentTimeFormatted"></span>
+            <span x-text="durationFormatted"></span>
+          </div>
+
+          <!-- Controls -->
+          <div class="ux-audio-player__controls">
+            <button class="ux-audio-player__btn ux-audio-player__btn--sm" @click="seekBackward(10)">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/>
+              </svg>
+            </button>
+            <button class="ux-audio-player__btn ux-audio-player__btn--play" @click="toggle()">
+              <template x-if="!isPlaying">
+                <svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </template>
+              <template x-if="isPlaying">
+                <svg fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+              </template>
+            </button>
+            <button class="ux-audio-player__btn ux-audio-player__btn--sm" @click="seekForward(10)">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Secondary -->
+          <div class="ux-audio-player__secondary">
+            <div class="ux-audio-player__volume">
+              <button class="ux-audio-player__btn ux-audio-player__btn--sm" @click="toggleMute()">
+                <template x-if="!isMuted && volume >= 0.5">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                  </svg>
+                </template>
+              </button>
+              <div class="ux-audio-player__volume-slider">
+                <div class="ux-audio-player__volume-fill" :style="{ width: volumePercent + '%' }"></div>
+                <input type="range" class="ux-audio-player__volume-input" min="0" max="1" step="0.01" :value="volume" @input="onVolumeInput($event)">
+              </div>
+            </div>
+            <div class="ux-audio-player__speed">
+              <button class="ux-audio-player__speed-btn" @click="cyclePlaybackRate()" x-text="playbackRate + 'x'"></button>
+            </div>
+          </div>
+        </div>

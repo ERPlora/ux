@@ -1,0 +1,64 @@
+<div x-data="{
+  query: '',
+  focused: false,
+  results: [
+    { title: 'iPhone 15 Pro', subtitle: 'Smartphones' },
+    { title: 'iPad Air', subtitle: 'Tablets' },
+    { title: 'MacBook Pro', subtitle: 'Laptops' },
+    { title: 'AirPods Pro', subtitle: 'Audio' }
+  ],
+  get filteredResults() {
+    if (!this.query) return [];
+    return this.results.filter(r =>
+      r.title.toLowerCase().includes(this.query.toLowerCase())
+    );
+  }
+}">
+  <div class="ux-searchbar"
+       :class="{
+         'ux-searchbar--has-value': query.length > 0,
+         'ux-searchbar--focused': focused
+       }"
+       style="position: relative;">
+    <div class="ux-searchbar__container">
+      <span class="ux-searchbar__icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </span>
+      <input type="search" class="ux-searchbar__input" placeholder="Buscar productos..."
+             x-model="query"
+             @focus="focused = true"
+             @blur="setTimeout(() => focused = false, 200)">
+      <button class="ux-searchbar__clear" @click="query = ''" type="button">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Results dropdown -->
+    <div class="ux-searchbar__results" x-show="focused && query.length > 0" x-cloak>
+      <template x-if="filteredResults.length > 0">
+        <div>
+          <template x-for="result in filteredResults" :key="result.title">
+            <div class="ux-searchbar__result" @click="query = result.title">
+              <span class="ux-searchbar__result-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </span>
+              <div class="ux-searchbar__result-content">
+                <div class="ux-searchbar__result-title" x-text="result.title"></div>
+                <div class="ux-searchbar__result-subtitle" x-text="result.subtitle"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+      <template x-if="filteredResults.length === 0">
+        <div class="ux-searchbar__no-results">No se encontraron resultados</div>
+      </template>
+    </div>
+  </div>
+</div>

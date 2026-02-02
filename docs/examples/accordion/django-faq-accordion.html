@@ -1,0 +1,37 @@
+<!-- components/faq_accordion.html -->
+{% if faqs %}
+<div class="ux-accordion ux-accordion--faq" x-data="uxAccordion({ multiple: true })">
+  {% for faq in faqs %}
+  <div class="ux-accordion-item" :class="{ 'ux-accordion-item--open': isOpen({{ forloop.counter0 }}) }">
+    <button class="ux-accordion-item__header"
+            @click="toggle({{ forloop.counter0 }})"
+            hx-get="{% url 'faq_content' faq.id %}"
+            hx-target="#faq-answer-{{ faq.id }}"
+            hx-trigger="click once"
+            hx-swap="innerHTML">
+      <div class="ux-accordion-item__content">
+        <span class="ux-accordion-item__title">{{ faq.question }}</span>
+        <span class="ux-accordion-item__subtitle">{{ faq.category.name }}</span>
+      </div>
+      <span class="ux-accordion-item__chevron">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </span>
+    </button>
+    <div class="ux-accordion-item__body">
+      <div class="ux-accordion-item__body-inner">
+        <div class="ux-accordion-item__body-content" id="faq-answer-{{ faq.id }}">
+          <span class="htmx-indicator ux-spinner"></span>
+          <span class="htmx-indicator" style="margin-left: 0.5rem;">Cargando...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="ux-card" style="text-align: center; ">
+  <p style="color: var(--ux-text-secondary);">No se encontraron preguntas.</p>
+</div>
+{% endif %}

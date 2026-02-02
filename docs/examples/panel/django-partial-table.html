@@ -1,0 +1,52 @@
+<!-- templates/admin/users/_table.html -->
+<div class="ux-panel-table-wrapper__header">
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 60px;">ID</th>
+        <th style="width: 200px;">Nombre</th>
+        <th style="width: 200px;">Email</th>
+        <th style="width: 100px;">Estado</th>
+        <th style="width: 120px;">Acciones</th>
+      </tr>
+    </thead>
+  </table>
+</div>
+<div class="ux-panel-table-wrapper__body">
+  <table>
+    <tbody>
+      {% for user in users %}
+      <tr id="user-{{ user.id }}">
+        <td style="width: 60px;">#{{ user.id }}</td>
+        <td style="width: 200px;">{{ user.get_full_name }}</td>
+        <td style="width: 200px;">{{ user.email }}</td>
+        <td style="width: 100px;">
+          <span class="ux-badge ux-color-{{ user.is_active|yesno:'success,danger' }}--soft">
+            {{ user.is_active|yesno:'Activo,Inactivo' }}
+          </span>
+        </td>
+        <td style="width: 120px;">
+          <button class="ux-button ux-button--sm ux-button--clear"
+                  hx-get="{% url 'admin:users-edit' user.id %}"
+                  hx-target="#modal-container">
+            Editar
+          </button>
+          <button class="ux-button ux-button--sm ux-button--clear ux-color-danger"
+                  hx-delete="{% url 'admin:users-delete' user.id %}"
+                  hx-target="#user-{{ user.id }}"
+                  hx-swap="outerHTML"
+                  hx-confirm="Eliminar usuario {{ user.get_full_name }}?">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" style="text-align: center; padding: var(--ux-space-xl);">
+          No se encontraron usuarios
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

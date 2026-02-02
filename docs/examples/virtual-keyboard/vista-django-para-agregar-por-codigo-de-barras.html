@@ -1,0 +1,37 @@
+<pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
+from .models import Product, Cart, CartItem
+
+def add_by_barcode(request):
+    barcode = request.POST.get('barcode', '').strip()
+    cart = Cart.get_current(request)
+
+    try:
+        product = Product.objects.get(barcode=barcode, is_active=True)
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            defaults={'quantity': 1, 'price': product.price}
+        )
+
+        if not created:
+            cart_item.quantity += 1
+            cart_item.save()
+
+        html = render_to_string('pos/partials/cart_item.html', {
+            'item': cart_item,
+            'is_new': created
+        })
+
+        response = HttpResponse(html)
+        response['HX-Trigger'] = 'cartUpdated'
+        return response
+
+    except Product.DoesNotExist:
+        return HttpResponse(
+            '<div class="ux-toast ux-toast--danger">'
+            'Producto no encontrado</div>',
+            status=404
+        )</pre>

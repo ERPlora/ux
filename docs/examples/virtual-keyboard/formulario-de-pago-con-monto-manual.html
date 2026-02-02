@@ -1,0 +1,47 @@
+<p style="font-size: 0.875rem; color: var(--ux-text-secondary); margin-bottom: 1rem;">
+        Entrada de monto en efectivo para calcular cambio.
+      </p>
+      <pre class="ux-code-block" data-lang="html"><form x-data="uxVirtualKeyboard()"
+      hx-post="/pos/payment/cash/"
+      hx-target="#payment-result"
+      hx-swap="innerHTML">
+
+  <input type="hidden" name="order_id" value="{{ order.id }}">
+
+  <div class="ux-card" style="margin-bottom: 1rem;">
+    <div class="ux-card__content">
+      <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 600;">
+        <span>Total a pagar:</span>
+        <span>${{ order.total }}</span>
+      </div>
+    </div>
+  </div>
+
+  <label class="ux-label">Monto recibido</label>
+  <div class="input-with-btn" style="margin-bottom: 1rem;">
+    <input type="number"
+           x-ref="amountInput"
+           name="amount_received"
+           class="ux-input"
+           placeholder="0.00"
+           step="0.01"
+           min="0"
+           inputmode="decimal"
+           required
+           @input="$dispatch('calculate-change', { amount: $el.value })">
+    <button type="button"
+            class="ux-virtual-keyboard-btn ux-virtual-keyboard-btn--icon-only ux-virtual-keyboard-btn--lg"
+            @click="show($refs.amountInput)"
+            x-show="isSupported">
+      <span class="ux-virtual-keyboard-btn__icon" x-html="keyboardIcon"></span>
+    </button>
+  </div>
+
+  <div id="change-display" class="ux-card ux-card--soft" style="margin-bottom: 1rem;">
+    <!-- Cambio calculado dinamicamente -->
+  </div>
+
+  <button type="submit" class="ux-button ux-color-success" style="width: 100%;">
+    Confirmar Pago
+  </button>
+</form></pre>

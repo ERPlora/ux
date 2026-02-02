@@ -1,0 +1,315 @@
+<header class="ux-docs-header">
+  <h1>Fullscreen Modal</h1>
+  <p>Full-screen modal dialogs for immersive experiences like onboarding, media viewers, and complex forms.</p>
+</header>
+
+<!-- Basic Fullscreen Modal -->
+<section class="component-section">
+  <h2>Basic Fullscreen Modal</h2>
+  <ux-playground src="examples/fullscreen-modal/basico.html"></ux-playground>
+</section>
+
+<!-- Animation Variants -->
+<section class="component-section">
+  <h2>Animation Variants</h2>
+  <ux-playground src="examples/fullscreen-modal/animaciones.html"></ux-playground>
+</section>
+
+<!-- Dark Variant -->
+<section class="component-section">
+  <h2>Dark Variant</h2>
+  <ux-playground src="examples/fullscreen-modal/oscuro.html"></ux-playground>
+</section>
+
+<!-- Transparent Header -->
+<section class="component-section">
+  <h2>Transparent Header (Hero Image)</h2>
+  <ux-playground src="examples/fullscreen-modal/header-transparente.html"></ux-playground>
+</section>
+
+<!-- With Steps -->
+<section class="component-section">
+  <h2>Multi-Step Modal</h2>
+  <ux-playground src="examples/fullscreen-modal/multi-paso.html"></ux-playground>
+</section>
+
+<!-- Loading State -->
+<section class="component-section">
+  <h2>Loading State</h2>
+  <ux-playground src="examples/fullscreen-modal/cargando.html"></ux-playground>
+</section>
+
+<!-- Form Modal -->
+<section class="component-section">
+  <h2>Form Modal</h2>
+  <ux-playground src="examples/fullscreen-modal/formulario.html"></ux-playground>
+</section>
+
+<!-- HTMX + Django -->
+<section class="component-section">
+  <h2>HTMX + Django</h2>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">Integration patterns for Django templates with HTMX for dynamic fullscreen modals.</p>
+
+  <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Basic Django Template</h3>
+  <pre class="ux-code-block" data-lang="html">
+<!-- templates/components/fullscreen_modal.html -->
+<div x-data="uxFullscreenModal()" id="fullscreen-modal-{{ modal_id }}">
+  <button class="ux-button ux-color-primary"
+          @click="open()"
+          hx-get="{% url 'modal_content' pk=object.pk %}"
+          hx-target="#modal-content-{{ modal_id }}"
+          hx-trigger="click once">
+    {{ button_text|default:"Open Modal" }}
+  </button>
+
+  <div class="ux-fullscreen-modal" :class="{ 'ux-fullscreen-modal--open': isOpen }">
+    <header class="ux-fullscreen-modal__header">
+      <div class="ux-fullscreen-modal__header-start">
+        <button class="ux-fullscreen-modal__close" @click="close()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="ux-fullscreen-modal__header-center">
+        <h2 class="ux-fullscreen-modal__title">{{ title }}</h2>
+      </div>
+      <div class="ux-fullscreen-modal__header-end"></div>
+    </header>
+    <div class="ux-fullscreen-modal__content">
+      <div id="modal-content-{{ modal_id }}" class="ux-fullscreen-modal__content-inner">
+        <div class="ux-fullscreen-modal__loader">
+          <div class="ux-fullscreen-modal__spinner"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  </pre>
+
+  <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Django Form Modal with HTMX Submit</h3>
+  <pre class="ux-code-block" data-lang="html">
+<!-- templates/products/product_form_modal.html -->
+<div x-data="uxFullscreenModal()" @htmx:after-request="if(event.detail.successful) close()">
+  <button class="ux-button ux-color-primary" @click="open()">
+    {% if product %}Edit Product{% else %}New Product{% endif %}
+  </button>
+
+  <div class="ux-fullscreen-modal ux-fullscreen-modal--slide-right"
+       :class="{ 'ux-fullscreen-modal--open': isOpen }">
+    <header class="ux-fullscreen-modal__header">
+      <div class="ux-fullscreen-modal__header-start">
+        <button class="ux-fullscreen-modal__close" @click="close()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="ux-fullscreen-modal__header-center">
+        <h2 class="ux-fullscreen-modal__title">
+          {% if product %}Edit {{ product.name }}{% else %}New Product{% endif %}
+        </h2>
+      </div>
+      <div class="ux-fullscreen-modal__header-end"></div>
+    </header>
+
+    <form hx-post="{% url 'product_save' pk=product.pk|default:'' %}"
+          hx-target="#product-list"
+          hx-swap="innerHTML">
+      {% csrf_token %}
+      <div class="ux-fullscreen-modal__content">
+        <div class="ux-fullscreen-modal__content-inner" style="max-width: 600px; margin: 0 auto;">
+          {% for field in form %}
+          <div class="ux-input" style="margin-bottom: 1rem;">
+            <input type="{{ field.field.widget.input_type|default:'text' }}"
+                   name="{{ field.name }}"
+                   value="{{ field.value|default:'' }}"
+                   placeholder=" "
+                   {% if field.field.required %}required{% endif %}>
+            <label>{{ field.label }}</label>
+            {% if field.errors %}
+            <span class="ux-input__error">{{ field.errors.0 }}</span>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <footer class="ux-fullscreen-modal__footer">
+        <button type="button" class="ux-button" @click="close()">Cancel</button>
+        <button type="submit" class="ux-button ux-color-primary">
+          {% if product %}Update{% else %}Create{% endif %}
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>
+  </pre>
+
+  <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Django View for HTMX Partial</h3>
+  <pre class="ux-code-block" data-lang="python">
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from .models import Product
+from .forms import ProductForm
+
+def modal_content(request, pk):
+    """Return partial HTML for fullscreen modal content."""
+    product = get_object_or_404(Product, pk=pk)
+    return render(request, 'products/partials/product_detail.html', {
+        'product': product
+    })
+
+def product_save(request, pk=None):
+    """Handle form submission via HTMX."""
+    product = get_object_or_404(Product, pk=pk) if pk else None
+    form = ProductForm(request.POST or None, instance=product)
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        # Return updated list for hx-target
+        products = Product.objects.all()
+        return render(request, 'products/partials/product_list.html', {
+            'products': products
+        })
+
+    # Return form with errors for validation display
+    return render(request, 'products/partials/product_form.html', {
+        'form': form,
+        'product': product
+    })
+  </pre>
+
+  <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Multi-Step Wizard with Django</h3>
+  <pre class="ux-code-block" data-lang="html">
+<!-- templates/onboarding/wizard.html -->
+<div x-data="uxFullscreenModal({ totalSteps: {{ steps|length }} })">
+  <button class="ux-button ux-color-primary" @click="open()">Start Setup</button>
+
+  <div class="ux-fullscreen-modal" :class="{ 'ux-fullscreen-modal--open': isOpen }">
+    <header class="ux-fullscreen-modal__header">
+      <div class="ux-fullscreen-modal__header-start">
+        <button class="ux-fullscreen-modal__close" @click="close()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="ux-fullscreen-modal__header-center">
+        <div class="ux-fullscreen-modal__steps">
+          {% for step in steps %}
+          <div class="ux-fullscreen-modal__step-dot"
+               :class="{
+                 'ux-fullscreen-modal__step-dot--active': currentStep === {{ forloop.counter0 }},
+                 'ux-fullscreen-modal__step-dot--completed': currentStep > {{ forloop.counter0 }}
+               }"></div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="ux-fullscreen-modal__header-end">
+        <button class="ux-button ux-button--clear ux-button--sm" @click="close()">Skip</button>
+      </div>
+    </header>
+
+    <div class="ux-fullscreen-modal__content ux-fullscreen-modal__content--centered">
+      <div id="wizard-content">
+        {% for step in steps %}
+        <div x-show="currentStep === {{ forloop.counter0 }}"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 transform translate-x-4"
+             x-transition:enter-end="opacity-100 transform translate-x-0">
+          <form hx-post="{% url 'wizard_step' step=forloop.counter0 %}"
+                hx-target="#wizard-content"
+                hx-swap="innerHTML"
+                @htmx:after-request="if(event.detail.successful) nextStep()">
+            {% csrf_token %}
+            {% include step.template %}
+            <input type="hidden" name="step" value="{{ forloop.counter0 }}">
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <footer class="ux-fullscreen-modal__footer ux-fullscreen-modal__footer--spaced">
+      <button class="ux-button" @click="prevStep()" x-show="currentStep > 0">Back</button>
+      <div x-show="currentStep === 0"></div>
+      <button type="submit"
+              form="step-form"
+              class="ux-button ux-color-primary"
+              x-text="currentStep < totalSteps - 1 ? 'Continue' : 'Finish'">
+      </button>
+    </footer>
+  </div>
+</div>
+  </pre>
+
+  <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Detail View Modal (Read-Only)</h3>
+  <pre class="ux-code-block" data-lang="html">
+<!-- templates/orders/order_detail_modal.html -->
+{% for order in orders %}
+<div x-data="uxFullscreenModal()" class="ux-list__item">
+  <div hx-get="{% url 'order_detail' pk=order.pk %}"
+       hx-target="#order-modal-content-{{ order.pk }}"
+       hx-trigger="click once"
+       @click="open()"
+       style="cursor: pointer;">
+    <strong>Order #{{ order.number }}</strong>
+    <span class="ux-badge ux-color-{{ order.status_color }}--soft">{{ order.status }}</span>
+  </div>
+
+  <div class="ux-fullscreen-modal ux-fullscreen-modal--slide-right"
+       :class="{ 'ux-fullscreen-modal--open': isOpen }">
+    <header class="ux-fullscreen-modal__header">
+      <div class="ux-fullscreen-modal__header-start">
+        <button class="ux-fullscreen-modal__close" @click="close()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="ux-fullscreen-modal__header-center">
+        <h2 class="ux-fullscreen-modal__title">Order #{{ order.number }}</h2>
+      </div>
+      <div class="ux-fullscreen-modal__header-end">
+        <a href="{% url 'order_print' pk=order.pk %}" class="ux-button ux-button--sm">Print</a>
+      </div>
+    </header>
+    <div class="ux-fullscreen-modal__content">
+      <div id="order-modal-content-{{ order.pk }}" class="ux-fullscreen-modal__content-inner">
+        <div class="ux-fullscreen-modal__loader">
+          <div class="ux-fullscreen-modal__spinner"></div>
+        </div>
+      </div>
+    </div>
+    <footer class="ux-fullscreen-modal__footer">
+      <button class="ux-button" @click="close()">Close</button>
+      <a href="{% url 'order_edit' pk=order.pk %}" class="ux-button ux-color-primary">Edit Order</a>
+    </footer>
+  </div>
+</div>
+{% endfor %}
+  </pre>
+
+  <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">URL Configuration</h3>
+  <pre class="ux-code-block" data-lang="python">
+# urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('modal/content/<int:pk>/', views.modal_content, name='modal_content'),
+    path('products/save/', views.product_save, name='product_save'),
+    path('products/save/<int:pk>/', views.product_save, name='product_save'),
+    path('orders/<int:pk>/', views.order_detail, name='order_detail'),
+    path('wizard/step/<int:step>/', views.wizard_step, name='wizard_step'),
+]
+  </pre>
+</section>
+
+<!-- API Reference -->
+<section class="component-section">
+  <h2>API Reference</h2>
+  <ux-playground src="examples/fullscreen-modal/referencia-api.html"></ux-playground>
+</section>

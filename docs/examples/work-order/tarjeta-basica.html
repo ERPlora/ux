@@ -1,0 +1,179 @@
+<div class="demo-row">
+  <!-- Pending Work Order -->
+  <div x-data="uxWorkOrder({
+    workOrderNumber: 'WO-2024-0142',
+    product: {
+      name: 'Aluminum Housing Assembly',
+      sku: 'ALU-HSG-001'
+    },
+    status: 'pending',
+    priority: 'normal',
+    quantityOrdered: 500,
+    quantityCompleted: 0,
+    dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    machine: 'CNC Mill #3',
+    materials: [
+      { name: 'Aluminum Sheet 6061', qty: '50 units' },
+      { name: 'M4 Bolts', qty: '2000 pcs' },
+      { name: 'Rubber Gaskets', qty: '500 pcs' }
+    ]
+  })" class="ux-work-order ux-work-order--priority-normal"
+     @work-order:status-change.window="console.log('Status changed:', $event.detail)">
+    <div class="ux-work-order__header">
+      <div class="ux-work-order__header-top">
+        <h4 class="ux-work-order__number" x-text="workOrderNumber"></h4>
+        <span class="ux-work-order__status" :class="'ux-work-order__status--' + status">
+          <span class="ux-work-order__status-dot"></span>
+          <span x-text="statusLabel"></span>
+        </span>
+      </div>
+      <div class="ux-work-order__product">
+        <h5 class="ux-work-order__product-name" x-text="product.name"></h5>
+        <span class="ux-work-order__product-sku" x-text="product.sku"></span>
+      </div>
+    </div>
+
+    <div class="ux-work-order__content">
+      <div class="ux-work-order__quantities">
+        <div class="ux-work-order__quantity">
+          <span class="ux-work-order__quantity-label" x-text="labels.ordered"></span>
+          <span class="ux-work-order__quantity-value" x-text="quantityOrdered"></span>
+        </div>
+        <div class="ux-work-order__quantity">
+          <span class="ux-work-order__quantity-label" x-text="labels.completed"></span>
+          <span class="ux-work-order__quantity-value ux-work-order__quantity-value--completed" x-text="quantityCompleted"></span>
+        </div>
+        <div class="ux-work-order__quantity">
+          <span class="ux-work-order__quantity-label" x-text="labels.remaining"></span>
+          <span class="ux-work-order__quantity-value ux-work-order__quantity-value--remaining" x-text="quantityRemaining"></span>
+        </div>
+      </div>
+
+      <div class="ux-work-order__progress">
+        <div class="ux-work-order__progress-header">
+          <span class="ux-work-order__progress-label" x-text="labels.progress"></span>
+          <span class="ux-work-order__progress-value" x-text="progressPercent + '%'"></span>
+        </div>
+        <div class="ux-work-order__progress-bar">
+          <div class="ux-work-order__progress-fill" :style="'width: ' + progressPercent + '%'"></div>
+        </div>
+      </div>
+
+      <div class="ux-work-order__meta">
+        <div class="ux-work-order__due-date" :class="{'ux-work-order__due-date--overdue': isOverdue, 'ux-work-order__due-date--warning': isDueSoon}">
+          <span class="ux-work-order__due-date-icon" x-html="getIcon('calendar')"></span>
+          <span x-text="formattedDueDate"></span>
+        </div>
+        <div class="ux-work-order__machine">
+          <span class="ux-work-order__machine-icon" x-html="getIcon('machine')"></span>
+          <span class="ux-work-order__machine-name" x-text="machine"></span>
+        </div>
+      </div>
+
+      <div class="ux-work-order__materials" x-show="materials.length > 0">
+        <div class="ux-work-order__materials-header">
+          <span x-text="labels.materials"></span>
+          <span class="ux-work-order__materials-count" x-text="materials.length + ' items'"></span>
+        </div>
+        <ul class="ux-work-order__materials-list">
+          <template x-for="(material, index) in materials.slice(0, 3)" :key="index">
+            <li class="ux-work-order__material" :class="{'ux-work-order__material--shortage': material.shortage}">
+              <span class="ux-work-order__material-name" x-text="material.name"></span>
+              <span class="ux-work-order__material-qty" x-text="material.qty"></span>
+            </li>
+          </template>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ux-work-order__actions">
+      <button type="button" class="ux-work-order__action ux-work-order__action--start" @click="start()">
+        <span class="ux-work-order__action-icon" x-html="getIcon('play')"></span>
+        <span x-text="labels.start"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- In Progress Work Order -->
+  <div x-data="uxWorkOrder({
+    workOrderNumber: 'WO-2024-0138',
+    product: {
+      name: 'Steel Bracket Type B',
+      sku: 'STL-BRK-002'
+    },
+    status: 'in-progress',
+    priority: 'high',
+    quantityOrdered: 1000,
+    quantityCompleted: 650,
+    dueDate: new Date(Date.now() + 12 * 60 * 60 * 1000),
+    machine: 'Press #1',
+    startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    materials: [
+      { name: 'Steel Sheet 304', qty: '100 units' },
+      { name: 'Zinc Coating', qty: '5 L' }
+    ]
+  })" class="ux-work-order ux-work-order--priority-high">
+    <div class="ux-work-order__header">
+      <div class="ux-work-order__header-top">
+        <h4 class="ux-work-order__number" x-text="workOrderNumber"></h4>
+        <span class="ux-work-order__status ux-work-order__status--pulse" :class="'ux-work-order__status--' + status">
+          <span class="ux-work-order__status-dot"></span>
+          <span x-text="statusLabel"></span>
+        </span>
+      </div>
+      <div class="ux-work-order__product">
+        <h5 class="ux-work-order__product-name" x-text="product.name"></h5>
+        <span class="ux-work-order__product-sku" x-text="product.sku"></span>
+      </div>
+    </div>
+
+    <div class="ux-work-order__content">
+      <div class="ux-work-order__quantities">
+        <div class="ux-work-order__quantity">
+          <span class="ux-work-order__quantity-label" x-text="labels.ordered"></span>
+          <span class="ux-work-order__quantity-value" x-text="quantityOrdered"></span>
+        </div>
+        <div class="ux-work-order__quantity">
+          <span class="ux-work-order__quantity-label" x-text="labels.completed"></span>
+          <span class="ux-work-order__quantity-value ux-work-order__quantity-value--completed" x-text="quantityCompleted"></span>
+        </div>
+        <div class="ux-work-order__quantity">
+          <span class="ux-work-order__quantity-label" x-text="labels.remaining"></span>
+          <span class="ux-work-order__quantity-value ux-work-order__quantity-value--remaining" x-text="quantityRemaining"></span>
+        </div>
+      </div>
+
+      <div class="ux-work-order__progress">
+        <div class="ux-work-order__progress-header">
+          <span class="ux-work-order__progress-label" x-text="labels.progress"></span>
+          <span class="ux-work-order__progress-value" x-text="progressPercent + '%'"></span>
+        </div>
+        <div class="ux-work-order__progress-bar">
+          <div class="ux-work-order__progress-fill" :style="'width: ' + progressPercent + '%'"></div>
+        </div>
+      </div>
+
+      <div class="ux-work-order__meta">
+        <div class="ux-work-order__due-date" :class="{'ux-work-order__due-date--overdue': isOverdue, 'ux-work-order__due-date--warning': isDueSoon}">
+          <span class="ux-work-order__due-date-icon" x-html="getIcon('calendar')"></span>
+          <span x-text="formattedDueDate"></span>
+        </div>
+        <div class="ux-work-order__meta-item">
+          <span class="ux-work-order__meta-icon" x-html="getIcon('clock')"></span>
+          <span x-text="formattedElapsedTime"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ux-work-order__actions">
+      <button type="button" class="ux-work-order__action ux-work-order__action--pause" @click="pause()">
+        <span class="ux-work-order__action-icon" x-html="getIcon('pause')"></span>
+        <span x-text="labels.pause"></span>
+      </button>
+      <button type="button" class="ux-work-order__action ux-work-order__action--complete" @click="complete()">
+        <span class="ux-work-order__action-icon" x-html="getIcon('check')"></span>
+        <span x-text="labels.complete"></span>
+      </button>
+    </div>
+  </div>
+</div>

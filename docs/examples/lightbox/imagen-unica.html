@@ -1,0 +1,58 @@
+<style>
+  .demo-image {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .demo-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .demo-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>
+
+<div x-data="uxLightbox({
+  images: [{ src: 'https://picsum.photos/1200/900?random=20', title: 'Single Image View' }],
+  showThumbnails: false
+})">
+  <div class="demo-image ux-lightbox-trigger" style="max-width: 300px;" @click="open(0)">
+    <img src="https://picsum.photos/300/300?random=20" alt="Single Image">
+  </div>
+
+  <div class="ux-lightbox" :class="{ 'ux-lightbox--open': isOpen, 'ux-lightbox--hide-ui': hideUI, 'ux-lightbox--zoomed': zoom > 1 }">
+    <div class="ux-lightbox__backdrop" @click="handleBackdropClick($event)"></div>
+    <div class="ux-lightbox__container">
+      <header class="ux-lightbox__header">
+        <h3 class="ux-lightbox__title" x-text="currentImage.title"></h3>
+        <div class="ux-lightbox__actions">
+          <button class="ux-lightbox__btn" @click="close()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      </header>
+      <div class="ux-lightbox__image-container" @click="toggleUI()" @dblclick="handleDoubleTap()">
+        <div class="ux-lightbox__loading" x-show="loading">
+          <div class="ux-lightbox__spinner"></div>
+        </div>
+        <div class="ux-lightbox__image-wrapper" :style="{ transform: 'scale(' + zoom + ')' }">
+          <img class="ux-lightbox__image" :src="currentImage.src" x-show="!loading">
+        </div>
+      </div>
+      <div class="ux-lightbox__zoom-controls">
+        <button class="ux-lightbox__btn" @click.stop="zoomIn()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"></path></svg>
+        </button>
+        <span class="ux-lightbox__zoom-level" x-text="zoomPercent + '%'"></span>
+        <button class="ux-lightbox__btn" @click.stop="zoomOut()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35M8 11h6"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

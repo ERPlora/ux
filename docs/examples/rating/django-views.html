@@ -1,0 +1,54 @@
+# views.py
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.template.loader import render_to_string
+from .models import Product, Rating
+
+@login_required
+@require_POST
+def rate_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    rating_value = int(request.POST.get('rating', 0))
+
+    # Crear o actualizar rating
+    rating, created = Rating.objects.update_or_create(
+        product=product,
+        user=request.user,
+        defaults={'value': rating_value}
+    )
+
+    # Recalcular promedio del producto
+    product.update_average_rating()
+
+    # Devolver el componente actualizado
+    html = render_to_string('products/rating.html', {
+        'product': product,
+        'user_rating': rating_value,
+    }, request=request)
+
+    return HttpResponse(html)
+
+
+# Vista alternativa con feedback
+@login_required
+@require_POST
+def rate_product_feedback(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    rating_value = int(request.POST.get('rating', 0))
+
+    Rating.objects.update_or_create(
+        product=product,
+        user=request.user,
+        defaults={'value': rating_value}
+    )
+
+    product.update_average_rating()
+
+    # Devolver mensaje de confirmacion
+    return HttpResponse(f'''
+        <span class="ux-badge ux-color-success--soft">
+            Valoracion guardada: {rating_value} estrellas
+        </span>
+    ''')

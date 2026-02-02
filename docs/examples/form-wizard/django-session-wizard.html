@@ -1,0 +1,43 @@
+<pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from formtools.wizard.views import SessionWizardView
+
+WIZARD_FORMS = [
+    ("account", AccountForm),
+    ("personal", PersonalForm),
+    ("payment", PaymentForm),
+    ("confirm", ConfirmForm),
+]
+
+WIZARD_TEMPLATES = {
+    "account": "wizard/step_account.html",
+    "personal": "wizard/step_personal.html",
+    "payment": "wizard/step_payment.html",
+    "confirm": "wizard/step_confirm.html",
+}
+
+class RegistrationWizard(SessionWizardView):
+    def get_template_names(self):
+        return [WIZARD_TEMPLATES[self.steps.current]]
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form=form, **kwargs)
+        context.update({
+            'wizard_steps': [
+                {'number': i+1, 'label': name.title()}
+                for i, (name, _) in enumerate(WIZARD_FORMS)
+            ],
+            'current_step': self.steps.step1,
+            'total_steps': len(WIZARD_FORMS),
+            'progress_percent': (self.steps.step1 / len(WIZARD_FORMS)) * 100,
+        })
+        return context
+
+    def done(self, form_list, **kwargs):
+        # Procesar todos los formularios
+        data = {}
+        for form in form_list:
+            data.update(form.cleaned_data)
+
+        user = User.objects.create_user(**data)
+        return render(self.request, 'wizard/complete.html', {'user': user})</pre>

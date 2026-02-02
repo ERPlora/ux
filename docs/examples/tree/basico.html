@@ -1,0 +1,91 @@
+<div x-data="uxTree({
+  showIcons: true,
+  data: [
+    {
+      id: 'folder1',
+      label: 'Documentos',
+      icon: 'folder',
+      children: [
+        { id: 'file1', label: 'Informe.pdf', icon: 'file' },
+        { id: 'file2', label: 'Presentacion.pptx', icon: 'file' },
+        {
+          id: 'folder2',
+          label: 'Proyectos',
+          icon: 'folder',
+          children: [
+            { id: 'file3', label: 'Proyecto A.doc', icon: 'file' },
+            { id: 'file4', label: 'Proyecto B.doc', icon: 'file' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'folder3',
+      label: 'Imagenes',
+      icon: 'folder',
+      children: [
+        { id: 'img1', label: 'foto1.jpg', icon: 'file' },
+        { id: 'img2', label: 'foto2.png', icon: 'file' }
+      ]
+    },
+    { id: 'file5', label: 'README.md', icon: 'file' }
+  ]
+})">
+  <div class="ux-tree">
+    <template x-for="node in data" :key="node.id">
+      <div class="ux-tree__node" x-data="{ node }">
+        <div class="ux-tree__item"
+             @click="handleClick(node.id, node, $event)"
+             :data-node-id="node.id">
+          <span class="ux-tree__toggle"
+                :class="{
+                  'ux-tree__toggle--expanded': expandedNodes.has(node.id),
+                  'ux-tree__toggle--empty': !node.children || node.children.length === 0
+                }"
+                @click.stop="toggle(node.id)"
+                x-html="icons.chevron"></span>
+          <span class="ux-tree__icon"
+                :class="node.icon === 'folder' ? 'ux-tree__icon--folder' : 'ux-tree__icon--file'"
+                x-html="node.icon === 'folder' ? (expandedNodes.has(node.id) ? icons.folderOpen : icons.folder) : icons.file"></span>
+          <span class="ux-tree__label" x-text="node.label"></span>
+        </div>
+        <template x-if="node.children && node.children.length > 0 && expandedNodes.has(node.id)">
+          <ul class="ux-tree__list ux-tree__list--nested">
+            <template x-for="child in node.children" :key="child.id">
+              <li class="ux-tree__node">
+                <div class="ux-tree__item"
+                     @click="handleClick(child.id, child, $event)"
+                     :data-node-id="child.id">
+                  <span class="ux-tree__toggle"
+                        :class="{
+                          'ux-tree__toggle--expanded': expandedNodes.has(child.id),
+                          'ux-tree__toggle--empty': !child.children || child.children.length === 0
+                        }"
+                        @click.stop="toggle(child.id)"
+                        x-html="icons.chevron"></span>
+                  <span class="ux-tree__icon"
+                        :class="child.icon === 'folder' ? 'ux-tree__icon--folder' : 'ux-tree__icon--file'"
+                        x-html="child.icon === 'folder' ? (expandedNodes.has(child.id) ? icons.folderOpen : icons.folder) : icons.file"></span>
+                  <span class="ux-tree__label" x-text="child.label"></span>
+                </div>
+                <template x-if="child.children && child.children.length > 0 && expandedNodes.has(child.id)">
+                  <ul class="ux-tree__list ux-tree__list--nested">
+                    <template x-for="grandchild in child.children" :key="grandchild.id">
+                      <li class="ux-tree__node">
+                        <div class="ux-tree__item" @click="handleClick(grandchild.id, grandchild, $event)">
+                          <span class="ux-tree__toggle ux-tree__toggle--empty" x-html="icons.chevron"></span>
+                          <span class="ux-tree__icon ux-tree__icon--file" x-html="icons.file"></span>
+                          <span class="ux-tree__label" x-text="grandchild.label"></span>
+                        </div>
+                      </li>
+                    </template>
+                  </ul>
+                </template>
+              </li>
+            </template>
+          </ul>
+        </template>
+      </div>
+    </template>
+  </div>
+</div>

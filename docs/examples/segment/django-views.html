@@ -1,0 +1,38 @@
+# views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from .models import Task, Product
+
+def task_list(request):
+    """Vista que filtra tareas segun el status."""
+    status = request.GET.get('status', 'all')
+
+    if status == 'active':
+        tasks = Task.objects.filter(completed=False)
+    elif status == 'completed':
+        tasks = Task.objects.filter(completed=True)
+    else:
+        tasks = Task.objects.all()
+
+    # Si es peticion HTMX, retornar solo el partial
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/task_list.html', {'tasks': tasks})
+
+    # Si es peticion normal, retornar pagina completa
+    return render(request, 'tasks/index.html', {'tasks': tasks, 'status': status})
+
+
+def product_list(request):
+    """Vista que retorna productos en formato lista o grid."""
+    view = request.GET.get('view', 'list')
+    products = Product.objects.all()
+
+    template = f'partials/products_{view}.html'
+
+    if request.headers.get('HX-Request'):
+        return render(request, template, {'products': products})
+
+    return render(request, 'products/index.html', {
+        'products': products,
+        'view': view
+    })

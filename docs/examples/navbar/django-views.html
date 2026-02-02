@@ -1,0 +1,26 @@
+<pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+
+def notification_count(request):
+    """Retorna el badge de notificaciones para HTMX."""
+    count = request.user.notifications.unread().count()
+
+    if count == 0:
+        return HttpResponse("")  # Sin badge si no hay notificaciones
+
+    # Badge con numero (max 99+)
+    display = "99+" if count &gt; 99 else str(count)
+    html = f'''&lt;span class="ux-badge ux-color-danger"
+               style="position: absolute; top: 0; right: 0;
+                      min-width: 18px; height: 18px; font-size: 11px;"&gt;
+               {display}
+           &lt;/span&gt;'''
+
+    return HttpResponse(html)
+
+def user_menu(request):
+    """Retorna el contenido del menu de usuario."""
+    return render_to_string('partials/user_menu.html', {
+        'user': request.user
+    }, request=request)</pre>

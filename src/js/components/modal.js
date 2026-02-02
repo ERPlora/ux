@@ -72,7 +72,12 @@ export class UXModal {
     // Click on backdrop to close
     if (this.options.closeOnBackdrop) {
       this.el.addEventListener('click', (e) => {
-        if (e.target === this.el) {
+        // Close if clicking on backdrop or any element that's not inside .ux-modal
+        const modal = this.el.querySelector('.ux-modal');
+        if (modal && !modal.contains(e.target)) {
+          this.close();
+        } else if (!modal && e.target === this.el) {
+          // Fallback if no .ux-modal found
           this.close();
         }
       });

@@ -1,0 +1,44 @@
+<div x-data="uxDateRangePicker({
+       presets: [
+         {
+           label: 'Hoy',
+           getValue: () => {
+             const d = new Date();
+             return [d, d];
+           }
+         },
+         {
+           label: 'Esta semana',
+           getValue: () => {
+             const end = new Date();
+             const start = new Date();
+             start.setDate(start.getDate() - start.getDay());
+             return [start, end];
+           }
+         },
+         {
+           label: 'Este mes',
+           getValue: () => {
+             const now = new Date();
+             const start = new Date(now.getFullYear(), now.getMonth(), 1);
+             return [start, now];
+           }
+         },
+         {
+           label: 'Ultimo trimestre',
+           getValue: () => {
+             const end = new Date();
+             const start = new Date();
+             start.setMonth(start.getMonth() - 3);
+             return [start, end];
+           }
+         }
+       ]
+     })"
+     @daterange:change="
+       fetch(`/api/ventas/?start=${$event.detail.startDate.toISOString()}&end=${$event.detail.endDate.toISOString()}`)
+         .then(r => r.json())
+         .then(data => { ventas = data; })
+     ">
+  <!-- Trigger y panel... -->
+</div>

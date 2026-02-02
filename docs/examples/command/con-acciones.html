@@ -1,0 +1,68 @@
+<div x-data="{
+  ...uxCommand({
+    placeholder: 'Ejecutar accion...',
+    commands: [
+      {
+        id: 'alert',
+        title: 'Mostrar Alerta',
+        description: 'Muestra una alerta de prueba',
+        icon: 'command',
+        action: () => alert('Alerta ejecutada!')
+      },
+      {
+        id: 'log',
+        title: 'Log en Consola',
+        description: 'Imprime mensaje en consola',
+        action: () => console.log('Comando ejecutado desde la paleta!')
+      },
+      {
+        id: 'toggle-dark',
+        title: 'Alternar Modo Oscuro',
+        description: 'Cambiar entre claro y oscuro',
+        action: () => document.body.classList.toggle('ux-dark')
+      },
+      {
+        id: 'scroll-top',
+        title: 'Ir Arriba',
+        description: 'Desplazar al inicio de la pagina',
+        action: () => window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    ]
+  }),
+  lastExecuted: null
+}" @command:execute.window="lastExecuted = $event.detail.command.title">
+  <button class="ux-button ux-color-primary" @click="open()">
+    Ejecutar Comando
+  </button>
+
+  <div class="ux-command-backdrop" :class="{ 'ux-command-backdrop--open': isOpen }" @click="close()"></div>
+  <div class="ux-command" :class="{ 'ux-command--open': isOpen }">
+    <div class="ux-command__search">
+      <span class="ux-command__search-icon" x-html="icons.search"></span>
+      <input type="text" class="ux-command__input" :placeholder="placeholder"
+             x-model="query" @input="filterCommands()" @keydown="handleKeydown($event)">
+    </div>
+    <div class="ux-command__results">
+      <template x-for="(group, gi) in filteredCommands" :key="group.group">
+        <div class="ux-command__group">
+          <ul class="ux-command__list">
+            <template x-for="(cmd, ii) in group.commands" :key="cmd.id">
+              <li class="ux-command__item" :class="{ 'ux-command__item--active': isActiveItem(gi, ii) }"
+                  @click="executeCommand(cmd)">
+                <div class="ux-command__item-icon" x-html="getIcon(cmd)"></div>
+                <div class="ux-command__item-content">
+                  <div class="ux-command__item-title" x-text="cmd.title"></div>
+                  <div class="ux-command__item-description" x-text="cmd.description"></div>
+                </div>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <div class="demo-output" x-show="lastExecuted">
+    Ultimo comando ejecutado: <strong x-text="lastExecuted"></strong>
+  </div>
+</div>

@@ -20,6 +20,8 @@ import { UXOtpInput } from './components/otp-input.js';
 import { UXAutocomplete } from './components/autocomplete.js';
 import { UXTagInput } from './components/tag-input.js';
 import { UXUpload } from './components/upload.js';
+import { UXQuantityStepper } from './components/quantity-stepper.js';
+import { UXSignaturePad } from './components/signature-pad.js';
 
 // ==========================================================
 // Component Registry
@@ -33,6 +35,8 @@ const componentMap = {
   'ux-autocomplete': UXAutocomplete,
   'ux-tag-input': UXTagInput,
   'ux-upload': UXUpload,
+  'ux-quantity-stepper': UXQuantityStepper,
+  'ux-signature-pad': UXSignaturePad,
 };
 
 // ==========================================================
@@ -54,6 +58,8 @@ const UX = {
   Autocomplete: UXAutocomplete,
   TagInput: UXTagInput,
   Upload: UXUpload,
+  QuantityStepper: UXQuantityStepper,
+  SignaturePad: UXSignaturePad,
 
   // Component instances registry
   _instances: new WeakMap(),
@@ -86,6 +92,8 @@ const UX = {
     this._initByAttribute('data-ux-autocomplete', UXAutocomplete);
     this._initByAttribute('data-ux-tag-input', UXTagInput);
     this._initByAttribute('data-ux-upload', UXUpload);
+    this._initByAttribute('data-ux-quantity-stepper', UXQuantityStepper);
+    this._initByAttribute('data-ux-signature-pad', UXSignaturePad);
   },
 
   /**
@@ -131,6 +139,10 @@ const UX = {
       taginput: UXTagInput,
       'tag-input': UXTagInput,
       upload: UXUpload,
+      quantitystepper: UXQuantityStepper,
+      'quantity-stepper': UXQuantityStepper,
+      signaturepad: UXSignaturePad,
+      'signature-pad': UXSignaturePad,
     }[type.toLowerCase()];
 
     if (!ComponentClass) {
@@ -195,6 +207,8 @@ export {
   UXAutocomplete,
   UXTagInput,
   UXUpload,
+  UXQuantityStepper,
+  UXSignaturePad,
   // Re-export helpers for tree-shaking
   helpers
 };

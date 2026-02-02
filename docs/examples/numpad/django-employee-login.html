@@ -1,0 +1,44 @@
+<!-- templates/pos/employee_login.html -->
+
+<div class="employee-login">
+  <h3>Ingrese su PIN</h3>
+
+  <div x-data="uxNumpad({
+    pinMode: true,
+    pinLength: 4,
+    pinMask: true
+  })" class="ux-numpad ux-numpad--pin"
+       @numpad-submit="
+         htmx.ajax('POST', '{% url 'pos:validate_pin' %}', {
+           values: {
+             pin: $event.detail.value,
+             csrfmiddlewaretoken: '{{ csrf_token }}'
+           },
+           target: '#login-result',
+           swap: 'innerHTML'
+         }).then(() => clear())
+       ">
+
+    <div class="ux-numpad__pin-dots">
+      <template x-for="(filled, i) in getPinDots()" :key="i">
+        <div class="ux-numpad__pin-dot"
+             :class="{ 'ux-numpad__pin-dot--filled': filled }"></div>
+      </template>
+    </div>
+
+    <div class="ux-numpad__grid">
+      <template x-for="key in ['1','2','3','4','5','6','7','8','9']">
+        <button type="button" class="ux-numpad__key"
+                @click="appendDigit(key)" x-text="key"></button>
+      </template>
+      <button type="button" class="ux-numpad__key ux-numpad__key--action"
+              @click="clear()">C</button>
+      <button type="button" class="ux-numpad__key"
+              @click="appendDigit('0')">0</button>
+      <button type="button" class="ux-numpad__key ux-numpad__key--action"
+              @click="backspace()">&#9003;</button>
+    </div>
+  </div>
+
+  <div id="login-result"></div>
+</div>

@@ -1,0 +1,122 @@
+<div class="demo-box">
+  <div x-data="uxRichText({ placeholder: 'Escribe tu contenido aqui...' })">
+    <div class="ux-rich-text">
+      <!-- Toolbar -->
+      <div class="ux-rich-text__toolbar">
+        <!-- Undo/Redo -->
+        <div class="ux-rich-text__toolbar-group">
+          <button type="button" class="ux-rich-text__btn" @click="undo()" title="Deshacer (Ctrl+Z)">
+            <span x-html="icons.undo"></span>
+          </button>
+          <button type="button" class="ux-rich-text__btn" @click="redo()" title="Rehacer (Ctrl+Y)">
+            <span x-html="icons.redo"></span>
+          </button>
+        </div>
+
+        <div class="ux-rich-text__toolbar-divider"></div>
+
+        <!-- Headings Dropdown -->
+        <div class="ux-rich-text__dropdown">
+          <button type="button" class="ux-rich-text__btn ux-rich-text__btn--dropdown" @click="headingDropdownOpen = !headingDropdownOpen">
+            <span x-html="icons.heading"></span>
+            <span x-text="currentHeading === 'p' ? 'Parrafo' : currentHeading.toUpperCase()"></span>
+            <span x-html="icons.chevronDown"></span>
+          </button>
+          <div class="ux-rich-text__dropdown-menu" :class="headingDropdownOpen && 'ux-rich-text__dropdown-menu--open'">
+            <button type="button" class="ux-rich-text__dropdown-item" @click="setHeading('p')">Parrafo</button>
+            <button type="button" class="ux-rich-text__dropdown-item ux-rich-text__dropdown-item--h1" @click="setHeading('h1')">Titulo 1</button>
+            <button type="button" class="ux-rich-text__dropdown-item ux-rich-text__dropdown-item--h2" @click="setHeading('h2')">Titulo 2</button>
+            <button type="button" class="ux-rich-text__dropdown-item ux-rich-text__dropdown-item--h3" @click="setHeading('h3')">Titulo 3</button>
+          </div>
+        </div>
+
+        <div class="ux-rich-text__toolbar-divider"></div>
+
+        <!-- Text Formatting -->
+        <div class="ux-rich-text__toolbar-group">
+          <button type="button" class="ux-rich-text__btn" :class="isBold && 'ux-rich-text__btn--active'" @click="toggleBold()" title="Negrita (Ctrl+B)">
+            <span x-html="icons.bold"></span>
+          </button>
+          <button type="button" class="ux-rich-text__btn" :class="isItalic && 'ux-rich-text__btn--active'" @click="toggleItalic()" title="Cursiva (Ctrl+I)">
+            <span x-html="icons.italic"></span>
+          </button>
+          <button type="button" class="ux-rich-text__btn" :class="isUnderline && 'ux-rich-text__btn--active'" @click="toggleUnderline()" title="Subrayado (Ctrl+U)">
+            <span x-html="icons.underline"></span>
+          </button>
+          <button type="button" class="ux-rich-text__btn" :class="isStrikethrough && 'ux-rich-text__btn--active'" @click="toggleStrikethrough()" title="Tachado">
+            <span x-html="icons.strikethrough"></span>
+          </button>
+        </div>
+
+        <div class="ux-rich-text__toolbar-divider"></div>
+
+        <!-- Lists -->
+        <div class="ux-rich-text__toolbar-group">
+          <button type="button" class="ux-rich-text__btn" :class="isList && 'ux-rich-text__btn--active'" @click="toggleUnorderedList()" title="Lista con vinetas">
+            <span x-html="icons.listUl"></span>
+          </button>
+          <button type="button" class="ux-rich-text__btn" :class="isOrderedList && 'ux-rich-text__btn--active'" @click="toggleOrderedList()" title="Lista numerada">
+            <span x-html="icons.listOl"></span>
+          </button>
+        </div>
+
+        <div class="ux-rich-text__toolbar-divider"></div>
+
+        <!-- Alignment Dropdown -->
+        <div class="ux-rich-text__dropdown">
+          <button type="button" class="ux-rich-text__btn" @click="alignDropdownOpen = !alignDropdownOpen" title="Alineacion">
+            <span x-html="icons['align' + currentAlign.charAt(0).toUpperCase() + currentAlign.slice(1)]"></span>
+          </button>
+          <div class="ux-rich-text__dropdown-menu" :class="alignDropdownOpen && 'ux-rich-text__dropdown-menu--open'">
+            <button type="button" class="ux-rich-text__dropdown-item" @click="setAlign('left')">Izquierda</button>
+            <button type="button" class="ux-rich-text__dropdown-item" @click="setAlign('center')">Centro</button>
+            <button type="button" class="ux-rich-text__dropdown-item" @click="setAlign('right')">Derecha</button>
+            <button type="button" class="ux-rich-text__dropdown-item" @click="setAlign('justify')">Justificado</button>
+          </div>
+        </div>
+
+        <div class="ux-rich-text__toolbar-divider"></div>
+
+        <!-- Link & Image -->
+        <div class="ux-rich-text__toolbar-group">
+          <button type="button" class="ux-rich-text__btn" @click="insertLink()" title="Insertar enlace">
+            <span x-html="icons.link"></span>
+          </button>
+          <button type="button" class="ux-rich-text__btn" @click="insertImage()" title="Insertar imagen">
+            <span x-html="icons.image"></span>
+          </button>
+        </div>
+
+        <div class="ux-rich-text__toolbar-divider"></div>
+
+        <!-- Source View -->
+        <button type="button" class="ux-rich-text__btn" :class="sourceView && 'ux-rich-text__btn--active'" @click="toggleSourceView()" title="Ver HTML">
+          <span x-html="icons.code"></span>
+        </button>
+      </div>
+
+      <!-- Editor Area -->
+      <div class="ux-rich-text__editor"
+           x-ref="editor"
+           contenteditable="true"
+           :data-placeholder="placeholder"
+           @input="handleInput()"
+           @paste="handlePaste($event)"
+           @keydown="handleKeydown($event)"></div>
+
+      <!-- Source View -->
+      <textarea class="ux-rich-text__source"
+                x-ref="source"
+                @input="handleInput()"></textarea>
+
+      <!-- Footer with counters -->
+      <div class="ux-rich-text__footer">
+        <span></span>
+        <div class="ux-rich-text__counter">
+          <span x-text="charCount + ' caracteres'"></span>
+          <span x-text="wordCount + ' palabras'"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

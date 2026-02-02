@@ -12,7 +12,9 @@
 .ux-phone {
   position: relative;
   display: flex;
+  align-items: stretch;
   font-family: var(--ux-font-family);
+  width: 100%;
 
   /* ========================================
      Country Selector
@@ -22,11 +24,13 @@
     display: flex;
     align-items: center;
     gap: 0.375rem;
+    height: var(--ux-input-height, 44px);
+    min-height: 44px;
     padding: 0 0.75rem;
     background: var(--ux-surface-secondary);
-    border: var(--ux-input-border-width) solid var(--ux-border-color);
+    border: var(--ux-input-border-width, 1px) solid var(--ux-border-color);
     border-right: none;
-    border-radius: var(--ux-input-border-radius) 0 0 var(--ux-input-border-radius);
+    border-radius: var(--ux-input-border-radius, 8px) 0 0 var(--ux-input-border-radius, 8px);
     cursor: pointer;
     transition: all var(--ux-transition-fast) var(--ux-ease);
     flex-shrink: 0;
@@ -65,7 +69,34 @@
 
   .ux-input {
     flex: 1;
-    border-radius: 0 var(--ux-input-border-radius) var(--ux-input-border-radius) 0;
+    min-width: 0;
+    height: var(--ux-input-height, 44px);
+    min-height: 44px;
+    border-radius: 0 var(--ux-input-border-radius, 8px) var(--ux-input-border-radius, 8px) 0;
+  }
+
+  /* Direct input child (when not using .ux-input class) */
+  > input[type="tel"] {
+    flex: 1;
+    min-width: 0;
+    height: var(--ux-input-height, 44px);
+    min-height: 44px;
+    padding: 0 var(--ux-input-padding-x, 12px);
+    font-size: var(--ux-input-font-size, 1rem);
+    color: var(--ux-text);
+    background: var(--ux-surface);
+    border: var(--ux-input-border-width, 1px) solid var(--ux-border-color);
+    border-radius: 0 var(--ux-input-border-radius, 8px) var(--ux-input-border-radius, 8px) 0;
+    outline: none;
+
+    &:focus {
+      border-color: var(--ux-primary);
+      box-shadow: 0 0 0 3px rgba(var(--ux-primary-rgb), 0.15);
+    }
+
+    &::placeholder {
+      color: var(--ux-text-tertiary);
+    }
   }
 
   &:focus-within &__country {
@@ -89,6 +120,11 @@
     box-shadow: var(--ux-shadow-lg);
     overflow: hidden;
     z-index: var(--ux-z-dropdown);
+    display: none;
+  }
+
+  &--open &__dropdown {
+    display: block;
   }
 
   &__search {
@@ -158,6 +194,8 @@
   /* Small */
   &--sm {
     .ux-phone__country {
+      height: var(--ux-input-height-sm, 36px);
+      min-height: 36px;
       padding: 0 0.5rem;
     }
 
@@ -169,15 +207,19 @@
       font-size: 0.75rem;
     }
 
-    .ux-input {
-      height: var(--ux-input-height-sm);
-      font-size: var(--ux-font-size-sm);
+    .ux-input,
+    > input[type="tel"] {
+      height: var(--ux-input-height-sm, 36px);
+      min-height: 36px;
+      font-size: var(--ux-font-size-sm, 0.875rem);
     }
   }
 
   /* Large */
   &--lg {
     .ux-phone__country {
+      height: var(--ux-input-height-lg, 52px);
+      min-height: 52px;
       padding: 0 1rem;
     }
 
@@ -189,9 +231,11 @@
       font-size: 1rem;
     }
 
-    .ux-input {
-      height: var(--ux-input-height-lg);
-      font-size: var(--ux-font-size-lg);
+    .ux-input,
+    > input[type="tel"] {
+      height: var(--ux-input-height-lg, 52px);
+      min-height: 52px;
+      font-size: var(--ux-font-size-lg, 1.125rem);
     }
   }
 
@@ -202,11 +246,14 @@
   /* Error */
   &--error {
     .ux-phone__country,
-    .ux-input {
+    .ux-input,
+    > input[type="tel"] {
       border-color: var(--ux-danger);
     }
 
-    .ux-input:focus {
+    .ux-input:focus,
+    > input[type="tel"]:focus {
+      border-color: var(--ux-danger);
       box-shadow: 0 0 0 3px rgba(var(--ux-danger-rgb), 0.15);
     }
   }
@@ -214,20 +261,32 @@
   /* Success */
   &--success {
     .ux-phone__country,
-    .ux-input {
+    .ux-input,
+    > input[type="tel"] {
       border-color: var(--ux-success);
     }
 
-    .ux-input:focus {
+    .ux-input:focus,
+    > input[type="tel"]:focus {
+      border-color: var(--ux-success);
       box-shadow: 0 0 0 3px rgba(var(--ux-success-rgb), 0.15);
     }
   }
 
   /* Disabled */
-  &--disabled &__country {
-    opacity: 0.6;
-    cursor: not-allowed;
-    pointer-events: none;
+  &--disabled {
+    .ux-phone__country {
+      opacity: 0.6;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .ux-input,
+    > input[type="tel"] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
   }
 
   /* ========================================

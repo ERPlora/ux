@@ -1,0 +1,41 @@
+<form hx-get="/dashboard/stats/"
+      hx-target="#stats-container"
+      hx-trigger="change from:find input, change from:find select, daterange:change from:body">
+
+  <!-- Filtro de categoria -->
+  <select name="category" class="ux-select">
+    <option value="">Todas las categorias</option>
+    <option value="ventas">Ventas</option>
+    <option value="inventario">Inventario</option>
+  </select>
+
+  <!-- Filtro de sucursal -->
+  <select name="branch" class="ux-select">
+    <option value="">Todas las sucursales</option>
+    {% for branch in branches %}
+    <option value="{{ branch.id }}">{{ branch.name }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Date Range Picker -->
+  <div x-data="uxDateRangePicker({ autoApply: true })"
+       @daterange:change="
+         document.querySelector('[name=start_date]').value = $event.detail.startDate.toISOString().split('T')[0];
+         document.querySelector('[name=end_date]').value = $event.detail.endDate.toISOString().split('T')[0];
+       ">
+    <div class="ux-date-range" :class="{ 'ux-date-range--open': isOpen }">
+      <button type="button" class="ux-date-range__trigger" @click="toggle()">
+        <span x-html="icons.calendar"></span>
+        <span x-text="displayText || 'Rango de fechas'"></span>
+      </button>
+      <!-- Panel... -->
+    </div>
+  </div>
+
+  <input type="hidden" name="start_date">
+  <input type="hidden" name="end_date">
+</form>
+
+<div id="stats-container">
+  {% include 'partials/dashboard_stats.html' %}
+</div>

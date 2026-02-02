@@ -1,0 +1,51 @@
+<!-- components/faq_answer.html -->
+<div class="faq-answer">
+  <div class="faq-answer__text">
+    {{ faq.answer|linebreaks }}
+  </div>
+
+  {% if faq.related_links.exists %}
+  <div class="faq-answer__links" style="margin-top: 1rem;">
+    <strong>Enlaces relacionados:</strong>
+    <ul class="ux-list ux-list--inset">
+      {% for link in faq.related_links.all %}
+      <li class="ux-list__item">
+        <a href="{{ link.url }}">{{ link.title }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if related_faqs %}
+  <div class="faq-answer__related" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--ux-border-color);">
+    <strong style="font-size: 0.875rem; color: var(--ux-text-secondary);">Preguntas relacionadas:</strong>
+    <ul class="ux-list" style="margin-top: 0.5rem;">
+      {% for related in related_faqs %}
+      <li class="ux-list__item">
+        <a href="#"
+           hx-get="{% url 'faq_list' %}?highlight={{ related.id }}"
+           hx-target="#faq-accordion"
+           hx-push-url="true">
+          {{ related.question }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="faq-answer__feedback" style="margin-top: 1.5rem; display: flex; gap: 0.5rem; align-items: center;">
+    <span style="font-size: 0.875rem; color: var(--ux-text-secondary);">Te fue util?</span>
+    <button class="ux-button ux-button--sm ux-color-success--soft"
+            hx-post="{% url 'faq_feedback' faq.id %}?helpful=yes"
+            hx-swap="outerHTML">
+      Si
+    </button>
+    <button class="ux-button ux-button--sm ux-color-danger--soft"
+            hx-post="{% url 'faq_feedback' faq.id %}?helpful=no"
+            hx-swap="outerHTML">
+      No
+    </button>
+  </div>
+</div>

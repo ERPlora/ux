@@ -1,0 +1,77 @@
+# views.py
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def command_search(request):
+    query = request.GET.get('q', '').strip()
+    results = []
+
+    if query:
+        # Buscar en paginas/navegacion
+        pages = [
+            {'title': 'Dashboard', 'url': '/', 'icon': 'home', 'category': 'Navegacion'},
+            {'title': 'Productos', 'url': '/productos/', 'icon': 'box', 'category': 'Navegacion'},
+            {'title': 'Pedidos', 'url': '/pedidos/', 'icon': 'clipboard', 'category': 'Navegacion'},
+            {'title': 'Clientes', 'url': '/clientes/', 'icon': 'users', 'category': 'Navegacion'},
+            {'title': 'Configuracion', 'url': '/settings/', 'icon': 'settings', 'category': 'Navegacion', 'shortcut': 'Cmd+,'},
+        ]
+
+        # Filtrar paginas
+        for page in pages:
+            if query.lower() in page['title'].lower():
+                results.append(page)
+
+        # Buscar usuarios
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        users = User.objects.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(email__icontains=query)
+        )[:5]
+
+        for user in users:
+            results.append({
+                'title': user.get_full_name() or user.username,
+                'description': user.email,
+                'url': f'/usuarios/{user.pk}/',
+                'icon': 'user',
+                'category': 'Usuarios'
+            })
+
+        # Buscar productos
+        from products.models import Product
+        products = Product.objects.filter(
+            Q(name__icontains=query) |
+            Q(sku__icontains=query)
+        )[:5]
+
+        for product in products:
+            results.append({
+                'title': product.name,
+                'description': f'SKU: {product.sku} - ${product.price}',
+                'url': f'/productos/{product.pk}/',
+                'icon': 'box',
+                'category': 'Productos'
+            })
+
+        # Acciones rapidas
+        actions = [
+            {'title': 'Nuevo Producto', 'url': '/productos/nuevo/', 'icon': 'plus', 'category': 'Acciones', 'shortcut': 'Cmd+N'},
+            {'title': 'Nuevo Pedido', 'url': '/pedidos/nuevo/', 'icon': 'plus', 'category': 'Acciones'},
+            {'title': 'Exportar Datos', 'url': '/export/', 'icon': 'download', 'category': 'Acciones'},
+        ]
+
+        for action in actions:
+            if query.lower() in action['title'].lower():
+                results.append(action)
+
+    html = render_to_string('partials/command_results.html', {
+        'results': results,
+        'query': query
+    })
+
+    return HttpResponse(html)

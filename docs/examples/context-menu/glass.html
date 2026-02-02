@@ -1,0 +1,28 @@
+<div class="context-trigger"
+     style="background: transparent; border-color: var(--ux-glass-bg-thin); color: var(--ux-primary-contrast);"
+     x-data="uxContextMenu({
+       items: [
+         { id: 'view', label: 'View', icon: 'eye' },
+         { id: 'edit', label: 'Edit', icon: 'edit' },
+         { divider: true },
+         { id: 'delete', label: 'Delete', icon: 'trash', danger: true }
+       ]
+     })"
+     @contextmenu.prevent="open($event)">
+  Right-click for glass menu
+  <div class="ux-context-menu ux-context-menu--glass" x-show="isOpen" x-transition :style="menuStyle" @click.outside="close()">
+    <template x-for="item in items" :key="item.id || 'divider-' + Math.random()">
+      <template x-if="item.divider">
+        <div class="ux-context-menu__divider"></div>
+      </template>
+      <template x-if="!item.divider">
+        <button class="ux-context-menu__item"
+                :class="{ 'ux-context-menu__item--danger': item.danger }"
+                @click="select(item)">
+          <span class="ux-context-menu__item-icon" x-html="getIcon(item.icon)"></span>
+          <span class="ux-context-menu__item-label" x-text="item.label"></span>
+        </button>
+      </template>
+    </template>
+  </div>
+</div>

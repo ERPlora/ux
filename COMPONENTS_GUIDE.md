@@ -1,30 +1,53 @@
 # UX Component Library - Complete Component Guide
 
-> **Zero-dependency CSS component library** - Works with any framework.
+> **Zero-dependency, framework-agnostic CSS component library** with iOS/Ionic-style design.
 >
-> Total Components: **153 CSS files** | Last Updated: 2026-01-28
+> Total Components: **161 CSS files** | Last Updated: 2026-01-29
 >
 > **Architecture:**
-> - **Pure CSS** - No JavaScript required
+> - **Pure CSS** - All styling works without JavaScript
+> - **Vanilla JS Components** - Optional JS classes for interactive components (modal, tabs, accordion, etc.)
+> - **Alpine.js Support** - Full Alpine.js components available for demos
 > - **Framework agnostic** - Works with HTMX, React, Vue, Radix UI, vanilla JS
 > - **State selectors** - Supports `data-state`, ARIA attributes, and `.is-*` classes
-> - **Optional JS helpers** - `js/ux-helpers.js` for convenience functions
 >
 > **Files:**
-> - `dist/ux.min.css` - Minified bundle (~1.1MB)
-> - `dist/ux.css` - Full bundle (~1.8MB)
-> - `js/ux-helpers.min.js` - Optional JS utilities
+> - `dist/ux.min.css` - Minified CSS bundle (~1.1MB)
+> - `dist/ux.min.js` - Vanilla JS components (~45KB)
+> - `docs/alpine-components.js` - Alpine.js components for demos (~80KB)
 
 ---
 
 ## Quick Start
 
 ```html
-<!-- Just CSS - works with any framework -->
+<!-- CSS only - works with any framework -->
 <link rel="stylesheet" href="dist/ux.min.css">
 
-<!-- Optional: JS helpers -->
-<script src="js/ux-helpers.min.js"></script>
+<!-- Optional: Vanilla JS components (modal, tabs, accordion, toast, etc.) -->
+<script src="dist/ux.min.js"></script>
+
+<!-- Optional: Alpine.js components (for demos) -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="docs/alpine-components.js"></script>
+```
+
+### Using Vanilla JS Components
+
+```html
+<!-- Auto-init via data attributes -->
+<div id="my-modal" class="ux-modal-backdrop" data-ux="js" data-state="closed">
+  <div class="ux-modal">
+    <button data-ux-close>Close</button>
+  </div>
+</div>
+<button onclick="UX.get('#my-modal').open()">Open Modal</button>
+
+<!-- Manual init -->
+<script>
+  const modal = UX.create('modal', '#my-modal');
+  modal.open();
+</script>
 ```
 
 ---
@@ -524,6 +547,55 @@ Icon-only button.
 | `.ux-icon-button--sm` | Small |
 | `.ux-icon-button--lg` | Large |
 | `.ux-icon-button--glass` | Glass effect |
+
+---
+
+### ux-icon-btn.css
+Compact icon-only buttons for actions in tables, toolbars, and cards.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-icon-btn` | Base icon button |
+| `.ux-icon-btn--xs` | Extra small (24px) |
+| `.ux-icon-btn--sm` | Small (32px) |
+| `.ux-icon-btn--lg` | Large (44px) |
+| `.ux-icon-btn--xl` | Extra large (52px) |
+| `.ux-icon-btn--primary` | Primary color |
+| `.ux-icon-btn--success` | Success color |
+| `.ux-icon-btn--warning` | Warning color |
+| `.ux-icon-btn--danger` | Danger color |
+| `.ux-icon-btn--info` | Info color |
+| `.ux-icon-btn--active` | Active/selected state |
+| `.ux-icon-btn--filled` | Filled background |
+| `.ux-icon-btn--outlined` | Outlined border |
+| `.ux-icon-btn--rounded` | Fully rounded (circle) |
+| `.ux-icon-btn--glass` | Glass morphism |
+| `.ux-icon-btn--badge` | Enable badge positioning |
+| `.ux-icon-btn--loading` | Loading spinner state |
+
+**Elements:** `__badge`, `__badge--dot`
+
+**Group:** `.ux-icon-btn-group`, `.ux-icon-btn-group--divided`
+
+---
+
+### ux-menu-button.css
+Hamburger menu button for navigation drawers and sidebars.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-menu-button` | Base menu button |
+| `.ux-menu-button--sm` | Small |
+| `.ux-menu-button--lg` | Large |
+| `.ux-menu-button--glass` | Glass effect |
+| `.ux-menu-button--filled` | Filled background |
+| `.ux-menu-button--outlined` | Outlined border |
+| `.ux-menu-button--rounded` | Fully rounded |
+| `.ux-menu-button--open` | X animation state |
+
+**Elements:** `__icon`, `__lines`, `__line`, `__label`
+
+**State:** Add `data-state="open"` or `aria-expanded="true"` to animate hamburger to X.
 
 ---
 
@@ -1645,6 +1717,47 @@ Stats/KPI card.
 
 ---
 
+### ux-kpi-card.css
+Dashboard KPI cards with value, change indicator, and progress bar.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-kpi-card` | KPI card wrapper |
+| `.ux-kpi-card--glass` | Glass effect |
+| `.ux-kpi-card--sm` | Small size |
+| `.ux-kpi-card--lg` | Large size |
+| `.ux-kpi-card--primary` | Primary color |
+| `.ux-kpi-card--success` | Success color |
+| `.ux-kpi-card--warning` | Warning color |
+| `.ux-kpi-card--danger` | Danger color |
+| `.ux-kpi-card--info` | Info color |
+| `.ux-kpi-card--purple` | Purple color |
+
+**Elements:** `__header`, `__icon`, `__change`, `__change--up`, `__change--down`, `__label`, `__value`, `__progress`, `__progress-bar`, `__target`
+
+---
+
+### ux-bar-chart.css
+CSS-only bar chart for simple visualizations.
+
+| Class | Description |
+|-------|-------------|
+| `.ux-bar-chart` | Chart container |
+| `.ux-bar-chart--horizontal` | Horizontal bars |
+| `.ux-bar-chart--sm` | Small (160px) |
+| `.ux-bar-chart--lg` | Large (320px) |
+| `.ux-bar-chart--compact` | Mini sparkline style |
+| `.ux-bar-chart--grid` | Show grid lines |
+| `.ux-bar-chart--glass` | Glass effect |
+| `.ux-bar-chart--primary` | Primary color |
+| `.ux-bar-chart--success` | Success color |
+| `.ux-bar-chart--warning` | Warning color |
+| `.ux-bar-chart--danger` | Danger color |
+
+**Elements:** `__item`, `__value`, `__value-main`, `__value-sub`, `__bar`, `__bar--no-dot`, `__label`
+
+---
+
 ### ux-sparkline.css
 Sparkline chart.
 
@@ -2034,6 +2147,33 @@ Loading spinner.
 | `.ux-spinner--sm` | Small |
 | `.ux-spinner--lg` | Large |
 | `.ux-spinner--xl` | Extra large |
+
+---
+
+### ux-status-badge.css
+Badge with status dot indicator for showing state (active, inactive, pending, etc.)
+
+| Class | Description |
+|-------|-------------|
+| `.ux-status-badge` | Base badge |
+| `.ux-status-badge--active` | Active state (green) |
+| `.ux-status-badge--inactive` | Inactive state (gray) |
+| `.ux-status-badge--pending` | Pending state (amber) |
+| `.ux-status-badge--error` | Error state (red) |
+| `.ux-status-badge--info` | Info state (blue) |
+| `.ux-status-badge--online` | Online state (green) |
+| `.ux-status-badge--offline` | Offline state (gray) |
+| `.ux-status-badge--away` | Away state (yellow) |
+| `.ux-status-badge--busy` | Busy state (red) |
+| `.ux-status-badge--sm` | Small size |
+| `.ux-status-badge--lg` | Large size |
+| `.ux-status-badge--pulse` | Animated pulsing dot |
+| `.ux-status-badge--dot-only` | Show only dot (no text) |
+| `.ux-status-badge--solid` | Solid filled background |
+| `.ux-status-badge--outlined` | Outlined variant |
+| `.ux-status-badge--glass` | Glass morphism |
+
+**Elements:** `__dot`, `__icon`
 
 ---
 
@@ -2644,17 +2784,17 @@ Scroll-related Alpine components.
 | Other | 6 |
 | **Total** | **148** |
 
-### By Alpine.js Requirement
+### By JavaScript Requirement
 
 | Type | Count | Components |
 |------|-------|------------|
-| **CSS-only** | 13 | avatar, badge, divider, icon-button, spacer, state, status-indicator, table, toolbar, app-icon, employee-card, event-card, machine-status |
-| **With vanilla JS** | 10 | accordion, alert, drawer, dropdown, element, modal, sheet, tabs, toast, tooltip |
-| **Alpine directives** | 3 | core, swipe, utilities |
-| **Alpine components** | 122 | All others |
+| **CSS-only** | ~50 | avatar, badge, button, card, divider, icon-button, list, navbar, progress, spacer, spinner, table, toolbar, etc. |
+| **Vanilla JS classes** | 12 | accordion, alert, drawer, dropdown, modal, sheet, tabs, toast, tooltip, quantity-stepper, signature-pad, password-toggle |
+| **Alpine.js components** | ~90 | calendar, datatable, carousel, command, picker, etc. |
+| **Alpine directives** | 6 | x-swipe, x-drag, x-long-press, x-tap, x-pinch, x-pull-refresh |
 
-> **Note:** Components with vanilla JS classes (UXModal, UXSheet, etc.) can be used without Alpine.js.
-> `ux-scroll.js` only contains Alpine.js components (CSS is in `ux-content.js`).
+> **Note:** Vanilla JS components (UXModal, UXSheet, UXTabs, etc.) work without Alpine.js.
+> Alpine.js components are provided in `docs/alpine-components.js` for documentation demos.
 
 ---
 
@@ -2670,4 +2810,4 @@ When adding a new component:
 
 ---
 
-*Last Updated: 2026-01-23*
+*Last Updated: 2026-01-29*

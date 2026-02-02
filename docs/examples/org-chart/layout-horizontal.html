@@ -1,0 +1,114 @@
+<div class="ux-org-chart ux-org-chart--horizontal" x-data="uxOrgChart({
+        horizontal: true,
+        showSearch: false,
+        data: {
+          id: 'root',
+          name: 'Director General',
+          title: 'CEO',
+          children: [
+            {
+              id: 'dept1',
+              name: 'Tecnologia',
+              title: 'Departamento',
+              children: [
+                { id: 'sub1', name: 'Desarrollo', title: 'Area' },
+                { id: 'sub2', name: 'Infraestructura', title: 'Area' }
+              ]
+            },
+            {
+              id: 'dept2',
+              name: 'Ventas',
+              title: 'Departamento',
+              children: [
+                { id: 'sub3', name: 'Nacional', title: 'Area' },
+                { id: 'sub4', name: 'Internacional', title: 'Area' }
+              ]
+            }
+          ]
+        }
+      })">
+        <div class="ux-org-chart__controls">
+          <button class="ux-org-chart__control" @click="zoomIn()" :disabled="zoom >= maxZoom">
+            <span x-html="icons.zoomIn"></span>
+          </button>
+          <div class="ux-org-chart__zoom-level" x-text="getZoomPercentage()"></div>
+          <button class="ux-org-chart__control" @click="zoomOut()" :disabled="zoom <= minZoom">
+            <span x-html="icons.zoomOut"></span>
+          </button>
+          <button class="ux-org-chart__control" @click="resetZoom()">
+            <span x-html="icons.reset"></span>
+          </button>
+        </div>
+
+        <div class="ux-org-chart__viewport"
+             @mousedown="startDrag($event)"
+             @mousemove="drag($event)"
+             @mouseup="endDrag()"
+             @mouseleave="endDrag()">
+          <div class="ux-org-chart__canvas"
+               :class="{ 'ux-org-chart__canvas--dragging': isDragging }"
+               :style="{ transform: getTransform() }">
+            <div class="ux-org-chart__tree">
+              <template x-if="data">
+                <div class="ux-org-chart__branch" x-data="{ node: data }">
+                  <div class="ux-org-chart__node"
+                       :class="{ 'ux-org-chart__node--selected': isSelected(node.id) }"
+                       @click="selectNode(node.id, node)">
+                    <div class="ux-org-chart__avatar">
+                      <span x-text="getInitials(node.name)"></span>
+                    </div>
+                    <div class="ux-org-chart__name" x-text="node.name"></div>
+                    <div class="ux-org-chart__title" x-text="node.title"></div>
+                    <template x-if="hasChildren(node)">
+                      <button class="ux-org-chart__toggle"
+                              :class="{ 'ux-org-chart__toggle--collapsed': isCollapsed(node.id) }"
+                              @click.stop="toggleNode(node.id)">
+                        <span x-html="icons.chevron"></span>
+                      </button>
+                    </template>
+                  </div>
+                  <template x-if="hasChildren(node) && !isCollapsed(node.id)">
+                    <div class="ux-org-chart__children">
+                      <template x-for="child in node.children" :key="child.id">
+                        <div class="ux-org-chart__branch">
+                          <div class="ux-org-chart__node"
+                               :class="{ 'ux-org-chart__node--selected': isSelected(child.id) }"
+                               @click="selectNode(child.id, child)">
+                            <div class="ux-org-chart__avatar">
+                              <span x-text="getInitials(child.name)"></span>
+                            </div>
+                            <div class="ux-org-chart__name" x-text="child.name"></div>
+                            <div class="ux-org-chart__title" x-text="child.title"></div>
+                            <template x-if="hasChildren(child)">
+                              <button class="ux-org-chart__toggle"
+                                      :class="{ 'ux-org-chart__toggle--collapsed': isCollapsed(child.id) }"
+                                      @click.stop="toggleNode(child.id)">
+                                <span x-html="icons.chevron"></span>
+                              </button>
+                            </template>
+                          </div>
+                          <template x-if="hasChildren(child) && !isCollapsed(child.id)">
+                            <div class="ux-org-chart__children">
+                              <template x-for="gc in child.children" :key="gc.id">
+                                <div class="ux-org-chart__branch">
+                                  <div class="ux-org-chart__node" @click="selectNode(gc.id, gc)">
+                                    <div class="ux-org-chart__avatar">
+                                      <span x-text="getInitials(gc.name)"></span>
+                                    </div>
+                                    <div class="ux-org-chart__name" x-text="gc.name"></div>
+                                    <div class="ux-org-chart__title" x-text="gc.title"></div>
+                                  </div>
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>

@@ -1,0 +1,22 @@
+# views.py
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from .models import Category
+
+def tag_suggestions(request):
+    """Endpoint HTMX para sugerencias de tags"""
+    query = request.GET.get('categories', '').strip()
+
+    if len(query) < 2:
+        return HttpResponse('')
+
+    # Buscar categorias que coincidan
+    suggestions = Category.objects.filter(
+        name__icontains=query
+    ).values('id', 'name')[:10]
+
+    html = render_to_string('partials/tag_suggestions.html', {
+        'suggestions': suggestions,
+        'query': query
+    })
+    return HttpResponse(html)

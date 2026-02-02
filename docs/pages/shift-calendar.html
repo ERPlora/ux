@@ -1,0 +1,256 @@
+<h1 style="margin-bottom: 0.5rem;">Shift Calendar</h1>
+<p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+  Calendario de turnos semanal con vista de horas, arrastrar para crear turnos y filtrado por empleado.
+</p>
+
+<!-- Basic Shift Calendar -->
+<section class="component-section">
+  <h2>Calendario de Turnos Basico</h2>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+    Vista semanal con turnos de diferentes tipos. Haz clic en un turno para seleccionarlo.
+  </p>
+  <ux-playground src="examples/shift-calendar/basico.html"></ux-playground>
+</section>
+
+<!-- Drag to Create -->
+<section class="component-section">
+  <h2>Arrastrar para Crear Turnos</h2>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+    Arrastra sobre las celdas para crear un nuevo turno. El evento <code>shift-calendar:create</code> se dispara con los datos.
+  </p>
+  <ux-playground src="examples/shift-calendar/drag-to-create.html"></ux-playground>
+</section>
+
+<!-- With Employee Filter -->
+<section class="component-section">
+  <h2>Filtro por Empleado</h2>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+    Filtra los turnos por empleado usando <code>filterByEmployee(id)</code>.
+  </p>
+  <ux-playground src="examples/shift-calendar/filter-employee.html"></ux-playground>
+</section>
+
+<!-- Glass Variant -->
+<section class="component-section">
+  <h2>Glass Variant</h2>
+  <ux-playground src="examples/shift-calendar/glass.html"></ux-playground>
+</section>
+
+<!-- Compact Variant -->
+<section class="component-section">
+  <h2>Variante Compacta</h2>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+    Usa <code>.ux-shift-calendar--compact</code> para una vista mas densa.
+  </p>
+  <ux-playground src="examples/shift-calendar/compact.html"></ux-playground>
+</section>
+
+<!-- API Reference -->
+<section class="component-section">
+  <h2>API Reference</h2>
+
+  <h3>Opciones</h3>
+  <pre class="ux-code-block" data-lang="javascript">uxShiftCalendar({
+  startHour: 6,              // Hora de inicio del calendario
+  endHour: 22,               // Hora de fin del calendario
+  hourStep: 1,               // Intervalo de horas
+  firstDayOfWeek: 1,         // 0=Domingo, 1=Lunes
+  locale: 'es',              // Idioma para fechas
+  showLegend: true,          // Mostrar leyenda de colores
+  readOnly: false,           // Deshabilitar creacion de turnos
+  shifts: [],                // Array de turnos
+  employees: []              // Array de empleados
+})</pre>
+
+  <h3>Estructura de Turno</h3>
+  <pre class="ux-code-block" data-lang="javascript">{
+  id: 'shift-1',             // ID unico
+  date: '2025-01-15',        // Fecha YYYY-MM-DD
+  employeeId: 'e1',          // ID del empleado
+  employeeName: 'Ana Garcia', // Nombre del empleado
+  startTime: '08:00',        // Hora inicio HH:MM
+  endTime: '14:00',          // Hora fin HH:MM
+  type: 'morning',           // morning, afternoon, night, full-day, overtime, off
+  department: 'Ventas'       // Departamento (opcional)
+}</pre>
+
+  <h3>Propiedades</h3>
+  <pre class="ux-code-block" data-lang="javascript">currentDate          // Fecha actual del calendario
+weekDates            // Array de 7 fechas de la semana
+weekRangeTitle       // String con el rango de la semana
+timeSlots            // Array de slots de hora
+shifts               // Array de turnos
+filteredEmployeeIds  // Array de IDs filtrados
+selectedShift        // Turno seleccionado actualmente</pre>
+
+  <h3>Metodos</h3>
+  <pre class="ux-code-block" data-lang="javascript">// Navegacion
+navigateWeek(direction)      // -1 = semana anterior, 1 = semana siguiente
+goToToday()                  // Ir a la semana actual
+goToDate(date)               // Ir a una fecha especifica
+
+// CRUD de turnos
+addShift(shiftData)          // Agregar turno
+editShift(shiftId, updates)  // Editar turno
+deleteShift(shiftId)         // Eliminar turno
+
+// Filtrado
+filterByEmployee(employeeId) // Toggle filtro por empleado
+clearFilters()               // Limpiar todos los filtros
+isEmployeeFiltered(id)       // Verificar si un empleado esta filtrado
+
+// Utilidades
+getShiftsForDay(date)        // Obtener turnos de un dia
+getShiftType(shift)          // Obtener tipo de turno automatico
+formatDate(date)             // Formatear fecha a YYYY-MM-DD
+formatTime(hours, minutes)   // Formatear hora a HH:MM</pre>
+
+  <h3>Eventos</h3>
+  <pre class="ux-code-block" data-lang="javascript">@shift-calendar:navigate   // Navegacion de semana
+  // { direction: 1|-1, weekStart: Date, weekEnd: Date }
+
+@shift-calendar:today      // Click en "Hoy"
+
+@shift-calendar:select     // Turno seleccionado
+  // { shift: {...} }
+
+@shift-calendar:create     // Arrastrar para crear turno
+  // { date: 'YYYY-MM-DD', startTime: 'HH:MM', endTime: 'HH:MM' }
+
+@shift-calendar:add        // Turno agregado
+  // { shift: {...} }
+
+@shift-calendar:edit       // Turno editado
+  // { shift: {...} }
+
+@shift-calendar:delete     // Turno eliminado
+  // { shift: {...} }
+
+@shift-calendar:filter     // Filtros cambiados
+  // { filteredEmployeeIds: [...] }</pre>
+
+  <h3>Clases CSS</h3>
+  <pre class="ux-code-block" data-lang="css">.ux-shift-calendar                    // Contenedor principal
+.ux-shift-calendar--glass             // Variante glass
+.ux-shift-calendar--compact           // Variante compacta
+
+.ux-shift-calendar__header            // Header con navegacion
+.ux-shift-calendar__grid              // Grid de la semana
+.ux-shift-calendar__day-header        // Cabecera de dia
+.ux-shift-calendar__day-header--today // Dia actual
+.ux-shift-calendar__time-slot         // Slot de hora
+.ux-shift-calendar__cell              // Celda del grid
+.ux-shift-calendar__shift             // Bloque de turno
+
+// Tipos de turno
+.ux-shift-calendar__shift--morning    // Turno de manana (amarillo)
+.ux-shift-calendar__shift--afternoon  // Turno de tarde (azul)
+.ux-shift-calendar__shift--night      // Turno de noche (indigo)
+.ux-shift-calendar__shift--full-day   // Turno completo (verde)
+.ux-shift-calendar__shift--overtime   // Horas extra (naranja)
+.ux-shift-calendar__shift--off        // Dia libre (gris)</pre>
+</section>
+
+<!-- HTMX + Django -->
+<section class="component-section">
+  <h2>HTMX + Django</h2>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+    Integracion con Django para cargar y guardar turnos desde el servidor.
+  </p>
+
+  <h3>Template Django</h3>
+  <pre class="ux-code-block" data-lang="html"><!-- templates/shifts/calendar.html -->
+<div id="shift-calendar"
+     x-data="uxShiftCalendar({
+       shifts: {{ shifts_json|safe }},
+       employees: {{ employees_json|safe }}
+     })"
+     @shift-calendar:create="openCreateModal($event.detail)"
+     @shift-calendar:select="openEditModal($event.detail.shift)"
+     @shift-calendar:navigate="loadWeekShifts($event.detail)">
+
+  <div class="ux-shift-calendar"
+       hx-get="{% url 'shifts:week' %}"
+       hx-trigger="load-week from:body"
+       hx-vals="js:{start: event.detail.weekStart, end: event.detail.weekEnd}"
+       hx-target="#shifts-data"
+       hx-swap="innerHTML">
+    <!-- ... calendar content ... -->
+  </div>
+</div></pre>
+
+  <h3>Vista Django</h3>
+  <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import JsonResponse, HttpResponse
+from .models import Shift, Employee
+import json
+from datetime import datetime, timedelta
+
+def calendar_view(request):
+    today = datetime.now().date()
+    week_start = today - timedelta(days=today.weekday())
+    week_end = week_start + timedelta(days=6)
+
+    shifts = Shift.objects.filter(
+        date__range=[week_start, week_end]
+    ).select_related('employee')
+
+    shifts_json = json.dumps([
+        {
+            'id': str(s.id),
+            'date': s.date.isoformat(),
+            'employeeId': str(s.employee_id),
+            'employeeName': s.employee.name,
+            'startTime': s.start_time.strftime('%H:%M'),
+            'endTime': s.end_time.strftime('%H:%M'),
+            'type': s.shift_type,
+            'department': s.employee.department
+        }
+        for s in shifts
+    ])
+
+    return render(request, 'shifts/calendar.html', {
+        'shifts_json': shifts_json
+    })</pre>
+
+  <h3>Modelo Django</h3>
+  <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+
+class Shift(models.Model):
+    SHIFT_TYPES = [
+        ('morning', 'Manana'),
+        ('afternoon', 'Tarde'),
+        ('night', 'Noche'),
+        ('full-day', 'Dia Completo'),
+        ('overtime', 'Horas Extra'),
+        ('off', 'Libre'),
+    ]
+
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    shift_type = models.CharField(max_length=20, choices=SHIFT_TYPES)
+
+    class Meta:
+        ordering = ['date', 'start_time']
+        unique_together = ['employee', 'date']</pre>
+</section>
+
+<style>
+.demo-section { margin-bottom: 3rem; }
+.demo-section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--ux-text);
+}
+.demo-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.75rem;
+  color: var(--ux-text);
+}
+</style>

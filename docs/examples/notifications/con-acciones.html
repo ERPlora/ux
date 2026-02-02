@@ -1,0 +1,75 @@
+<div class="demo-box" x-data="uxNotificationCenter({
+  showFilters: false,
+  groupByDate: false,
+  notifications: [
+    {
+      id: 'a1',
+      title: 'Solicitud de amistad',
+      message: 'Carlos Lopez quiere conectar contigo',
+      type: 'info',
+      timestamp: new Date().toISOString(),
+      read: false,
+      actions: [
+        { id: 'accept', label: 'Aceptar', primary: true },
+        { id: 'decline', label: 'Rechazar' }
+      ]
+    },
+    {
+      id: 'a2',
+      title: 'Nuevo comentario',
+      message: 'Ana Garcia comento en tu publicacion',
+      type: 'info',
+      timestamp: new Date(Date.now() - 600000).toISOString(),
+      read: false,
+      actions: [
+        { id: 'view', label: 'Ver comentario', primary: true }
+      ]
+    }
+  ]
+})" @notification:action.window="alert('Accion: ' + $event.detail.action.label)">
+  <div style="max-width: 400px; border: 1px solid var(--ux-border-color); border-radius: var(--ux-radius-lg); overflow: hidden;">
+    <div class="ux-notification-panel__header">
+      <h2 class="ux-notification-panel__title">Notificaciones</h2>
+    </div>
+    <div class="ux-notification-panel__content" style="max-height: 400px;">
+      <ul class="ux-notification-panel__list">
+        <template x-for="notification in notifications" :key="notification.id">
+          <li class="ux-notification-item" :class="{ 'ux-notification-item--unread': !notification.read }">
+            <div class="ux-notification-item__icon"
+                 :class="'ux-notification-item__icon--' + notification.type"
+                 x-html="getTypeIcon(notification.type)"></div>
+            <div class="ux-notification-item__content">
+              <div class="ux-notification-item__header">
+                <span class="ux-notification-item__title" x-text="notification.title"></span>
+                <span class="ux-notification-item__time" x-text="formatTime(notification.timestamp)"></span>
+              </div>
+              <p class="ux-notification-item__message" x-text="notification.message"></p>
+              <div x-show="notification.actions && notification.actions.length > 0" class="ux-notification-item__actions">
+                <template x-for="action in notification.actions" :key="action.id">
+                  <button class="ux-notification-item__action-btn"
+                          :class="{ 'ux-notification-item__action-btn--primary': action.primary }"
+                          @click.stop="handleAction(notification, action)"
+                          x-text="action.label"></button>
+                </template>
+              </div>
+            </div>
+          </li>
+        </template>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<pre class="ux-code-block" data-lang="html">// Notificacion con acciones
+{
+  id: 'a1',
+  title: 'Solicitud de amistad',
+  message: 'Carlos quiere conectar',
+  actions: [
+    { id: 'accept', label: 'Aceptar', primary: true },
+    { id: 'decline', label: 'Rechazar' }
+  ]
+}
+
+// Escuchar evento
+@notification:action="handleAction($event.detail)"</pre>

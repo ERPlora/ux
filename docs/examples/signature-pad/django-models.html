@@ -1,0 +1,34 @@
+# models.py
+from django.db import models
+from django.contrib.auth import get_user_model
+
+class Document(models.Model):
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE
+    )
+    signature = models.ImageField(
+        upload_to='signatures/',
+        blank=True,
+        null=True
+    )
+    signed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-signed_at']
+
+    def __str__(self):
+        return f"Documento firmado por {self.user} - {self.signed_at}"
+
+
+# Alternativa: guardar como TextField (base64)
+class Contract(models.Model):
+    title = models.CharField(max_length=200)
+    signature_data = models.TextField(
+        blank=True,
+        help_text="Firma en formato base64"
+    )
+    signed_at = models.DateTimeField(null=True, blank=True)
+
+    def has_signature(self):
+        return bool(self.signature_data)

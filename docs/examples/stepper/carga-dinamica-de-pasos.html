@@ -1,0 +1,29 @@
+<div class="ux-stepper">
+          <div class="ux-stepper__header">
+            <div class="ux-stepper__progress" :style="{ width: progressWidth }"></div>
+            <template x-for="(label, index) in ['Productos', 'Envio', 'Pago']" :key="index">
+              <div class="ux-stepper__step"
+                   :class="getStepClasses(index)"
+                   @click="goTo(index)"
+                   :hx-get="'/api/wizard/step/' + (index + 1)"
+                   hx-target="#dynamic-step-content"
+                   hx-swap="innerHTML"
+                   hx-trigger="click">
+                <div class="ux-stepper__circle">
+                  <span x-text="index + 1"></span>
+                </div>
+                <span class="ux-stepper__label" x-text="label"></span>
+              </div>
+            </template>
+          </div>
+
+          <div class="ux-stepper__content">
+            <div id="dynamic-step-content"
+                 hx-get="/api/wizard/step/1"
+                 hx-trigger="load"
+                 hx-swap="innerHTML"
+                 style="min-height: 150px; padding: var(--ux-space-lg);">
+              <span class="ux-spinner"></span> Cargando paso...
+            </div>
+          </div>
+        </div>

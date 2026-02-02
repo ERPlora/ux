@@ -1,0 +1,116 @@
+<div x-data="uxAttendanceList({
+          employees: [
+            { id: 1, name: 'John Doe', department: 'Engineering', status: 'present', clockIn: '08:45', clockOut: null, avatar: null },
+            { id: 2, name: 'Ana Smith', department: 'Design', status: 'late', clockIn: '09:32', clockOut: null, avatar: null },
+            { id: 3, name: 'Mike Johnson', department: 'Marketing', status: 'absent', clockIn: null, clockOut: null, avatar: null },
+            { id: 4, name: 'Sarah Wilson', department: 'Engineering', status: 'remote', clockIn: '08:30', clockOut: '17:15', avatar: 'https://i.pravatar.cc/100?img=5' },
+            { id: 5, name: 'Robert Lee', department: 'HR', status: 'leave', clockIn: null, clockOut: null, avatar: null },
+            { id: 6, name: 'Emily Chen', department: 'Engineering', status: 'present', clockIn: '08:55', clockOut: null, avatar: 'https://i.pravatar.cc/100?img=9' },
+            { id: 7, name: 'David Brown', department: 'Sales', status: 'present', clockIn: '08:30', clockOut: '17:00', avatar: null },
+            { id: 8, name: 'Lisa Garcia', department: 'Design', status: 'remote', clockIn: '09:00', clockOut: null, avatar: 'https://i.pravatar.cc/100?img=16' }
+          ],
+          clickable: true
+        })" class="ux-attendance-list" @employee-click="alert('Clicked: ' + $event.detail.employee.name)">
+
+          <!-- Header -->
+          <div class="ux-attendance-list__header">
+            <div class="ux-attendance-list__header-row">
+              <h2 class="ux-attendance-list__title">Team Attendance</h2>
+              <div class="ux-attendance-list__date">
+                <input type="date" class="ux-attendance-list__date-input" x-model="selectedDate" @change="onDateChange()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div class="ux-attendance-list__summary" x-show="showSummary">
+            <div class="ux-attendance-list__stat">
+              <span class="ux-attendance-list__stat-value" x-text="summaryStats.total"></span>
+              <span class="ux-attendance-list__stat-label">Total</span>
+            </div>
+            <div class="ux-attendance-list__stat ux-attendance-list__stat--present">
+              <span class="ux-attendance-list__stat-value" x-text="summaryStats.present"></span>
+              <span class="ux-attendance-list__stat-label" x-text="labels.present"></span>
+            </div>
+            <div class="ux-attendance-list__stat ux-attendance-list__stat--absent">
+              <span class="ux-attendance-list__stat-value" x-text="summaryStats.absent"></span>
+              <span class="ux-attendance-list__stat-label" x-text="labels.absent"></span>
+            </div>
+            <div class="ux-attendance-list__stat ux-attendance-list__stat--late">
+              <span class="ux-attendance-list__stat-value" x-text="summaryStats.late"></span>
+              <span class="ux-attendance-list__stat-label" x-text="labels.late"></span>
+            </div>
+            <div class="ux-attendance-list__stat ux-attendance-list__stat--leave">
+              <span class="ux-attendance-list__stat-value" x-text="summaryStats.leave"></span>
+              <span class="ux-attendance-list__stat-label" x-text="labels.leave"></span>
+            </div>
+            <div class="ux-attendance-list__stat ux-attendance-list__stat--remote">
+              <span class="ux-attendance-list__stat-value" x-text="summaryStats.remote"></span>
+              <span class="ux-attendance-list__stat-label" x-text="labels.remote"></span>
+            </div>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="ux-attendance-list__toolbar">
+            <div class="ux-attendance-list__search">
+              <svg class="ux-attendance-list__search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+              </svg>
+              <input type="text" class="ux-attendance-list__search-input" :placeholder="labels.search" x-model="searchQuery" @input="onSearch()">
+            </div>
+            <div class="ux-attendance-list__filter">
+              <button class="ux-attendance-list__filter-btn" :class="{ 'ux-attendance-list__filter-btn--active': filterStatus === 'all' }" @click="setFilter('all')" x-text="labels.all"></button>
+              <button class="ux-attendance-list__filter-btn ux-attendance-list__filter-btn--present" :class="{ 'ux-attendance-list__filter-btn--active': filterStatus === 'present' }" @click="setFilter('present')" x-text="labels.present"></button>
+              <button class="ux-attendance-list__filter-btn ux-attendance-list__filter-btn--absent" :class="{ 'ux-attendance-list__filter-btn--active': filterStatus === 'absent' }" @click="setFilter('absent')" x-text="labels.absent"></button>
+              <button class="ux-attendance-list__filter-btn ux-attendance-list__filter-btn--late" :class="{ 'ux-attendance-list__filter-btn--active': filterStatus === 'late' }" @click="setFilter('late')" x-text="labels.late"></button>
+              <button class="ux-attendance-list__filter-btn ux-attendance-list__filter-btn--leave" :class="{ 'ux-attendance-list__filter-btn--active': filterStatus === 'leave' }" @click="setFilter('leave')" x-text="labels.leave"></button>
+              <button class="ux-attendance-list__filter-btn ux-attendance-list__filter-btn--remote" :class="{ 'ux-attendance-list__filter-btn--active': filterStatus === 'remote' }" @click="setFilter('remote')" x-text="labels.remote"></button>
+            </div>
+          </div>
+
+          <!-- List Body -->
+          <div class="ux-attendance-list__body">
+            <template x-for="employee in filteredEmployees" :key="employee.id">
+              <div class="ux-attendance-list__item ux-attendance-list__item--clickable" @click="onEmployeeClick(employee)">
+                <div class="ux-attendance-list__avatar">
+                  <img x-show="employee.avatar" class="ux-attendance-list__avatar-img" :src="employee.avatar" :alt="employee.name">
+                  <div x-show="!employee.avatar" class="ux-attendance-list__avatar-initials" x-text="getInitials(employee.name)"></div>
+                </div>
+                <div class="ux-attendance-list__info">
+                  <span class="ux-attendance-list__name" x-text="employee.name"></span>
+                  <span class="ux-attendance-list__department" x-text="employee.department"></span>
+                </div>
+                <span class="ux-attendance-list__status" :class="'ux-attendance-list__status--' + employee.status">
+                  <span class="ux-attendance-list__status-dot"></span>
+                  <span x-text="getStatusLabel(employee.status)"></span>
+                </span>
+                <div class="ux-attendance-list__times">
+                  <div class="ux-attendance-list__clock">
+                    <span class="ux-attendance-list__clock-label" x-text="labels.clockIn"></span>
+                    <span class="ux-attendance-list__clock-time" :class="{ 'ux-attendance-list__clock-time--late': isLateClockIn(employee.clockIn) }" x-text="formatTime(employee.clockIn)"></span>
+                  </div>
+                  <div class="ux-attendance-list__clock">
+                    <span class="ux-attendance-list__clock-label" x-text="labels.clockOut"></span>
+                    <span class="ux-attendance-list__clock-time" x-text="formatTime(employee.clockOut)"></span>
+                  </div>
+                  <span x-show="employee.clockIn && employee.clockOut" class="ux-attendance-list__work-hours" :class="getWorkHoursClass(employee)" x-text="calculateWorkHours(employee)?.formatted"></span>
+                </div>
+              </div>
+            </template>
+
+            <!-- Empty State -->
+            <div x-show="filteredEmployees.length === 0" class="ux-attendance-list__empty">
+              <svg class="ux-attendance-list__empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path d="M22 22L2 2" stroke-width="2"/>
+              </svg>
+              <h3 class="ux-attendance-list__empty-title" x-text="labels.noResults"></h3>
+              <p class="ux-attendance-list__empty-text" x-text="labels.noResultsText"></p>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="ux-attendance-list__footer">
+            <span x-text="labels.showing + ' ' + filteredEmployees.length + ' ' + labels.of + ' ' + employees.length + ' ' + labels.employees"></span>
+          </div>
+        </div>

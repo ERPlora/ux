@@ -1,0 +1,40 @@
+<h3 style="font-size: 1rem; margin-bottom: 1rem;">Vista Django (views.py)</h3>
+      <pre class="ux-code-block" data-lang="python">from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
+def api_user_detail(request, user_id):
+    """Endpoint que retorna datos de usuario en JSON"""
+    user = get_object_or_404(User, pk=user_id)
+    return JsonResponse({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'is_active': user.is_active,
+        'date_joined': user.date_joined.isoformat(),
+        'profile': {
+            'bio': user.profile.bio,
+            'avatar': user.profile.avatar.url if user.profile.avatar else None,
+            'preferences': user.profile.preferences
+        }
+    })
+
+@require_GET
+def api_orders_list(request):
+    """Endpoint que retorna lista de pedidos"""
+    orders = Order.objects.select_related('customer').all()[:10]
+    return JsonResponse({
+        'status': 200,
+        'count': orders.count(),
+        'results': [
+            {
+                'id': order.id,
+                'customer': order.customer.username,
+                'total': float(order.total),
+                'status': order.status,
+                'items': order.items.count(),
+                'created_at': order.created_at.isoformat()
+            }
+            for order in orders
+        ]
+    })</pre>

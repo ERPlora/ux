@@ -1,0 +1,1195 @@
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--ux-surface-secondary);
+      
+      
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--ux-text);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .demo-glass-bg {
+      background: linear-gradient(135deg, var(--ux-cyan-500), var(--ux-blue-600));
+      
+      border-radius: 16px;
+    }
+    .demo-dark-bg {
+      background: var(--ux-gray-900);
+      
+      border-radius: 16px;
+    }
+  </style>
+
+<h1 style="margin-bottom: 0.5rem;">Performance Meter</h1>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+    HR module component for visualizing employee performance metrics with score gauges,
+    category breakdowns, trend indicators, and goal comparisons.
+  </p>
+
+  <!-- Basic Performance Meter -->
+  <section class="component-section">
+    <h2>Basic Performance Meter</h2>
+
+    <div class="demo-grid">
+      <!-- Full featured -->
+      <div x-data="uxPerformanceMeter({
+        employee: {
+          name: 'Sarah Johnson',
+          role: 'Senior Developer',
+          department: 'Engineering',
+          initials: 'SJ'
+        },
+        score: 87,
+        maxScore: 100,
+        trend: 5,
+        trendLabel: 'vs last quarter',
+        period: 'quarterly',
+        goal: 85,
+        actual: 87,
+        categories: [
+          { name: 'Productivity', score: 92, trend: 8 },
+          { name: 'Code Quality', score: 88, trend: 3 },
+          { name: 'Teamwork', score: 85, trend: -2 },
+          { name: 'Communication', score: 82, trend: 5 }
+        ]
+      })" class="ux-performance-meter">
+
+        <!-- Employee Header -->
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar">
+            <span x-text="getInitials()"></span>
+          </div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+            <p class="ux-performance-meter__employee-department" x-text="employee.department"></p>
+          </div>
+          <div class="ux-performance-meter__period-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span x-text="period.charAt(0).toUpperCase() + period.slice(1)"></span>
+          </div>
+        </div>
+
+        <!-- Score Section -->
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"
+                      :style="'--ux-perf-circumference: ' + gaugeCircumference"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max" x-text="displayMaxScore"></span>
+              <div class="ux-performance-meter__score-label">Overall Score</div>
+            </div>
+          </div>
+
+          <div class="ux-performance-meter__score-summary">
+            <span class="ux-performance-meter__score-status"
+                  :class="'ux-performance-meter__score-status--' + scoreLevel"
+                  x-text="scoreLevelLabel"></span>
+            <span class="ux-performance-meter__trend"
+                  :class="'ux-performance-meter__trend--' + trendDirection"
+                  x-show="trend !== null">
+              <template x-if="trendDirection === 'up'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </template>
+              <template x-if="trendDirection === 'down'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </template>
+              <span x-text="trendValue + ' ' + trendLabel"></span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Goal vs Actual -->
+        <div class="ux-performance-meter__goal-section" x-show="goal !== null">
+          <div class="ux-performance-meter__goal-item">
+            <span class="ux-performance-meter__goal-label">Goal</span>
+            <span class="ux-performance-meter__goal-value" x-text="goal"></span>
+          </div>
+          <div class="ux-performance-meter__goal-divider"></div>
+          <div class="ux-performance-meter__goal-item">
+            <span class="ux-performance-meter__goal-label">Actual</span>
+            <span class="ux-performance-meter__goal-value" x-text="actual"></span>
+          </div>
+          <div class="ux-performance-meter__goal-divider"></div>
+          <div class="ux-performance-meter__goal-item">
+            <span class="ux-performance-meter__goal-label">Diff</span>
+            <span class="ux-performance-meter__goal-diff"
+                  :class="goalDifference >= 0 ? 'ux-performance-meter__goal-diff--positive' : 'ux-performance-meter__goal-diff--negative'"
+                  x-text="goalDifferenceLabel"></span>
+          </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="ux-performance-meter__categories">
+          <h4 class="ux-performance-meter__categories-title">Performance Breakdown</h4>
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <div class="ux-performance-meter__category-score">
+                  <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+                  <span class="ux-performance-meter__category-trend"
+                        :class="'ux-performance-meter__category-trend--' + getCategoryTrendDirection(cat.trend)"
+                        x-show="cat.trend !== undefined">
+                    <template x-if="getCategoryTrendDirection(cat.trend) === 'up'">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                      </svg>
+                    </template>
+                    <template x-if="getCategoryTrendDirection(cat.trend) === 'down'">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </template>
+                    <span x-text="getCategoryTrendValue(cat.trend)"></span>
+                  </span>
+                </div>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Excellent Performance -->
+      <div x-data="uxPerformanceMeter({
+        employee: {
+          name: 'Michael Chen',
+          role: 'Team Lead',
+          department: 'Product',
+          initials: 'MC'
+        },
+        score: 95,
+        trend: 8,
+        period: 'quarterly',
+        categories: [
+          { name: 'Leadership', score: 98, trend: 5 },
+          { name: 'Delivery', score: 94, trend: 10 },
+          { name: 'Innovation', score: 92, trend: 3 },
+          { name: 'Mentoring', score: 96, trend: 7 }
+        ]
+      })" class="ux-performance-meter">
+
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar" style="background: var(--ux-success);">
+            <span x-text="getInitials()"></span>
+          </div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+            <p class="ux-performance-meter__employee-department" x-text="employee.department"></p>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max" x-text="displayMaxScore"></span>
+            </div>
+          </div>
+
+          <div class="ux-performance-meter__score-summary">
+            <span class="ux-performance-meter__score-status ux-performance-meter__score-status--excellent">
+              Top Performer
+            </span>
+            <span class="ux-performance-meter__trend ux-performance-meter__trend--up">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              <span x-text="'+' + trend + '% vs last quarter'"></span>
+            </span>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <h4 class="ux-performance-meter__categories-title">Performance Breakdown</h4>
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div x-data="uxPerformanceMeter({
+  employee: {
+    name: 'Sarah Johnson',
+    role: 'Senior Developer',
+    department: 'Engineering'
+  },
+  score: 87,
+  maxScore: 100,
+  trend: 5,
+  goal: 85,
+  actual: 87,
+  categories: [
+    { name: 'Productivity', score: 92, trend: 8 },
+    { name: 'Code Quality', score: 88, trend: 3 },
+    { name: 'Teamwork', score: 85, trend: -2 }
+  ]
+})" class="ux-performance-meter">
+  <!-- Component content -->
+</div></pre>
+  </section>
+
+  <!-- Rating Scale (1-5) -->
+  <section class="component-section">
+    <h2>Rating Scale (1-5 Stars)</h2>
+
+    <div class="demo-grid">
+      <div x-data="uxPerformanceMeter({
+        employee: {
+          name: 'Emily Rodriguez',
+          role: 'UX Designer',
+          department: 'Design'
+        },
+        score: 4.2,
+        scoreType: 'rating',
+        ratingMax: 5,
+        trend: 0.3,
+        categories: [
+          { name: 'Creativity', score: 90, trend: 5 },
+          { name: 'User Research', score: 85, trend: 2 },
+          { name: 'Prototyping', score: 88, trend: 8 },
+          { name: 'Collaboration', score: 82, trend: -1 }
+        ]
+      })" class="ux-performance-meter">
+
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar" style="background: var(--ux-purple-500);">
+            <span x-text="getInitials()"></span>
+          </div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">/ 5</span>
+              <div class="ux-performance-meter__score-label">Rating</div>
+            </div>
+          </div>
+
+          <div class="ux-performance-meter__score-summary">
+            <span class="ux-performance-meter__score-status"
+                  :class="'ux-performance-meter__score-status--' + scoreLevel"
+                  x-text="scoreLevelLabel"></span>
+            <span class="ux-performance-meter__trend ux-performance-meter__trend--up">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              +0.3 vs last review
+            </span>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Needs Improvement -->
+      <div x-data="uxPerformanceMeter({
+        employee: {
+          name: 'Alex Thompson',
+          role: 'Junior Developer',
+          department: 'Engineering'
+        },
+        score: 2.8,
+        scoreType: 'rating',
+        ratingMax: 5,
+        trend: -0.2,
+        categories: [
+          { name: 'Technical Skills', score: 55, trend: -5 },
+          { name: 'Code Quality', score: 48, trend: -8 },
+          { name: 'Punctuality', score: 70, trend: 2 },
+          { name: 'Learning', score: 65, trend: 5 }
+        ]
+      })" class="ux-performance-meter">
+
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar" style="background: var(--ux-warning);">
+            <span x-text="getInitials()"></span>
+          </div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">/ 5</span>
+            </div>
+          </div>
+
+          <div class="ux-performance-meter__score-summary">
+            <span class="ux-performance-meter__score-status"
+                  :class="'ux-performance-meter__score-status--' + scoreLevel"
+                  x-text="scoreLevelLabel"></span>
+            <span class="ux-performance-meter__trend ux-performance-meter__trend--down">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+              -0.2 vs last review
+            </span>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <div class="ux-performance-meter__category-score">
+                  <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+                  <span class="ux-performance-meter__category-trend"
+                        :class="'ux-performance-meter__category-trend--' + getCategoryTrendDirection(cat.trend)">
+                    <template x-if="getCategoryTrendDirection(cat.trend) === 'up'">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                      </svg>
+                    </template>
+                    <template x-if="getCategoryTrendDirection(cat.trend) === 'down'">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </template>
+                    <span x-text="getCategoryTrendValue(cat.trend)"></span>
+                  </span>
+                </div>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compact Variant -->
+  <section class="component-section">
+    <h2>Compact Variant</h2>
+
+    <div class="demo-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+      <div x-data="uxPerformanceMeter({
+        employee: { name: 'John Doe', role: 'Developer' },
+        score: 82,
+        trend: 3,
+        categories: [
+          { name: 'Productivity', score: 85 },
+          { name: 'Quality', score: 80 }
+        ]
+      })" class="ux-performance-meter ux-performance-meter--compact">
+
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar">JD</div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius" stroke-width="8"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      stroke-width="8"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div x-data="uxPerformanceMeter({
+        employee: { name: 'Jane Smith', role: 'Designer' },
+        score: 91,
+        trend: 7,
+        categories: [
+          { name: 'Creativity', score: 95 },
+          { name: 'Delivery', score: 88 }
+        ]
+      })" class="ux-performance-meter ux-performance-meter--compact">
+
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar" style="background: var(--ux-primary);">JS</div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius" stroke-width="8"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      stroke-width="8"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div x-data="uxPerformanceMeter({
+        employee: { name: 'Bob Wilson', role: 'Manager' },
+        score: 45,
+        trend: -8,
+        categories: [
+          { name: 'Leadership', score: 42 },
+          { name: 'Communication', score: 48 }
+        ]
+      })" class="ux-performance-meter ux-performance-meter--compact">
+
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar" style="background: var(--ux-danger);">BW</div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius" stroke-width="8"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      stroke-width="8"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Score Only -->
+  <section class="component-section">
+    <h2>Score Only (Minimal)</h2>
+
+    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+      <div x-data="uxPerformanceMeter({ score: 92 })"
+           class="ux-performance-meter ux-performance-meter--score-only"
+           style="width: 160px;">
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill ux-performance-meter__score-fill--excellent"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div x-data="uxPerformanceMeter({ score: 75 })"
+           class="ux-performance-meter ux-performance-meter--score-only"
+           style="width: 160px;">
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill ux-performance-meter__score-fill--good"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div x-data="uxPerformanceMeter({ score: 58 })"
+           class="ux-performance-meter ux-performance-meter--score-only"
+           style="width: 160px;">
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill ux-performance-meter__score-fill--average"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div x-data="uxPerformanceMeter({ score: 35 })"
+           class="ux-performance-meter ux-performance-meter--score-only"
+           style="width: 160px;">
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill ux-performance-meter__score-fill--poor"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- With Period Selector -->
+  <section class="component-section">
+    <h2>With Period Selector</h2>
+
+    <ux-playground src="examples/performance-meter/performance-breakdown.html"></ux-playground>
+      <div class="demo-box" style="max-width: 500px;">
+      <div x-data="uxPerformanceMeter({
+        employee: { name: 'Lisa Park', role: 'Product Manager', department: 'Product' },
+        score: 88,
+        trend: 4,
+        period: 'quarterly',
+        periods: ['monthly', 'quarterly', 'yearly'],
+        categories: [
+          { name: 'Strategy', score: 90, trend: 5 },
+          { name: 'Execution', score: 86, trend: 3 },
+          { name: 'Stakeholder Management', score: 88, trend: 6 }
+        ]
+      })"
+      @performance-meter:period-change="console.log('Period changed:', $event.detail.period)"
+      class="ux-performance-meter">
+
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar" style="background: var(--ux-indigo-500);">
+            <span x-text="getInitials()"></span>
+          </div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+          </div>
+        </div>
+
+        <!-- Period Selector -->
+        <div class="ux-performance-meter__period-selector">
+          <template x-for="p in periods" :key="p">
+            <button class="ux-performance-meter__period-btn"
+                    :class="{'ux-performance-meter__period-btn--active': period === p}"
+                    @click="setPeriod(p)"
+                    x-text="p.charAt(0).toUpperCase() + p.slice(1)"></button>
+          </template>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+              <div class="ux-performance-meter__score-label" x-text="period + ' score'"></div>
+            </div>
+          </div>
+
+          <div class="ux-performance-meter__score-summary">
+            <span class="ux-performance-meter__score-status"
+                  :class="'ux-performance-meter__score-status--' + scoreLevel"
+                  x-text="scoreLevelLabel"></span>
+            <span class="ux-performance-meter__trend ux-performance-meter__trend--up">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              +4% vs previous
+            </span>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Glass Variant -->
+  <section class="component-section">
+    <h2>Glass Variant</h2>
+
+    <div class="demo-glass-bg">
+      <div x-data="uxPerformanceMeter({
+        employee: { name: 'David Kim', role: 'Engineering Lead', department: 'Platform' },
+        score: 93,
+        trend: 6,
+        goal: 90,
+        actual: 93,
+        categories: [
+          { name: 'Technical Excellence', score: 95 },
+          { name: 'Team Leadership', score: 91 },
+          { name: 'Innovation', score: 94 }
+        ]
+      })" class="ux-performance-meter ux-performance-meter--glass" style="max-width: 420px; color: white;">
+
+        <div class="ux-performance-meter__header" style="border-color: rgba(255,255,255,0.2);">
+          <div class="ux-performance-meter__avatar" style="background: rgba(255,255,255,0.2);">
+            <span x-text="getInitials()"></span>
+          </div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name" style="color: white;"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role" style="color: rgba(255,255,255,0.8);"></p>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill ux-performance-meter__score-fill--excellent"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore" style="color: white;"></span>
+              <span class="ux-performance-meter__score-max" style="color: rgba(255,255,255,0.7);">%</span>
+            </div>
+          </div>
+
+          <div class="ux-performance-meter__score-summary">
+            <span class="ux-performance-meter__score-status ux-performance-meter__score-status--excellent">
+              Excellent
+            </span>
+            <span class="ux-performance-meter__trend ux-performance-meter__trend--up">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              +6%
+            </span>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__goal-section">
+          <div class="ux-performance-meter__goal-item">
+            <span class="ux-performance-meter__goal-label" style="color: rgba(255,255,255,0.6);">Goal</span>
+            <span class="ux-performance-meter__goal-value" style="color: white;" x-text="goal"></span>
+          </div>
+          <div class="ux-performance-meter__goal-divider" style="background: rgba(255,255,255,0.2);"></div>
+          <div class="ux-performance-meter__goal-item">
+            <span class="ux-performance-meter__goal-label" style="color: rgba(255,255,255,0.6);">Actual</span>
+            <span class="ux-performance-meter__goal-value" style="color: white;" x-text="actual"></span>
+          </div>
+          <div class="ux-performance-meter__goal-divider" style="background: rgba(255,255,255,0.2);"></div>
+          <div class="ux-performance-meter__goal-item">
+            <span class="ux-performance-meter__goal-label" style="color: rgba(255,255,255,0.6);">Diff</span>
+            <span class="ux-performance-meter__goal-diff ux-performance-meter__goal-diff--positive">+3</span>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <h4 class="ux-performance-meter__categories-title" style="color: white; border-color: rgba(255,255,255,0.2);">Breakdown</h4>
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name" style="color: white;"></span>
+                <span class="ux-performance-meter__category-value" x-text="cat.score + '%'" style="color: white;"></span>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Demo -->
+  <section class="component-section">
+    <h2>Interactive Demo</h2>
+
+    <ux-playground src="examples/performance-meter/breakdown-3.html"></ux-playground>
+      <div class="demo-box" style="max-width: 500px;">
+      <div x-data="{
+        ...uxPerformanceMeter({
+          employee: { name: 'Interactive Demo', role: 'Test Employee' },
+          score: 75,
+          categories: [
+            { name: 'Productivity', score: 75 },
+            { name: 'Quality', score: 75 },
+            { name: 'Teamwork', score: 75 }
+          ]
+        }),
+        adjustScore(delta) {
+          this.score = Math.max(0, Math.min(100, this.score + delta));
+          this.categories.forEach(c => {
+            c.score = Math.max(0, Math.min(100, c.score + delta));
+          });
+        }
+      }" class="ux-performance-meter">
+
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar">
+            <span x-text="getInitials()"></span>
+          </div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+            </div>
+          </div>
+
+          <div class="ux-performance-meter__score-summary">
+            <span class="ux-performance-meter__score-status"
+                  :class="'ux-performance-meter__score-status--' + scoreLevel"
+                  x-text="scoreLevelLabel"></span>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Controls -->
+        <div style="display: flex; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--ux-border-color);">
+          <button class="ux-button ux-button--sm ux-button--outline" @click="adjustScore(-10)">-10</button>
+          <button class="ux-button ux-button--sm ux-button--outline" @click="adjustScore(-5)">-5</button>
+          <button class="ux-button ux-button--sm ux-button--outline" @click="adjustScore(5)">+5</button>
+          <button class="ux-button ux-button--sm ux-button--outline" @click="adjustScore(10)">+10</button>
+          <input type="range" min="0" max="100" x-model="score"
+                 @input="categories.forEach(c => c.score = parseInt($event.target.value))"
+                 style="flex: 1;">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CSS Reference -->
+  <section class="component-section">
+    <h2>CSS Classes Reference</h2>
+
+    <ux-playground src="examples/performance-meter/breakdown-2.html"></ux-playground>
+      <div class="demo-box">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: 0.75rem;">Class</th>
+            <th style="text-align: left; padding: 0.75rem;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-performance-meter</code></td>
+            <td style="padding: 0.75rem;">Main container</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-performance-meter--compact</code></td>
+            <td style="padding: 0.75rem;">Smaller, condensed layout</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-performance-meter--lg</code></td>
+            <td style="padding: 0.75rem;">Larger size variant</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-performance-meter--score-only</code></td>
+            <td style="padding: 0.75rem;">Minimal view with score gauge only</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-performance-meter--inline</code></td>
+            <td style="padding: 0.75rem;">Horizontal layout</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-performance-meter--glass</code></td>
+            <td style="padding: 0.75rem;">Glass morphism variant</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-performance-meter--animated</code></td>
+            <td style="padding: 0.75rem;">Enables fill animations (auto-added)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>__score-fill--excellent/good/average/poor</code></td>
+            <td style="padding: 0.75rem;">Score color variants (green/blue/yellow/red)</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem;"><code>__category-fill--excellent/good/average/poor</code></td>
+            <td style="padding: 0.75rem;">Category bar color variants</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Alpine.js Options -->
+  <section class="component-section">
+    <h2>Alpine.js Options</h2>
+
+    <ux-playground src="examples/performance-meter/breakdown-1.html"></ux-playground>
+      <div class="demo-box">
+      <pre class="ux-code-block" data-lang="javascript">uxPerformanceMeter({
+  // Employee data
+  employee: {
+    name: 'Employee Name',
+    role: 'Role',
+    department: 'Department',
+    avatar: null,      // Image URL
+    initials: null     // Override auto-generated initials
+  },
+
+  // Score configuration
+  score: 0,            // Current score value
+  maxScore: 100,       // Maximum score (for percentage/points)
+  scoreType: 'percentage', // 'percentage' | 'points' | 'rating'
+  ratingMax: 5,        // Max rating (when scoreType is 'rating')
+
+  // Goal tracking
+  goal: null,          // Target goal value
+  actual: null,        // Actual achieved value
+
+  // Categories breakdown
+  categories: [
+    { name: 'Category', score: 85, trend: 5 }
+  ],
+
+  // Trend indicator
+  trend: null,         // Change from previous period (+/- number)
+  trendLabel: 'vs last period',
+
+  // Period
+  period: 'quarterly', // Current period
+  periods: ['monthly', 'quarterly', 'yearly'],
+
+  // Animation
+  animated: true,      // Enable fill animations
+
+  // Thresholds for color coding
+  thresholds: {
+    excellent: 90,     // >= 90 = green
+    good: 70,          // >= 70 = blue
+    average: 50        // >= 50 = yellow, < 50 = red
+  }
+})
+
+// Computed properties
+scoreLevel          // 'excellent' | 'good' | 'average' | 'poor'
+scoreLevelLabel     // Human-readable label
+normalizedScore     // Score as 0-100 percentage
+displayScore        // Formatted score for display
+trendDirection      // 'up' | 'down' | 'neutral'
+goalDifference      // actual - goal
+
+// Methods
+setPeriod(period)   // Change period, dispatches event
+updateScore(value)  // Update score with event
+getInitials()       // Get employee initials
+getCategoryLevel(score)  // Get level for a score
+
+// Events
+@performance-meter:period-change  // { period }
+@performance-meter:score-change   // { score, level }</pre>
+    </div>
+  </section>
+
+  <!-- HTMX + Django Example -->
+  <section class="component-section">
+    <h2>HTMX + Django Integration</h2>
+
+    <ux-playground src="examples/performance-meter/breakdown.html"></ux-playground>
+      <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Django Template</h3>
+      <pre class="ux-code-block" data-lang="html"><!-- Load employee performance with HTMX -->
+<div hx-get="/api/employees/{{ employee.id }}/performance/"
+     hx-trigger="load"
+     hx-swap="innerHTML">
+  <!-- Loading skeleton -->
+  <div class="ux-skeleton" style="height: 300px;"></div>
+</div>
+
+<!-- Partial template: employee_performance.html -->
+<div x-data="uxPerformanceMeter({
+  employee: {
+    name: '{{ employee.name }}',
+    role: '{{ employee.role }}',
+    department: '{{ employee.department.name }}'
+  },
+  score: {{ performance.overall_score }},
+  scoreType: '{{ performance.score_type }}',
+  trend: {{ performance.trend }},
+  goal: {{ performance.goal }},
+  actual: {{ performance.actual }},
+  period: '{{ performance.period }}',
+  categories: {{ performance.categories|safe }}
+})" class="ux-performance-meter">
+  <!-- Component markup -->
+</div></pre>
+
+      <h3 style="font-size: 1rem; margin: 2rem 0 1rem;">Django View</h3>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+import json
+
+def employee_performance(request, employee_id):
+    employee = get_object_or_404(Employee, id=employee_id)
+    period = request.GET.get('period', 'quarterly')
+
+    # Get performance data for the period
+    performance = PerformanceReview.objects.filter(
+        employee=employee,
+        period=period
+    ).latest('created_at')
+
+    categories = [
+        {'name': c.name, 'score': c.score, 'trend': c.trend}
+        for c in performance.categories.all()
+    ]
+
+    context = {
+        'employee': employee,
+        'performance': {
+            'overall_score': performance.overall_score,
+            'score_type': 'percentage',
+            'trend': performance.trend_vs_previous,
+            'goal': performance.goal,
+            'actual': performance.overall_score,
+            'period': period,
+            'categories': json.dumps(categories)
+        }
+    }
+
+    return render(request, 'partials/employee_performance.html', context)</pre>
+    </div>
+  </section>

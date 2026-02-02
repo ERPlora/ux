@@ -14,10 +14,11 @@ export class UXTagInput {
     }
 
     this.options = {
-      inputSelector: '.ux-tag-input__input, input',
+      inputSelector: '.ux-tag-input__input, .ux-tag-input__field, input',
       tagsContainerSelector: '.ux-tag-input__tags',
-      tagSelector: '.ux-tag-input__tag',
-      removeSelector: '.ux-tag-input__remove, [data-remove]',
+      tagSelector: '.ux-tag',
+      removeSelector: '.ux-tag__remove, [data-remove]',
+      tagClass: 'ux-tag--primary', // Can be: ux-tag--primary, ux-tag--success, ux-tag--warning, ux-tag--danger
       tags: [],
       maxTags: Infinity,
       allowDuplicates: false,
@@ -96,11 +97,13 @@ export class UXTagInput {
   }
 
   _renderTags() {
+    const tagClass = this.options.tagClass || 'ux-tag--primary';
+
     this.tagsContainer.innerHTML = this._tags.map((tag, index) => `
-      <span class="ux-tag-input__tag" data-index="${index}">
-        <span class="ux-tag-input__tag-text">${this._escapeHtml(tag)}</span>
-        <button type="button" class="ux-tag-input__remove" data-index="${index}" aria-label="Remove ${this._escapeHtml(tag)}">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <span class="ux-tag ${tagClass}" data-index="${index}">
+        <span class="ux-tag__text">${this._escapeHtml(tag)}</span>
+        <button type="button" class="ux-tag__remove" data-index="${index}" aria-label="Remove ${this._escapeHtml(tag)}">
+          <svg class="ux-tag__remove-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -108,8 +111,8 @@ export class UXTagInput {
       </span>
     `).join('');
 
-    // Bind remove events
-    this.tagsContainer.querySelectorAll('.ux-tag-input__remove').forEach(btn => {
+    // Bind remove events using event delegation
+    this.tagsContainer.querySelectorAll('.ux-tag__remove').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const index = parseInt(btn.dataset.index, 10);

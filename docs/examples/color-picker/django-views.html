@@ -1,0 +1,32 @@
+# views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+
+@require_POST
+def update_theme_color(request):
+    """Actualiza el color del tema del usuario."""
+    color = request.POST.get('theme_color', '#3b82f6')
+
+    # Validar formato HEX
+    if not color.startswith('#') or len(color) not in [4, 7, 9]:
+        return HttpResponse(status=400)
+
+    request.user.profile.theme_color = color
+    request.user.profile.save()
+
+    return HttpResponse(status=204)
+
+
+@require_POST
+def update_product(request, product_id):
+    """Actualiza un producto con su color."""
+    product = get_object_or_404(Product, id=product_id)
+
+    product.name = request.POST.get('name', product.name)
+    product.color = request.POST.get('color', product.color)
+    product.save()
+
+    # Retorna preview actualizado
+    return render(request, 'partials/product_preview.html', {
+        'product': product
+    })

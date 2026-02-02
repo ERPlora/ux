@@ -1,0 +1,27 @@
+<pre class="ux-code-block" data-lang="html"><!-- templates/components/sortable_header.html -->
+{% load ux_tags %}
+
+<th class="ux-datatable__th ux-datatable__th--sortable
+           {% if current_order == field %}ux-datatable__th--sorted{% endif %}
+           {% if current_order == '-'|add:field %}ux-datatable__th--sorted ux-datatable__th--sorted-desc{% endif %}"
+    hx-get="{{ url }}?order_by={% if current_order == field %}-{% endif %}{{ field }}{% for key, value in request.GET.items %}{% if key != 'order_by' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+    hx-target="#{{ target }}"
+    hx-push-url="true"
+    hx-indicator=".htmx-indicator">
+  {{ label }}
+  <span class="ux-datatable__sort-icon">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 5v14M5 12l7-7 7 7"/>
+    </svg>
+  </span>
+</th>
+
+<!-- Uso en la tabla -->
+<thead class="ux-datatable__thead">
+  <tr>
+    {% include "components/sortable_header.html" with field="name" label="Nombre" current_order=order_by url=request.path target="table-container" %}
+    {% include "components/sortable_header.html" with field="email" label="Email" current_order=order_by url=request.path target="table-container" %}
+    {% include "components/sortable_header.html" with field="created_at" label="Creado" current_order=order_by url=request.path target="table-container" %}
+    {% include "components/sortable_header.html" with field="status" label="Estado" current_order=order_by url=request.path target="table-container" %}
+  </tr>
+</thead></pre>

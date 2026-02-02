@@ -1,0 +1,302 @@
+<!-- Basic Product Grid -->
+<section class="component-section">
+  <h3>Grid de Productos POS</h3>
+  <p>Grid de productos con imagenes, precios y boton de agregar rapido. Ideal para punto de venta.</p>
+
+  <ux-playground src="examples/product-card/grid-pos.html"></ux-playground>
+</section>
+
+<!-- Grid Sizes -->
+<section class="component-section">
+  <h3>Tamanos de Grid</h3>
+  <p>Controla el numero de columnas con clases: .ux-product-grid--2, --3, --4, --5, --6</p>
+
+  <ux-playground src="examples/product-card/tamanos-grid.html"></ux-playground>
+</section>
+
+<!-- Horizontal Card -->
+<section class="component-section">
+  <h3>Tarjeta Horizontal</h3>
+  <p>Layout horizontal para listas de productos.</p>
+
+  <ux-playground src="examples/product-card/horizontal.html"></ux-playground>
+</section>
+
+<!-- Glass Variant -->
+<section class="component-section">
+  <h3>Variante Glass</h3>
+  <p>Tarjetas con efecto glass morphism.</p>
+
+  <ux-playground src="examples/product-card/glass.html"></ux-playground>
+</section>
+
+<!-- HTMX Integration -->
+<section class="component-section">
+  <h3>Integracion con HTMX</h3>
+  <p>Los product cards funcionan perfectamente con HTMX para cargar productos del servidor, agregar al carrito, y actualizar stock en tiempo real.</p>
+
+  <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Grid de Productos con HTMX</h4>
+  <p>Cargar productos desde el servidor y agregar al carrito con HTMX.</p>
+
+  <ux-playground src="examples/product-card/htmx-grid.html"></ux-playground>
+
+  <pre class="ux-code-block" data-lang="html"><!-- Grid que carga productos del servidor -->
+<div id="product-catalog"
+     class="ux-product-grid ux-product-grid--4"
+     hx-get="/api/products"
+     hx-trigger="load"
+     hx-swap="innerHTML"
+     hx-indicator="#loading">
+  <div class="ux-spinner htmx-indicator" id="loading"></div>
+</div>
+
+<!-- Respuesta del servidor (HTML parcial): -->
+<div class="ux-product-card"
+     hx-post="/api/cart/add"
+     hx-vals='{"product_id": 1, "quantity": 1}'
+     hx-target="#cart-summary"
+     hx-swap="outerHTML">
+  <img src="..." class="ux-product-card__image">
+  <h4 class="ux-product-card__name">Cafe</h4>
+  <span class="ux-product-card__price">$3.50</span>
+</div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Agregar al Carrito con HTMX</h4>
+  <p>Click en producto para agregarlo al carrito via HTMX.</p>
+
+  <ux-playground src="examples/product-card/htmx-agregar-carrito.html"></ux-playground>
+
+  <pre class="ux-code-block" data-lang="html"><!-- Producto que agrega al carrito con HTMX -->
+<div class="ux-product-card"
+     hx-post="/api/cart/add"
+     hx-vals='{"product_id": 1, "quantity": 1}'
+     hx-target="#cart-result"
+     hx-swap="innerHTML">
+  <img src="..." class="ux-product-card__image">
+  <h4 class="ux-product-card__name">Cafe</h4>
+  <span class="ux-product-card__price">$3.50</span>
+</div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Busqueda y Filtrado con HTMX</h4>
+  <p>Filtrar productos en tiempo real con busqueda HTMX.</p>
+
+  <ux-playground src="examples/product-card/htmx-busqueda-filtrado.html"></ux-playground>
+
+  <pre class="ux-code-block" data-lang="html"><!-- Busqueda en tiempo real -->
+<input type="search"
+       name="search"
+       hx-get="/api/products/search"
+       hx-trigger="input changed delay:300ms"
+       hx-target="#product-grid">
+
+<!-- Filtro por categoria -->
+<div class="ux-segment">
+  <button hx-get="/api/products?category=bebidas"
+          hx-target="#product-grid">Bebidas</button>
+  <button hx-get="/api/products?category=comida"
+          hx-target="#product-grid">Comida</button>
+</div>
+
+<div id="product-grid" class="ux-product-grid"></div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Actualizar Stock en Tiempo Real</h4>
+  <p>Polling HTMX para mantener stock actualizado.</p>
+
+  <ux-playground src="examples/product-card/htmx-stock-tiempo-real.html"></ux-playground>
+
+  <pre class="ux-code-block" data-lang="html"><!-- Producto con actualizacion de stock cada 5s -->
+<div id="product-1"
+     class="ux-product-card"
+     hx-get="/api/products/1/stock"
+     hx-trigger="every 5s"
+     hx-swap="outerHTML">
+  <!-- El servidor devuelve el card completo con stock actualizado -->
+</div>
+
+<!-- O actualizar solo el badge de stock -->
+<span id="stock-badge-1"
+      class="ux-product-card__badge"
+      hx-get="/api/products/1/stock-badge"
+      hx-trigger="every 5s"
+      hx-swap="outerHTML">Stock: 5</span></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Paginacion Infinita</h4>
+  <p>Cargar mas productos al hacer scroll.</p>
+
+  <ux-playground src="examples/product-card/htmx-paginacion-infinita.html"></ux-playground>
+
+  <pre class="ux-code-block" data-lang="html"><!-- Grid con scroll infinito -->
+<div id="products" class="ux-product-grid">
+  <!-- productos... -->
+
+  <!-- Trigger al final -->
+  <div hx-get="/api/products?page=2"
+       hx-trigger="revealed"
+       hx-swap="outerHTML">
+    <span class="ux-spinner htmx-indicator"></span>
+    Cargando...
+  </div>
+</div>
+
+<!-- Respuesta del servidor incluye mas productos + nuevo trigger --></pre>
+</section>
+
+<!-- HTMX + Django -->
+<section class="component-section">
+  <h3>HTMX + Django</h3>
+  <p>Ejemplos de integracion con Django para agregar productos al carrito usando HTMX y vistas basadas en clases o funciones.</p>
+
+  <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Vista Django para Agregar al Carrito</h4>
+  <p>Endpoint que recibe el producto y devuelve HTML parcial con el carrito actualizado.</p>
+
+  <ux-code src="examples/product-card/django-vista-agregar-carrito.py" lang="python"></ux-code>
+
+  <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Template Django para Product Card</h4>
+  <p>Template parcial que renderiza un product card con atributos HTMX.</p>
+
+  <ux-code src="examples/product-card/django-template-product-card.html" lang="html"></ux-code>
+
+  <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Template para Cart Summary</h4>
+  <p>HTML parcial que HTMX inserta despues de agregar un producto.</p>
+
+  <ux-code src="examples/product-card/django-template-cart-summary.html" lang="html"></ux-code>
+
+  <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Grid de Productos con Filtros</h4>
+  <p>Vista y template para mostrar productos con filtro por categoria.</p>
+
+  <ux-code src="examples/product-card/django-vista-filtros.py" lang="python"></ux-code>
+
+  <ux-code src="examples/product-card/django-template-products-list.html" lang="html"></ux-code>
+
+  <ux-code src="examples/product-card/django-template-product-grid.html" lang="html"></ux-code>
+
+  <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">URLs de Django</h4>
+
+  <ux-code src="examples/product-card/django-urls.py" lang="python"></ux-code>
+
+  <h4 style="margin-top: var(--ux-space-xl); margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Modelo de Producto</h4>
+
+  <ux-code src="examples/product-card/django-models.py" lang="python"></ux-code>
+</section>
+
+<!-- API Reference -->
+<section class="component-section">
+  <h3>Componente Alpine.js</h3>
+  <div style="background: var(--ux-surface); padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg);">
+    <pre class="ux-code-block" data-lang="javascript">// uxProductCard - Tarjeta individual
+uxProductCard({
+  product: {
+    id: 1,
+    name: 'Producto',
+    price: 9.99,
+    originalPrice: 12.99,    // Precio original (para descuentos)
+    stock: 50,               // Stock disponible
+    image: 'https://...',    // URL de imagen
+    category: 'Categoria',
+    sku: 'SKU-001'
+  },
+  currency: '$',              // Simbolo de moneda
+  locale: 'en-US',            // Locale para formato
+  lowStockThreshold: 5,       // Umbral de stock bajo
+  showQuickAdd: true,         // Mostrar boton agregar rapido
+  labels: {
+    addToCart: 'Add to cart',
+    outOfStock: 'Out of stock',
+    lowStock: 'Low stock',
+    inStock: 'In stock'
+  }
+})
+
+// Propiedades:
+product         // Datos del producto
+isAdding        // True durante animacion de agregar
+isAvailable()   // True si hay stock
+
+// Metodos:
+formatPrice(n)      // Formatear precio
+getDiscountPercent() // Calcular % descuento
+getStockStatus()    // 'available', 'low', 'out'
+getStockText()      // Texto de stock
+addToCart(event)    // Agregar al carrito
+getIcon(name)       // Obtener icono SVG
+
+// Eventos:
+@product-add        // { product, quantity }
+@product-select     // { product, selected }
+
+
+// uxProductGrid - Grid con filtros
+uxProductGrid({
+  products: [...],
+  multiSelect: false,
+  sortBy: 'name'
+})
+
+// Propiedades:
+filteredProducts    // Productos filtrados
+categories          // Categorias unicas
+selectedProducts    // Productos seleccionados
+
+// Metodos:
+toggleSelect(product)
+isSelected(product)
+clearSelection()</pre>
+  </div>
+</section>
+
+<!-- CSS Classes -->
+<section class="component-section">
+  <h3>Clases CSS</h3>
+  <div style="background: var(--ux-surface); padding: var(--ux-space-lg); border-radius: var(--ux-border-radius-lg);">
+    <pre class="ux-code-block" data-lang="css">/* Grid */
+.ux-product-grid              // Grid base
+.ux-product-grid--2/3/4/5/6   // Numero de columnas
+.ux-product-grid--compact     // Gap reducido
+
+/* Tarjeta */
+.ux-product-card              // Tarjeta base
+.ux-product-card--sm          // Tamano pequeno
+.ux-product-card--lg          // Tamano grande
+.ux-product-card--horizontal  // Layout horizontal
+.ux-product-card--glass       // Variante glass
+.ux-product-card--selected    // Seleccionada
+.ux-product-card--unavailable // No disponible
+.ux-product-card--out-of-stock // Sin stock
+.ux-product-card--adding      // Animacion agregar
+
+/* Imagen */
+.ux-product-card__image-wrapper
+.ux-product-card__image
+.ux-product-card__placeholder
+
+/* Badges */
+.ux-product-card__badges
+.ux-product-card__badge
+.ux-product-card__badge--sale
+.ux-product-card__badge--new
+.ux-product-card__badge--low-stock
+.ux-product-card__badge--out
+
+/* Contenido */
+.ux-product-card__content
+.ux-product-card__name
+.ux-product-card__category
+.ux-product-card__sku
+
+/* Precio */
+.ux-product-card__price-wrapper
+.ux-product-card__price
+.ux-product-card__price--sale
+.ux-product-card__price-original
+.ux-product-card__discount
+
+/* Stock */
+.ux-product-card__stock
+.ux-product-card__stock--low
+.ux-product-card__stock--out
+.ux-product-card__stock--available
+
+/* Agregar rapido */
+.ux-product-card__quick-add</pre>
+  </div>
+</section>

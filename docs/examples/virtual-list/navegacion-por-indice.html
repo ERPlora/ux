@@ -1,0 +1,42 @@
+items: Array.from({ length: 1000 }, (_, i) => ({
+        id: i,
+        label: 'Item ' + i
+      })),
+      targetIndex: 500
+    }">
+      <div style="padding: var(--ux-space-md); display: flex; gap: var(--ux-space-sm); align-items: center; border-bottom: 1px solid var(--ux-border-color);">
+        <div class="ux-input-group" style="width: 100px; flex-shrink: 0;">
+          <input type="number" class="ux-input" x-model.number="targetIndex" min="0" max="999" placeholder="Indice">
+        </div>
+        <button class="ux-button ux-color-primary ux-button--sm" @click="$refs.virtualList.scrollToIndex(targetIndex)">
+          Ir al indice
+        </button>
+        <button class="ux-button ux-button--outline ux-button--sm" @click="$refs.virtualList.scrollToIndex(0)">
+          Ir al inicio
+        </button>
+        <button class="ux-button ux-button--outline ux-button--sm" @click="$refs.virtualList.scrollToIndex(999)">
+          Ir al final
+        </button>
+      </div>
+
+      <div class="ux-virtual-list"
+           x-ref="virtualList"
+           x-data="uxVirtualList({ items: $data.items, itemHeight: 50 })"
+           style="height: 300px;">
+
+        <div class="ux-virtual-list__container" :style="containerStyle">
+          <div class="ux-virtual-list__content" :style="contentStyle">
+            <template x-for="item in visibleItems" :key="item.id">
+              <div class="ux-virtual-list__item"
+                   :style="{ height: itemHeight + 'px', display: 'flex', alignItems: 'center', padding: '0 var(--ux-space-md)', borderBottom: '1px solid var(--ux-border-color)' }">
+                <span class="ux-badge ux-color-primary" style="margin-right: var(--ux-space-sm);" x-text="item.id"></span>
+                <span x-text="item.label"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: var(--ux-space-sm) var(--ux-space-md); background: var(--ux-surface-secondary); font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary);">
+        1,000 elementos - Renderizando solo los visibles
+      </div>

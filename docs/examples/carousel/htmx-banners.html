@@ -1,0 +1,29 @@
+<!-- Hero banners con HTMX -->
+<div x-data="uxCarousel({ slidesPerView: 1, loop: true, autoplay: true, autoplayInterval: 5000 })"
+     class="ux-carousel ux-carousel--show-1">
+
+  <div class="ux-carousel__viewport" x-ref="viewport">
+    <div class="ux-carousel__track" x-ref="track" :style="{ transform: `translateX(${translateX}%)` }"
+         hx-get="/api/banners/"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+      <!-- Banners cargados dinamicamente -->
+    </div>
+  </div>
+
+  <div class="ux-carousel__pagination ux-carousel--pagination-lines">
+    <template x-for="(dot, i) in paginationDots" :key="i">
+      <button class="ux-carousel__dot" :class="{ 'ux-carousel__dot--active': getCurrentPage() === i }" @click="goToPage(i)"></button>
+    </template>
+  </div>
+</div>
+
+<!-- partials/banners.html -->
+{% for banner in banners %}
+<div class="ux-carousel__slide">
+  <a href="{{ banner.url }}" style="display: block;">
+    <img src="{{ banner.imagen.url }}" alt="{{ banner.titulo }}"
+         style="width: 100%; height: 300px; object-fit: cover; border-radius: var(--ux-border-radius-lg);">
+  </a>
+</div>
+{% endfor %}

@@ -1,0 +1,38 @@
+<div class="demo-box" style="text-align: center;">
+  <div x-data="uxGauge({ value: 50, size: 220, unit: '%', label: 'Carga CPU' })"
+       @gauge:change="console.log($event.detail)"
+       class="ux-gauge ux-gauge--lg"
+       :class="{
+         'ux-gauge--success': percentage < 50,
+         'ux-gauge--warning': percentage >= 50 && percentage < 80,
+         'ux-gauge--danger': percentage >= 80
+       }">
+    <svg class="ux-gauge__svg" :width="size" :height="size * 0.6" :viewBox="`0 0 ${size} ${size * 0.65}`">
+      <path class="ux-gauge__track" :d="arcPath" :stroke-width="strokeWidth" />
+      <path class="ux-gauge__fill" :d="arcPath" :stroke-width="strokeWidth"
+            :stroke-dasharray="circumference" :stroke-dashoffset="dashOffset" />
+    </svg>
+    <div class="ux-gauge__value-container" :style="valueContainerStyle">
+      <span class="ux-gauge__value" x-text="displayValue"></span>
+      <span class="ux-gauge__unit" x-text="unit"></span>
+      <span class="ux-gauge__label" x-text="label"></span>
+    </div>
+    <div class="ux-gauge__labels">
+      <span class="ux-gauge__min" x-text="min"></span>
+      <span class="ux-gauge__max" x-text="max"></span>
+    </div>
+
+    <!-- Controls -->
+    <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center;">
+      <button class="ux-button ux-button--sm ux-button--outline" @click="decrement(10)">-10</button>
+      <button class="ux-button ux-button--sm ux-button--outline" @click="decrement(1)">-1</button>
+      <button class="ux-button ux-button--sm ux-button--outline" @click="increment(1)">+1</button>
+      <button class="ux-button ux-button--sm ux-button--outline" @click="increment(10)">+10</button>
+    </div>
+
+    <div class="result-display">
+      Valor: <strong x-text="displayValue + unit"></strong> |
+      Color: <strong x-text="percentage < 50 ? 'Success' : (percentage < 80 ? 'Warning' : 'Danger')"></strong>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,105 @@
+<div class="ux-batch-card" x-data="uxBatchTracker({
+        batchNumber: 'BATCH-2024-00156',
+        lotNumber: 'LOT-A1B2C3',
+        productName: 'Organic Tomato Sauce 500ml',
+        productSku: 'OTS-500-001',
+        status: 'in-progress',
+        initialQuantity: 1000,
+        currentQuantity: 985,
+        rejectedQuantity: 15,
+        unit: 'units',
+        createdAt: '2024-01-15T08:30:00',
+        manufacturedDate: '2024-01-15',
+        expiryDate: '2025-01-15',
+        location: { name: 'Warehouse A', zone: 'Zone 3', shelf: 'Shelf 12', bin: 'Bin 4' }
+      })">
+        <div class="ux-batch-card__header">
+          <div class="ux-batch-card__title-group">
+            <h2 class="ux-batch-card__batch-number" x-text="batchNumber"></h2>
+            <p class="ux-batch-card__product-name" x-text="productName"></p>
+          </div>
+          <div x-show="showQR" class="ux-batch-card__qr">
+            <svg viewBox="0 0 100 100" fill="currentColor">
+              <rect x="10" y="10" width="20" height="20"/>
+              <rect x="70" y="10" width="20" height="20"/>
+              <rect x="10" y="70" width="20" height="20"/>
+              <rect x="40" y="40" width="20" height="20"/>
+              <rect x="15" y="15" width="10" height="10" fill="var(--ux-surface)"/>
+              <rect x="75" y="15" width="10" height="10" fill="var(--ux-surface)"/>
+              <rect x="15" y="75" width="10" height="10" fill="var(--ux-surface)"/>
+              <rect x="35" y="10" width="5" height="5"/>
+              <rect x="45" y="10" width="5" height="5"/>
+              <rect x="55" y="10" width="5" height="5"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="ux-batch-card__body">
+          <!-- Status Badge -->
+          <div style="display: flex; align-items: center; gap: var(--ux-space-md); margin-bottom: var(--ux-space-md);">
+            <div :class="'ux-batch-status ux-batch-status--' + status">
+              <span class="ux-batch-status__dot"></span>
+              <span x-text="getStatusLabel(status)"></span>
+            </div>
+            <span style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary);">
+              SKU: <span x-text="productSku"></span>
+            </span>
+          </div>
+
+          <!-- Info Grid -->
+          <div class="ux-batch-info">
+            <div class="ux-batch-info__item">
+              <span class="ux-batch-info__label">Lot Number</span>
+              <span class="ux-batch-info__value ux-batch-info__value--mono" x-text="lotNumber"></span>
+            </div>
+            <div class="ux-batch-info__item">
+              <span class="ux-batch-info__label">Manufactured</span>
+              <span class="ux-batch-info__value" x-text="formatDate(manufacturedDate)"></span>
+            </div>
+            <div class="ux-batch-info__item">
+              <span class="ux-batch-info__label">Expiry Date</span>
+              <span class="ux-batch-info__value" x-text="formatDate(expiryDate)"></span>
+            </div>
+            <div class="ux-batch-info__item">
+              <span class="ux-batch-info__label">Location</span>
+              <span class="ux-batch-info__value" x-text="location.name"></span>
+            </div>
+          </div>
+
+          <!-- Quantity Stats -->
+          <div class="ux-batch-quantity" style="margin-top: var(--ux-space-lg);">
+            <div class="ux-batch-quantity__header">
+              <span class="ux-batch-quantity__title">Quantity Tracking</span>
+            </div>
+            <div class="ux-batch-quantity__values">
+              <div class="ux-batch-quantity__stat">
+                <span class="ux-batch-quantity__stat-value ux-batch-quantity__stat-value--initial" x-text="initialQuantity"></span>
+                <span class="ux-batch-quantity__stat-label">Initial</span>
+              </div>
+              <div class="ux-batch-quantity__stat">
+                <span class="ux-batch-quantity__stat-value ux-batch-quantity__stat-value--current" x-text="currentQuantity"></span>
+                <span class="ux-batch-quantity__stat-label">Current</span>
+              </div>
+              <div class="ux-batch-quantity__stat">
+                <span class="ux-batch-quantity__stat-value ux-batch-quantity__stat-value--rejected" x-text="rejectedQuantity"></span>
+                <span class="ux-batch-quantity__stat-label">Rejected</span>
+              </div>
+              <div class="ux-batch-quantity__stat">
+                <span class="ux-batch-quantity__stat-value ux-batch-quantity__stat-value--yield" x-text="yieldPercentage + '%'"></span>
+                <span class="ux-batch-quantity__stat-label">Yield</span>
+              </div>
+            </div>
+            <div class="ux-batch-quantity__bar">
+              <div class="ux-batch-quantity__bar-segment ux-batch-quantity__bar-segment--good" :style="'width: ' + yieldPercentage + '%'"></div>
+              <div class="ux-batch-quantity__bar-segment ux-batch-quantity__bar-segment--rejected" :style="'width: ' + rejectedPercentage + '%'"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-batch-card__footer">
+          <span style="font-size: var(--ux-font-size-xs); color: var(--ux-text-tertiary);">
+            Created: <span x-text="formatDateTime(createdAt)"></span>
+          </span>
+          <button class="ux-button ux-button--sm ux-button--outline">View Details</button>
+        </div>
+      </div>

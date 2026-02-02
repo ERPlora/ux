@@ -1,0 +1,56 @@
+<div class="demo-box" x-data="{ previewUrl: null, fileName: null }">
+  <div class="ux-upload ux-upload--compact" style="max-width: 400px;">
+    <input type="file"
+           name="document"
+           class="ux-upload__input"
+           id="preview-upload"
+           accept="image/*"
+           @change="
+             const file = $event.target.files[0];
+             if (file) {
+               fileName = file.name;
+               previewUrl = URL.createObjectURL(file);
+             }
+           ">
+    <label for="preview-upload" class="ux-upload__dropzone" style="cursor: pointer;">
+      <template x-if="!previewUrl">
+        <div style="text-align: center;">
+          <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <p class="ux-upload__text">Selecciona una imagen</p>
+        </div>
+      </template>
+      <template x-if="previewUrl">
+        <div style="display: flex; align-items: center; gap: var(--ux-space-md);">
+          <img :src="previewUrl" style="width: 60px; height: 60px; object-fit: cover; border-radius: var(--ux-border-radius);" alt="Preview">
+          <div>
+            <p style="font-weight: 500;" x-text="fileName"></p>
+            <p style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">Click para cambiar</p>
+          </div>
+        </div>
+      </template>
+    </label>
+  </div>
+
+  <div x-show="previewUrl" style="margin-top: var(--ux-space-md); display: flex; gap: var(--ux-space-sm);">
+    <button type="button"
+            class="ux-button ux-color-primary"
+            hx-post="/api/upload/document"
+            hx-encoding="multipart/form-data"
+            hx-include="#preview-upload"
+            hx-target="#preview-upload-result"
+            hx-indicator="#preview-spinner">
+      <span class="ux-spinner ux-spinner--sm htmx-indicator" id="preview-spinner"></span>
+      Confirmar Upload
+    </button>
+    <button type="button"
+            class="ux-button ux-button--outline"
+            @click="previewUrl = null; fileName = null; document.getElementById('preview-upload').value = ''">
+      Cancelar
+    </button>
+  </div>
+  <div id="preview-upload-result" style="margin-top: var(--ux-space-md);"></div>
+</div>

@@ -1,0 +1,70 @@
+<div x-data="{
+  ...uxAutocomplete({
+    placeholder: 'Buscar usuario...',
+    debounce: 500,
+    fetchFn: async function(query) {
+      // Simulated API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const users = [
+        { label: 'Ana García', value: 'ana', description: 'ana@example.com' },
+        { label: 'Carlos López', value: 'carlos', description: 'carlos@example.com' },
+        { label: 'María Rodríguez', value: 'maria', description: 'maria@example.com' },
+        { label: 'Pedro Martínez', value: 'pedro', description: 'pedro@example.com' },
+        { label: 'Laura Sánchez', value: 'laura', description: 'laura@example.com' },
+        { label: 'Antonio Fernández', value: 'antonio', description: 'antonio@example.com' }
+      ];
+      return users.filter(u =>
+        u.label.toLowerCase().includes(query.toLowerCase()) ||
+        u.description.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+  })
+}">
+  <div class="ux-autocomplete" style="max-width: 400px;">
+    <input type="text"
+           class="ux-autocomplete__input"
+           :class="{ 'ux-autocomplete__input--loading': isLoading }"
+           x-ref="input"
+           x-model="query"
+           :placeholder="placeholder"
+           @input="onInput()"
+           @focus="onFocus()"
+           @blur="onBlur()"
+           @keydown="onKeydown($event)"
+           autocomplete="off">
+
+    <button class="ux-autocomplete__clear"
+            :class="{ 'ux-autocomplete__clear--hidden': !query || isLoading }"
+            @click="clear()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <div class="ux-autocomplete__dropdown"
+         :class="{ 'ux-autocomplete__dropdown--open': isOpen || isLoading }">
+
+      <div class="ux-autocomplete__loading" x-show="isLoading">
+        <div class="ux-autocomplete__loading-spinner"></div>
+      </div>
+
+      <ul class="ux-autocomplete__list" x-show="filteredItems.length > 0 && !isLoading">
+        <template x-for="(item, index) in filteredItems" :key="getValue(item)">
+          <li class="ux-autocomplete__item"
+              :class="{ 'ux-autocomplete__item--active': index === activeIndex }"
+              @click="select(item)"
+              @mouseenter="activeIndex = index">
+            <div class="ux-autocomplete__item-content">
+              <div class="ux-autocomplete__item-label" x-html="highlight(getLabel(item))"></div>
+              <div class="ux-autocomplete__item-description" x-html="highlight(getDescription(item))"></div>
+            </div>
+          </li>
+        </template>
+      </ul>
+
+      <div class="ux-autocomplete__empty" x-show="filteredItems.length === 0 && !isLoading && query.length >= minChars">
+        <span class="ux-autocomplete__empty-text" x-text="emptyText"></span>
+      </div>
+    </div>
+  </div>
+</div>

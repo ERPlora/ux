@@ -1,0 +1,24 @@
+<!-- Menu con items generados desde el servidor -->
+<div class="context-trigger"
+     x-data="uxContextMenu({
+       items: {{ menu_items|safe }}
+     })"
+     @contextmenu.prevent="open($event)"
+     @context-menu:select="
+       htmx.ajax($event.detail.method || 'POST', $event.detail.url, {
+         target: $event.detail.target || 'body',
+         swap: $event.detail.swap || 'none'
+       });
+     ">
+  Click derecho para acciones
+</div>
+
+<!-- En Django views.py -->
+def get_context_menu(request):
+    menu_items = [
+        {'id': 'refresh', 'label': 'Actualizar', 'icon': 'refresh', 'url': '/api/refresh/', 'method': 'GET'},
+        {'id': 'export', 'label': 'Exportar', 'icon': 'download', 'url': '/api/export/'},
+        {'divider': True},
+        {'id': 'settings', 'label': 'Configuracion', 'icon': 'settings', 'url': '/settings/', 'target': '#modal-content'},
+    ]
+    return {'menu_items': json.dumps(menu_items)}

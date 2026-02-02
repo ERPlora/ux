@@ -1,0 +1,111 @@
+<div x-data="{
+        ...uxProductionLine({
+          name: 'Bottling Line B2',
+          status: 'running',
+          target: 5000,
+          actual: 3842,
+          efficiency: 97.8,
+          speed: 92,
+          maxSpeed: 100,
+          downtime: 0,
+          stations: [
+            { name: 'Filling', status: 'running', output: 3900, icon: 'fill' },
+            { name: 'Capping', status: 'running', output: 3885, icon: 'cap' },
+            { name: 'Labeling', status: 'running', output: 3870, icon: 'label' },
+            { name: 'QC Check', status: 'running', output: 3855, icon: 'check' },
+            { name: 'Boxing', status: 'running', output: 3842, icon: 'box' }
+          ]
+        }),
+        icons: {
+          fill: '<svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path d=&quot;M8 2v4&quot;/><path d=&quot;M16 2v4&quot;/><path d=&quot;M6 6h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2z&quot;/><path d=&quot;M4 14h16&quot;/></svg>',
+          cap: '<svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;8&quot;/><path d=&quot;M12 8v4l2 2&quot;/></svg>',
+          label: '<svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path d=&quot;M5 8h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2z&quot;/><path d=&quot;M3 8V6a2 2 0 012-2h14a2 2 0 012 2v2&quot;/></svg>',
+          check: '<svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path d=&quot;M9 11l3 3L22 4&quot;/><path d=&quot;M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11&quot;/></svg>',
+          box: '<svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path d=&quot;M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z&quot;/><path d=&quot;M3.27 6.96L12 12.01l8.73-5.05&quot;/><path d=&quot;M12 22.08V12&quot;/></svg>'
+        }
+      }" class="ux-production-line">
+        <div class="ux-production-line__header">
+          <h3 class="ux-production-line__title">
+            <span x-text="name"></span>
+            <span class="ux-production-line__status-badge" :class="'ux-production-line__status-badge--' + status">
+              <span class="ux-production-line__status-dot"></span>
+              <span x-text="getStatusLabel(status)"></span>
+            </span>
+          </h3>
+          <div class="ux-production-line__speed">
+            <span class="ux-production-line__speed-label">Speed:</span>
+            <span class="ux-production-line__speed-value" x-text="speed + '%'"></span>
+            <div class="ux-production-line__speed-bar">
+              <div class="ux-production-line__speed-fill" :style="{ width: speedPercent + '%' }"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ux-production-line__metrics">
+          <div class="ux-production-line__metric">
+            <span class="ux-production-line__metric-label">Units Produced</span>
+            <span class="ux-production-line__metric-value">
+              <span x-text="actual.toLocaleString()"></span>
+              <span class="ux-production-line__metric-unit">/ <span x-text="target.toLocaleString()"></span></span>
+            </span>
+          </div>
+          <div class="ux-production-line__metric">
+            <span class="ux-production-line__metric-label">Efficiency</span>
+            <span class="ux-production-line__metric-value">
+              <span x-text="efficiencyDisplay"></span>
+              <span class="ux-production-line__metric-unit">%</span>
+            </span>
+          </div>
+          <div class="ux-production-line__metric">
+            <span class="ux-production-line__metric-label">Active Stations</span>
+            <span class="ux-production-line__metric-value">
+              <span x-text="runningStationsCount + '/' + stations.length"></span>
+            </span>
+          </div>
+        </div>
+
+        <div class="ux-production-line__progress">
+          <div class="ux-production-line__progress-header">
+            <span class="ux-production-line__progress-label">Daily Target</span>
+            <span class="ux-production-line__progress-values">
+              <span class="ux-production-line__progress-actual" x-text="progressPercent.toFixed(1) + '%'"></span>
+            </span>
+          </div>
+          <div class="ux-production-line__progress-bar">
+            <div class="ux-production-line__progress-fill"
+                 :class="'ux-production-line__progress-fill--' + progressStatus"
+                 :style="{ width: progressPercent + '%' }"></div>
+          </div>
+        </div>
+
+        <div class="ux-production-line__stations">
+          <div class="ux-production-line__stations-wrapper">
+            <template x-for="(station, index) in stations" :key="index">
+              <template x-if="true">
+                <div style="display: contents;">
+                  <div class="ux-production-line__station" :class="getStationClass(station)">
+                    <div class="ux-production-line__station-icon" x-html="icons[station.icon] || icons.box"></div>
+                    <span class="ux-production-line__station-label" x-text="station.name"></span>
+                    <span class="ux-production-line__station-sublabel" x-text="station.output.toLocaleString()"></span>
+                    <div class="ux-production-line__station-tooltip">
+                      <div class="ux-production-line__tooltip-row">
+                        <span class="ux-production-line__tooltip-label">Status:</span>
+                        <span class="ux-production-line__tooltip-value" x-text="getStatusLabel(station.status)"></span>
+                      </div>
+                      <div class="ux-production-line__tooltip-row">
+                        <span class="ux-production-line__tooltip-label">Output:</span>
+                        <span class="ux-production-line__tooltip-value" x-text="station.output.toLocaleString() + ' units'"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ux-production-line__connector"
+                       :class="{ 'ux-production-line__connector--active': isConnectorActive(index), 'ux-production-line__connector--inactive': !isConnectorActive(index) }"
+                       x-show="index < stations.length - 1">
+                    <div class="ux-production-line__connector-flow" x-show="isConnectorActive(index)"></div>
+                  </div>
+                </div>
+              </template>
+            </template>
+          </div>
+        </div>
+      </div>

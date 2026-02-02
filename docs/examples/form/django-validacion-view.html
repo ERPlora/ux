@@ -1,0 +1,19 @@
+<pre class="ux-code-block" data-lang="python"># views.py
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from .models import User
+
+def validate_email_field(request):
+    email = request.POST.get('email', '')
+    context = {'value': email}
+
+    try:
+        validate_email(email)
+        if User.objects.filter(email=email).exists():
+            context['error'] = 'Este email ya esta registrado'
+        else:
+            context['success'] = 'Email disponible'
+    except ValidationError:
+        context['error'] = 'Ingresa un email valido'
+
+    return render(request, 'partials/email_field.html', context)</pre>

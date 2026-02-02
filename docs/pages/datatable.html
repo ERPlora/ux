@@ -1,0 +1,2978 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); padding: var(--ux-space-lg); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); margin-bottom: var(--ux-space-md); overflow: hidden; }
+  </style>
+
+<!-- Basic DataTable -->
+  <div class="demo-section">
+    <h3>DataTable Basico con Toggle Vista</h3>
+    <p>Tabla de datos con ordenamiento, paginacion, busqueda y <strong>toggle para cambiar entre vista tabla y tarjetas</strong>. El usuario puede elegir la vista en cualquier dispositivo.</p>
+
+    <ux-playground src="examples/datatable/datatable-basico-con-toggle-vista.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'id', label: 'ID', sortable: true, type: 'number' },
+        { key: 'name', label: 'Nombre', sortable: true },
+        { key: 'email', label: 'Email', sortable: true },
+        { key: 'role', label: 'Rol', sortable: true },
+        { key: 'status', label: 'Estado', sortable: true }
+      ],
+      rows: [
+        { id: 1, name: 'Juan Garcia', email: 'juan@example.com', role: 'Admin', status: 'Activo' },
+        { id: 2, name: 'Maria Lopez', email: 'maria@example.com', role: 'Editor', status: 'Activo' },
+        { id: 3, name: 'Carlos Rodriguez', email: 'carlos@example.com', role: 'Usuario', status: 'Inactivo' },
+        { id: 4, name: 'Ana Martinez', email: 'ana@example.com', role: 'Editor', status: 'Activo' },
+        { id: 5, name: 'Pedro Sanchez', email: 'pedro@example.com', role: 'Usuario', status: 'Activo' },
+        { id: 6, name: 'Laura Fernandez', email: 'laura@example.com', role: 'Admin', status: 'Activo' },
+        { id: 7, name: 'Miguel Torres', email: 'miguel@example.com', role: 'Usuario', status: 'Inactivo' },
+        { id: 8, name: 'Sofia Ruiz', email: 'sofia@example.com', role: 'Editor', status: 'Activo' }
+      ],
+      perPage: 5,
+      searchPlaceholder: 'Buscar usuarios...',
+      labels: {
+        showing: 'Mostrando',
+        to: 'a',
+        of: 'de',
+        entries: 'registros',
+        perPage: 'por pagina'
+      }
+    })" class="ux-datatable ux-datatable--bordered" :class="viewModeClass">
+
+      <!-- Toolbar con View Toggle -->
+      <div class="ux-datatable__toolbar">
+        <div class="ux-datatable__toolbar-start">
+          <span class="ux-text-sm ux-text-secondary" x-text="sortedRows.length + ' usuarios'"></span>
+        </div>
+        <div class="ux-datatable__toolbar-end">
+          <!-- View Toggle -->
+          <div class="ux-datatable__view-toggle" x-show="showViewToggle">
+            <button type="button"
+                    class="ux-datatable__view-toggle-btn"
+                    :class="{ 'ux-datatable__view-toggle-btn--active': viewMode === 'table' }"
+                    @click="setViewMode('table')"
+                    :title="labels.viewTable">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M3 12h18M3 18h18"/>
+              </svg>
+            </button>
+            <button type="button"
+                    class="ux-datatable__view-toggle-btn"
+                    :class="{ 'ux-datatable__view-toggle-btn--active': viewMode === 'cards' }"
+                    @click="setViewMode('cards')"
+                    :title="labels.viewCards">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </button>
+          </div>
+          <input type="search"
+                 class="ux-input ux-datatable__search"
+                 :placeholder="searchPlaceholder"
+                 x-model="searchQuery"
+                 @input.debounce.300ms="onSearch()">
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table" x-bind="ariaAttrs">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th"
+                    :class="{
+                      'ux-datatable__th--sortable': col.sortable,
+                      'ux-datatable__th--sorted': isSorted(col),
+                      'ux-datatable__th--sorted-desc': isSorted(col) && sortDirection === 'desc'
+                    }"
+                    @click="sortBy(col)">
+                  <span x-text="col.label"></span>
+                  <span x-show="col.sortable" class="ux-datatable__sort-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12l7-7 7 7"/>
+                    </svg>
+                  </span>
+                </th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-if="paginatedRows.length === 0">
+              <tr>
+                <td :colspan="columns.length" class="ux-datatable__empty">
+                  <div class="ux-datatable__empty-icon" x-html="getIcon('empty')"></div>
+                  <h4 class="ux-datatable__empty-title" x-text="emptyTitle"></h4>
+                  <p class="ux-datatable__empty-text" x-text="emptyText"></p>
+                </td>
+              </tr>
+            </template>
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <tr class="ux-datatable__tr">
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td" :data-label="col.label">
+                    <span x-text="formatCellValue(row, col)"></span>
+                  </td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div class="ux-datatable__footer">
+        <div class="ux-datatable__info" x-text="showingInfo"></div>
+        <div class="ux-datatable__pagination">
+          <button class="ux-datatable__page-btn" @click="goToPage(1)" :disabled="currentPage === 1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/>
+            </svg>
+          </button>
+          <button class="ux-datatable__page-btn" @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <template x-for="page in visiblePages" :key="page">
+            <button class="ux-datatable__page-btn"
+                    :class="{ 'ux-datatable__page-btn--active': page === currentPage }"
+                    @click="typeof page === 'number' && goToPage(page)"
+                    :disabled="page === '...'"
+                    x-text="page">
+            </button>
+          </template>
+          <button class="ux-datatable__page-btn" @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+          <button class="ux-datatable__page-btn" @click="goToPage(totalPages)" :disabled="currentPage === totalPages">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 7l5 5-5 5M6 7l5 5-5 5"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div x-data="uxDatatable({
+  columns: [
+    { key: 'id', label: 'ID', sortable: true, type: 'number' },
+    { key: 'name', label: 'Nombre', sortable: true },
+    { key: 'email', label: 'Email', sortable: true },
+    { key: 'status', label: 'Estado', sortable: true }
+  ],
+  rows: [...],
+  perPage: 10,
+  labels: { showing: 'Mostrando', to: 'a', of: 'de', entries: 'registros' }
+})" class="ux-datatable ux-datatable--responsive">
+  ...
+</div></pre>
+  </div>
+
+  <!-- With Selection and Actions -->
+  <div class="demo-section">
+    <h3>Con Seleccion y Acciones</h3>
+    <p>Tabla con checkboxes para seleccion multiple y botones de accion por fila.</p>
+
+    <ux-playground src="examples/datatable/con-seleccion-y-acciones.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'name', label: 'Producto', sortable: true },
+        { key: 'category', label: 'Categoria', sortable: true },
+        { key: 'price', label: 'Precio', sortable: true, type: 'number', format: (v) => '$' + v.toFixed(2) },
+        { key: 'stock', label: 'Stock', sortable: true, type: 'number' }
+      ],
+      rows: [
+        { id: 1, name: 'Laptop Pro 15', category: 'Electronica', price: 1299.99, stock: 45 },
+        { id: 2, name: 'Mouse Wireless', category: 'Accesorios', price: 29.99, stock: 120 },
+        { id: 3, name: 'Teclado Mecanico', category: 'Accesorios', price: 89.99, stock: 78 },
+        { id: 4, name: 'Monitor 27 pulgadas', category: 'Electronica', price: 399.99, stock: 22 },
+        { id: 5, name: 'Webcam HD', category: 'Accesorios', price: 59.99, stock: 95 }
+      ],
+      selectable: true,
+      perPage: 10,
+      paginated: false
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--responsive" @row-action.window="alert($event.detail.action + ': ' + $event.detail.row.name)">
+
+      <!-- Header -->
+      <div class="ux-datatable__header">
+        <div>
+          <h3 class="ux-datatable__title">Inventario</h3>
+          <p class="ux-datatable__subtitle" x-text="selectedRows.length + ' seleccionados'"></p>
+        </div>
+        <div class="ux-datatable__actions">
+          <button class="ux-button ux-button--outline ux-button--sm" :disabled="selectedRows.length === 0">
+            Exportar
+          </button>
+          <button class="ux-button ux-button ux-color-primary ux-button--sm">
+            Nuevo Producto
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <th class="ux-datatable__th ux-datatable__th--checkbox">
+                <input type="checkbox" class="ux-checkbox" x-model="selectAll" @change="toggleSelectAll()">
+              </th>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th"
+                    :class="{
+                      'ux-datatable__th--sortable': col.sortable,
+                      'ux-datatable__th--sorted': isSorted(col),
+                      'ux-datatable__th--sorted-desc': isSorted(col) && sortDirection === 'desc'
+                    }"
+                    @click="sortBy(col)">
+                  <span x-text="col.label"></span>
+                  <span x-show="col.sortable" class="ux-datatable__sort-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12l7-7 7 7"/>
+                    </svg>
+                  </span>
+                </th>
+              </template>
+              <th class="ux-datatable__th ux-datatable__th--actions">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <tr class="ux-datatable__tr" :class="{ 'ux-datatable__tr--selected': isRowSelected(row) }">
+                <td class="ux-datatable__td ux-datatable__td--checkbox" data-label="">
+                  <input type="checkbox" class="ux-checkbox" :checked="isRowSelected(row)" @change="toggleRowSelection(row)">
+                </td>
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td" :data-label="col.label">
+                    <span x-text="formatCellValue(row, col)"></span>
+                  </td>
+                </template>
+                <td class="ux-datatable__td ux-datatable__td--actions" data-label="">
+                  <div class="ux-datatable__row-actions">
+                    <button class="ux-datatable__row-action" @click="onAction('edit', row, $event)" title="Editar">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="ux-datatable__row-action ux-datatable__row-action--danger" @click="onAction('delete', row, $event)" title="Eliminar">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Force Responsive View -->
+  <div class="demo-section">
+    <h3>Vista Responsive Forzada</h3>
+    <p>La clase <code>ux-datatable--force-responsive</code> muestra siempre la vista movil "No More Tables".</p>
+
+    <ux-playground src="examples/datatable/vista-responsive-forzada.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'name', label: 'Cliente', sortable: true },
+        { key: 'email', label: 'Email' },
+        { key: 'phone', label: 'Telefono' },
+        { key: 'company', label: 'Empresa' }
+      ],
+      rows: [
+        { id: 1, name: 'Roberto Diaz', email: 'roberto@empresa.com', phone: '+34 612 345 678', company: 'Tech Corp' },
+        { id: 2, name: 'Elena Vega', email: 'elena@startup.io', phone: '+34 623 456 789', company: 'StartUp Inc' },
+        { id: 3, name: 'Fernando Gil', email: 'fernando@agency.es', phone: '+34 634 567 890', company: 'Digital Agency' }
+      ],
+      paginated: false,
+      searchable: false
+    })" class="ux-datatable ux-datatable--force-responsive" style="padding: var(--ux-space-lg);">
+
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th" x-text="col.label"></th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <tr class="ux-datatable__tr">
+                <template x-for="(col, index) in columns" :key="col.key">
+                  <td class="ux-datatable__td"
+                      :class="{ 'ux-datatable__td--primary': index === 0 }"
+                      :data-label="col.label">
+                    <span x-text="formatCellValue(row, col)"></span>
+                  </td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div class="ux-datatable ux-datatable--force-responsive">
+  <!-- Always shows mobile card view -->
+</div></pre>
+  </div>
+
+  <!-- View Toggle -->
+  <div class="demo-section">
+    <h3>Toggle Vista Tabla/Tarjetas</h3>
+    <p>Botones de cambio de vista para que el usuario elija entre vista de tabla o tarjetas.</p>
+
+    <ux-playground src="examples/datatable/toggle-vista-tablatarjetas.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'name', label: 'Nombre', sortable: true },
+        { key: 'department', label: 'Departamento', sortable: true },
+        { key: 'email', label: 'Email' },
+        { key: 'location', label: 'Ubicacion' }
+      ],
+      rows: [
+        { id: 1, name: 'Ana Martinez', department: 'Desarrollo', email: 'ana@empresa.com', location: 'Madrid' },
+        { id: 2, name: 'Carlos Ruiz', department: 'Diseno', email: 'carlos@empresa.com', location: 'Barcelona' },
+        { id: 3, name: 'Elena Torres', department: 'Marketing', email: 'elena@empresa.com', location: 'Valencia' },
+        { id: 4, name: 'Miguel Santos', department: 'Desarrollo', email: 'miguel@empresa.com', location: 'Sevilla' },
+        { id: 5, name: 'Laura Vega', department: 'RRHH', email: 'laura@empresa.com', location: 'Madrid' }
+      ],
+      paginated: false,
+      showViewToggle: true,
+      labels: {
+        viewTable: 'Vista tabla',
+        viewCards: 'Vista tarjetas'
+      }
+    })" class="ux-datatable ux-datatable--bordered" :class="viewModeClass">
+
+      <!-- Toolbar with View Toggle -->
+      <div class="ux-datatable__toolbar">
+        <div class="ux-datatable__toolbar-start">
+          <span class="ux-text-sm ux-text-secondary" x-text="rows.length + ' empleados'"></span>
+        </div>
+        <div class="ux-datatable__toolbar-end">
+          <!-- View Toggle Buttons -->
+          <div class="ux-datatable__view-toggle" role="group" aria-label="Cambiar vista">
+            <button type="button"
+                    class="ux-datatable__view-btn"
+                    :class="{ 'ux-datatable__view-btn--active': viewMode === 'table' }"
+                    @click="setViewMode('table')"
+                    :title="labels.viewTable"
+                    :aria-pressed="viewMode === 'table'">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
+              </svg>
+            </button>
+            <button type="button"
+                    class="ux-datatable__view-btn"
+                    :class="{ 'ux-datatable__view-btn--active': viewMode === 'cards' }"
+                    @click="setViewMode('cards')"
+                    :title="labels.viewCards"
+                    :aria-pressed="viewMode === 'cards'">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </button>
+          </div>
+
+          <input type="search"
+                 class="ux-input ux-datatable__search"
+                 placeholder="Buscar..."
+                 x-model="searchQuery"
+                 @input.debounce.300ms="onSearch()">
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table" x-bind="ariaAttrs">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th"
+                    :class="{
+                      'ux-datatable__th--sortable': col.sortable,
+                      'ux-datatable__th--sorted': isSorted(col),
+                      'ux-datatable__th--sorted-desc': isSorted(col) && sortDirection === 'desc'
+                    }"
+                    @click="sortBy(col)">
+                  <span x-text="col.label"></span>
+                  <span x-show="col.sortable" class="ux-datatable__sort-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12l7-7 7 7"/>
+                    </svg>
+                  </span>
+                </th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <tr class="ux-datatable__tr">
+                <template x-for="(col, index) in columns" :key="col.key">
+                  <td class="ux-datatable__td"
+                      :class="{ 'ux-datatable__td--primary': index === 0 }"
+                      :data-label="col.label">
+                    <span x-text="formatCellValue(row, col)"></span>
+                  </td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div x-data="uxDatatable({
+  columns: [...],
+  rows: [...],
+  showViewToggle: true,
+  labels: {
+    viewTable: 'Vista tabla',
+    viewCards: 'Vista tarjetas'
+  }
+})" class="ux-datatable" :class="viewModeClass">
+
+  <!-- View Toggle Buttons -->
+  <div class="ux-datatable__view-toggle">
+    <button class="ux-datatable__view-btn"
+            :class="{ 'ux-datatable__view-btn--active': viewMode === 'table' }"
+            @click="setViewMode('table')">
+      <!-- Table icon -->
+    </button>
+    <button class="ux-datatable__view-btn"
+            :class="{ 'ux-datatable__view-btn--active': viewMode === 'cards' }"
+            @click="setViewMode('cards')">
+      <!-- Cards icon -->
+    </button>
+  </div>
+
+  ...
+</div></pre>
+  </div>
+
+  <!-- Column Filters and Bulk Actions -->
+  <div class="demo-section">
+    <h3>Filtros por Columna y Acciones Masivas</h3>
+    <p>Tabla con filtros por columna (texto, select) y barra de acciones masivas cuando hay filas seleccionadas.</p>
+
+    <ux-playground src="examples/datatable/filtros-por-columna-y-acciones-masivas.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'name', label: 'Nombre', sortable: true, filterable: true },
+        { key: 'department', label: 'Departamento', sortable: true, filterable: true, filterType: 'select' },
+        { key: 'status', label: 'Estado', sortable: true, filterable: true, filterType: 'select' },
+        { key: 'salary', label: 'Salario', sortable: true, type: 'number', format: (v) => '$' + v.toLocaleString() }
+      ],
+      rows: [
+        { id: 1, name: 'Ana Martinez', department: 'Desarrollo', status: 'Activo', salary: 55000 },
+        { id: 2, name: 'Carlos Ruiz', department: 'Diseno', status: 'Activo', salary: 48000 },
+        { id: 3, name: 'Elena Torres', department: 'Marketing', status: 'Inactivo', salary: 52000 },
+        { id: 4, name: 'Miguel Santos', department: 'Desarrollo', status: 'Activo', salary: 62000 },
+        { id: 5, name: 'Laura Vega', department: 'RRHH', status: 'Activo', salary: 45000 },
+        { id: 6, name: 'Pedro Garcia', department: 'Desarrollo', status: 'Vacaciones', salary: 58000 },
+        { id: 7, name: 'Sofia Lopez', department: 'Marketing', status: 'Activo', salary: 50000 },
+        { id: 8, name: 'Diego Fernandez', department: 'Diseno', status: 'Inactivo', salary: 47000 }
+      ],
+      selectable: true,
+      filterable: true,
+      showFilters: true,
+      perPage: 10,
+      paginated: false,
+      bulkActions: [
+        { key: 'export', label: 'Exportar', icon: 'export' },
+        { key: 'delete', label: 'Eliminar', icon: 'delete', danger: true }
+      ],
+      labels: {
+        selected: 'seleccionados',
+        clearSelection: 'Limpiar seleccion',
+        clearFilters: 'Limpiar filtros',
+        all: 'Todos'
+      }
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--responsive"
+       @bulk-action.window="alert($event.detail.action + ': ' + $event.detail.selectedRows.length + ' filas')">
+
+      <!-- Bulk Actions Toolbar (shown when rows selected) -->
+      <template x-if="selectedRows.length > 0">
+        <div class="ux-datatable__bulk-toolbar">
+          <div class="ux-datatable__bulk-info">
+            <span class="ux-datatable__bulk-count" x-text="selectedRows.length"></span>
+            <span x-text="labels.selected"></span>
+          </div>
+          <div class="ux-datatable__bulk-actions">
+            <button type="button" class="ux-datatable__bulk-btn" @click="onBulkAction('export', $event)">
+              <span x-html="getIcon('export')"></span>
+              Exportar
+            </button>
+            <button type="button" class="ux-datatable__bulk-btn ux-datatable__bulk-btn--danger" @click="onBulkAction('delete', $event)">
+              <span x-html="getIcon('delete')"></span>
+              Eliminar
+            </button>
+            <button type="button" class="ux-datatable__bulk-clear" @click="clearSelection()" :title="labels.clearSelection">
+              <span x-html="getIcon('close')"></span>
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <!-- Regular Toolbar (shown when no rows selected) -->
+      <template x-if="selectedRows.length === 0">
+        <div class="ux-datatable__toolbar">
+          <div class="ux-datatable__toolbar-start">
+            <span class="ux-text-sm ux-text-secondary" x-text="filteredRows.length + ' empleados'"></span>
+            <button type="button" class="ux-button ux-button--outline ux-button--sm" @click="toggleFilters()">
+              <span x-html="getIcon('filter')"></span>
+              Filtros
+            </button>
+          </div>
+          <div class="ux-datatable__toolbar-end">
+            <input type="search"
+                   class="ux-input ux-datatable__search"
+                   placeholder="Buscar..."
+                   x-model="searchQuery"
+                   @input.debounce.300ms="onSearch()">
+          </div>
+        </div>
+      </template>
+
+      <!-- Active Filters Tags -->
+      <template x-if="hasActiveFilters">
+        <div class="ux-datatable__active-filters">
+          <template x-for="filter in activeFiltersList" :key="filter.key">
+            <span class="ux-datatable__filter-tag">
+              <span class="ux-datatable__filter-tag-label" x-text="filter.label + ':'"></span>
+              <span x-text="filter.value"></span>
+              <button type="button" class="ux-datatable__filter-tag-remove" @click="clearColumnFilter(filter.key)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </span>
+          </template>
+          <button type="button" class="ux-datatable__clear-filters" @click="clearAllFilters()" x-text="labels.clearFilters"></button>
+        </div>
+      </template>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <th class="ux-datatable__th ux-datatable__th--checkbox">
+                <input type="checkbox" class="ux-checkbox" x-model="selectAll" @change="toggleSelectAll()">
+              </th>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th"
+                    :class="{
+                      'ux-datatable__th--sortable': col.sortable,
+                      'ux-datatable__th--sorted': isSorted(col),
+                      'ux-datatable__th--sorted-desc': isSorted(col) && sortDirection === 'desc'
+                    }"
+                    @click="sortBy(col)">
+                  <span x-text="col.label"></span>
+                  <span x-show="col.sortable" class="ux-datatable__sort-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12l7-7 7 7"/>
+                    </svg>
+                  </span>
+                </th>
+              </template>
+            </tr>
+            <!-- Filter Row -->
+            <tr class="ux-datatable__filters" x-show="showFilters && filterable">
+              <td class="ux-datatable__filter-cell"></td>
+              <template x-for="col in columns" :key="'filter-' + col.key">
+                <td class="ux-datatable__filter-cell">
+                  <template x-if="col.filterable !== false">
+                    <!-- Select filter -->
+                    <template x-if="col.filterType === 'select'">
+                      <select class="ux-datatable__filter-select"
+                              x-model="columnFilters[col.key]"
+                              @change="setColumnFilter(col.key, $event.target.value)">
+                        <option value="" x-text="labels.all"></option>
+                        <template x-for="opt in getUniqueValues(col.key)" :key="opt">
+                          <option :value="opt" x-text="opt"></option>
+                        </template>
+                      </select>
+                    </template>
+                    <!-- Text filter (default) -->
+                    <template x-if="col.filterType !== 'select' && col.filterType !== 'date-range'">
+                      <div class="ux-datatable__filter-wrapper">
+                        <input type="text"
+                               class="ux-datatable__filter-input"
+                               :placeholder="labels.filterBy + '...'"
+                               x-model="columnFilters[col.key]"
+                               @input.debounce.300ms="setColumnFilter(col.key, $event.target.value)">
+                      </div>
+                    </template>
+                  </template>
+                </td>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-if="paginatedRows.length === 0">
+              <tr>
+                <td :colspan="columns.length + 1" class="ux-datatable__empty">
+                  <div class="ux-datatable__empty-icon" x-html="getIcon('empty')"></div>
+                  <h4 class="ux-datatable__empty-title" x-text="emptyTitle"></h4>
+                  <p class="ux-datatable__empty-text" x-text="emptyText"></p>
+                </td>
+              </tr>
+            </template>
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <tr class="ux-datatable__tr" :class="{ 'ux-datatable__tr--selected': isRowSelected(row) }">
+                <td class="ux-datatable__td ux-datatable__td--checkbox" data-label="">
+                  <input type="checkbox" class="ux-checkbox" :checked="isRowSelected(row)" @change="toggleRowSelection(row)">
+                </td>
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td" :data-label="col.label">
+                    <span x-text="formatCellValue(row, col)"></span>
+                  </td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div x-data="uxDatatable({
+  columns: [
+    { key: 'name', label: 'Nombre', filterable: true },
+    { key: 'department', label: 'Depto', filterType: 'select' },
+    { key: 'status', label: 'Estado', filterType: 'select' }
+  ],
+  rows: [...],
+  selectable: true,
+  filterable: true,
+  showFilters: true
+})">
+  <!-- Bulk Actions Toolbar -->
+  <template x-if="selectedRows.length > 0">
+    <div class="ux-datatable__bulk-toolbar">
+      <div class="ux-datatable__bulk-info">
+        <span class="ux-datatable__bulk-count" x-text="selectedRows.length"></span>
+        seleccionados
+      </div>
+      <div class="ux-datatable__bulk-actions">
+        <button @click="onBulkAction('export')">Exportar</button>
+        <button @click="onBulkAction('delete')">Eliminar</button>
+        <button @click="clearSelection()">&times;</button>
+      </div>
+    </div>
+  </template>
+
+  <!-- Filter Row in thead -->
+  <tr class="ux-datatable__filters" x-show="showFilters">
+    <td class="ux-datatable__filter-cell">
+      <select x-model="columnFilters[col.key]">...</select>
+    </td>
+  </tr>
+</div></pre>
+  </div>
+
+  <!-- With Custom Cell Rendering -->
+  <div class="demo-section">
+    <h3>Con Badges y Formato Personalizado</h3>
+    <p>Uso de badges y formato personalizado en celdas.</p>
+
+    <ux-playground src="examples/datatable/con-badges-y-formato-personalizado.html"></ux-playground>
+      <div class="demo-box" x-data="{
+      ...uxDatatable({
+        columns: [
+          { key: 'id', label: '#', type: 'number' },
+          { key: 'title', label: 'Pedido' },
+          { key: 'customer', label: 'Cliente' },
+          { key: 'amount', label: 'Total', type: 'number' },
+          { key: 'status', label: 'Estado' },
+          { key: 'date', label: 'Fecha', type: 'date' }
+        ],
+        rows: [
+          { id: 1001, title: 'Pedido #1001', customer: 'Juan Garcia', amount: 299.99, status: 'completed', date: '2024-01-15' },
+          { id: 1002, title: 'Pedido #1002', customer: 'Maria Lopez', amount: 149.50, status: 'pending', date: '2024-01-16' },
+          { id: 1003, title: 'Pedido #1003', customer: 'Carlos Ruiz', amount: 599.00, status: 'processing', date: '2024-01-16' },
+          { id: 1004, title: 'Pedido #1004', customer: 'Ana Torres', amount: 89.99, status: 'cancelled', date: '2024-01-17' }
+        ],
+        paginated: false
+      }),
+      getStatusClass(status) {
+        const classes = {
+          'completed': 'ux-badge--success',
+          'pending': 'ux-badge--warning',
+          'processing': 'ux-badge--primary',
+          'cancelled': 'ux-badge--danger'
+        };
+        return classes[status] || 'ux-badge--secondary';
+      },
+      getStatusLabel(status) {
+        const labels = {
+          'completed': 'Completado',
+          'pending': 'Pendiente',
+          'processing': 'Procesando',
+          'cancelled': 'Cancelado'
+        };
+        return labels[status] || status;
+      },
+      formatAmount(amount) {
+        return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
+      },
+      formatDate(date) {
+        return new Date(date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+    }" class="ux-datatable ux-datatable--bordered ux-datatable--striped ux-datatable--responsive">
+
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <th class="ux-datatable__th">#</th>
+              <th class="ux-datatable__th">Pedido</th>
+              <th class="ux-datatable__th">Cliente</th>
+              <th class="ux-datatable__th ux-datatable__th--right">Total</th>
+              <th class="ux-datatable__th ux-datatable__th--center">Estado</th>
+              <th class="ux-datatable__th">Fecha</th>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in rows" :key="row.id">
+              <tr class="ux-datatable__tr ux-datatable__tr--clickable" @click="onRowClick(row, $event)">
+                <td class="ux-datatable__td" data-label="#">
+                  <span class="ux-text-secondary" x-text="row.id"></span>
+                </td>
+                <td class="ux-datatable__td ux-datatable__td--primary" data-label="Pedido">
+                  <strong x-text="row.title"></strong>
+                </td>
+                <td class="ux-datatable__td" data-label="Cliente" x-text="row.customer"></td>
+                <td class="ux-datatable__td ux-datatable__td--right" data-label="Total">
+                  <strong x-text="formatAmount(row.amount)"></strong>
+                </td>
+                <td class="ux-datatable__td ux-datatable__td--center" data-label="Estado">
+                  <span class="ux-badge ux-badge--soft" :class="getStatusClass(row.status)" x-text="getStatusLabel(row.status)"></span>
+                </td>
+                <td class="ux-datatable__td" data-label="Fecha" x-text="formatDate(row.date)"></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compact Size -->
+  <div class="demo-section">
+    <h3>Tamano Compacto</h3>
+    <p>Tabla con padding reducido para mostrar mas datos.</p>
+
+    <ux-playground src="examples/datatable/tamano-compacto.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'code', label: 'Codigo' },
+        { key: 'name', label: 'Nombre' },
+        { key: 'qty', label: 'Cant.', type: 'number' },
+        { key: 'price', label: 'Precio', type: 'number' }
+      ],
+      rows: [
+        { code: 'SKU001', name: 'Articulo A', qty: 10, price: 25.00 },
+        { code: 'SKU002', name: 'Articulo B', qty: 5, price: 35.00 },
+        { code: 'SKU003', name: 'Articulo C', qty: 20, price: 15.00 },
+        { code: 'SKU004', name: 'Articulo D', qty: 8, price: 45.00 },
+        { code: 'SKU005', name: 'Articulo E', qty: 15, price: 20.00 }
+      ],
+      paginated: false
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--compact ux-datatable--responsive">
+
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th" x-text="col.label"></th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in rows" :key="row.code">
+              <tr class="ux-datatable__tr">
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td" :data-label="col.label" x-text="formatCellValue(row, col)"></td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div class="ux-datatable ux-datatable--compact">...</div></pre>
+  </div>
+
+  <!-- Alpine.js Component -->
+  <div class="demo-section">
+    <h3>Componente Alpine.js</h3>
+    <ux-playground src="examples/datatable/componente-alpinejs.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html">// Configuracion del componente uxDatatable
+uxDatatable({
+  // Columnas
+  columns: [
+    {
+      key: 'name',           // Clave del campo en los datos
+      label: 'Nombre',       // Etiqueta visible (para i18n)
+      sortable: true,        // Permitir ordenar
+      type: 'string',        // Tipo: string, number, date
+      format: (val) => val,  // Funcion de formato
+      getValue: (row) => row.name, // Funcion para obtener valor
+      defaultValue: '-'      // Valor por defecto si es null
+    }
+  ],
+
+  // Datos
+  rows: [...],              // Array de objetos
+
+  // Seleccion
+  selectable: false,        // Habilitar checkboxes
+
+  // Ordenamiento
+  sortable: true,           // Habilitar ordenamiento
+  sortColumn: null,         // Columna inicial
+  sortDirection: 'asc',     // Direccion inicial
+
+  // Paginacion
+  paginated: true,          // Habilitar paginacion
+  perPage: 10,              // Registros por pagina
+  perPageOptions: [10, 25, 50, 100],
+
+  // Busqueda
+  searchable: true,         // Habilitar busqueda
+  searchPlaceholder: 'Buscar...',
+
+  // Responsive
+  responsive: true,         // Vista movil automatica
+  forceResponsive: false,   // Forzar vista movil
+
+  // Vista manual
+  viewMode: 'table',        // 'table' o 'cards'
+  showViewToggle: false,    // Mostrar botones de toggle
+
+  // Estados
+  loading: false,           // Mostrar cargando
+  emptyTitle: 'Sin datos',
+  emptyText: 'No hay registros',
+
+  // Labels (i18n)
+  labels: {
+    showing: 'Mostrando',
+    to: 'a',
+    of: 'de',
+    entries: 'registros',
+    perPage: 'por pagina',
+    viewTable: 'Vista tabla',
+    viewCards: 'Vista tarjetas'
+  }
+})
+
+// Propiedades reactivas:
+filteredRows      // Filas filtradas por busqueda
+sortedRows        // Filas ordenadas
+paginatedRows     // Filas de la pagina actual
+totalPages        // Total de paginas
+selectedRows      // IDs de filas seleccionadas
+
+// Metodos:
+sortBy(column)              // Ordenar por columna
+goToPage(page)              // Ir a pagina
+setViewMode(mode)           // Cambiar vista ('table'/'cards')
+toggleSelectAll()           // Seleccionar todas
+toggleRowSelection(row)     // Seleccionar fila
+isRowSelected(row)          // Verificar seleccion
+getCellValue(row, col)      // Obtener valor
+formatCellValue(row, col)   // Formatear valor
+
+// Eventos emitidos:
+@sort-change                // { column, direction }
+@page-change                // { page }
+@per-page-change            // { perPage }
+@search                     // { query }
+@view-mode-change           // { mode }
+@selection-change           // { selected }
+@row-click                  // { row, event }
+@row-action                 // { action, row, event }</pre>
+    </div>
+  </div>
+
+  <!-- HTMX Integration -->
+  <div class="demo-section">
+    <h3>Integracion con HTMX</h3>
+    <p>HTMX es la tecnologia principal para cargar y manipular datos de tablas desde el servidor.</p>
+
+    <h4 style="margin-top: var(--ux-space-lg); font-size: var(--ux-font-size-md);">Cargar datos al iniciar</h4>
+    <ux-playground src="examples/datatable/cargar-datos-al-iniciar.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- Tabla que carga datos al cargar la pagina -->
+<table class="ux-datatable__table">
+  <thead class="ux-datatable__thead">
+    <tr>
+      <th class="ux-datatable__th">ID</th>
+      <th class="ux-datatable__th">Nombre</th>
+      <th class="ux-datatable__th">Email</th>
+      <th class="ux-datatable__th">Estado</th>
+    </tr>
+  </thead>
+  <tbody id="users-body"
+         hx-get="/api/users"
+         hx-trigger="load"
+         hx-indicator="#loading-indicator">
+    <tr>
+      <td colspan="4">
+        <div id="loading-indicator" class="htmx-indicator ux-spinner"></div>
+        Cargando...
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Respuesta del servidor -->
+<tr class="ux-datatable__tr">
+  <td class="ux-datatable__td">1</td>
+  <td class="ux-datatable__td">Juan Garcia</td>
+  <td class="ux-datatable__td">juan@email.com</td>
+  <td class="ux-datatable__td">
+    <span class="ux-badge ux-color-success">Activo</span>
+  </td>
+</tr>
+...</pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Ordenamiento en servidor</h4>
+    <ux-playground src="examples/datatable/ordenamiento-en-servidor.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- Headers con ordenamiento via HTMX -->
+<thead class="ux-datatable__thead">
+  <tr>
+    <th class="ux-datatable__th ux-datatable__th--sortable"
+        hx-get="/api/users?sort=name&dir=asc"
+        hx-target="#users-body"
+        hx-swap="innerHTML"
+        hx-indicator="#sort-spinner">
+      Nombre
+      <span class="ux-datatable__sort-icon">...</span>
+    </th>
+    <th class="ux-datatable__th ux-datatable__th--sortable"
+        hx-get="/api/users?sort=email&dir=asc"
+        hx-target="#users-body">
+      Email
+      <span class="ux-datatable__sort-icon">...</span>
+    </th>
+    <th class="ux-datatable__th ux-datatable__th--sortable"
+        hx-get="/api/users?sort=created_at&dir=desc"
+        hx-target="#users-body">
+      Fecha
+    </th>
+  </tr>
+</thead></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Busqueda en servidor</h4>
+    <ux-playground src="examples/datatable/busqueda-en-servidor.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- Barra de busqueda con HTMX -->
+<div class="ux-datatable__toolbar">
+  <div class="ux-datatable__toolbar-end">
+    <input type="search"
+           class="ux-input ux-datatable__search"
+           name="q"
+           placeholder="Buscar usuarios..."
+           hx-get="/api/users/search"
+           hx-trigger="input changed delay:300ms, search"
+           hx-target="#users-body"
+           hx-indicator="#search-spinner">
+    <span id="search-spinner" class="htmx-indicator ux-spinner ux-spinner--sm"></span>
+  </div>
+</div></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Paginacion en servidor</h4>
+    <ux-playground src="examples/datatable/paginacion-en-servidor.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- Footer con paginacion HTMX -->
+<div class="ux-datatable__footer">
+  <div class="ux-datatable__info">Mostrando 1-10 de 100</div>
+  <div class="ux-datatable__pagination">
+    <button class="ux-datatable__page-btn"
+            hx-get="/api/users?page=1"
+            hx-target="#users-body">
+      1
+    </button>
+    <button class="ux-datatable__page-btn ux-datatable__page-btn--active"
+            hx-get="/api/users?page=2"
+            hx-target="#users-body">
+      2
+    </button>
+    <button class="ux-datatable__page-btn"
+            hx-get="/api/users?page=3"
+            hx-target="#users-body">
+      3
+    </button>
+  </div>
+</div>
+
+<!-- Servidor devuelve filas + actualiza paginacion OOB -->
+<tr class="ux-datatable__tr">...fila 11...</tr>
+<tr class="ux-datatable__tr">...fila 12...</tr>
+...
+<div id="pagination" hx-swap-oob="true">
+  <!-- Paginacion actualizada -->
+</div></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Editar fila inline</h4>
+    <ux-playground src="examples/datatable/editar-fila-inline.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- Click para editar fila -->
+<tr class="ux-datatable__tr" id="user-row-123">
+  <td class="ux-datatable__td">Juan Garcia</td>
+  <td class="ux-datatable__td">juan@email.com</td>
+  <td class="ux-datatable__td">
+    <button class="ux-datatable__row-action"
+            hx-get="/api/users/123/edit"
+            hx-target="#user-row-123"
+            hx-swap="outerHTML">
+      Editar
+    </button>
+  </td>
+</tr>
+
+<!-- Servidor devuelve fila en modo edicion -->
+<tr class="ux-datatable__tr ux-datatable__tr--editing" id="user-row-123">
+  <td class="ux-datatable__td">
+    <input type="text" name="name" value="Juan Garcia" class="ux-input">
+  </td>
+  <td class="ux-datatable__td">
+    <input type="email" name="email" value="juan@email.com" class="ux-input">
+  </td>
+  <td class="ux-datatable__td">
+    <button class="ux-button ux-button--sm ux-color-primary"
+            hx-put="/api/users/123"
+            hx-include="closest tr"
+            hx-target="#user-row-123"
+            hx-swap="outerHTML">
+      Guardar
+    </button>
+    <button class="ux-button ux-button--sm"
+            hx-get="/api/users/123"
+            hx-target="#user-row-123"
+            hx-swap="outerHTML">
+      Cancelar
+    </button>
+  </td>
+</tr></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Eliminar fila con confirmacion</h4>
+    <ux-playground src="examples/datatable/eliminar-fila-con-confirmacion.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- Boton eliminar con confirmacion -->
+<button class="ux-datatable__row-action ux-datatable__row-action--danger"
+        hx-delete="/api/users/123"
+        hx-target="closest tr"
+        hx-swap="outerHTML swap:1s"
+        hx-confirm="Estas seguro de eliminar este usuario?">
+  Eliminar
+</button>
+
+<!-- Servidor devuelve fila vacia o animacion de salida -->
+<tr class="ux-datatable__tr ux-datatable__tr--deleted">
+  <td colspan="4" style="text-align: center; opacity: 0.5;">
+    Usuario eliminado
+  </td>
+</tr></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Acciones masivas</h4>
+    <ux-playground src="examples/datatable/acciones-masivas.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- Formulario para acciones masivas -->
+<form id="bulk-form">
+  <table class="ux-datatable__table">
+    <thead>
+      <tr>
+        <th class="ux-datatable__th ux-datatable__th--checkbox">
+          <input type="checkbox" class="ux-checkbox" id="select-all">
+        </th>
+        <th class="ux-datatable__th">Nombre</th>
+      </tr>
+    </thead>
+    <tbody id="users-body">
+      <tr class="ux-datatable__tr">
+        <td class="ux-datatable__td ux-datatable__td--checkbox">
+          <input type="checkbox" name="ids[]" value="1" class="ux-checkbox">
+        </td>
+        <td class="ux-datatable__td">Juan Garcia</td>
+      </tr>
+      <tr class="ux-datatable__tr">
+        <td class="ux-datatable__td ux-datatable__td--checkbox">
+          <input type="checkbox" name="ids[]" value="2" class="ux-checkbox">
+        </td>
+        <td class="ux-datatable__td">Maria Lopez</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Barra de acciones masivas -->
+  <div class="ux-datatable__bulk-toolbar">
+    <button type="button"
+            hx-post="/api/users/bulk/export"
+            hx-include="#bulk-form"
+            hx-swap="none">
+      Exportar seleccionados
+    </button>
+    <button type="button"
+            hx-delete="/api/users/bulk"
+            hx-include="#bulk-form"
+            hx-target="#users-body"
+            hx-confirm="Eliminar usuarios seleccionados?">
+      Eliminar seleccionados
+    </button>
+  </div>
+</form></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Cargar detalles expandibles via HTMX</h4>
+    <ux-playground src="examples/datatable/cargar-detalles-expandibles-via-htmx.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- Fila con contenido expandible cargado bajo demanda -->
+<tr class="ux-datatable__tr ux-datatable__tr--expandable" id="order-row-1">
+  <td class="ux-datatable__td ux-datatable__td--expand">
+    <button class="ux-datatable__expand-btn"
+            hx-get="/api/orders/1/details"
+            hx-target="#order-details-1"
+            hx-swap="innerHTML"
+            hx-trigger="click once">
+      <svg>...</svg>
+    </button>
+  </td>
+  <td class="ux-datatable__td">ORD-001</td>
+  <td class="ux-datatable__td">Juan Garcia</td>
+  <td class="ux-datatable__td">$299.99</td>
+</tr>
+<tr class="ux-datatable__expand-row">
+  <td colspan="4">
+    <div id="order-details-1" class="ux-datatable__expand-content">
+      <!-- Cargado via HTMX al expandir -->
+      <div class="htmx-indicator">Cargando detalles...</div>
+    </div>
+  </td>
+</tr>
+
+<!-- Servidor devuelve detalles -->
+<div class="ux-datatable__expand-inner">
+  <div class="ux-datatable__detail-list">
+    <div class="ux-datatable__detail-item">
+      <span class="ux-datatable__detail-label">Direccion</span>
+      <span class="ux-datatable__detail-value">Calle Principal 123</span>
+    </div>
+  </div>
+  <table class="ux-datatable__table">
+    <!-- Sub-tabla de items -->
+  </table>
+</div></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Filtros con HTMX</h4>
+    <ux-playground src="examples/datatable/filtros-con-htmx.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- Fila de filtros -->
+<tr class="ux-datatable__filters">
+  <td class="ux-datatable__filter-cell">
+    <input type="text"
+           name="filter_name"
+           class="ux-datatable__filter-input"
+           placeholder="Filtrar..."
+           hx-get="/api/users"
+           hx-trigger="input changed delay:300ms"
+           hx-target="#users-body"
+           hx-include="[name^='filter_']">
+  </td>
+  <td class="ux-datatable__filter-cell">
+    <select name="filter_status"
+            class="ux-datatable__filter-select"
+            hx-get="/api/users"
+            hx-trigger="change"
+            hx-target="#users-body"
+            hx-include="[name^='filter_']">
+      <option value="">Todos</option>
+      <option value="active">Activo</option>
+      <option value="inactive">Inactivo</option>
+    </select>
+  </td>
+</tr></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Polling para datos en tiempo real</h4>
+    <ux-playground src="examples/datatable/polling-para-datos-en-tiempo-real.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- Tabla que se actualiza cada 30 segundos -->
+<tbody id="orders-body"
+       hx-get="/api/orders/recent"
+       hx-trigger="load, every 30s"
+       hx-swap="innerHTML">
+  <!-- Filas actualizadas automaticamente -->
+</tbody>
+
+<!-- O actualizar contador en header -->
+<div class="ux-datatable__header">
+  <span id="order-count"
+        hx-get="/api/orders/count"
+        hx-trigger="every 10s"
+        hx-swap="innerHTML">
+    15 pedidos
+  </span>
+</div></pre>
+    </div>
+  </div>
+
+  <!-- HTMX + Django -->
+  <div class="demo-section">
+    <h3>HTMX + Django</h3>
+    <p>Ejemplos de integracion de DataTable con Django usando HTMX para paginacion, ordenacion y filtrado en servidor.</p>
+
+    <h4 style="margin-top: var(--ux-space-lg); font-size: var(--ux-font-size-md);">Tabla con Paginacion HTMX</h4>
+    <ux-playground src="examples/datatable/tabla-con-paginacion-htmx.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- templates/users/user_table.html -->
+<div class="ux-datatable ux-datatable--bordered ux-datatable--responsive">
+  <div class="ux-datatable__toolbar">
+    <div class="ux-datatable__toolbar-start">
+      <span class="ux-text-sm ux-text-secondary">{{ page_obj.paginator.count }} usuarios</span>
+    </div>
+    <div class="ux-datatable__toolbar-end">
+      <input type="search"
+             name="q"
+             class="ux-input ux-datatable__search"
+             placeholder="Buscar usuarios..."
+             value="{{ request.GET.q }}"
+             hx-get="{% url 'users:list' %}"
+             hx-trigger="input changed delay:300ms, search"
+             hx-target="#user-table-container"
+             hx-push-url="true">
+    </div>
+  </div>
+
+  <div class="ux-datatable__body">
+    <table class="ux-datatable__table">
+      <thead class="ux-datatable__thead">
+        <tr>
+          <th class="ux-datatable__th ux-datatable__th--sortable
+                     {% if order_by == 'name' %}ux-datatable__th--sorted{% endif %}
+                     {% if order_by == '-name' %}ux-datatable__th--sorted ux-datatable__th--sorted-desc{% endif %}"
+              hx-get="{% url 'users:list' %}?order_by={% if order_by == 'name' %}-{% endif %}name&q={{ request.GET.q }}"
+              hx-target="#user-table-container"
+              hx-push-url="true">
+            Nombre
+            <span class="ux-datatable__sort-icon">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12l7-7 7 7"/>
+              </svg>
+            </span>
+          </th>
+          <th class="ux-datatable__th">Email</th>
+          <th class="ux-datatable__th">Estado</th>
+          <th class="ux-datatable__th ux-datatable__th--actions">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="ux-datatable__tbody">
+        {% for user in page_obj %}
+        <tr class="ux-datatable__tr">
+          <td class="ux-datatable__td" data-label="Nombre">{{ user.name }}</td>
+          <td class="ux-datatable__td" data-label="Email">{{ user.email }}</td>
+          <td class="ux-datatable__td" data-label="Estado">
+            <span class="ux-badge ux-badge--soft {% if user.is_active %}ux-color-success--soft{% else %}ux-color-danger--soft{% endif %}">
+              {{ user.status_display }}
+            </span>
+          </td>
+          <td class="ux-datatable__td ux-datatable__td--actions">
+            <div class="ux-datatable__row-actions">
+              <button class="ux-datatable__row-action"
+                      hx-get="{% url 'users:edit' user.pk %}"
+                      hx-target="#modal-container"
+                      title="Editar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button class="ux-datatable__row-action ux-datatable__row-action--danger"
+                      hx-delete="{% url 'users:delete' user.pk %}"
+                      hx-target="closest tr"
+                      hx-swap="outerHTML swap:500ms"
+                      hx-confirm="Eliminar a {{ user.name }}?"
+                      title="Eliminar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="ux-datatable__empty">
+            <h4 class="ux-datatable__empty-title">Sin resultados</h4>
+            <p class="ux-datatable__empty-text">No se encontraron usuarios</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginacion -->
+  <div class="ux-datatable__footer">
+    <div class="ux-datatable__info">
+      Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+    </div>
+    <div class="ux-datatable__pagination">
+      {% if page_obj.has_previous %}
+      <button class="ux-datatable__page-btn"
+              hx-get="{% url 'users:list' %}?page=1&q={{ request.GET.q }}&order_by={{ order_by }}"
+              hx-target="#user-table-container"
+              hx-push-url="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/>
+        </svg>
+      </button>
+      <button class="ux-datatable__page-btn"
+              hx-get="{% url 'users:list' %}?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}&order_by={{ order_by }}"
+              hx-target="#user-table-container"
+              hx-push-url="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <button class="ux-datatable__page-btn ux-datatable__page-btn--active">{{ num }}</button>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <button class="ux-datatable__page-btn"
+                hx-get="{% url 'users:list' %}?page={{ num }}&q={{ request.GET.q }}&order_by={{ order_by }}"
+                hx-target="#user-table-container"
+                hx-push-url="true">{{ num }}</button>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+      <button class="ux-datatable__page-btn"
+              hx-get="{% url 'users:list' %}?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}&order_by={{ order_by }}"
+              hx-target="#user-table-container"
+              hx-push-url="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+      <button class="ux-datatable__page-btn"
+              hx-get="{% url 'users:list' %}?page={{ page_obj.paginator.num_pages }}&q={{ request.GET.q }}&order_by={{ order_by }}"
+              hx-target="#user-table-container"
+              hx-push-url="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13 7l5 5-5 5M6 7l5 5-5 5"/>
+        </svg>
+      </button>
+      {% endif %}
+    </div>
+  </div>
+</div></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Ordenacion de Columnas Dinamica</h4>
+    <ux-playground src="examples/datatable/ordenacion-de-columnas-dinamica.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- templates/components/sortable_header.html -->
+{% load ux_tags %}
+
+<th class="ux-datatable__th ux-datatable__th--sortable
+           {% if current_order == field %}ux-datatable__th--sorted{% endif %}
+           {% if current_order == '-'|add:field %}ux-datatable__th--sorted ux-datatable__th--sorted-desc{% endif %}"
+    hx-get="{{ url }}?order_by={% if current_order == field %}-{% endif %}{{ field }}{% for key, value in request.GET.items %}{% if key != 'order_by' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+    hx-target="#{{ target }}"
+    hx-push-url="true"
+    hx-indicator=".htmx-indicator">
+  {{ label }}
+  <span class="ux-datatable__sort-icon">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 5v14M5 12l7-7 7 7"/>
+    </svg>
+  </span>
+</th>
+
+<!-- Uso en la tabla -->
+<thead class="ux-datatable__thead">
+  <tr>
+    {% include "components/sortable_header.html" with field="name" label="Nombre" current_order=order_by url=request.path target="table-container" %}
+    {% include "components/sortable_header.html" with field="email" label="Email" current_order=order_by url=request.path target="table-container" %}
+    {% include "components/sortable_header.html" with field="created_at" label="Creado" current_order=order_by url=request.path target="table-container" %}
+    {% include "components/sortable_header.html" with field="status" label="Estado" current_order=order_by url=request.path target="table-container" %}
+  </tr>
+</thead></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Vista Django con Paginacion y Filtros</h4>
+    <ux-playground src="examples/datatable/vista-django-con-paginacion-y-filtros.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.views.generic import ListView
+from django.db.models import Q
+
+class UserListView(ListView):
+    model = User
+    template_name = 'users/user_list.html'
+    context_object_name = 'users'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Busqueda
+        search = self.request.GET.get('q', '')
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(email__icontains=search)
+            )
+
+        # Filtro por estado
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(is_active=(status == 'active'))
+
+        # Filtro por departamento
+        department = self.request.GET.get('department')
+        if department:
+            queryset = queryset.filter(department_id=department)
+
+        # Ordenacion
+        order_by = self.request.GET.get('order_by', '-created_at')
+        allowed_fields = ['name', '-name', 'email', '-email', 'created_at', '-created_at', 'status', '-status']
+        if order_by in allowed_fields:
+            queryset = queryset.order_by(order_by)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['order_by'] = self.request.GET.get('order_by', '-created_at')
+        context['departments'] = Department.objects.all()
+        context['current_filters'] = {
+            'q': self.request.GET.get('q', ''),
+            'status': self.request.GET.get('status', ''),
+            'department': self.request.GET.get('department', ''),
+        }
+        return context
+
+    def get_template_names(self):
+        # Devolver partial si es peticion HTMX
+        if self.request.headers.get('HX-Request'):
+            return ['users/partials/user_table.html']
+        return [self.template_name]
+
+
+# urls.py
+from django.urls import path
+from . import views
+
+app_name = 'users'
+
+urlpatterns = [
+    path('', views.UserListView.as_view(), name='list'),
+    path('<int:pk>/edit/', views.user_edit, name='edit'),
+    path('<int:pk>/delete/', views.user_delete, name='delete'),
+]</pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Filtros Avanzados con HTMX</h4>
+    <ux-playground src="examples/datatable/filtros-avanzados-con-htmx.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html"><!-- templates/users/partials/filters.html -->
+<div class="ux-datatable__toolbar">
+  <div class="ux-datatable__toolbar-start">
+    <span class="ux-text-sm ux-text-secondary">{{ page_obj.paginator.count }} resultados</span>
+
+    <!-- Filtro por estado -->
+    <select name="status"
+            class="ux-select ux-select--sm"
+            hx-get="{% url 'users:list' %}"
+            hx-trigger="change"
+            hx-target="#user-table-container"
+            hx-include="[name='q'], [name='department']"
+            hx-push-url="true">
+      <option value="">Todos los estados</option>
+      <option value="active" {% if current_filters.status == 'active' %}selected{% endif %}>Activos</option>
+      <option value="inactive" {% if current_filters.status == 'inactive' %}selected{% endif %}>Inactivos</option>
+    </select>
+
+    <!-- Filtro por departamento -->
+    <select name="department"
+            class="ux-select ux-select--sm"
+            hx-get="{% url 'users:list' %}"
+            hx-trigger="change"
+            hx-target="#user-table-container"
+            hx-include="[name='q'], [name='status']"
+            hx-push-url="true">
+      <option value="">Todos los departamentos</option>
+      {% for dept in departments %}
+      <option value="{{ dept.pk }}" {% if current_filters.department == dept.pk|stringformat:"s" %}selected{% endif %}>
+        {{ dept.name }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <!-- Boton limpiar filtros -->
+    {% if current_filters.q or current_filters.status or current_filters.department %}
+    <button type="button"
+            class="ux-button ux-button--outline ux-button--sm"
+            hx-get="{% url 'users:list' %}"
+            hx-target="#user-table-container"
+            hx-push-url="true">
+      Limpiar filtros
+    </button>
+    {% endif %}
+  </div>
+
+  <div class="ux-datatable__toolbar-end">
+    <input type="search"
+           name="q"
+           class="ux-input ux-datatable__search"
+           placeholder="Buscar..."
+           value="{{ current_filters.q }}"
+           hx-get="{% url 'users:list' %}"
+           hx-trigger="input changed delay:300ms, search"
+           hx-target="#user-table-container"
+           hx-include="[name='status'], [name='department']"
+           hx-push-url="true">
+  </div>
+</div>
+
+<!-- Tags de filtros activos -->
+{% if current_filters.q or current_filters.status or current_filters.department %}
+<div class="ux-datatable__active-filters">
+  {% if current_filters.q %}
+  <span class="ux-datatable__filter-tag">
+    <span class="ux-datatable__filter-tag-label">Busqueda:</span>
+    {{ current_filters.q }}
+    <button type="button"
+            class="ux-datatable__filter-tag-remove"
+            hx-get="{% url 'users:list' %}?status={{ current_filters.status }}&department={{ current_filters.department }}"
+            hx-target="#user-table-container"
+            hx-push-url="true">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </span>
+  {% endif %}
+
+  {% if current_filters.status %}
+  <span class="ux-datatable__filter-tag">
+    <span class="ux-datatable__filter-tag-label">Estado:</span>
+    {% if current_filters.status == 'active' %}Activo{% else %}Inactivo{% endif %}
+    <button type="button"
+            class="ux-datatable__filter-tag-remove"
+            hx-get="{% url 'users:list' %}?q={{ current_filters.q }}&department={{ current_filters.department }}"
+            hx-target="#user-table-container"
+            hx-push-url="true">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </span>
+  {% endif %}
+</div>
+{% endif %}</pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Acciones CRUD con HTMX</h4>
+    <ux-playground src="examples/datatable/acciones-crud-con-htmx.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="python"># views.py - Acciones CRUD
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["GET", "POST"])
+def user_edit(request, pk):
+    user = get_object_or_404(User, pk=pk)
+
+    if request.method == "POST":
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            # Devolver fila actualizada
+            return render(request, 'users/partials/user_row.html', {'user': user})
+        # Si hay errores, devolver formulario con errores
+        return render(request, 'users/partials/user_edit_form.html', {
+            'form': form,
+            'user': user
+        }, status=422)
+
+    # GET: mostrar formulario en modal
+    form = UserForm(instance=user)
+    return render(request, 'users/partials/user_edit_modal.html', {
+        'form': form,
+        'user': user
+    })
+
+
+@require_http_methods(["DELETE"])
+def user_delete(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    user.delete()
+    # Devolver fila vacia con animacion de salida
+    return HttpResponse(
+        '<tr class="ux-datatable__tr ux-datatable__tr--deleted">'
+        '<td colspan="4" style="text-align: center; opacity: 0.5;">'
+        'Usuario eliminado'
+        '</td>'
+        '</tr>'
+    )
+
+
+# templates/users/partials/user_row.html
+<tr class="ux-datatable__tr" id="user-row-{{ user.pk }}">
+  <td class="ux-datatable__td" data-label="Nombre">{{ user.name }}</td>
+  <td class="ux-datatable__td" data-label="Email">{{ user.email }}</td>
+  <td class="ux-datatable__td" data-label="Estado">
+    <span class="ux-badge ux-badge--soft {% if user.is_active %}ux-color-success--soft{% else %}ux-color-danger--soft{% endif %}">
+      {{ user.status_display }}
+    </span>
+  </td>
+  <td class="ux-datatable__td ux-datatable__td--actions">
+    <div class="ux-datatable__row-actions">
+      <button class="ux-datatable__row-action"
+              hx-get="{% url 'users:edit' user.pk %}"
+              hx-target="#modal-container">
+        Editar
+      </button>
+      <button class="ux-datatable__row-action ux-datatable__row-action--danger"
+              hx-delete="{% url 'users:delete' user.pk %}"
+              hx-target="#user-row-{{ user.pk }}"
+              hx-swap="outerHTML swap:500ms"
+              hx-confirm="Eliminar a {{ user.name }}?">
+        Eliminar
+      </button>
+    </div>
+  </td>
+</tr></pre>
+    </div>
+
+    <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Exportar a CSV con HTMX</h4>
+    <ux-playground src="examples/datatable/exportar-a-csv-con-htmx.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="python"># views.py
+import csv
+from django.http import HttpResponse
+
+def export_users_csv(request):
+    # Obtener queryset con los mismos filtros que la tabla
+    queryset = User.objects.all()
+
+    search = request.GET.get('q', '')
+    if search:
+        queryset = queryset.filter(
+            Q(name__icontains=search) |
+            Q(email__icontains=search)
+        )
+
+    status = request.GET.get('status')
+    if status:
+        queryset = queryset.filter(is_active=(status == 'active'))
+
+    # Generar CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="usuarios.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Nombre', 'Email', 'Estado', 'Departamento', 'Fecha Creacion'])
+
+    for user in queryset:
+        writer.writerow([
+            user.name,
+            user.email,
+            'Activo' if user.is_active else 'Inactivo',
+            user.department.name if user.department else '',
+            user.created_at.strftime('%Y-%m-%d')
+        ])
+
+    return response
+
+
+# Template - Boton de exportar
+<button class="ux-button ux-button--outline ux-button--sm"
+        hx-get="{% url 'users:export' %}?q={{ current_filters.q }}&status={{ current_filters.status }}"
+        hx-swap="none">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+  </svg>
+  Exportar CSV
+</button></pre>
+    </div>
+  </div>
+
+  <!-- Expandable Rows -->
+  <div class="demo-section">
+    <h3>Filas Expandibles</h3>
+    <p>Tabla con filas que se pueden expandir para mostrar contenido adicional como detalles, sub-tablas o formularios.</p>
+
+    <ux-playground src="examples/datatable/filas-expandibles.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'orderNumber', label: 'Pedido', sortable: true },
+        { key: 'customer', label: 'Cliente', sortable: true },
+        { key: 'date', label: 'Fecha', sortable: true, type: 'date' },
+        { key: 'total', label: 'Total', sortable: true, type: 'number' },
+        { key: 'status', label: 'Estado', sortable: true }
+      ],
+      rows: [
+        {
+          id: 1,
+          orderNumber: 'ORD-001',
+          customer: 'Juan Garcia',
+          date: '2024-01-15',
+          total: 299.99,
+          status: 'Completado',
+          items: [
+            { name: 'Laptop Pro', qty: 1, price: 250.00 },
+            { name: 'Mouse Wireless', qty: 2, price: 24.99 }
+          ],
+          shipping: 'Calle Principal 123, Madrid',
+          notes: 'Entregar por la tarde'
+        },
+        {
+          id: 2,
+          orderNumber: 'ORD-002',
+          customer: 'Maria Lopez',
+          date: '2024-01-16',
+          total: 149.50,
+          status: 'Pendiente',
+          items: [
+            { name: 'Teclado Mecanico', qty: 1, price: 89.99 },
+            { name: 'Cable USB-C', qty: 3, price: 19.83 }
+          ],
+          shipping: 'Av. Libertad 456, Barcelona',
+          notes: ''
+        },
+        {
+          id: 3,
+          orderNumber: 'ORD-003',
+          customer: 'Carlos Ruiz',
+          date: '2024-01-17',
+          total: 599.00,
+          status: 'Procesando',
+          items: [
+            { name: 'Monitor 27 pulgadas', qty: 1, price: 399.00 },
+            { name: 'Webcam HD', qty: 1, price: 200.00 }
+          ],
+          shipping: 'Plaza Mayor 789, Valencia',
+          notes: 'Regalo - incluir tarjeta'
+        }
+      ],
+      expandable: true,
+      paginated: false
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--responsive">
+
+      <div class="ux-datatable__header">
+        <div>
+          <h3 class="ux-datatable__title">Pedidos</h3>
+          <p class="ux-datatable__subtitle">Click en la flecha para ver detalles</p>
+        </div>
+        <div class="ux-datatable__actions">
+          <button type="button"
+                  class="ux-button ux-button--outline ux-button--sm"
+                  @click="toggleExpandAll()">
+            <span x-text="expandAllState ? 'Colapsar todos' : 'Expandir todos'"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <th class="ux-datatable__th ux-datatable__th--expand">
+                <button type="button"
+                        class="ux-datatable__expand-all-btn"
+                        :class="{ 'ux-datatable__expand-all-btn--expanded': expandAllState }"
+                        @click="toggleExpandAll()"
+                        title="Expandir/Colapsar todos">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </button>
+              </th>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th"
+                    :class="{
+                      'ux-datatable__th--sortable': col.sortable,
+                      'ux-datatable__th--sorted': isSorted(col),
+                      'ux-datatable__th--sorted-desc': isSorted(col) && sortDirection === 'desc'
+                    }"
+                    @click="sortBy(col)">
+                  <span x-text="col.label"></span>
+                  <span x-show="col.sortable" class="ux-datatable__sort-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12l7-7 7 7"/>
+                    </svg>
+                  </span>
+                </th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <template x-fragment>
+                <!-- Main Row -->
+                <tr class="ux-datatable__tr ux-datatable__tr--expandable"
+                    :class="{ 'ux-datatable__tr--expanded': isRowExpanded(row) }"
+                    @click="toggleRowExpand(row, $event)">
+                  <td class="ux-datatable__td ux-datatable__td--expand">
+                    <button type="button"
+                            class="ux-datatable__expand-btn"
+                            :class="{ 'ux-datatable__expand-btn--expanded': isRowExpanded(row) }"
+                            @click.stop="toggleRowExpand(row, $event)"
+                            :aria-expanded="isRowExpanded(row)">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6"/>
+                      </svg>
+                    </button>
+                  </td>
+                  <template x-for="col in columns" :key="col.key">
+                    <td class="ux-datatable__td" :data-label="col.label">
+                      <template x-if="col.key === 'total'">
+                        <strong x-text="'$' + row.total.toFixed(2)"></strong>
+                      </template>
+                      <template x-if="col.key === 'status'">
+                        <span class="ux-badge ux-badge--soft"
+                              :class="{
+                                'ux-color-success--soft': row.status === 'Completado',
+                                'ux-color-warning--soft': row.status === 'Pendiente',
+                                'ux-color-primary--soft': row.status === 'Procesando'
+                              }"
+                              x-text="row.status"></span>
+                      </template>
+                      <template x-if="col.key !== 'total' && col.key !== 'status'">
+                        <span x-text="formatCellValue(row, col)"></span>
+                      </template>
+                    </td>
+                  </template>
+                </tr>
+
+                <!-- Expanded Content Row -->
+                <tr class="ux-datatable__expand-row" x-show="isRowExpanded(row)">
+                  <td :colspan="columns.length + 1">
+                    <div class="ux-datatable__expand-content"
+                         :class="{ 'ux-datatable__expand-content--open': isRowExpanded(row) }">
+                      <div class="ux-datatable__expand-inner">
+                        <div class="ux-datatable__expand-body">
+                          <!-- Detail Grid -->
+                          <div class="ux-datatable__detail-list" style="margin-bottom: var(--ux-space-lg);">
+                            <div class="ux-datatable__detail-item">
+                              <span class="ux-datatable__detail-label">Direccion de envio</span>
+                              <span class="ux-datatable__detail-value" x-text="row.shipping"></span>
+                            </div>
+                            <div class="ux-datatable__detail-item">
+                              <span class="ux-datatable__detail-label">Notas</span>
+                              <span class="ux-datatable__detail-value" x-text="row.notes || 'Sin notas'"></span>
+                            </div>
+                          </div>
+
+                          <!-- Items Sub-table -->
+                          <h4 style="font-size: var(--ux-font-size-sm); font-weight: 600; margin-bottom: var(--ux-space-sm); color: var(--ux-text-secondary);">ARTICULOS DEL PEDIDO</h4>
+                          <table class="ux-datatable__table" style="border: 1px solid var(--ux-border-color); border-radius: var(--ux-border-radius);">
+                            <thead>
+                              <tr>
+                                <th class="ux-datatable__th" style="background: var(--ux-surface);">Producto</th>
+                                <th class="ux-datatable__th ux-datatable__th--center" style="background: var(--ux-surface);">Cantidad</th>
+                                <th class="ux-datatable__th ux-datatable__th--right" style="background: var(--ux-surface);">Precio</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <template x-for="item in row.items" :key="item.name">
+                                <tr>
+                                  <td class="ux-datatable__td" x-text="item.name"></td>
+                                  <td class="ux-datatable__td ux-datatable__td--center" x-text="item.qty"></td>
+                                  <td class="ux-datatable__td ux-datatable__td--right" x-text="'$' + item.price.toFixed(2)"></td>
+                                </tr>
+                              </template>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div x-data="uxDatatable({
+  columns: [...],
+  rows: [
+    {
+      id: 1,
+      name: 'Item',
+      // Additional data for expanded view
+      details: { ... },
+      items: [...]
+    }
+  ],
+  expandable: true,
+  singleExpand: false  // Allow multiple rows expanded
+})" class="ux-datatable">
+
+  <!-- Expand column header -->
+  <th class="ux-datatable__th ux-datatable__th--expand">
+    <button class="ux-datatable__expand-all-btn" @click="toggleExpandAll()">
+      <svg>...</svg>
+    </button>
+  </th>
+
+  <!-- Main row with expand button -->
+  <tr class="ux-datatable__tr ux-datatable__tr--expandable"
+      :class="{ 'ux-datatable__tr--expanded': isRowExpanded(row) }">
+    <td class="ux-datatable__td ux-datatable__td--expand">
+      <button class="ux-datatable__expand-btn"
+              :class="{ 'ux-datatable__expand-btn--expanded': isRowExpanded(row) }"
+              @click="toggleRowExpand(row)">
+        <svg>...</svg>
+      </button>
+    </td>
+    <!-- Other columns -->
+  </tr>
+
+  <!-- Expanded content row -->
+  <tr class="ux-datatable__expand-row" x-show="isRowExpanded(row)">
+    <td :colspan="columns.length + 1">
+      <div class="ux-datatable__expand-content"
+           :class="{ 'ux-datatable__expand-content--open': isRowExpanded(row) }">
+        <div class="ux-datatable__expand-inner">
+          <div class="ux-datatable__expand-body">
+            <!-- Your expanded content here -->
+          </div>
+        </div>
+      </div>
+    </td>
+  </tr>
+</div>
+
+// Methods for expandable rows:
+toggleRowExpand(row)     // Toggle single row
+isRowExpanded(row)       // Check if expanded
+expandRow(row)           // Expand single row
+collapseRow(row)         // Collapse single row
+toggleExpandAll()        // Toggle all rows
+expandAll()              // Expand all rows
+collapseAll()            // Collapse all rows
+getExpandedData()        // Get expanded rows data
+
+// Events:
+@row-expand              // { row, rowId }
+@row-collapse            // { row, rowId }
+@expand-all              // { expanded: true/false }</pre>
+  </div>
+
+  <!-- Single Expand Mode -->
+  <div class="demo-section">
+    <h3>Modo Single Expand</h3>
+    <p>Solo permite una fila expandida a la vez. Al expandir una nueva fila, la anterior se colapsa automaticamente.</p>
+
+    <ux-playground src="examples/datatable/modo-single-expand.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'name', label: 'Producto', sortable: true },
+        { key: 'sku', label: 'SKU' },
+        { key: 'price', label: 'Precio', type: 'number' },
+        { key: 'stock', label: 'Stock', type: 'number' }
+      ],
+      rows: [
+        { id: 1, name: 'Laptop Pro 15', sku: 'LP-15-001', price: 1299.99, stock: 45, specs: { cpu: 'Intel i7', ram: '16GB', storage: '512GB SSD' } },
+        { id: 2, name: 'Monitor 27 pulgadas 4K', sku: 'MN-27-4K', price: 499.99, stock: 23, specs: { resolution: '3840x2160', panel: 'IPS', refresh: '60Hz' } },
+        { id: 3, name: 'Teclado Mecanico RGB', sku: 'KB-RGB-01', price: 149.99, stock: 78, specs: { switches: 'Cherry MX Red', layout: 'Full-size', backlight: 'RGB' } }
+      ],
+      expandable: true,
+      singleExpand: true,
+      paginated: false
+    })" class="ux-datatable ux-datatable--bordered">
+
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <th class="ux-datatable__th ux-datatable__th--expand"></th>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th" x-text="col.label"></th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <template x-fragment>
+                <tr class="ux-datatable__tr ux-datatable__tr--expandable"
+                    :class="{ 'ux-datatable__tr--expanded': isRowExpanded(row) }"
+                    @click="toggleRowExpand(row, $event)">
+                  <td class="ux-datatable__td ux-datatable__td--expand">
+                    <button type="button"
+                            class="ux-datatable__expand-btn"
+                            :class="{ 'ux-datatable__expand-btn--expanded': isRowExpanded(row) }"
+                            @click.stop="toggleRowExpand(row, $event)">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6"/>
+                      </svg>
+                    </button>
+                  </td>
+                  <td class="ux-datatable__td"><strong x-text="row.name"></strong></td>
+                  <td class="ux-datatable__td"><code x-text="row.sku"></code></td>
+                  <td class="ux-datatable__td" x-text="'$' + row.price.toFixed(2)"></td>
+                  <td class="ux-datatable__td">
+                    <span class="ux-badge"
+                          :class="row.stock > 50 ? 'ux-color-success' : row.stock > 20 ? 'ux-color-warning' : 'ux-color-danger'"
+                          x-text="row.stock + ' uds'"></span>
+                  </td>
+                </tr>
+
+                <tr class="ux-datatable__expand-row" x-show="isRowExpanded(row)">
+                  <td :colspan="columns.length + 1">
+                    <div class="ux-datatable__expand-content"
+                         :class="{ 'ux-datatable__expand-content--open': isRowExpanded(row) }">
+                      <div class="ux-datatable__expand-inner">
+                        <div class="ux-datatable__expand-body">
+                          <h4 style="font-size: var(--ux-font-size-sm); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text-secondary);">ESPECIFICACIONES</h4>
+                          <div class="ux-datatable__detail-list">
+                            <template x-for="(value, key) in row.specs" :key="key">
+                              <div class="ux-datatable__detail-item">
+                                <span class="ux-datatable__detail-label" x-text="key"></span>
+                                <span class="ux-datatable__detail-value" x-text="value"></span>
+                              </div>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div x-data="uxDatatable({
+  expandable: true,
+  singleExpand: true  // Only one row can be expanded at a time
+})">
+  ...
+</div></pre>
+  </div>
+
+  <!-- Export Functionality -->
+  <div class="demo-section">
+    <h3>Exportar Datos</h3>
+    <p>Funcionalidad integrada para exportar datos a CSV y Excel. Soporta exportar solo filas seleccionadas, columnas visibles y formato de fechas personalizado.</p>
+
+    <ux-playground src="examples/datatable/exportar-datos.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'id', label: 'ID', type: 'number', sortable: true },
+        { key: 'name', label: 'Nombre', sortable: true },
+        { key: 'email', label: 'Email', sortable: true },
+        { key: 'department', label: 'Departamento', sortable: true },
+        { key: 'salary', label: 'Salario', type: 'number', sortable: true },
+        { key: 'hired', label: 'Contratado', type: 'date', sortable: true }
+      ],
+      rows: [
+        { id: 1, name: 'Ana Martinez', email: 'ana@empresa.com', department: 'Desarrollo', salary: 55000, hired: '2022-03-15' },
+        { id: 2, name: 'Carlos Ruiz', email: 'carlos@empresa.com', department: 'Diseno', salary: 48000, hired: '2021-07-20' },
+        { id: 3, name: 'Elena Torres', email: 'elena@empresa.com', department: 'Marketing', salary: 52000, hired: '2023-01-10' },
+        { id: 4, name: 'Miguel Santos', email: 'miguel@empresa.com', department: 'Desarrollo', salary: 62000, hired: '2020-11-05' },
+        { id: 5, name: 'Laura Vega', email: 'laura@empresa.com', department: 'RRHH', salary: 45000, hired: '2022-09-01' },
+        { id: 6, name: 'Pedro Garcia', email: 'pedro@empresa.com', department: 'Desarrollo', salary: 58000, hired: '2021-04-12' },
+        { id: 7, name: 'Sofia Lopez', email: 'sofia@empresa.com', department: 'Marketing', salary: 50000, hired: '2023-06-18' },
+        { id: 8, name: 'Diego Fernandez', email: 'diego@empresa.com', department: 'Diseno', salary: 47000, hired: '2022-12-03' }
+      ],
+      selectable: true,
+      perPage: 10,
+      paginated: false
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--responsive"
+       @click.outside="closeExportMenu()"
+       @export.window="alert('Exportado: ' + $event.detail.filename + ' (' + $event.detail.rowCount + ' filas)')">
+
+      <!-- Header with Export -->
+      <div class="ux-datatable__header">
+        <div>
+          <h3 class="ux-datatable__title">Empleados</h3>
+          <p class="ux-datatable__subtitle" x-text="selectedRows.length > 0 ? selectedRows.length + ' seleccionados' : sortedRows.length + ' registros'"></p>
+        </div>
+        <div class="ux-datatable__actions">
+          <!-- Export Dropdown -->
+          <div class="ux-datatable__export">
+            <button type="button" class="ux-datatable__export-btn" @click="toggleExportMenu()">
+              <span x-html="getIcon('download')"></span>
+              Exportar
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
+            <div class="ux-datatable__export-menu" :class="{ 'ux-datatable__export-menu--open': exportMenuOpen }">
+              <button type="button" class="ux-datatable__export-item" @click="exportToCSV({ filename: 'empleados' })">
+                <span x-html="getIcon('csv')"></span>
+                <span class="ux-datatable__export-item-text">
+                  Exportar CSV
+                  <span class="ux-datatable__export-item-desc">Formato universal</span>
+                </span>
+              </button>
+              <button type="button" class="ux-datatable__export-item" @click="exportToExcel({ filename: 'empleados', sheetName: 'Empleados' })">
+                <span x-html="getIcon('excel')"></span>
+                <span class="ux-datatable__export-item-text">
+                  Exportar Excel
+                  <span class="ux-datatable__export-item-desc">Con formato</span>
+                </span>
+              </button>
+              <div class="ux-datatable__export-divider"></div>
+              <label class="ux-datatable__export-option">
+                <input type="checkbox" x-model="exportSelectedOnly" :disabled="selectedRows.length === 0">
+                Solo seleccionados
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <th class="ux-datatable__th ux-datatable__th--checkbox">
+                <input type="checkbox" class="ux-checkbox" x-model="selectAll" @change="toggleSelectAll()">
+              </th>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th"
+                    :class="{
+                      'ux-datatable__th--sortable': col.sortable,
+                      'ux-datatable__th--sorted': isSorted(col),
+                      'ux-datatable__th--sorted-desc': isSorted(col) && sortDirection === 'desc'
+                    }"
+                    @click="sortBy(col)">
+                  <span x-text="col.label"></span>
+                  <span x-show="col.sortable" class="ux-datatable__sort-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12l7-7 7 7"/>
+                    </svg>
+                  </span>
+                </th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <tr class="ux-datatable__tr" :class="{ 'ux-datatable__tr--selected': isRowSelected(row) }">
+                <td class="ux-datatable__td ux-datatable__td--checkbox" data-label="">
+                  <input type="checkbox" class="ux-checkbox" :checked="isRowSelected(row)" @change="toggleRowSelection(row)">
+                </td>
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td" :data-label="col.label">
+                    <span x-text="col.type === 'number' && col.key === 'salary' ? '$' + formatCellValue(row, col).toLocaleString() : formatCellValue(row, col)"></span>
+                  </td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><!-- Boton de exportacion con menu desplegable -->
+<div class="ux-datatable__export">
+  <button type="button" class="ux-datatable__export-btn" @click="toggleExportMenu()">
+    <span x-html="getIcon('download')"></span>
+    Exportar
+  </button>
+  <div class="ux-datatable__export-menu"
+       :class="{ 'ux-datatable__export-menu--open': exportMenuOpen }">
+    <button class="ux-datatable__export-item"
+            @click="exportToCSV({ filename: 'datos' })">
+      Exportar CSV
+    </button>
+    <button class="ux-datatable__export-item"
+            @click="exportToExcel({ filename: 'datos' })">
+      Exportar Excel
+    </button>
+    <div class="ux-datatable__export-divider"></div>
+    <label class="ux-datatable__export-option">
+      <input type="checkbox" x-model="exportSelectedOnly">
+      Solo seleccionados
+    </label>
+  </div>
+</div></pre>
+  </div>
+
+  <!-- Export with Quick Buttons -->
+  <div class="demo-section">
+    <h3>Exportacion Rapida</h3>
+    <p>Botones de exportacion directa sin menu desplegable. Exporta automaticamente las filas seleccionadas si hay alguna.</p>
+
+    <ux-playground src="examples/datatable/exportacion-rapida.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'code', label: 'Codigo' },
+        { key: 'product', label: 'Producto' },
+        { key: 'quantity', label: 'Cantidad', type: 'number' },
+        { key: 'price', label: 'Precio', type: 'number' },
+        { key: 'date', label: 'Fecha', type: 'date' }
+      ],
+      rows: [
+        { id: 1, code: 'PRD-001', product: 'Laptop Pro', quantity: 5, price: 1299.99, date: '2024-01-15' },
+        { id: 2, code: 'PRD-002', product: 'Mouse Wireless', quantity: 50, price: 29.99, date: '2024-01-16' },
+        { id: 3, code: 'PRD-003', product: 'Teclado Mecanico', quantity: 25, price: 89.99, date: '2024-01-17' },
+        { id: 4, code: 'PRD-004', product: 'Monitor 27 pulgadas', quantity: 10, price: 399.99, date: '2024-01-18' }
+      ],
+      selectable: true,
+      paginated: false
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--responsive">
+
+      <!-- Toolbar with Quick Export Buttons -->
+      <div class="ux-datatable__toolbar">
+        <div class="ux-datatable__toolbar-start">
+          <span class="ux-text-sm ux-text-secondary" x-text="selectedRows.length > 0 ? selectedRows.length + ' seleccionados' : rows.length + ' productos'"></span>
+        </div>
+        <div class="ux-datatable__toolbar-end" style="display: flex; gap: var(--ux-space-sm);">
+          <button type="button" class="ux-button ux-button--outline ux-button--sm" @click="quickExportCSV()">
+            <span x-html="getIcon('csv')"></span>
+            CSV
+          </button>
+          <button type="button" class="ux-button ux-button--outline ux-button--sm" @click="quickExportExcel()">
+            <span x-html="getIcon('excel')"></span>
+            Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <th class="ux-datatable__th ux-datatable__th--checkbox">
+                <input type="checkbox" class="ux-checkbox" x-model="selectAll" @change="toggleSelectAll()">
+              </th>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th" x-text="col.label"></th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in rows" :key="row.id">
+              <tr class="ux-datatable__tr" :class="{ 'ux-datatable__tr--selected': isRowSelected(row) }">
+                <td class="ux-datatable__td ux-datatable__td--checkbox" data-label="">
+                  <input type="checkbox" class="ux-checkbox" :checked="isRowSelected(row)" @change="toggleRowSelection(row)">
+                </td>
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td" :data-label="col.label" x-text="formatCellValue(row, col)"></td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><!-- Botones de exportacion directa -->
+<button class="ux-button ux-button--outline ux-button--sm"
+        @click="quickExportCSV()">
+  CSV
+</button>
+<button class="ux-button ux-button--outline ux-button--sm"
+        @click="quickExportExcel()">
+  Excel
+</button>
+
+<!-- O con opciones personalizadas -->
+<button @click="exportToCSV({
+  filename: 'productos',
+  selectedOnly: true,
+  dateFormat: 'DD/MM/YYYY'
+})">
+  Exportar seleccionados
+</button></pre>
+  </div>
+
+  <!-- Export API Reference -->
+  <div class="demo-section">
+    <h3>API de Exportacion</h3>
+    <ux-playground src="examples/datatable/api-de-exportacion.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="javascript">// Metodos de exportacion disponibles
+exportToCSV(options)     // Exportar a CSV
+exportToExcel(options)   // Exportar a Excel (XML SpreadsheetML)
+getExportData(selectedOnly)  // Obtener datos para exportar
+quickExportCSV()         // Exportacion rapida CSV
+quickExportExcel()       // Exportacion rapida Excel
+
+// Opciones de exportToCSV
+{
+  filename: 'export',        // Nombre del archivo (sin extension)
+  selectedOnly: false,       // Solo filas seleccionadas
+  dateFormat: 'YYYY-MM-DD',  // Formato de fechas
+  delimiter: ',',            // Delimitador (,  ;  \t)
+  includeHeaders: true,      // Incluir cabeceras
+  useRawValue: true          // Usar valor sin formato
+}
+
+// Opciones de exportToExcel
+{
+  filename: 'export',        // Nombre del archivo
+  selectedOnly: false,       // Solo filas seleccionadas
+  dateFormat: 'YYYY-MM-DD',  // Formato de fechas
+  sheetName: 'Data',         // Nombre de la hoja
+  useRawValue: true          // Usar valor sin formato
+}
+
+// Propiedades de columna para exportacion
+{
+  key: 'price',
+  label: 'Precio',
+  type: 'number',
+  exportable: true,          // false para excluir de exportacion
+  visible: true,             // false si columna esta oculta
+  exportWidth: 100,          // Ancho en Excel
+  exportFormat: (val) => val // Funcion de formato personalizado
+}
+
+// Propiedades reactivas de exportacion
+exportMenuOpen              // Estado del menu desplegable
+exportSelectedOnly          // Exportar solo seleccionados
+exportVisibleColumnsOnly    // Solo columnas visibles
+
+// Evento emitido
+@export                     // { type: 'csv'|'excel', filename, rowCount }
+
+// Formatos de fecha soportados
+'YYYY-MM-DD'               // 2024-01-15
+'DD/MM/YYYY'               // 15/01/2024
+'MM/DD/YYYY'               // 01/15/2024
+'YYYY-MM-DD HH:mm:ss'      // 2024-01-15 14:30:00</pre>
+    </div>
+  </div>
+
+  <!-- Resizable Columns -->
+  <div class="demo-section">
+    <h3>Columnas Redimensionables</h3>
+    <p>Arrastra los bordes de las columnas para cambiar su ancho. Se almacena el estado en <code>columnWidths</code>.</p>
+
+    <ux-playground src="examples/datatable/columnas-redimensionables.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'id', label: 'ID', sortable: true, type: 'number', width: 80 },
+        { key: 'name', label: 'Nombre', sortable: true, width: 200 },
+        { key: 'email', label: 'Email', sortable: true, width: 250 },
+        { key: 'department', label: 'Departamento', sortable: true, width: 150 },
+        { key: 'salary', label: 'Salario', sortable: true, type: 'number', width: 120 }
+      ],
+      rows: [
+        { id: 1, name: 'Ana Martinez', email: 'ana@empresa.com', department: 'Desarrollo', salary: 55000 },
+        { id: 2, name: 'Carlos Ruiz', email: 'carlos@empresa.com', department: 'Diseno', salary: 48000 },
+        { id: 3, name: 'Elena Torres', email: 'elena@empresa.com', department: 'Marketing', salary: 52000 },
+        { id: 4, name: 'Miguel Santos', email: 'miguel@empresa.com', department: 'Desarrollo', salary: 62000 },
+        { id: 5, name: 'Laura Vega', email: 'laura@empresa.com', department: 'RRHH', salary: 45000 }
+      ],
+      resizable: true,
+      paginated: false,
+      minColumnWidth: 60
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--resizable"
+       @column-resize.window="console.log('Column resize:', $event.detail)">
+
+      <!-- Header with reset button -->
+      <div class="ux-datatable__header">
+        <div>
+          <h3 class="ux-datatable__title">Empleados</h3>
+          <p class="ux-datatable__subtitle">Arrastra el borde de las columnas para redimensionar</p>
+        </div>
+        <div class="ux-datatable__actions">
+          <button type="button" class="ux-button ux-button--outline ux-button--sm"
+                  @click="resetAllColumnWidths()"
+                  :disabled="Object.keys(columnWidths).length === 0">
+            Restablecer anchos
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th"
+                    :class="{
+                      'ux-datatable__th--sortable': col.sortable,
+                      'ux-datatable__th--sorted': isSorted(col),
+                      'ux-datatable__th--sorted-desc': isSorted(col) && sortDirection === 'desc',
+                      'ux-datatable__th--resizing': isColumnResizing(col)
+                    }"
+                    :style="{ width: getColumnWidth(col) }"
+                    @click="sortBy(col)">
+                  <span x-text="col.label"></span>
+                  <span x-show="col.sortable" class="ux-datatable__sort-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12l7-7 7 7"/>
+                    </svg>
+                  </span>
+                  <!-- Resize Handle -->
+                  <div class="ux-datatable__resize-handle"
+                       :class="{ 'ux-datatable__resize-handle--active': isColumnResizing(col) }"
+                       @mousedown.stop="startResize(col, $event)"
+                       @touchstart.stop="startResize(col, $event)"></div>
+                </th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <tr class="ux-datatable__tr">
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td" :data-label="col.label">
+                    <span x-text="col.key === 'salary' ? '$' + formatCellValue(row, col).toLocaleString() : formatCellValue(row, col)"></span>
+                  </td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer showing current widths -->
+      <div class="ux-datatable__footer">
+        <div class="ux-datatable__info">
+          <span class="ux-text-sm ux-text-secondary">
+            Anchos actuales: <code x-text="JSON.stringify(columnWidths)"></code>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div x-data="uxDatatable({
+  columns: [
+    { key: 'name', label: 'Nombre', width: 200 },
+    { key: 'email', label: 'Email', width: 250 }
+  ],
+  rows: [...],
+  resizable: true,
+  minColumnWidth: 60  // Ancho minimo en px
+})" class="ux-datatable ux-datatable--resizable">
+
+  <th class="ux-datatable__th"
+      :style="{ width: getColumnWidth(col) }">
+    <span x-text="col.label"></span>
+    <!-- Resize Handle -->
+    <div class="ux-datatable__resize-handle"
+         @mousedown.stop="startResize(col, $event)"
+         @touchstart.stop="startResize(col, $event)"></div>
+  </th>
+</div>
+
+// Metodos disponibles:
+getColumnWidth(col)           // Obtiene ancho de columna
+setColumnWidth(colKey, width) // Establece ancho
+startResize(col, event)       // Inicia redimension
+resetColumnWidth(colKey)      // Restablece ancho de columna
+resetAllColumnWidths()        // Restablece todos los anchos
+
+// Eventos:
+@column-resize    // { column, width }</pre>
+  </div>
+
+  <!-- Column Visibility -->
+  <div class="demo-section">
+    <h3>Visibilidad de Columnas</h3>
+    <p>Menu desplegable para mostrar/ocultar columnas. Se almacena en <code>hiddenColumns</code>.</p>
+
+    <ux-playground src="examples/datatable/visibilidad-de-columnas.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'id', label: 'ID', type: 'number', sortable: true },
+        { key: 'name', label: 'Nombre', sortable: true },
+        { key: 'email', label: 'Email', sortable: true },
+        { key: 'phone', label: 'Telefono' },
+        { key: 'department', label: 'Departamento', sortable: true },
+        { key: 'location', label: 'Ubicacion' },
+        { key: 'salary', label: 'Salario', type: 'number', sortable: true }
+      ],
+      rows: [
+        { id: 1, name: 'Ana Martinez', email: 'ana@empresa.com', phone: '+34 612 345 678', department: 'Desarrollo', location: 'Madrid', salary: 55000 },
+        { id: 2, name: 'Carlos Ruiz', email: 'carlos@empresa.com', phone: '+34 623 456 789', department: 'Diseno', location: 'Barcelona', salary: 48000 },
+        { id: 3, name: 'Elena Torres', email: 'elena@empresa.com', phone: '+34 634 567 890', department: 'Marketing', location: 'Valencia', salary: 52000 },
+        { id: 4, name: 'Miguel Santos', email: 'miguel@empresa.com', phone: '+34 645 678 901', department: 'Desarrollo', location: 'Sevilla', salary: 62000 }
+      ],
+      hiddenColumns: ['phone', 'location'],
+      paginated: false
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--responsive"
+       @click.outside="closeColumnMenu()"
+       @column-visibility-change.window="console.log('Column visibility:', $event.detail)">
+
+      <!-- Toolbar with Column Toggle -->
+      <div class="ux-datatable__toolbar">
+        <div class="ux-datatable__toolbar-start">
+          <span class="ux-text-sm ux-text-secondary">
+            <span x-text="visibleColumns.length"></span> de <span x-text="columns.length"></span> columnas visibles
+          </span>
+        </div>
+        <div class="ux-datatable__toolbar-end">
+          <!-- Column Visibility Toggle -->
+          <div class="ux-datatable__column-toggle">
+            <button type="button" class="ux-datatable__column-btn" @click="toggleColumnMenu()">
+              <span x-html="getIcon('columns')"></span>
+              <span x-text="labels.columns"></span>
+              <template x-if="hiddenColumnsCount > 0">
+                <span class="ux-datatable__column-btn-badge" x-text="hiddenColumnsCount"></span>
+              </template>
+            </button>
+            <div class="ux-datatable__column-menu" :class="{ 'ux-datatable__column-menu--open': showColumnMenu }">
+              <div class="ux-datatable__column-menu-header">
+                <span class="ux-datatable__column-menu-title" x-text="labels.columns"></span>
+                <div class="ux-datatable__column-menu-actions">
+                  <button type="button" class="ux-datatable__column-menu-action" @click="showAllColumns()" x-text="labels.showAll"></button>
+                  <button type="button" class="ux-datatable__column-menu-action" @click="hideAllColumns()" x-text="labels.hideAll"></button>
+                </div>
+              </div>
+              <div class="ux-datatable__column-list">
+                <template x-for="col in columns" :key="col.key">
+                  <label class="ux-datatable__column-item"
+                         :class="{ 'ux-datatable__column-item--disabled': !canHideColumn(col) && isColumnVisible(col) }">
+                    <input type="checkbox"
+                           class="ux-checkbox"
+                           :checked="isColumnVisible(col)"
+                           :disabled="!canHideColumn(col) && isColumnVisible(col)"
+                           @change="toggleColumnVisibility(col)">
+                    <span class="ux-datatable__column-item-label" x-text="col.label"></span>
+                  </label>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <input type="search"
+                 class="ux-input ux-datatable__search"
+                 placeholder="Buscar..."
+                 x-model="searchQuery"
+                 @input.debounce.300ms="onSearch()">
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th"
+                    x-show="isColumnVisible(col)"
+                    :class="{
+                      'ux-datatable__th--sortable': col.sortable,
+                      'ux-datatable__th--sorted': isSorted(col),
+                      'ux-datatable__th--sorted-desc': isSorted(col) && sortDirection === 'desc'
+                    }"
+                    @click="sortBy(col)">
+                  <span x-text="col.label"></span>
+                  <span x-show="col.sortable" class="ux-datatable__sort-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12l7-7 7 7"/>
+                    </svg>
+                  </span>
+                </th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <tr class="ux-datatable__tr">
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td"
+                      x-show="isColumnVisible(col)"
+                      :data-label="col.label">
+                    <span x-text="col.key === 'salary' ? '$' + formatCellValue(row, col).toLocaleString() : formatCellValue(row, col)"></span>
+                  </td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div x-data="uxDatatable({
+  columns: [...],
+  rows: [...],
+  hiddenColumns: ['phone', 'location']  // Columnas ocultas inicialmente
+})" @click.outside="closeColumnMenu()">
+
+  <!-- Column Visibility Toggle Button -->
+  <div class="ux-datatable__column-toggle">
+    <button class="ux-datatable__column-btn" @click="toggleColumnMenu()">
+      Columnas
+      <span x-if="hiddenColumnsCount > 0" x-text="hiddenColumnsCount"></span>
+    </button>
+    <div class="ux-datatable__column-menu"
+         :class="{ 'ux-datatable__column-menu--open': showColumnMenu }">
+      <div class="ux-datatable__column-menu-header">
+        <span>Columnas</span>
+        <div>
+          <button @click="showAllColumns()">Mostrar todas</button>
+          <button @click="hideAllColumns()">Ocultar todas</button>
+        </div>
+      </div>
+      <div class="ux-datatable__column-list">
+        <template x-for="col in columns">
+          <label class="ux-datatable__column-item">
+            <input type="checkbox"
+                   :checked="isColumnVisible(col)"
+                   @change="toggleColumnVisibility(col)">
+            <span x-text="col.label"></span>
+          </label>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Use x-show on th and td -->
+  <th x-show="isColumnVisible(col)">...</th>
+  <td x-show="isColumnVisible(col)">...</td>
+</div>
+
+// Metodos disponibles:
+toggleColumnMenu()            // Abre/cierra menu
+isColumnVisible(col)          // Verifica si columna es visible
+toggleColumnVisibility(col)   // Alterna visibilidad
+showColumn(colKey)            // Muestra columna
+hideColumn(colKey)            // Oculta columna
+showAllColumns()              // Muestra todas
+hideAllColumns()              // Oculta todas (excepto primera)
+canHideColumn(col)            // Verifica si se puede ocultar
+
+// Propiedades reactivas:
+visibleColumns                // Array de columnas visibles
+hiddenColumnsCount            // Cantidad de columnas ocultas
+
+// Eventos:
+@column-show              // { column }
+@column-hide              // { column }
+@column-visibility-change // { hiddenColumns }</pre>
+  </div>
+
+  <!-- Combined: Resize + Visibility -->
+  <div class="demo-section">
+    <h3>Redimensionar y Visibilidad Combinados</h3>
+    <p>Ejemplo completo con ambas funcionalidades: redimensionar columnas y controlar su visibilidad.</p>
+
+    <ux-playground src="examples/datatable/redimensionar-y-visibilidad-combinados.html"></ux-playground>
+      <div class="demo-box" x-data="uxDatatable({
+      columns: [
+        { key: 'id', label: 'ID', type: 'number', sortable: true, width: 60 },
+        { key: 'product', label: 'Producto', sortable: true, width: 180 },
+        { key: 'sku', label: 'SKU', width: 100 },
+        { key: 'category', label: 'Categoria', sortable: true, width: 120 },
+        { key: 'price', label: 'Precio', type: 'number', sortable: true, width: 100 },
+        { key: 'stock', label: 'Stock', type: 'number', sortable: true, width: 80 },
+        { key: 'supplier', label: 'Proveedor', width: 150 }
+      ],
+      rows: [
+        { id: 1, product: 'Laptop Pro 15', sku: 'LP-15-001', category: 'Electronica', price: 1299.99, stock: 45, supplier: 'Tech Corp' },
+        { id: 2, product: 'Mouse Wireless', sku: 'MW-001', category: 'Accesorios', price: 29.99, stock: 120, supplier: 'Peripherals Inc' },
+        { id: 3, product: 'Teclado Mecanico', sku: 'KM-RGB-01', category: 'Accesorios', price: 89.99, stock: 78, supplier: 'Peripherals Inc' },
+        { id: 4, product: 'Monitor 27 pulgadas 4K', sku: 'MN-27-4K', category: 'Electronica', price: 499.99, stock: 23, supplier: 'Display Tech' },
+        { id: 5, product: 'Webcam HD', sku: 'WC-HD-01', category: 'Accesorios', price: 59.99, stock: 95, supplier: 'Video Systems' },
+        { id: 6, product: 'SSD 1TB NVMe', sku: 'SSD-1TB', category: 'Almacenamiento', price: 129.99, stock: 67, supplier: 'Storage Pro' }
+      ],
+      resizable: true,
+      minColumnWidth: 50,
+      hiddenColumns: ['sku', 'supplier'],
+      selectable: true,
+      paginated: false
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--resizable ux-datatable--responsive"
+       @click.outside="closeColumnMenu(); closeExportMenu()">
+
+      <!-- Header -->
+      <div class="ux-datatable__header">
+        <div>
+          <h3 class="ux-datatable__title">Inventario de Productos</h3>
+          <p class="ux-datatable__subtitle" x-text="selectedRows.length > 0 ? selectedRows.length + ' seleccionados' : rows.length + ' productos'"></p>
+        </div>
+        <div class="ux-datatable__actions">
+          <!-- Column Visibility Toggle -->
+          <div class="ux-datatable__column-toggle">
+            <button type="button" class="ux-datatable__column-btn" @click="toggleColumnMenu()">
+              <span x-html="getIcon('columns')"></span>
+              Columnas
+              <template x-if="hiddenColumnsCount > 0">
+                <span class="ux-datatable__column-btn-badge" x-text="hiddenColumnsCount"></span>
+              </template>
+            </button>
+            <div class="ux-datatable__column-menu" :class="{ 'ux-datatable__column-menu--open': showColumnMenu }">
+              <div class="ux-datatable__column-menu-header">
+                <span class="ux-datatable__column-menu-title">Columnas</span>
+                <div class="ux-datatable__column-menu-actions">
+                  <button type="button" class="ux-datatable__column-menu-action" @click="showAllColumns()">Mostrar</button>
+                  <button type="button" class="ux-datatable__column-menu-action" @click="hideAllColumns()">Ocultar</button>
+                </div>
+              </div>
+              <div class="ux-datatable__column-list">
+                <template x-for="col in columns" :key="col.key">
+                  <label class="ux-datatable__column-item">
+                    <input type="checkbox"
+                           class="ux-checkbox"
+                           :checked="isColumnVisible(col)"
+                           :disabled="!canHideColumn(col) && isColumnVisible(col)"
+                           @change="toggleColumnVisibility(col)">
+                    <span class="ux-datatable__column-item-label" x-text="col.label"></span>
+                  </label>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Export Menu -->
+          <div class="ux-datatable__export">
+            <button type="button" class="ux-datatable__export-btn" @click="toggleExportMenu()">
+              <span x-html="getIcon('download')"></span>
+              Exportar
+            </button>
+            <div class="ux-datatable__export-menu" :class="{ 'ux-datatable__export-menu--open': exportMenuOpen }">
+              <button type="button" class="ux-datatable__export-item" @click="exportToCSV({ filename: 'inventario' })">
+                <span x-html="getIcon('csv')"></span>
+                <span class="ux-datatable__export-item-text">CSV</span>
+              </button>
+              <button type="button" class="ux-datatable__export-item" @click="exportToExcel({ filename: 'inventario' })">
+                <span x-html="getIcon('excel')"></span>
+                <span class="ux-datatable__export-item-text">Excel</span>
+              </button>
+            </div>
+          </div>
+
+          <button type="button" class="ux-button ux-button--outline ux-button--sm"
+                  @click="resetAllColumnWidths()"
+                  :disabled="Object.keys(columnWidths).length === 0">
+            Reset anchos
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <th class="ux-datatable__th ux-datatable__th--checkbox">
+                <input type="checkbox" class="ux-checkbox" x-model="selectAll" @change="toggleSelectAll()">
+              </th>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th"
+                    x-show="isColumnVisible(col)"
+                    :class="{
+                      'ux-datatable__th--sortable': col.sortable,
+                      'ux-datatable__th--sorted': isSorted(col),
+                      'ux-datatable__th--sorted-desc': isSorted(col) && sortDirection === 'desc',
+                      'ux-datatable__th--resizing': isColumnResizing(col)
+                    }"
+                    :style="{ width: getColumnWidth(col) }"
+                    @click="sortBy(col)">
+                  <span x-text="col.label"></span>
+                  <span x-show="col.sortable" class="ux-datatable__sort-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12l7-7 7 7"/>
+                    </svg>
+                  </span>
+                  <!-- Resize Handle -->
+                  <div class="ux-datatable__resize-handle"
+                       :class="{ 'ux-datatable__resize-handle--active': isColumnResizing(col) }"
+                       @mousedown.stop="startResize(col, $event)"
+                       @touchstart.stop="startResize(col, $event)"></div>
+                </th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <tr class="ux-datatable__tr" :class="{ 'ux-datatable__tr--selected': isRowSelected(row) }">
+                <td class="ux-datatable__td ux-datatable__td--checkbox" data-label="">
+                  <input type="checkbox" class="ux-checkbox" :checked="isRowSelected(row)" @change="toggleRowSelection(row)">
+                </td>
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td"
+                      x-show="isColumnVisible(col)"
+                      :data-label="col.label">
+                    <template x-if="col.key === 'price'">
+                      <strong x-text="'$' + row.price.toFixed(2)"></strong>
+                    </template>
+                    <template x-if="col.key === 'stock'">
+                      <span class="ux-badge"
+                            :class="row.stock > 50 ? 'ux-color-success' : row.stock > 20 ? 'ux-color-warning' : 'ux-color-danger'"
+                            x-text="row.stock"></span>
+                    </template>
+                    <template x-if="col.key !== 'price' && col.key !== 'stock'">
+                      <span x-text="formatCellValue(row, col)"></span>
+                    </template>
+                  </td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div class="ux-datatable__footer">
+        <div class="ux-datatable__info">
+          <span class="ux-text-sm ux-text-secondary">
+            <span x-text="visibleColumns.length"></span>/<span x-text="columns.length"></span> columnas
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div x-data="uxDatatable({
+  columns: [...],
+  rows: [...],
+  resizable: true,
+  minColumnWidth: 50,
+  hiddenColumns: ['sku', 'supplier'],
+  selectable: true
+})" class="ux-datatable ux-datatable--resizable">
+
+  <!-- Combina ambas funcionalidades -->
+  <th x-show="isColumnVisible(col)"
+      :style="{ width: getColumnWidth(col) }">
+    <span x-text="col.label"></span>
+    <div class="ux-datatable__resize-handle"
+         @mousedown.stop="startResize(col, $event)"></div>
+  </th>
+
+  <td x-show="isColumnVisible(col)">...</td>
+</div></pre>
+  </div>
+
+  <!-- CSS Classes -->
+  <div class="demo-section">
+    <h3>Clases CSS</h3>
+    <ux-playground src="examples/datatable/clases-css.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+      <pre class="ux-code-block" data-lang="html">/* Contenedor */
+.ux-datatable                    // Contenedor principal
+.ux-datatable--bordered          // Con borde
+.ux-datatable--inset             // Con margen
+.ux-datatable--striped           // Filas alternadas
+.ux-datatable--compact           // Padding reducido
+.ux-datatable--responsive        // Vista movil automatica
+.ux-datatable--force-responsive  // Siempre vista movil
+
+/* Cabecera */
+.ux-datatable__th--sortable      // Columna ordenable
+.ux-datatable__th--sorted        // Columna ordenada
+.ux-datatable__th--sorted-desc   // Ordenado descendente
+.ux-datatable__th--center        // Alineado centro
+.ux-datatable__th--right         // Alineado derecha
+.ux-datatable__th--checkbox      // Columna checkbox
+.ux-datatable__th--actions       // Columna acciones
+
+/* Celdas */
+.ux-datatable__td--center        // Alineado centro
+.ux-datatable__td--right         // Alineado derecha
+.ux-datatable__td--truncate      // Truncar texto largo
+.ux-datatable__td--primary       // Celda destacada (responsive)
+.ux-datatable__td--checkbox      // Celda checkbox
+.ux-datatable__td--actions       // Celda acciones
+
+/* Filas */
+.ux-datatable__tr--selected      // Fila seleccionada
+.ux-datatable__tr--clickable     // Fila clickeable
+
+/* View Toggle */
+.ux-datatable__view-toggle       // Contenedor botones
+.ux-datatable__view-btn          // Boton de vista
+.ux-datatable__view-btn--active  // Boton activo
+
+/* Expandable Rows */
+.ux-datatable__th--expand        // Columna expand en header
+.ux-datatable__td--expand        // Celda expand
+.ux-datatable__expand-btn        // Boton expandir fila
+.ux-datatable__expand-btn--expanded  // Boton cuando expandido
+.ux-datatable__expand-all-btn    // Boton expandir todos
+.ux-datatable__expand-all-btn--expanded // Expandir todos activo
+.ux-datatable__tr--expandable    // Fila expandible
+.ux-datatable__tr--expanded      // Fila expandida
+.ux-datatable__expand-row        // Fila con contenido expandido
+.ux-datatable__expand-content    // Contenedor animacion
+.ux-datatable__expand-content--open // Contenedor abierto
+.ux-datatable__expand-inner      // Inner para overflow
+.ux-datatable__expand-body       // Contenido expandido
+.ux-datatable__detail-list       // Grid de detalles
+.ux-datatable__detail-item       // Item de detalle
+.ux-datatable__detail-label      // Label de detalle
+.ux-datatable__detail-value      // Valor de detalle
+
+/* Export */
+.ux-datatable__export            // Contenedor boton exportar
+.ux-datatable__export-btn        // Boton exportar
+.ux-datatable__export-menu       // Menu desplegable
+.ux-datatable__export-menu--open // Menu abierto
+.ux-datatable__export-item       // Item del menu
+.ux-datatable__export-item-text  // Texto del item
+.ux-datatable__export-item-desc  // Descripcion del item
+.ux-datatable__export-divider    // Separador
+.ux-datatable__export-option     // Opcion checkbox
+
+/* Column Resize */
+.ux-datatable--resizable         // Habilita redimensionado
+.ux-datatable--resizing          // Durante redimensionado
+.ux-datatable__resize-handle     // Handle de arrastre
+.ux-datatable__resize-handle--active // Handle activo
+.ux-datatable__th--resizing      // Columna redimensionando
+.ux-datatable__th--min-width     // Columna en ancho minimo
+
+/* Column Visibility */
+.ux-datatable__column-toggle     // Contenedor boton columnas
+.ux-datatable__column-btn        // Boton toggle columnas
+.ux-datatable__column-btn-badge  // Badge con contador
+.ux-datatable__column-menu       // Menu desplegable columnas
+.ux-datatable__column-menu--open // Menu abierto
+.ux-datatable__column-menu-header    // Cabecera menu
+.ux-datatable__column-menu-title     // Titulo menu
+.ux-datatable__column-menu-actions   // Acciones (mostrar/ocultar)
+.ux-datatable__column-menu-action    // Boton accion
+.ux-datatable__column-list       // Lista de columnas
+.ux-datatable__column-item       // Item de columna
+.ux-datatable__column-item--disabled // Item deshabilitado
+.ux-datatable__column-item-label // Label de columna
+.ux-datatable__th--hidden        // Columna oculta
+.ux-datatable__td--hidden        // Celda oculta</pre>
+    </div>
+  </div>
