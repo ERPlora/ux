@@ -255,7 +255,7 @@ class UXPlayground extends HTMLElement {
 
   async fetchSource(url) {
     try {
-      const baseUrl = this.getAttribute('base-url') || '/docs/';
+      const baseUrl = this.getAttribute('base-url') || '';
       const fullUrl = url.startsWith('/') || url.startsWith('http') ? url : baseUrl + url;
       const response = await fetch(fullUrl);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
