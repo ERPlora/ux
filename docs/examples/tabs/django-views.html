@@ -1,0 +1,31 @@
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.http import require_GET
+from .models import Product
+
+@require_GET
+def tab_overview(request, pk):
+    """Retorna el partial HTML para el tab de vista general."""
+    product = get_object_or_404(Product, pk=pk)
+    return render(request, 'products/partials/tab_overview.html', {
+        'product': product
+    })
+
+@require_GET
+def tab_specs(request, pk):
+    """Retorna el partial HTML para el tab de especificaciones."""
+    product = get_object_or_404(Product, pk=pk)
+    return render(request, 'products/partials/tab_specs.html', {
+        'product': product,
+        'specs': product.specifications.all()
+    })
+
+@require_GET
+def tab_reviews(request, pk):
+    """Retorna el partial HTML para el tab de resenas."""
+    product = get_object_or_404(Product, pk=pk)
+    reviews = product.reviews.select_related('user').order_by('-created_at')
+    return render(request, 'products/partials/tab_reviews.html', {
+        'product': product,
+        'reviews': reviews
+    })

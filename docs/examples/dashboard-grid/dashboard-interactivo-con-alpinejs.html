@@ -1,0 +1,124 @@
+<div x-data="uxDashboardGrid({
+      items: [
+        { id: 'users', title: 'Usuarios', size: 'sm', value: '1,234', trend: '+12%', trendUp: true },
+        { id: 'revenue', title: 'Ingresos', size: 'sm', value: '$45.2k', trend: '+8%', trendUp: true },
+        { id: 'orders', title: 'Pedidos', size: 'sm', value: '89', trend: '-3%', trendUp: false },
+        { id: 'satisfaction', title: 'Satisfaccion', size: 'sm', value: '94%', trend: '+5%', trendUp: true },
+        { id: 'chart', title: 'Ventas Mensuales', size: 'full', type: 'chart' },
+        { id: 'activity', title: 'Actividad Reciente', size: 'md' },
+        { id: 'tasks', title: 'Tareas Pendientes', size: 'md' }
+      ],
+      columns: 4
+    })" @dashboard:move.window="console.log('Widget moved:', $event.detail)">
+
+      <!-- Toolbar -->
+      <div style="padding: var(--ux-space-md); border-bottom: 1px solid var(--ux-border-color); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 600; color: var(--ux-text);">Mi Dashboard</span>
+        <div style="display: flex; gap: var(--ux-space-sm);">
+          <button class="ux-button ux-button--sm" :class="editing ? 'ux-color-primary' : 'ux-button--outline'" @click="toggleEdit()">
+            <span x-show="!editing">Editar</span>
+            <span x-show="editing">Guardar</span>
+          </button>
+          <button class="ux-button ux-button--sm ux-button--outline" @click="addItem({ title: 'Nuevo Widget', size: 'sm' })" x-show="editing">
+            + Agregar
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div class="ux-dashboard-grid"
+           :class="[getGridClass(), { 'ux-dashboard-grid--editing': editing }]">
+
+        <template x-for="(item, index) in items" :key="item.id">
+          <div class="ux-dashboard-grid__item"
+               :class="[
+                 getItemSizeClass(item.size),
+                 { 'ux-dashboard-grid__item--dragging': isDragging(index) },
+                 { 'ux-dashboard-grid__item--drag-over': isDragOver(index) }
+               ]"
+               :draggable="editing"
+               @dragstart="onDragStart(index, $event)"
+               @dragover="onDragOver(index, $event)"
+               @dragend="onDragEnd($event)"
+               @drop="onDrop(index, $event)">
+
+            <!-- Header -->
+            <div class="ux-dashboard-grid__item-header">
+              <div class="ux-dashboard-grid__item-header-start">
+                <!-- Drag Handle -->
+                <div class="ux-dashboard-grid__drag-handle" x-show="editing">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/>
+                    <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+                    <circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/>
+                  </svg>
+                </div>
+                <h4 class="ux-dashboard-grid__item-title" x-text="item.title"></h4>
+              </div>
+              <div class="ux-dashboard-grid__item-actions">
+                <!-- Size selector in edit mode -->
+                <template x-if="editing">
+                  <select style="font-size: 12px; padding: 2px 4px; border-radius: 4px; border: 1px solid var(--ux-border-color);"
+                          @change="resizeItem(item.id, $event.target.value)"
+                          :value="item.size">
+                    <option value="sm">Small</option>
+                    <option value="md">Medium</option>
+                    <option value="lg">Large</option>
+                    <option value="full">Full</option>
+                  </select>
+                </template>
+                <button class="ux-dashboard-grid__item-btn" x-show="editing" @click="removeItem(item.id)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="ux-dashboard-grid__item-content ux-dashboard-grid__item-content--centered">
+              <!-- Chart type -->
+              <template x-if="item.type === 'chart'">
+                <div class="demo-chart" style="width: 100%;">
+                  <div class="demo-chart-bar" style="height: 60%;"></div>
+                  <div class="demo-chart-bar" style="height: 80%;"></div>
+                  <div class="demo-chart-bar" style="height: 45%;"></div>
+                  <div class="demo-chart-bar" style="height: 90%;"></div>
+                  <div class="demo-chart-bar" style="height: 70%;"></div>
+                  <div class="demo-chart-bar" style="height: 85%;"></div>
+                  <div class="demo-chart-bar" style="height: 55%;"></div>
+                  <div class="demo-chart-bar" style="height: 95%;"></div>
+                </div>
+              </template>
+
+              <!-- Stat type (default) -->
+              <template x-if="item.value">
+                <div class="ux-dashboard-grid__stat">
+                  <span class="ux-dashboard-grid__stat-value" x-text="item.value"></span>
+                  <span class="ux-dashboard-grid__stat-label" x-text="item.title"></span>
+                  <span class="ux-dashboard-grid__stat-trend"
+                        :class="item.trendUp ? 'ux-dashboard-grid__stat-trend--up' : 'ux-dashboard-grid__stat-trend--down'"
+                        x-show="item.trend">
+                    <svg x-show="item.trendUp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l5-5 5 5"/></svg>
+                    <svg x-show="!item.trendUp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 7l-5 5-5-5"/></svg>
+                    <span x-text="item.trend"></span>
+                  </span>
+                </div>
+              </template>
+
+              <!-- Empty content -->
+              <template x-if="!item.value && item.type !== 'chart'">
+                <p style="color: var(--ux-text-secondary); text-align: center;">Contenido del widget</p>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <!-- Add Widget Button -->
+        <button class="ux-dashboard-grid__add-item"
+                x-show="editing"
+                @click="addItem({ title: 'Widget ' + (items.length + 1), size: 'sm' })">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Agregar Widget
+        </button>
+      </div>
+
+    </div>

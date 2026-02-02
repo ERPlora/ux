@@ -1,0 +1,69 @@
+<div class="demo-box" x-data="uxUpload()">
+  <div class="ux-upload" :class="{ 'ux-upload--dragover': isDragover }">
+    <input type="file"
+           class="ux-upload__input"
+           x-ref="input"
+           multiple
+           @change="handleFiles($event.target.files)">
+
+    <div class="ux-upload__dropzone"
+         @click="browse()"
+         @dragenter="onDragEnter($event)"
+         @dragover="onDragOver($event)"
+         @dragleave="onDragLeave($event)"
+         @drop="onDrop($event)">
+      <svg class="ux-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <p class="ux-upload__text">
+        Arrastra archivos aquí o <span class="ux-upload__browse">busca en tu dispositivo</span>
+      </p>
+      <p class="ux-upload__hint">PNG, JPG, PDF hasta 10MB</p>
+    </div>
+
+    <!-- Lista de archivos -->
+    <div class="ux-upload__files" x-show="hasFiles">
+      <template x-for="file in files" :key="file.id">
+        <div class="ux-upload__file"
+             :class="{
+               'ux-upload__file--error': file.status === 'error',
+               'ux-upload__file--success': file.status === 'success'
+             }">
+          <div class="ux-upload__preview">
+            <template x-if="file.preview">
+              <img :src="file.preview" alt="">
+            </template>
+            <template x-if="!file.preview">
+              <div class="ux-upload__preview-icon" x-html="getFileIcon(file.type)"></div>
+            </template>
+          </div>
+          <div class="ux-upload__file-info">
+            <p class="ux-upload__file-name" x-text="file.name"></p>
+            <p class="ux-upload__file-meta">
+              <span x-text="formatSize(file.size)"></span>
+              <span x-show="file.status === 'uploading'" x-text="file.progress + '%'"></span>
+            </p>
+            <p class="ux-upload__file-error" x-show="file.error" x-text="file.error"></p>
+            <div class="ux-upload__progress" x-show="file.status === 'uploading'">
+              <div class="ux-upload__progress-bar" :style="{ width: file.progress + '%' }"></div>
+            </div>
+          </div>
+          <div class="ux-upload__file-actions">
+            <button class="ux-upload__file-action ux-upload__file-action--danger"
+                    @click="removeFile(file.id)"
+                    title="Eliminar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <p class="ux-upload__error-message" x-show="error" x-text="error"></p>
+  </div>
+</div>

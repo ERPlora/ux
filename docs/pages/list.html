@@ -1,0 +1,413 @@
+<section class="component-section">
+  <h3>Lista Basica</h3>
+  <ux-playground src="examples/list/basico.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Lista Inset (iOS Style)</h3>
+  <ux-playground src="examples/list/inset.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Con Avatar</h3>
+  <ux-playground src="examples/list/con-avatar.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Con Toggle</h3>
+  <ux-playground src="examples/list/con-toggle.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Con Header y Footer</h3>
+  <ux-playground src="examples/list/header-footer.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Con Badge/Detail</h3>
+  <ux-playground src="examples/list/con-badge.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Item Multilinea</h3>
+  <ux-playground src="examples/list/multilinea.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Integracion con HTMX</h3>
+  <p>HTMX es la tecnologia principal para cargar y manipular listas desde el servidor.</p>
+
+  <h4 style="margin-top: var(--ux-space-lg); font-size: var(--ux-font-size-md);">Cargar lista desde servidor</h4>
+  <p style="color: var(--ux-text-secondary);">Lista que carga items al cargar la pagina.</p>
+  <pre class="ux-code-block" data-lang="html"><div class="ux-list ux-list--inset"
+     id="contacts-list"
+     hx-get="/api/contacts"
+     hx-trigger="load"
+     hx-indicator="#list-loading">
+  <div id="list-loading" class="htmx-indicator" style="padding: var(--ux-space-lg); text-align: center;">
+    <span class="ux-spinner"></span>
+  </div>
+</div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Click para cargar detalle</h4>
+  <p style="color: var(--ux-text-secondary);">Cada item carga su detalle en un panel lateral.</p>
+  <pre class="ux-code-block" data-lang="html"><div class="ux-list ux-list--inset">
+  <a href="#"
+     class="ux-item ux-item--button"
+     hx-get="/api/users/1"
+     hx-target="#user-detail"
+     hx-swap="innerHTML">
+    <div class="ux-avatar ux-avatar--md">JD</div>
+    <div class="ux-item__content">
+      <span class="ux-item__label">John Doe</span>
+      <span class="ux-item__note">Desarrollador</span>
+    </div>
+    <svg class="ux-item__chevron">...</svg>
+  </a>
+  <a href="#"
+     class="ux-item ux-item--button"
+     hx-get="/api/users/2"
+     hx-target="#user-detail">
+    ...
+  </a>
+</div>
+
+<div id="user-detail">
+  <!-- Detalle cargado via HTMX -->
+</div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Toggles con guardado automatico</h4>
+  <p style="color: var(--ux-text-secondary);">Los toggles guardan automaticamente al cambiar.</p>
+  <pre class="ux-code-block" data-lang="html"><div class="ux-list ux-list--inset">
+  <label class="ux-item">
+    <div class="ux-item__content">
+      <span class="ux-item__label">Notificaciones</span>
+    </div>
+    <span class="ux-toggle">
+      <input type="checkbox"
+             name="notifications"
+             hx-post="/api/settings/notifications"
+             hx-trigger="change"
+             hx-swap="none"
+             checked>
+      <span class="ux-toggle__track"></span>
+    </span>
+  </label>
+  <label class="ux-item">
+    <div class="ux-item__content">
+      <span class="ux-item__label">Modo Oscuro</span>
+    </div>
+    <span class="ux-toggle">
+      <input type="checkbox"
+             name="dark_mode"
+             hx-post="/api/settings/dark_mode"
+             hx-trigger="change"
+             hx-swap="none">
+      <span class="ux-toggle__track"></span>
+    </span>
+  </label>
+</div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Eliminar item con swipe o boton</h4>
+  <p style="color: var(--ux-text-secondary);">Eliminar elementos de la lista.</p>
+  <pre class="ux-code-block" data-lang="html"><div class="ux-list ux-list--inset" id="notifications-list">
+  <div class="ux-item" id="notif-1">
+    <div class="ux-item__content">
+      <span class="ux-item__label">Nueva actualizacion disponible</span>
+      <span class="ux-item__note">Hace 5 minutos</span>
+    </div>
+    <button class="ux-button ux-button--sm ux-color-danger--outline"
+            hx-delete="/api/notifications/1"
+            hx-target="#notif-1"
+            hx-swap="outerHTML swap:300ms">
+      Eliminar
+    </button>
+  </div>
+</div>
+
+<!-- Servidor devuelve elemento vacio para animacion -->
+<div class="ux-item" style="opacity: 0; max-height: 0; padding: 0;"></div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Busqueda y filtrado</h4>
+  <p style="color: var(--ux-text-secondary);">Filtrar lista mientras se escribe.</p>
+  <pre class="ux-code-block" data-lang="html"><input type="search"
+       class="ux-input"
+       placeholder="Buscar contactos..."
+       hx-get="/api/contacts/search"
+       hx-trigger="input changed delay:300ms"
+       hx-target="#contacts-list"
+       name="q">
+
+<div class="ux-list ux-list--inset" id="contacts-list">
+  <!-- Resultados actualizados via HTMX -->
+</div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Agregar nuevo item</h4>
+  <p style="color: var(--ux-text-secondary);">Agregar elementos a la lista sin recargar.</p>
+  <pre class="ux-code-block" data-lang="html"><form hx-post="/api/contacts"
+      hx-target="#contacts-list"
+      hx-swap="beforeend"
+      hx-on::after-request="this.reset()">
+  <input type="text" name="name" class="ux-input" placeholder="Nombre" required>
+  <input type="email" name="email" class="ux-input" placeholder="Email">
+  <button type="submit" class="ux-button ux-color-primary">Agregar</button>
+</form>
+
+<div class="ux-list ux-list--inset" id="contacts-list">
+  <!-- Items existentes -->
+</div>
+
+<!-- Servidor devuelve nuevo item -->
+<div class="ux-item" id="contact-123">
+  <div class="ux-avatar">AB</div>
+  <div class="ux-item__content">
+    <span class="ux-item__label">Ana Bella</span>
+    <span class="ux-item__note">ana@email.com</span>
+  </div>
+</div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Badge con contador en tiempo real</h4>
+  <p style="color: var(--ux-text-secondary);">Actualizar contadores sin recargar.</p>
+  <pre class="ux-code-block" data-lang="html"><div class="ux-list ux-list--inset">
+  <a href="#" class="ux-item ux-item--button">
+    <div class="ux-item__content">
+      <span class="ux-item__label">Mensajes</span>
+    </div>
+    <span id="msg-count"
+          class="ux-badge ux-badge--danger"
+          hx-get="/api/messages/count"
+          hx-trigger="every 30s">5</span>
+  </a>
+  <a href="#" class="ux-item ux-item--button">
+    <div class="ux-item__content">
+      <span class="ux-item__label">Pedidos pendientes</span>
+    </div>
+    <span id="orders-count"
+          class="ux-badge ux-badge--warning"
+          hx-get="/api/orders/pending/count"
+          hx-trigger="every 30s">3</span>
+  </a>
+</div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Menu de navegacion con estado activo</h4>
+  <p style="color: var(--ux-text-secondary);">Cargar contenido y actualizar estado activo.</p>
+  <pre class="ux-code-block" data-lang="html"><div class="ux-list ux-list--inset"
+     hx-boost="true"
+     hx-target="#main-content"
+     hx-select="#main-content">
+  <a href="/dashboard"
+     class="ux-item ux-item--button ux-item--active">
+    <svg class="ux-item__icon">...</svg>
+    <div class="ux-item__content">
+      <span class="ux-item__label">Dashboard</span>
+    </div>
+  </a>
+  <a href="/products" class="ux-item ux-item--button">
+    <svg class="ux-item__icon">...</svg>
+    <div class="ux-item__content">
+      <span class="ux-item__label">Productos</span>
+    </div>
+  </a>
+  <a href="/orders" class="ux-item ux-item--button">
+    <svg class="ux-item__icon">...</svg>
+    <div class="ux-item__content">
+      <span class="ux-item__label">Pedidos</span>
+    </div>
+  </a>
+</div></pre>
+</section>
+
+<section class="component-section">
+  <h3>HTMX + Django</h3>
+  <p>Ejemplos de integracion con Django para operaciones CRUD en listas.</p>
+
+  <h4 style="margin-top: var(--ux-space-lg); font-size: var(--ux-font-size-md);">Lista con items cargados dinamicamente</h4>
+  <p style="color: var(--ux-text-secondary);">Cargar lista de contactos desde Django al cargar la pagina.</p>
+  <pre class="ux-code-block" data-lang="html"><!-- Template: contacts.html -->
+<div class="ux-list ux-list--inset"
+     id="contacts-list"
+     hx-get="{% url 'contacts_list' %}"
+     hx-trigger="load"
+     hx-indicator="#loading">
+  <div id="loading" class="htmx-indicator" style="padding: var(--ux-space-lg); text-align: center;">
+    <span class="ux-spinner"></span>
+  </div>
+</div></pre>
+
+  <pre class="ux-code-block" data-lang="django"><!-- Template parcial: partials/contact_list.html -->
+{% for contact in contacts %}
+<div class="ux-item" id="contact-{{ contact.id }}">
+  <div class="ux-avatar ux-avatar--md" style="margin-right: var(--ux-space-md);">
+    {{ contact.initials }}
+  </div>
+  <div class="ux-item__content">
+    <span class="ux-item__label">{{ contact.name }}</span>
+    <span class="ux-item__note">{{ contact.email }}</span>
+  </div>
+  <button class="ux-button ux-button--sm ux-color-danger--outline"
+          hx-delete="{% url 'contact_delete' contact.id %}"
+          hx-target="#contact-{{ contact.id }}"
+          hx-swap="outerHTML swap:300ms"
+          hx-confirm="Eliminar {{ contact.name }}?">
+    Eliminar
+  </button>
+</div>
+{% empty %}
+<div class="ux-item">
+  <div class="ux-item__content">
+    <span class="ux-item__label" style="color: var(--ux-text-secondary);">No hay contactos</span>
+  </div>
+</div>
+{% endfor %}</pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Eliminar item de lista via HTMX</h4>
+  <p style="color: var(--ux-text-secondary);">Eliminar un contacto con confirmacion y animacion.</p>
+  <pre class="ux-code-block" data-lang="html"><!-- En el item de la lista -->
+<div class="ux-item" id="contact-{{ contact.id }}">
+  <div class="ux-item__content">
+    <span class="ux-item__label">{{ contact.name }}</span>
+  </div>
+  <button class="ux-button ux-button--sm ux-color-danger--outline"
+          hx-delete="{% url 'contact_delete' contact.id %}"
+          hx-target="#contact-{{ contact.id }}"
+          hx-swap="outerHTML swap:300ms"
+          hx-confirm="Estas seguro de eliminar este contacto?">
+    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+    </svg>
+  </button>
+</div></pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Vista Django que maneja la lista</h4>
+  <p style="color: var(--ux-text-secondary);">Views de Django para listar y eliminar contactos.</p>
+  <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
+from .models import Contact
+
+def contacts_page(request):
+    """Pagina principal con la lista vacia (se carga via HTMX)"""
+    return render(request, 'contacts/contacts.html')
+
+def contacts_list(request):
+    """Devuelve los items de la lista (llamado via HTMX)"""
+    contacts = Contact.objects.filter(user=request.user).order_by('name')
+    return render(request, 'contacts/partials/contact_list.html', {
+        'contacts': contacts
+    })
+
+@require_http_methods(["DELETE"])
+def contact_delete(request, pk):
+    """Elimina un contacto y devuelve elemento vacio para animacion"""
+    contact = get_object_or_404(Contact, pk=pk, user=request.user)
+    contact.delete()
+    # Devolver elemento vacio que se desvanece
+    return HttpResponse(
+        '<div class="ux-item" style="opacity: 0; max-height: 0; padding: 0; overflow: hidden; transition: all 0.3s ease;"></div>'
+    )
+
+def contacts_search(request):
+    """Busqueda de contactos"""
+    query = request.GET.get('q', '')
+    contacts = Contact.objects.filter(
+        user=request.user,
+        name__icontains=query
+    ).order_by('name')
+    return render(request, 'contacts/partials/contact_list.html', {
+        'contacts': contacts
+    })</pre>
+
+  <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('contacts/', views.contacts_page, name='contacts_page'),
+    path('contacts/list/', views.contacts_list, name='contacts_list'),
+    path('contacts/search/', views.contacts_search, name='contacts_search'),
+    path('contacts/<int:pk>/delete/', views.contact_delete, name='contact_delete'),
+]</pre>
+
+  <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+from django.contrib.auth.models import User
+
+class Contact(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def initials(self):
+        parts = self.name.split()
+        if len(parts) >= 2:
+            return f"{parts[0][0]}{parts[1][0]}".upper()
+        return self.name[:2].upper()
+
+    def __str__(self):
+        return self.name</pre>
+
+  <h4 style="margin-top: var(--ux-space-xl); font-size: var(--ux-font-size-md);">Agregar contacto con formulario HTMX</h4>
+  <p style="color: var(--ux-text-secondary);">Formulario que agrega items a la lista sin recargar.</p>
+  <pre class="ux-code-block" data-lang="html"><!-- Template: contacts.html -->
+<form hx-post="{% url 'contact_create' %}"
+      hx-target="#contacts-list"
+      hx-swap="beforeend"
+      hx-on::after-request="if(event.detail.successful) this.reset()"
+      style="margin-bottom: var(--ux-space-lg);">
+  {% csrf_token %}
+  <div style="display: flex; gap: var(--ux-space-sm);">
+    <input type="text" name="name" class="ux-input" placeholder="Nombre" required style="flex: 1;">
+    <input type="email" name="email" class="ux-input" placeholder="Email" style="flex: 1;">
+    <button type="submit" class="ux-button ux-color-primary">Agregar</button>
+  </div>
+</form>
+
+<div class="ux-list ux-list--inset" id="contacts-list"
+     hx-get="{% url 'contacts_list' %}"
+     hx-trigger="load">
+</div></pre>
+
+  <pre class="ux-code-block" data-lang="python"># views.py - Agregar esta vista
+from django.views.decorators.http import require_POST
+
+@require_POST
+def contact_create(request):
+    """Crea un nuevo contacto y devuelve el HTML del item"""
+    name = request.POST.get('name', '').strip()
+    email = request.POST.get('email', '').strip()
+
+    if not name:
+        return HttpResponse(status=400)
+
+    contact = Contact.objects.create(
+        user=request.user,
+        name=name,
+        email=email
+    )
+
+    return render(request, 'contacts/partials/contact_item.html', {
+        'contact': contact
+    })</pre>
+
+  <pre class="ux-code-block" data-lang="django"><!-- Template parcial: partials/contact_item.html -->
+<div class="ux-item" id="contact-{{ contact.id }}">
+  <div class="ux-avatar ux-avatar--md" style="margin-right: var(--ux-space-md);">
+    {{ contact.initials }}
+  </div>
+  <div class="ux-item__content">
+    <span class="ux-item__label">{{ contact.name }}</span>
+    <span class="ux-item__note">{{ contact.email|default:"Sin email" }}</span>
+  </div>
+  <button class="ux-button ux-button--sm ux-color-danger--outline"
+          hx-delete="{% url 'contact_delete' contact.id %}"
+          hx-target="#contact-{{ contact.id }}"
+          hx-swap="outerHTML swap:300ms"
+          hx-confirm="Eliminar {{ contact.name }}?">
+    Eliminar
+  </button>
+</div></pre>
+</section>

@@ -1,108 +1,145 @@
 # UX - Universal eXtensions
 
-Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Optimized for HTMX and Alpine.js.
+**Zero-dependency, framework-agnostic CSS component library** with iOS/Ionic-style design. Works with any framework: HTMX, React, Vue, Radix UI, or vanilla JavaScript.
 
 **[Live Demo](https://erplora.github.io/ux/)** | [Documentation](docs/index.html)
 
 ## Features
 
-- **Zero Build** - No compilation needed, works directly in browsers
-- **Self-contained** - Each component includes CSS + JS in one file
-- **145 Components** - Comprehensive library for any application
-- **Universal** - Works on Web, Mobile browsers & PWA
-- **HTMX Compatible** - Works seamlessly with HTMX
+- **Zero Dependencies** - Pure CSS library, no JavaScript framework required
+- **Framework Agnostic** - Works with HTMX, React, Vue, Radix UI, vanilla JS
+- **157 Components** - Comprehensive library for any application
+- **Vanilla JS Components** - Optional JS classes for interactive components (modal, tabs, accordion, etc.)
+- **Web Components** - Framework-agnostic custom elements (`<ux-modal>`, `<ux-toast>`, `<ux-sheet>`, `<ux-alert>`)
+- **Alpine.js Support** - Full Alpine.js components available for demos
+- **Interactive Documentation** - Live code playground with editable examples
 - **Touch-First** - Optimized for mobile (44px touch targets, gestures)
 - **iOS Style** - Pixel-perfect iOS/Ionic design patterns
 - **Glass Morphism** - iOS 26 Liquid Glass effect on all components
-- **Accessible** - ARIA attributes for screen readers
+- **Accessible** - ARIA attributes and keyboard navigation
 - **Dark Mode** - Built-in light and dark themes
 - **12 Color Themes** - Ocean, Emerald, Purple, Sunset, Rose, Teal, Amber, Slate, Indigo, Cyan, Crimson, Forest
 
 ## Installation
 
-### Via CDN (Recommended)
+### CSS Only (Recommended)
 
 ```html
-<!-- Bootstrap Grid (external, for grid system) -->
+<!-- Just CSS - works with any framework -->
+<link rel="stylesheet" href="dist/ux.min.css">
+
+<!-- Optional: Bootstrap Grid for layout -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
-
-<!-- Alpine.js (required for interactive components) -->
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-<!-- Full library (all 145 components) -->
-<script src="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/ux.min.js"></script>
-
-<!-- Or core only (basic components) -->
-<script src="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/ux-core.min.js"></script>
 ```
 
-> **Note:** UX Library uses Bootstrap Grid externally. Load `bootstrap-grid.min.css` before `ux-core.js`. UX automatically overrides Bootstrap's gutter variables to match Ionic spacing.
+### With Vanilla JS Components
+
+```html
+<!-- CSS -->
+<link rel="stylesheet" href="dist/ux.min.css">
+
+<!-- Vanilla JS bundle (modal, tabs, accordion, toast, etc.) -->
+<script src="dist/ux.min.js"></script>
+
+<!-- Use components -->
+<script>
+  // Auto-initialized via data attributes
+  // Or manually:
+  const modal = UX.create('modal', '#my-modal');
+  modal.open();
+</script>
+```
+
+### With Web Components
+
+```html
+<!-- CSS + JS -->
+<link rel="stylesheet" href="dist/ux.min.css">
+<script src="dist/ux.min.js"></script>
+
+<!-- Use anywhere - React, Vue, Angular, vanilla HTML -->
+<ux-modal id="my-modal" title="Hello">
+  <p>Modal content here</p>
+</ux-modal>
+
+<button onclick="document.getElementById('my-modal').open()">Open</button>
+
+<!-- Toast notifications -->
+<ux-toast message="Saved!" variant="success" duration="3000"></ux-toast>
+
+<!-- Bottom sheet -->
+<ux-sheet id="my-sheet" side="bottom">
+  <p>Sheet content</p>
+</ux-sheet>
+
+<!-- Alert dialog -->
+<ux-alert id="my-alert" title="Confirm" message="Are you sure?"></ux-alert>
+```
+
+### With Alpine.js (for demos)
+
+```html
+<!-- CSS -->
+<link rel="stylesheet" href="dist/ux.min.css">
+
+<!-- Alpine.js -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<!-- Alpine components -->
+<script src="docs/alpine-components.js"></script>
+```
 
 ### Bundle Sizes
 
-| Bundle | Size | Gzipped |
-|--------|------|---------|
-| ux.min.js | ~1.7 MB | ~294 KB |
-| ux-core.min.js | ~60 KB | ~11 KB |
+| Bundle | Size | Description |
+|--------|------|-------------|
+| ux.min.css | ~1.1 MB | All CSS styles |
+| ux.min.js | ~50 KB | Vanilla JS + Web Components |
+| ux.esm.js | ~50 KB | ES Module bundle |
+| alpine-components.js | ~80 KB | Alpine.js components (optional) |
 
-### Local Installation
+## Components (157)
 
-```html
-<!-- Bootstrap Grid (required for grid system) -->
-<link href="bootstrap-grid.min.css" rel="stylesheet">
+### CSS-Only (no JS required)
+`avatar` · `badge` · `button` · `button-group` · `chip` · `divider` · `icon-button` · `img` · `progress` · `spacer` · `spinner` · `tag` · `card` · `list` · `navbar` · `toolbar`
 
-<!-- Dependencies (optional) -->
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script src="https://unpkg.com/htmx.org@1.x.x"></script>
+### Vanilla JS Components
+Interactive components with vanilla JavaScript classes:
+`accordion` · `alert` · `drawer` · `dropdown` · `modal` · `sheet` · `tabs` · `toast` · `tooltip` · `quantity-stepper` · `signature-pad` · `color-picker` · `phone-input` · `autocomplete` · `tag-input` · `otp-input`
 
-<!-- Core (required) -->
-<script src="components/ux-core.js"></script>
-
-<!-- Load only what you need -->
-<script src="components/ux-button.js"></script>
-<script src="components/ux-modal.js"></script>
-
-<!-- Or load everything -->
-<script src="dist/ux.min.js"></script>
-```
-
-## Components (145)
-
-### Basic (CSS-only)
-`avatar` · `badge` · `button` · `button-group` · `chip` · `divider` · `icon-button` · `img` · `progress` · `spacer` · `spinner` · `tag`
+### Web Components (Custom Elements)
+Framework-agnostic components that work everywhere:
+`<ux-modal>` · `<ux-toast>` · `<ux-sheet>` · `<ux-alert>`
 
 ### Forms
 `autocomplete` · `checkbox` · `color-picker` · `currency-input` · `form` · `form-wizard` · `input` · `otp-input` · `phone-input` · `radio` · `range` · `searchbar` · `select` · `signature-pad` · `tag-input` · `textarea` · `toggle` · `upload`
 
 ### Layout
-`card` · `content` · `list` · `masonry` · `master-detail` · `section` · `split-pane-right`
+`card` · `content` · `list` · `masonry` · `master-detail` · `section` · `split-pane-right` · `shell` · `sidebar` · `resizable`
 
 ### Navigation
-`back-button` · `breadcrumbs` · `category-tabs` · `context-menu` · `dropdown` · `mega-menu` · `menu` · `navbar` · `pagination` · `segment` · `tabs` · `toolbar`
+`back-button` · `breadcrumbs` · `category-tabs` · `context-menu` · `dropdown` · `mega-menu` · `menu` · `menubar` · `navbar` · `pagination` · `segment` · `tabs` · `toolbar`
 
 ### Overlay
-`alert` · `drawer` · `fullscreen-modal` · `lightbox` · `loading` · `modal` · `picker` · `popover` · `sheet` · `snackbar` · `toast` · `tooltip`
+`alert` · `drawer` · `fullscreen-modal` · `lightbox` · `loading` · `modal` · `picker` · `popover` · `hover-card` · `sheet` · `snackbar` · `toast` · `tooltip`
 
 ### Feedback
 `banner` · `callout` · `fab` · `notifications` · `progress-circle` · `progress-steps` · `rating` · `skeleton` · `state` · `stats` · `status-indicator` · `stepper`
 
-### Interactive
-`accordion` · `calendar` · `calendar-views` · `carousel` · `command` · `datatable` · `date-range-picker` · `datetime` · `infinite-scroll` · `load-more` · `refresher` · `reorder` · `tree` · `virtual-list`
+### Interactive (Alpine.js)
+`calendar` · `calendar-views` · `carousel` · `command` · `datatable` · `date-range-picker` · `datetime` · `infinite-scroll` · `load-more` · `refresher` · `reorder` · `tree` · `virtual-list`
 
-### Gestures
-`swipe` (x-swipe, x-drag, x-pull-refresh, x-long-press, x-pinch, x-tap)
+### Gestures (Alpine directives)
+`x-swipe` · `x-drag` · `x-pull-refresh` · `x-long-press` · `x-pinch` · `x-tap`
 
 ### Media
 `audio-player` · `barcode-scanner` · `image-crop` · `image-gallery` · `image-zoom` · `lightbox` · `pdf-viewer` · `qr-code` · `video-player`
 
 ### Data Visualization
-`code-block` · `diff-viewer` · `gauge` · `json-viewer` · `sparkline` · `table`
-
-### Admin/Shell
-`dashboard-grid` · `panel` · `shell`
+`chart` · `code-block` · `diff-viewer` · `gauge` · `json-viewer` · `sparkline` · `table`
 
 ### POS/Retail
-`calculator` · `cart` · `numpad` · `payment` · `product-card` · `quantity-badge` · `quantity-stepper` · `receipt` · `variant-selector`
+`calculator` · `cart` · `numpad` · `payment` · `product-card` · `quantity-badge` · `quantity-stepper` · `receipt` · `variant-selector` · `virtual-keyboard` · `onscreen-keyboard`
 
 ### Manufacturing/ERP
 `batch-tracker` · `bom-tree` · `gantt` · `kanban` · `machine-status` · `order-ticket` · `org-chart` · `performance-meter` · `production-line` · `quality-check` · `scheduler` · `stock-indicator` · `timeline` · `work-order`
@@ -110,27 +147,88 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 ### HR/Time
 `attendance-list` · `employee-card` · `event-card` · `leave-request` · `shift-calendar` · `time-clock`
 
-### Utilities
-`alpine-utils` · `app-icon` · `core` · `electron` · `keyboard` · `pwa` · `rich-text` · `scroll` · `utilities` · `virtual-keyboard`
-
 ## Usage
 
-### Buttons with Color Composition
+### CSS-Only (Any Framework)
 ```html
-<!-- Filled buttons -->
+<!-- Just use CSS classes -->
 <button class="ux-button ux-color-primary">Primary</button>
-<button class="ux-button ux-color-success">Success</button>
-<button class="ux-button ux-color-danger">Danger</button>
+<button class="ux-button ux-button--outline">Outline</button>
 
-<!-- Outline variant -->
-<button class="ux-button ux-button--outline ux-color-primary--outline">Outline</button>
+<!-- State management via data-state -->
+<div class="ux-modal-backdrop" data-state="closed">
+  <div class="ux-modal">Modal content</div>
+</div>
 
-<!-- Soft/tinted variant -->
-<button class="ux-button ux-button--soft ux-color-success--soft">Soft</button>
+<!-- Open via JavaScript (any framework) -->
+<script>
+  document.getElementById('modal').dataset.state = 'open';
+</script>
+```
 
-<!-- Sizes -->
-<button class="ux-button ux-button--sm ux-color-primary">Small</button>
-<button class="ux-button ux-button--lg ux-color-primary">Large</button>
+### Vanilla JS Components
+```html
+<link rel="stylesheet" href="dist/ux.min.css">
+<script src="dist/ux.min.js"></script>
+
+<!-- Auto-init via data attributes -->
+<div id="my-modal" class="ux-modal-backdrop" data-ux="js" data-state="closed">
+  <div class="ux-modal">
+    <button data-ux-close>Close</button>
+  </div>
+</div>
+
+<button onclick="UX.get('#my-modal').open()">Open Modal</button>
+
+<!-- Or manual init -->
+<script>
+  const modal = UX.create('modal', '#my-modal');
+  modal.open();
+  modal.close();
+</script>
+```
+
+### With React/Radix UI
+```jsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+<Dialog.Root>
+  <Dialog.Trigger className="ux-button ux-color-primary">Open</Dialog.Trigger>
+  <Dialog.Portal>
+    <Dialog.Overlay className="ux-modal-backdrop" data-state="open" />
+    <Dialog.Content className="ux-modal">
+      <Dialog.Title className="ux-modal__title">Title</Dialog.Title>
+    </Dialog.Content>
+  </Dialog.Portal>
+</Dialog.Root>
+```
+
+### With HTMX
+```html
+<button class="ux-button ux-color-primary"
+        hx-get="/modal-content"
+        hx-target="#modal-content"
+        hx-on::after-swap="document.getElementById('my-modal').dataset.state='open'">
+  Load & Open
+</button>
+
+<div id="my-modal" class="ux-modal-backdrop" data-state="closed">
+  <div class="ux-modal">
+    <div id="modal-content"></div>
+  </div>
+</div>
+```
+
+### With Alpine.js
+```html
+<script src="docs/alpine-components.js"></script>
+
+<div x-data="uxModal()">
+  <button @click="open()" class="ux-button">Open</button>
+  <div class="ux-modal-backdrop" :data-state="isOpen ? 'open' : 'closed'">
+    <div class="ux-modal">Content</div>
+  </div>
+</div>
 ```
 
 ### Glass Morphism (iOS 26 Style)
@@ -140,80 +238,6 @@ Touch-first UI components for Web, Mobile & PWA. Inspired by Ionic Framework. Op
 <nav class="ux-navbar--glass">Glass navbar</nav>
 <div class="ux-modal--glass">Glass modal</div>
 <input class="ux-input--glass" placeholder="Glass input">
-```
-
-### Modal (Alpine.js)
-```html
-<div x-data="uxModal()">
-  <button @click="open()" class="ux-button">Open</button>
-  <template x-teleport="body">
-    <div x-show="isOpen" class="ux-modal__backdrop" @click.self="close()">
-      <div class="ux-modal__content">
-        Modal content
-      </div>
-    </div>
-  </template>
-</div>
-```
-
-### Toast Notifications
-```html
-<div x-data="uxToastManager({ position: 'top-end' })">
-  <button @click="success('Saved!')">Toast</button>
-  <button @click="danger('Error!')">Error</button>
-</div>
-```
-
-### DataTable
-```html
-<div x-data="uxDatatable({
-  data: [...],
-  columns: [
-    { key: 'name', label: 'Name', sortable: true },
-    { key: 'email', label: 'Email' }
-  ]
-})">
-  <table class="ux-datatable">
-    <!-- Auto-generated content -->
-  </table>
-</div>
-```
-
-### Shell (Admin Layout)
-```html
-<div class="ux-shell" x-data="uxShell()">
-  <nav class="ux-shell__navbar">
-    <button @click="toggleSidebar()">Menu</button>
-    <div class="ux-shell__navbar-brand">My App</div>
-  </nav>
-
-  <aside class="ux-shell__sidebar">
-    <div class="ux-shell__sidebar-header">
-      <img src="logo.png" class="ux-shell__sidebar-logo">
-      <span class="ux-shell__sidebar-title">My App</span>
-    </div>
-    <nav class="ux-shell__sidebar-nav">
-      <a href="#" class="ux-shell__sidebar-item">Dashboard</a>
-    </nav>
-  </aside>
-
-  <main class="ux-shell__main">Content</main>
-</div>
-```
-
-### With HTMX
-```html
-<button class="ux-button" hx-post="/api/save" hx-target="#result">
-  Save
-</button>
-
-<form hx-post="/api/submit" hx-swap="outerHTML">
-  <div class="ux-input">
-    <input type="email" name="email">
-    <label>Email</label>
-  </div>
-  <button type="submit" class="ux-button ux-color-primary">Submit</button>
-</form>
 ```
 
 ## Theming
@@ -313,6 +337,42 @@ Chrome 88+ | Firefox 78+ | Safari 14+ | Edge 88+
 ## Documentation
 
 Open `docs/index.html` for full documentation with live examples.
+
+### Interactive Code Playground
+
+All HTML code examples in the documentation are interactive:
+- **Editable** - Modify the code directly in the browser
+- **Live Preview** - See changes rendered in real-time below each code block
+- **Copy & Reset** - Copy code to clipboard or reset to original
+
+Code blocks with Alpine.js expressions or JavaScript that require external dependencies display as static examples with syntax highlighting.
+
+#### Writing Code Examples
+
+Use escaped HTML in `<pre>` tags:
+
+```html
+<!-- Escaped HTML (HTMX-compatible) -->
+<pre class="ux-code-block" data-lang="html">&lt;button class="ux-button ux-color-primary"&gt;Click me&lt;/button&gt;</pre>
+```
+
+Add `data-no-playground` to disable the playground for blocks with external dependencies (Alpine.js, etc.).
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Run tests
+npm test
+```
 
 ## License
 

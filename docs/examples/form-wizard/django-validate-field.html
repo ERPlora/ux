@@ -1,0 +1,21 @@
+<pre class="ux-code-block" data-lang="python"># views.py - Validacion individual de campos
+from django.http import HttpResponse
+
+def validate_field(request):
+    """Valida un campo individual via HTMX."""
+    field_name = list(request.POST.keys())[0]
+    field_value = request.POST.get(field_name)
+
+    # Determinar que formulario usar basado en el campo
+    for step_name, form_class in WIZARD_FORMS:
+        if field_name in form_class.base_fields:
+            form = form_class({field_name: field_value})
+            form.is_valid()  # Trigger validation
+
+            if field_name in form.errors:
+                return HttpResponse(
+                    f'&lt;span class="ux-input__error"&gt;{form.errors[field_name][0]}&lt;/span&gt;'
+                )
+            return HttpResponse('')
+
+    return HttpResponse('')</pre>

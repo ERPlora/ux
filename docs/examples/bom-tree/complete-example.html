@@ -1,0 +1,183 @@
+currency: '$',
+      lowStockThreshold: 20,
+      selectable: true,
+      data: [
+        {
+          id: 'tv-001',
+          sku: 'TV-LED-55',
+          name: 'LED TV 55 pulgadas 4K Smart',
+          type: 'finished',
+          quantity: 1,
+          unit: 'pcs',
+          unitCost: 0,
+          stock: 28,
+          children: [
+            {
+              id: 'panel-001',
+              sku: 'PANEL-LED-55',
+              name: 'LED Panel Assembly',
+              type: 'subassembly',
+              quantity: 1,
+              unit: 'pcs',
+              unitCost: 280.00,
+              stock: 45,
+              children: [
+                { id: 'lcd-001', sku: 'LCD-55-4K', name: 'LCD Glass 55 pulgadas 4K', type: 'raw', quantity: 1, unit: 'pcs', unitCost: 195.00, stock: 62 },
+                { id: 'led-001', sku: 'LED-STRIP-55', name: 'LED Backlight Strip', type: 'raw', quantity: 6, unit: 'pcs', unitCost: 12.50, stock: 340 },
+                { id: 'diff-001', sku: 'DIFF-SHEET-55', name: 'Diffuser Sheet', type: 'raw', quantity: 1, unit: 'pcs', unitCost: 8.00, stock: 18 }
+              ]
+            },
+            {
+              id: 'main-001',
+              sku: 'MAINBD-SMART',
+              name: 'Smart TV Main Board',
+              type: 'subassembly',
+              quantity: 1,
+              unit: 'pcs',
+              unitCost: 95.00,
+              stock: 67,
+              children: [
+                { id: 'proc-001', sku: 'PROC-QUAD', name: 'Quad-Core Processor', type: 'raw', quantity: 1, unit: 'pcs', unitCost: 45.00, stock: 89 },
+                { id: 'mem-001', sku: 'MEM-2GB', name: 'Memory 2GB DDR4', type: 'raw', quantity: 1, unit: 'pcs', unitCost: 18.00, stock: 156 },
+                { id: 'wifi-001', sku: 'WIFI-MODULE', name: 'WiFi/BT Module', type: 'raw', quantity: 1, unit: 'pcs', unitCost: 8.50, stock: 0 }
+              ]
+            },
+            { id: 'psu-001', sku: 'PSU-TV-200W', name: 'Power Supply 200W', type: 'raw', quantity: 1, unit: 'pcs', unitCost: 32.00, stock: 78 },
+            { id: 'spk-001', sku: 'SPK-STEREO-PR', name: 'Stereo Speakers (Pair)', type: 'raw', quantity: 1, unit: 'pair', unitCost: 15.00, stock: 92 },
+            { id: 'case-001', sku: 'CASE-TV-55', name: 'Plastic Housing', type: 'raw', quantity: 1, unit: 'set', unitCost: 28.00, stock: 5 },
+            { id: 'remote-001', sku: 'REMOTE-SMART', name: 'Smart Remote Control', type: 'raw', quantity: 1, unit: 'pcs', unitCost: 6.50, stock: 234 },
+            { id: 'stand-001', sku: 'STAND-TV-55', name: 'TV Stand Base', type: 'raw', quantity: 1, unit: 'pcs', unitCost: 12.00, stock: 47 },
+            { id: 'pack-001', sku: 'PACK-TV-55', name: 'Packaging Kit', type: 'packaging', quantity: 1, unit: 'set', unitCost: 18.00, stock: 52 }
+          ]
+        }
+      ]
+    })" @bom:select="console.log('Selected:', $event.detail)">
+      <div class="ux-bom-tree ux-bom-tree--bordered">
+        <div class="ux-bom-tree__header">
+          <div class="ux-bom-tree__title">Manufacturing BOM</div>
+          <div class="ux-bom-tree__actions">
+            <button class="ux-bom-tree__action" @click="expandAll()" title="Expand All"><span x-html="icons.expandAll"></span></button>
+            <button class="ux-bom-tree__action" @click="collapseAll()" title="Collapse All"><span x-html="icons.collapseAll"></span></button>
+            <button class="ux-bom-tree__action" @click="exportBOM('json')" title="Export"><span x-html="icons.export"></span></button>
+          </div>
+        </div>
+        <div class="ux-bom-tree__search">
+          <input type="text" class="ux-bom-tree__search-input" placeholder="Search components..." x-model="searchQuery">
+        </div>
+        <ul class="ux-bom-tree__list">
+          <template x-for="node in filteredData" :key="node.id">
+            <li class="ux-bom-tree__node">
+              <div class="ux-bom-tree__item"
+                   :class="{
+                     'ux-bom-tree__item--selected': selectedNode === node.id,
+                     'ux-bom-tree__item--highlight': node._highlight
+                   }"
+                   @click="toggle(node.id); select(node.id, node)">
+                <span class="ux-bom-tree__toggle"
+                      :class="{ 'ux-bom-tree__toggle--expanded': expandedNodes.has(node.id), 'ux-bom-tree__toggle--empty': !node.children }"
+                      x-html="icons.chevron"></span>
+                <div class="ux-bom-tree__level">
+                  <span class="ux-bom-tree__level-bar ux-bom-tree__level-bar--l1"></span>
+                </div>
+                <span class="ux-bom-tree__icon" :class="'ux-bom-tree__icon--' + (node.type || 'raw')" x-html="getTypeIcon(node.type)"></span>
+                <div class="ux-bom-tree__details">
+                  <span class="ux-bom-tree__name" x-text="node.name"></span>
+                  <span class="ux-bom-tree__sku" x-text="node.sku"></span>
+                </div>
+                <div class="ux-bom-tree__quantity">
+                  <span class="ux-bom-tree__qty-value" x-text="node.quantity"></span>
+                  <span class="ux-bom-tree__qty-unit" x-text="node.unit"></span>
+                </div>
+                <div class="ux-bom-tree__stock" :class="'ux-bom-tree__stock--' + getStockStatus(node)">
+                  <span class="ux-bom-tree__stock-dot"></span>
+                  <span class="ux-bom-tree__stock-text" x-text="node.stock"></span>
+                </div>
+                <div class="ux-bom-tree__cost ux-bom-tree__cost--total">
+                  <span class="ux-bom-tree__cost-value" x-text="formatCurrency(calculateRollupCost(node))"></span>
+                </div>
+              </div>
+              <template x-if="node.children && expandedNodes.has(node.id)">
+                <ul class="ux-bom-tree__list ux-bom-tree__list--nested">
+                  <template x-for="child in node.children" :key="child.id">
+                    <li class="ux-bom-tree__node">
+                      <div class="ux-bom-tree__item"
+                           :class="{ 'ux-bom-tree__item--selected': selectedNode === child.id }"
+                           @click="toggle(child.id); select(child.id, child)">
+                        <span class="ux-bom-tree__toggle"
+                              :class="{ 'ux-bom-tree__toggle--expanded': expandedNodes.has(child.id), 'ux-bom-tree__toggle--empty': !child.children }"
+                              x-html="icons.chevron"></span>
+                        <div class="ux-bom-tree__level">
+                          <span class="ux-bom-tree__level-bar ux-bom-tree__level-bar--l1"></span>
+                          <span class="ux-bom-tree__level-bar ux-bom-tree__level-bar--l2"></span>
+                        </div>
+                        <span class="ux-bom-tree__icon" :class="'ux-bom-tree__icon--' + (child.type || 'raw')" x-html="getTypeIcon(child.type)"></span>
+                        <div class="ux-bom-tree__details">
+                          <span class="ux-bom-tree__name" x-text="child.name"></span>
+                          <span class="ux-bom-tree__sku" x-text="child.sku"></span>
+                        </div>
+                        <div class="ux-bom-tree__quantity">
+                          <span class="ux-bom-tree__qty-value" x-text="child.quantity"></span>
+                          <span class="ux-bom-tree__qty-unit" x-text="child.unit"></span>
+                        </div>
+                        <div class="ux-bom-tree__stock" :class="'ux-bom-tree__stock--' + getStockStatus(child)">
+                          <span class="ux-bom-tree__stock-dot"></span>
+                          <span class="ux-bom-tree__stock-text" x-text="child.stock"></span>
+                        </div>
+                        <div class="ux-bom-tree__cost">
+                          <span class="ux-bom-tree__cost-value" x-text="formatCurrency(child.unitCost * child.quantity)"></span>
+                        </div>
+                      </div>
+                      <template x-if="child.children && expandedNodes.has(child.id)">
+                        <ul class="ux-bom-tree__list ux-bom-tree__list--nested">
+                          <template x-for="gc in child.children" :key="gc.id">
+                            <li class="ux-bom-tree__node">
+                              <div class="ux-bom-tree__item"
+                                   :class="{ 'ux-bom-tree__item--selected': selectedNode === gc.id }"
+                                   @click="select(gc.id, gc)">
+                                <span class="ux-bom-tree__toggle ux-bom-tree__toggle--empty" x-html="icons.chevron"></span>
+                                <div class="ux-bom-tree__level">
+                                  <span class="ux-bom-tree__level-bar ux-bom-tree__level-bar--l1"></span>
+                                  <span class="ux-bom-tree__level-bar ux-bom-tree__level-bar--l2"></span>
+                                  <span class="ux-bom-tree__level-bar ux-bom-tree__level-bar--l3"></span>
+                                </div>
+                                <span class="ux-bom-tree__icon" :class="'ux-bom-tree__icon--' + (gc.type || 'raw')" x-html="getTypeIcon(gc.type)"></span>
+                                <div class="ux-bom-tree__details">
+                                  <span class="ux-bom-tree__name" x-text="gc.name"></span>
+                                  <span class="ux-bom-tree__sku" x-text="gc.sku"></span>
+                                </div>
+                                <div class="ux-bom-tree__quantity">
+                                  <span class="ux-bom-tree__qty-value" x-text="gc.quantity"></span>
+                                  <span class="ux-bom-tree__qty-unit" x-text="gc.unit"></span>
+                                </div>
+                                <div class="ux-bom-tree__stock" :class="'ux-bom-tree__stock--' + getStockStatus(gc)">
+                                  <span class="ux-bom-tree__stock-dot"></span>
+                                  <span class="ux-bom-tree__stock-text" x-text="gc.stock"></span>
+                                </div>
+                                <div class="ux-bom-tree__cost">
+                                  <span class="ux-bom-tree__cost-value" x-text="formatCurrency(gc.unitCost * gc.quantity)"></span>
+                                </div>
+                              </div>
+                            </li>
+                          </template>
+                        </ul>
+                      </template>
+                    </li>
+                  </template>
+                </ul>
+              </template>
+            </li>
+          </template>
+        </ul>
+        <div class="ux-bom-tree__footer">
+          <div class="ux-bom-tree__summary">
+            <div class="ux-bom-tree__summary-item">
+              <span class="ux-bom-tree__summary-label">Components</span>
+              <span class="ux-bom-tree__summary-value" x-text="countComponents()"></span>
+            </div>
+            <div class="ux-bom-tree__summary-item">
+              <span class="ux-bom-tree__summary-label">Total Cost</span>
+              <span class="ux-bom-tree__summary-value" style="color: var(--ux-primary);" x-text="formatCurrency(calculateTotalCost())"></span>
+            </div>
+          </div>
+        </div>
+      </div>

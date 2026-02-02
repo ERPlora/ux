@@ -882,39 +882,159 @@ function uxSparkline(options = {}) {
   return {
     data: options.data || [],
     type: options.type || 'line',
-    color: options.color || 'var(--ux-primary)',
-    height: options.height || 40,
     width: options.width || 100,
+    height: options.height || 30,
+    padding: options.padding || 4,
+    showDots: options.showDots || false,
+    showLastDot: options.showLastDot !== false,
+    showArea: options.showArea || false,
+    showReference: options.showReference || false,
+    referenceValue: options.referenceValue || null,
+    smooth: options.smooth !== false,
+    animated: options.animated || false,
+    barGap: options.barGap || 2,
+    showValue: options.showValue || false,
+    showChange: options.showChange || false,
 
-    init() {
-      this.render();
+    // Icons for change indicators
+    icons: {
+      up: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18,15 12,9 6,15"/></svg>',
+      down: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>',
+      neutral: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>'
     },
 
-    render() {
-      // Simple SVG sparkline rendering
-      if (!this.$refs.svg) return;
-
-      const svg = this.$refs.svg;
+    get points() {
+      if (this.data.length === 0) return [];
       const data = this.data;
-      if (data.length < 2) return;
-
       const max = Math.max(...data);
       const min = Math.min(...data);
       const range = max - min || 1;
-      const step = this.width / (data.length - 1);
+      const usableWidth = this.width - (this.padding * 2);
+      const usableHeight = this.height - (this.padding * 2);
+      const step = data.length > 1 ? usableWidth / (data.length - 1) : 0;
 
-      const points = data.map((val, i) => {
-        const x = i * step;
-        const y = this.height - ((val - min) / range) * this.height;
-        return `${x},${y}`;
-      }).join(' ');
-
-      svg.innerHTML = `<polyline fill="none" stroke="${this.color}" stroke-width="2" points="${points}" />`;
+      return data.map((value, i) => ({
+        x: this.padding + (i * step),
+        y: this.padding + usableHeight - ((value - min) / range) * usableHeight,
+        value
+      }));
     },
 
-    update(newData) {
+    get linePath() {
+      const pts = this.points;
+      if (pts.length < 2) return '';
+
+      if (this.smooth) {
+        return this._smoothPath(pts);
+      }
+      return 'M ' + pts.map(p => `${p.x},${p.y}`).join(' L ');
+    },
+
+    get areaPath() {
+      const pts = this.points;
+      if (pts.length < 2) return '';
+      const baseline = this.height - this.padding;
+      const linePart = this.smooth ? this._smoothPath(pts) : 'M ' + pts.map(p => `${p.x},${p.y}`).join(' L ');
+      return `${linePart} L ${pts[pts.length - 1].x},${baseline} L ${pts[0].x},${baseline} Z`;
+    },
+
+    get bars() {
+      if (this.data.length === 0) return [];
+      const data = this.data;
+      const absMax = Math.max(...data.map(Math.abs));
+      const usableWidth = this.width - (this.padding * 2);
+      const usableHeight = this.height - (this.padding * 2);
+      const barWidth = (usableWidth - (this.barGap * (data.length - 1))) / data.length;
+      const hasNegative = data.some(v => v < 0);
+      const baseline = hasNegative ? this.height / 2 : this.height - this.padding;
+
+      return data.map((value, i) => {
+        const isNegative = value < 0;
+        const absValue = Math.abs(value);
+        const barHeight = (absValue / absMax) * (hasNegative ? usableHeight / 2 : usableHeight);
+        return {
+          x: this.padding + (i * (barWidth + this.barGap)),
+          y: isNegative ? baseline : baseline - barHeight,
+          width: barWidth,
+          height: barHeight,
+          value,
+          isNegative
+        };
+      });
+    },
+
+    get currentValue() {
+      return this.data.length > 0 ? this.data[this.data.length - 1] : 0;
+    },
+
+    get firstValue() {
+      return this.data.length > 0 ? this.data[0] : 0;
+    },
+
+    get minValue() {
+      return this.data.length > 0 ? Math.min(...this.data) : 0;
+    },
+
+    get maxValue() {
+      return this.data.length > 0 ? Math.max(...this.data) : 0;
+    },
+
+    get average() {
+      if (this.data.length === 0) return 0;
+      return this.data.reduce((a, b) => a + b, 0) / this.data.length;
+    },
+
+    get change() {
+      if (this.data.length < 2 || this.firstValue === 0) return 0;
+      return ((this.currentValue - this.firstValue) / Math.abs(this.firstValue)) * 100;
+    },
+
+    get changeType() {
+      if (this.change > 0.5) return 'positive';
+      if (this.change < -0.5) return 'negative';
+      return 'neutral';
+    },
+
+    get referenceY() {
+      const refValue = this.referenceValue !== null ? this.referenceValue : this.average;
+      const max = Math.max(...this.data);
+      const min = Math.min(...this.data);
+      const range = max - min || 1;
+      const usableHeight = this.height - (this.padding * 2);
+      return this.padding + usableHeight - ((refValue - min) / range) * usableHeight;
+    },
+
+    _smoothPath(pts) {
+      if (pts.length < 2) return '';
+      let d = `M ${pts[0].x},${pts[0].y}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const x0 = pts[i].x;
+        const y0 = pts[i].y;
+        const x1 = pts[i + 1].x;
+        const y1 = pts[i + 1].y;
+        const cx = (x0 + x1) / 2;
+        d += ` C ${cx},${y0} ${cx},${y1} ${x1},${y1}`;
+      }
+      return d;
+    },
+
+    setData(newData) {
       this.data = newData;
-      this.render();
+    },
+
+    addPoint(value) {
+      this.data.push(value);
+    },
+
+    formatValue(value) {
+      if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+      if (value >= 1000) return (value / 1000).toFixed(1) + 'K';
+      return value.toLocaleString();
+    },
+
+    formatChange(value) {
+      const sign = value > 0 ? '+' : '';
+      return `${sign}${value.toFixed(1)}%`;
     }
   };
 }
@@ -1087,31 +1207,133 @@ function uxRating(options = {}) {
 }
 
 // ========================================
-// Counter/Stepper Component
+// Form Stepper / Wizard Component
 // ========================================
 function uxStepper(options = {}) {
   return {
-    value: options.value || 0,
-    min: options.min ?? -Infinity,
-    max: options.max ?? Infinity,
-    step: options.step || 1,
+    currentStep: options.currentStep || options.initialStep || 0,
+    totalSteps: options.totalSteps || options.steps || 4,
+    completedSteps: new Set(options.completedSteps || []),
+    allowSkip: options.allowSkip || false,
+    linear: options.linear !== false,  // Default to linear (must complete in order)
 
-    increment() {
-      if (this.value + this.step <= this.max) {
-        this.value += this.step;
-        this.$dispatch('change', this.value);
+    init() {
+      // Mark previous steps as completed if starting mid-way
+      if (this.currentStep > 0) {
+        for (let i = 0; i < this.currentStep; i++) {
+          this.completedSteps.add(i);
+        }
       }
     },
 
-    decrement() {
-      if (this.value - this.step >= this.min) {
-        this.value -= this.step;
-        this.$dispatch('change', this.value);
+    // Navigation
+    next() {
+      if (this.currentStep < this.totalSteps - 1) {
+        this.complete(this.currentStep);
+        this.currentStep++;
+        this.$dispatch('stepper:next', { step: this.currentStep });
+        this.$dispatch('stepper:change', { step: this.currentStep });
       }
     },
 
-    setValue(val) {
-      this.value = Math.min(this.max, Math.max(this.min, val));
+    prev() {
+      if (this.currentStep > 0) {
+        this.currentStep--;
+        this.$dispatch('stepper:prev', { step: this.currentStep });
+        this.$dispatch('stepper:change', { step: this.currentStep });
+      }
+    },
+
+    goTo(index) {
+      // In linear mode, can only go to completed steps or next step
+      if (this.linear && !this.allowSkip) {
+        if (index > this.currentStep && !this.isCompleted(this.currentStep)) {
+          return; // Can't skip ahead without completing current
+        }
+        if (index > this.currentStep + 1 && !this.isCompleted(index - 1)) {
+          return; // Can't skip multiple steps
+        }
+      }
+
+      if (index >= 0 && index < this.totalSteps) {
+        this.currentStep = index;
+        this.$dispatch('stepper:goto', { step: index });
+        this.$dispatch('stepper:change', { step: this.currentStep });
+      }
+    },
+
+    // Step completion
+    complete(index) {
+      const stepIndex = index !== undefined ? index : this.currentStep;
+      this.completedSteps.add(stepIndex);
+      this.$dispatch('stepper:complete', { step: stepIndex });
+    },
+
+    uncomplete(index) {
+      this.completedSteps.delete(index);
+    },
+
+    // State checks
+    isCompleted(index) {
+      return this.completedSteps.has(index);
+    },
+
+    isCurrent(index) {
+      return this.currentStep === index;
+    },
+
+    isActive(index) {
+      return index <= this.currentStep;
+    },
+
+    canGoTo(index) {
+      if (!this.linear || this.allowSkip) return true;
+      return index <= this.currentStep || this.isCompleted(index - 1);
+    },
+
+    get isFirst() {
+      return this.currentStep === 0;
+    },
+
+    get isLast() {
+      return this.currentStep === this.totalSteps - 1;
+    },
+
+    get progress() {
+      return (this.currentStep / (this.totalSteps - 1)) * 100;
+    },
+
+    get progressWidth() {
+      // Calculate width as percentage string
+      const percent = this.totalSteps > 1
+        ? (this.currentStep / (this.totalSteps - 1)) * 100
+        : 0;
+      return `${percent}%`;
+    },
+
+    // CSS classes helper
+    getStepClasses(index) {
+      return {
+        'ux-stepper__step--completed': this.isCompleted(index),
+        'ux-stepper__step--current': this.isCurrent(index),
+        'ux-stepper__step--active': this.isActive(index),
+        'ux-stepper__step--disabled': !this.canGoTo(index)
+      };
+    },
+
+    // Reset stepper
+    reset() {
+      this.currentStep = 0;
+      this.completedSteps.clear();
+      this.$dispatch('stepper:reset');
+    },
+
+    // Finish the wizard
+    finish() {
+      this.complete(this.currentStep);
+      this.$dispatch('stepper:finish', {
+        completedSteps: Array.from(this.completedSteps)
+      });
     }
   };
 }
@@ -1513,31 +1735,275 @@ function uxCarousel(options = {}) {
 // ========================================
 function uxLightbox(options = {}) {
   return {
+    // State
     isOpen: false,
     currentIndex: 0,
     images: options.images || [],
+    loading: false,
+    hideUI: false,
+    enableZoom: options.enableZoom !== false,
+    showThumbnails: options.showThumbnails !== false,
 
+    // Zoom state
+    zoom: 1,
+    minZoom: 1,
+    maxZoom: options.maxZoom || 4,
+    panX: 0,
+    panY: 0,
+    isPanning: false,
+    startX: 0,
+    startY: 0,
+    lastPanX: 0,
+    lastPanY: 0,
+
+    // UI auto-hide timer
+    uiTimer: null,
+    uiTimeout: options.uiTimeout || 3000,
+
+    init() {
+      // Auto-discover images from DOM if not provided
+      if (this.images.length === 0) {
+        this.discoverImages();
+      }
+
+      // Keyboard navigation
+      this._keyHandler = (e) => {
+        if (!this.isOpen) return;
+
+        switch (e.key) {
+          case 'Escape':
+            this.close();
+            break;
+          case 'ArrowLeft':
+            this.prev();
+            break;
+          case 'ArrowRight':
+            this.next();
+            break;
+          case '+':
+          case '=':
+            this.zoomIn();
+            break;
+          case '-':
+            this.zoomOut();
+            break;
+          case '0':
+            this.resetZoom();
+            break;
+        }
+      };
+      document.addEventListener('keydown', this._keyHandler);
+    },
+
+    destroy() {
+      if (this._keyHandler) {
+        document.removeEventListener('keydown', this._keyHandler);
+      }
+      if (this.uiTimer) {
+        clearTimeout(this.uiTimer);
+      }
+    },
+
+    discoverImages() {
+      const container = this.$el;
+      const triggers = container.querySelectorAll('[data-lightbox-src], .ux-lightbox-trigger');
+
+      this.images = Array.from(triggers).map(el => ({
+        src: el.dataset.lightboxSrc || el.querySelector('img')?.src || '',
+        thumbnail: el.dataset.lightboxThumb || el.querySelector('img')?.src || '',
+        title: el.dataset.lightboxTitle || el.querySelector('img')?.alt || '',
+        description: el.dataset.lightboxDesc || ''
+      }));
+    },
+
+    // Computed properties
+    get currentImage() {
+      return this.images[this.currentIndex] || { src: '', title: '', description: '', thumbnail: '' };
+    },
+
+    get hasPrev() {
+      return this.images.length > 1;
+    },
+
+    get hasNext() {
+      return this.images.length > 1;
+    },
+
+    get zoomPercent() {
+      return Math.round(this.zoom * 100);
+    },
+
+    // Methods
     open(index = 0) {
-      this.currentIndex = index;
+      this.currentIndex = Math.min(Math.max(0, index), this.images.length - 1);
       this.isOpen = true;
+      this.loading = true;
+      this.resetZoom();
+      this.hideUI = false;
+      this.startUITimer();
       document.body.style.overflow = 'hidden';
+
+      // Preload image
+      const img = new Image();
+      img.onload = () => {
+        this.loading = false;
+      };
+      img.onerror = () => {
+        this.loading = false;
+      };
+      img.src = this.currentImage.src;
+
+      this.$dispatch('lightbox:open', { index: this.currentIndex, image: this.currentImage });
     },
 
     close() {
       this.isOpen = false;
+      this.resetZoom();
       document.body.style.overflow = '';
+
+      if (this.uiTimer) {
+        clearTimeout(this.uiTimer);
+      }
+
+      this.$dispatch('lightbox:close');
     },
 
     next() {
+      if (this.images.length <= 1) return;
+
+      this.loading = true;
+      this.resetZoom();
       this.currentIndex = (this.currentIndex + 1) % this.images.length;
+
+      // Preload next image
+      const img = new Image();
+      img.onload = () => {
+        this.loading = false;
+      };
+      img.src = this.currentImage.src;
+
+      this.$dispatch('lightbox:change', { index: this.currentIndex, image: this.currentImage });
     },
 
     prev() {
+      if (this.images.length <= 1) return;
+
+      this.loading = true;
+      this.resetZoom();
       this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+
+      // Preload prev image
+      const img = new Image();
+      img.onload = () => {
+        this.loading = false;
+      };
+      img.src = this.currentImage.src;
+
+      this.$dispatch('lightbox:change', { index: this.currentIndex, image: this.currentImage });
     },
 
-    get currentImage() {
-      return this.images[this.currentIndex];
+    goTo(index) {
+      if (index === this.currentIndex) return;
+      if (index < 0 || index >= this.images.length) return;
+
+      this.loading = true;
+      this.resetZoom();
+      this.currentIndex = index;
+
+      // Preload image
+      const img = new Image();
+      img.onload = () => {
+        this.loading = false;
+      };
+      img.src = this.currentImage.src;
+
+      this.$dispatch('lightbox:change', { index: this.currentIndex, image: this.currentImage });
+    },
+
+    // Zoom methods
+    zoomIn() {
+      if (!this.enableZoom) return;
+      this.zoom = Math.min(this.zoom + 0.5, this.maxZoom);
+      this.startUITimer();
+    },
+
+    zoomOut() {
+      if (!this.enableZoom) return;
+      this.zoom = Math.max(this.zoom - 0.5, this.minZoom);
+      if (this.zoom === this.minZoom) {
+        this.panX = 0;
+        this.panY = 0;
+      }
+      this.startUITimer();
+    },
+
+    resetZoom() {
+      this.zoom = 1;
+      this.panX = 0;
+      this.panY = 0;
+    },
+
+    handleDoubleTap() {
+      if (!this.enableZoom) return;
+
+      if (this.zoom > 1) {
+        this.resetZoom();
+      } else {
+        this.zoom = 2;
+      }
+      this.startUITimer();
+    },
+
+    // Pan methods
+    startPan(event) {
+      if (this.zoom <= 1) return;
+
+      this.isPanning = true;
+      const point = event.touches ? event.touches[0] : event;
+      this.startX = point.clientX - this.panX;
+      this.startY = point.clientY - this.panY;
+      this.lastPanX = this.panX;
+      this.lastPanY = this.panY;
+    },
+
+    pan(event) {
+      if (!this.isPanning || this.zoom <= 1) return;
+
+      event.preventDefault();
+      const point = event.touches ? event.touches[0] : event;
+      this.panX = point.clientX - this.startX;
+      this.panY = point.clientY - this.startY;
+    },
+
+    endPan() {
+      this.isPanning = false;
+    },
+
+    // UI visibility
+    toggleUI() {
+      this.hideUI = !this.hideUI;
+      if (!this.hideUI) {
+        this.startUITimer();
+      }
+    },
+
+    startUITimer() {
+      if (this.uiTimer) {
+        clearTimeout(this.uiTimer);
+      }
+      this.hideUI = false;
+      this.uiTimer = setTimeout(() => {
+        if (this.isOpen) {
+          this.hideUI = true;
+        }
+      }, this.uiTimeout);
+    },
+
+    handleBackdropClick(event) {
+      // Only close if clicking the backdrop itself, not the image
+      if (event.target === event.currentTarget) {
+        this.close();
+      }
     }
   };
 }
@@ -2297,27 +2763,256 @@ function uxOtpInput(options = {}) {
 // Color Picker Component
 // ========================================
 function uxColorPicker(options = {}) {
+  // Parse initial color
+  function hexToHsl(hex) {
+    hex = hex.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16) / 255;
+    const g = parseInt(hex.substr(2, 2), 16) / 255;
+    const b = parseInt(hex.substr(4, 2), 16) / 255;
+
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0;
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+  }
+
+  function hslToHex(h, s, l) {
+    s /= 100;
+    l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => {
+      const k = (n + h / 30) % 12;
+      const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * color).toString(16).padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+  }
+
+  const initialColor = options.value || '#3b82f6';
+  const initialHsl = hexToHsl(initialColor);
+
   return {
     isOpen: false,
-    color: options.color || '#000000',
+    value: initialColor,
+    hue: initialHsl.h,
+    saturation: initialHsl.s,
+    lightness: initialHsl.l,
+    alphaEnabled: options.alpha || false,
+    alphaValue: 1,
+    format: options.format || 'hex',
     presets: options.presets || [
       '#ef4444', '#f97316', '#f59e0b', '#eab308',
       '#84cc16', '#22c55e', '#10b981', '#14b8a6',
       '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
       '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'
     ],
+    inline: options.inline || false,
+    closeOnSelect: options.closeOnSelect || false,
+    _spectrumDragging: false,
+    _hueDragging: false,
+    _alphaDragging: false,
+
+    get displayValue() {
+      const hex = hslToHex(this.hue, this.saturation, this.lightness);
+      const r = parseInt(hex.substr(1, 2), 16);
+      const g = parseInt(hex.substr(3, 2), 16);
+      const b = parseInt(hex.substr(5, 2), 16);
+
+      if (this.alphaEnabled && this.alphaValue < 1) {
+        // Always show rgba when alpha is enabled and < 1
+        return `rgba(${r}, ${g}, ${b}, ${this.alphaValue.toFixed(2)})`;
+      }
+
+      if (this.format === 'rgb') {
+        return `rgb(${r}, ${g}, ${b})`;
+      } else if (this.format === 'hsl') {
+        return `hsl(${this.hue}, ${this.saturation}%, ${this.lightness}%)`;
+      }
+      return hex;
+    },
 
     toggle() {
       this.isOpen = !this.isOpen;
+      if (this.isOpen) {
+        this.$dispatch('colorpicker:open');
+      } else {
+        this.$dispatch('colorpicker:close');
+      }
     },
 
-    setColor(color) {
-      this.color = color;
-      this.$dispatch('change', color);
+    open() {
+      this.isOpen = true;
+      this.$dispatch('colorpicker:open');
     },
 
     close() {
       this.isOpen = false;
+      this.$dispatch('colorpicker:close');
+    },
+
+    setValue(color) {
+      const hsl = hexToHsl(color.startsWith('#') ? color : '#' + color);
+      this.hue = hsl.h;
+      this.saturation = hsl.s;
+      this.lightness = hsl.l;
+      this.value = color;
+      this._emitChange();
+      if (this.closeOnSelect) this.close();
+    },
+
+    setFromInput(value) {
+      try {
+        if (value.startsWith('#')) {
+          this.setValue(value);
+        } else if (value.startsWith('rgb')) {
+          const match = value.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+          if (match) {
+            const hex = '#' + [match[1], match[2], match[3]].map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+            this.setValue(hex);
+          }
+        } else if (value.startsWith('hsl')) {
+          const match = value.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
+          if (match) {
+            this.hue = parseInt(match[1]);
+            this.saturation = parseInt(match[2]);
+            this.lightness = parseInt(match[3]);
+            this._emitChange();
+          }
+        }
+      } catch (e) {
+        console.warn('Invalid color format');
+      }
+    },
+
+    cycleFormat() {
+      const formats = ['hex', 'rgb', 'hsl'];
+      const idx = formats.indexOf(this.format);
+      this.format = formats[(idx + 1) % formats.length];
+    },
+
+    onSpectrumMouseDown(event) {
+      this._spectrumDragging = true;
+      this._updateSpectrum(event);
+      const onMove = (e) => this._updateSpectrum(e);
+      const onUp = () => {
+        this._spectrumDragging = false;
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    },
+
+    onSpectrumTouchStart(event) {
+      this._spectrumDragging = true;
+      this._updateSpectrum(event.touches[0]);
+      const onMove = (e) => this._updateSpectrum(e.touches[0]);
+      const onEnd = () => {
+        this._spectrumDragging = false;
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+      };
+      document.addEventListener('touchmove', onMove);
+      document.addEventListener('touchend', onEnd);
+    },
+
+    _updateSpectrum(event) {
+      const rect = event.target.closest('.ux-color-picker__spectrum').getBoundingClientRect();
+      const x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      const y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+      this.saturation = Math.round(x * 100);
+      this.lightness = Math.round((1 - y) * 50);
+      this._emitChange();
+    },
+
+    onHueMouseDown(event) {
+      this._hueDragging = true;
+      this._updateHue(event);
+      const onMove = (e) => this._updateHue(e);
+      const onUp = () => {
+        this._hueDragging = false;
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    },
+
+    onHueTouchStart(event) {
+      this._hueDragging = true;
+      this._updateHue(event.touches[0]);
+      const onMove = (e) => this._updateHue(e.touches[0]);
+      const onEnd = () => {
+        this._hueDragging = false;
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+      };
+      document.addEventListener('touchmove', onMove);
+      document.addEventListener('touchend', onEnd);
+    },
+
+    _updateHue(event) {
+      const rect = event.target.closest('.ux-color-picker__slider').getBoundingClientRect();
+      const x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      this.hue = Math.round(x * 360);
+      this._emitChange();
+    },
+
+    // Alpha slider handlers
+    onAlphaMouseDown(event) {
+      this._alphaDragging = true;
+      this._updateAlpha(event);
+      const onMove = (e) => this._updateAlpha(e);
+      const onUp = () => {
+        this._alphaDragging = false;
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    },
+
+    onAlphaTouchStart(event) {
+      this._alphaDragging = true;
+      this._updateAlpha(event.touches[0]);
+      const onMove = (e) => this._updateAlpha(e.touches[0]);
+      const onEnd = () => {
+        this._alphaDragging = false;
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+      };
+      document.addEventListener('touchmove', onMove);
+      document.addEventListener('touchend', onEnd);
+    },
+
+    _updateAlpha(event) {
+      const rect = event.target.closest('.ux-color-picker__slider').getBoundingClientRect();
+      const x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      this.alphaValue = Math.round(x * 100) / 100;
+      this._emitChange();
+    },
+
+    _emitChange() {
+      this.value = this.displayValue;
+      const hex = hslToHex(this.hue, this.saturation, this.lightness);
+      this.$dispatch('colorpicker:change', {
+        value: this.displayValue,
+        hex: hex,
+        hsl: { h: this.hue, s: this.saturation, l: this.lightness },
+        alpha: this.alphaValue,
+        format: this.format
+      });
     }
   };
 }
@@ -2330,36 +3025,85 @@ function uxSignaturePad(options = {}) {
     canvas: null,
     ctx: null,
     isDrawing: false,
-    isEmpty: true,
+    hasSignature: false,
+    history: [],
+    showGuide: options.showGuide !== false,
+    showPlaceholder: options.showPlaceholder !== false,
+    placeholderText: options.placeholderText || 'Firme aquí',
+    strokeColor: options.color || '#000',
+    strokeWidth: options.lineWidth || 2,
+    backgroundColor: options.backgroundColor || 'transparent',
+
+    icons: {
+      pen: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>',
+      undo: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>',
+      clear: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+      download: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+    },
 
     init() {
       this.canvas = this.$refs.canvas;
-      this.ctx = this.canvas.getContext('2d');
-      this.ctx.strokeStyle = options.color || '#000';
-      this.ctx.lineWidth = options.lineWidth || 2;
-      this.ctx.lineCap = 'round';
+      if (!this.canvas) return;
+
+      // Set canvas size to match container
+      this.$nextTick(() => {
+        const container = this.canvas.parentElement;
+        const rect = container.getBoundingClientRect();
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height || 200;
+
+        this.ctx = this.canvas.getContext('2d');
+        this.ctx.strokeStyle = this.strokeColor;
+        this.ctx.lineWidth = this.strokeWidth;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+
+        // Save initial state
+        this._saveState();
+      });
+
+      // Add event listeners
+      this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
+      this.canvas.addEventListener('mousemove', (e) => this.draw(e));
+      this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+      this.canvas.addEventListener('mouseleave', () => this.stopDrawing());
+
+      // Touch events
+      this.canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        this.startDrawing(e);
+      });
+      this.canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        this.draw(e);
+      });
+      this.canvas.addEventListener('touchend', () => this.stopDrawing());
     },
 
     startDrawing(event) {
       this.isDrawing = true;
-      this.isEmpty = false;
-      const { x, y } = this.getPosition(event);
+      const { x, y } = this._getPosition(event);
       this.ctx.beginPath();
       this.ctx.moveTo(x, y);
     },
 
     draw(event) {
       if (!this.isDrawing) return;
-      const { x, y } = this.getPosition(event);
+      const { x, y } = this._getPosition(event);
       this.ctx.lineTo(x, y);
       this.ctx.stroke();
     },
 
     stopDrawing() {
-      this.isDrawing = false;
+      if (this.isDrawing) {
+        this.isDrawing = false;
+        this.hasSignature = true;
+        this._saveState();
+        this.$dispatch('signature:change', { hasSignature: this.hasSignature });
+      }
     },
 
-    getPosition(event) {
+    _getPosition(event) {
       const rect = this.canvas.getBoundingClientRect();
       const e = event.touches ? event.touches[0] : event;
       return {
@@ -2368,13 +3112,58 @@ function uxSignaturePad(options = {}) {
       };
     },
 
-    clear() {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.isEmpty = true;
+    _saveState() {
+      if (!this.canvas || !this.ctx) return;
+      const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+      this.history.push(imageData);
+      // Limit history to 20 states
+      if (this.history.length > 20) {
+        this.history.shift();
+      }
     },
 
-    toDataURL() {
-      return this.canvas.toDataURL();
+    undo() {
+      if (this.history.length <= 1) return;
+      this.history.pop(); // Remove current state
+      const prevState = this.history[this.history.length - 1];
+      if (prevState) {
+        this.ctx.putImageData(prevState, 0, 0);
+      }
+      // Check if canvas is empty after undo
+      this.hasSignature = this.history.length > 1;
+      this.$dispatch('signature:change', { hasSignature: this.hasSignature });
+    },
+
+    clear() {
+      if (!this.canvas || !this.ctx) return;
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.hasSignature = false;
+      this.history = [];
+      this._saveState();
+      this.$dispatch('signature:change', { hasSignature: false });
+    },
+
+    getSignature(type = 'image/png', quality = 1) {
+      if (!this.canvas) return null;
+      return this.canvas.toDataURL(type, quality);
+    },
+
+    toDataURL(type = 'image/png', quality = 1) {
+      return this.getSignature(type, quality);
+    },
+
+    download(filename = 'signature.png') {
+      const dataURL = this.getSignature();
+      if (!dataURL) return;
+
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataURL;
+      link.click();
+    },
+
+    isEmpty() {
+      return !this.hasSignature;
     }
   };
 }
@@ -2383,23 +3172,161 @@ function uxSignaturePad(options = {}) {
 // Phone Input Component
 // ========================================
 function uxPhoneInput(options = {}) {
+  // Country data
+  const countries = [
+    { code: 'ES', name: 'España', dial: '+34', flag: '🇪🇸' },
+    { code: 'US', name: 'Estados Unidos', dial: '+1', flag: '🇺🇸' },
+    { code: 'MX', name: 'México', dial: '+52', flag: '🇲🇽' },
+    { code: 'AR', name: 'Argentina', dial: '+54', flag: '🇦🇷' },
+    { code: 'CO', name: 'Colombia', dial: '+57', flag: '🇨🇴' },
+    { code: 'CL', name: 'Chile', dial: '+56', flag: '🇨🇱' },
+    { code: 'PE', name: 'Perú', dial: '+51', flag: '🇵🇪' },
+    { code: 'VE', name: 'Venezuela', dial: '+58', flag: '🇻🇪' },
+    { code: 'EC', name: 'Ecuador', dial: '+593', flag: '🇪🇨' },
+    { code: 'BO', name: 'Bolivia', dial: '+591', flag: '🇧🇴' },
+    { code: 'UY', name: 'Uruguay', dial: '+598', flag: '🇺🇾' },
+    { code: 'PY', name: 'Paraguay', dial: '+595', flag: '🇵🇾' },
+    { code: 'BR', name: 'Brasil', dial: '+55', flag: '🇧🇷' },
+    { code: 'PT', name: 'Portugal', dial: '+351', flag: '🇵🇹' },
+    { code: 'FR', name: 'Francia', dial: '+33', flag: '🇫🇷' },
+    { code: 'DE', name: 'Alemania', dial: '+49', flag: '🇩🇪' },
+    { code: 'IT', name: 'Italia', dial: '+39', flag: '🇮🇹' },
+    { code: 'GB', name: 'Reino Unido', dial: '+44', flag: '🇬🇧' },
+    { code: 'CA', name: 'Canadá', dial: '+1', flag: '🇨🇦' },
+    { code: 'AU', name: 'Australia', dial: '+61', flag: '🇦🇺' },
+    { code: 'JP', name: 'Japón', dial: '+81', flag: '🇯🇵' },
+    { code: 'CN', name: 'China', dial: '+86', flag: '🇨🇳' },
+    { code: 'IN', name: 'India', dial: '+91', flag: '🇮🇳' },
+    { code: 'KR', name: 'Corea del Sur', dial: '+82', flag: '🇰🇷' },
+    { code: 'NL', name: 'Países Bajos', dial: '+31', flag: '🇳🇱' },
+    { code: 'BE', name: 'Bélgica', dial: '+32', flag: '🇧🇪' },
+    { code: 'CH', name: 'Suiza', dial: '+41', flag: '🇨🇭' },
+    { code: 'AT', name: 'Austria', dial: '+43', flag: '🇦🇹' },
+    { code: 'SE', name: 'Suecia', dial: '+46', flag: '🇸🇪' },
+    { code: 'NO', name: 'Noruega', dial: '+47', flag: '🇳🇴' },
+    { code: 'DK', name: 'Dinamarca', dial: '+45', flag: '🇩🇰' },
+    { code: 'FI', name: 'Finlandia', dial: '+358', flag: '🇫🇮' },
+    { code: 'PL', name: 'Polonia', dial: '+48', flag: '🇵🇱' },
+    { code: 'CZ', name: 'República Checa', dial: '+420', flag: '🇨🇿' },
+    { code: 'GR', name: 'Grecia', dial: '+30', flag: '🇬🇷' },
+    { code: 'IE', name: 'Irlanda', dial: '+353', flag: '🇮🇪' },
+    { code: 'RU', name: 'Rusia', dial: '+7', flag: '🇷🇺' },
+    { code: 'ZA', name: 'Sudáfrica', dial: '+27', flag: '🇿🇦' },
+    { code: 'NZ', name: 'Nueva Zelanda', dial: '+64', flag: '🇳🇿' },
+    { code: 'SG', name: 'Singapur', dial: '+65', flag: '🇸🇬' },
+  ];
+
+  const defaultCountry = options.defaultCountry || 'ES';
+  const preferredCountries = options.preferredCountries || ['ES', 'US', 'MX'];
+
+  // Sort countries: preferred first, then alphabetically
+  const sortedCountries = [
+    ...preferredCountries.map(code => countries.find(c => c.code === code)).filter(Boolean),
+    ...countries.filter(c => !preferredCountries.includes(c.code)).sort((a, b) => a.name.localeCompare(b.name))
+  ];
+
   return {
-    value: options.value || '',
-    countryCode: options.countryCode || '+1',
+    isOpen: false,
+    phoneNumber: options.value || '',
+    searchQuery: '',
+    selectedCountry: countries.find(c => c.code === defaultCountry) || countries[0],
+    countries: sortedCountries,
+    showFlags: options.showFlags !== false,
+    showDialCode: options.showDialCode !== false,
+    searchable: options.searchable !== false,
+    placeholder: options.placeholder || '600 000 000',
+    disabled: options.disabled || false,
 
-    formatPhone(input) {
-      const digits = input.replace(/\D/g, '');
-      if (digits.length <= 3) return digits;
-      if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+    arrowIcon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>',
+
+    get filteredCountries() {
+      if (!this.searchQuery) return this.countries;
+      const q = this.searchQuery.toLowerCase();
+      return this.countries.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.dial.includes(q) ||
+        c.code.toLowerCase().includes(q)
+      );
     },
 
-    handleInput(event) {
-      this.value = this.formatPhone(event.target.value);
+    toggle() {
+      this.isOpen = !this.isOpen;
+      if (this.isOpen) {
+        this.searchQuery = '';
+        this.$nextTick(() => {
+          if (this.$refs.searchInput) this.$refs.searchInput.focus();
+        });
+      }
     },
 
-    get fullNumber() {
-      return this.countryCode + this.value.replace(/\D/g, '');
+    open() {
+      this.isOpen = true;
+      this.searchQuery = '';
+    },
+
+    close() {
+      this.isOpen = false;
+      this.searchQuery = '';
+    },
+
+    selectCountry(country) {
+      this.selectedCountry = country;
+      this.isOpen = false;
+      this.searchQuery = '';
+      this.$dispatch('phone:countrychange', { country });
+      this._emitChange();
+      this.$nextTick(() => {
+        if (this.$refs.phoneInput) this.$refs.phoneInput.focus();
+      });
+    },
+
+    onPhoneInput(event) {
+      this.phoneNumber = event.target.value;
+      this._emitChange();
+    },
+
+    onKeyDown(event) {
+      if (event.key === 'Escape') {
+        this.close();
+      }
+    },
+
+    getFullNumber() {
+      const digits = this.phoneNumber.replace(/\D/g, '');
+      return this.selectedCountry.dial + digits;
+    },
+
+    getFormattedNumber() {
+      const digits = this.phoneNumber.replace(/\D/g, '');
+      return this.selectedCountry.dial + ' ' + digits;
+    },
+
+    isValid() {
+      const digits = this.phoneNumber.replace(/\D/g, '');
+      return digits.length >= 7 && digits.length <= 15;
+    },
+
+    clear() {
+      this.phoneNumber = '';
+      this._emitChange();
+    },
+
+    setValue(value, countryCode) {
+      this.phoneNumber = value;
+      if (countryCode) {
+        const country = this.countries.find(c => c.code === countryCode);
+        if (country) this.selectedCountry = country;
+      }
+      this._emitChange();
+    },
+
+    _emitChange() {
+      this.$dispatch('phone:change', {
+        number: this.phoneNumber,
+        fullNumber: this.getFullNumber(),
+        country: this.selectedCountry,
+        isValid: this.isValid()
+      });
     }
   };
 }
@@ -3742,81 +4669,837 @@ function uxProgressSteps(options = {}) {
   };
 }
 
-// QR Code Component
+// QR Code Component - Full implementation with QR code generation
 function uxQRCode(options = {}) {
+  // QR Code Generator - Pure JavaScript implementation
+  const QRCodeGenerator = {
+    // Error correction levels
+    ECL: { L: 1, M: 0, Q: 3, H: 2 },
+
+    // Mode indicators
+    MODE: { NUMERIC: 1, ALPHANUMERIC: 2, BYTE: 4 },
+
+    // Alphanumeric character set
+    ALPHANUMERIC_CHARS: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./: ',
+
+    // Error correction codewords and blocks for each version and level
+    EC_BLOCKS: [
+      null,
+      // Version 1
+      { L: [1, 26, 19], M: [1, 26, 16], Q: [1, 26, 13], H: [1, 26, 9] },
+      // Version 2
+      { L: [1, 44, 34], M: [1, 44, 28], Q: [1, 44, 22], H: [1, 44, 16] },
+      // Version 3
+      { L: [1, 70, 55], M: [1, 70, 44], Q: [2, 35, 17], H: [2, 35, 13] },
+      // Version 4
+      { L: [1, 100, 80], M: [2, 50, 32], Q: [2, 50, 24], H: [4, 25, 9] },
+      // Version 5
+      { L: [1, 134, 108], M: [2, 67, 43], Q: [2, 33, 15, 2, 34, 16], H: [2, 33, 11, 2, 34, 12] },
+      // Version 6
+      { L: [2, 86, 68], M: [4, 43, 27], Q: [4, 43, 19], H: [4, 43, 15] },
+      // Version 7
+      { L: [2, 98, 78], M: [4, 49, 31], Q: [2, 32, 14, 4, 33, 15], H: [4, 39, 13, 1, 40, 14] },
+      // Version 8
+      { L: [2, 121, 97], M: [2, 60, 38, 2, 61, 39], Q: [4, 40, 18, 2, 41, 19], H: [4, 40, 14, 2, 41, 15] },
+      // Version 9
+      { L: [2, 146, 116], M: [3, 58, 36, 2, 59, 37], Q: [4, 36, 16, 4, 37, 17], H: [4, 36, 12, 4, 37, 13] },
+      // Version 10
+      { L: [2, 86, 68, 2, 87, 69], M: [4, 69, 43, 1, 70, 44], Q: [6, 43, 19, 2, 44, 20], H: [6, 43, 15, 2, 44, 16] }
+    ],
+
+    // Get the best mode for the data
+    getMode(data) {
+      if (/^[0-9]+$/.test(data)) return this.MODE.NUMERIC;
+      if (/^[0-9A-Z $%*+\-./:]+$/.test(data.toUpperCase())) return this.MODE.ALPHANUMERIC;
+      return this.MODE.BYTE;
+    },
+
+    // Get the minimum version needed for data
+    getVersion(data, ecl) {
+      const mode = this.getMode(data);
+      const len = data.length;
+
+      for (let v = 1; v <= 10; v++) {
+        const capacity = this.getCapacity(v, ecl, mode);
+        if (len <= capacity) return v;
+      }
+      return 10; // Max supported version in this implementation
+    },
+
+    // Get data capacity for version, ecl, and mode
+    getCapacity(version, ecl, mode) {
+      const blocks = this.EC_BLOCKS[version][ecl];
+      let dataCodewords = 0;
+
+      for (let i = 0; i < blocks.length; i += 3) {
+        dataCodewords += blocks[i] * blocks[i + 2];
+      }
+
+      const dataBits = dataCodewords * 8;
+      const charCountBits = version < 10 ? (mode === this.MODE.NUMERIC ? 10 : mode === this.MODE.ALPHANUMERIC ? 9 : 8) : 12;
+      const usableBits = dataBits - 4 - charCountBits;
+
+      if (mode === this.MODE.NUMERIC) return Math.floor(usableBits / 10) * 3;
+      if (mode === this.MODE.ALPHANUMERIC) return Math.floor(usableBits / 11) * 2;
+      return Math.floor(usableBits / 8);
+    },
+
+    // Encode data to binary string
+    encodeData(data, version, ecl) {
+      const mode = this.getMode(data);
+      let bits = '';
+
+      // Mode indicator (4 bits)
+      bits += mode.toString(2).padStart(4, '0');
+
+      // Character count indicator
+      const ccBits = version < 10 ? (mode === this.MODE.NUMERIC ? 10 : mode === this.MODE.ALPHANUMERIC ? 9 : 8) : 12;
+      bits += data.length.toString(2).padStart(ccBits, '0');
+
+      // Encode data
+      if (mode === this.MODE.NUMERIC) {
+        for (let i = 0; i < data.length; i += 3) {
+          const chunk = data.substr(i, 3);
+          const numBits = chunk.length === 3 ? 10 : chunk.length === 2 ? 7 : 4;
+          bits += parseInt(chunk, 10).toString(2).padStart(numBits, '0');
+        }
+      } else if (mode === this.MODE.ALPHANUMERIC) {
+        const chars = this.ALPHANUMERIC_CHARS;
+        const upper = data.toUpperCase();
+        for (let i = 0; i < upper.length; i += 2) {
+          if (i + 1 < upper.length) {
+            const val = chars.indexOf(upper[i]) * 45 + chars.indexOf(upper[i + 1]);
+            bits += val.toString(2).padStart(11, '0');
+          } else {
+            bits += chars.indexOf(upper[i]).toString(2).padStart(6, '0');
+          }
+        }
+      } else {
+        // Byte mode (UTF-8)
+        const bytes = new TextEncoder().encode(data);
+        for (const byte of bytes) {
+          bits += byte.toString(2).padStart(8, '0');
+        }
+      }
+
+      // Calculate total codewords needed
+      const blocks = this.EC_BLOCKS[version][ecl];
+      let totalDataCodewords = 0;
+      for (let i = 0; i < blocks.length; i += 3) {
+        totalDataCodewords += blocks[i] * blocks[i + 2];
+      }
+      const totalBits = totalDataCodewords * 8;
+
+      // Add terminator (up to 4 zeros)
+      const terminator = Math.min(4, totalBits - bits.length);
+      bits += '0'.repeat(terminator);
+
+      // Pad to byte boundary
+      if (bits.length % 8 !== 0) {
+        bits += '0'.repeat(8 - (bits.length % 8));
+      }
+
+      // Add pad bytes
+      const padBytes = ['11101100', '00010001'];
+      let padIndex = 0;
+      while (bits.length < totalBits) {
+        bits += padBytes[padIndex % 2];
+        padIndex++;
+      }
+
+      return bits;
+    },
+
+    // Convert bit string to byte array
+    bitsToBytes(bits) {
+      const bytes = [];
+      for (let i = 0; i < bits.length; i += 8) {
+        bytes.push(parseInt(bits.substr(i, 8), 2));
+      }
+      return bytes;
+    },
+
+    // Reed-Solomon error correction
+    getECCodewords(data, ecCodewords) {
+      // Simplified RS encoding using polynomial division
+      const gfExp = new Array(512);
+      const gfLog = new Array(256);
+
+      // Initialize Galois Field tables
+      let x = 1;
+      for (let i = 0; i < 255; i++) {
+        gfExp[i] = x;
+        gfLog[x] = i;
+        x <<= 1;
+        if (x & 0x100) x ^= 0x11d;
+      }
+      for (let i = 255; i < 512; i++) {
+        gfExp[i] = gfExp[i - 255];
+      }
+
+      // Generate generator polynomial
+      let gen = [1];
+      for (let i = 0; i < ecCodewords; i++) {
+        const newGen = new Array(gen.length + 1).fill(0);
+        for (let j = 0; j < gen.length; j++) {
+          newGen[j] ^= gen[j];
+          newGen[j + 1] ^= gfExp[(gfLog[gen[j]] + i) % 255];
+        }
+        gen = newGen;
+      }
+
+      // Polynomial division
+      const result = new Array(ecCodewords).fill(0);
+      for (let i = 0; i < data.length; i++) {
+        const coef = data[i] ^ result[0];
+        result.shift();
+        result.push(0);
+        if (coef !== 0) {
+          for (let j = 0; j < ecCodewords; j++) {
+            if (gen[j + 1] !== 0) {
+              result[j] ^= gfExp[(gfLog[gen[j + 1]] + gfLog[coef]) % 255];
+            }
+          }
+        }
+      }
+
+      return result;
+    },
+
+    // Create the QR code matrix
+    createMatrix(version) {
+      const size = version * 4 + 17;
+      const matrix = Array(size).fill(null).map(() => Array(size).fill(null));
+      return matrix;
+    },
+
+    // Add finder patterns
+    addFinderPatterns(matrix) {
+      const size = matrix.length;
+      const pattern = (x, y) => {
+        for (let dy = -1; dy <= 7; dy++) {
+          for (let dx = -1; dx <= 7; dx++) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
+              if (dx === -1 || dx === 7 || dy === -1 || dy === 7) {
+                matrix[ny][nx] = 0; // White separator
+              } else if (dx === 0 || dx === 6 || dy === 0 || dy === 6 ||
+                        (dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4)) {
+                matrix[ny][nx] = 1; // Black
+              } else {
+                matrix[ny][nx] = 0; // White
+              }
+            }
+          }
+        }
+      };
+
+      pattern(0, 0);
+      pattern(size - 7, 0);
+      pattern(0, size - 7);
+    },
+
+    // Add timing patterns
+    addTimingPatterns(matrix) {
+      const size = matrix.length;
+      for (let i = 8; i < size - 8; i++) {
+        const val = i % 2 === 0 ? 1 : 0;
+        if (matrix[6][i] === null) matrix[6][i] = val;
+        if (matrix[i][6] === null) matrix[i][6] = val;
+      }
+    },
+
+    // Add alignment patterns (for version >= 2)
+    addAlignmentPatterns(matrix, version) {
+      if (version < 2) return;
+
+      const positions = this.getAlignmentPositions(version);
+      const size = matrix.length;
+
+      for (const y of positions) {
+        for (const x of positions) {
+          // Skip if overlapping with finder patterns
+          if ((x < 8 && y < 8) || (x < 8 && y > size - 9) || (x > size - 9 && y < 8)) continue;
+
+          for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = -2; dx <= 2; dx++) {
+              const val = (dx === 0 && dy === 0) || Math.abs(dx) === 2 || Math.abs(dy) === 2 ? 1 : 0;
+              matrix[y + dy][x + dx] = val;
+            }
+          }
+        }
+      }
+    },
+
+    getAlignmentPositions(version) {
+      if (version === 1) return [];
+      const positions = [6];
+      const size = version * 4 + 17;
+      const last = size - 7;
+      const step = Math.ceil((last - 6) / Math.ceil(version / 7 + 1));
+      for (let pos = last; pos > 6; pos -= step) {
+        positions.unshift(pos);
+      }
+      return positions;
+    },
+
+    // Reserve format information areas
+    reserveFormatAreas(matrix, version) {
+      const size = matrix.length;
+
+      // Around top-left finder
+      for (let i = 0; i < 9; i++) {
+        if (matrix[8][i] === null) matrix[8][i] = 0;
+        if (matrix[i][8] === null) matrix[i][8] = 0;
+      }
+
+      // Around top-right finder
+      for (let i = 0; i < 8; i++) {
+        if (matrix[8][size - 1 - i] === null) matrix[8][size - 1 - i] = 0;
+      }
+
+      // Around bottom-left finder
+      for (let i = 0; i < 8; i++) {
+        if (matrix[size - 1 - i][8] === null) matrix[size - 1 - i][8] = 0;
+      }
+
+      // Dark module
+      matrix[size - 8][8] = 1;
+    },
+
+    // Place data in matrix
+    placeData(matrix, bits) {
+      const size = matrix.length;
+      let bitIndex = 0;
+      let up = true;
+
+      for (let x = size - 1; x >= 1; x -= 2) {
+        if (x === 6) x = 5; // Skip timing pattern column
+
+        for (let y = up ? size - 1 : 0; up ? y >= 0 : y < size; y += up ? -1 : 1) {
+          for (let dx = 0; dx <= 1; dx++) {
+            const col = x - dx;
+            if (matrix[y][col] === null) {
+              matrix[y][col] = bitIndex < bits.length ? parseInt(bits[bitIndex], 10) : 0;
+              bitIndex++;
+            }
+          }
+        }
+        up = !up;
+      }
+    },
+
+    // Apply mask pattern
+    applyMask(matrix, maskNum) {
+      const size = matrix.length;
+      const masked = matrix.map(row => [...row]);
+
+      const masks = [
+        (x, y) => (x + y) % 2 === 0,
+        (x, y) => y % 2 === 0,
+        (x, y) => x % 3 === 0,
+        (x, y) => (x + y) % 3 === 0,
+        (x, y) => (Math.floor(y / 2) + Math.floor(x / 3)) % 2 === 0,
+        (x, y) => ((x * y) % 2) + ((x * y) % 3) === 0,
+        (x, y) => (((x * y) % 2) + ((x * y) % 3)) % 2 === 0,
+        (x, y) => (((x + y) % 2) + ((x * y) % 3)) % 2 === 0
+      ];
+
+      const mask = masks[maskNum];
+
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          // Only mask data areas (skip function patterns)
+          if (this.isDataArea(x, y, size, matrix.length)) {
+            if (mask(x, y)) {
+              masked[y][x] ^= 1;
+            }
+          }
+        }
+      }
+
+      return masked;
+    },
+
+    isDataArea(x, y, size) {
+      // Finder patterns
+      if (x < 9 && y < 9) return false;
+      if (x < 9 && y > size - 9) return false;
+      if (x > size - 9 && y < 9) return false;
+
+      // Timing patterns
+      if (x === 6 || y === 6) return false;
+
+      return true;
+    },
+
+    // Add format information
+    addFormatInfo(matrix, ecl, maskNum) {
+      const eclBits = { L: 1, M: 0, Q: 3, H: 2 };
+      const formatBits = (eclBits[ecl] << 3) | maskNum;
+
+      // BCH error correction for format info
+      let format = formatBits << 10;
+      const generator = 0x537;
+      for (let i = 4; i >= 0; i--) {
+        if (format & (1 << (i + 10))) {
+          format ^= generator << i;
+        }
+      }
+      format = ((formatBits << 10) | format) ^ 0x5412;
+
+      const size = matrix.length;
+
+      // Place format bits
+      const formatPos1 = [[8, 0], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 7], [8, 8], [7, 8], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [0, 8]];
+      const formatPos2 = [[size - 1, 8], [size - 2, 8], [size - 3, 8], [size - 4, 8], [size - 5, 8], [size - 6, 8], [size - 7, 8], [8, size - 8], [8, size - 7], [8, size - 6], [8, size - 5], [8, size - 4], [8, size - 3], [8, size - 2], [8, size - 1]];
+
+      for (let i = 0; i < 15; i++) {
+        const bit = (format >> (14 - i)) & 1;
+        matrix[formatPos1[i][1]][formatPos1[i][0]] = bit;
+        matrix[formatPos2[i][0]][formatPos2[i][1]] = bit;
+      }
+    },
+
+    // Generate the complete QR code
+    generate(data, ecl = 'M') {
+      if (!data) return null;
+
+      const version = this.getVersion(data, ecl);
+      const dataBits = this.encodeData(data, version, ecl);
+      const dataBytes = this.bitsToBytes(dataBits);
+
+      // Get error correction info
+      const blocks = this.EC_BLOCKS[version][ecl];
+      let ecCodewordsPerBlock = 0;
+      let totalBlocks = 0;
+
+      for (let i = 0; i < blocks.length; i += 3) {
+        totalBlocks += blocks[i];
+        ecCodewordsPerBlock = blocks[i + 1] - blocks[i + 2];
+      }
+
+      // Split data into blocks and calculate EC
+      const dataBlocks = [];
+      const ecBlocks = [];
+      let dataIndex = 0;
+
+      for (let i = 0; i < blocks.length; i += 3) {
+        const numBlocks = blocks[i];
+        const dataCodewords = blocks[i + 2];
+
+        for (let j = 0; j < numBlocks; j++) {
+          const block = dataBytes.slice(dataIndex, dataIndex + dataCodewords);
+          dataBlocks.push(block);
+          ecBlocks.push(this.getECCodewords(block, ecCodewordsPerBlock));
+          dataIndex += dataCodewords;
+        }
+      }
+
+      // Interleave data and EC codewords
+      let finalBits = '';
+      const maxDataLen = Math.max(...dataBlocks.map(b => b.length));
+      const maxEcLen = ecCodewordsPerBlock;
+
+      for (let i = 0; i < maxDataLen; i++) {
+        for (const block of dataBlocks) {
+          if (i < block.length) {
+            finalBits += block[i].toString(2).padStart(8, '0');
+          }
+        }
+      }
+
+      for (let i = 0; i < maxEcLen; i++) {
+        for (const block of ecBlocks) {
+          if (i < block.length) {
+            finalBits += block[i].toString(2).padStart(8, '0');
+          }
+        }
+      }
+
+      // Create and fill matrix
+      const matrix = this.createMatrix(version);
+      this.addFinderPatterns(matrix);
+      this.addTimingPatterns(matrix);
+      this.addAlignmentPatterns(matrix, version);
+      this.reserveFormatAreas(matrix, version);
+      this.placeData(matrix, finalBits);
+
+      // Apply best mask (simplified: use mask 0)
+      const maskedMatrix = this.applyMask(matrix, 0);
+      this.addFormatInfo(maskedMatrix, ecl, 0);
+
+      return maskedMatrix;
+    }
+  };
+
   return {
     value: options.value || '',
     size: options.size || 200,
-    errorCorrectionLevel: options.errorCorrectionLevel || 'M',
-    dark: options.dark || '#000000',
-    light: options.light || '#ffffff',
+    errorCorrection: options.errorCorrection || 'M',
+    foreground: options.foreground || '#000000',
+    background: options.background || '#ffffff',
+    margin: options.margin || 4,
+    logo: options.logo || null,
+    logoSize: options.logoSize || 0.2,
+    loading: true,
+    error: null,
 
-    init() {
-      this.render();
+    icons: {
+      download: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+      copy: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+      error: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
     },
 
-    render() {
-      // QR code rendering is typically done by an external library
-      // This provides the data and configuration
-      this.$dispatch('render', {
-        value: this.value,
-        size: this.size,
-        errorCorrectionLevel: this.errorCorrectionLevel
+    init() {
+      this.$nextTick(() => {
+        this.generate();
       });
     },
 
-    setValue(val) {
-      this.value = val;
-      this.render();
+    generate() {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const canvas = this.$refs.canvas;
+        if (!canvas) {
+          this.loading = false;
+          return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        const matrix = QRCodeGenerator.generate(this.value, this.errorCorrection);
+
+        if (!matrix) {
+          this.error = 'Failed to generate QR code';
+          this.loading = false;
+          return;
+        }
+
+        const moduleCount = matrix.length;
+        const moduleSize = Math.floor((this.size - this.margin * 2) / moduleCount);
+        const actualSize = moduleSize * moduleCount + this.margin * 2;
+
+        canvas.width = actualSize;
+        canvas.height = actualSize;
+
+        // Draw background
+        ctx.fillStyle = this.background;
+        ctx.fillRect(0, 0, actualSize, actualSize);
+
+        // Draw modules
+        ctx.fillStyle = this.foreground;
+        for (let y = 0; y < moduleCount; y++) {
+          for (let x = 0; x < moduleCount; x++) {
+            if (matrix[y][x]) {
+              ctx.fillRect(
+                this.margin + x * moduleSize,
+                this.margin + y * moduleSize,
+                moduleSize,
+                moduleSize
+              );
+            }
+          }
+        }
+
+        // Add logo if provided
+        if (this.logo) {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            const logoActualSize = actualSize * this.logoSize;
+            const logoX = (actualSize - logoActualSize) / 2;
+            const logoY = (actualSize - logoActualSize) / 2;
+
+            // White background for logo
+            ctx.fillStyle = this.background;
+            ctx.fillRect(logoX - 4, logoY - 4, logoActualSize + 8, logoActualSize + 8);
+
+            ctx.drawImage(img, logoX, logoY, logoActualSize, logoActualSize);
+          };
+          img.src = this.logo;
+        }
+
+        this.loading = false;
+        this.$dispatch('qr:generated', { value: this.value });
+
+      } catch (err) {
+        this.error = err.message || 'Error generating QR code';
+        this.loading = false;
+      }
+    },
+
+    setValue(value) {
+      this.value = value;
+      this.generate();
+    },
+
+    download(filename = 'qrcode') {
+      const canvas = this.$refs.canvas;
+      if (!canvas) return;
+
+      const link = document.createElement('a');
+      link.download = `${filename}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+
+      this.$dispatch('qr:download', { filename });
+    },
+
+    async copyToClipboard() {
+      const canvas = this.$refs.canvas;
+      if (!canvas) return;
+
+      try {
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        this.$dispatch('qr:copied');
+      } catch (err) {
+        // Fallback: copy data URL as text
+        try {
+          await navigator.clipboard.writeText(canvas.toDataURL('image/png'));
+          this.$dispatch('qr:copied');
+        } catch (e) {
+          console.error('Failed to copy QR code:', e);
+        }
+      }
+    },
+
+    getDataURL(type = 'image/png', quality = 1) {
+      const canvas = this.$refs.canvas;
+      return canvas ? canvas.toDataURL(type, quality) : null;
+    },
+
+    getBlob(type = 'image/png', quality = 1) {
+      return new Promise((resolve) => {
+        const canvas = this.$refs.canvas;
+        if (canvas) {
+          canvas.toBlob(resolve, type, quality);
+        } else {
+          resolve(null);
+        }
+      });
     }
   };
 }
 
-// Numpad Component
+// Numpad Component - Full implementation with all features
 function uxNumpad(options = {}) {
   return {
     value: options.value || '',
-    maxLength: options.maxLength || 10,
-    decimal: options.decimal || false,
-    negative: options.negative || false,
+    maxLength: options.maxLength || 12,
+    allowDecimal: options.allowDecimal !== false,
+    decimals: options.decimals || 2,
+    currency: options.currency || '$',
+    quickAmounts: options.quickAmounts || [],
+    pinMode: options.pinMode || false,
+    pinLength: options.pinLength || 4,
+    pinMask: options.pinMask !== false,
 
-    append(digit) {
-      if (this.value.length < this.maxLength) {
+    icons: {
+      backspace: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>',
+      check: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+      clear: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+    },
+
+    get displayValue() {
+      if (!this.value) return '0';
+
+      if (this.pinMode && this.pinMask) {
+        return '•'.repeat(this.value.length);
+      }
+
+      // Format with decimals
+      if (this.allowDecimal && this.value.includes('.')) {
+        const [whole, dec] = this.value.split('.');
+        const formattedWhole = this.formatNumber(whole || '0');
+        return `${formattedWhole}.${dec}`;
+      }
+
+      return this.formatNumber(this.value);
+    },
+
+    get numericValue() {
+      return parseFloat(this.value) || 0;
+    },
+
+    formatNumber(numStr) {
+      if (!numStr) return '0';
+      return parseInt(numStr, 10).toLocaleString();
+    },
+
+    getIcon(name) {
+      return this.icons[name] || '';
+    },
+
+    appendDigit(digit) {
+      // PIN mode: check length
+      if (this.pinMode && this.value.length >= this.pinLength) {
+        return;
+      }
+
+      // Check max length
+      if (this.value.length >= this.maxLength) {
+        return;
+      }
+
+      // Don't allow leading zeros for non-decimal values
+      if (this.value === '0' && digit === '0' && !this.allowDecimal) {
+        return;
+      }
+
+      // Replace leading zero
+      if (this.value === '0' && digit !== '0' && !this.value.includes('.')) {
+        this.value = digit;
+      } else {
+        // Check decimal precision
+        if (this.value.includes('.')) {
+          const decimalPart = this.value.split('.')[1];
+          if (decimalPart && decimalPart.length >= this.decimals) {
+            return;
+          }
+        }
         this.value += digit;
-        this.$dispatch('input', { value: this.value });
+      }
+
+      this.$dispatch('numpad-change', { value: this.value, numericValue: this.numericValue });
+
+      // Auto-submit PIN when complete
+      if (this.pinMode && this.value.length === this.pinLength) {
+        this.$nextTick(() => {
+          this.submit();
+        });
+      }
+    },
+
+    appendDecimal() {
+      if (!this.allowDecimal || this.pinMode) return;
+
+      if (!this.value.includes('.')) {
+        if (!this.value) {
+          this.value = '0.';
+        } else {
+          this.value += '.';
+        }
+        this.$dispatch('numpad-change', { value: this.value, numericValue: this.numericValue });
       }
     },
 
     backspace() {
-      this.value = this.value.slice(0, -1);
-      this.$dispatch('input', { value: this.value });
+      if (this.value.length > 0) {
+        this.value = this.value.slice(0, -1);
+        this.$dispatch('numpad-change', { value: this.value, numericValue: this.numericValue });
+      }
     },
 
     clear() {
       this.value = '';
-      this.$dispatch('input', { value: this.value });
+      this.$dispatch('numpad-change', { value: this.value, numericValue: 0 });
     },
 
-    addDecimal() {
-      if (this.decimal && !this.value.includes('.')) {
-        this.value += '.';
-        this.$dispatch('input', { value: this.value });
-      }
-    },
-
-    toggleSign() {
-      if (this.negative) {
-        if (this.value.startsWith('-')) {
-          this.value = this.value.slice(1);
-        } else {
-          this.value = '-' + this.value;
-        }
-        this.$dispatch('input', { value: this.value });
-      }
+    setQuickAmount(amount) {
+      this.value = amount.toString();
+      this.$dispatch('numpad-change', { value: this.value, numericValue: amount });
     },
 
     submit() {
-      this.$dispatch('submit', { value: this.value });
+      this.$dispatch('numpad-submit', {
+        value: this.value,
+        numericValue: this.numericValue
+      });
+    },
+
+    // PIN mode helpers
+    getPinDots() {
+      const dots = [];
+      for (let i = 0; i < this.pinLength; i++) {
+        dots.push(i < this.value.length);
+      }
+      return dots;
+    }
+  };
+}
+
+// Pinpad Component - Dedicated PIN entry component
+function uxPinpad(options = {}) {
+  return {
+    length: options.length || 4,
+    label: options.label || 'Enter PIN',
+    hint: options.hint || '',
+    loadingText: options.loadingText || 'Verifying...',
+    pin: '',
+    loading: false,
+    errorMessage: '',
+    successState: false,
+
+    keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'backspace'],
+
+    getBackspaceIcon() {
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>';
+    },
+
+    getDotClass(index) {
+      const classes = [];
+      if (index < this.pin.length) {
+        classes.push('ux-pinpad__dot--filled');
+      }
+      if (this.errorMessage) {
+        classes.push('ux-pinpad__dot--error');
+      }
+      if (this.successState) {
+        classes.push('ux-pinpad__dot--success');
+      }
+      return classes.join(' ');
+    },
+
+    handleKey(key) {
+      if (this.loading) return;
+
+      // Clear error state on input
+      if (this.errorMessage) {
+        this.errorMessage = '';
+      }
+
+      if (key === 'backspace') {
+        this.pin = this.pin.slice(0, -1);
+      } else if (key !== '' && this.pin.length < this.length) {
+        this.pin += key;
+
+        // Auto-submit when PIN is complete
+        if (this.pin.length === this.length) {
+          this.$nextTick(() => {
+            this.$dispatch('pinpad-submit', { pin: this.pin });
+          });
+        }
+      }
+    },
+
+    setLoading(state) {
+      this.loading = state;
+    },
+
+    setError(message) {
+      this.loading = false;
+      this.errorMessage = message;
+      this.pin = '';
+      this.successState = false;
+    },
+
+    setSuccess() {
+      this.loading = false;
+      this.errorMessage = '';
+      this.successState = true;
+    },
+
+    reset() {
+      this.pin = '';
+      this.loading = false;
+      this.errorMessage = '';
+      this.successState = false;
     }
   };
 }
@@ -4282,37 +5965,129 @@ function uxRichText(options = {}) {
 // Quantity Stepper Component
 function uxQuantityStepper(options = {}) {
   return {
-    value: options.value || 1,
+    value: options.value ?? 1,
     min: options.min ?? 0,
     max: options.max ?? Infinity,
     step: options.step || 1,
+    disabled: options.disabled || false,
+    _holdInterval: null,
+    _holdTimeout: null,
+
+    // Icons
+    minusIcon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    plusIcon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+
+    get isAtMin() {
+      return this.value <= this.min;
+    },
+
+    get isAtMax() {
+      return this.value >= this.max;
+    },
+
+    get canIncrement() {
+      return !this.disabled && this.value + this.step <= this.max;
+    },
+
+    get canDecrement() {
+      return !this.disabled && this.value - this.step >= this.min;
+    },
 
     increment() {
-      if (this.value + this.step <= this.max) {
-        this.value += this.step;
-        this.$dispatch('change', { value: this.value });
+      if (this.canIncrement) {
+        this.value = Math.min(this.max, this.value + this.step);
+        this._emitChange();
       }
     },
 
     decrement() {
-      if (this.value - this.step >= this.min) {
-        this.value -= this.step;
-        this.$dispatch('change', { value: this.value });
+      if (this.canDecrement) {
+        this.value = Math.max(this.min, this.value - this.step);
+        this._emitChange();
       }
     },
 
     setValue(val) {
-      const num = parseFloat(val) || 0;
+      const num = parseFloat(val);
+      if (isNaN(num)) return;
       this.value = Math.min(this.max, Math.max(this.min, num));
+      this._emitChange();
+    },
+
+    // Hold-to-repeat functionality
+    onIncrementStart(event) {
+      event.preventDefault();
+      this.increment();
+      this._startHold(() => this.increment());
+    },
+
+    onDecrementStart(event) {
+      event.preventDefault();
+      this.decrement();
+      this._startHold(() => this.decrement());
+    },
+
+    onPressEnd() {
+      this._stopHold();
+    },
+
+    _startHold(action) {
+      this._stopHold();
+      // Start repeating after 400ms, then every 100ms
+      this._holdTimeout = setTimeout(() => {
+        this._holdInterval = setInterval(action, 100);
+      }, 400);
+    },
+
+    _stopHold() {
+      if (this._holdTimeout) {
+        clearTimeout(this._holdTimeout);
+        this._holdTimeout = null;
+      }
+      if (this._holdInterval) {
+        clearInterval(this._holdInterval);
+        this._holdInterval = null;
+      }
+    },
+
+    // Input handlers
+    onInput(event) {
+      // Allow typing, validation happens on blur
+      const val = event.target.value;
+      if (val === '' || val === '-') return;
+      const num = parseFloat(val);
+      if (!isNaN(num)) {
+        this.value = num;
+      }
+    },
+
+    onBlur(event) {
+      // Clamp value on blur
+      const num = parseFloat(event.target.value);
+      if (isNaN(num)) {
+        this.value = this.min;
+      } else {
+        this.value = Math.min(this.max, Math.max(this.min, num));
+      }
+      event.target.value = this.value;
+      this._emitChange();
+    },
+
+    onKeydown(event) {
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.increment();
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.decrement();
+      } else if (event.key === 'Enter') {
+        event.target.blur();
+      }
+    },
+
+    _emitChange() {
+      this.$dispatch('quantity-change', { value: this.value });
       this.$dispatch('change', { value: this.value });
-    },
-
-    get canIncrement() {
-      return this.value + this.step <= this.max;
-    },
-
-    get canDecrement() {
-      return this.value - this.step >= this.min;
     }
   };
 }
@@ -4437,23 +6212,40 @@ function uxJsonViewer(options = {}) {
   };
 }
 
-// Fab Component
+// Fab Component - Speed Dial FAB
 function uxFab(options = {}) {
   return {
-    open: false,
-    position: options.position || 'bottom-right',
-    actions: options.actions || [],
+    isOpen: false,
+    hidden: false,
+    hideOnScroll: options.hideOnScroll || false,
+    threshold: options.threshold || 50,
+    _lastScrollY: 0,
 
     toggle() {
-      this.open = !this.open;
+      this.isOpen = !this.isOpen;
+    },
+
+    open() {
+      this.isOpen = true;
     },
 
     close() {
-      this.open = false;
+      this.isOpen = false;
     },
 
-    doAction(action) {
-      this.$dispatch('action', { action });
+    handleScroll(y) {
+      if (!this.hideOnScroll) return;
+
+      if (y > this._lastScrollY && y > this.threshold) {
+        this.hidden = true;
+      } else {
+        this.hidden = false;
+      }
+      this._lastScrollY = y;
+    },
+
+    handleAction(fn) {
+      if (typeof fn === 'function') fn();
       this.close();
     }
   };
@@ -4510,18 +6302,64 @@ function uxContextMenu(options = {}) {
 // Mega Menu Component
 function uxMegaMenu(options = {}) {
   return {
-    open: false,
+    isOpen: false,
     activeCategory: null,
     categories: options.categories || [],
+    openOnHover: options.openOnHover || false,
+    hoverDelay: options.hoverDelay || 150,
+    closeOnClickOutside: options.closeOnClickOutside !== false,
+    closeOnEscape: options.closeOnEscape !== false,
+    _hoverTimeout: null,
 
-    openMenu(category) {
-      this.activeCategory = category;
-      this.open = true;
+    init() {
+      // Close on click outside
+      if (this.closeOnClickOutside) {
+        document.addEventListener('click', (e) => {
+          if (this.isOpen && !this.$el.contains(e.target)) {
+            this.close();
+          }
+        });
+      }
+
+      // Close on Escape
+      if (this.closeOnEscape) {
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.isOpen) {
+            this.close();
+          }
+        });
+      }
     },
 
-    closeMenu() {
-      this.open = false;
+    open() {
+      this.isOpen = true;
+      this.$dispatch('megamenu:open');
+    },
+
+    close() {
+      this.isOpen = false;
       this.activeCategory = null;
+      this.$dispatch('megamenu:close');
+    },
+
+    toggle() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    },
+
+    handleMouseEnter() {
+      if (!this.openOnHover) return;
+      if (this._hoverTimeout) clearTimeout(this._hoverTimeout);
+      this._hoverTimeout = setTimeout(() => this.open(), this.hoverDelay);
+    },
+
+    handleMouseLeave() {
+      if (!this.openOnHover) return;
+      if (this._hoverTimeout) clearTimeout(this._hoverTimeout);
+      this._hoverTimeout = setTimeout(() => this.close(), this.hoverDelay);
     },
 
     setCategory(category) {
@@ -4618,26 +6456,158 @@ function uxLoadMore(options = {}) {
   };
 }
 
-// Picker Component
+// Picker Component - iOS-style wheel picker
 function uxPicker(options = {}) {
-  return {
-    open: false,
-    value: options.value || null,
-    options: options.options || [],
-    columns: options.columns || 1,
+  const ITEM_HEIGHT = 40;
+  const VISIBLE_ITEMS = 5;
 
-    toggle() {
-      this.open = !this.open;
+  return {
+    isOpen: false,
+    title: options.title || '',
+    columns: options.columns || [],
+    selectedIndexes: [],
+    _columnStates: {},
+    _initialIndexes: [],
+
+    init() {
+      // Initialize selectedIndexes from columns
+      this.selectedIndexes = this.columns.map(col => col.selectedIndex || 0);
+      this._initialIndexes = [...this.selectedIndexes];
+
+      // Initialize column states for drag tracking
+      this.columns.forEach((_, i) => {
+        this._columnStates[i] = {
+          isDragging: false,
+          startY: 0,
+          currentY: 0,
+          startOffset: 0
+        };
+      });
+    },
+
+    open(opts) {
+      if (opts) {
+        if (opts.title) this.title = opts.title;
+        if (opts.columns) {
+          this.columns = opts.columns;
+          this.selectedIndexes = this.columns.map(col => col.selectedIndex || 0);
+        }
+      }
+      this._initialIndexes = [...this.selectedIndexes];
+      this.isOpen = true;
+      document.body.style.overflow = 'hidden';
     },
 
     close() {
-      this.open = false;
+      this.isOpen = false;
+      document.body.style.overflow = '';
     },
 
-    select(option) {
-      this.value = option;
-      this.$dispatch('change', { value: option });
+    cancel() {
+      // Restore initial values
+      this.selectedIndexes = [...this._initialIndexes];
+      this.$dispatch('picker-cancel');
       this.close();
+    },
+
+    confirm() {
+      this._initialIndexes = [...this.selectedIndexes];
+      const values = this.getValues();
+      this.$dispatch('picker-confirm', { values, indexes: this.selectedIndexes });
+      this.close();
+    },
+
+    getValues() {
+      return this.columns.map((col, i) => {
+        const option = col.options[this.selectedIndexes[i]];
+        return typeof option === 'object' ? option.value || option.text : option;
+      });
+    },
+
+    setValues(values) {
+      values.forEach((value, colIndex) => {
+        const col = this.columns[colIndex];
+        if (col) {
+          const index = col.options.findIndex(opt =>
+            (typeof opt === 'object' ? (opt.value || opt.text) : opt) === value
+          );
+          if (index !== -1) {
+            this.selectedIndexes[colIndex] = index;
+          }
+        }
+      });
+    },
+
+    isSelected(colIndex, optIndex) {
+      return this.selectedIndexes[colIndex] === optIndex;
+    },
+
+    selectItem(colIndex, optIndex) {
+      this.selectedIndexes[colIndex] = optIndex;
+      this.$dispatch('picker-change', {
+        columnIndex: colIndex,
+        optionIndex: optIndex,
+        value: this.columns[colIndex].options[optIndex]
+      });
+    },
+
+    scrollToIndex(colIndex, index, animate = true) {
+      this.selectedIndexes[colIndex] = Math.max(0, Math.min(index, this.columns[colIndex].options.length - 1));
+    },
+
+    getColumnTransform(colIndex) {
+      const state = this._columnStates[colIndex];
+      const selectedIndex = this.selectedIndexes[colIndex];
+      const centerOffset = Math.floor(VISIBLE_ITEMS / 2) * ITEM_HEIGHT;
+
+      let offset = centerOffset - (selectedIndex * ITEM_HEIGHT);
+
+      if (state && state.isDragging) {
+        offset += state.currentY - state.startY;
+      }
+
+      return `translateY(${offset}px)`;
+    },
+
+    onTouchStart(e, colIndex) {
+      const state = this._columnStates[colIndex];
+      state.isDragging = true;
+      state.startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+      state.currentY = state.startY;
+      state.startOffset = this.selectedIndexes[colIndex];
+
+      if (e.type.includes('mouse')) {
+        e.preventDefault();
+      }
+    },
+
+    onTouchMove(e, colIndex) {
+      const state = this._columnStates[colIndex];
+      if (!state.isDragging) return;
+
+      state.currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+
+      // Calculate new index based on drag distance
+      const deltaY = state.currentY - state.startY;
+      const deltaIndex = Math.round(-deltaY / ITEM_HEIGHT);
+      const newIndex = state.startOffset + deltaIndex;
+      const maxIndex = this.columns[colIndex].options.length - 1;
+
+      this.selectedIndexes[colIndex] = Math.max(0, Math.min(newIndex, maxIndex));
+    },
+
+    onTouchEnd(e, colIndex) {
+      const state = this._columnStates[colIndex];
+      if (!state.isDragging) return;
+
+      state.isDragging = false;
+
+      // Dispatch change event
+      this.$dispatch('picker-change', {
+        columnIndex: colIndex,
+        optionIndex: this.selectedIndexes[colIndex],
+        value: this.columns[colIndex].options[this.selectedIndexes[colIndex]]
+      });
     }
   };
 }
@@ -4833,13 +6803,57 @@ function uxTextarea(options = {}) {
 // Section Component
 function uxSection(options = {}) {
   return {
-    collapsed: options.collapsed || false,
-    collapsible: options.collapsible || false,
+    expanded: options.expanded !== false,  // Default to expanded
+    collapsed: options.collapsed || false,  // Legacy support
+    collapsible: options.collapsible !== false,  // Default to collapsible
+
+    init() {
+      // Sync legacy collapsed prop with expanded
+      if (options.collapsed !== undefined) {
+        this.expanded = !options.collapsed;
+      }
+    },
 
     toggle() {
       if (this.collapsible) {
-        this.collapsed = !this.collapsed;
+        this.expanded = !this.expanded;
+        this.collapsed = !this.expanded;
+        this.$dispatch('section:toggle', { expanded: this.expanded });
       }
+    },
+
+    expand() {
+      this.expanded = true;
+      this.collapsed = false;
+      this.$dispatch('section:expand');
+    },
+
+    collapse() {
+      this.expanded = false;
+      this.collapsed = true;
+      this.$dispatch('section:collapse');
+    },
+
+    handleKeydown(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        this.toggle();
+      }
+    },
+
+    get headerAriaAttrs() {
+      return {
+        'role': 'button',
+        'tabindex': this.collapsible ? '0' : '-1',
+        'aria-expanded': this.expanded ? 'true' : 'false'
+      };
+    },
+
+    get sectionClasses() {
+      return {
+        'ux-section--expanded': this.expanded,
+        'ux-section--collapsed': !this.expanded
+      };
     }
   };
 }
@@ -4860,16 +6874,71 @@ function uxContent(options = {}) {
 
 // Shell Component
 function uxShell(options = {}) {
-  return {
-    sidebarOpen: options.sidebarOpen !== false,
-    sidebarCollapsed: options.sidebarCollapsed || false,
+  const MOBILE_BREAKPOINT = options.breakpoint || 768;
 
-    toggleSidebar() {
-      this.sidebarOpen = !this.sidebarOpen;
+  return {
+    sidebarOpen: options.sidebarOpen || false,  // On mobile, sidebar overlay
+    sidebarCollapsed: options.sidebarCollapsed || false,  // On desktop, collapsed state
+    breakpoint: MOBILE_BREAKPOINT,
+
+    init() {
+      // Handle resize to close mobile sidebar when going to desktop
+      this._handleResize = () => {
+        if (window.innerWidth >= this.breakpoint) {
+          this.sidebarOpen = false;
+        }
+      };
+      window.addEventListener('resize', this._handleResize);
     },
 
+    destroy() {
+      window.removeEventListener('resize', this._handleResize);
+    },
+
+    get isMobile() {
+      return window.innerWidth < this.breakpoint;
+    },
+
+    get shellClasses() {
+      return {
+        'ux-shell--sidebar-open': this.sidebarOpen,
+        'ux-shell--sidebar-collapsed': this.sidebarCollapsed
+      };
+    },
+
+    // Toggle sidebar (mobile: overlay, desktop: collapse)
+    toggleSidebar() {
+      if (this.isMobile) {
+        this.sidebarOpen = !this.sidebarOpen;
+        this.$dispatch('shell:sidebar-toggle', { open: this.sidebarOpen });
+      } else {
+        this.sidebarCollapsed = !this.sidebarCollapsed;
+        this.$dispatch('shell:sidebar-collapse', { collapsed: this.sidebarCollapsed });
+      }
+    },
+
+    // Open sidebar (mobile overlay)
+    openSidebar() {
+      this.sidebarOpen = true;
+      this.$dispatch('shell:sidebar-open');
+    },
+
+    // Close sidebar (mobile overlay)
+    closeSidebar() {
+      this.sidebarOpen = false;
+      this.$dispatch('shell:sidebar-close');
+    },
+
+    // Collapse/expand sidebar (desktop)
     collapseSidebar() {
       this.sidebarCollapsed = !this.sidebarCollapsed;
+      this.$dispatch('shell:sidebar-collapse', { collapsed: this.sidebarCollapsed });
+    },
+
+    // Expand sidebar (desktop)
+    expandSidebar() {
+      this.sidebarCollapsed = false;
+      this.$dispatch('shell:sidebar-expand');
     }
   };
 }
@@ -4887,31 +6956,173 @@ function uxSplitPane(options = {}) {
 }
 
 function uxSplitPaneRight(options = {}) {
-  return {
-    sideVisible: options.sideVisible !== false,
-    sideWidth: options.sideWidth || 300,
+  const MOBILE_BREAKPOINT = options.breakpoint || 992;
 
-    toggleSide() {
-      this.sideVisible = !this.sideVisible;
+  return {
+    isOpen: false,          // Overlay state (mobile)
+    isCollapsed: options.collapsed || false,  // Collapsed state (desktop)
+    breakpoint: MOBILE_BREAKPOINT,
+
+    init() {
+      // Listen for resize to handle responsive behavior
+      this._handleResize = () => {
+        if (window.innerWidth >= this.breakpoint) {
+          // On desktop, close overlay
+          this.isOpen = false;
+        }
+      };
+      window.addEventListener('resize', this._handleResize);
+    },
+
+    destroy() {
+      window.removeEventListener('resize', this._handleResize);
+    },
+
+    get isMobile() {
+      return window.innerWidth < this.breakpoint;
+    },
+
+    get containerClasses() {
+      return {
+        'ux-split-pane-right--open': this.isOpen,
+        'ux-split-pane-right--collapsed': this.isCollapsed
+      };
+    },
+
+    toggle() {
+      if (this.isMobile) {
+        this.isOpen = !this.isOpen;
+      } else {
+        this.isCollapsed = !this.isCollapsed;
+      }
+      this.$dispatch('splitpaneright:toggle', { isOpen: this.isOpen, isCollapsed: this.isCollapsed });
+    },
+
+    open() {
+      this.isOpen = true;
+      this.$dispatch('splitpaneright:open');
+    },
+
+    close() {
+      this.isOpen = false;
+      this.$dispatch('splitpaneright:close');
+    },
+
+    show() {
+      this.isCollapsed = false;
+      this.$dispatch('splitpaneright:show');
+    },
+
+    hide() {
+      this.isCollapsed = true;
+      this.$dispatch('splitpaneright:hide');
     }
   };
 }
 
 // Master Detail Component
 function uxMasterDetail(options = {}) {
-  return {
-    selectedItem: null,
-    showDetail: false,
+  const MOBILE_BREAKPOINT = options.breakpoint || 768;
 
-    selectItem(item) {
-      this.selectedItem = item;
-      this.showDetail = true;
-      this.$dispatch('select', { item });
+  return {
+    selectedId: options.initialSelection || null,
+    selectedItem: null,
+    items: options.items || [],
+    masterOpen: options.masterOpenByDefault || false,
+    breakpoint: MOBILE_BREAKPOINT,
+
+    init() {
+      // Handle resize for responsive behavior
+      this._handleResize = () => {
+        if (window.innerWidth >= this.breakpoint) {
+          this.masterOpen = false;
+        }
+      };
+      window.addEventListener('resize', this._handleResize);
+
+      // If initialSelection provided, select that item
+      if (this.selectedId && this.items.length > 0) {
+        this.selectedItem = this.items.find(i => i.id === this.selectedId);
+      }
     },
 
+    destroy() {
+      window.removeEventListener('resize', this._handleResize);
+    },
+
+    get isMobile() {
+      return window.innerWidth < this.breakpoint;
+    },
+
+    get containerClasses() {
+      return {
+        'ux-master-detail--master-open': this.masterOpen && this.isMobile,
+        'ux-master-detail--has-selection': this.selectedId !== null
+      };
+    },
+
+    // Select by ID
+    select(id) {
+      this.selectedId = id;
+      this.selectedItem = this.items.find(i => i.id === id) || { id };
+      // On mobile, close master when selecting
+      if (this.isMobile) {
+        this.masterOpen = false;
+      }
+      this.$dispatch('masterdetail:select', { id, item: this.selectedItem });
+    },
+
+    // Legacy method for selecting by item object
+    selectItem(item) {
+      this.selectedItem = item;
+      this.selectedId = item?.id || null;
+      if (this.isMobile) {
+        this.masterOpen = false;
+      }
+      this.$dispatch('masterdetail:select', { id: this.selectedId, item });
+    },
+
+    // Check if item is selected
+    isSelected(id) {
+      return this.selectedId === id;
+    },
+
+    // Clear selection
     clearSelection() {
+      this.selectedId = null;
       this.selectedItem = null;
-      this.showDetail = false;
+    },
+
+    // Toggle master panel (mobile)
+    toggleMaster() {
+      this.masterOpen = !this.masterOpen;
+      this.$dispatch('masterdetail:toggle', { open: this.masterOpen });
+    },
+
+    // Open master panel (mobile)
+    openMaster() {
+      this.masterOpen = true;
+      this.$dispatch('masterdetail:open');
+    },
+
+    // Close master panel (mobile)
+    closeMaster() {
+      this.masterOpen = false;
+      this.$dispatch('masterdetail:close');
+    },
+
+    // Get selected item data
+    getSelectedItem() {
+      return this.selectedItem;
+    },
+
+    // Check if has selection
+    get hasSelection() {
+      return this.selectedId !== null;
+    },
+
+    get showDetail() {
+      return this.selectedId !== null;
     }
   };
 }
@@ -4919,17 +7130,145 @@ function uxMasterDetail(options = {}) {
 // Dashboard Grid Component
 function uxDashboardGrid(options = {}) {
   return {
-    widgets: options.widgets || [],
+    items: options.items || options.widgets || [],
+    columns: options.columns || 4,
     editing: false,
+    _draggedIndex: null,
+    _dragOverIndex: null,
+    _nextItemId: 1000,
 
-    toggleEdit() {
-      this.editing = !this.editing;
+    init() {
+      // Ensure all items have IDs
+      this.items.forEach((item, i) => {
+        if (!item.id) item.id = `widget-${i}`;
+      });
     },
 
+    // Toggle edit mode
+    toggleEdit() {
+      this.editing = !this.editing;
+      if (!this.editing) {
+        this.$dispatch('dashboard:save', { items: this.items });
+      }
+    },
+
+    // Get grid columns class
+    getGridClass() {
+      return `ux-dashboard-grid--cols-${this.columns}`;
+    },
+
+    // Get item size class
+    getItemSizeClass(size) {
+      const sizeMap = {
+        'sm': 'ux-dashboard-grid__item--sm',
+        'md': 'ux-dashboard-grid__item--md',
+        'lg': 'ux-dashboard-grid__item--lg',
+        'full': 'ux-dashboard-grid__item--full',
+        'half': 'ux-dashboard-grid__item--half'
+      };
+      return sizeMap[size] || sizeMap['sm'];
+    },
+
+    // Add new item
+    addItem(item) {
+      const newItem = {
+        id: item.id || `widget-${this._nextItemId++}`,
+        title: item.title || 'New Widget',
+        size: item.size || 'sm',
+        ...item
+      };
+      this.items.push(newItem);
+      this.$dispatch('dashboard:add', { item: newItem });
+    },
+
+    // Remove item
+    removeItem(id) {
+      const index = this.items.findIndex(item => item.id === id);
+      if (index !== -1) {
+        const removed = this.items.splice(index, 1)[0];
+        this.$dispatch('dashboard:remove', { item: removed });
+      }
+    },
+
+    // Resize item
+    resizeItem(id, newSize) {
+      const item = this.items.find(item => item.id === id);
+      if (item) {
+        item.size = newSize;
+        this.$dispatch('dashboard:resize', { item, size: newSize });
+      }
+    },
+
+    // Move widget (for programmatic reorder)
     moveWidget(fromIndex, toIndex) {
-      const widget = this.widgets.splice(fromIndex, 1)[0];
-      this.widgets.splice(toIndex, 0, widget);
-      this.$dispatch('reorder', { widgets: this.widgets });
+      if (fromIndex === toIndex) return;
+      const item = this.items.splice(fromIndex, 1)[0];
+      this.items.splice(toIndex, 0, item);
+      this.$dispatch('dashboard:move', { from: fromIndex, to: toIndex, item });
+    },
+
+    // Drag and drop handlers
+    isDragging(index) {
+      return this._draggedIndex === index;
+    },
+
+    isDragOver(index) {
+      return this._dragOverIndex === index && this._draggedIndex !== index;
+    },
+
+    onDragStart(index, event) {
+      if (!this.editing) return;
+      this._draggedIndex = index;
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', index.toString());
+      // Add dragging class after a small delay for visual feedback
+      setTimeout(() => {
+        if (event.target) {
+          event.target.classList.add('ux-dashboard-grid__item--dragging');
+        }
+      }, 0);
+    },
+
+    onDragOver(index, event) {
+      if (!this.editing || this._draggedIndex === null) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      this._dragOverIndex = index;
+    },
+
+    onDragEnd(event) {
+      this._draggedIndex = null;
+      this._dragOverIndex = null;
+      if (event.target) {
+        event.target.classList.remove('ux-dashboard-grid__item--dragging');
+      }
+    },
+
+    onDrop(targetIndex, event) {
+      event.preventDefault();
+      if (!this.editing || this._draggedIndex === null) return;
+
+      const fromIndex = this._draggedIndex;
+      if (fromIndex !== targetIndex) {
+        this.moveWidget(fromIndex, targetIndex);
+      }
+
+      this._draggedIndex = null;
+      this._dragOverIndex = null;
+    },
+
+    // Get item by ID
+    getItem(id) {
+      return this.items.find(item => item.id === id);
+    },
+
+    // Update item data
+    updateItem(id, data) {
+      const item = this.items.find(item => item.id === id);
+      if (item) {
+        Object.assign(item, data);
+        this.$dispatch('dashboard:update', { item });
+      }
     }
   };
 }
@@ -5450,35 +7789,254 @@ function uxProductionLine(options = {}) {
 // Quality Check Component
 function uxQualityCheck(options = {}) {
   return {
-    checks: options.checks || [],
-    status: 'pending',
+    // Configuration
+    title: options.title || 'Quality Check',
+    subtitle: options.subtitle || '',
+    orderNumber: options.orderNumber || '',
+    productName: options.productName || '',
+    batchNumber: options.batchNumber || '',
+    inspector: options.inspector || '',
 
-    get passedCount() {
-      return this.checks.filter(c => c.passed === true).length;
+    // Timestamps
+    startedAt: new Date().toISOString(),
+    completedAt: null,
+
+    // Signatures
+    inspectorSignature: null,
+    supervisorSignature: null,
+
+    // Defect categories
+    defectCategories: options.defectCategories || [
+      'Rayadura', 'Mancha', 'Deformacion', 'Grieta',
+      'Color', 'Dimension', 'Otro'
+    ],
+
+    // Items initialized from checklistItems
+    items: [],
+
+    // Icons
+    icons: {
+      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+      x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+      minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+      clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+      camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>',
+      print: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>',
+      save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>'
     },
 
-    get failedCount() {
-      return this.checks.filter(c => c.passed === false).length;
+    init() {
+      // Initialize items from checklistItems
+      const checklistItems = options.checklistItems || [];
+      this.items = checklistItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description || '',
+        required: item.required !== false,
+        status: item.status || null, // 'pass', 'fail', 'na', null
+        notes: item.notes || '',
+        photos: item.photos || [],
+        defects: item.defects || [],
+        // Measurement support
+        measurement: item.hasMeasurement ? {
+          unit: item.measurementUnit || '',
+          min: item.measurementMin,
+          max: item.measurementMax,
+          target: item.measurementTarget,
+          value: item.measurementValue || null
+        } : null
+      }));
+    },
+
+    // Computed properties
+    get passCount() {
+      return this.items.filter(item => item.status === 'pass').length;
+    },
+
+    get failCount() {
+      return this.items.filter(item => item.status === 'fail').length;
+    },
+
+    get naCount() {
+      return this.items.filter(item => item.status === 'na').length;
     },
 
     get pendingCount() {
-      return this.checks.filter(c => c.passed === null || c.passed === undefined).length;
+      return this.items.filter(item => item.status === null).length;
     },
 
-    setCheckResult(index, passed) {
-      if (this.checks[index]) {
-        this.checks[index].passed = passed;
-        this.updateStatus();
+    get totalCount() {
+      return this.items.length;
+    },
+
+    get completionPercent() {
+      if (this.totalCount === 0) return 0;
+      const completed = this.passCount + this.failCount + this.naCount;
+      return Math.round((completed / this.totalCount) * 100);
+    },
+
+    get overallStatus() {
+      if (this.failCount > 0) return 'fail';
+      if (this.pendingCount === 0 && this.passCount > 0) return 'pass';
+      return 'pending';
+    },
+
+    get isComplete() {
+      // All required items must have a status
+      return this.items
+        .filter(item => item.required)
+        .every(item => item.status !== null);
+    },
+
+    // Methods
+    setStatus(itemId, status) {
+      const item = this.items.find(i => i.id === itemId);
+      if (item) {
+        item.status = status;
+        this.$dispatch('qualitycheck:statuschange', { itemId, status, item });
       }
     },
 
-    updateStatus() {
-      if (this.failedCount > 0) {
-        this.status = 'failed';
-      } else if (this.pendingCount === 0) {
-        this.status = 'passed';
-      } else {
-        this.status = 'pending';
+    updateNotes(itemId, notes) {
+      const item = this.items.find(i => i.id === itemId);
+      if (item) {
+        item.notes = notes;
+      }
+    },
+
+    updateMeasurement(itemId, value) {
+      const item = this.items.find(i => i.id === itemId);
+      if (item && item.measurement) {
+        item.measurement.value = parseFloat(value) || null;
+
+        // Auto-set status based on measurement
+        if (item.measurement.value !== null) {
+          const inRange = this.isInRange(item);
+          if (inRange === true) {
+            item.status = 'pass';
+          } else if (inRange === false) {
+            item.status = 'fail';
+          }
+        }
+
+        this.$dispatch('qualitycheck:measurementchange', { itemId, value: item.measurement.value, item });
+      }
+    },
+
+    isInRange(item) {
+      if (!item.measurement || item.measurement.value === null) return null;
+      const { value, min, max } = item.measurement;
+      if (min !== undefined && max !== undefined) {
+        return value >= min && value <= max;
+      }
+      return null;
+    },
+
+    addPhoto(itemId, file) {
+      if (!file) return;
+
+      const item = this.items.find(i => i.id === itemId);
+      if (!item) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const photo = {
+          id: Date.now().toString(),
+          name: file.name,
+          data: e.target.result,
+          timestamp: new Date().toISOString()
+        };
+        item.photos.push(photo);
+        this.$dispatch('qualitycheck:photochange', { itemId, photo, action: 'add' });
+      };
+      reader.readAsDataURL(file);
+    },
+
+    removePhoto(itemId, photoId) {
+      const item = this.items.find(i => i.id === itemId);
+      if (item) {
+        const index = item.photos.findIndex(p => p.id === photoId);
+        if (index !== -1) {
+          const photo = item.photos.splice(index, 1)[0];
+          this.$dispatch('qualitycheck:photochange', { itemId, photo, action: 'remove' });
+        }
+      }
+    },
+
+    toggleDefect(itemId, defect) {
+      const item = this.items.find(i => i.id === itemId);
+      if (item) {
+        const index = item.defects.indexOf(defect);
+        if (index === -1) {
+          item.defects.push(defect);
+        } else {
+          item.defects.splice(index, 1);
+        }
+        this.$dispatch('qualitycheck:defectchange', { itemId, defect, defects: item.defects });
+      }
+    },
+
+    complete() {
+      if (!this.isComplete) {
+        this.$dispatch('qualitycheck:incomplete', {
+          pendingRequired: this.items.filter(i => i.required && i.status === null)
+        });
+        return;
+      }
+
+      this.completedAt = new Date().toISOString();
+      this.$dispatch('qualitycheck:complete', this.getData());
+    },
+
+    print() {
+      window.print();
+    },
+
+    getData() {
+      return {
+        title: this.title,
+        subtitle: this.subtitle,
+        orderNumber: this.orderNumber,
+        productName: this.productName,
+        batchNumber: this.batchNumber,
+        inspector: this.inspector,
+        startedAt: this.startedAt,
+        completedAt: this.completedAt,
+        inspectorSignature: this.inspectorSignature,
+        supervisorSignature: this.supervisorSignature,
+        items: this.items.map(item => ({
+          id: item.id,
+          name: item.name,
+          status: item.status,
+          notes: item.notes,
+          measurement: item.measurement,
+          defects: item.defects,
+          photoCount: item.photos.length
+        })),
+        summary: {
+          passCount: this.passCount,
+          failCount: this.failCount,
+          naCount: this.naCount,
+          totalCount: this.totalCount,
+          completionPercent: this.completionPercent,
+          overallStatus: this.overallStatus
+        }
+      };
+    },
+
+    formatTimestamp(isoString) {
+      if (!isoString) return '';
+      try {
+        const date = new Date(isoString);
+        return date.toLocaleString('es-ES', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return isoString;
       }
     }
   };
@@ -5859,54 +8417,449 @@ function uxCategoryTabs(options = {}) {
 
 // Onscreen Keyboard Component
 function uxOnscreenKeyboard(options = {}) {
-  return {
-    layout: options.layout || 'qwerty',
-    shift: false,
-    caps: false,
-    value: '',
+  // Keyboard layouts for multiple languages
+  const LAYOUTS = {
+    en: {
+      code: 'en',
+      name: 'English',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+        ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+        ['{shift}', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'],
+        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+        ['{shift}', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    },
+    es: {
+      code: 'es',
+      name: 'Español',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+        ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ñ'],
+        ['{shift}', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '"', '#', '$', '%', '&', '/', '(', ')', '='],
+        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
+        ['{shift}', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    },
+    fr: {
+      code: 'fr',
+      name: 'Français',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+        ['q', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm'],
+        ['{shift}', 'w', 'x', 'c', 'v', 'b', 'n', 'é', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '@', '#', '€', '%', '^', '&', '*', '(', ')'],
+        ['A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+        ['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M'],
+        ['{shift}', 'W', 'X', 'C', 'V', 'B', 'N', 'É', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    },
+    de: {
+      code: 'de',
+      name: 'Deutsch',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p', 'ü'],
+        ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ö', 'ä'],
+        ['{shift}', 'y', 'x', 'c', 'v', 'b', 'n', 'm', 'ß', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '"', '§', '$', '%', '&', '/', '(', ')', '='],
+        ['Q', 'W', 'E', 'R', 'T', 'Z', 'U', 'I', 'O', 'P', 'Ü'],
+        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ö', 'Ä'],
+        ['{shift}', 'Y', 'X', 'C', 'V', 'B', 'N', 'M', 'ẞ', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    },
+    it: {
+      code: 'it',
+      name: 'Italiano',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+        ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'è'],
+        ['{shift}', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'ì', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '"', '£', '$', '%', '&', '/', '(', ')', '='],
+        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'É'],
+        ['{shift}', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Ì', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    },
+    pt: {
+      code: 'pt',
+      name: 'Português',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+        ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ç'],
+        ['{shift}', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '@', '#', '$', '%', '&', '*', '(', ')', '-'],
+        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ç'],
+        ['{shift}', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    },
+    ro: {
+      code: 'ro',
+      name: 'Română',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'ă'],
+        ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ș', 'ț'],
+        ['{shift}', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'â', 'î', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'],
+        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Ă'],
+        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ș', 'Ț'],
+        ['{shift}', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Â', 'Î', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    },
+    ru: {
+      code: 'ru',
+      name: 'Русский',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х'],
+        ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'э'],
+        ['{shift}', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '"', '№', ';', '%', ':', '?', '*', '(', ')'],
+        ['Й', 'Ц', 'У', 'К', 'Е', 'Н', 'Г', 'Ш', 'Щ', 'З', 'Х'],
+        ['Ф', 'Ы', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Э'],
+        ['{shift}', 'Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    },
+    uk: {
+      code: 'uk',
+      name: 'Українська',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х'],
+        ['ф', 'і', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'є'],
+        ['{shift}', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', 'ї', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '"', '№', ';', '%', ':', '?', '*', '(', ')'],
+        ['Й', 'Ц', 'У', 'К', 'Е', 'Н', 'Г', 'Ш', 'Щ', 'З', 'Х'],
+        ['Ф', 'І', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Є'],
+        ['{shift}', 'Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю', 'Ї', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    },
+    bg: {
+      code: 'bg',
+      name: 'Български',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['я', 'в', 'е', 'р', 'т', 'ъ', 'у', 'и', 'о', 'п', 'ш'],
+        ['а', 'с', 'д', 'ф', 'г', 'х', 'й', 'к', 'л', 'ю'],
+        ['{shift}', 'з', 'ь', 'ц', 'ж', 'б', 'н', 'м', 'ч', 'щ', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '?', '+', '"', '%', '=', ':', '/', '_', '№'],
+        ['Я', 'В', 'Е', 'Р', 'Т', 'Ъ', 'У', 'И', 'О', 'П', 'Ш'],
+        ['А', 'С', 'Д', 'Ф', 'Г', 'Х', 'Й', 'К', 'Л', 'Ю'],
+        ['{shift}', 'З', 'Ь', 'Ц', 'Ж', 'Б', 'Н', 'М', 'Ч', 'Щ', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    },
+    el: {
+      code: 'el',
+      name: 'Ελληνικά',
+      rows: [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['ς', 'ε', 'ρ', 'τ', 'υ', 'θ', 'ι', 'ο', 'π'],
+        ['α', 'σ', 'δ', 'φ', 'γ', 'η', 'ξ', 'κ', 'λ'],
+        ['{shift}', 'ζ', 'χ', 'ψ', 'ω', 'β', 'ν', 'μ', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', '.', '{enter}']
+      ],
+      shiftRows: [
+        ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'],
+        ['΅', 'Ε', 'Ρ', 'Τ', 'Υ', 'Θ', 'Ι', 'Ο', 'Π'],
+        ['Α', 'Σ', 'Δ', 'Φ', 'Γ', 'Η', 'Ξ', 'Κ', 'Λ'],
+        ['{shift}', 'Ζ', 'Χ', 'Ψ', 'Ω', 'Β', 'Ν', 'Μ', '{backspace}'],
+        ['{numbers}', '{lang}', '{space}', ',', '{enter}']
+      ]
+    }
+  };
 
-    get currentLayout() {
-      const layouts = {
-        qwerty: [
-          ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-          ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-          ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-          ['shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'backspace'],
-          ['space']
-        ],
-        numeric: [
-          ['1', '2', '3'],
-          ['4', '5', '6'],
-          ['7', '8', '9'],
-          ['clear', '0', 'backspace']
-        ]
-      };
-      return layouts[this.layout] || layouts.qwerty;
+  // Numbers layout
+  const NUMBERS_LAYOUT = {
+    rows: [
+      ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+      ['-', '/', ':', ';', '(', ')', '$', '&', '@', '"'],
+      ['{symbols}', '.', ',', '?', '!', "'", '{backspace}'],
+      ['{abc}', '{lang}', '{space}', '.', '{enter}']
+    ]
+  };
+
+  const SYMBOLS_LAYOUT = {
+    rows: [
+      ['[', ']', '{', '}', '#', '%', '^', '*', '+', '='],
+      ['_', '\\', '|', '~', '<', '>', '€', '£', '¥', '•'],
+      ['{numbers}', '.', ',', '?', '!', "'", '{backspace}'],
+      ['{abc}', '{lang}', '{space}', '.', '{enter}']
+    ]
+  };
+
+  return {
+    // State
+    isOpen: false,
+    shift: false,
+    capsLock: false,
+    showNumbers: false,
+    showSymbols: false,
+    showLangPicker: false,
+    currentLanguage: options.defaultLanguage || 'en',
+    languages: options.languages || ['en'],
+    targetSelector: options.targetSelector || null,
+    targetElement: null,
+
+    // Icons
+    icons: {
+      globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1.25em;height:1.25em;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+      close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1.25em;height:1.25em;"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+      backspace: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1.25em;height:1.25em;"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><path d="M18 9l-6 6M12 9l6 6"/></svg>',
+      shift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1.25em;height:1.25em;"><path d="M12 2l9 10h-6v10H9V12H3z"/></svg>',
+      enter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1.25em;height:1.25em;"><path d="M9 10l-5 5 5 5"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>'
     },
 
-    press(key) {
-      switch (key) {
-        case 'shift':
-          this.shift = !this.shift;
-          break;
-        case 'caps':
-          this.caps = !this.caps;
-          break;
-        case 'backspace':
-          this.value = this.value.slice(0, -1);
-          break;
-        case 'space':
-          this.value += ' ';
-          break;
-        case 'clear':
-          this.value = '';
-          break;
-        default:
-          const char = (this.shift || this.caps) ? key.toUpperCase() : key;
-          this.value += char;
-          if (this.shift) this.shift = false;
+    // Computed
+    get currentLayout() {
+      return LAYOUTS[this.currentLanguage] || LAYOUTS.en;
+    },
+
+    get currentRows() {
+      if (this.showSymbols) return SYMBOLS_LAYOUT.rows;
+      if (this.showNumbers) return NUMBERS_LAYOUT.rows;
+      return this.shift || this.capsLock
+        ? this.currentLayout.shiftRows
+        : this.currentLayout.rows;
+    },
+
+    get availableLayouts() {
+      return this.languages
+        .filter(lang => LAYOUTS[lang])
+        .map(lang => ({ code: lang, name: LAYOUTS[lang].name }));
+    },
+
+    // Init
+    init() {
+      if (this.targetSelector) {
+        this.targetElement = document.querySelector(this.targetSelector);
       }
-      this.$dispatch('input', { value: this.value });
+    },
+
+    // Methods
+    open() {
+      this.isOpen = true;
+      this.showLangPicker = false;
+      this.$dispatch('osk:open');
+    },
+
+    close() {
+      this.isOpen = false;
+      this.showLangPicker = false;
+      this.$dispatch('osk:close');
+    },
+
+    toggle() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    },
+
+    selectLanguage(code) {
+      if (LAYOUTS[code]) {
+        this.currentLanguage = code;
+        this.showLangPicker = false;
+        this.$dispatch('osk:language', { language: code, layout: LAYOUTS[code] });
+      }
+    },
+
+    loadLayout(langCode) {
+      this.selectLanguage(langCode);
+    },
+
+    isSpecialKey(key) {
+      return key.startsWith('{') && key.endsWith('}');
+    },
+
+    isSpecialKeyIcon(key) {
+      return ['{shift}', '{backspace}', '{enter}', '{lang}'].includes(key);
+    },
+
+    getSpecialKeyContent(key) {
+      const map = {
+        '{shift}': this.icons.shift,
+        '{backspace}': this.icons.backspace,
+        '{enter}': this.icons.enter,
+        '{space}': '',
+        '{lang}': this.icons.globe,
+        '{numbers}': '123',
+        '{symbols}': '#+=',
+        '{abc}': 'ABC'
+      };
+      return map[key] || key.replace(/[{}]/g, '');
+    },
+
+    getKeyClass(key) {
+      const base = 'ux-onscreen-keyboard__key';
+      const classes = [base];
+
+      if (this.isSpecialKey(key)) {
+        classes.push(`${base}--special`);
+
+        if (key === '{space}') classes.push(`${base}--space`);
+        if (key === '{shift}') {
+          classes.push(`${base}--shift`);
+          if (this.shift || this.capsLock) classes.push(`${base}--active`);
+        }
+        if (key === '{backspace}') classes.push(`${base}--backspace`);
+        if (key === '{enter}') classes.push(`${base}--enter`);
+      }
+
+      return classes.join(' ');
+    },
+
+    displayKey(key) {
+      return key;
+    },
+
+    pressKey(key, event) {
+      if (event) event.preventDefault();
+
+      if (this.isSpecialKey(key)) {
+        switch (key) {
+          case '{shift}':
+            this.toggleShift();
+            break;
+          case '{backspace}':
+            this.handleBackspace();
+            break;
+          case '{enter}':
+            this.handleEnter();
+            break;
+          case '{space}':
+            this.insertCharacter(' ');
+            break;
+          case '{lang}':
+            this.showLangPicker = !this.showLangPicker;
+            break;
+          case '{numbers}':
+            this.showNumbers = true;
+            this.showSymbols = false;
+            break;
+          case '{symbols}':
+            this.showSymbols = true;
+            this.showNumbers = false;
+            break;
+          case '{abc}':
+            this.showNumbers = false;
+            this.showSymbols = false;
+            break;
+        }
+      } else {
+        this.insertCharacter(key);
+        if (this.shift && !this.capsLock) {
+          this.shift = false;
+        }
+      }
+    },
+
+    toggleShift() {
+      if (this.shift) {
+        // If already shifted, double tap = caps lock
+        this.capsLock = !this.capsLock;
+        this.shift = this.capsLock;
+      } else {
+        this.shift = true;
+        this.capsLock = false;
+      }
+    },
+
+    insertCharacter(char) {
+      const target = this.targetElement || document.activeElement;
+      if (!target || !('value' in target)) return;
+
+      const start = target.selectionStart || 0;
+      const end = target.selectionEnd || 0;
+      const value = target.value;
+
+      target.value = value.substring(0, start) + char + value.substring(end);
+      target.selectionStart = target.selectionEnd = start + char.length;
+
+      // Trigger input event
+      target.dispatchEvent(new Event('input', { bubbles: true }));
+      this.$dispatch('osk:input', { key: char });
+    },
+
+    handleBackspace() {
+      const target = this.targetElement || document.activeElement;
+      if (!target || !('value' in target)) return;
+
+      const start = target.selectionStart || 0;
+      const end = target.selectionEnd || 0;
+      const value = target.value;
+
+      if (start === end && start > 0) {
+        target.value = value.substring(0, start - 1) + value.substring(end);
+        target.selectionStart = target.selectionEnd = start - 1;
+      } else if (start !== end) {
+        target.value = value.substring(0, start) + value.substring(end);
+        target.selectionStart = target.selectionEnd = start;
+      }
+
+      target.dispatchEvent(new Event('input', { bubbles: true }));
+      this.$dispatch('osk:backspace');
+    },
+
+    handleEnter() {
+      const target = this.targetElement || document.activeElement;
+      if (target && 'value' in target) {
+        this.$dispatch('osk:enter', { value: target.value });
+      }
+      if (options.closeOnEnter !== false) {
+        this.close();
+      }
     }
   };
 }
@@ -5949,60 +8902,241 @@ function uxPdfViewer(options = {}) {
 
 // Command Palette Component
 function uxCommand(options = {}) {
-  return {
-    open: false,
-    query: '',
-    commands: options.commands || [],
-    selectedIndex: 0,
+  // Icons for command palette
+  const icons = {
+    search: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
+    arrow: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>',
+    enter: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 10l-5 5 5 5"/><path d="M20 4v7a4 4 0 01-4 4H4"/></svg>',
+    command: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 3a3 3 0 00-3 3v12a3 3 0 003 3 3 3 0 003-3 3 3 0 00-3-3H6a3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3V6a3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3h12a3 3 0 003-3 3 3 0 00-3-3z"/></svg>',
+    file: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>',
+    folder: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>',
+    settings: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+    user: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    clock: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+    empty: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>'
+  };
 
-    get filteredCommands() {
-      if (!this.query) return this.commands;
-      return this.commands.filter(cmd =>
-        cmd.label.toLowerCase().includes(this.query.toLowerCase())
-      );
+  // Process groups or flat commands
+  const groups = options.groups || [];
+  const flatCommands = options.commands || [];
+
+  // Convert flat commands to grouped format
+  let allGroups = [];
+  if (groups.length > 0) {
+    allGroups = groups.map(g => ({
+      group: g.name,
+      commands: g.commands || []
+    }));
+  } else if (flatCommands.length > 0) {
+    allGroups = [{ group: 'Comandos', commands: flatCommands }];
+  }
+
+  return {
+    isOpen: false,
+    query: '',
+    loading: false,
+    activeIndex: 0,
+    groups: allGroups,
+    filteredCommands: allGroups,
+    recentCommands: [],
+    placeholder: options.placeholder || 'Buscar comandos...',
+    maxRecent: options.maxRecent || 5,
+    closeOnSelect: options.closeOnSelect !== false,
+    fuzzySearch: options.fuzzySearch !== false,
+    showShortcuts: options.showShortcuts !== false,
+    showFooter: options.showFooter !== false,
+    loadResults: options.loadResults || null,
+    icons: icons,
+
+    init() {
+      // Listen for Cmd+K / Ctrl+K
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          this.toggle();
+        }
+      });
     },
 
-    toggle() {
-      this.open = !this.open;
-      if (this.open) {
-        this.$nextTick(() => {
-          const input = this.$refs.input;
-          if (input) input.focus();
-        });
-      }
+    open() {
+      this.isOpen = true;
+      this.query = '';
+      this.activeIndex = 0;
+      this.filterCommands();
+      this.$nextTick(() => {
+        const input = this.$el.querySelector('.ux-command__input');
+        if (input) input.focus();
+      });
+      this.$dispatch('command:open');
     },
 
     close() {
-      this.open = false;
+      this.isOpen = false;
       this.query = '';
-      this.selectedIndex = 0;
+      this.activeIndex = 0;
+      this.$dispatch('command:close');
     },
 
-    select(command) {
-      this.$dispatch('select', { command });
-      this.close();
+    toggle() {
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
     },
 
-    onKeydown(event) {
+    async filterCommands() {
+      const q = this.query.toLowerCase().trim();
+
+      // If async loader provided
+      if (this.loadResults && q) {
+        this.loading = true;
+        try {
+          this.filteredCommands = await this.loadResults(q);
+        } catch (e) {
+          console.error('Error loading results:', e);
+          this.filteredCommands = [];
+        }
+        this.loading = false;
+        return;
+      }
+
+      // Filter locally
+      if (!q) {
+        this.filteredCommands = this.groups;
+        return;
+      }
+
+      this.filteredCommands = this.groups.map(group => {
+        const filtered = group.commands.filter(cmd => {
+          const title = (cmd.title || '').toLowerCase();
+          const desc = (cmd.description || '').toLowerCase();
+          const keywords = (cmd.keywords || []).join(' ').toLowerCase();
+          return title.includes(q) || desc.includes(q) || keywords.includes(q);
+        });
+        return { group: group.group, commands: filtered };
+      }).filter(g => g.commands.length > 0);
+
+      this.activeIndex = 0;
+    },
+
+    executeCommand(cmd) {
+      // Add to recent
+      if (!this.recentCommands.find(c => c.id === cmd.id)) {
+        this.recentCommands.unshift({ ...cmd, recent: true });
+        if (this.recentCommands.length > this.maxRecent) {
+          this.recentCommands.pop();
+        }
+      }
+
+      // Execute action if provided
+      if (typeof cmd.action === 'function') {
+        cmd.action();
+      }
+
+      // Navigate to URL if provided
+      if (cmd.url) {
+        window.location.href = cmd.url;
+      }
+
+      // Dispatch event
+      this.$dispatch('command:execute', { command: cmd });
+
+      if (this.closeOnSelect) {
+        this.close();
+      }
+    },
+
+    handleKeydown(event) {
+      const totalItems = this.getTotalItems();
+
       switch (event.key) {
         case 'ArrowDown':
           event.preventDefault();
-          this.selectedIndex = Math.min(this.selectedIndex + 1, this.filteredCommands.length - 1);
+          this.activeIndex = Math.min(this.activeIndex + 1, totalItems - 1);
+          this.scrollToActive();
           break;
         case 'ArrowUp':
           event.preventDefault();
-          this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
+          this.activeIndex = Math.max(this.activeIndex - 1, 0);
+          this.scrollToActive();
+          break;
+        case 'Tab':
+          event.preventDefault();
+          if (event.shiftKey) {
+            this.activeIndex = Math.max(this.activeIndex - 1, 0);
+          } else {
+            this.activeIndex = Math.min(this.activeIndex + 1, totalItems - 1);
+          }
+          this.scrollToActive();
           break;
         case 'Enter':
           event.preventDefault();
-          if (this.filteredCommands[this.selectedIndex]) {
-            this.select(this.filteredCommands[this.selectedIndex]);
-          }
+          const cmd = this.getCommandAtIndex(this.activeIndex);
+          if (cmd) this.executeCommand(cmd);
           break;
         case 'Escape':
           this.close();
           break;
       }
+    },
+
+    getTotalItems() {
+      return this.filteredCommands.reduce((sum, g) => sum + g.commands.length, 0);
+    },
+
+    getCommandAtIndex(index) {
+      let count = 0;
+      for (const group of this.filteredCommands) {
+        for (const cmd of group.commands) {
+          if (count === index) return cmd;
+          count++;
+        }
+      }
+      return null;
+    },
+
+    isActiveItem(groupIndex, itemIndex) {
+      let count = 0;
+      for (let gi = 0; gi < this.filteredCommands.length; gi++) {
+        for (let ii = 0; ii < this.filteredCommands[gi].commands.length; ii++) {
+          if (gi === groupIndex && ii === itemIndex) {
+            return count === this.activeIndex;
+          }
+          count++;
+        }
+      }
+      return false;
+    },
+
+    scrollToActive() {
+      this.$nextTick(() => {
+        const active = this.$el.querySelector('.ux-command__item--active');
+        if (active) {
+          active.scrollIntoView({ block: 'nearest' });
+        }
+      });
+    },
+
+    getIcon(cmd) {
+      if (!cmd.icon) return '';
+      if (cmd.icon.startsWith('<svg')) return cmd.icon;
+      return this.icons[cmd.icon] || this.icons.command;
+    },
+
+    formatShortcut(shortcut) {
+      if (!shortcut) return [];
+      return shortcut.replace('Cmd', '⌘').replace('Ctrl', '⌃').replace('Shift', '⇧').replace('Alt', '⌥').split('+');
+    },
+
+    highlightMatch(text, query) {
+      if (!query) return text;
+      const regex = new RegExp(`(${query})`, 'gi');
+      return text.replace(regex, '<mark>$1</mark>');
+    },
+
+    clearRecent() {
+      this.recentCommands = [];
     }
   };
 }
@@ -6128,25 +9262,83 @@ function uxDateRangePicker(options = {}) {
   };
 }
 
-// Swipe Item Component
+// Swipe Item Component - iOS-style swipeable list item
 function uxSwipeItem(options = {}) {
   return {
-    open: false,
-    side: null,
+    offset: 0,
+    isSwiping: false,
+    openSide: null,
+    startActionsWidth: options.startActionsWidth || 0,
+    endActionsWidth: options.endActionsWidth || 80,
+    threshold: options.threshold || 40,
+    _startX: 0,
+    _currentX: 0,
 
-    openLeft() {
-      this.side = 'left';
-      this.open = true;
+    get contentStyle() {
+      return `transform: translateX(${this.offset}px); transition: ${this.isSwiping ? 'none' : 'transform 0.3s ease'};`;
     },
 
-    openRight() {
-      this.side = 'right';
-      this.open = true;
+    handleSwipeStart(e) {
+      this.isSwiping = true;
+      const touch = e.touches ? e.touches[0] : e;
+      this._startX = touch ? touch.clientX : 0;
+      this._currentX = this._startX;
+    },
+
+    handleSwipeMove(distance) {
+      if (!this.isSwiping) return;
+
+      // Limit movement based on available actions
+      let newOffset = distance;
+
+      // Limit left swipe (negative) to endActionsWidth
+      if (newOffset < 0) {
+        newOffset = Math.max(newOffset, -this.endActionsWidth);
+      }
+      // Limit right swipe (positive) to startActionsWidth
+      if (newOffset > 0) {
+        newOffset = Math.min(newOffset, this.startActionsWidth);
+      }
+
+      this.offset = newOffset;
+    },
+
+    handleSwipeEnd() {
+      this.isSwiping = false;
+
+      // Snap to open or closed position
+      if (this.offset < -this.threshold && this.endActionsWidth > 0) {
+        // Snap open to end actions
+        this.offset = -this.endActionsWidth;
+        this.openSide = 'end';
+      } else if (this.offset > this.threshold && this.startActionsWidth > 0) {
+        // Snap open to start actions
+        this.offset = this.startActionsWidth;
+        this.openSide = 'start';
+      } else {
+        // Snap closed
+        this.offset = 0;
+        this.openSide = null;
+      }
+    },
+
+    openStart() {
+      if (this.startActionsWidth > 0) {
+        this.offset = this.startActionsWidth;
+        this.openSide = 'start';
+      }
+    },
+
+    openEnd() {
+      if (this.endActionsWidth > 0) {
+        this.offset = -this.endActionsWidth;
+        this.openSide = 'end';
+      }
     },
 
     close() {
-      this.open = false;
-      this.side = null;
+      this.offset = 0;
+      this.openSide = null;
     }
   };
 }
@@ -6183,23 +9375,120 @@ function uxRefresher(options = {}) {
 function uxReorder(options = {}) {
   return {
     items: options.items || [],
+    editing: options.editing || false,
+    disabled: options.disabled || false,
     dragging: false,
     dragIndex: null,
+    dragOverIndex: null,
 
-    startDrag(index) {
+    // Toggle edit mode
+    toggleEdit() {
+      this.editing = !this.editing;
+    },
+
+    startEdit() {
+      this.editing = true;
+    },
+
+    endEdit() {
+      this.editing = false;
+    },
+
+    // Check if item is being dragged
+    isDragging(index) {
+      return this.dragIndex === index;
+    },
+
+    // Check if cursor is over item
+    isDragOver(index) {
+      return this.dragOverIndex === index && this.dragIndex !== index;
+    },
+
+    // Drag event handlers
+    handleDragStart(event, index) {
+      if (this.disabled || !this.editing) return;
+      this.dragging = true;
+      this.dragIndex = index;
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', index);
+    },
+
+    handleDragOver(event, index) {
+      if (this.disabled || this.dragIndex === null) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      this.dragOverIndex = index;
+
+      // Reorder items
+      if (this.dragIndex !== index) {
+        this.moveItem(this.dragIndex, index);
+        this.dragIndex = index;
+      }
+    },
+
+    handleDragEnd() {
+      this.dragging = false;
+      this.dragIndex = null;
+      this.dragOverIndex = null;
+      this.$dispatch('reorder:end', { items: this.items });
+    },
+
+    // Touch event handlers
+    handleTouchStart(event, index) {
+      if (this.disabled || !this.editing) return;
       this.dragging = true;
       this.dragIndex = index;
     },
 
-    endDrag() {
+    handleTouchMove(event, index) {
+      if (this.disabled || this.dragIndex === null) return;
+      // Get touch position and find element under it
+      const touch = event.touches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (element) {
+        const item = element.closest('.ux-reorder-item');
+        if (item) {
+          const items = Array.from(item.parentElement.children);
+          const newIndex = items.indexOf(item);
+          if (newIndex !== -1 && newIndex !== this.dragIndex) {
+            this.moveItem(this.dragIndex, newIndex);
+            this.dragIndex = newIndex;
+          }
+        }
+      }
+    },
+
+    handleTouchEnd() {
       this.dragging = false;
       this.dragIndex = null;
+      this.dragOverIndex = null;
+      this.$dispatch('reorder:end', { items: this.items });
+    },
+
+    // Move item from one index to another
+    moveItem(fromIndex, toIndex) {
+      const item = this.items.splice(fromIndex, 1)[0];
+      this.items.splice(toIndex, 0, item);
+      this.$dispatch('reorder', { items: this.items, from: fromIndex, to: toIndex });
+    },
+
+    // Remove item at index
+    removeItem(index) {
+      const removed = this.items.splice(index, 1)[0];
+      this.$dispatch('reorder:remove', { item: removed, index, items: this.items });
+    },
+
+    // Legacy methods for compatibility
+    startDrag(index) {
+      this.handleDragStart({ dataTransfer: { effectAllowed: '', setData: () => {} } }, index);
+    },
+
+    endDrag() {
+      this.handleDragEnd();
     },
 
     move(fromIndex, toIndex) {
-      const item = this.items.splice(fromIndex, 1)[0];
-      this.items.splice(toIndex, 0, item);
-      this.$dispatch('reorder', { items: this.items });
+      this.moveItem(fromIndex, toIndex);
     }
   };
 }
@@ -6757,10 +10046,33 @@ function uxPage(options = {}) {
 
 // Panel Detail Component
 function uxPanelDetail(options = {}) {
+  const MOBILE_BREAKPOINT = options.breakpoint || 768;
+
   return {
     open: options.open || false,
+    asideOpen: options.asideOpen || false,
     data: options.data || null,
+    breakpoint: MOBILE_BREAKPOINT,
 
+    init() {
+      // Close aside on resize if going to desktop
+      this._handleResize = () => {
+        if (window.innerWidth >= this.breakpoint) {
+          this.asideOpen = false;
+        }
+      };
+      window.addEventListener('resize', this._handleResize);
+    },
+
+    destroy() {
+      window.removeEventListener('resize', this._handleResize);
+    },
+
+    get isMobile() {
+      return window.innerWidth < this.breakpoint;
+    },
+
+    // Legacy show/hide for data
     show(data) {
       this.data = data;
       this.open = true;
@@ -6768,6 +10080,28 @@ function uxPanelDetail(options = {}) {
 
     hide() {
       this.open = false;
+    },
+
+    // Aside panel controls (mobile drawer)
+    toggleAside() {
+      this.asideOpen = !this.asideOpen;
+      this.$dispatch('paneldetail:toggle', { open: this.asideOpen });
+    },
+
+    openAside() {
+      this.asideOpen = true;
+      this.$dispatch('paneldetail:open');
+    },
+
+    closeAside() {
+      this.asideOpen = false;
+      this.$dispatch('paneldetail:close');
+    },
+
+    get panelClasses() {
+      return {
+        'ux-panel-detail--aside-open': this.asideOpen
+      };
     }
   };
 }
@@ -6784,40 +10118,6 @@ function uxPanelGroup(options = {}) {
 
     isActive(id) {
       return this.activePanel === id;
-    }
-  };
-}
-
-// Pinpad Component
-function uxPinpad(options = {}) {
-  return {
-    value: '',
-    maxLength: options.maxLength || 4,
-    masked: options.masked !== false,
-
-    append(digit) {
-      if (this.value.length < this.maxLength) {
-        this.value += digit;
-        this.$dispatch('input', { value: this.value });
-
-        if (this.value.length === this.maxLength) {
-          this.$dispatch('complete', { value: this.value });
-        }
-      }
-    },
-
-    backspace() {
-      this.value = this.value.slice(0, -1);
-      this.$dispatch('input', { value: this.value });
-    },
-
-    clear() {
-      this.value = '';
-      this.$dispatch('input', { value: '' });
-    },
-
-    get displayValue() {
-      return this.masked ? '•'.repeat(this.value.length) : this.value;
     }
   };
 }
@@ -7068,3 +10368,620 @@ window.uxCollapsibleHeader = uxCollapsibleHeader;
 window.uxScrollProgress = uxScrollProgress;
 window.uxScrollTop = uxScrollTop;
 window.uxVirtualScroll = uxVirtualScroll;
+
+// ============================================
+// Alpine.js Custom Directives for Gestures
+// ============================================
+
+// Register directives when Alpine is available
+document.addEventListener('alpine:init', () => {
+  if (typeof Alpine === 'undefined') return;
+
+  // x-swipe directive - Detects swipe gestures
+  Alpine.directive('swipe', (el, { modifiers, expression }, { evaluate }) => {
+    const callback = evaluate(expression);
+    const directions = modifiers.filter(m => ['left', 'right', 'up', 'down'].includes(m));
+    const threshold = 50;
+    let startX = 0, startY = 0, startTime = 0;
+
+    const handleStart = (e) => {
+      const touch = e.touches ? e.touches[0] : e;
+      startX = touch.clientX;
+      startY = touch.clientY;
+      startTime = Date.now();
+    };
+
+    const handleEnd = (e) => {
+      const touch = e.changedTouches ? e.changedTouches[0] : e;
+      const deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
+      const deltaTime = Date.now() - startTime;
+      const velocity = Math.sqrt(deltaX * deltaX + deltaY * deltaY) / deltaTime;
+
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      if (absX < threshold && absY < threshold) return;
+
+      let direction;
+      if (absX > absY) {
+        direction = deltaX > 0 ? 'right' : 'left';
+      } else {
+        direction = deltaY > 0 ? 'down' : 'up';
+      }
+
+      // Filter by direction if modifiers specified
+      if (directions.length > 0 && !directions.includes(direction)) return;
+
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+
+      if (typeof callback === 'function') {
+        callback({ direction, distance, velocity, angle, deltaX, deltaY });
+      }
+    };
+
+    el.addEventListener('touchstart', handleStart, { passive: true });
+    el.addEventListener('touchend', handleEnd);
+    el.addEventListener('mousedown', handleStart);
+    el.addEventListener('mouseup', handleEnd);
+  });
+
+  // x-long-press directive - Detects long press
+  Alpine.directive('long-press', (el, { modifiers, expression }, { evaluate }) => {
+    const callback = evaluate(expression);
+    const duration = parseInt(modifiers.find(m => m.endsWith('ms'))?.replace('ms', '')) || 500;
+    let timeout = null;
+    let triggered = false;
+
+    const start = (e) => {
+      triggered = false;
+      timeout = setTimeout(() => {
+        triggered = true;
+        if (typeof callback === 'function') callback(e);
+      }, duration);
+    };
+
+    const cancel = () => {
+      if (timeout) clearTimeout(timeout);
+      timeout = null;
+    };
+
+    el.addEventListener('touchstart', start, { passive: true });
+    el.addEventListener('touchend', cancel);
+    el.addEventListener('touchmove', cancel);
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', cancel);
+    el.addEventListener('mouseleave', cancel);
+  });
+
+  // x-tap directive - Detects single or double tap
+  Alpine.directive('tap', (el, { modifiers, expression }, { evaluate }) => {
+    const callback = evaluate(expression);
+    const isDouble = modifiers.includes('double');
+    let lastTap = 0;
+    const doubleDelay = 300;
+
+    const handleTap = (e) => {
+      const now = Date.now();
+
+      if (isDouble) {
+        if (now - lastTap < doubleDelay) {
+          if (typeof callback === 'function') callback(e);
+          lastTap = 0;
+        } else {
+          lastTap = now;
+        }
+      } else {
+        // Single tap - delay to check for double tap
+        setTimeout(() => {
+          if (now === lastTap || lastTap === 0) {
+            if (typeof callback === 'function') callback(e);
+          }
+        }, doubleDelay);
+        lastTap = now;
+      }
+    };
+
+    el.addEventListener('touchend', handleTap);
+    el.addEventListener('click', handleTap);
+  });
+
+  // x-drag directive - Enables drag functionality
+  Alpine.directive('drag', (el, { expression }, { evaluate }) => {
+    const callback = evaluate(expression);
+    let isDragging = false;
+    let startPos = { x: 0, y: 0 };
+
+    const getPos = (e) => {
+      const touch = e.touches ? e.touches[0] : e;
+      return { x: touch.clientX, y: touch.clientY };
+    };
+
+    const start = (e) => {
+      isDragging = true;
+      startPos = getPos(e);
+      if (typeof callback === 'function') {
+        callback({ type: 'start', startPos, offset: { x: 0, y: 0 }, element: el });
+      }
+    };
+
+    const move = (e) => {
+      if (!isDragging) return;
+      const currentPos = getPos(e);
+      const delta = {
+        x: currentPos.x - startPos.x,
+        y: currentPos.y - startPos.y
+      };
+      if (typeof callback === 'function') {
+        callback({ type: 'move', startPos, currentPos, delta, element: el });
+      }
+    };
+
+    const end = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      const endPos = e.changedTouches ? { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY } : getPos(e);
+      const delta = {
+        x: endPos.x - startPos.x,
+        y: endPos.y - startPos.y
+      };
+      if (typeof callback === 'function') {
+        callback({ type: 'end', startPos, endPos, delta, element: el });
+      }
+    };
+
+    el.addEventListener('touchstart', start, { passive: true });
+    el.addEventListener('touchmove', move, { passive: true });
+    el.addEventListener('touchend', end);
+    el.addEventListener('mousedown', start);
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', end);
+  });
+
+  // x-pinch directive - Detects pinch gestures (touch only)
+  Alpine.directive('pinch', (el, { expression }, { evaluate }) => {
+    const callback = evaluate(expression);
+    let initialDistance = 0;
+    let initialScale = 1;
+
+    const getDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const getCenter = (touches) => ({
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2
+    });
+
+    const start = (e) => {
+      if (e.touches.length === 2) {
+        initialDistance = getDistance(e.touches);
+        initialScale = 1;
+      }
+    };
+
+    const move = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const currentDistance = getDistance(e.touches);
+        const scale = currentDistance / initialDistance;
+        const delta = scale - initialScale;
+        initialScale = scale;
+
+        if (typeof callback === 'function') {
+          callback({
+            type: 'pinch',
+            scale,
+            delta,
+            center: getCenter(e.touches)
+          });
+        }
+      }
+    };
+
+    el.addEventListener('touchstart', start, { passive: true });
+    el.addEventListener('touchmove', move, { passive: false });
+  });
+
+  // x-pull-refresh directive - Pull to refresh
+  Alpine.directive('pull-refresh', (el, { expression }, { evaluate }) => {
+    const callback = evaluate(expression);
+    const threshold = 80;
+    let startY = 0;
+    let pulling = false;
+
+    const start = (e) => {
+      if (el.scrollTop === 0) {
+        startY = e.touches[0].clientY;
+        pulling = true;
+      }
+    };
+
+    const move = (e) => {
+      if (!pulling) return;
+      const currentY = e.touches[0].clientY;
+      const pullDistance = currentY - startY;
+
+      if (pullDistance > 0 && el.scrollTop === 0) {
+        // Visual feedback could be added here
+      }
+    };
+
+    const end = async (e) => {
+      if (!pulling) return;
+      pulling = false;
+
+      const endY = e.changedTouches[0].clientY;
+      const pullDistance = endY - startY;
+
+      if (pullDistance > threshold && el.scrollTop === 0) {
+        if (typeof callback === 'function') {
+          await callback();
+        }
+      }
+    };
+
+    el.addEventListener('touchstart', start, { passive: true });
+    el.addEventListener('touchmove', move, { passive: true });
+    el.addEventListener('touchend', end);
+  });
+
+  // ============================================
+  // Utility Directives for Alpine Utils
+  // ============================================
+
+  // x-focus-trap directive - Traps focus within an element
+  Alpine.directive('focus-trap', (el, { expression }, { evaluate, effect, cleanup }) => {
+    let focusableElements = [];
+    let firstFocusable = null;
+    let lastFocusable = null;
+    let isActive = false;
+
+    const getFocusableElements = () => {
+      const selectors = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])'
+      ].join(',');
+      return el.querySelectorAll(selectors);
+    };
+
+    const updateFocusable = () => {
+      focusableElements = Array.from(getFocusableElements());
+      firstFocusable = focusableElements[0];
+      lastFocusable = focusableElements[focusableElements.length - 1];
+    };
+
+    const handleKeydown = (e) => {
+      if (e.key !== 'Tab' || !isActive) return;
+
+      updateFocusable();
+      if (focusableElements.length === 0) return;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable?.focus();
+        }
+      } else {
+        if (document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable?.focus();
+        }
+      }
+    };
+
+    const activate = () => {
+      if (isActive) return;
+      isActive = true;
+      updateFocusable();
+      el.addEventListener('keydown', handleKeydown);
+      el.setAttribute('data-focus-trapped', '');
+      // Focus first element after a short delay
+      setTimeout(() => {
+        if (firstFocusable) firstFocusable.focus();
+      }, 50);
+    };
+
+    const deactivate = () => {
+      if (!isActive) return;
+      isActive = false;
+      el.removeEventListener('keydown', handleKeydown);
+      el.removeAttribute('data-focus-trapped');
+    };
+
+    // Watch expression changes
+    if (expression) {
+      effect(() => {
+        const shouldTrap = evaluate(expression);
+        if (shouldTrap) {
+          activate();
+        } else {
+          deactivate();
+        }
+      });
+    } else {
+      // Always active if no expression
+      activate();
+    }
+
+    cleanup(() => {
+      deactivate();
+    });
+  });
+
+  // x-click-outside directive - Detects clicks outside the element
+  Alpine.directive('click-outside', (el, { expression }, { evaluate, cleanup }) => {
+    const callback = (e) => {
+      if (!el.contains(e.target)) {
+        evaluate(expression);
+      }
+    };
+
+    // Delay to prevent immediate trigger
+    setTimeout(() => {
+      document.addEventListener('click', callback);
+      document.addEventListener('touchstart', callback, { passive: true });
+    }, 0);
+
+    cleanup(() => {
+      document.removeEventListener('click', callback);
+      document.removeEventListener('touchstart', callback);
+    });
+  });
+
+  // x-scroll-lock directive - Locks body scroll
+  Alpine.directive('scroll-lock', (el, { expression }, { evaluate, effect, cleanup }) => {
+    let isLocked = false;
+    let originalOverflow = '';
+    let originalPaddingRight = '';
+
+    const lock = () => {
+      if (isLocked) return;
+      isLocked = true;
+
+      // Get scrollbar width
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+      originalOverflow = document.body.style.overflow;
+      originalPaddingRight = document.body.style.paddingRight;
+
+      document.body.style.overflow = 'hidden';
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = scrollbarWidth + 'px';
+      }
+    };
+
+    const unlock = () => {
+      if (!isLocked) return;
+      isLocked = false;
+
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+    };
+
+    if (expression) {
+      effect(() => {
+        const shouldLock = evaluate(expression);
+        if (shouldLock) {
+          lock();
+        } else {
+          unlock();
+        }
+      });
+    } else {
+      // Always lock if no expression
+      lock();
+    }
+
+    cleanup(() => {
+      unlock();
+    });
+  });
+
+  // x-clipboard directive - Copies text to clipboard
+  Alpine.directive('clipboard', (el, { expression, modifiers }, { evaluate }) => {
+    const trigger = modifiers.includes('click') || !modifiers.length;
+
+    const copy = async () => {
+      const text = evaluate(expression);
+      try {
+        await navigator.clipboard.writeText(text);
+        el.dispatchEvent(new CustomEvent('clipboard:success', { detail: { text } }));
+      } catch (err) {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          el.dispatchEvent(new CustomEvent('clipboard:success', { detail: { text } }));
+        } catch (e) {
+          el.dispatchEvent(new CustomEvent('clipboard:error', { detail: { error: e } }));
+        }
+        document.body.removeChild(textarea);
+      }
+    };
+
+    if (trigger) {
+      el.addEventListener('click', copy);
+    }
+  });
+
+  // ============================================
+  // Magic Helpers for Alpine Utils
+  // ============================================
+
+  // $debounce magic - Debounces a function
+  Alpine.magic('debounce', () => {
+    return (callback, wait = 300) => {
+      let timeout = null;
+      return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => callback.apply(this, args), wait);
+      };
+    };
+  });
+
+  // $throttle magic - Throttles a function
+  Alpine.magic('throttle', () => {
+    return (callback, limit = 300) => {
+      let waiting = false;
+      return (...args) => {
+        if (!waiting) {
+          callback.apply(this, args);
+          waiting = true;
+          setTimeout(() => { waiting = false; }, limit);
+        }
+      };
+    };
+  });
+
+  // $clipboard magic - Copy text to clipboard
+  Alpine.magic('clipboard', () => {
+    return async (text) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (err) {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          return true;
+        } catch (e) {
+          document.body.removeChild(textarea);
+          return false;
+        }
+      }
+    };
+  });
+
+  // $scrollLock magic - Lock/unlock body scroll
+  Alpine.magic('scrollLock', () => {
+    let isLocked = false;
+    let originalOverflow = '';
+    let originalPaddingRight = '';
+
+    return {
+      lock() {
+        if (isLocked) return;
+        isLocked = true;
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        originalOverflow = document.body.style.overflow;
+        originalPaddingRight = document.body.style.paddingRight;
+        document.body.style.overflow = 'hidden';
+        if (scrollbarWidth > 0) {
+          document.body.style.paddingRight = scrollbarWidth + 'px';
+        }
+      },
+      unlock() {
+        if (!isLocked) return;
+        isLocked = false;
+        document.body.style.overflow = originalOverflow;
+        document.body.style.paddingRight = originalPaddingRight;
+      },
+      toggle() {
+        if (isLocked) {
+          this.unlock();
+        } else {
+          this.lock();
+        }
+      },
+      get isLocked() {
+        return isLocked;
+      }
+    };
+  });
+
+  // $focusTrap magic - Trap focus within an element
+  Alpine.magic('focusTrap', () => {
+    return (element) => {
+      if (!element) return { release: () => {} };
+
+      const getFocusableElements = () => {
+        const selectors = [
+          'a[href]',
+          'button:not([disabled])',
+          'input:not([disabled])',
+          'select:not([disabled])',
+          'textarea:not([disabled])',
+          '[tabindex]:not([tabindex="-1"])'
+        ].join(',');
+        return Array.from(element.querySelectorAll(selectors));
+      };
+
+      const handleKeydown = (e) => {
+        if (e.key !== 'Tab') return;
+
+        const focusable = getFocusableElements();
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      };
+
+      element.addEventListener('keydown', handleKeydown);
+
+      // Focus first element
+      const focusable = getFocusableElements();
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+
+      return {
+        release() {
+          element.removeEventListener('keydown', handleKeydown);
+        }
+      };
+    };
+  });
+
+  // $announce magic - Screen reader announcements
+  Alpine.magic('announce', () => {
+    return (message, priority = 'polite') => {
+      const id = 'alpine-sr-announcer';
+      let announcer = document.getElementById(id);
+
+      if (!announcer) {
+        announcer = document.createElement('div');
+        announcer.id = id;
+        announcer.setAttribute('aria-live', priority);
+        announcer.setAttribute('aria-atomic', 'true');
+        announcer.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;';
+        document.body.appendChild(announcer);
+      }
+
+      announcer.setAttribute('aria-live', priority);
+      announcer.textContent = '';
+
+      // Delay to ensure screen reader picks up the change
+      setTimeout(() => {
+        announcer.textContent = message;
+      }, 100);
+    };
+  });
+});

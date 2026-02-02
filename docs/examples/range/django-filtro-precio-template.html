@@ -1,0 +1,59 @@
+<!-- templates/products/filter.html -->
+<div class="product-filter">
+  <form hx-get="{% url 'products:list' %}"
+        hx-trigger="change from:find input delay:300ms"
+        hx-target="#product-results"
+        hx-indicator="#loading-spinner">
+
+    <!-- Filtro de categoria -->
+    <input type="hidden" name="category" value="{{ category.slug }}">
+
+    <!-- Dual Range para precio -->
+    <div class="ux-range ux-range--dual"
+         x-data="uxDualRange({
+           minValue: {{ price_min|default:0 }},
+           maxValue: {{ price_max|default:1000 }},
+           min: 0,
+           max: 1000,
+           minGap: 50
+         })">
+      <span class="ux-range__label">Rango de precio</span>
+      <div class="ux-range__wrapper">
+        <span class="ux-range__value ux-range__value--start" x-text="'$' + minValue"></span>
+        <div class="ux-range__track-container">
+          <div class="ux-range__track">
+            <div class="ux-range__fill" :style="fillStyle"></div>
+          </div>
+          <input type="range" class="ux-range__input ux-range__input--min"
+                 name="price_min"
+                 min="0" max="1000" step="10"
+                 x-model="minValue"
+                 @input="updateMin($event.target.value)">
+          <input type="range" class="ux-range__input ux-range__input--max"
+                 name="price_max"
+                 min="0" max="1000" step="10"
+                 x-model="maxValue"
+                 @input="updateMax($event.target.value)">
+          <div class="ux-range__thumb" :style="{ left: minPercent + '%' }"></div>
+          <div class="ux-range__thumb" :style="{ left: maxPercent + '%' }"></div>
+        </div>
+        <span class="ux-range__value ux-range__value--end" x-text="'$' + maxValue"></span>
+      </div>
+    </div>
+
+    <!-- Ordenamiento -->
+    <select name="sort" class="ux-select">
+      <option value="price_asc">Precio: menor a mayor</option>
+      <option value="price_desc">Precio: mayor a menor</option>
+      <option value="name">Nombre</option>
+    </select>
+  </form>
+
+  <!-- Indicador de carga -->
+  <div id="loading-spinner" class="ux-spinner htmx-indicator"></div>
+
+  <!-- Resultados -->
+  <div id="product-results">
+    {% include 'products/partials/product_list.html' %}
+  </div>
+</div>

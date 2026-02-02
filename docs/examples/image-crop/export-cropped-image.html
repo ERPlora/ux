@@ -1,0 +1,86 @@
+cropper: null,
+        croppedUrl: null,
+        cropData: null,
+        async exportImage() {
+          if (this.cropper && this.cropper.imageLoaded) {
+            this.croppedUrl = await this.cropper.getCroppedImageDataURL();
+            this.cropData = this.cropper.getCropData();
+          }
+        }
+      }">
+        <div x-data="uxImageCrop()" x-init="$nextTick(() => cropper = $data)" style="margin-bottom: var(--ux-space-lg);">
+          <div class="ux-image-crop" :class="{ 'ux-image-crop--loading': isLoading, 'ux-image-crop--aspect-locked': isAspectLocked }">
+            <div class="ux-image-crop__canvas"
+                 :class="{ 'ux-image-crop__canvas--empty': !imageLoaded }"
+                 x-ref="canvas"
+                 @click="!imageLoaded && $refs.fileInput.click()">
+
+              <template x-if="!imageLoaded && !isLoading">
+                <div class="ux-image-crop__placeholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="m21 15-5-5L5 21"/>
+                  </svg>
+                  <p class="ux-image-crop__placeholder-text">Select image to crop</p>
+                </div>
+              </template>
+
+              <template x-if="imageLoaded">
+                <div class="ux-image-crop__image-container">
+                  <img :src="imageSrc" class="ux-image-crop__image" :style="{ transform: imageTransform }" alt="Image">
+
+                  <div class="ux-image-crop__crop-area" x-ref="cropArea" :style="cropAreaStyle"
+                       @mousedown="onCropMouseDown($event)" @touchstart.prevent="onCropTouchStart($event)">
+                    <div class="ux-image-crop__grid ux-image-crop__grid--thirds"></div>
+                    <div class="ux-image-crop__handles">
+                      <div class="ux-image-crop__handle ux-image-crop__handle--nw" @mousedown.stop="onHandleMouseDown($event, 'nw')" @touchstart.stop.prevent="onHandleTouchStart($event, 'nw')"></div>
+                      <div class="ux-image-crop__handle ux-image-crop__handle--ne" @mousedown.stop="onHandleMouseDown($event, 'ne')" @touchstart.stop.prevent="onHandleTouchStart($event, 'ne')"></div>
+                      <div class="ux-image-crop__handle ux-image-crop__handle--sw" @mousedown.stop="onHandleMouseDown($event, 'sw')" @touchstart.stop.prevent="onHandleTouchStart($event, 'sw')"></div>
+                      <div class="ux-image-crop__handle ux-image-crop__handle--se" @mousedown.stop="onHandleMouseDown($event, 'se')" @touchstart.stop.prevent="onHandleTouchStart($event, 'se')"></div>
+                      <div class="ux-image-crop__handle ux-image-crop__handle--n" @mousedown.stop="onHandleMouseDown($event, 'n')" @touchstart.stop.prevent="onHandleTouchStart($event, 'n')"></div>
+                      <div class="ux-image-crop__handle ux-image-crop__handle--s" @mousedown.stop="onHandleMouseDown($event, 's')" @touchstart.stop.prevent="onHandleTouchStart($event, 's')"></div>
+                      <div class="ux-image-crop__handle ux-image-crop__handle--e" @mousedown.stop="onHandleMouseDown($event, 'e')" @touchstart.stop.prevent="onHandleTouchStart($event, 'e')"></div>
+                      <div class="ux-image-crop__handle ux-image-crop__handle--w" @mousedown.stop="onHandleMouseDown($event, 'w')" @touchstart.stop.prevent="onHandleTouchStart($event, 'w')"></div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <div class="ux-image-crop__controls" x-show="imageLoaded">
+              <div class="ux-image-crop__control-row">
+                <div class="ux-image-crop__aspect-buttons">
+                  <button class="ux-image-crop__aspect-btn" :class="{ 'ux-image-crop__aspect-btn--active': !aspectRatio }" @click="setAspectRatio(null, 'Free')">Free</button>
+                  <button class="ux-image-crop__aspect-btn" :class="{ 'ux-image-crop__aspect-btn--active': aspectRatio === 1 }" @click="setAspectRatio(1, '1:1')">1:1</button>
+                  <button class="ux-image-crop__aspect-btn" :class="{ 'ux-image-crop__aspect-btn--active': aspectRatio === 16/9 }" @click="setAspectRatio(16/9, '16:9')">16:9</button>
+                </div>
+              </div>
+            </div>
+
+            <input type="file" x-ref="fileInput" accept="image/*" style="display: none;" @change="onFileSelect($event)">
+          </div>
+        </div>
+
+        <button class="ux-button ux-color-primary" @click="exportImage()" :disabled="!cropper?.imageLoaded">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export Cropped Image
+        </button>
+
+        <!-- Export Results -->
+        <div x-show="croppedUrl" style="margin-top: var(--ux-space-lg);">
+          <h4 style="margin-bottom: var(--ux-space-sm); color: var(--ux-text);">Cropped Result</h4>
+          <div style="display: flex; gap: var(--ux-space-lg); flex-wrap: wrap;">
+            <div>
+              <img :src="croppedUrl" style="max-width: 200px; max-height: 200px; border-radius: var(--ux-border-radius-md); border: 1px solid var(--ux-border-color);">
+            </div>
+            <div x-show="cropData" style="flex: 1; min-width: 200px;">
+              <p style="font-weight: 500; margin-bottom: var(--ux-space-xs); color: var(--ux-text);">Crop Data (for server-side processing):</p>
+              <pre style="background: var(--ux-surface-secondary); padding: var(--ux-space-sm); border-radius: var(--ux-border-radius-sm); font-size: var(--ux-font-size-sm); overflow-x: auto;" x-text="JSON.stringify(cropData, null, 2)"></pre>
+            </div>
+          </div>
+        </div>

@@ -1,0 +1,28 @@
+<h4 style="margin-bottom: var(--ux-space-md); font-weight: 600;">Acciones en Items (Editar/Eliminar)</h4>
+      <pre class="ux-code-block" data-lang="html"><template x-for="item in visibleItems" :key="item.id">
+  <div class="ux-virtual-list__item virtual-item" :style="{ height: itemHeight + 'px' }">
+    <div class="virtual-item__content">
+      <div class="virtual-item__title" x-text="item.name"></div>
+      <div class="virtual-item__subtitle" x-text="item.email"></div>
+    </div>
+
+    <!-- Acciones con HTMX -->
+    <div class="virtual-item__actions">
+      <button class="ux-button ux-button--sm ux-button--outline"
+              :hx-get="'/usuarios/' + item.id + '/editar/'"
+              hx-target="#modal-content"
+              hx-trigger="click"
+              @click="$dispatch('open-modal')">
+        Editar
+      </button>
+
+      <button class="ux-button ux-button--sm ux-color-danger--outline"
+              :hx-delete="'/usuarios/' + item.id + '/'"
+              hx-confirm="Eliminar este usuario?"
+              hx-swap="none"
+              @htmx:after-request="removeItem(visibleItems.indexOf(item))">
+        Eliminar
+      </button>
+    </div>
+  </div>
+</template></pre>

@@ -1,0 +1,35 @@
+<div x-data="{
+  ...uxTagInput({
+    placeholder: 'Añadir email...',
+    validateTag: function(tag) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(tag)) {
+        return 'Debe ser un email válido';
+      }
+      return true;
+    }
+  }),
+  errorMsg: ''
+}"
+@tag-input:invalid.window="errorMsg = $event.detail.reason; setTimeout(() => errorMsg = '', 3000)"
+class="ux-tag-input-wrapper" style="max-width: 500px;">
+  <label style="display: block; font-size: 0.875rem; font-weight: 500; color: var(--ux-text-secondary); margin-bottom: 0.5rem;">Emails</label>
+  <div class="ux-tag-input" :class="{ 'ux-tag-input--error': errorMsg }" @click="focus()">
+    <template x-for="(tag, index) in tags" :key="index">
+      <span class="ux-tag">
+        <span class="ux-tag__text" x-text="getLabel(tag)"></span>
+        <button type="button" class="ux-tag__remove" @click.stop="removeTag(index)" x-html="closeIcon"></button>
+      </span>
+    </template>
+    <input type="text"
+           class="ux-tag-input__field"
+           x-ref="input"
+           x-model="inputValue"
+           :placeholder="placeholder"
+           @input="onInput($event)"
+           @keydown="onKeydown($event)"
+           @focus="onFocus()"
+           @blur="onBlur()">
+  </div>
+  <p x-show="errorMsg" x-text="errorMsg" style="color: var(--ux-danger); font-size: 0.8125rem; margin-top: 0.5rem;"></p>
+</div>

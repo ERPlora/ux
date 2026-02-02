@@ -1,0 +1,109 @@
+columns: [
+        { key: 'id', label: 'ID', type: 'number', sortable: true },
+        { key: 'name', label: 'Nombre', sortable: true },
+        { key: 'email', label: 'Email', sortable: true },
+        { key: 'phone', label: 'Telefono' },
+        { key: 'department', label: 'Departamento', sortable: true },
+        { key: 'location', label: 'Ubicacion' },
+        { key: 'salary', label: 'Salario', type: 'number', sortable: true }
+      ],
+      rows: [
+        { id: 1, name: 'Ana Martinez', email: 'ana@empresa.com', phone: '+34 612 345 678', department: 'Desarrollo', location: 'Madrid', salary: 55000 },
+        { id: 2, name: 'Carlos Ruiz', email: 'carlos@empresa.com', phone: '+34 623 456 789', department: 'Diseno', location: 'Barcelona', salary: 48000 },
+        { id: 3, name: 'Elena Torres', email: 'elena@empresa.com', phone: '+34 634 567 890', department: 'Marketing', location: 'Valencia', salary: 52000 },
+        { id: 4, name: 'Miguel Santos', email: 'miguel@empresa.com', phone: '+34 645 678 901', department: 'Desarrollo', location: 'Sevilla', salary: 62000 }
+      ],
+      hiddenColumns: ['phone', 'location'],
+      paginated: false
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--responsive"
+       @click.outside="closeColumnMenu()"
+       @column-visibility-change.window="console.log('Column visibility:', $event.detail)">
+
+      <!-- Toolbar with Column Toggle -->
+      <div class="ux-datatable__toolbar">
+        <div class="ux-datatable__toolbar-start">
+          <span class="ux-text-sm ux-text-secondary">
+            <span x-text="visibleColumns.length"></span> de <span x-text="columns.length"></span> columnas visibles
+          </span>
+        </div>
+        <div class="ux-datatable__toolbar-end">
+          <!-- Column Visibility Toggle -->
+          <div class="ux-datatable__column-toggle">
+            <button type="button" class="ux-datatable__column-btn" @click="toggleColumnMenu()">
+              <span x-html="getIcon('columns')"></span>
+              <span x-text="labels.columns"></span>
+              <template x-if="hiddenColumnsCount > 0">
+                <span class="ux-datatable__column-btn-badge" x-text="hiddenColumnsCount"></span>
+              </template>
+            </button>
+            <div class="ux-datatable__column-menu" :class="{ 'ux-datatable__column-menu--open': showColumnMenu }">
+              <div class="ux-datatable__column-menu-header">
+                <span class="ux-datatable__column-menu-title" x-text="labels.columns"></span>
+                <div class="ux-datatable__column-menu-actions">
+                  <button type="button" class="ux-datatable__column-menu-action" @click="showAllColumns()" x-text="labels.showAll"></button>
+                  <button type="button" class="ux-datatable__column-menu-action" @click="hideAllColumns()" x-text="labels.hideAll"></button>
+                </div>
+              </div>
+              <div class="ux-datatable__column-list">
+                <template x-for="col in columns" :key="col.key">
+                  <label class="ux-datatable__column-item"
+                         :class="{ 'ux-datatable__column-item--disabled': !canHideColumn(col) && isColumnVisible(col) }">
+                    <input type="checkbox"
+                           class="ux-checkbox"
+                           :checked="isColumnVisible(col)"
+                           :disabled="!canHideColumn(col) && isColumnVisible(col)"
+                           @change="toggleColumnVisibility(col)">
+                    <span class="ux-datatable__column-item-label" x-text="col.label"></span>
+                  </label>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <input type="search"
+                 class="ux-input ux-datatable__search"
+                 placeholder="Buscar..."
+                 x-model="searchQuery"
+                 @input.debounce.300ms="onSearch()">
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th"
+                    x-show="isColumnVisible(col)"
+                    :class="{
+                      'ux-datatable__th--sortable': col.sortable,
+                      'ux-datatable__th--sorted': isSorted(col),
+                      'ux-datatable__th--sorted-desc': isSorted(col) && sortDirection === 'desc'
+                    }"
+                    @click="sortBy(col)">
+                  <span x-text="col.label"></span>
+                  <span x-show="col.sortable" class="ux-datatable__sort-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12l7-7 7 7"/>
+                    </svg>
+                  </span>
+                </th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in paginatedRows" :key="getRowId(row)">
+              <tr class="ux-datatable__tr">
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td"
+                      x-show="isColumnVisible(col)"
+                      :data-label="col.label">
+                    <span x-text="col.key === 'salary' ? '$' + formatCellValue(row, col).toLocaleString() : formatCellValue(row, col)"></span>
+                  </td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>

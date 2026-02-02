@@ -1,0 +1,78 @@
+<div class="ux-barcode-scanner"
+             x-data="uxBarcodeScanner({ showManualInput: true, beepOnScan: true })"
+             @scanner:detected="scannedCode = $event.detail.rawValue; scannedFormat = $event.detail.format"
+             style="max-width: 500px; margin: 0 auto;">
+
+          <!-- Video -->
+          <video class="ux-barcode-scanner__video"
+                 x-ref="video"
+                 playsinline
+                 muted></video>
+
+          <!-- Overlay -->
+          <div class="ux-barcode-scanner__overlay">
+            <div class="ux-barcode-scanner__frame">
+              <div class="ux-barcode-scanner__corners"></div>
+              <div class="ux-barcode-scanner__scan-line" x-show="isActive"></div>
+            </div>
+            <p class="ux-barcode-scanner__instructions">Coloca el codigo dentro del marco</p>
+          </div>
+
+          <!-- Result -->
+          <div class="ux-barcode-scanner__result" x-show="lastResult" x-cloak>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span x-text="lastResult?.rawValue"></span>
+          </div>
+
+          <!-- Controls -->
+          <div class="ux-barcode-scanner__controls">
+            <button class="ux-barcode-scanner__btn" @click="toggleCamera()" title="Cambiar camara">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </button>
+            <button class="ux-barcode-scanner__btn"
+                    @click="toggleTorch()"
+                    x-show="hasTorch"
+                    :class="{ 'active': torchOn }"
+                    title="Linterna">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Manual input -->
+          <div class="ux-barcode-scanner__manual" x-show="showManualInput">
+            <input type="text"
+                   class="ux-barcode-scanner__manual-input"
+                   placeholder="Ingresar codigo manual"
+                   x-model="manualCode"
+                   @keyup.enter="submitManual()">
+            <button class="ux-barcode-scanner__manual-submit" @click="submitManual()">OK</button>
+          </div>
+
+          <!-- Loading -->
+          <div class="ux-barcode-scanner__loading" x-show="isLoading">
+            <div class="ux-barcode-scanner__loading-spinner"></div>
+            <span class="ux-barcode-scanner__loading-text">Iniciando camara...</span>
+          </div>
+
+          <!-- Error -->
+          <div class="ux-barcode-scanner__error" x-show="error" x-cloak>
+            <svg class="ux-barcode-scanner__error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <span class="ux-barcode-scanner__error-text" x-text="error"></span>
+            <span class="ux-barcode-scanner__error-hint">Usa el campo de entrada manual como alternativa</span>
+          </div>
+        </div>
+
+        <!-- Resultado escaneado -->
+        <div class="result-display" x-show="scannedCode">
+          <strong>Ultimo codigo escaneado:</strong><br>
+          <span x-text="scannedCode"></span>
+          <span class="ux-barcode-scanner__format" x-text="scannedFormat" style="margin-left: 8px;"></span>
+        </div>

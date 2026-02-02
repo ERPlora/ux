@@ -1,0 +1,27 @@
+<!-- Template: accordion_lazy.html -->
+<div class="ux-accordion ux-accordion--faq" x-data="uxAccordion()">
+  {% for item in accordion_items %}
+  <div class="ux-accordion-item" :class="{ 'ux-accordion-item--open': isOpen({{ forloop.counter0 }}) }">
+    <button class="ux-accordion-item__header"
+            @click="toggle({{ forloop.counter0 }})"
+            hx-get="{% url 'accordion_content' item.id %}"
+            hx-target="#content-{{ item.id }}"
+            hx-trigger="click once"
+            hx-indicator="#loader-{{ item.id }}">
+      <span class="ux-accordion-item__title">{{ item.title }}</span>
+      <span class="ux-accordion-item__chevron">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </span>
+    </button>
+    <div class="ux-accordion-item__body">
+      <div class="ux-accordion-item__body-inner">
+        <div class="ux-accordion-item__body-content" id="content-{{ item.id }}">
+          <span id="loader-{{ item.id }}" class="htmx-indicator ux-spinner"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>

@@ -1,0 +1,23 @@
+# models.py
+from django.db import models
+from django.conf import settings
+from django.db.models import Avg
+
+class Product(models.Model):
+    name = models.CharField(max_length=255)
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+
+    def update_average_rating(self):
+        avg = self.ratings.aggregate(avg=Avg('value'))['avg'] or 0
+        self.average_rating = round(avg, 2)
+        self.save(update_fields=['average_rating'])
+
+class Rating(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    value = models.PositiveSmallIntegerField()  # 1-5
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['product', 'user']

@@ -1,0 +1,36 @@
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST, require_http_methods
+
+@require_POST
+def cart_update(request, item_id):
+    """Actualiza la cantidad de un item en el carrito."""
+    cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    quantity = int(request.POST.get('quantity', 1))
+
+    # Validar stock disponible
+    if quantity > cart_item.product.stock:
+        quantity = cart_item.product.stock
+
+    cart_item.quantity = quantity
+    cart_item.save()
+
+    # Retornar el fragmento HTML actualizado
+    html = render_to_string('cart/cart_item.html', {
+        'item': cart_item
+    }, request=request)
+
+    response = HttpResponse(html)
+    # Trigger evento para actualizar totales del carrito
+    response['HX-Trigger'] = 'cart-updated'
+    return response
+
+@require_http_methods(["DELETE"])
+def cart_remove(request, item_id):
+    """Elimina un item del carrito."""
+    cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    cart_item.delete()
+
+    response = HttpResponse("")
+    response['HX-Trigger'] = 'cart-updated'
+    return response

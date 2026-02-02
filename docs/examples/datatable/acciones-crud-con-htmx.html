@@ -1,0 +1,69 @@
+<pre class="ux-code-block" data-lang="python"># views.py - Acciones CRUD
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["GET", "POST"])
+def user_edit(request, pk):
+    user = get_object_or_404(User, pk=pk)
+
+    if request.method == "POST":
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            # Devolver fila actualizada
+            return render(request, 'users/partials/user_row.html', {'user': user})
+        # Si hay errores, devolver formulario con errores
+        return render(request, 'users/partials/user_edit_form.html', {
+            'form': form,
+            'user': user
+        }, status=422)
+
+    # GET: mostrar formulario en modal
+    form = UserForm(instance=user)
+    return render(request, 'users/partials/user_edit_modal.html', {
+        'form': form,
+        'user': user
+    })
+
+
+@require_http_methods(["DELETE"])
+def user_delete(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    user.delete()
+    # Devolver fila vacia con animacion de salida
+    return HttpResponse(
+        '<tr class="ux-datatable__tr ux-datatable__tr--deleted">'
+        '<td colspan="4" style="text-align: center; opacity: 0.5;">'
+        'Usuario eliminado'
+        '</td>'
+        '</tr>'
+    )
+
+
+# templates/users/partials/user_row.html
+<tr class="ux-datatable__tr" id="user-row-{{ user.pk }}">
+  <td class="ux-datatable__td" data-label="Nombre">{{ user.name }}</td>
+  <td class="ux-datatable__td" data-label="Email">{{ user.email }}</td>
+  <td class="ux-datatable__td" data-label="Estado">
+    <span class="ux-badge ux-badge--soft {% if user.is_active %}ux-color-success--soft{% else %}ux-color-danger--soft{% endif %}">
+      {{ user.status_display }}
+    </span>
+  </td>
+  <td class="ux-datatable__td ux-datatable__td--actions">
+    <div class="ux-datatable__row-actions">
+      <button class="ux-datatable__row-action"
+              hx-get="{% url 'users:edit' user.pk %}"
+              hx-target="#modal-container">
+        Editar
+      </button>
+      <button class="ux-datatable__row-action ux-datatable__row-action--danger"
+              hx-delete="{% url 'users:delete' user.pk %}"
+              hx-target="#user-row-{{ user.pk }}"
+              hx-swap="outerHTML swap:500ms"
+              hx-confirm="Eliminar a {{ user.name }}?">
+        Eliminar
+      </button>
+    </div>
+  </td>
+</tr></pre>

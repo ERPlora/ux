@@ -1,0 +1,197 @@
+<div class="ux-org-chart" x-data="uxOrgChart({
+        data: {
+          id: 'ceo',
+          name: 'Maria Garcia',
+          title: 'CEO',
+          avatar: 'https://i.pravatar.cc/150?img=1',
+          children: [
+            {
+              id: 'cto',
+              name: 'Carlos Rodriguez',
+              title: 'CTO',
+              avatar: 'https://i.pravatar.cc/150?img=2',
+              children: [
+                { id: 'dev1', name: 'Ana Martinez', title: 'Senior Developer', avatar: 'https://i.pravatar.cc/150?img=3' },
+                { id: 'dev2', name: 'Luis Perez', title: 'Developer', avatar: 'https://i.pravatar.cc/150?img=4' },
+                { id: 'dev3', name: 'Sofia Lopez', title: 'Junior Developer', avatar: 'https://i.pravatar.cc/150?img=5' }
+              ]
+            },
+            {
+              id: 'cfo',
+              name: 'Roberto Sanchez',
+              title: 'CFO',
+              avatar: 'https://i.pravatar.cc/150?img=6',
+              children: [
+                { id: 'fin1', name: 'Elena Torres', title: 'Controller', avatar: 'https://i.pravatar.cc/150?img=7' },
+                { id: 'fin2', name: 'Miguel Ruiz', title: 'Accountant', avatar: 'https://i.pravatar.cc/150?img=8' }
+              ]
+            },
+            {
+              id: 'cmo',
+              name: 'Patricia Fernandez',
+              title: 'CMO',
+              avatar: 'https://i.pravatar.cc/150?img=9',
+              children: [
+                { id: 'mkt1', name: 'Diego Morales', title: 'Marketing Manager', avatar: 'https://i.pravatar.cc/150?img=10' }
+              ]
+            }
+          ]
+        }
+      })" @orgchart:select.window="console.log('Selected:', $event.detail)">
+        <!-- Search -->
+        <div class="ux-org-chart__search" x-show="showSearch">
+          <span class="ux-org-chart__search-icon" x-html="icons.search"></span>
+          <input type="text"
+                 class="ux-org-chart__search-input"
+                 placeholder="Buscar empleado..."
+                 x-model="searchQuery"
+                 @input.debounce.300ms="search()">
+        </div>
+
+        <!-- Controls -->
+        <div class="ux-org-chart__controls" x-show="showControls">
+          <button class="ux-org-chart__control" @click="zoomIn()" :disabled="zoom >= maxZoom" title="Acercar">
+            <span x-html="icons.zoomIn"></span>
+          </button>
+          <div class="ux-org-chart__zoom-level" x-text="getZoomPercentage()"></div>
+          <button class="ux-org-chart__control" @click="zoomOut()" :disabled="zoom <= minZoom" title="Alejar">
+            <span x-html="icons.zoomOut"></span>
+          </button>
+          <button class="ux-org-chart__control" @click="resetZoom()" title="Restablecer">
+            <span x-html="icons.reset"></span>
+          </button>
+          <button class="ux-org-chart__control" @click="expandAll()" title="Expandir todo">
+            <span x-html="icons.expand"></span>
+          </button>
+          <button class="ux-org-chart__control" @click="collapseAll()" title="Colapsar todo">
+            <span x-html="icons.collapse"></span>
+          </button>
+        </div>
+
+        <!-- Viewport -->
+        <div class="ux-org-chart__viewport"
+             @mousedown="startDrag($event)"
+             @mousemove="drag($event)"
+             @mouseup="endDrag()"
+             @mouseleave="endDrag()"
+             @touchstart="startDrag($event)"
+             @touchmove="drag($event)"
+             @touchend="endDrag()">
+          <div class="ux-org-chart__canvas"
+               :class="{ 'ux-org-chart__canvas--dragging': isDragging }"
+               :style="{ transform: getTransform() }">
+
+            <!-- Tree structure using recursive template -->
+            <div class="ux-org-chart__tree">
+              <template x-if="data">
+                <div class="ux-org-chart__branch" x-data="{ node: data }">
+                  <!-- Node -->
+                  <div class="ux-org-chart__node"
+                       :class="{
+                         'ux-org-chart__node--selected': isSelected(node.id),
+                         'ux-org-chart__node--highlighted': isHighlighted(node.id),
+                         'ux-org-chart__node--collapsed': isCollapsed(node.id)
+                       }"
+                       :data-node-id="node.id"
+                       @click="selectNode(node.id, node)">
+                    <div class="ux-org-chart__avatar">
+                      <template x-if="node.avatar">
+                        <img :src="node.avatar" :alt="node.name">
+                      </template>
+                      <template x-if="!node.avatar">
+                        <span x-text="getInitials(node.name)"></span>
+                      </template>
+                    </div>
+                    <div class="ux-org-chart__name" x-text="node.name"></div>
+                    <div class="ux-org-chart__title" x-text="node.title"></div>
+                    <template x-if="node.department">
+                      <div class="ux-org-chart__department" x-text="node.department"></div>
+                    </template>
+
+                    <!-- Toggle button -->
+                    <template x-if="hasChildren(node)">
+                      <button class="ux-org-chart__toggle"
+                              :class="{ 'ux-org-chart__toggle--collapsed': isCollapsed(node.id) }"
+                              @click.stop="toggleNode(node.id)">
+                        <span x-html="icons.chevron"></span>
+                      </button>
+                    </template>
+
+                    <!-- Connector line down -->
+                    <template x-if="hasChildren(node) && !isCollapsed(node.id)">
+                      <div class="ux-org-chart__connector ux-org-chart__connector--vertical"></div>
+                    </template>
+                  </div>
+
+                  <!-- Children - Level 1 -->
+                  <template x-if="hasChildren(node) && !isCollapsed(node.id)">
+                    <div class="ux-org-chart__children">
+                      <template x-for="child in node.children" :key="child.id">
+                        <div class="ux-org-chart__branch">
+                          <div class="ux-org-chart__node"
+                               :class="{
+                                 'ux-org-chart__node--selected': isSelected(child.id),
+                                 'ux-org-chart__node--highlighted': isHighlighted(child.id),
+                                 'ux-org-chart__node--collapsed': isCollapsed(child.id)
+                               }"
+                               :data-node-id="child.id"
+                               @click="selectNode(child.id, child)">
+                            <div class="ux-org-chart__avatar">
+                              <template x-if="child.avatar">
+                                <img :src="child.avatar" :alt="child.name">
+                              </template>
+                              <template x-if="!child.avatar">
+                                <span x-text="getInitials(child.name)"></span>
+                              </template>
+                            </div>
+                            <div class="ux-org-chart__name" x-text="child.name"></div>
+                            <div class="ux-org-chart__title" x-text="child.title"></div>
+                            <template x-if="hasChildren(child)">
+                              <button class="ux-org-chart__toggle"
+                                      :class="{ 'ux-org-chart__toggle--collapsed': isCollapsed(child.id) }"
+                                      @click.stop="toggleNode(child.id)">
+                                <span x-html="icons.chevron"></span>
+                              </button>
+                            </template>
+                            <template x-if="hasChildren(child) && !isCollapsed(child.id)">
+                              <div class="ux-org-chart__connector ux-org-chart__connector--vertical"></div>
+                            </template>
+                          </div>
+
+                          <!-- Children - Level 2 -->
+                          <template x-if="hasChildren(child) && !isCollapsed(child.id)">
+                            <div class="ux-org-chart__children">
+                              <template x-for="grandchild in child.children" :key="grandchild.id">
+                                <div class="ux-org-chart__branch">
+                                  <div class="ux-org-chart__node"
+                                       :class="{
+                                         'ux-org-chart__node--selected': isSelected(grandchild.id),
+                                         'ux-org-chart__node--highlighted': isHighlighted(grandchild.id)
+                                       }"
+                                       :data-node-id="grandchild.id"
+                                       @click="selectNode(grandchild.id, grandchild)">
+                                    <div class="ux-org-chart__avatar">
+                                      <template x-if="grandchild.avatar">
+                                        <img :src="grandchild.avatar" :alt="grandchild.name">
+                                      </template>
+                                      <template x-if="!grandchild.avatar">
+                                        <span x-text="getInitials(grandchild.name)"></span>
+                                      </template>
+                                    </div>
+                                    <div class="ux-org-chart__name" x-text="grandchild.name"></div>
+                                    <div class="ux-org-chart__title" x-text="grandchild.title"></div>
+                                  </div>
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>

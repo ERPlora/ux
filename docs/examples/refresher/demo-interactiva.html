@@ -1,0 +1,57 @@
+items: ['Elemento 1', 'Elemento 2', 'Elemento 3', 'Elemento 4', 'Elemento 5'],
+      lastUpdate: new Date().toLocaleTimeString()
+    }">
+      <div class="refresher-demo">
+        <div class="refresher-content"
+             x-data="uxRefresher({
+               onRefresh: async () => {
+                 await new Promise(r => setTimeout(r, 1500));
+                 $data.items.unshift('Nuevo elemento ' + ($data.items.length + 1));
+                 $data.lastUpdate = new Date().toLocaleTimeString();
+               }
+             })"
+             @touchstart="handleTouchStart"
+             @touchmove="handleTouchMove"
+             @touchend="handleTouchEnd">
+
+          <!-- Refresher indicator -->
+          <div class="ux-refresher"
+               :class="{
+                 'ux-refresher--pulling': isPulling,
+                 'ux-refresher--refreshing': isRefreshing,
+                 'ux-refresher--complete': isComplete
+               }"
+               :style="contentStyle">
+            <template x-if="!isRefreshing && !isComplete">
+              <div class="ux-refresher__icon" :style="{ transform: 'rotate(' + (progress * 180) + 'deg)' }">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                </svg>
+              </div>
+            </template>
+            <template x-if="isRefreshing">
+              <div class="ux-spinner"></div>
+            </template>
+            <template x-if="isComplete">
+              <div class="ux-refresher__icon" style="color: var(--ux-success);">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+            </template>
+          </div>
+
+          <!-- Content -->
+          <div class="demo-list">
+            <p style="font-size: var(--ux-font-size-md); color: var(--ux-text-tertiary); margin-bottom: var(--ux-space-sm);">
+              Ultima actualizacion: <span x-text="lastUpdate"></span>
+            </p>
+            <template x-for="(item, index) in items" :key="index">
+              <div class="demo-list-item" x-text="item"></div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <p style="font-size: var(--ux-font-size-md); color: var(--ux-text-tertiary); margin-top: var(--ux-space-sm);">
+        Tip: En desktop, usa touch simulation del DevTools
+      </p>

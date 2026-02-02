@@ -1,0 +1,134 @@
+company: {
+        name: 'Cafeteria Central',
+        address: 'Calle Mayor 123, Madrid',
+        phone: 'Tel: 91 234 5678',
+        taxId: 'CIF: B12345678'
+      },
+      receipt: {
+        number: '001234',
+        date: '15/01/2024',
+        time: '14:32',
+        cashier: 'Maria',
+        terminal: 'Caja 01'
+      },
+      items: [
+        { name: 'Cafe Americano', qty: 2, price: 2.50 },
+        { name: 'Croissant', qty: 1, price: 1.80 },
+        { name: 'Zumo de Naranja Natural', qty: 1, price: 3.20 },
+        { name: 'Tostada con Tomate', qty: 2, price: 2.00 }
+      ],
+      subtotal: 14.00,
+      tax: 1.47,
+      taxRate: 10,
+      total: 15.47,
+      payments: [
+        { method: 'Efectivo', amount: 20.00 }
+      ],
+      change: 4.53,
+      footer: {
+        thanks: 'Gracias por su visita',
+        message: 'Conserve su ticket para cambios',
+        social: '@cafeteriacentral'
+      }
+    })">
+      <div class="demo-controls">
+        <button class="ux-button ux-button--outline ux-button--sm" @click="print()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          Imprimir
+        </button>
+      </div>
+
+      <div class="ux-receipt-preview">
+        <div class="ux-receipt">
+          <!-- Header -->
+          <div x-show="showHeader" class="ux-receipt__header">
+            <div x-show="company.logo" class="ux-receipt__logo">
+              <img :src="company.logo" alt="">
+            </div>
+            <div class="ux-receipt__company" x-text="company.name"></div>
+            <div x-show="company.address" class="ux-receipt__address" x-text="company.address"></div>
+            <div x-show="company.phone" class="ux-receipt__phone" x-text="company.phone"></div>
+            <div x-show="company.taxId" class="ux-receipt__tax-id" x-text="company.taxId"></div>
+          </div>
+
+          <!-- Receipt Info -->
+          <div class="ux-receipt__info">
+            <div class="ux-receipt__info-item">
+              <span class="ux-receipt__info-label">Ticket:</span>
+              <span class="ux-receipt__info-value" x-text="receipt.number"></span>
+            </div>
+            <div class="ux-receipt__info-item">
+              <span class="ux-receipt__info-label">Fecha:</span>
+              <span class="ux-receipt__info-value" x-text="receipt.date"></span>
+            </div>
+            <div class="ux-receipt__info-item">
+              <span class="ux-receipt__info-label">Hora:</span>
+              <span class="ux-receipt__info-value" x-text="receipt.time"></span>
+            </div>
+            <div x-show="receipt.cashier" class="ux-receipt__info-item">
+              <span class="ux-receipt__info-label">Cajero:</span>
+              <span class="ux-receipt__info-value" x-text="receipt.cashier"></span>
+            </div>
+          </div>
+
+          <!-- Items -->
+          <div class="ux-receipt__items">
+            <div x-show="showItemsHeader" class="ux-receipt__items-header">
+              <span>Producto</span>
+              <span>Importe</span>
+            </div>
+            <template x-for="item in items" :key="item.name">
+              <div class="ux-receipt__item">
+                <span class="ux-receipt__item-name" x-text="item.name"></span>
+                <span class="ux-receipt__item-qty" x-text="item.qty + 'x'"></span>
+                <span class="ux-receipt__item-price" x-text="formatPrice(item.price)"></span>
+                <span class="ux-receipt__item-total" x-text="formatPrice(item.price * item.qty)"></span>
+              </div>
+            </template>
+          </div>
+
+          <!-- Totals -->
+          <div class="ux-receipt__totals">
+            <div class="ux-receipt__total-row ux-receipt__total-row--subtotal">
+              <span class="ux-receipt__total-label">Subtotal</span>
+              <span class="ux-receipt__total-value" x-text="formatPrice(subtotal)"></span>
+            </div>
+            <div x-show="discount > 0" class="ux-receipt__total-row">
+              <span class="ux-receipt__total-label" x-text="discountLabel"></span>
+              <span class="ux-receipt__total-value" x-text="'-' + formatPrice(discount)"></span>
+            </div>
+            <div x-show="showTax && tax > 0" class="ux-receipt__total-row">
+              <span class="ux-receipt__total-label" x-text="taxLabel + (taxRate ? ' (' + taxRate + '%)' : '')"></span>
+              <span class="ux-receipt__total-value" x-text="formatPrice(tax)"></span>
+            </div>
+            <div class="ux-receipt__total-row ux-receipt__total-row--grand">
+              <span class="ux-receipt__total-label">TOTAL</span>
+              <span class="ux-receipt__total-value" x-text="formatPrice(total)"></span>
+            </div>
+          </div>
+
+          <!-- Payment -->
+          <div x-show="showPayment && payments.length > 0" class="ux-receipt__payment">
+            <div class="ux-receipt__payment-title">Forma de Pago</div>
+            <template x-for="payment in payments" :key="payment.method">
+              <div class="ux-receipt__payment-row">
+                <span class="ux-receipt__payment-method" x-text="payment.method"></span>
+                <span x-text="formatPrice(payment.amount)"></span>
+              </div>
+            </template>
+            <div x-show="change > 0" class="ux-receipt__payment-row ux-receipt__change">
+              <span>Cambio</span>
+              <span x-text="formatPrice(change)"></span>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div x-show="showFooter" class="ux-receipt__footer">
+            <div class="ux-receipt__thanks" x-text="footer.thanks"></div>
+            <div x-show="footer.message" class="ux-receipt__message" x-text="footer.message"></div>
+            <div x-show="footer.social" class="ux-receipt__social" x-text="footer.social"></div>
+          </div>
+        </div>
+      </div>

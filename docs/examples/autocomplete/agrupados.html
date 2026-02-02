@@ -1,0 +1,51 @@
+<div x-data="uxAutocomplete({
+  items: [
+    { label: 'JavaScript', value: 'js', group: 'Frontend' },
+    { label: 'TypeScript', value: 'ts', group: 'Frontend' },
+    { label: 'React', value: 'react', group: 'Frontend' },
+    { label: 'Vue.js', value: 'vue', group: 'Frontend' },
+    { label: 'Node.js', value: 'node', group: 'Backend' },
+    { label: 'Python', value: 'python', group: 'Backend' },
+    { label: 'Ruby', value: 'ruby', group: 'Backend' },
+    { label: 'PostgreSQL', value: 'postgres', group: 'Database' },
+    { label: 'MongoDB', value: 'mongo', group: 'Database' },
+    { label: 'Redis', value: 'redis', group: 'Database' }
+  ],
+  placeholder: 'Buscar tecnología...'
+})">
+  <div class="ux-autocomplete" style="max-width: 400px;">
+    <input type="text"
+           class="ux-autocomplete__input"
+           x-ref="input"
+           x-model="query"
+           :placeholder="placeholder"
+           @input="onInput()"
+           @focus="onFocus()"
+           @blur="onBlur()"
+           @keydown="onKeydown($event)"
+           autocomplete="off">
+
+    <div class="ux-autocomplete__dropdown"
+         :class="{ 'ux-autocomplete__dropdown--open': isOpen }">
+      <div class="ux-autocomplete__list" x-show="filteredItems.length > 0">
+        <template x-for="[groupName, items] in groupedItems" :key="groupName">
+          <div class="ux-autocomplete__group">
+            <div class="ux-autocomplete__group-label" x-text="groupName !== '__ungrouped__' ? groupName : ''"></div>
+            <template x-for="(item, index) in items" :key="getValue(item)">
+              <div class="ux-autocomplete__item"
+                   :class="{ 'ux-autocomplete__item--active': filteredItems.indexOf(item) === activeIndex }"
+                   @click="select(item)"
+                   @mouseenter="activeIndex = filteredItems.indexOf(item)">
+                <span class="ux-autocomplete__item-label" x-html="highlight(getLabel(item))"></span>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+
+      <div class="ux-autocomplete__empty" x-show="filteredItems.length === 0 && query.length >= minChars">
+        <span class="ux-autocomplete__empty-text" x-text="emptyText"></span>
+      </div>
+    </div>
+  </div>
+</div>

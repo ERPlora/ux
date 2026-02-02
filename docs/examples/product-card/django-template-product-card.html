@@ -1,0 +1,69 @@
+<!-- templates/partials/product_card.html -->
+<div class="ux-product-card {% if product.stock == 0 %}ux-product-card--out-of-stock{% endif %}"
+     hx-post="{% url 'cart:add' %}"
+     hx-vals='{"product_id": "{{ product.id }}", "quantity": 1}'
+     hx-target="#cart-summary"
+     hx-swap="innerHTML"
+     hx-indicator="find .ux-product-card__quick-add"
+     style="cursor: pointer;">
+
+  <div class="ux-product-card__image-wrapper">
+    {% if product.discount_percent %}
+    <div class="ux-product-card__badges">
+      <span class="ux-product-card__badge ux-product-card__badge--sale">
+        -{{ product.discount_percent }}%
+      </span>
+    </div>
+    {% elif product.is_new %}
+    <div class="ux-product-card__badges">
+      <span class="ux-product-card__badge ux-product-card__badge--new">Nuevo</span>
+    </div>
+    {% elif product.stock <= 5 and product.stock > 0 %}
+    <div class="ux-product-card__badges">
+      <span class="ux-product-card__badge ux-product-card__badge--low-stock">
+        Quedan {{ product.stock }}
+      </span>
+    </div>
+    {% endif %}
+
+    {% if product.image %}
+    <img src="{{ product.image.url }}"
+         alt="{{ product.name }}"
+         class="ux-product-card__image"
+         loading="lazy">
+    {% else %}
+    <div class="ux-product-card__placeholder">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.5" width="48" height="48">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+      </svg>
+    </div>
+    {% endif %}
+
+    {% if product.stock > 0 %}
+    <button type="button" class="ux-product-card__quick-add">
+      <span class="htmx-indicator">
+        <span class="ux-spinner ux-spinner--sm"></span>
+      </span>
+      <span class="htmx-settle">+</span>
+    </button>
+    {% endif %}
+  </div>
+
+  <div class="ux-product-card__content">
+    <span class="ux-product-card__category">{{ product.category.name }}</span>
+    <h4 class="ux-product-card__name">{{ product.name }}</h4>
+    <div class="ux-product-card__price-wrapper">
+      {% if product.original_price %}
+      <span class="ux-product-card__price ux-product-card__price--sale">
+        ${{ product.price }}
+      </span>
+      <span class="ux-product-card__price-original">
+        ${{ product.original_price }}
+      </span>
+      {% else %}
+      <span class="ux-product-card__price">${{ product.price }}</span>
+      {% endif %}
+    </div>
+  </div>
+</div>

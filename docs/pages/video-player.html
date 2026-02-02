@@ -1,0 +1,881 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { margin-bottom: var(--ux-space-md); font-weight: 600; }
+    .demo-section p { color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); font-size: var(--ux-font-size-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .demo-box--dark { background: #1a1a1a; }
+  </style>
+
+<div>
+    <h1 class="ux-text-2xl ux-font-bold ux-mb-sm">Video Player</h1>
+    <p class="ux-text-secondary ux-mb-xl">Custom video player with iOS-style controls, keyboard shortcuts, and fullscreen support.</p>
+
+    <!-- Basic Video Player -->
+    <section class="component-section">
+      <h3>Basic Video Player</h3>
+      <p>A fully-featured video player with custom controls.</p>
+
+      <ux-playground src="examples/video-player/basic-video-player.html"></ux-playground>
+      <div class="demo-box">
+        <div
+          x-data="uxVideoPlayer()"
+          class="ux-video-player ux-video-player--16-9"
+          tabindex="0"
+          @mousemove="showControlsTemporarily()"
+          @mouseleave="hideControls()"
+        >
+          <!-- Video Element -->
+          <video
+            x-ref="video"
+            class="ux-video-player__video"
+            poster="https://images.unsplash.com/photo-1536240478700-b869070f9279?w=1280&h=720&fit=crop"
+            preload="metadata"
+          >
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+
+          <!-- Poster Overlay -->
+          <div
+            class="ux-video-player__poster"
+            :class="{ 'ux-video-player__poster--hidden': hasStarted }"
+            :style="poster ? `background-image: url(${poster})` : ''"
+            @click="play()"
+          >
+            <button class="ux-video-player__poster-play" aria-label="Play video">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+          </div>
+
+          <!-- Loading Spinner -->
+          <div class="ux-video-player__loading" x-show="isBuffering">
+            <div class="ux-video-player__spinner"></div>
+          </div>
+
+          <!-- Center Play Button (when paused) -->
+          <div class="ux-video-player__center-play" x-show="hasStarted && isPaused" @click="toggle()">
+            <button class="ux-video-player__center-play-btn" aria-label="Play">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+          </div>
+
+          <!-- Controls -->
+          <div class="ux-video-player__controls">
+            <!-- Progress Bar -->
+            <div
+              class="ux-video-player__progress-wrapper"
+              x-ref="progressWrapper"
+              @click="handleProgressClick($event)"
+              @mousedown="startProgressDrag($event)"
+            >
+              <div class="ux-video-player__progress">
+                <div class="ux-video-player__progress-buffer" :style="{ width: bufferedPercent + '%' }"></div>
+                <div class="ux-video-player__progress-fill" :style="{ width: progress + '%' }"></div>
+              </div>
+              <div class="ux-video-player__progress-thumb" :style="{ left: progress + '%' }"></div>
+            </div>
+
+            <!-- Controls Bar -->
+            <div class="ux-video-player__controls-bar">
+              <!-- Left Controls -->
+              <div class="ux-video-player__controls-left">
+                <!-- Play/Pause -->
+                <button class="ux-video-player__btn" @click="toggle()" :aria-label="isPlaying ? 'Pause' : 'Play'">
+                  <svg x-show="!isPlaying" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  <svg x-show="isPlaying" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                </button>
+
+                <!-- Skip Back -->
+                <button class="ux-video-player__btn ux-video-player__btn--sm" @click="skip(-10)" aria-label="Skip back 10 seconds">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-7-7 7-7"/><path d="M18 19V5"/></svg>
+                </button>
+
+                <!-- Skip Forward -->
+                <button class="ux-video-player__btn ux-video-player__btn--sm" @click="skip(10)" aria-label="Skip forward 10 seconds">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 5l7 7-7 7"/><path d="M6 5v14"/></svg>
+                </button>
+
+                <!-- Volume -->
+                <div class="ux-video-player__volume">
+                  <button class="ux-video-player__btn ux-video-player__btn--sm" @click="toggleMute()" :aria-label="isMuted ? 'Unmute' : 'Mute'">
+                    <svg x-show="volumeIcon === 'high'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+                    <svg x-show="volumeIcon === 'low'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>
+                    <svg x-show="volumeIcon === 'muted'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                  </button>
+                  <div class="ux-video-player__volume-slider-wrapper">
+                    <input
+                      type="range"
+                      class="ux-video-player__volume-slider"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      :value="volume"
+                      @input="setVolume(parseFloat($event.target.value))"
+                      aria-label="Volume"
+                    >
+                  </div>
+                </div>
+
+                <!-- Time -->
+                <div class="ux-video-player__time">
+                  <span x-text="currentTimeFormatted"></span>
+                  <span class="ux-video-player__time-separator">/</span>
+                  <span x-text="durationFormatted"></span>
+                </div>
+              </div>
+
+              <!-- Center (spacer) -->
+              <div class="ux-video-player__controls-center"></div>
+
+              <!-- Right Controls -->
+              <div class="ux-video-player__controls-right">
+                <!-- Speed -->
+                <div class="ux-video-player__speed" @click.outside="showSpeedMenu = false">
+                  <button class="ux-video-player__speed-btn" @click="toggleSpeedMenu()" aria-label="Playback speed">
+                    <span x-text="playbackRate + 'x'"></span>
+                  </button>
+                  <div class="ux-video-player__speed-menu" :class="{ 'ux-video-player__speed-menu--open': showSpeedMenu }">
+                    <template x-for="speed in speeds" :key="speed">
+                      <button
+                        class="ux-video-player__speed-option"
+                        :class="{ 'ux-video-player__speed-option--active': playbackRate === speed }"
+                        @click="setSpeed(speed)"
+                        x-text="speed + 'x'"
+                      ></button>
+                    </template>
+                  </div>
+                </div>
+
+                <!-- Picture-in-Picture -->
+                <button class="ux-video-player__btn ux-video-player__btn--sm" @click="togglePiP()" aria-label="Picture-in-Picture">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><rect x="11" y="9" width="9" height="7" rx="1"/></svg>
+                </button>
+
+                <!-- Fullscreen -->
+                <button class="ux-video-player__btn" @click="toggleFullscreen()" :aria-label="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'">
+                  <svg x-show="!isFullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                  <svg x-show="isFullscreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PiP Indicator -->
+          <div class="ux-video-player__pip-indicator" x-show="isPiP">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><rect x="11" y="9" width="9" height="7" rx="1"/></svg>
+            <span>Playing in Picture-in-Picture</span>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><div
+  x-data="uxVideoPlayer()"
+  class="ux-video-player ux-video-player--16-9"
+  tabindex="0"
+  @mousemove="showControlsTemporarily()"
+>
+  <video x-ref="video" class="ux-video-player__video" preload="metadata">
+    <source src="video.mp4" type="video/mp4">
+  </video>
+
+  <!-- Poster, Loading, Controls... -->
+</div></pre>
+    </section>
+
+    <!-- Aspect Ratios -->
+    <section class="component-section">
+      <h3>Aspect Ratios</h3>
+      <p>Different aspect ratio modifiers for various video formats.</p>
+
+      <ux-playground src="examples/video-player/aspect-ratios.html"></ux-playground>
+      <div class="demo-box">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ux-space-md);">
+          <div>
+            <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-sm);">16:9 (default)</p>
+            <div class="ux-video-player ux-video-player--16-9" style="background: var(--ux-gray-800);">
+              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--ux-gray-400);">16:9</div>
+            </div>
+          </div>
+          <div>
+            <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-sm);">4:3</p>
+            <div class="ux-video-player ux-video-player--4-3" style="background: var(--ux-gray-800);">
+              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--ux-gray-400);">4:3</div>
+            </div>
+          </div>
+          <div>
+            <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-sm);">1:1 (square)</p>
+            <div class="ux-video-player ux-video-player--1-1" style="background: var(--ux-gray-800); max-width: 200px;">
+              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--ux-gray-400);">1:1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><!-- 16:9 (widescreen) -->
+<div class="ux-video-player ux-video-player--16-9">...</div>
+
+<!-- 4:3 (classic) -->
+<div class="ux-video-player ux-video-player--4-3">...</div>
+
+<!-- 1:1 (square, for social media) -->
+<div class="ux-video-player ux-video-player--1-1">...</div></pre>
+    </section>
+
+    <!-- Glass Variant -->
+    <section class="component-section">
+      <h3>Glass Variant</h3>
+      <p>iOS-style glass morphism controls with blur effect.</p>
+
+      <ux-playground src="examples/video-player/glass-variant.html"></ux-playground>
+      <div class="demo-box demo-box--dark" style="background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200'); background-size: cover; background-position: center;">
+        <div
+          x-data="uxVideoPlayer()"
+          class="ux-video-player ux-video-player--16-9 ux-video-player--glass ux-video-player--controls-visible"
+          tabindex="0"
+        >
+          <video
+            x-ref="video"
+            class="ux-video-player__video"
+            poster="https://images.unsplash.com/photo-1518770660439-4636190af475?w=1280&h=720&fit=crop"
+            preload="metadata"
+          >
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+          </video>
+
+          <div
+            class="ux-video-player__poster"
+            :class="{ 'ux-video-player__poster--hidden': hasStarted }"
+            @click="play()"
+          >
+            <button class="ux-video-player__poster-play">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+          </div>
+
+          <div class="ux-video-player__controls">
+            <div class="ux-video-player__progress-wrapper" @click="handleProgressClick($event)">
+              <div class="ux-video-player__progress">
+                <div class="ux-video-player__progress-buffer" :style="{ width: bufferedPercent + '%' }"></div>
+                <div class="ux-video-player__progress-fill" :style="{ width: progress + '%' }"></div>
+              </div>
+              <div class="ux-video-player__progress-thumb" :style="{ left: progress + '%' }"></div>
+            </div>
+
+            <div class="ux-video-player__controls-bar">
+              <div class="ux-video-player__controls-left">
+                <button class="ux-video-player__btn" @click="toggle()">
+                  <svg x-show="!isPlaying" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  <svg x-show="isPlaying" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                </button>
+                <div class="ux-video-player__time">
+                  <span x-text="currentTimeFormatted"></span>
+                  <span class="ux-video-player__time-separator">/</span>
+                  <span x-text="durationFormatted"></span>
+                </div>
+              </div>
+              <div class="ux-video-player__controls-center"></div>
+              <div class="ux-video-player__controls-right">
+                <button class="ux-video-player__btn" @click="toggleFullscreen()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><div class="ux-video-player ux-video-player--glass">
+  ...
+</div></pre>
+    </section>
+
+    <!-- Minimal Controls -->
+    <section class="component-section">
+      <h3>Minimal Controls</h3>
+      <p>Progress bar only, no control buttons (click video to play/pause).</p>
+
+      <ux-playground src="examples/video-player/minimal-controls.html"></ux-playground>
+      <div class="demo-box">
+        <div
+          x-data="uxVideoPlayer()"
+          class="ux-video-player ux-video-player--16-9 ux-video-player--minimal"
+          tabindex="0"
+          @click="toggle()"
+        >
+          <video
+            x-ref="video"
+            class="ux-video-player__video"
+            poster="https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1280&h=720&fit=crop"
+            preload="metadata"
+          >
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+          </video>
+
+          <div
+            class="ux-video-player__poster"
+            :class="{ 'ux-video-player__poster--hidden': hasStarted }"
+          >
+            <button class="ux-video-player__poster-play">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+          </div>
+
+          <div class="ux-video-player__center-play" x-show="hasStarted && isPaused">
+            <button class="ux-video-player__center-play-btn">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+          </div>
+
+          <div class="ux-video-player__controls">
+            <div class="ux-video-player__progress-wrapper" @click.stop="handleProgressClick($event)">
+              <div class="ux-video-player__progress">
+                <div class="ux-video-player__progress-fill" :style="{ width: progress + '%' }"></div>
+              </div>
+              <div class="ux-video-player__progress-thumb" :style="{ left: progress + '%' }"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><div class="ux-video-player ux-video-player--minimal" @click="toggle()">
+  <!-- Only shows progress bar -->
+</div></pre>
+    </section>
+
+    <!-- Keyboard Shortcuts -->
+    <section class="component-section">
+      <h3>Keyboard Shortcuts</h3>
+      <p>Full keyboard navigation support when the player is focused.</p>
+
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: var(--ux-space-sm);">Key</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>Space</code> / <code>K</code></td>
+            <td style="padding: var(--ux-space-sm);">Play/Pause</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>Arrow Left</code></td>
+            <td style="padding: var(--ux-space-sm);">Skip back 10 seconds</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>Arrow Right</code></td>
+            <td style="padding: var(--ux-space-sm);">Skip forward 10 seconds</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>Arrow Up</code></td>
+            <td style="padding: var(--ux-space-sm);">Increase volume</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>Arrow Down</code></td>
+            <td style="padding: var(--ux-space-sm);">Decrease volume</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>M</code></td>
+            <td style="padding: var(--ux-space-sm);">Toggle mute</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>F</code></td>
+            <td style="padding: var(--ux-space-sm);">Toggle fullscreen</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>Shift + P</code></td>
+            <td style="padding: var(--ux-space-sm);">Toggle Picture-in-Picture</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>0-9</code></td>
+            <td style="padding: var(--ux-space-sm);">Seek to 0%-90% of video</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>Home</code></td>
+            <td style="padding: var(--ux-space-sm);">Go to start</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>End</code></td>
+            <td style="padding: var(--ux-space-sm);">Go to end</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>&lt;</code></td>
+            <td style="padding: var(--ux-space-sm);">Decrease playback speed</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>&gt;</code></td>
+            <td style="padding: var(--ux-space-sm);">Increase playback speed</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- API Reference -->
+    <section class="component-section">
+      <h3>Alpine.js API</h3>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Configuration Options</h4>
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: var(--ux-space-sm);">Option</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Default</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>autoplay</code></td>
+            <td style="padding: var(--ux-space-sm);">false</td>
+            <td style="padding: var(--ux-space-sm);">Auto-start playback</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>muted</code></td>
+            <td style="padding: var(--ux-space-sm);">false</td>
+            <td style="padding: var(--ux-space-sm);">Start muted</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>loop</code></td>
+            <td style="padding: var(--ux-space-sm);">false</td>
+            <td style="padding: var(--ux-space-sm);">Loop playback</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>volume</code></td>
+            <td style="padding: var(--ux-space-sm);">1</td>
+            <td style="padding: var(--ux-space-sm);">Initial volume (0-1)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>playbackRate</code></td>
+            <td style="padding: var(--ux-space-sm);">1</td>
+            <td style="padding: var(--ux-space-sm);">Initial playback speed</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>speeds</code></td>
+            <td style="padding: var(--ux-space-sm);">[0.5, 0.75, 1, 1.25, 1.5, 2]</td>
+            <td style="padding: var(--ux-space-sm);">Available speed options</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>controlsTimeout</code></td>
+            <td style="padding: var(--ux-space-sm);">3000</td>
+            <td style="padding: var(--ux-space-sm);">Hide controls after ms</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Methods</h4>
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: var(--ux-space-sm);">Method</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>play()</code></td>
+            <td style="padding: var(--ux-space-sm);">Start playback</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>pause()</code></td>
+            <td style="padding: var(--ux-space-sm);">Pause playback</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>toggle()</code></td>
+            <td style="padding: var(--ux-space-sm);">Toggle play/pause</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>seek(time)</code></td>
+            <td style="padding: var(--ux-space-sm);">Seek to time in seconds</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>skip(seconds)</code></td>
+            <td style="padding: var(--ux-space-sm);">Skip forward/backward</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>setVolume(level)</code></td>
+            <td style="padding: var(--ux-space-sm);">Set volume (0-1)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>toggleMute()</code></td>
+            <td style="padding: var(--ux-space-sm);">Toggle mute</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>setSpeed(rate)</code></td>
+            <td style="padding: var(--ux-space-sm);">Set playback speed</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>toggleFullscreen()</code></td>
+            <td style="padding: var(--ux-space-sm);">Toggle fullscreen</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>togglePiP()</code></td>
+            <td style="padding: var(--ux-space-sm);">Toggle Picture-in-Picture</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Reactive Properties</h4>
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: var(--ux-space-sm);">Property</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Type</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>isPlaying</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean</td>
+            <td style="padding: var(--ux-space-sm);">Is video playing</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>isPaused</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean</td>
+            <td style="padding: var(--ux-space-sm);">Is video paused</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>isBuffering</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean</td>
+            <td style="padding: var(--ux-space-sm);">Is video buffering</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>currentTime</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">Current time in seconds</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>duration</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">Total duration in seconds</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>progress</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">Progress percentage (0-100)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>currentTimeFormatted</code></td>
+            <td style="padding: var(--ux-space-sm);">String</td>
+            <td style="padding: var(--ux-space-sm);">Formatted time (e.g., "1:23")</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>durationFormatted</code></td>
+            <td style="padding: var(--ux-space-sm);">String</td>
+            <td style="padding: var(--ux-space-sm);">Formatted duration</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>volume</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">Current volume (0-1)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>isMuted</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean</td>
+            <td style="padding: var(--ux-space-sm);">Is muted</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>isFullscreen</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean</td>
+            <td style="padding: var(--ux-space-sm);">Is in fullscreen</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>isPiP</code></td>
+            <td style="padding: var(--ux-space-sm);">Boolean</td>
+            <td style="padding: var(--ux-space-sm);">Is in Picture-in-Picture</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>playbackRate</code></td>
+            <td style="padding: var(--ux-space-sm);">Number</td>
+            <td style="padding: var(--ux-space-sm);">Current playback speed</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Events</h4>
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: var(--ux-space-sm);">Event</th>
+            <th style="text-align: left; padding: var(--ux-space-sm);">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>ux-video-player:play</code></td>
+            <td style="padding: var(--ux-space-sm);">Fired when playback starts</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>ux-video-player:pause</code></td>
+            <td style="padding: var(--ux-space-sm);">Fired when playback pauses</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>ux-video-player:ended</code></td>
+            <td style="padding: var(--ux-space-sm);">Fired when video ends</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>ux-video-player:fullscreen-enter</code></td>
+            <td style="padding: var(--ux-space-sm);">Entered fullscreen</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>ux-video-player:fullscreen-exit</code></td>
+            <td style="padding: var(--ux-space-sm);">Exited fullscreen</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>ux-video-player:pip-enter</code></td>
+            <td style="padding: var(--ux-space-sm);">Entered Picture-in-Picture</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>ux-video-player:pip-leave</code></td>
+            <td style="padding: var(--ux-space-sm);">Exited Picture-in-Picture</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: var(--ux-space-sm);"><code>ux-video-player:error</code></td>
+            <td style="padding: var(--ux-space-sm);">Video error occurred</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CSS Classes -->
+    <section class="component-section">
+      <h3>CSS Classes</h3>
+
+      <pre class="ux-code-block" data-lang="css">/* Base */
+.ux-video-player              /* Container */
+.ux-video-player__video       /* Video element */
+.ux-video-player__poster      /* Poster overlay */
+.ux-video-player__controls    /* Controls container */
+.ux-video-player__progress    /* Progress bar */
+.ux-video-player__btn         /* Control button */
+
+/* Aspect Ratios */
+.ux-video-player--16-9        /* 16:9 widescreen */
+.ux-video-player--4-3         /* 4:3 classic */
+.ux-video-player--1-1         /* Square */
+
+/* Variants */
+.ux-video-player--glass       /* Glass morphism controls */
+.ux-video-player--minimal     /* Progress bar only */
+.ux-video-player--cover       /* Cover object-fit */
+
+/* Sizes */
+.ux-video-player--sm          /* Small buttons */
+.ux-video-player--lg          /* Large buttons */
+
+/* States */
+.ux-video-player--playing     /* Video is playing */
+.ux-video-player--paused      /* Video is paused */
+.ux-video-player--fullscreen  /* In fullscreen mode */
+.ux-video-player--loading     /* Video is loading */
+.ux-video-player--controls-visible  /* Force show controls */
+.ux-video-player--controls-always   /* Always show controls */</pre>
+    </section>
+
+    <!-- HTMX + Django -->
+    <section class="component-section">
+      <h3>HTMX + Django</h3>
+      <p>Stream videos from Django and track viewing progress with HTMX.</p>
+      <pre class="ux-code-block" data-lang="html"><!-- Video player with Django streaming -->
+<div x-data="uxVideoPlayer()"
+     class="ux-video-player ux-video-player--16-9"
+     @ux-video-player:ended="trackCompletion()"
+     @ux-video-player:play="trackPlay()">
+
+  <video x-ref="video"
+         class="ux-video-player__video"
+         poster="{% url 'videos:thumbnail' video.id %}"
+         preload="metadata">
+    <source src="{% url 'videos:stream' video.id %}" type="video/mp4">
+  </video>
+
+  <!-- Controls and overlays -->
+</div>
+
+<!-- Track viewing progress -->
+<div x-data="uxVideoPlayer()"
+     @ux-video-player:timeupdate.debounce.5s="
+       htmx.ajax('POST', '{% url \'videos:track-progress\' video.id %}', {
+         values: {
+           time: currentTime,
+           duration: duration,
+           progress: progress
+         }
+       })
+     ">
+  <!-- Video player -->
+</div>
+
+<!-- Load video list with HTMX -->
+<div hx-get="{% url 'videos:list' %}?category={{ category.slug }}"
+     hx-trigger="load"
+     hx-swap="innerHTML">
+  <div class="ux-skeleton" style="height: 200px;"></div>
+</div>
+
+<!-- Video details loaded on demand -->
+<div class="video-card"
+     hx-get="{% url 'videos:details' video.id %}"
+     hx-trigger="click"
+     hx-target="#video-modal-content"
+     hx-swap="innerHTML">
+  <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}">
+  <h4>{{ video.title }}</h4>
+</div>
+
+<!-- Resume watching from last position -->
+<div x-data="uxVideoPlayer()"
+     x-init="$watch('hasStarted', () => {
+       if (hasStarted && {{ resume_time }} > 0) {
+         seek({{ resume_time }});
+       }
+     })">
+  <!-- Video player -->
+</div></pre>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import StreamingHttpResponse, JsonResponse, FileResponse
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth.decorators import login_required
+from django.core.files.storage import default_storage
+import os
+import re
+
+def video_page(request, video_id):
+    """Render video player page."""
+    video = get_object_or_404(Video, id=video_id, is_published=True)
+
+    # Get resume position if user is logged in
+    resume_time = 0
+    if request.user.is_authenticated:
+        progress = VideoProgress.objects.filter(
+            user=request.user,
+            video=video
+        ).first()
+        if progress:
+            resume_time = progress.current_time
+
+    return render(request, 'videos/player.html', {
+        'video': video,
+        'resume_time': resume_time
+    })
+
+def stream_video(request, video_id):
+    """Stream video with range request support."""
+    video = get_object_or_404(Video, id=video_id)
+    video_path = video.file.path
+    file_size = os.path.getsize(video_path)
+
+    # Handle range requests for seeking
+    range_header = request.META.get('HTTP_RANGE', '')
+    range_match = re.match(r'bytes=(\d+)-(\d*)', range_header)
+
+    if range_match:
+        start = int(range_match.group(1))
+        end = int(range_match.group(2)) if range_match.group(2) else file_size - 1
+        length = end - start + 1
+
+        response = StreamingHttpResponse(
+            file_iterator(video_path, start, length),
+            status=206,
+            content_type='video/mp4'
+        )
+        response['Content-Range'] = f'bytes {start}-{end}/{file_size}'
+        response['Content-Length'] = length
+    else:
+        response = FileResponse(
+            open(video_path, 'rb'),
+            content_type='video/mp4'
+        )
+        response['Content-Length'] = file_size
+
+    response['Accept-Ranges'] = 'bytes'
+    return response
+
+def file_iterator(path, start=0, length=None, chunk_size=8192):
+    """Generator for streaming file chunks."""
+    with open(path, 'rb') as f:
+        f.seek(start)
+        remaining = length
+        while remaining is None or remaining > 0:
+            chunk_length = min(chunk_size, remaining) if remaining else chunk_size
+            chunk = f.read(chunk_length)
+            if not chunk:
+                break
+            if remaining:
+                remaining -= len(chunk)
+            yield chunk
+
+def video_thumbnail(request, video_id):
+    """Return video thumbnail image."""
+    video = get_object_or_404(Video, id=video_id)
+    if video.thumbnail:
+        return FileResponse(video.thumbnail.open(), content_type='image/jpeg')
+    # Return default thumbnail
+    return FileResponse(
+        default_storage.open('defaults/video-thumbnail.jpg'),
+        content_type='image/jpeg'
+    )
+
+@login_required
+@require_POST
+def track_progress(request, video_id):
+    """Track user's viewing progress."""
+    video = get_object_or_404(Video, id=video_id)
+
+    current_time = float(request.POST.get('time', 0))
+    duration = float(request.POST.get('duration', 0))
+    progress_percent = float(request.POST.get('progress', 0))
+
+    progress, created = VideoProgress.objects.update_or_create(
+        user=request.user,
+        video=video,
+        defaults={
+            'current_time': current_time,
+            'duration': duration,
+            'progress_percent': progress_percent,
+            'completed': progress_percent >= 95
+        }
+    )
+
+    return JsonResponse({'success': True})
+
+@require_GET
+def video_list(request):
+    """Return video list as HTML partial."""
+    category = request.GET.get('category')
+    videos = Video.objects.filter(is_published=True)
+
+    if category:
+        videos = videos.filter(category__slug=category)
+
+    videos = videos.order_by('-created_at')[:20]
+
+    return render(request, 'videos/partials/list.html', {
+        'videos': videos
+    })
+
+def video_details(request, video_id):
+    """Return video details as HTML partial for modal."""
+    video = get_object_or_404(Video, id=video_id)
+    return render(request, 'videos/partials/details.html', {
+        'video': video
+    })
+
+# urls.py
+from django.urls import path
+from . import views
+
+app_name = 'videos'
+urlpatterns = [
+    path('<int:video_id>/', views.video_page, name='page'),
+    path('<int:video_id>/stream/', views.stream_video, name='stream'),
+    path('<int:video_id>/thumbnail/', views.video_thumbnail, name='thumbnail'),
+    path('<int:video_id>/progress/', views.track_progress, name='track-progress'),
+    path('<int:video_id>/details/', views.video_details, name='details'),
+    path('list/', views.video_list, name='list'),
+]</pre>
+    </section>
+
+  </div>

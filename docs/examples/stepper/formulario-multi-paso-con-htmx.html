@@ -1,0 +1,121 @@
+<div class="ux-stepper">
+          <div class="ux-stepper__header">
+            <div class="ux-stepper__progress" :style="{ width: progressWidth }"></div>
+            <template x-for="(label, index) in ['Datos', 'Direccion', 'Confirmar']" :key="index">
+              <div class="ux-stepper__step"
+                   :class="getStepClasses(index)"
+                   @click="goTo(index)">
+                <div class="ux-stepper__circle">
+                  <template x-if="isCompleted(index)">
+                    <svg class="ux-stepper__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </template>
+                  <template x-if="!isCompleted(index)">
+                    <span x-text="index + 1"></span>
+                  </template>
+                </div>
+                <span class="ux-stepper__label" x-text="label"></span>
+              </div>
+            </template>
+          </div>
+
+          <div class="ux-stepper__content">
+            <!-- Step 1: Personal Data -->
+            <div class="ux-stepper__panel" :class="{ 'ux-stepper__panel--active': currentStep === 0 }">
+              <form id="step1-form"
+                    hx-post="/api/checkout/step1"
+                    hx-target="#step1-result"
+                    hx-swap="innerHTML"
+                    hx-indicator="#step1-spinner">
+                <h4 style="margin-bottom: var(--ux-space-md);">Datos Personales</h4>
+                <div class="ux-input" style="margin-bottom: var(--ux-space-md);">
+                  <label class="ux-input__label">Nombre</label>
+                  <input type="text" name="name" class="ux-input__field" placeholder="Juan Perez" required>
+                </div>
+                <div class="ux-input">
+                  <label class="ux-input__label">Email</label>
+                  <input type="email" name="email" class="ux-input__field" placeholder="juan@email.com" required>
+                </div>
+                <div id="step1-result" style="margin-top: var(--ux-space-sm);"></div>
+              </form>
+            </div>
+
+            <!-- Step 2: Address -->
+            <div class="ux-stepper__panel" :class="{ 'ux-stepper__panel--active': currentStep === 1 }">
+              <form id="step2-form"
+                    hx-post="/api/checkout/step2"
+                    hx-target="#step2-result"
+                    hx-swap="innerHTML">
+                <h4 style="margin-bottom: var(--ux-space-md);">Direccion de Envio</h4>
+                <div class="ux-input" style="margin-bottom: var(--ux-space-md);">
+                  <label class="ux-input__label">Direccion</label>
+                  <input type="text" name="address" class="ux-input__field" placeholder="Calle 123">
+                </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--ux-space-md);">
+                  <div class="ux-input">
+                    <label class="ux-input__label">Ciudad</label>
+                    <input type="text" name="city" class="ux-input__field" placeholder="Ciudad">
+                  </div>
+                  <div class="ux-input">
+                    <label class="ux-input__label">CP</label>
+                    <input type="text" name="zip" class="ux-input__field" placeholder="12345">
+                  </div>
+                </div>
+                <div id="step2-result" style="margin-top: var(--ux-space-sm);"></div>
+              </form>
+            </div>
+
+            <!-- Step 3: Confirmation -->
+            <div class="ux-stepper__panel" :class="{ 'ux-stepper__panel--active': currentStep === 2 }">
+              <h4 style="margin-bottom: var(--ux-space-md);">Confirmar Pedido</h4>
+              <div id="order-summary"
+                   hx-get="/api/checkout/summary"
+                   hx-trigger="revealed"
+                   hx-swap="innerHTML"
+                   style="padding: var(--ux-space-lg); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius-md);">
+                <span class="ux-spinner"></span> Cargando resumen...
+              </div>
+            </div>
+          </div>
+
+          <div class="ux-stepper__actions">
+            <div class="ux-stepper__actions-start">
+              <button class="ux-button ux-button--outline"
+                      @click="prev()"
+                      :disabled="isFirst">
+                Anterior
+              </button>
+            </div>
+            <div class="ux-stepper__actions-end">
+              <template x-if="currentStep === 0">
+                <button type="submit"
+                        form="step1-form"
+                        class="ux-button ux-button ux-color-primary"
+                        @click="complete(0); next()">
+                  <span class="ux-spinner ux-spinner--sm htmx-indicator" id="step1-spinner"></span>
+                  Siguiente
+                </button>
+              </template>
+              <template x-if="currentStep === 1">
+                <button type="submit"
+                        form="step2-form"
+                        class="ux-button ux-button ux-color-primary"
+                        @click="complete(1); next()">
+                  Siguiente
+                </button>
+              </template>
+              <template x-if="currentStep === 2">
+                <button class="ux-button ux-button ux-color-primary"
+                        hx-post="/api/checkout/complete"
+                        hx-target="#order-result"
+                        hx-swap="innerHTML"
+                        hx-indicator="#complete-spinner">
+                  <span class="ux-spinner ux-spinner--sm htmx-indicator" id="complete-spinner"></span>
+                  Completar Pedido
+                </button>
+              </template>
+            </div>
+          </div>
+          <div id="order-result" style="margin-top: var(--ux-space-md);"></div>
+        </div>

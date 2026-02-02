@@ -1,0 +1,645 @@
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--ux-surface-secondary);
+      
+      
+    }
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--ux-text);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 1.5rem;
+    }
+  </style>
+
+<h1 style="margin-bottom: 0.5rem;">JSON Viewer</h1>
+  <p style="color: var(--ux-text-secondary); margin-bottom: 2rem;">
+    Visualizador interactivo de JSON con arbol colapsable, resaltado de sintaxis y busqueda.
+  </p>
+
+  <!-- Basic JSON Viewer -->
+  <section class="component-section">
+    <h2>JSON Viewer Basico</h2>
+
+    <div x-data="uxJsonViewer({
+      data: {
+        name: 'John Doe',
+        age: 30,
+        email: 'john@example.com',
+        active: true,
+        address: {
+          street: '123 Main St',
+          city: 'Madrid',
+          country: 'Espana',
+          zipCode: '28001'
+        },
+        tags: ['developer', 'javascript', 'alpine'],
+        metadata: null
+      },
+      initialExpanded: 2
+    })" class="ux-json-viewer">
+      <!-- Header -->
+      <div class="ux-json-viewer__header" x-show="showHeader">
+        <div class="ux-json-viewer__title">
+          <span>JSON</span>
+          <span class="ux-json-viewer__badge">Object</span>
+        </div>
+        <div class="ux-json-viewer__actions">
+          <button class="ux-json-viewer__btn" @click="expandAll()">
+            <span x-html="icons.expand"></span>
+            Expandir
+          </button>
+          <button class="ux-json-viewer__btn" @click="collapseAll()">
+            <span x-html="icons.collapse"></span>
+            Colapsar
+          </button>
+          <button class="ux-json-viewer__btn" :class="{ 'ux-json-viewer__btn--active': copied }" @click="copyJson()">
+            <span x-html="copied ? icons.check : icons.copy"></span>
+            <span x-text="copied ? 'Copiado' : 'Copiar'"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="ux-json-viewer__content">
+        <template x-if="data && viewMode === 'tree'">
+          <ul class="ux-json-viewer__tree" x-data="{ renderNode(value, key, path, isLast) {
+            return { value, key, path, isLast }
+          }}">
+            <!-- Root object -->
+            <li class="ux-json-viewer__node">
+              <div class="ux-json-viewer__row">
+                <button class="ux-json-viewer__toggle"
+                        :class="{ 'ux-json-viewer__toggle--expanded': isExpanded('root') }"
+                        @click="toggleNode('root')"
+                        x-html="icons.chevron"></button>
+                <span class="ux-json-viewer__bracket ux-json-viewer__bracket--open">{</span>
+                <template x-if="!isExpanded('root')">
+                  <span class="ux-json-viewer__preview" x-text="getPreview(data)"></span>
+                </template>
+                <span class="ux-json-viewer__count" x-text="getCount(data)"></span>
+              </div>
+
+              <ul class="ux-json-viewer__children" x-show="isExpanded('root')">
+                <template x-for="(propKey, index) in Object.keys(data)" :key="propKey">
+                  <li class="ux-json-viewer__node">
+                    <div class="ux-json-viewer__row">
+                      <!-- Toggle for nested objects -->
+                      <button class="ux-json-viewer__toggle"
+                              :class="{
+                                'ux-json-viewer__toggle--expanded': isExpanded(propKey),
+                                'ux-json-viewer__toggle--hidden': !isExpandable(data[propKey])
+                              }"
+                              @click="toggleNode(propKey)"
+                              x-html="icons.chevron"></button>
+
+                      <span class="ux-json-viewer__key" x-text="propKey"></span>
+
+                      <!-- Value based on type -->
+                      <template x-if="getType(data[propKey]) === 'string'">
+                        <span class="ux-json-viewer__value--string" x-text="data[propKey]"></span>
+                      </template>
+                      <template x-if="getType(data[propKey]) === 'number'">
+                        <span class="ux-json-viewer__value--number" x-text="data[propKey]"></span>
+                      </template>
+                      <template x-if="getType(data[propKey]) === 'boolean'">
+                        <span class="ux-json-viewer__value--boolean" x-text="data[propKey]"></span>
+                      </template>
+                      <template x-if="getType(data[propKey]) === 'null'">
+                        <span class="ux-json-viewer__value--null">null</span>
+                      </template>
+                      <template x-if="getType(data[propKey]) === 'array'">
+                        <span>
+                          <span class="ux-json-viewer__bracket">[</span>
+                          <template x-if="!isExpanded(propKey)">
+                            <span class="ux-json-viewer__preview" x-text="getPreview(data[propKey])"></span>
+                          </template>
+                          <span class="ux-json-viewer__count" x-text="getCount(data[propKey])"></span>
+                        </span>
+                      </template>
+                      <template x-if="getType(data[propKey]) === 'object' && data[propKey] !== null">
+                        <span>
+                          <span class="ux-json-viewer__bracket">{</span>
+                          <template x-if="!isExpanded(propKey)">
+                            <span class="ux-json-viewer__preview" x-text="getPreview(data[propKey])"></span>
+                          </template>
+                          <span class="ux-json-viewer__count" x-text="getCount(data[propKey])"></span>
+                        </span>
+                      </template>
+                    </div>
+
+                    <!-- Nested children for objects -->
+                    <template x-if="getType(data[propKey]) === 'object' && data[propKey] !== null && isExpanded(propKey)">
+                      <ul class="ux-json-viewer__children">
+                        <template x-for="(nestedKey, nIndex) in Object.keys(data[propKey])" :key="nestedKey">
+                          <li class="ux-json-viewer__node">
+                            <div class="ux-json-viewer__row">
+                              <button class="ux-json-viewer__toggle ux-json-viewer__toggle--hidden"></button>
+                              <span class="ux-json-viewer__key" x-text="nestedKey"></span>
+                              <template x-if="typeof data[propKey][nestedKey] === 'string'">
+                                <span class="ux-json-viewer__value--string" x-text="data[propKey][nestedKey]"></span>
+                              </template>
+                              <template x-if="typeof data[propKey][nestedKey] === 'number'">
+                                <span class="ux-json-viewer__value--number" x-text="data[propKey][nestedKey]"></span>
+                              </template>
+                            </div>
+                          </li>
+                        </template>
+                        <li class="ux-json-viewer__node">
+                          <div class="ux-json-viewer__row">
+                            <span class="ux-json-viewer__bracket">}</span>
+                          </div>
+                        </li>
+                      </ul>
+                    </template>
+
+                    <!-- Nested children for arrays -->
+                    <template x-if="getType(data[propKey]) === 'array' && isExpanded(propKey)">
+                      <ul class="ux-json-viewer__children">
+                        <template x-for="(item, itemIndex) in data[propKey]" :key="itemIndex">
+                          <li class="ux-json-viewer__node">
+                            <div class="ux-json-viewer__row">
+                              <button class="ux-json-viewer__toggle ux-json-viewer__toggle--hidden"></button>
+                              <span class="ux-json-viewer__key" x-text="itemIndex"></span>
+                              <span class="ux-json-viewer__value--string" x-text="item"></span>
+                            </div>
+                          </li>
+                        </template>
+                        <li class="ux-json-viewer__node">
+                          <div class="ux-json-viewer__row">
+                            <span class="ux-json-viewer__bracket">]</span>
+                          </div>
+                        </li>
+                      </ul>
+                    </template>
+                  </li>
+                </template>
+
+                <li class="ux-json-viewer__node">
+                  <div class="ux-json-viewer__row">
+                    <span class="ux-json-viewer__bracket">}</span>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </template>
+
+        <template x-if="viewMode === 'raw'">
+          <pre class="ux-json-viewer__raw" x-text="rawJson"></pre>
+        </template>
+      </div>
+    </div>
+
+    <pre class="ux-code-block" data-lang="html"><div x-data="uxJsonViewer({
+  data: { name: 'John', age: 30, ... },
+  initialExpanded: 2
+})" class="ux-json-viewer">
+  <div class="ux-json-viewer__header">...</div>
+  <div class="ux-json-viewer__content">...</div>
+</div></pre>
+  </section>
+
+  <!-- API Response Example -->
+  <section class="component-section">
+    <h2>Respuesta de API</h2>
+
+    <div x-data="uxJsonViewer({
+      data: {
+        status: 200,
+        success: true,
+        data: {
+          users: [
+            { id: 1, name: 'Alice', email: 'alice@example.com', role: 'admin' },
+            { id: 2, name: 'Bob', email: 'bob@example.com', role: 'user' },
+            { id: 3, name: 'Charlie', email: 'charlie@example.com', role: 'user' }
+          ],
+          pagination: {
+            page: 1,
+            perPage: 10,
+            total: 3,
+            totalPages: 1
+          }
+        },
+        meta: {
+          timestamp: '2024-01-15T10:30:00Z',
+          requestId: 'abc123-def456',
+          version: '1.0.0'
+        }
+      },
+      initialExpanded: 3
+    })" class="ux-json-viewer">
+      <div class="ux-json-viewer__header">
+        <div class="ux-json-viewer__title">
+          <span>API Response</span>
+          <span class="ux-json-viewer__badge" style="background: var(--ux-success); color: var(--ux-primary-contrast);">200 OK</span>
+        </div>
+        <div class="ux-json-viewer__actions">
+          <button class="ux-json-viewer__btn" @click="expandAll()">Expandir</button>
+          <button class="ux-json-viewer__btn" @click="collapseAll()">Colapsar</button>
+          <button class="ux-json-viewer__btn" @click="copyJson()">
+            <span x-html="copied ? icons.check : icons.copy"></span>
+          </button>
+        </div>
+      </div>
+      <div class="ux-json-viewer__content" style="max-height: 400px;">
+        <pre class="ux-json-viewer__raw" x-text="rawJson"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Light Theme -->
+  <section class="component-section">
+    <h2>Tema Claro</h2>
+
+    <div x-data="uxJsonViewer({
+      data: {
+        product: 'iPhone 15 Pro',
+        price: 1199,
+        currency: 'EUR',
+        inStock: true,
+        specs: {
+          display: '6.1 inch',
+          storage: '256GB',
+          color: 'Natural Titanium'
+        }
+      }
+    })" class="ux-json-viewer ux-json-viewer--light">
+      <div class="ux-json-viewer__header">
+        <div class="ux-json-viewer__title">
+          <span>Product Data</span>
+          <span class="ux-json-viewer__badge">Object</span>
+        </div>
+        <div class="ux-json-viewer__actions">
+          <button class="ux-json-viewer__btn" @click="copyJson()">
+            <span x-html="copied ? icons.check : icons.copy"></span>
+            <span x-text="copied ? 'Copiado' : 'Copiar'"></span>
+          </button>
+        </div>
+      </div>
+      <div class="ux-json-viewer__content">
+        <pre class="ux-json-viewer__raw" x-text="rawJson"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compact Mode -->
+  <section class="component-section">
+    <h2>Modo Compacto</h2>
+
+    <div class="demo-grid">
+      <div x-data="uxJsonViewer({
+        data: { a: 1, b: 2, c: 'test', d: true, e: null }
+      })" class="ux-json-viewer ux-json-viewer--compact ux-json-viewer--sm">
+        <div class="ux-json-viewer__header">
+          <div class="ux-json-viewer__title">Pequeno</div>
+          <div class="ux-json-viewer__actions">
+            <button class="ux-json-viewer__btn" @click="copyJson()">
+              <span x-html="icons.copy"></span>
+            </button>
+          </div>
+        </div>
+        <div class="ux-json-viewer__content" style="max-height: 200px;">
+          <pre class="ux-json-viewer__raw" x-text="rawJson"></pre>
+        </div>
+      </div>
+
+      <div x-data="uxJsonViewer({
+        data: { a: 1, b: 2, c: 'test', d: true, e: null }
+      })" class="ux-json-viewer ux-json-viewer--lg">
+        <div class="ux-json-viewer__header">
+          <div class="ux-json-viewer__title">Grande</div>
+          <div class="ux-json-viewer__actions">
+            <button class="ux-json-viewer__btn" @click="copyJson()">
+              <span x-html="icons.copy"></span>
+            </button>
+          </div>
+        </div>
+        <div class="ux-json-viewer__content" style="max-height: 200px;">
+          <pre class="ux-json-viewer__raw" x-text="rawJson"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Error Response -->
+  <section class="component-section">
+    <h2>Respuesta de Error</h2>
+
+    <div x-data="uxJsonViewer({
+      data: {
+        status: 400,
+        error: 'Bad Request',
+        message: 'Validation failed',
+        details: [
+          { field: 'email', message: 'Email is required' },
+          { field: 'password', message: 'Password must be at least 8 characters' }
+        ]
+      }
+    })" class="ux-json-viewer">
+      <div class="ux-json-viewer__header">
+        <div class="ux-json-viewer__title">
+          <span>Error Response</span>
+          <span class="ux-json-viewer__badge" style="background: var(--ux-danger); color: var(--ux-primary-contrast);">400 Error</span>
+        </div>
+        <div class="ux-json-viewer__actions">
+          <button class="ux-json-viewer__btn" @click="copyJson()">
+            <span x-html="icons.copy"></span>
+          </button>
+        </div>
+      </div>
+      <div class="ux-json-viewer__content">
+        <pre class="ux-json-viewer__raw" x-text="rawJson"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- CSS Classes Reference -->
+  <section class="component-section">
+    <h2>Referencia de Clases CSS</h2>
+
+    <ux-playground src="examples/json-viewer/example-2.html"></ux-playground>
+      <div class="demo-box">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--ux-border-color);">
+            <th style="text-align: left; padding: 0.75rem;">Clase</th>
+            <th style="text-align: left; padding: 0.75rem;">Descripcion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-json-viewer</code></td>
+            <td style="padding: 0.75rem;">Contenedor principal (tema oscuro por defecto)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-json-viewer--light</code></td>
+            <td style="padding: 0.75rem;">Tema claro</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-json-viewer--compact</code></td>
+            <td style="padding: 0.75rem;">Modo compacto (menos espaciado)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-json-viewer--sm</code></td>
+            <td style="padding: 0.75rem;">Tamano de fuente pequeno</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-json-viewer--lg</code></td>
+            <td style="padding: 0.75rem;">Tamano de fuente grande</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-json-viewer__value--string</code></td>
+            <td style="padding: 0.75rem;">Valor tipo string (verde)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-json-viewer__value--number</code></td>
+            <td style="padding: 0.75rem;">Valor tipo number (naranja)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--ux-border-color);">
+            <td style="padding: 0.75rem;"><code>.ux-json-viewer__value--boolean</code></td>
+            <td style="padding: 0.75rem;">Valor tipo boolean (cyan)</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem;"><code>.ux-json-viewer__value--null</code></td>
+            <td style="padding: 0.75rem;">Valor null (morado)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Alpine.js Options -->
+  <section class="component-section">
+    <h2>Opciones Alpine.js</h2>
+
+    <ux-playground src="examples/json-viewer/example-1.html"></ux-playground>
+      <div class="demo-box">
+      <pre class="ux-code-block" data-lang="html">uxJsonViewer({
+  data: {},                // Objeto JS o string JSON
+  initialExpanded: 2,      // Profundidad de expansion inicial
+  maxHeight: '500px',      // Altura maxima del contenedor
+  showHeader: true,        // Mostrar header
+  showSearch: false,       // Mostrar busqueda
+  linkUrls: true           // Convertir URLs en enlaces
+})
+
+// Metodos
+expandAll()               // Expandir todos los nodos
+collapseAll()             // Colapsar todos los nodos
+toggleNode(path)          // Alternar nodo especifico
+copyJson()                // Copiar JSON al portapapeles
+setData(data)             // Actualizar datos
+isExpanded(path)          // Verificar si nodo esta expandido
+
+// Propiedades
+data                      // Datos parseados
+rawJson                   // JSON como string formateado
+viewMode                  // 'tree' o 'raw'
+
+// Eventos
+@jsonviewer:copy          // Se dispara al copiar</pre>
+    </div>
+  </section>
+
+  <!-- HTMX + Django Integration -->
+  <section class="component-section">
+    <h2>HTMX + Django</h2>
+    <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">
+      Visualiza respuestas JSON desde una API Django usando HTMX para carga dinamica.
+    </p>
+
+    <ux-playground src="examples/json-viewer/example.html"></ux-playground>
+      <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Vista Django (views.py)</h3>
+      <pre class="ux-code-block" data-lang="python">from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
+def api_user_detail(request, user_id):
+    """Endpoint que retorna datos de usuario en JSON"""
+    user = get_object_or_404(User, pk=user_id)
+    return JsonResponse({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'is_active': user.is_active,
+        'date_joined': user.date_joined.isoformat(),
+        'profile': {
+            'bio': user.profile.bio,
+            'avatar': user.profile.avatar.url if user.profile.avatar else None,
+            'preferences': user.profile.preferences
+        }
+    })
+
+@require_GET
+def api_orders_list(request):
+    """Endpoint que retorna lista de pedidos"""
+    orders = Order.objects.select_related('customer').all()[:10]
+    return JsonResponse({
+        'status': 200,
+        'count': orders.count(),
+        'results': [
+            {
+                'id': order.id,
+                'customer': order.customer.username,
+                'total': float(order.total),
+                'status': order.status,
+                'items': order.items.count(),
+                'created_at': order.created_at.isoformat()
+            }
+            for order in orders
+        ]
+    })</pre>
+    </div>
+
+    <ux-playground src="examples/json-viewer/vista-django-viewspy.html"></ux-playground>
+      <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Template Django con HTMX</h3>
+      <pre class="ux-code-block" data-lang="html"><!-- Boton que carga JSON de usuario -->
+<button class="ux-button ux-color-primary"
+        hx-get="{% url 'api_user_detail' user.id %}"
+        hx-target="#json-container"
+        hx-swap="innerHTML"
+        hx-indicator="#loading">
+  Ver datos JSON
+</button>
+
+<div class="ux-spinner" id="loading" style="display: none;"></div>
+
+<!-- Contenedor donde se renderiza el JSON Viewer -->
+<div id="json-container"></div></pre>
+    </div>
+
+    <ux-playground src="examples/json-viewer/template-django-con-htmx.html"></ux-playground>
+      <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Fragment Django para HTMX Response</h3>
+      <pre class="ux-code-block" data-lang="html"><!-- templates/partials/json_viewer.html -->
+<div x-data="uxJsonViewer({
+  data: {{ json_data|safe }},
+  initialExpanded: 2
+})" class="ux-json-viewer">
+  <div class="ux-json-viewer__header">
+    <div class="ux-json-viewer__title">
+      <span>{{ title }}</span>
+      <span class="ux-json-viewer__badge">{{ badge }}</span>
+    </div>
+    <div class="ux-json-viewer__actions">
+      <button class="ux-json-viewer__btn" @click="expandAll()">Expandir</button>
+      <button class="ux-json-viewer__btn" @click="collapseAll()">Colapsar</button>
+      <button class="ux-json-viewer__btn" @click="copyJson()">
+        <span x-html="copied ? icons.check : icons.copy"></span>
+      </button>
+    </div>
+  </div>
+  <div class="ux-json-viewer__content">
+    <pre class="ux-json-viewer__raw" x-text="rawJson"></pre>
+  </div>
+</div></pre>
+    </div>
+
+    <ux-playground src="examples/json-viewer/fragment-django-para-htmx-response.html"></ux-playground>
+      <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Vista que retorna el fragment</h3>
+      <pre class="ux-code-block" data-lang="python">import json
+from django.shortcuts import render
+
+def htmx_user_json(request, user_id):
+    """Vista que retorna un fragment HTML con el JSON Viewer"""
+    user = get_object_or_404(User, pk=user_id)
+    user_data = {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'is_active': user.is_active,
+        'profile': {
+            'bio': user.profile.bio,
+            'preferences': user.profile.preferences
+        }
+    }
+    return render(request, 'partials/json_viewer.html', {
+        'json_data': json.dumps(user_data),
+        'title': f'Usuario #{user.id}',
+        'badge': 'User'
+    })</pre>
+    </div>
+
+    <ux-playground src="examples/json-viewer/vista-que-retorna-el-fragment.html"></ux-playground>
+      <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Uso con hx-on para procesar respuesta JSON directa</h3>
+      <pre class="ux-code-block" data-lang="html"><!-- Cargar JSON directamente y procesarlo con Alpine.js -->
+<div x-data="{
+  jsonData: null,
+  loading: false,
+  async loadJson(url) {
+    this.loading = true;
+    try {
+      const response = await fetch(url);
+      this.jsonData = await response.json();
+    } finally {
+      this.loading = false;
+    }
+  }
+}">
+  <button class="ux-button ux-color-primary"
+          @click="loadJson('{% url 'api_orders_list' %}')"
+          :disabled="loading">
+    <span x-show="loading" class="ux-spinner ux-spinner--sm"></span>
+    <span x-text="loading ? 'Cargando...' : 'Cargar Pedidos'"></span>
+  </button>
+
+  <template x-if="jsonData">
+    <div x-data="uxJsonViewer({ data: jsonData, initialExpanded: 3 })"
+         class="ux-json-viewer" style="margin-top: 1rem;">
+      <div class="ux-json-viewer__header">
+        <div class="ux-json-viewer__title">
+          <span>Pedidos</span>
+          <span class="ux-json-viewer__badge"
+                x-text="jsonData.count + ' items'"></span>
+        </div>
+        <div class="ux-json-viewer__actions">
+          <button class="ux-json-viewer__btn" @click="expandAll()">Expandir</button>
+          <button class="ux-json-viewer__btn" @click="collapseAll()">Colapsar</button>
+          <button class="ux-json-viewer__btn" @click="copyJson()">Copiar</button>
+        </div>
+      </div>
+      <div class="ux-json-viewer__content" style="max-height: 400px;">
+        <pre class="ux-json-viewer__raw" x-text="rawJson"></pre>
+      </div>
+    </div>
+  </template>
+</div></pre>
+    </div>
+
+    <ux-playground src="examples/json-viewer/uso-con-hx-on-para-procesar-respuesta-json-directa.html"></ux-playground>
+      <div class="demo-box">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">URLs Django</h3>
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    # API endpoints (retornan JSON)
+    path('api/users/<int:user_id>/', views.api_user_detail, name='api_user_detail'),
+    path('api/orders/', views.api_orders_list, name='api_orders_list'),
+
+    # HTMX endpoints (retornan HTML fragments)
+    path('htmx/users/<int:user_id>/json/', views.htmx_user_json, name='htmx_user_json'),
+]</pre>
+    </div>
+  </section>

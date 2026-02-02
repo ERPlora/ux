@@ -1,0 +1,94 @@
+<div x-data="{
+       alertOpen: false,
+       tempValues: [],
+       values: [],
+       options: [
+         { value: 'wifi', label: 'WiFi' },
+         { value: 'bluetooth', label: 'Bluetooth' },
+         { value: 'nfc', label: 'NFC' },
+         { value: 'gps', label: 'GPS' },
+         { value: 'cellular', label: 'Datos moviles' }
+       ],
+       get displayValue() {
+         if (this.values.length === 0) return '';
+         if (this.values.length === 1) {
+           const opt = this.options.find(o => o.value === this.values[0]);
+           return opt ? opt.label : '';
+         }
+         return this.values.length + ' seleccionados';
+       },
+       openAlert() {
+         this.tempValues = [...this.values];
+         this.alertOpen = true;
+         document.body.style.overflow = 'hidden';
+       },
+       closeAlert() {
+         this.alertOpen = false;
+         document.body.style.overflow = '';
+       },
+       toggleOption(value) {
+         const idx = this.tempValues.indexOf(value);
+         if (idx === -1) {
+           this.tempValues.push(value);
+         } else {
+           this.tempValues.splice(idx, 1);
+         }
+       },
+       isSelected(value) {
+         return this.tempValues.includes(value);
+       },
+       confirm() {
+         this.values = [...this.tempValues];
+         this.closeAlert();
+       }
+     }">
+  <!-- Trigger Button -->
+  <div class="ux-select">
+    <span class="ux-select__label">Conexiones</span>
+    <button type="button" class="ux-select__trigger" @click="openAlert()">
+      <span class="ux-select__value" :class="{ 'ux-select__placeholder': values.length === 0 }">
+        <span x-text="displayValue || 'Selecciona conexiones'"></span>
+      </span>
+      <span class="ux-select__icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </span>
+    </button>
+  </div>
+
+  <!-- Alert Modal Multi -->
+  <template x-teleport="body">
+    <div class="ux-select-alert"
+         :class="{ 'ux-select-alert--open': alertOpen }"
+         x-show="alertOpen"
+         x-cloak
+         @keydown.escape.window="closeAlert()">
+      <div class="ux-select-alert__backdrop" @click="closeAlert()"></div>
+      <div class="ux-select-alert__content" @click.stop>
+        <div class="ux-select-alert__header">
+          <h3 class="ux-select-alert__title">Conexiones</h3>
+          <p class="ux-select-alert__message">Selecciona las conexiones a activar</p>
+        </div>
+        <div class="ux-select-alert__options">
+          <template x-for="option in options" :key="option.value">
+            <div class="ux-select-alert__option"
+                 :class="{ 'ux-select-alert__option--selected': isSelected(option.value) }"
+                 @click="toggleOption(option.value)">
+              <span class="ux-select-alert__option-checkbox">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </span>
+              <span class="ux-select-alert__option-label" x-text="option.label"></span>
+            </div>
+          </template>
+        </div>
+        <div class="ux-select-alert__footer">
+          <button class="ux-select-alert__button ux-select-alert__button--cancel" @click="closeAlert()">Cancelar</button>
+          <button class="ux-select-alert__button ux-select-alert__button--ok" @click="confirm()">OK</button>
+        </div>
+      </div>
+    </div>
+  </template>
+</div>

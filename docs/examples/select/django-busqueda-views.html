@@ -1,0 +1,31 @@
+# views.py
+from django.http import HttpResponse
+from django.db.models import Q
+from .models import Product
+
+def search_products(request):
+    """Busca productos y retorna HTML con opciones."""
+    query = request.GET.get('q', '').strip()
+
+    if len(query) < 2:
+        return HttpResponse('<div class="ux-search-select__empty">Escribe al menos 2 caracteres</div>')
+
+    products = Product.objects.filter(
+        Q(name__icontains=query) | Q(sku__icontains=query)
+    )[:20]  # Limitar resultados
+
+    if not products:
+        return HttpResponse('<div class="ux-search-select__empty">No se encontraron productos</div>')
+
+    html = ''
+    for product in products:
+        html += f'''
+        <div class="ux-search-select__option"
+             hx-on:click="document.getElementById('product-value').value='{product.id}';
+                         this.closest('.ux-search-select').querySelector('input[type=text]').value='{product.name}';
+                         Alpine.store('open', false);">
+          <span class="ux-search-select__option-label">{product.name}</span>
+          <span class="ux-search-select__option-description">SKU: {product.sku}</span>
+        </div>
+        '''
+    return HttpResponse(html)

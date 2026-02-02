@@ -1,0 +1,27 @@
+from django.core.paginator import Paginator
+from django.shortcuts import render
+
+def item_list(request):
+    """Vista principal que renderiza la pagina completa"""
+    items = Item.objects.all().order_by('-created_at')
+    paginator = Paginator(items, 10)  # 10 items por pagina
+    page = paginator.get_page(1)
+
+    return render(request, 'items/list.html', {
+        'page': page,
+        'items': page.object_list
+    })
+
+
+def item_list_partial(request):
+    """Vista parcial para cargar mas items via HTMX"""
+    page_number = request.GET.get('page', 1)
+    items = Item.objects.all().order_by('-created_at')
+    paginator = Paginator(items, 10)
+    page = paginator.get_page(page_number)
+
+    # Retorna solo el fragmento HTML
+    return render(request, 'items/_items_partial.html', {
+        'page': page,
+        'items': page.object_list
+    })

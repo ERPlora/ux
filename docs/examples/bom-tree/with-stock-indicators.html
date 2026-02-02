@@ -1,0 +1,79 @@
+showCost: false,
+      lowStockThreshold: 15,
+      data: [
+        {
+          id: 'chair-001',
+          sku: 'CHAIR-OFC-BLK',
+          name: 'Office Chair Ergonomic',
+          type: 'finished',
+          quantity: 1,
+          unit: 'pcs',
+          stock: 45,
+          children: [
+            { id: 'base-001', sku: 'BASE-5STAR', name: '5-Star Base Chrome', type: 'subassembly', quantity: 1, unit: 'pcs', stock: 120 },
+            { id: 'caster-001', sku: 'CASTER-NYL', name: 'Nylon Casters', type: 'raw', quantity: 5, unit: 'pcs', stock: 8 },
+            { id: 'gas-001', sku: 'GASLIFT-CL3', name: 'Gas Lift Class 3', type: 'raw', quantity: 1, unit: 'pcs', stock: 0 },
+            { id: 'seat-001', sku: 'SEAT-FOAM', name: 'Seat Foam Cushion', type: 'raw', quantity: 1, unit: 'pcs', stock: 67 },
+            { id: 'back-001', sku: 'BACK-MESH', name: 'Mesh Backrest', type: 'raw', quantity: 1, unit: 'pcs', stock: 12 },
+            { id: 'arm-001', sku: 'ARM-ADJ-PR', name: 'Adjustable Armrests (Pair)', type: 'raw', quantity: 1, unit: 'pair', stock: 34 }
+          ]
+        }
+      ]
+    })">
+      <div class="ux-bom-tree ux-bom-tree--bordered">
+        <div class="ux-bom-tree__header">
+          <div class="ux-bom-tree__title">Stock Status</div>
+          <div class="ux-bom-tree__actions">
+            <button class="ux-bom-tree__action" @click="expandAll()"><span x-html="icons.expandAll"></span></button>
+            <button class="ux-bom-tree__action" @click="collapseAll()"><span x-html="icons.collapseAll"></span></button>
+          </div>
+        </div>
+        <ul class="ux-bom-tree__list">
+          <template x-for="node in data" :key="node.id">
+            <li class="ux-bom-tree__node">
+              <div class="ux-bom-tree__item" @click="toggle(node.id)">
+                <span class="ux-bom-tree__toggle"
+                      :class="{ 'ux-bom-tree__toggle--expanded': expandedNodes.has(node.id), 'ux-bom-tree__toggle--empty': !node.children }"
+                      x-html="icons.chevron"></span>
+                <span class="ux-bom-tree__icon" :class="'ux-bom-tree__icon--' + (node.type || 'raw')" x-html="getTypeIcon(node.type)"></span>
+                <div class="ux-bom-tree__details">
+                  <span class="ux-bom-tree__name" x-text="node.name"></span>
+                  <span class="ux-bom-tree__sku" x-text="node.sku"></span>
+                </div>
+                <div class="ux-bom-tree__quantity">
+                  <span class="ux-bom-tree__qty-value" x-text="node.quantity"></span>
+                  <span class="ux-bom-tree__qty-unit" x-text="node.unit"></span>
+                </div>
+                <div class="ux-bom-tree__stock" :class="'ux-bom-tree__stock--' + getStockStatus(node)">
+                  <span class="ux-bom-tree__stock-dot"></span>
+                  <span class="ux-bom-tree__stock-text" x-text="node.stock + ' in stock'"></span>
+                </div>
+              </div>
+              <template x-if="node.children && expandedNodes.has(node.id)">
+                <ul class="ux-bom-tree__list ux-bom-tree__list--nested">
+                  <template x-for="child in node.children" :key="child.id">
+                    <li class="ux-bom-tree__node">
+                      <div class="ux-bom-tree__item">
+                        <span class="ux-bom-tree__toggle ux-bom-tree__toggle--empty" x-html="icons.chevron"></span>
+                        <span class="ux-bom-tree__icon" :class="'ux-bom-tree__icon--' + (child.type || 'raw')" x-html="getTypeIcon(child.type)"></span>
+                        <div class="ux-bom-tree__details">
+                          <span class="ux-bom-tree__name" x-text="child.name"></span>
+                          <span class="ux-bom-tree__sku" x-text="child.sku"></span>
+                        </div>
+                        <div class="ux-bom-tree__quantity">
+                          <span class="ux-bom-tree__qty-value" x-text="child.quantity"></span>
+                          <span class="ux-bom-tree__qty-unit" x-text="child.unit"></span>
+                        </div>
+                        <div class="ux-bom-tree__stock" :class="'ux-bom-tree__stock--' + getStockStatus(child)">
+                          <span class="ux-bom-tree__stock-dot"></span>
+                          <span class="ux-bom-tree__stock-text" x-text="child.stock + ' in stock'"></span>
+                        </div>
+                      </div>
+                    </li>
+                  </template>
+                </ul>
+              </template>
+            </li>
+          </template>
+        </ul>
+      </div>

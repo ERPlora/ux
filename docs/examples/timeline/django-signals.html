@@ -1,0 +1,33 @@
+# signals.py
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from .models import ActivityLog
+
+@receiver(post_save, sender='orders.Order')
+def log_order_activity(sender, instance, created, **kwargs):
+    if created:
+        ActivityLog.objects.create(
+            user=instance.user,
+            action='create',
+            description=f'Pedido #{instance.id} creado por ${instance.total}',
+            target_model='Order',
+            target_id=instance.id,
+            metadata={
+                'order_id': instance.id,
+                'total': str(instance.total),
+                'items_count': instance.items.count(),
+            }
+        )
+    else:
+        if instance.tracker.has_changed('status'):
+            ActivityLog.objects.create(
+                user=instance.updated_by or instance.user,
+                action='status',
+                description=f'Estado cambiado a {instance.get_status_display()}',
+                target_model='Order',
+                target_id=instance.id,
+                metadata={
+                    'old_status': instance.tracker.previous('status'),
+                    'new_status': instance.status,
+                }
+            )

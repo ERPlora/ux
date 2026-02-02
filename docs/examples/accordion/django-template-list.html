@@ -1,0 +1,43 @@
+<!-- faq/list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h1>Preguntas Frecuentes</h1>
+
+  <!-- Buscador -->
+  <div class="ux-searchbar" style="margin-bottom: 1rem;">
+    <input type="search"
+           name="q"
+           placeholder="Buscar pregunta..."
+           hx-get="{% url 'faq_search' %}"
+           hx-trigger="input changed delay:300ms, search"
+           hx-target="#faq-accordion"
+           hx-indicator="#search-spinner">
+    <span id="search-spinner" class="htmx-indicator ux-spinner ux-spinner--sm"></span>
+  </div>
+
+  <!-- Filtros por categoria -->
+  <div class="ux-segment" style="margin-bottom: 1.5rem;">
+    <button class="ux-segment__button {% if current_category == 'all' %}ux-segment__button--selected{% endif %}"
+            hx-get="{% url 'faq_list' %}?category=all"
+            hx-target="#faq-accordion"
+            hx-push-url="true">
+      Todas
+    </button>
+    {% for cat in categories %}
+    <button class="ux-segment__button {% if current_category == cat.slug %}ux-segment__button--selected{% endif %}"
+            hx-get="{% url 'faq_list' %}?category={{ cat.slug }}"
+            hx-target="#faq-accordion"
+            hx-push-url="true">
+      {{ cat.name }}
+    </button>
+    {% endfor %}
+  </div>
+
+  <!-- Accordion de FAQs -->
+  <div id="faq-accordion">
+    {% include 'components/faq_accordion.html' %}
+  </div>
+</div>
+{% endblock %}

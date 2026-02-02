@@ -1,0 +1,25 @@
+{% if products %}
+<ul class="ux-autocomplete__list ux-autocomplete__dropdown--open">
+  {% for product in products %}
+  <li class="ux-autocomplete__item"
+      hx-get="{% url 'select_product' product.id %}"
+      hx-target="#product-details"
+      hx-on:click="
+        document.getElementById('product-id-input').value = '{{ product.id }}';
+        document.querySelector('.ux-autocomplete__input').value = '{{ product.name }}';
+        document.getElementById('autocomplete-results').innerHTML = '';
+      ">
+    <div class="ux-autocomplete__item-content">
+      <div class="ux-autocomplete__item-label">{{ product.name }}</div>
+      <div class="ux-autocomplete__item-description">{{ product.category.name }} - ${{ product.price }}</div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="ux-autocomplete__dropdown--open">
+  <div class="ux-autocomplete__empty">
+    <span class="ux-autocomplete__empty-text">No se encontraron productos</span>
+  </div>
+</div>
+{% endif %}

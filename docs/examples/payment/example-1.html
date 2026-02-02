@@ -1,0 +1,48 @@
+total: 27.80,
+      quickAmounts: [10, 20, 30, 50, 100],
+      methods: [
+        { id: 'cash', name: 'Efectivo', icon: 'cash' }
+      ],
+      defaultMethod: 'cash'
+    })">
+      <div class="ux-payment">
+        <div class="ux-payment__section">
+          <span class="ux-payment__label">Importe recibido</span>
+          <div class="ux-payment-quick">
+            <template x-for="amount in quickAmounts" :key="amount">
+              <button class="ux-payment-quick__btn"
+                      :class="{ 'ux-payment-quick__btn--exact': amount === total }"
+                      @click="addQuickAmount(amount)"
+                      x-text="formatCurrency(amount)">
+              </button>
+            </template>
+            <button class="ux-payment-quick__btn ux-payment-quick__btn--exact"
+                    @click="setExactAmount()">
+              Exacto
+            </button>
+          </div>
+        </div>
+
+        <div class="ux-payment-change">
+          <div class="ux-payment-change__row">
+            <span class="ux-payment-change__label">Total a cobrar</span>
+            <span class="ux-payment-change__value" x-text="formatCurrency(total)"></span>
+          </div>
+          <div class="ux-payment-change__row">
+            <span class="ux-payment-change__label">Recibido</span>
+            <span class="ux-payment-change__value" x-text="formatCurrency(amountReceived)"></span>
+          </div>
+          <div class="ux-payment-change__row ux-payment-change__row--total"
+               :class="{ 'ux-payment-change__row--change': change > 0, 'ux-payment-change__row--due': amountDue > 0 && amountReceived > 0 }">
+            <span class="ux-payment-change__label" x-text="change > 0 ? 'Cambio' : 'Pendiente'"></span>
+            <span class="ux-payment-change__value" x-text="formatCurrency(change > 0 ? change : amountDue)"></span>
+          </div>
+        </div>
+
+        <button class="ux-button ux-color-success" style="width: 100%;"
+                :disabled="!isPaid"
+                @click="processPayment()">
+          <span x-show="isPaid">Completar Venta</span>
+          <span x-show="!isPaid">Faltan <span x-text="formatCurrency(amountDue)"></span></span>
+        </button>
+      </div>

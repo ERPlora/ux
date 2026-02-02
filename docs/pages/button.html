@@ -1,0 +1,149 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text);
+    }
+    .demo-section p {
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--ux-space-md);
+      align-items: center;
+    }
+    .demo-box--vertical {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  </style>
+
+<!-- Basic -->
+    <section class="component-section">
+      <h3>Basico</h3>
+      <p>El boton basico usa la clase <code>.ux-button</code>. Sin clase de color, usa primary por defecto.</p>
+      <ux-playground src="examples/button/basico.html"></ux-playground>
+    </section>
+
+    <!-- Colors -->
+    <section class="component-section">
+      <h3>Colores</h3>
+      <p>Usa las clases <code>.ux-color-{color}</code> para aplicar colores.</p>
+      <ux-playground src="examples/button/colores.html"></ux-playground>
+    </section>
+
+    <!-- Variants -->
+    <section class="component-section">
+      <h3>Variantes</h3>
+      <p>Outline, clear, y solid (default). Para outline usa <code>.ux-color-{color}--outline</code>.</p>
+      <ux-playground src="examples/button/variantes.html"></ux-playground>
+    </section>
+
+    <!-- Glass Variant -->
+    <section class="component-section">
+      <h3>Glass (iOS 26 Liquid Glass)</h3>
+      <p>Boton con efecto de vidrio esmerilado para interfaces modernas. Usa <code>.ux-button--glass</code>.</p>
+      <ux-playground src="examples/button/glass-ios-26-liquid-glass.html"></ux-playground>
+    </section>
+
+    <!-- Sizes -->
+    <section class="component-section">
+      <h3>Tamanos</h3>
+      <p>Pequeno, mediano (default), y grande.</p>
+      <ux-playground src="examples/button/tamanos.html"></ux-playground>
+    </section>
+
+    <!-- Shapes -->
+    <section class="component-section">
+      <h3>Formas</h3>
+      <p>Rounded (default), round, y block.</p>
+      <ux-playground src="examples/button/formas.html"></ux-playground>
+    </section>
+
+    <!-- Icons -->
+    <section class="component-section">
+      <h3>Con Iconos</h3>
+      <p>Iconos al inicio, al final, o solo icono.</p>
+      <ux-playground src="examples/button/con-iconos.html"></ux-playground>
+    </section>
+
+    <!-- States -->
+    <section class="component-section">
+      <h3>Estados</h3>
+      <p>Disabled y loading.</p>
+      <ux-playground src="examples/button/estados.html"></ux-playground>
+    </section>
+
+    <!-- Button Group -->
+    <section class="component-section">
+      <h3>Grupo de Botones</h3>
+      <p>Agrupa botones con <code>.ux-button-group</code>.</p>
+      <ux-playground src="examples/button/grupo-de-botones.html"></ux-playground>
+    </section>
+
+    <!-- HTMX + Django -->
+    <section class="component-section">
+      <h3>HTMX + Django</h3>
+      <p>Botones con HTMX para acciones asincronas en Django.</p>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Template Django</h4>
+      <pre class="ux-code-block" data-lang="html"><!-- templates/partials/boton_accion.html -->
+<button class="ux-button ux-color-primary"
+        hx-post="{% url 'procesar_accion' %}"
+        hx-target="#resultado"
+        hx-swap="innerHTML"
+        hx-indicator="#loading">
+  <span class="htmx-indicator" id="loading">
+    <span class="ux-spinner ux-spinner--sm"></span>
+  </span>
+  Procesar
+</button>
+
+<div id="resultado"></div></pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Vista Django</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+
+@require_POST
+def procesar_accion(request):
+    # Procesar la accion
+    resultado = realizar_operacion()
+
+    # Retornar fragmento HTML
+    return HttpResponse(f'''
+        <div class="ux-badge ux-color-success">
+            Completado: {resultado}
+        </div>
+    ''')</pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Boton Eliminar con Confirmacion</h4>
+      <pre class="ux-code-block" data-lang="html"><!-- Boton eliminar con confirmacion -->
+<button class="ux-button ux-color-danger"
+        hx-delete="{% url 'eliminar_item' item.id %}"
+        hx-target="closest .item-row"
+        hx-swap="outerHTML swap:1s"
+        hx-confirm="¿Eliminar este elemento?">
+  Eliminar
+</button></pre>
+
+      <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">URLs Django</h4>
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('accion/', views.procesar_accion, name='procesar_accion'),
+    path('eliminar/<int:pk>/', views.eliminar_item, name='eliminar_item'),
+]</pre>
+    </section>

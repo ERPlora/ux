@@ -1,0 +1,26 @@
+<!-- Template Django - Lista de productos -->
+{% for producto in productos %}
+<div class="ux-list__item"
+     x-data="{ showActions: false }">
+  <div class="ux-list__item-content">
+    <span>{{ producto.nombre }}</span>
+    <span class="ux-badge">${{ producto.precio }}</span>
+  </div>
+
+  <button class="ux-button ux-button--clear"
+          @click="showActions = true"
+          hx-get="{% url 'producto_actions' producto.id %}"
+          hx-target="#actions-{{ producto.id }}"
+          hx-trigger="click">
+    &#8942;
+  </button>
+
+  <div class="ux-sheet-backdrop"
+       :class="{ 'ux-sheet-backdrop--open': showActions }"
+       @click.self="showActions = false">
+    <div id="actions-{{ producto.id }}" class="ux-action-sheet">
+      <!-- Acciones cargadas via HTMX -->
+    </div>
+  </div>
+</div>
+{% endfor %}

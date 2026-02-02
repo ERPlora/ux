@@ -1,0 +1,58 @@
+<div x-data="uxAutocomplete({
+  items: [
+    { label: 'Apple', value: 'apple' },
+    { label: 'Banana', value: 'banana' },
+    { label: 'Cherry', value: 'cherry' },
+    { label: 'Date', value: 'date' },
+    { label: 'Elderberry', value: 'elderberry' },
+    { label: 'Fig', value: 'fig' },
+    { label: 'Grape', value: 'grape' },
+    { label: 'Honeydew', value: 'honeydew' }
+  ],
+  placeholder: 'Search fruits...'
+})">
+  <div class="ux-autocomplete" style="max-width: 400px;">
+    <input type="text"
+           class="ux-autocomplete__input"
+           :class="{ 'ux-autocomplete__input--loading': isLoading }"
+           x-ref="input"
+           x-model="query"
+           :placeholder="placeholder"
+           @input="onInput()"
+           @focus="onFocus()"
+           @blur="onBlur()"
+           @keydown="onKeydown($event)"
+           autocomplete="off">
+
+    <button class="ux-autocomplete__clear"
+            :class="{ 'ux-autocomplete__clear--hidden': !query }"
+            @click="clear()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <div class="ux-autocomplete__dropdown"
+         :class="{ 'ux-autocomplete__dropdown--open': isOpen }">
+      <ul class="ux-autocomplete__list" x-show="filteredItems.length > 0">
+        <template x-for="(item, index) in filteredItems" :key="getValue(item)">
+          <li class="ux-autocomplete__item"
+              :class="{ 'ux-autocomplete__item--active': index === activeIndex }"
+              @click="select(item)"
+              @mouseenter="activeIndex = index">
+            <span class="ux-autocomplete__item-label" x-html="highlight(getLabel(item))"></span>
+          </li>
+        </template>
+      </ul>
+
+      <div class="ux-autocomplete__empty" x-show="filteredItems.length === 0 && showEmpty && query.length >= minChars">
+        <div class="ux-autocomplete__empty-icon" x-html="icons.empty"></div>
+        <span class="ux-autocomplete__empty-text" x-text="emptyText"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-display" x-show="selectedValue" style="margin-top: 1rem; padding: 0.75rem; background: var(--ux-surface-secondary); border-radius: 8px; font-size: 0.875rem;">
+    Seleccionado: <strong x-text="selectedValue"></strong>
+  </div>
+</div>

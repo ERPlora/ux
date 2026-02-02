@@ -1,0 +1,1293 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+    .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+    .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); }
+    .demo-box--dark { background: var(--ux-gray-900); }
+    .api-table { width: 100%; border-collapse: collapse; font-size: var(--ux-font-size-md); }
+    .api-table th { text-align: left; padding: var(--ux-space-sm) var(--ux-space-md); background: var(--ux-surface-secondary); font-weight: 600; border-bottom: 1px solid var(--ux-border-color); }
+    .api-table td { padding: var(--ux-space-sm) var(--ux-space-md); border-bottom: 1px solid var(--ux-border-color); }
+    .api-table code { background: var(--ux-surface-secondary); padding: 2px 6px; border-radius: 4px; font-size: var(--ux-font-size-md); }
+    .status-indicator { display: inline-flex; align-items: center; gap: var(--ux-space-xs); padding: var(--ux-space-xs) var(--ux-space-sm); border-radius: var(--ux-border-radius); font-size: var(--ux-font-size-md); font-weight: 500; }
+    .status-indicator--online { background: var(--ux-success-soft); color: var(--ux-success); }
+    .status-indicator--offline { background: var(--ux-danger-soft); color: var(--ux-danger); }
+  </style>
+
+<div>
+    <!-- Introduccion -->
+    <section class="component-section">
+      <h3>PWA / Offline Support</h3>
+      <p>Componente para convertir tu aplicacion en una Progressive Web App. Incluye deteccion de conexion, banner de instalacion, actualizaciones y soporte offline.</p>
+
+      <ux-playground src="examples/pwa/pwa-offline-support.html"></ux-playground>
+      <div class="demo-box">
+        <div class="ux-flex ux-items-center ux-gap-md" style="flex-wrap: wrap;">
+          <div class="status-indicator" :class="isOnline ? 'status-indicator--online' : 'status-indicator--offline'">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor">
+              <circle cx="4" cy="4" r="4"/>
+            </svg>
+            <span x-text="isOnline ? 'Conectado' : 'Sin conexion'"></span>
+          </div>
+
+          <button class="ux-button ux-button ux-color-secondary ux-button--sm" @click="showOfflineStatus = true; setTimeout(() => showOfflineStatus = false, 3000)">
+            Simular Offline
+          </button>
+
+          <button class="ux-button ux-button ux-color-secondary ux-button--sm" @click="showOnlineStatus = true; setTimeout(() => showOnlineStatus = false, 2000)">
+            Simular Online
+          </button>
+
+          <button class="ux-button ux-button ux-color-primary ux-button--sm" @click="showInstallBanner = true" x-show="!isStandalone">
+            Mostrar Install Banner
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Status Bar -->
+    <section class="component-section">
+      <h3>Barra de Estado</h3>
+      <p>Muestra una notificacion cuando cambia el estado de conexion.</p>
+
+      <ux-playground src="examples/pwa/barra-de-estado.html"></ux-playground>
+      <div class="demo-box demo-box--dark" style="position: relative; min-height: 100px; overflow: hidden;">
+        <!-- Offline Status Demo -->
+        <div class="ux-pwa-status ux-pwa-status--offline" :class="showOfflineStatus ? 'ux-pwa-status--visible' : ''">
+          Sin conexion a Internet
+        </div>
+        <!-- Online Status Demo -->
+        <div class="ux-pwa-status ux-pwa-status--online" :class="showOnlineStatus ? 'ux-pwa-status--visible' : ''">
+          Conexion restaurada
+        </div>
+        <p style="text-align: center; color: var(--ux-text-muted); padding-top: 40px;">Haz clic en los botones de arriba para ver la barra</p>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><!-- Barra de estado offline -->
+<div class="ux-pwa-status ux-pwa-status--offline"
+     :class="showOfflineStatus ? 'ux-pwa-status--visible' : ''">
+  Sin conexion a Internet
+</div>
+
+<!-- Barra de estado online -->
+<div class="ux-pwa-status ux-pwa-status--online"
+     :class="showOnlineStatus ? 'ux-pwa-status--visible' : ''">
+  Conexion restaurada
+</div></pre>
+    </section>
+
+    <!-- Install Banner -->
+    <section class="component-section">
+      <h3>Banner de Instalacion</h3>
+      <p>Prompt nativo para instalar la aplicacion como PWA.</p>
+
+      <ux-playground src="examples/pwa/banner-de-instalacion.html"></ux-playground>
+      <div class="demo-box demo-box--dark" style="position: relative; min-height: 140px; overflow: hidden;">
+        <div class="ux-pwa-install" :class="showInstallBanner ? 'ux-pwa-install--visible' : ''" style="position: absolute;">
+          <div class="ux-pwa-install__content">
+            <img src="../icon-192.png" alt="App Icon" class="ux-pwa-install__icon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23007aff%22 width=%22100%22 height=%22100%22 rx=%2220%22/><text x=%2250%22 y=%2265%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2250%22 font-weight=%22bold%22>UX</text></svg>'">
+            <div class="ux-pwa-install__text">
+              <div class="ux-pwa-install__title" x-text="appName">UX App</div>
+              <div class="ux-pwa-install__subtitle">Instalar para acceso rapido</div>
+            </div>
+            <div class="ux-pwa-install__actions">
+              <button class="ux-button ux-button--clear ux-button--sm" @click="dismissInstall()">Ahora no</button>
+              <button class="ux-button ux-button ux-color-primary ux-button--sm" @click="promptInstall()">Instalar</button>
+            </div>
+          </div>
+        </div>
+        <p style="text-align: center; color: var(--ux-text-muted); padding-top: 20px;">Banner de instalacion</p>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><!-- Banner de instalacion -->
+<div class="ux-pwa-install"
+     :class="showInstallBanner ? 'ux-pwa-install--visible' : ''">
+  <div class="ux-pwa-install__content">
+    <img :src="appIcon" class="ux-pwa-install__icon">
+    <div class="ux-pwa-install__text">
+      <div class="ux-pwa-install__title" x-text="appName"></div>
+      <div class="ux-pwa-install__subtitle">Instalar para acceso rapido</div>
+    </div>
+    <div class="ux-pwa-install__actions">
+      <button @click="dismissInstall()">Ahora no</button>
+      <button @click="promptInstall()">Instalar</button>
+    </div>
+  </div>
+</div></pre>
+    </section>
+
+    <!-- Update Banner -->
+    <section class="component-section">
+      <h3>Banner de Actualizacion</h3>
+      <p>Notifica cuando hay una nueva version disponible.</p>
+
+      <ux-playground src="examples/pwa/banner-de-actualizacion.html"></ux-playground>
+      <div class="demo-box demo-box--dark" style="position: relative; min-height: 100px; overflow: hidden;">
+        <div class="ux-pwa-update ux-pwa-update--visible" style="position: absolute; bottom: 16px;">
+          <span class="ux-pwa-update__text">Nueva version disponible</span>
+          <button class="ux-pwa-update__btn" @click="applyUpdate()">Actualizar</button>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html"><!-- Banner de actualizacion -->
+<div class="ux-pwa-update"
+     :class="showUpdateBanner ? 'ux-pwa-update--visible' : ''">
+  <span class="ux-pwa-update__text">Nueva version disponible</span>
+  <button class="ux-pwa-update__btn" @click="applyUpdate()">Actualizar</button>
+</div></pre>
+    </section>
+
+    <!-- Alpine Component -->
+    <section class="component-section">
+      <h3>Componente Alpine</h3>
+      <p>El componente <code>uxPWA</code> maneja todo el ciclo de vida de la PWA.</p>
+
+      <pre class="ux-code-block" data-lang="html"><!-- Uso basico -->
+<div x-data="uxPWA()">
+  <!-- Estado de conexion -->
+  <span x-text="isOnline ? 'Online' : 'Offline'"></span>
+
+  <!-- Boton de instalacion (solo si es instalable) -->
+  <button x-show="canInstall" @click="promptInstall()">
+    Instalar App
+  </button>
+</div>
+
+<!-- Con configuracion -->
+<div x-data="uxPWA({
+  serviceWorkerPath: '/sw.js',
+  appName: 'Mi App',
+  appIcon: '/icon-192.png',
+  autoShowInstall: true,
+  installDelay: 30000
+})">
+  ...
+</div></pre>
+    </section>
+
+    <!-- Service Worker -->
+    <section class="component-section">
+      <h3>Service Worker</h3>
+      <p>Ejemplo de Service Worker para cache offline.</p>
+
+      <pre class="ux-code-block" data-lang="javascript">// sw.js - Service Worker basico
+const CACHE_NAME = 'app-cache-v1';
+const PRECACHE = ['/', '/index.html', '/dist/ux.min.js'];
+
+// Install - cache recursos
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(PRECACHE))
+      .then(() => self.skipWaiting())
+  );
+});
+
+// Fetch - network first, fallback cache
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME)
+          .then(cache => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
+  );
+});
+
+// Message - skip waiting
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});</pre>
+    </section>
+
+    <!-- Manifest -->
+    <section class="component-section">
+      <h3>Web App Manifest</h3>
+      <p>Configuracion del manifest.json para PWA.</p>
+
+      <pre class="ux-code-block" data-lang="json">// manifest.json
+{
+  "name": "Mi Aplicacion",
+  "short_name": "MiApp",
+  "description": "Descripcion de la app",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007aff",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}</pre>
+
+      <pre class="ux-code-block" data-lang="html"><!-- En el HTML -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#007aff">
+<link rel="apple-touch-icon" href="/icon-192.png"></pre>
+    </section>
+
+    <!-- API Reference -->
+    <section class="component-section">
+      <h3>API Reference</h3>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Configuracion</h4>
+      <div class="ux-card">
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>Opcion</th>
+              <th>Tipo</th>
+              <th>Default</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>serviceWorkerPath</code></td>
+              <td>string</td>
+              <td><code>'/sw.js'</code></td>
+              <td>Ruta al Service Worker</td>
+            </tr>
+            <tr>
+              <td><code>appName</code></td>
+              <td>string</td>
+              <td>document.title</td>
+              <td>Nombre de la app en el banner</td>
+            </tr>
+            <tr>
+              <td><code>appIcon</code></td>
+              <td>string</td>
+              <td><code>'/icon-192.png'</code></td>
+              <td>Icono de la app</td>
+            </tr>
+            <tr>
+              <td><code>autoShowInstall</code></td>
+              <td>boolean</td>
+              <td><code>true</code></td>
+              <td>Mostrar banner automaticamente</td>
+            </tr>
+            <tr>
+              <td><code>installDelay</code></td>
+              <td>number</td>
+              <td><code>30000</code></td>
+              <td>Delay antes de mostrar banner (ms)</td>
+            </tr>
+            <tr>
+              <td><code>registerServiceWorker</code></td>
+              <td>boolean</td>
+              <td><code>true</code></td>
+              <td>Registrar SW automaticamente</td>
+            </tr>
+            <tr>
+              <td><code>reloadOnUpdate</code></td>
+              <td>boolean</td>
+              <td><code>true</code></td>
+              <td>Recargar al aplicar actualizacion</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Propiedades</h4>
+      <div class="ux-card">
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>Propiedad</th>
+              <th>Tipo</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>isOnline</code></td>
+              <td>boolean</td>
+              <td>Estado de conexion actual</td>
+            </tr>
+            <tr>
+              <td><code>isInstallable</code></td>
+              <td>boolean</td>
+              <td>Si la app se puede instalar</td>
+            </tr>
+            <tr>
+              <td><code>isStandalone</code></td>
+              <td>boolean</td>
+              <td>Si esta ejecutandose como PWA</td>
+            </tr>
+            <tr>
+              <td><code>hasUpdate</code></td>
+              <td>boolean</td>
+              <td>Si hay actualizacion disponible</td>
+            </tr>
+            <tr>
+              <td><code>canInstall</code></td>
+              <td>boolean</td>
+              <td>Computed: isInstallable && !isStandalone</td>
+            </tr>
+            <tr>
+              <td><code>isIOS</code></td>
+              <td>boolean</td>
+              <td>Si es dispositivo iOS</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Metodos</h4>
+      <div class="ux-card">
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>Metodo</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>promptInstall()</code></td>
+              <td>Muestra el prompt nativo de instalacion</td>
+            </tr>
+            <tr>
+              <td><code>dismissInstall()</code></td>
+              <td>Oculta el banner de instalacion</td>
+            </tr>
+            <tr>
+              <td><code>applyUpdate()</code></td>
+              <td>Aplica la actualizacion pendiente</td>
+            </tr>
+            <tr>
+              <td><code>dismissUpdate()</code></td>
+              <td>Oculta el banner de actualizacion</td>
+            </tr>
+            <tr>
+              <td><code>isCached(url)</code></td>
+              <td>Verifica si una URL esta en cache</td>
+            </tr>
+            <tr>
+              <td><code>clearCache()</code></td>
+              <td>Limpia todo el cache</td>
+            </tr>
+            <tr>
+              <td><code>getCacheSize()</code></td>
+              <td>Obtiene info del espacio de cache</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Eventos</h4>
+      <div class="ux-card">
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>Evento</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ux-pwa-online</code></td>
+              <td>Conexion restaurada</td>
+            </tr>
+            <tr>
+              <td><code>ux-pwa-offline</code></td>
+              <td>Conexion perdida</td>
+            </tr>
+            <tr>
+              <td><code>ux-pwa-installable</code></td>
+              <td>App lista para instalar</td>
+            </tr>
+            <tr>
+              <td><code>ux-pwa-installed</code></td>
+              <td>App instalada exitosamente</td>
+            </tr>
+            <tr>
+              <td><code>ux-pwa-install-dismissed</code></td>
+              <td>Usuario cerro el banner</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Helper sin Alpine -->
+    <section class="component-section">
+      <h3>Helper sin Alpine</h3>
+      <p>Para proyectos sin Alpine.js, usa el helper <code>UXOffline</code>.</p>
+
+      <pre class="ux-code-block" data-lang="javascript">// Deteccion de conexion sin Alpine
+if (window.UXOffline.isOnline) {
+  console.log('Conectado');
+}
+
+// Escuchar cambios
+window.UXOffline.onOffline(() => {
+  console.log('Sin conexion');
+});
+
+window.UXOffline.onOnline(() => {
+  console.log('Conexion restaurada');
+});</pre>
+    </section>
+
+    <!-- HTMX + Django -->
+    <section class="component-section">
+      <h3>HTMX + Django</h3>
+      <p>Integracion de PWA con Django y HTMX para aplicaciones con soporte offline.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Service Worker para Django</h4>
+      <pre class="ux-code-block" data-lang="javascript">// static/sw.js - Service Worker para Django
+const CACHE_NAME = 'django-app-v1';
+const STATIC_CACHE = 'static-v1';
+const DYNAMIC_CACHE = 'dynamic-v1';
+
+// Recursos estaticos a precachear
+const PRECACHE_URLS = [
+  '/',
+  '/offline/',
+  '/static/dist/ux.min.js',
+  '/static/css/app.css',
+  '/static/manifest.json'
+];
+
+// URLs que siempre deben ir a la red (API, formularios)
+const NETWORK_ONLY = [
+  '/api/',
+  '/admin/',
+  '/accounts/'
+];
+
+// Install
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(STATIC_CACHE)
+      .then(cache => cache.addAll(PRECACHE_URLS))
+      .then(() => self.skipWaiting())
+  );
+});
+
+// Activate - limpiar caches antiguos
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.filter(key => key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
+            .map(key => caches.delete(key))
+      )
+    ).then(() => self.clients.claim())
+  );
+});
+
+// Fetch - estrategia por tipo de recurso
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
+  // Network only para API y admin
+  if (NETWORK_ONLY.some(path => url.pathname.startsWith(path))) {
+    return;
+  }
+
+  // HTMX requests - network first con fallback
+  if (event.request.headers.get('HX-Request')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(DYNAMIC_CACHE)
+            .then(cache => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request)
+          .then(cached => cached || caches.match('/offline/'))
+        )
+    );
+    return;
+  }
+
+  // Estaticos - cache first
+  if (url.pathname.startsWith('/static/')) {
+    event.respondWith(
+      caches.match(event.request)
+        .then(cached => cached || fetch(event.request)
+          .then(response => {
+            const clone = response.clone();
+            caches.open(STATIC_CACHE)
+              .then(cache => cache.put(event.request, clone));
+            return response;
+          })
+        )
+    );
+    return;
+  }
+
+  // HTML pages - network first
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        const clone = response.clone();
+        caches.open(DYNAMIC_CACHE)
+          .then(cache => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request)
+        .then(cached => cached || caches.match('/offline/'))
+      )
+  );
+});</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Vista Offline en Django</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import JsonResponse
+
+def offline_view(request):
+    """Pagina mostrada cuando no hay conexion"""
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/offline_message.html')
+    return render(request, 'offline.html')
+
+def manifest_view(request):
+    """Manifest.json dinamico"""
+    manifest = {
+        "name": "Mi App Django",
+        "short_name": "MiApp",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#ffffff",
+        "theme_color": "#007aff",
+        "icons": [
+            {"src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+            {"src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png"}
+        ]
+    }
+    return JsonResponse(manifest)</pre>
+
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('offline/', views.offline_view, name='offline'),
+    path('manifest.json', views.manifest_view, name='manifest'),
+]</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Template Base con PWA</h4>
+      <pre class="ux-code-block" data-lang="html"><!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#007aff">
+  <link rel="manifest" href="{% url 'manifest' %}">
+  <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.x"></script>
+  <script src="{% static 'dist/ux.min.js' %}"></script>
+  {% block head %}{% endblock %}
+</head>
+<body class="ux-app" x-data="uxPWA({
+  serviceWorkerPath: '{% static 'sw.js' %}',
+  appName: 'Mi App Django',
+  appIcon: '{% static 'icons/icon-192.png' %}'
+})">
+
+  <!-- Barra de estado offline -->
+  <div class="ux-pwa-status ux-pwa-status--offline"
+       :class="!isOnline ? 'ux-pwa-status--visible' : ''">
+    Sin conexion - Modo offline
+  </div>
+
+  <!-- Banner de instalacion -->
+  <div class="ux-pwa-install" :class="showInstallBanner ? 'ux-pwa-install--visible' : ''">
+    <div class="ux-pwa-install__content">
+      <img :src="appIcon" class="ux-pwa-install__icon">
+      <div class="ux-pwa-install__text">
+        <div class="ux-pwa-install__title" x-text="appName"></div>
+        <div class="ux-pwa-install__subtitle">Instalar para acceso rapido</div>
+      </div>
+      <div class="ux-pwa-install__actions">
+        <button class="ux-button ux-button--clear ux-button--sm" @click="dismissInstall()">No</button>
+        <button class="ux-button ux-button ux-color-primary ux-button--sm" @click="promptInstall()">Instalar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Banner de actualizacion -->
+  <div class="ux-pwa-update" :class="showUpdateBanner ? 'ux-pwa-update--visible' : ''">
+    <span class="ux-pwa-update__text">Nueva version disponible</span>
+    <button class="ux-pwa-update__btn" @click="applyUpdate()">Actualizar</button>
+  </div>
+
+  {% block content %}{% endblock %}
+
+</body>
+</html></pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Formularios Offline con HTMX</h4>
+      <pre class="ux-code-block" data-lang="html"><!-- Formulario que guarda offline -->
+<form x-data="{ pending: [] }"
+      hx-post="/api/items/"
+      hx-target="#items-list"
+      hx-swap="beforeend"
+      @htmx:send-error="
+        // Guardar en localStorage si falla
+        const formData = new FormData($el);
+        const item = Object.fromEntries(formData);
+        pending.push(item);
+        localStorage.setItem('pending_items', JSON.stringify(pending));
+        $dispatch('notify', { message: 'Guardado offline' });
+      ">
+
+  <div class="ux-input">
+    <input type="text" name="title" required>
+    <label>Titulo</label>
+  </div>
+
+  <button type="submit" class="ux-button ux-color-primary">
+    Guardar
+  </button>
+</form>
+
+<!-- Sincronizar cuando vuelva la conexion -->
+<div x-data @ux-pwa-online.window="
+  const pending = JSON.parse(localStorage.getItem('pending_items') || '[]');
+  if (pending.length) {
+    // Enviar items pendientes
+    pending.forEach(item => {
+      fetch('/api/items/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
+    });
+    localStorage.removeItem('pending_items');
+    $dispatch('notify', { message: 'Datos sincronizados' });
+  }
+"></div></pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Indicador de Cache en Listas</h4>
+      <pre class="ux-code-block" data-lang="html"><!-- Lista con indicador de contenido cacheado -->
+<ul class="ux-list" hx-get="/api/items/" hx-trigger="load">
+  <template x-for="item in items">
+    <li class="ux-list__item">
+      <div class="ux-list__content">
+        <span x-text="item.title"></span>
+      </div>
+      <!-- Badge si esta cacheado -->
+      <span class="ux-pwa-cached"
+            x-show="await isCached('/api/items/' + item.id)">
+        Offline
+      </span>
+    </li>
+  </template>
+</ul></pre>
+    </section>
+
+    <!-- Background Sync -->
+    <section class="component-section">
+      <h3>Background Sync</h3>
+      <p>Sincroniza datos cuando vuelve la conexion usando la Background Sync API.</p>
+
+      <pre class="ux-code-block" data-lang="javascript">// sw.js - Background Sync
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-pending-orders') {
+    event.waitUntil(syncPendingOrders());
+  }
+});
+
+async function syncPendingOrders() {
+  const db = await openDB();
+  const pendingOrders = await db.getAll('pending-orders');
+
+  for (const order of pendingOrders) {
+    try {
+      const response = await fetch('/api/orders/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+
+      if (response.ok) {
+        await db.delete('pending-orders', order.id);
+        // Notificar al cliente
+        const clients = await self.clients.matchAll();
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'ORDER_SYNCED',
+            orderId: order.id
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Sync failed for order:', order.id);
+    }
+  }
+}</pre>
+
+      <pre class="ux-code-block" data-lang="javascript">// En tu aplicacion - Registrar sync
+async function saveOrderOffline(orderData) {
+  // Guardar en IndexedDB
+  const db = await openDB();
+  await db.add('pending-orders', {
+    ...orderData,
+    id: Date.now(),
+    createdAt: new Date().toISOString()
+  });
+
+  // Registrar background sync
+  const registration = await navigator.serviceWorker.ready;
+  await registration.sync.register('sync-pending-orders');
+
+  // Mostrar confirmacion
+  showToast('Pedido guardado. Se enviara cuando vuelva la conexion.');
+}
+
+// Escuchar confirmacion de sync
+navigator.serviceWorker.addEventListener('message', (event) => {
+  if (event.data.type === 'ORDER_SYNCED') {
+    showToast(`Pedido #${event.data.orderId} sincronizado!`);
+  }
+});</pre>
+
+      <pre class="ux-code-block" data-lang="html"><!-- Formulario con Background Sync -->
+<form x-data="{ submitting: false }"
+      @submit.prevent="
+        submitting = true;
+        if (navigator.onLine) {
+          // Enviar normalmente con HTMX
+          htmx.trigger($el, 'submit');
+        } else {
+          // Guardar para sync posterior
+          await saveOrderOffline(Object.fromEntries(new FormData($el)));
+        }
+        submitting = false;
+      ">
+
+  <div class="ux-input-group">
+    <input type="text" name="product" class="ux-input" required>
+    <label class="ux-input__label">Producto</label>
+  </div>
+
+  <button type="submit" class="ux-button ux-color-primary" :disabled="submitting">
+    <span x-show="!submitting">Crear Pedido</span>
+    <span x-show="submitting" class="ux-spinner ux-spinner--sm"></span>
+  </button>
+</form></pre>
+    </section>
+
+    <!-- Push Notifications -->
+    <section class="component-section">
+      <h3>Push Notifications</h3>
+      <p>Notificaciones push del servidor al dispositivo.</p>
+
+      <pre class="ux-code-block" data-lang="javascript">// Solicitar permisos y suscribir
+async function subscribeToPush() {
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') {
+    console.log('Notification permission denied');
+    return null;
+  }
+
+  const registration = await navigator.serviceWorker.ready;
+
+  // VAPID public key del servidor
+  const vapidPublicKey = 'YOUR_VAPID_PUBLIC_KEY';
+
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+  });
+
+  // Enviar subscription al servidor
+  await fetch('/api/push/subscribe/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscription)
+  });
+
+  return subscription;
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+}</pre>
+
+      <pre class="ux-code-block" data-lang="javascript">// sw.js - Recibir push
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() || {};
+
+  const options = {
+    body: data.body || 'Nueva notificacion',
+    icon: '/icon-192.png',
+    badge: '/badge-72.png',
+    vibrate: [100, 50, 100],
+    data: {
+      url: data.url || '/'
+    },
+    actions: data.actions || [
+      { action: 'open', title: 'Ver' },
+      { action: 'close', title: 'Cerrar' }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'App', options)
+  );
+});
+
+// Click en notificacion
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'close') return;
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(clientList => {
+      // Enfocar ventana existente o abrir nueva
+      for (const client of clientList) {
+        if (client.url === event.notification.data.url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(event.notification.data.url);
+    })
+  );
+});</pre>
+
+      <pre class="ux-code-block" data-lang="python"># Django - Enviar push notification
+# pip install pywebpush
+
+from pywebpush import webpush, WebPushException
+import json
+
+def send_push_notification(subscription_info, title, body, url='/'):
+    """Enviar notificacion push a un usuario"""
+    try:
+        webpush(
+            subscription_info=subscription_info,
+            data=json.dumps({
+                'title': title,
+                'body': body,
+                'url': url,
+                'actions': [
+                    {'action': 'open', 'title': 'Ver'},
+                    {'action': 'close', 'title': 'Cerrar'}
+                ]
+            }),
+            vapid_private_key='YOUR_VAPID_PRIVATE_KEY',
+            vapid_claims={
+                'sub': 'mailto:admin@example.com'
+            }
+        )
+        return True
+    except WebPushException as e:
+        print(f'Push failed: {e}')
+        return False
+
+# Ejemplo: notificar nuevo pedido
+def notify_new_order(order):
+    for subscription in UserPushSubscription.objects.filter(user=order.user):
+        send_push_notification(
+            subscription_info=subscription.subscription_json,
+            title='Nuevo Pedido',
+            body=f'Pedido #{order.id} recibido',
+            url=f'/orders/{order.id}/'
+        )</pre>
+
+      <pre class="ux-code-block" data-lang="html"><!-- UI para suscribirse -->
+<div x-data="{ subscribed: false, loading: false }"
+     x-init="
+       // Verificar si ya esta suscrito
+       navigator.serviceWorker.ready.then(async reg => {
+         const sub = await reg.pushManager.getSubscription();
+         subscribed = !!sub;
+       });
+     ">
+
+  <button class="ux-button"
+          :class="subscribed ? 'ux-color-success' : 'ux-color-primary'"
+          :disabled="loading"
+          @click="
+            loading = true;
+            if (!subscribed) {
+              await subscribeToPush();
+              subscribed = true;
+            }
+            loading = false;
+          ">
+    <span x-show="!subscribed">Activar Notificaciones</span>
+    <span x-show="subscribed">Notificaciones Activas</span>
+  </button>
+</div></pre>
+    </section>
+
+    <!-- Workbox -->
+    <section class="component-section">
+      <h3>Workbox Integration</h3>
+      <p>Usa Workbox para simplificar el desarrollo del Service Worker.</p>
+
+      <pre class="ux-code-block" data-lang="bash"># Instalar Workbox CLI
+npm install workbox-cli --save-dev
+
+# Generar Service Worker
+npx workbox generateSW workbox-config.js</pre>
+
+      <pre class="ux-code-block" data-lang="javascript">// workbox-config.js
+module.exports = {
+  globDirectory: 'static/',
+  globPatterns: [
+    '**/*.{js,css,html,png,svg,woff2}'
+  ],
+  swDest: 'static/sw.js',
+  runtimeCaching: [
+    {
+      // API calls - Network First
+      urlPattern: /\/api\//,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'api-cache',
+        networkTimeoutSeconds: 10,
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 5 * 60 // 5 minutes
+        }
+      }
+    },
+    {
+      // Images - Cache First
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'image-cache',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+        }
+      }
+    },
+    {
+      // Static assets - Stale While Revalidate
+      urlPattern: /\.(?:js|css)$/,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'static-cache'
+      }
+    },
+    {
+      // HTML pages - Network First
+      urlPattern: /\/$/,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'page-cache',
+        networkTimeoutSeconds: 3
+      }
+    }
+  ],
+  skipWaiting: true,
+  clientsClaim: true
+};</pre>
+
+      <pre class="ux-code-block" data-lang="javascript">// sw.js con Workbox (manual)
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js');
+
+const { registerRoute } = workbox.routing;
+const { CacheFirst, NetworkFirst, StaleWhileRevalidate } = workbox.strategies;
+const { ExpirationPlugin } = workbox.expiration;
+const { precacheAndRoute } = workbox.precaching;
+
+// Precache static assets
+precacheAndRoute(self.__WB_MANIFEST || []);
+
+// API - Network First con timeout
+registerRoute(
+  ({ url }) => url.pathname.startsWith('/api/'),
+  new NetworkFirst({
+    cacheName: 'api-cache',
+    networkTimeoutSeconds: 10,
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 5 * 60
+      })
+    ]
+  })
+);
+
+// Images - Cache First
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'image-cache',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 30 * 24 * 60 * 60
+      })
+    ]
+  })
+);
+
+// CSS/JS - Stale While Revalidate
+registerRoute(
+  ({ request }) => request.destination === 'style' || request.destination === 'script',
+  new StaleWhileRevalidate({
+    cacheName: 'static-cache'
+  })
+);
+
+// HTML - Network First
+registerRoute(
+  ({ request }) => request.destination === 'document',
+  new NetworkFirst({
+    cacheName: 'page-cache',
+    networkTimeoutSeconds: 3
+  })
+);</pre>
+    </section>
+
+    <!-- Cache Strategies -->
+    <section class="component-section">
+      <h3>Cache Strategies</h3>
+      <p>Diferentes estrategias de cache segun el tipo de recurso.</p>
+
+      <div class="ux-card" style="margin-bottom: var(--ux-space-lg);">
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>Estrategia</th>
+              <th>Uso</th>
+              <th>Comportamiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Cache First</strong></td>
+              <td>Imagenes, fonts, assets estaticos</td>
+              <td>Cache primero, red como fallback</td>
+            </tr>
+            <tr>
+              <td><strong>Network First</strong></td>
+              <td>API, HTML dinamico</td>
+              <td>Red primero, cache como fallback</td>
+            </tr>
+            <tr>
+              <td><strong>Stale While Revalidate</strong></td>
+              <td>CSS, JS, contenido semi-dinamico</td>
+              <td>Cache inmediato + actualiza en background</td>
+            </tr>
+            <tr>
+              <td><strong>Network Only</strong></td>
+              <td>Auth, checkout, datos criticos</td>
+              <td>Solo red, sin cache</td>
+            </tr>
+            <tr>
+              <td><strong>Cache Only</strong></td>
+              <td>Assets precacheados</td>
+              <td>Solo cache, sin red</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre class="ux-code-block" data-lang="javascript">// Implementacion manual de estrategias
+
+// Cache First
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  cache.put(request, response.clone());
+  return response;
+}
+
+// Network First con timeout
+async function networkFirst(request, cacheName, timeout = 3000) {
+  const cache = await caches.open(cacheName);
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    const response = await fetch(request, { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    throw error;
+  }
+}
+
+// Stale While Revalidate
+async function staleWhileRevalidate(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+
+  const fetchPromise = fetch(request).then(response => {
+    cache.put(request, response.clone());
+    return response;
+  });
+
+  return cached || fetchPromise;
+}</pre>
+    </section>
+
+    <!-- Debugging Tips -->
+    <section class="component-section">
+      <h3>Debugging Tips</h3>
+      <p>Herramientas y tecnicas para depurar PWAs.</p>
+
+      <pre class="ux-code-block" data-lang="javascript">// Ver estado del Service Worker
+navigator.serviceWorker.getRegistrations().then(registrations => {
+  console.log('SW Registrations:', registrations);
+});
+
+// Ver contenido del cache
+async function listCaches() {
+  const cacheNames = await caches.keys();
+  for (const name of cacheNames) {
+    const cache = await caches.open(name);
+    const keys = await cache.keys();
+    console.log(`Cache "${name}":`, keys.map(r => r.url));
+  }
+}
+listCaches();
+
+// Forzar actualizacion del SW
+navigator.serviceWorker.getRegistration().then(reg => {
+  reg.update();
+});
+
+// Limpiar todo el cache
+async function clearAllCaches() {
+  const cacheNames = await caches.keys();
+  await Promise.all(cacheNames.map(name => caches.delete(name)));
+  console.log('All caches cleared');
+}
+
+// Verificar espacio de almacenamiento
+if ('storage' in navigator && 'estimate' in navigator.storage) {
+  navigator.storage.estimate().then(estimate => {
+    console.log('Storage:', {
+      usage: (estimate.usage / 1024 / 1024).toFixed(2) + ' MB',
+      quota: (estimate.quota / 1024 / 1024).toFixed(2) + ' MB',
+      percent: ((estimate.usage / estimate.quota) * 100).toFixed(2) + '%'
+    });
+  });
+}</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm);">Chrome DevTools</h4>
+      <ul class="ux-list ux-list--inset" style="max-width: 500px;">
+        <li class="ux-list__item">
+          <div class="ux-list__content">
+            <span class="ux-list__title">Application > Service Workers</span>
+            <span class="ux-list__subtitle">Ver estado, actualizar, bypass</span>
+          </div>
+        </li>
+        <li class="ux-list__item">
+          <div class="ux-list__content">
+            <span class="ux-list__title">Application > Storage</span>
+            <span class="ux-list__subtitle">Ver Cache, IndexedDB, LocalStorage</span>
+          </div>
+        </li>
+        <li class="ux-list__item">
+          <div class="ux-list__content">
+            <span class="ux-list__title">Application > Manifest</span>
+            <span class="ux-list__subtitle">Verificar manifest.json</span>
+          </div>
+        </li>
+        <li class="ux-list__item">
+          <div class="ux-list__content">
+            <span class="ux-list__title">Network > Offline checkbox</span>
+            <span class="ux-list__subtitle">Simular modo offline</span>
+          </div>
+        </li>
+        <li class="ux-list__item">
+          <div class="ux-list__content">
+            <span class="ux-list__title">Lighthouse > PWA audit</span>
+            <span class="ux-list__subtitle">Verificar requisitos PWA</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Clases CSS -->
+    <section class="component-section">
+      <h3>Clases CSS</h3>
+      <div class="ux-card">
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>Clase</th>
+              <th>Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.ux-pwa-status</code></td>
+              <td>Barra de estado fija arriba</td>
+            </tr>
+            <tr>
+              <td><code>.ux-pwa-status--offline</code></td>
+              <td>Estilo para estado offline (rojo)</td>
+            </tr>
+            <tr>
+              <td><code>.ux-pwa-status--online</code></td>
+              <td>Estilo para estado online (verde)</td>
+            </tr>
+            <tr>
+              <td><code>.ux-pwa-status--visible</code></td>
+              <td>Muestra la barra (animada)</td>
+            </tr>
+            <tr>
+              <td><code>.ux-pwa-install</code></td>
+              <td>Banner de instalacion</td>
+            </tr>
+            <tr>
+              <td><code>.ux-pwa-install--visible</code></td>
+              <td>Muestra el banner</td>
+            </tr>
+            <tr>
+              <td><code>.ux-pwa-update</code></td>
+              <td>Banner de actualizacion</td>
+            </tr>
+            <tr>
+              <td><code>.ux-pwa-update--visible</code></td>
+              <td>Muestra el banner</td>
+            </tr>
+            <tr>
+              <td><code>.ux-pwa-offline-overlay</code></td>
+              <td>Overlay de pantalla completa offline</td>
+            </tr>
+            <tr>
+              <td><code>.ux-pwa-cached</code></td>
+              <td>Badge indicador de contenido cacheado</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>

@@ -1,0 +1,16 @@
+# views.py
+from django.shortcuts import render
+
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    context = {
+        'product': product,
+        'back_url': request.META.get('HTTP_HX_CURRENT_URL', '/products/'),
+        'back_text': 'Products',
+    }
+
+    # Retornar partial si es request HTMX
+    if request.headers.get('HX-Request'):
+        return render(request, 'products/_detail.html', context)
+
+    return render(request, 'products/detail.html', context)

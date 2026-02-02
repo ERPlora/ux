@@ -1,0 +1,162 @@
+showStock: false,
+      currency: '$',
+      data: [
+        {
+          id: 'laptop-001',
+          sku: 'LAPTOP-PRO-15',
+          name: 'Laptop Pro 15 pulgadas',
+          type: 'finished',
+          quantity: 1,
+          unit: 'pcs',
+          unitCost: 0,
+          children: [
+            {
+              id: 'screen-001',
+              sku: 'LCD-15-4K',
+              name: 'LCD Panel 15.6 pulg 4K',
+              type: 'raw',
+              quantity: 1,
+              unit: 'pcs',
+              unitCost: 189.99
+            },
+            {
+              id: 'mb-001',
+              sku: 'MB-INTEL-13',
+              name: 'Motherboard Intel 13th Gen',
+              type: 'subassembly',
+              quantity: 1,
+              unit: 'pcs',
+              unitCost: 245.00,
+              children: [
+                { id: 'cpu-001', sku: 'CPU-I7-13', name: 'Intel Core i7-13700H', type: 'raw', quantity: 1, unit: 'pcs', unitCost: 420.00 },
+                { id: 'ram-001', sku: 'RAM-DDR5-16', name: 'DDR5 RAM 16GB', type: 'raw', quantity: 2, unit: 'pcs', unitCost: 89.99 },
+                { id: 'ssd-001', sku: 'SSD-NVME-1T', name: 'NVMe SSD 1TB', type: 'raw', quantity: 1, unit: 'pcs', unitCost: 119.99 }
+              ]
+            },
+            {
+              id: 'batt-001',
+              sku: 'BATT-LI-72',
+              name: 'Battery Pack 72Wh',
+              type: 'raw',
+              quantity: 1,
+              unit: 'pcs',
+              unitCost: 65.00
+            },
+            {
+              id: 'case-001',
+              sku: 'CASE-AL-15',
+              name: 'Aluminum Chassis',
+              type: 'raw',
+              quantity: 1,
+              unit: 'pcs',
+              unitCost: 78.50
+            },
+            {
+              id: 'kb-001',
+              sku: 'KB-BACKLIT',
+              name: 'Backlit Keyboard',
+              type: 'raw',
+              quantity: 1,
+              unit: 'pcs',
+              unitCost: 42.00
+            }
+          ]
+        }
+      ]
+    })">
+      <div class="ux-bom-tree ux-bom-tree--bordered">
+        <div class="ux-bom-tree__header">
+          <div class="ux-bom-tree__title">Cost Breakdown</div>
+          <div class="ux-bom-tree__actions">
+            <button class="ux-bom-tree__action" @click="expandAll()"><span x-html="icons.expandAll"></span></button>
+            <button class="ux-bom-tree__action" @click="collapseAll()"><span x-html="icons.collapseAll"></span></button>
+            <button class="ux-bom-tree__action" @click="exportBOM('csv')" title="Export CSV"><span x-html="icons.export"></span></button>
+          </div>
+        </div>
+        <ul class="ux-bom-tree__list">
+          <template x-for="node in data" :key="node.id">
+            <li class="ux-bom-tree__node">
+              <div class="ux-bom-tree__item" @click="toggle(node.id)">
+                <span class="ux-bom-tree__toggle"
+                      :class="{ 'ux-bom-tree__toggle--expanded': expandedNodes.has(node.id), 'ux-bom-tree__toggle--empty': !node.children }"
+                      x-html="icons.chevron"></span>
+                <span class="ux-bom-tree__icon" :class="'ux-bom-tree__icon--' + (node.type || 'raw')" x-html="getTypeIcon(node.type)"></span>
+                <div class="ux-bom-tree__details">
+                  <span class="ux-bom-tree__name" x-text="node.name"></span>
+                  <span class="ux-bom-tree__sku" x-text="node.sku"></span>
+                </div>
+                <div class="ux-bom-tree__quantity">
+                  <span class="ux-bom-tree__qty-value" x-text="node.quantity"></span>
+                  <span class="ux-bom-tree__qty-unit" x-text="node.unit"></span>
+                </div>
+                <div class="ux-bom-tree__cost ux-bom-tree__cost--total">
+                  <span class="ux-bom-tree__cost-value" x-text="formatCurrency(calculateRollupCost(node))"></span>
+                  <span class="ux-bom-tree__cost-label">Total</span>
+                </div>
+              </div>
+              <template x-if="node.children && expandedNodes.has(node.id)">
+                <ul class="ux-bom-tree__list ux-bom-tree__list--nested">
+                  <template x-for="child in node.children" :key="child.id">
+                    <li class="ux-bom-tree__node">
+                      <div class="ux-bom-tree__item" @click="toggle(child.id)">
+                        <span class="ux-bom-tree__toggle"
+                              :class="{ 'ux-bom-tree__toggle--expanded': expandedNodes.has(child.id), 'ux-bom-tree__toggle--empty': !child.children }"
+                              x-html="icons.chevron"></span>
+                        <span class="ux-bom-tree__icon" :class="'ux-bom-tree__icon--' + (child.type || 'raw')" x-html="getTypeIcon(child.type)"></span>
+                        <div class="ux-bom-tree__details">
+                          <span class="ux-bom-tree__name" x-text="child.name"></span>
+                          <span class="ux-bom-tree__sku" x-text="child.sku"></span>
+                        </div>
+                        <div class="ux-bom-tree__quantity">
+                          <span class="ux-bom-tree__qty-value" x-text="child.quantity"></span>
+                          <span class="ux-bom-tree__qty-unit" x-text="child.unit"></span>
+                        </div>
+                        <div class="ux-bom-tree__cost">
+                          <span class="ux-bom-tree__cost-value" x-text="formatCurrency(child.unitCost * child.quantity)"></span>
+                          <span class="ux-bom-tree__cost-label" x-text="formatCurrency(child.unitCost) + '/ea'"></span>
+                        </div>
+                      </div>
+                      <template x-if="child.children && expandedNodes.has(child.id)">
+                        <ul class="ux-bom-tree__list ux-bom-tree__list--nested">
+                          <template x-for="gc in child.children" :key="gc.id">
+                            <li class="ux-bom-tree__node">
+                              <div class="ux-bom-tree__item">
+                                <span class="ux-bom-tree__toggle ux-bom-tree__toggle--empty" x-html="icons.chevron"></span>
+                                <span class="ux-bom-tree__icon" :class="'ux-bom-tree__icon--' + (gc.type || 'raw')" x-html="getTypeIcon(gc.type)"></span>
+                                <div class="ux-bom-tree__details">
+                                  <span class="ux-bom-tree__name" x-text="gc.name"></span>
+                                  <span class="ux-bom-tree__sku" x-text="gc.sku"></span>
+                                </div>
+                                <div class="ux-bom-tree__quantity">
+                                  <span class="ux-bom-tree__qty-value" x-text="gc.quantity"></span>
+                                  <span class="ux-bom-tree__qty-unit" x-text="gc.unit"></span>
+                                </div>
+                                <div class="ux-bom-tree__cost">
+                                  <span class="ux-bom-tree__cost-value" x-text="formatCurrency(gc.unitCost * gc.quantity)"></span>
+                                  <span class="ux-bom-tree__cost-label" x-text="formatCurrency(gc.unitCost) + '/ea'"></span>
+                                </div>
+                              </div>
+                            </li>
+                          </template>
+                        </ul>
+                      </template>
+                    </li>
+                  </template>
+                </ul>
+              </template>
+            </li>
+          </template>
+        </ul>
+        <div class="ux-bom-tree__footer">
+          <div class="ux-bom-tree__summary">
+            <div class="ux-bom-tree__summary-item">
+              <span class="ux-bom-tree__summary-label">Components</span>
+              <span class="ux-bom-tree__summary-value" x-text="countComponents()"></span>
+            </div>
+            <div class="ux-bom-tree__summary-item">
+              <span class="ux-bom-tree__summary-label">Total Cost</span>
+              <span class="ux-bom-tree__summary-value" style="color: var(--ux-primary);" x-text="formatCurrency(calculateTotalCost())"></span>
+            </div>
+          </div>
+        </div>
+      </div>

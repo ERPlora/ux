@@ -1,0 +1,102 @@
+# views.py
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth.decorators import login_required
+import bleach
+
+ALLOWED_TAGS = [
+    'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3',
+    'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code'
+]
+ALLOWED_ATTRS = {
+    'a': ['href', 'title', 'target'],
+    'img': ['src', 'alt', 'width', 'height']
+}
+
+@login_required
+def editor_view(request, article_id):
+    """Render the rich text editor page."""
+    article = get_object_or_404(Article, id=article_id, author=request.user)
+    return render(request, 'content/editor.html', {'article': article})
+
+@login_required
+def load_content(request, article_id):
+    """Load article content as HTML partial."""
+    article = get_object_or_404(Article, id=article_id, author=request.user)
+    return render(request, 'content/partials/editor.html', {
+        'article': article
+    })
+
+@login_required
+@require_POST
+def save_content(request, article_id):
+    """Save rich text content with sanitization."""
+    article = get_object_or_404(Article, id=article_id, author=request.user)
+
+    # Sanitize HTML to prevent XSS
+    raw_content = request.POST.get('content', '')
+    clean_content = bleach.clean(
+        raw_content,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRS,
+        strip=True
+    )
+
+    article.content = clean_content
+    article.save()
+
+    # Return HX-Trigger header for toast notification
+    response = JsonResponse({'success': True})
+    response['HX-Trigger'] = 'content-saved'
+    return response
+
+@login_required
+@require_POST
+def upload_image(request):
+    """Handle image upload for rich text editor."""
+    if 'image' not in request.FILES:
+        return JsonResponse({'error': 'No image provided'}, status=400)
+
+    image = request.FILES['image']
+
+    # Validate file type
+    if not image.content_type.startswith('image/'):
+        return JsonResponse({'error': 'Invalid file type'}, status=400)
+
+    # Save image
+    upload = ImageUpload.objects.create(
+        image=image,
+        uploaded_by=request.user
+    )
+
+    return JsonResponse({
+        'success': True,
+        'url': upload.image.url,
+        'alt': image.name
+    })
+
+@login_required
+@require_GET
+def get_content(request, article_id):
+    """Get article content as JSON (for API use)."""
+    article = get_object_or_404(Article, id=article_id, author=request.user)
+    return JsonResponse({
+        'id': article.id,
+        'title': article.title,
+        'content': article.content,
+        'updated_at': article.updated_at.isoformat()
+    })
+
+# urls.py
+from django.urls import path
+from . import views
+
+app_name = 'content'
+urlpatterns = [
+    path('<int:article_id>/edit/', views.editor_view, name='edit'),
+    path('<int:article_id>/load/', views.load_content, name='load'),
+    path('<int:article_id>/save/', views.save_content, name='save'),
+    path('<int:article_id>/json/', views.get_content, name='json'),
+    path('upload/image/', views.upload_image, name='upload-image'),
+]

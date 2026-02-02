@@ -1,0 +1,79 @@
+<div x-data="{
+        ...uxPerformanceMeter({
+          employee: { name: 'Interactive Demo', role: 'Test Employee' },
+          score: 75,
+          categories: [
+            { name: 'Productivity', score: 75 },
+            { name: 'Quality', score: 75 },
+            { name: 'Teamwork', score: 75 }
+          ]
+        }),
+        adjustScore(delta) {
+          this.score = Math.max(0, Math.min(100, this.score + delta));
+          this.categories.forEach(c => {
+            c.score = Math.max(0, Math.min(100, c.score + delta));
+          });
+        }
+      }" class="ux-performance-meter">
+
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar">
+            <span x-text="getInitials()"></span>
+          </div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+            </div>
+          </div>
+
+          <div class="ux-performance-meter__score-summary">
+            <span class="ux-performance-meter__score-status"
+                  :class="'ux-performance-meter__score-status--' + scoreLevel"
+                  x-text="scoreLevelLabel"></span>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Controls -->
+        <div style="display: flex; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--ux-border-color);">
+          <button class="ux-button ux-button--sm ux-button--outline" @click="adjustScore(-10)">-10</button>
+          <button class="ux-button ux-button--sm ux-button--outline" @click="adjustScore(-5)">-5</button>
+          <button class="ux-button ux-button--sm ux-button--outline" @click="adjustScore(5)">+5</button>
+          <button class="ux-button ux-button--sm ux-button--outline" @click="adjustScore(10)">+10</button>
+          <input type="range" min="0" max="100" x-model="score"
+                 @input="categories.forEach(c => c.score = parseInt($event.target.value))"
+                 style="flex: 1;">
+        </div>
+      </div>

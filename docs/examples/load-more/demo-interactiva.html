@@ -1,0 +1,49 @@
+<style>
+  .demo-list { list-style: none; padding: 0; margin: 0 0 1rem; border: 1px solid var(--ux-border-color); border-radius: 8px; overflow: hidden; }
+  .demo-list li { padding: 0.75rem 1rem; border-bottom: 1px solid var(--ux-border-color); }
+  .demo-list li:last-child { border-bottom: none; }
+</style>
+<div style="max-width: 400px; margin: 0 auto;" x-data="{
+  items: ['Product 1', 'Product 2', 'Product 3'],
+  total: 12,
+  loading: false,
+  get hasMore() { return this.items.length < this.total },
+  async loadMore() {
+    if (this.loading || !this.hasMore) return;
+    this.loading = true;
+    await new Promise(r => setTimeout(r, 1000));
+    const newItems = [];
+    for (let i = 0; i < 3 && this.items.length < this.total; i++) {
+      newItems.push('Product ' + (this.items.length + 1));
+      this.items.push(newItems[i]);
+    }
+    this.loading = false;
+  }
+}">
+  <ul class="demo-list">
+    <template x-for="item in items" :key="item">
+      <li x-text="item"></li>
+    </template>
+  </ul>
+
+  <div class="ux-load-more" :class="{ 'ux-load-more--loading': loading, 'ux-load-more--end': !hasMore }">
+    <button class="ux-load-more__button" @click="loadMore()" :disabled="loading || !hasMore">
+      <span x-show="!loading">Load More</span>
+      <span x-show="loading" class="ux-load-more__spinner"></span>
+      <span x-show="loading">Loading...</span>
+    </button>
+    <div class="ux-load-more__progress">
+      <div class="ux-load-more__progress-bar">
+        <div class="ux-load-more__progress-fill" :style="`width: ${(items.length/total)*100}%`"></div>
+      </div>
+      <span class="ux-load-more__progress-text" x-text="`${items.length} of ${total}`"></span>
+    </div>
+    <div class="ux-load-more__end-message" x-show="!hasMore">
+      <svg class="ux-load-more__end-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"></path>
+        <polyline points="22,4 12,14.01 9,11.01"></polyline>
+      </svg>
+      All products loaded
+    </div>
+  </div>
+</div>

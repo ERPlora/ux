@@ -1,0 +1,36 @@
+<div style="display: flex; gap: var(--ux-space-lg); align-items: flex-start;">
+  <div x-data="uxNumpad({ maxLength: 4 })"
+       class="ux-numpad ux-numpad--sm ux-numpad--compact"
+       hx-trigger="numpad-change from:body"
+       hx-get="/api/calculate-total"
+       hx-vals="js:{quantity: document.querySelector('#qty-input').value, product_id: 123}"
+       hx-target="#total-display"
+       @numpad-change="$refs.qtyInput.value = $event.detail.value; htmx.trigger(document.body, 'numpad-change')">
+
+    <div class="ux-numpad__display ux-numpad__display--sm">
+      <span class="ux-numpad__display-label">Cantidad</span>
+      <span class="ux-numpad__display-value" x-text="displayValue || '0'"></span>
+    </div>
+    <input type="hidden" id="qty-input" x-ref="qtyInput" value="0">
+
+    <div class="ux-numpad__grid">
+      <button type="button" class="ux-numpad__key" @click="appendDigit('7')">7</button>
+      <button type="button" class="ux-numpad__key" @click="appendDigit('8')">8</button>
+      <button type="button" class="ux-numpad__key" @click="appendDigit('9')">9</button>
+      <button type="button" class="ux-numpad__key" @click="appendDigit('4')">4</button>
+      <button type="button" class="ux-numpad__key" @click="appendDigit('5')">5</button>
+      <button type="button" class="ux-numpad__key" @click="appendDigit('6')">6</button>
+      <button type="button" class="ux-numpad__key" @click="appendDigit('1')">1</button>
+      <button type="button" class="ux-numpad__key" @click="appendDigit('2')">2</button>
+      <button type="button" class="ux-numpad__key" @click="appendDigit('3')">3</button>
+      <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="clear()">C</button>
+      <button type="button" class="ux-numpad__key" @click="appendDigit('0')">0</button>
+      <button type="button" class="ux-numpad__key ux-numpad__key--action" @click="backspace()">&#9003;</button>
+    </div>
+  </div>
+
+  <div id="total-display" style="padding: var(--ux-space-lg); background: var(--ux-surface-secondary); border-radius: var(--ux-border-radius); min-width: 150px;">
+    <div style="color: var(--ux-text-secondary); font-size: var(--ux-font-size-sm);">Total</div>
+    <div style="font-size: var(--ux-font-size-2xl); font-weight: 700; color: var(--ux-text);">$0.00</div>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<div x-data="uxPagination({ currentPage: 1, totalPages: 10, totalItems: 100, perPage: 10 })"
+     @page-change="console.log('Page:', $event.detail)"
+     @per-page-change="console.log('Per page:', $event.detail)">
+  <div class="ux-pagination ux-pagination--bordered">
+    <div class="ux-pagination__info">
+      <span x-text="`Showing ${showingInfo.start} to ${showingInfo.end} of ${showingInfo.total} items`"></span>
+    </div>
+
+    <div class="ux-pagination__controls">
+      <button class="ux-pagination__btn ux-pagination__prev" :disabled="!canGoPrevious" @click="prevPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+
+      <template x-for="page in visiblePages" :key="page">
+        <template x-if="page === '...'">
+          <span class="ux-pagination__ellipsis">...</span>
+        </template>
+        <template x-if="page !== '...'">
+          <button class="ux-pagination__btn"
+                  :class="{ 'ux-pagination__btn--active': isActive(page) }"
+                  @click="goToPage(page)"
+                  x-text="page"></button>
+        </template>
+      </template>
+
+      <button class="ux-pagination__btn ux-pagination__next" :disabled="!canGoNext" @click="nextPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <div class="ux-pagination__per-page">
+      <span>Show</span>
+      <select @change="changePerPage($event.target.value)">
+        <template x-for="opt in perPageOptions" :key="opt">
+          <option :value="opt" :selected="perPage === opt" x-text="opt"></option>
+        </template>
+      </select>
+      <span>per page</span>
+    </div>
+  </div>
+</div>

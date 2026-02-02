@@ -1,0 +1,52 @@
+<div class="ux-gallery ux-gallery--cols-4"
+     x-data="uxImageGallery({
+       images: [
+         { src: 'https://picsum.photos/600/600?random=20' },
+         { src: 'https://picsum.photos/600/600?random=21' },
+         { src: 'https://picsum.photos/600/600?random=22' },
+         { src: 'https://picsum.photos/600/600?random=23' },
+         { src: 'https://picsum.photos/600/600?random=24' },
+         { src: 'https://picsum.photos/600/600?random=25' },
+         { src: 'https://picsum.photos/600/600?random=26' },
+         { src: 'https://picsum.photos/600/600?random=27' }
+       ],
+       maxVisible: 4
+     })">
+  <div class="ux-gallery__grid">
+    <template x-for="(image, index) in visibleImages" :key="index">
+      <div class="ux-gallery__item" @click="openLightbox(index)">
+        <img :src="image.src" loading="lazy">
+        <template x-if="index === visibleImages.length - 1 && remainingCount > 0">
+          <div class="ux-gallery__more">+<span x-text="remainingCount"></span></div>
+        </template>
+      </div>
+    </template>
+  </div>
+
+  <template x-teleport="body">
+    <div class="ux-gallery-lightbox" :class="{ 'ux-gallery-lightbox--open': lightboxOpen }" @click.self="closeLightbox()">
+      <div class="ux-gallery-lightbox__header">
+        <span class="ux-gallery-lightbox__counter" x-text="(currentIndex + 1) + ' / ' + images.length"></span>
+        <button class="ux-gallery-lightbox__action" @click="closeLightbox()">
+          <span x-html="icons.close"></span>
+        </button>
+      </div>
+      <div class="ux-gallery-lightbox__content">
+        <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--prev" @click="prev()">
+          <span x-html="icons.prev"></span>
+        </button>
+        <img class="ux-gallery-lightbox__image" :src="currentImage.src">
+        <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--next" @click="next()">
+          <span x-html="icons.next"></span>
+        </button>
+      </div>
+      <div class="ux-gallery-lightbox__thumbs">
+        <template x-for="(image, index) in images" :key="'thumb-' + index">
+          <div class="ux-gallery-lightbox__thumb" :class="{ 'ux-gallery-lightbox__thumb--active': index === currentIndex }" @click="goTo(index)">
+            <img :src="image.src">
+          </div>
+        </template>
+      </div>
+    </div>
+  </template>
+</div>

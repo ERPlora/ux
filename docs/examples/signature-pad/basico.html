@@ -1,0 +1,72 @@
+<div class="demo-grid">
+  <div>
+    <div class="demo-box">
+      <div x-data="uxSignaturePad()"
+           class="ux-signature-pad"
+           :class="{ 'ux-signature-pad--has-signature': hasSignature }">
+        <label class="ux-signature-pad__label">Firma del cliente</label>
+
+        <div class="ux-signature-pad__container">
+          <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+
+          <div class="ux-signature-pad__guide" x-show="showGuide"></div>
+
+          <div class="ux-signature-pad__placeholder" x-show="showPlaceholder && !hasSignature">
+            <span x-html="icons.pen"></span>
+            <span x-text="placeholderText"></span>
+          </div>
+        </div>
+
+        <div class="ux-signature-pad__actions">
+          <button type="button" class="ux-signature-pad__btn" @click="undo()" :disabled="history.length <= 1">
+            <span x-html="icons.undo"></span>
+            Deshacer
+          </button>
+          <button type="button" class="ux-signature-pad__btn" @click="clear()" :disabled="!hasSignature">
+            <span x-html="icons.clear"></span>
+            Limpiar
+          </button>
+        </div>
+
+        <span class="ux-signature-pad__helper">Firme con el dedo o el ratón</span>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="demo-box">
+      <div x-data="{ ...uxSignaturePad(), signatureData: null }"
+           @signature:change="signatureData = hasSignature ? getSignature() : null"
+           class="ux-signature-pad"
+           :class="{ 'ux-signature-pad--has-signature': hasSignature }">
+        <label class="ux-signature-pad__label">Firma con preview</label>
+
+        <div class="ux-signature-pad__container">
+          <canvas x-ref="canvas" class="ux-signature-pad__canvas"></canvas>
+          <div class="ux-signature-pad__guide"></div>
+          <div class="ux-signature-pad__placeholder" x-show="!hasSignature">
+            <span x-html="icons.pen"></span>
+            <span>Firme aquí</span>
+          </div>
+        </div>
+
+        <div class="ux-signature-pad__actions">
+          <button type="button" class="ux-signature-pad__btn" @click="clear()" :disabled="!hasSignature">
+            <span x-html="icons.clear"></span>
+            Limpiar
+          </button>
+          <button type="button" class="ux-signature-pad__btn ux-signature-pad__btn--primary"
+                  @click="download('mi-firma.png')" :disabled="!hasSignature">
+            <span x-html="icons.download"></span>
+            Descargar
+          </button>
+        </div>
+
+        <div class="signature-preview" x-show="signatureData">
+          <p style="font-size: 0.75rem; color: var(--ux-text-secondary); margin-bottom: 0.5rem;">Preview:</p>
+          <img :src="signatureData" alt="Firma" style="max-height: 100px;">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

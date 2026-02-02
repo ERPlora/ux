@@ -1,0 +1,93 @@
+<h4 style="margin-bottom: var(--ux-space-md);">Modelo Django</h4>
+      <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+from django.contrib.auth.models import User
+
+class Batch(models.Model):
+    STATUS_CHOICES = [
+        ('created', 'Created'),
+        ('in-progress', 'In Progress'),
+        ('qc', 'Quality Check'),
+        ('completed', 'Completed'),
+        ('shipped', 'Shipped'),
+        ('rejected', 'Rejected'),
+        ('quarantine', 'Quarantine'),
+    ]
+
+    batch_number = models.CharField(max_length=50, unique=True)
+    lot_number = models.CharField(max_length=50)
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='created')
+
+    initial_quantity = models.PositiveIntegerField()
+    current_quantity = models.PositiveIntegerField()
+    rejected_quantity = models.PositiveIntegerField(default=0)
+    unit = models.CharField(max_length=20, default='units')
+
+    manufactured_date = models.DateField()
+    expiry_date = models.DateField(null=True, blank=True)
+
+    location = models.ForeignKey('Location', on_delete=models.SET_NULL, null=True)
+
+    parent_batches = models.ManyToManyField('self', symmetrical=False, related_name='child_batches', blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name_plural = 'Batches'
+
+    def __str__(self):
+        return self.batch_number
+
+    @property
+    def yield_percentage(self):
+        if self.initial_quantity == 0:
+            return 0
+        return round((self.current_quantity / self.initial_quantity) * 100, 1)
+
+    @property
+    def days_until_expiry(self):
+        if not self.expiry_date:
+            return None
+        from datetime import date
+        return (self.expiry_date - date.today()).days
+
+
+class BatchHistory(models.Model):
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='history')
+    action = models.CharField(max_length=200)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    details = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+
+class BatchTraceLink(models.Model):
+    LINK_TYPES = [
+        ('po', 'Production Order'),
+        ('qc', 'QC Report'),
+        ('coa', 'Certificate of Analysis'),
+        ('shipment', 'Shipment'),
+    ]
+
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='trace_links')
+    link_type = models.CharField(max_length=20, choices=LINK_TYPES)
+    reference = models.CharField(max_length=50)
+    url = models.URLField(blank=True)
+
+
+class Location(models.Model):
+    name = models.CharField(max_length=100)
+    zone = models.CharField(max_length=50, blank=True)
+    shelf = models.CharField(max_length=50, blank=True)
+    bin = models.CharField(max_length=50, blank=True)
+
+    def __str__(self):
+        parts = [self.name]
+        if self.zone: parts.append(self.zone)
+        if self.shelf: parts.append(self.shelf)
+        return ' - '.join(parts)</pre>

@@ -1,0 +1,19 @@
+# views.py
+from django.core.paginator import Paginator
+from django.shortcuts import render
+
+def product_list(request):
+    products = Product.objects.all()
+    paginator = Paginator(products, 10)  # 10 items per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    # Return partial template for HTMX requests
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/product_items.html', {
+            'page_obj': page_obj,
+        })
+
+    return render(request, 'products/list.html', {
+        'page_obj': page_obj,
+    })

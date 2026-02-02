@@ -1,0 +1,29 @@
+<!-- Color picker con preview en tiempo real -->
+<div class="demo-grid">
+  <div x-data="uxColorPicker({ value: '#3b82f6' })">
+    <button class="ux-color-picker__trigger" @click="toggle()">
+      <span class="ux-color-picker__swatch" :style="{ background: displayValue }"></span>
+      <span class="ux-color-picker__value" x-text="displayValue"></span>
+    </button>
+
+    <div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+      <!-- Picker content... -->
+    </div>
+
+    <!-- Guardar con debounce para evitar demasiadas peticiones -->
+    <input type="hidden"
+           name="color"
+           x-ref="colorInput"
+           :value="displayValue"
+           hx-post="/api/preview/color/"
+           hx-trigger="change delay:500ms"
+           hx-target="#color-preview">
+  </div>
+
+  <!-- Preview que se actualiza -->
+  <div id="color-preview">
+    <div class="ux-card" style="background: var(--preview-color, #3b82f6);">
+      <p style="color: var(--ux-primary-contrast);">Vista previa del color</p>
+    </div>
+  </div>
+</div>
