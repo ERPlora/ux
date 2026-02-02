@@ -23,6 +23,12 @@ import { UXUpload } from './components/upload.js';
 import { UXQuantityStepper } from './components/quantity-stepper.js';
 import { UXSignaturePad } from './components/signature-pad.js';
 
+// Web Components (Custom Elements)
+import { UxModal } from './web-components/ux-modal.js';
+import { UxToast } from './web-components/ux-toast.js';
+import { UxSheet } from './web-components/ux-sheet.js';
+import { UxAlert } from './web-components/ux-alert.js';
+
 // ==========================================================
 // Component Registry
 // ==========================================================
@@ -209,6 +215,11 @@ export {
   UXUpload,
   UXQuantityStepper,
   UXSignaturePad,
+  // Web Components
+  UxModal,
+  UxToast,
+  UxSheet,
+  UxAlert,
   // Re-export helpers for tree-shaking
   helpers
 };
