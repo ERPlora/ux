@@ -2,17 +2,17 @@
 
 **Zero-dependency, framework-agnostic CSS component library** with iOS/Ionic-style design. Works with any framework: HTMX, React, Vue, Radix UI, or vanilla JavaScript.
 
-**[Live Demo](https://erplora.github.io/ux/)** | [Documentation](docs/index.html)
+**[Live Demo](https://erplora.github.io/ux/docs/)** | [Documentation](docs/index.html)
 
 ## Features
 
 - **Zero Dependencies** - Pure CSS library, no JavaScript framework required
 - **Framework Agnostic** - Works with HTMX, React, Vue, Radix UI, vanilla JS
-- **157 Components** - Comprehensive library for any application
+- **164 Components** - Comprehensive library for any application
+- **1400+ Examples** - Interactive code playground with live editing
 - **Vanilla JS Components** - Optional JS classes for interactive components (modal, tabs, accordion, etc.)
 - **Web Components** - Framework-agnostic custom elements (`<ux-modal>`, `<ux-toast>`, `<ux-sheet>`, `<ux-alert>`)
-- **Alpine.js Support** - Full Alpine.js components available for demos
-- **Interactive Documentation** - Live code playground with editable examples
+- **Alpine.js Support** - Full Alpine.js components with utilities ($debounce, $throttle, x-focus-trap, etc.)
 - **Touch-First** - Optimized for mobile (44px touch targets, gestures)
 - **iOS Style** - Pixel-perfect iOS/Ionic design patterns
 - **Glass Morphism** - iOS 26 Liquid Glass effect on all components
@@ -82,11 +82,11 @@
 <!-- CSS -->
 <link rel="stylesheet" href="dist/ux.min.css">
 
-<!-- Alpine.js -->
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-<!-- Alpine components -->
+<!-- Alpine.js components (must load before Alpine) -->
 <script src="docs/alpine-components.js"></script>
+
+<!-- Alpine.js -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 ```
 
 ### Bundle Sizes
@@ -94,11 +94,10 @@
 | Bundle | Size | Description |
 |--------|------|-------------|
 | ux.min.css | ~1.1 MB | All CSS styles |
-| ux.min.js | ~50 KB | Vanilla JS + Web Components |
-| ux.esm.js | ~50 KB | ES Module bundle |
-| alpine-components.js | ~80 KB | Alpine.js components (optional) |
+| ux.min.js | ~40 KB | Vanilla JS + Web Components |
+| alpine-components.js | ~300 KB | Alpine.js components (optional) |
 
-## Components (157)
+## Components (164)
 
 ### CSS-Only (no JS required)
 `avatar` · `badge` · `button` · `button-group` · `chip` · `divider` · `icon-button` · `img` · `progress` · `spacer` · `spinner` · `tag` · `card` · `list` · `navbar` · `toolbar`

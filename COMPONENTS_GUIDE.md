@@ -2,19 +2,22 @@
 
 > **Zero-dependency, framework-agnostic CSS component library** with iOS/Ionic-style design.
 >
-> Total Components: **161 CSS files** | Last Updated: 2026-01-29
+> Total Components: **164 pages** | **1400+ examples** | Last Updated: 2026-02-02
 >
 > **Architecture:**
 > - **Pure CSS** - All styling works without JavaScript
 > - **Vanilla JS Components** - Optional JS classes for interactive components (modal, tabs, accordion, etc.)
-> - **Alpine.js Support** - Full Alpine.js components available for demos
+> - **Web Components** - Framework-agnostic custom elements (`<ux-modal>`, `<ux-toast>`, `<ux-sheet>`, `<ux-alert>`)
+> - **Alpine.js Support** - Full Alpine.js components with utilities ($debounce, $throttle, x-focus-trap, etc.)
 > - **Framework agnostic** - Works with HTMX, React, Vue, Radix UI, vanilla JS
 > - **State selectors** - Supports `data-state`, ARIA attributes, and `.is-*` classes
 >
 > **Files:**
 > - `dist/ux.min.css` - Minified CSS bundle (~1.1MB)
-> - `dist/ux.min.js` - Vanilla JS components (~45KB)
-> - `docs/alpine-components.js` - Alpine.js components for demos (~80KB)
+> - `dist/ux.min.js` - Vanilla JS + Web Components (~40KB)
+> - `docs/alpine-components.js` - Alpine.js components (~300KB)
+>
+> **Documentation:** [https://erplora.github.io/ux/docs/](https://erplora.github.io/ux/docs/)
 
 ---
 
