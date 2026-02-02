@@ -85,15 +85,48 @@
   // Loading state
   &--loading {
     pointer-events: none;
+    color: transparent;
 
-    .ux-button__text {
-      opacity: 0;
+    // Hide any child content while loading
+    > * {
+      visibility: hidden;
     }
 
-    .ux-button__spinner {
+    // Auto-generated spinner using ::after pseudo-element
+    &::after {
+      content: '';
       position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 1.25em;
+      height: 1.25em;
+      margin-top: -0.625em;
+      margin-left: -0.625em;
+      border: 2px solid var(--ux-variant-color, var(--ux-primary-contrast));
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: ux-button-spin 0.6s linear infinite;
     }
   }
+
+  // Spinner element (alternative to ::after for custom spinners)
+  &__spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1.25em;
+    height: 1.25em;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: ux-button-spin 0.6s linear infinite;
+  }
+}
+
+// Button spin animation
+@keyframes ux-button-spin {
+  to { transform: rotate(360deg); }
 }
 
 // ==========================================================
@@ -134,12 +167,25 @@
 
 // Clear/Ghost button
 .ux-button--clear {
-  background-color: transparent;
+  background-color: rgba(var(--ux-primary-rgb), 0.04);
   color: var(--ux-variant-color, var(--ux-primary));
   border-color: transparent;
 
-  &:hover {
-    background-color: rgba(var(--ux-primary-rgb), 0.08);
+  // Subtle underline to indicate interactivity
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--ux-primary-rgb), 0.3);
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: rgba(var(--ux-primary-rgb), 0.1);
+      text-decoration-color: rgba(var(--ux-primary-rgb), 0.6);
+    }
+  }
+
+  &:active {
+    background-color: rgba(var(--ux-primary-rgb), 0.15);
   }
 }
 
@@ -240,5 +286,36 @@
   .ux-button--block-mobile {
     display: flex;
     width: 100%;
+  }
+}
+
+// ==========================================================
+// Loading State for Style Variants
+// ==========================================================
+
+// For outline, soft, and clear buttons, spinner should use the variant color (not contrast)
+.ux-button--outline.ux-button--loading::after,
+.ux-button--soft.ux-button--loading::after,
+.ux-button--clear.ux-button--loading::after {
+  border-color: var(--ux-variant-color, var(--ux-primary));
+  border-top-color: transparent;
+}
+
+// ==========================================================
+// Reduced Motion
+// ==========================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-button {
+    transition: none;
+
+    &:active {
+      transform: none;
+    }
+  }
+
+  .ux-button--loading::after,
+  .ux-button__spinner {
+    animation: none;
   }
 }

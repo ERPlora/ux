@@ -6736,7 +6736,7 @@ function uxButtonGroup(options = {}) {
     multiple: options.multiple || false,
     selectedItems: options.selectedItems || [],
 
-    toggle(value) {
+    select(value) {
       if (this.multiple) {
         const index = this.selectedItems.indexOf(value);
         if (index === -1) {
@@ -6744,11 +6744,16 @@ function uxButtonGroup(options = {}) {
         } else {
           this.selectedItems.splice(index, 1);
         }
-        this.$dispatch('change', { selected: this.selectedItems });
+        this.$dispatch('buttongroup:change', { selected: this.selectedItems, value });
       } else {
-        this.selected = this.selected === value ? null : value;
-        this.$dispatch('change', { selected: this.selected });
+        this.selected = value;
+        this.$dispatch('buttongroup:change', { selected: this.selected, value });
       }
+    },
+
+    // Alias for backwards compatibility
+    toggle(value) {
+      this.select(value);
     },
 
     isSelected(value) {
@@ -6756,6 +6761,10 @@ function uxButtonGroup(options = {}) {
         return this.selectedItems.includes(value);
       }
       return this.selected === value;
+    },
+
+    getButtonClasses(value) {
+      return this.isSelected(value) ? 'ux-button--active' : '';
     }
   };
 }
