@@ -67,97 +67,97 @@
   <h3>HTMX + Django</h3>
   <p>Manage work orders with HTMX and Django for real-time production tracking.</p>
 
-  <pre class="ux-code-block" data-lang="html"><!-- Load work orders from Django -->
-<div class="ux-work-order-grid"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Load work orders from Django --&gt;
+&lt;div class="ux-work-order-grid"
      hx-get="{% url 'workorders:list' %}?status=pending"
      hx-trigger="load"
-     hx-swap="innerHTML">
-  <div class="ux-spinner"></div>
-</div>
+     hx-swap="innerHTML"&gt;
+  &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+&lt;/div&gt;
 
-<!-- Work order card with HTMX actions -->
-<div id="wo-{{ work_order.id }}"
-     class="ux-work-order ux-work-order--priority-{{ work_order.priority }}">
-  <div class="ux-work-order__header">
-    <div class="ux-work-order__header-top">
-      <h4 class="ux-work-order__number">{{ work_order.number }}</h4>
-      <span class="ux-work-order__status ux-work-order__status--{{ work_order.status }}">
-        <span class="ux-work-order__status-dot"></span>
-        <span>{{ work_order.get_status_display }}</span>
-      </span>
-    </div>
-    <div class="ux-work-order__product">
-      <h5 class="ux-work-order__product-name">{{ work_order.product.name }}</h5>
-      <span class="ux-work-order__product-sku">{{ work_order.product.sku }}</span>
-    </div>
-  </div>
+&lt;!-- Work order card with HTMX actions --&gt;
+&lt;div id="wo-{{ work_order.id }}"
+     class="ux-work-order ux-work-order--priority-{{ work_order.priority }}"&gt;
+  &lt;div class="ux-work-order__header"&gt;
+    &lt;div class="ux-work-order__header-top"&gt;
+      &lt;h4 class="ux-work-order__number"&gt;{{ work_order.number }}&lt;/h4&gt;
+      &lt;span class="ux-work-order__status ux-work-order__status--{{ work_order.status }}"&gt;
+        &lt;span class="ux-work-order__status-dot"&gt;&lt;/span&gt;
+        &lt;span&gt;{{ work_order.get_status_display }}&lt;/span&gt;
+      &lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-work-order__product"&gt;
+      &lt;h5 class="ux-work-order__product-name"&gt;{{ work_order.product.name }}&lt;/h5&gt;
+      &lt;span class="ux-work-order__product-sku"&gt;{{ work_order.product.sku }}&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
 
-  <div class="ux-work-order__content">
-    <div class="ux-work-order__quantities">
-      <div class="ux-work-order__quantity">
-        <span class="ux-work-order__quantity-label">Ordered</span>
-        <span class="ux-work-order__quantity-value">{{ work_order.quantity_ordered }}</span>
-      </div>
-      <div class="ux-work-order__quantity">
-        <span class="ux-work-order__quantity-label">Completed</span>
-        <span class="ux-work-order__quantity-value">{{ work_order.quantity_completed }}</span>
-      </div>
-    </div>
+  &lt;div class="ux-work-order__content"&gt;
+    &lt;div class="ux-work-order__quantities"&gt;
+      &lt;div class="ux-work-order__quantity"&gt;
+        &lt;span class="ux-work-order__quantity-label"&gt;Ordered&lt;/span&gt;
+        &lt;span class="ux-work-order__quantity-value"&gt;{{ work_order.quantity_ordered }}&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class="ux-work-order__quantity"&gt;
+        &lt;span class="ux-work-order__quantity-label"&gt;Completed&lt;/span&gt;
+        &lt;span class="ux-work-order__quantity-value"&gt;{{ work_order.quantity_completed }}&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
 
-    <div class="ux-work-order__progress">
-      <div class="ux-work-order__progress-bar">
-        <div class="ux-work-order__progress-fill" style="width: {{ work_order.progress_percent }}%"></div>
-      </div>
-    </div>
-  </div>
+    &lt;div class="ux-work-order__progress"&gt;
+      &lt;div class="ux-work-order__progress-bar"&gt;
+        &lt;div class="ux-work-order__progress-fill" style="width: {{ work_order.progress_percent }}%"&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
 
-  <div class="ux-work-order__actions">
+  &lt;div class="ux-work-order__actions"&gt;
     {% if work_order.status == 'pending' %}
-    <button class="ux-work-order__action ux-work-order__action--start"
+    &lt;button class="ux-work-order__action ux-work-order__action--start"
             hx-post="{% url 'workorders:start' work_order.id %}"
             hx-target="#wo-{{ work_order.id }}"
-            hx-swap="outerHTML">
+            hx-swap="outerHTML"&gt;
       Start
-    </button>
+    &lt;/button&gt;
     {% elif work_order.status == 'in-progress' %}
-    <button class="ux-work-order__action ux-work-order__action--pause"
+    &lt;button class="ux-work-order__action ux-work-order__action--pause"
             hx-post="{% url 'workorders:pause' work_order.id %}"
             hx-target="#wo-{{ work_order.id }}"
-            hx-swap="outerHTML">
+            hx-swap="outerHTML"&gt;
       Pause
-    </button>
-    <button class="ux-work-order__action ux-work-order__action--complete"
+    &lt;/button&gt;
+    &lt;button class="ux-work-order__action ux-work-order__action--complete"
             hx-post="{% url 'workorders:complete' work_order.id %}"
             hx-confirm="Mark this work order as complete?"
             hx-target="#wo-{{ work_order.id }}"
-            hx-swap="outerHTML">
+            hx-swap="outerHTML"&gt;
       Complete
-    </button>
+    &lt;/button&gt;
     {% endif %}
-  </div>
-</div>
+  &lt;/div&gt;
+&lt;/div&gt;
 
-<!-- Increment completed quantity -->
-<button class="ux-work-order__action"
+&lt;!-- Increment completed quantity --&gt;
+&lt;button class="ux-work-order__action"
         hx-post="{% url 'workorders:increment' work_order.id %}"
         hx-vals='{"amount": 10}'
         hx-target="#wo-{{ work_order.id }}"
-        hx-swap="outerHTML">
+        hx-swap="outerHTML"&gt;
   +10 Units
-</button>
+&lt;/button&gt;
 
-<!-- Filter work orders by status -->
-<div class="ux-segment">
-  <button class="ux-segment__button"
+&lt;!-- Filter work orders by status --&gt;
+&lt;div class="ux-segment"&gt;
+  &lt;button class="ux-segment__button"
           hx-get="{% url 'workorders:list' %}?status=pending"
-          hx-target="#work-orders-grid">Pending</button>
-  <button class="ux-segment__button"
+          hx-target="#work-orders-grid"&gt;Pending&lt;/button&gt;
+  &lt;button class="ux-segment__button"
           hx-get="{% url 'workorders:list' %}?status=in-progress"
-          hx-target="#work-orders-grid">In Progress</button>
-  <button class="ux-segment__button"
+          hx-target="#work-orders-grid"&gt;In Progress&lt;/button&gt;
+  &lt;button class="ux-segment__button"
           hx-get="{% url 'workorders:list' %}?status=completed"
-          hx-target="#work-orders-grid">Completed</button>
-</div></pre>
+          hx-target="#work-orders-grid"&gt;Completed&lt;/button&gt;
+&lt;/div&gt;</pre>
   <pre class="ux-code-block" data-lang="python"># views.py
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404

@@ -43,37 +43,37 @@
   <p>Banners promocionales dinamicos cargados desde el servidor.</p>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Banner promocional con HTMX</h4>
-  <pre class="ux-code-block" data-lang="html"><!-- Carga el banner activo al iniciar -->
-<div id="promo-banner"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Carga el banner activo al iniciar --&gt;
+&lt;div id="promo-banner"
      hx-get="/api/promotions/active/"
      hx-trigger="load"
-     hx-swap="innerHTML">
-</div>
+     hx-swap="innerHTML"&gt;
+&lt;/div&gt;
 
-<!-- Banner con dismiss que notifica al servidor -->
-<div class="ux-banner ux-banner--info ux-banner--inline"
+&lt;!-- Banner con dismiss que notifica al servidor --&gt;
+&lt;div class="ux-banner ux-banner--info ux-banner--inline"
      x-data="uxBanner()"
      x-show="visible"
-     x-transition>
-  <span class="ux-banner__icon">...</span>
-  <div class="ux-banner__content">
-    <p class="ux-banner__title">Oferta Especial</p>
-    <p class="ux-banner__message">20% de descuento en tu primera compra</p>
-  </div>
-  <div class="ux-banner__actions">
-    <button class="ux-banner__action"
+     x-transition&gt;
+  &lt;span class="ux-banner__icon"&gt;...&lt;/span&gt;
+  &lt;div class="ux-banner__content"&gt;
+    &lt;p class="ux-banner__title"&gt;Oferta Especial&lt;/p&gt;
+    &lt;p class="ux-banner__message"&gt;20% de descuento en tu primera compra&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-banner__actions"&gt;
+    &lt;button class="ux-banner__action"
             hx-post="/api/promotions/123/click/"
-            hx-swap="none">
+            hx-swap="none"&gt;
       Ver Oferta
-    </button>
-  </div>
-  <button class="ux-banner__close"
+    &lt;/button&gt;
+  &lt;/div&gt;
+  &lt;button class="ux-banner__close"
           @click="dismiss()"
           hx-post="/api/promotions/123/dismiss/"
-          hx-swap="none">
-    <svg>...</svg>
-  </button>
-</div></pre>
+          hx-swap="none"&gt;
+    &lt;svg&gt;...&lt;/svg&gt;
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Django View</h4>
   <pre class="ux-code-block" data-lang="python"># views.py
@@ -117,49 +117,49 @@ def click_promotion(request, promo_id):
     return HttpResponse(status=204)</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Django Template Partial</h4>
-  <pre class="ux-code-block" data-lang="html"><!-- templates/partials/promo_banner.html -->
+  <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/promo_banner.html --&gt;
 {% if promo %}
-<div class="ux-banner ux-banner--{{ promo.variant }}-filled ux-banner--inline"
+&lt;div class="ux-banner ux-banner--{{ promo.variant }}-filled ux-banner--inline"
      x-data="uxBanner()"
      x-show="visible"
-     x-transition>
-  <span class="ux-banner__icon">
+     x-transition&gt;
+  &lt;span class="ux-banner__icon"&gt;
     {% if promo.icon %}
       {{ promo.icon|safe }}
     {% else %}
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-      </svg>
+      &lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2"&gt;
+        &lt;path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/&gt;
+      &lt;/svg&gt;
     {% endif %}
-  </span>
-  <div class="ux-banner__content">
+  &lt;/span&gt;
+  &lt;div class="ux-banner__content"&gt;
     {% if promo.title %}
-      <p class="ux-banner__title">{{ promo.title }}</p>
+      &lt;p class="ux-banner__title"&gt;{{ promo.title }}&lt;/p&gt;
     {% endif %}
-    <p class="ux-banner__message">{{ promo.message }}</p>
-  </div>
+    &lt;p class="ux-banner__message"&gt;{{ promo.message }}&lt;/p&gt;
+  &lt;/div&gt;
   {% if promo.action_url %}
-  <div class="ux-banner__actions">
-    <a href="{{ promo.action_url }}"
+  &lt;div class="ux-banner__actions"&gt;
+    &lt;a href="{{ promo.action_url }}"
        class="ux-banner__action"
        hx-post="{% url 'promotion_click' promo.id %}"
-       hx-swap="none">
+       hx-swap="none"&gt;
       {{ promo.action_text|default:"Ver mas" }}
-    </a>
-  </div>
+    &lt;/a&gt;
+  &lt;/div&gt;
   {% endif %}
-  <button class="ux-banner__close"
+  &lt;button class="ux-banner__close"
           @click="dismiss()"
           hx-post="{% url 'promotion_dismiss' promo.id %}"
-          hx-swap="none">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2">
-      <line x1="18" y1="6" x2="6" y2="18"/>
-      <line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-  </button>
-</div>
+          hx-swap="none"&gt;
+    &lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2"&gt;
+      &lt;line x1="18" y1="6" x2="6" y2="18"/&gt;
+      &lt;line x1="6" y1="6" x2="18" y2="18"/&gt;
+    &lt;/svg&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
 {% endif %}</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Django Model</h4>

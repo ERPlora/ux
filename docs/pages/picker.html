@@ -30,12 +30,12 @@
 <section class="component-section">
   <h3>Eventos</h3>
   <p>Escuchar eventos del picker.</p>
-  <pre class="ux-code-block" data-lang="html"><div x-data="uxPicker({ columns: [...] })"
+  <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxPicker({ columns: [...] })"
      @picker-confirm="console.log('Valores:', $event.detail.values)"
      @picker-cancel="console.log('Cancelado')"
-     @picker-change="console.log('Columna:', $event.detail.columnIndex, 'Valor:', $event.detail.value)">
+     @picker-change="console.log('Columna:', $event.detail.columnIndex, 'Valor:', $event.detail.value)"&gt;
   ...
-</div></pre>
+&lt;/div&gt;</pre>
 </section>
 
 <!-- HTMX + Django -->
@@ -44,26 +44,26 @@
   <p>Cargar opciones del picker dinamicamente desde el servidor.</p>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Picker con opciones dinamicas</h4>
-  <pre class="ux-code-block" data-lang="html"><!-- Boton que carga opciones y abre el picker -->
-<div x-data="uxPicker({ columns: [] })"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Boton que carga opciones y abre el picker --&gt;
+&lt;div x-data="uxPicker({ columns: [] })"
      @htmx:after-request="
        if ($event.detail.successful) {
          columns = JSON.parse($event.detail.xhr.response);
-         selectedIndexes = columns.map(c => c.selectedIndex || 0);
+         selectedIndexes = columns.map(c =&gt; c.selectedIndex || 0);
          open();
        }
-     ">
-  <button class="ux-button"
+     "&gt;
+  &lt;button class="ux-button"
           hx-get="/api/picker-options/"
-          hx-trigger="click">
+          hx-trigger="click"&gt;
     Seleccionar Categoria
-  </button>
+  &lt;/button&gt;
 
-  <!-- Picker backdrop -->
-  <div class="ux-picker-backdrop" :class="{ 'ux-picker-backdrop--open': isOpen }">
-    <div class="ux-picker">...</div>
-  </div>
-</div></pre>
+  &lt;!-- Picker backdrop --&gt;
+  &lt;div class="ux-picker-backdrop" :class="{ 'ux-picker-backdrop--open': isOpen }"&gt;
+    &lt;div class="ux-picker"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Vista Django</h4>
   <pre class="ux-code-block" data-lang="python"># views.py
@@ -82,15 +82,15 @@ def picker_options(request):
     return JsonResponse(columns, safe=False)</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Picker cascada (columnas dependientes)</h4>
-  <pre class="ux-code-block" data-lang="html"><!-- Picker con columnas que dependen entre si -->
-<div x-data="uxPicker({
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Picker con columnas que dependen entre si --&gt;
+&lt;div x-data="uxPicker({
        columns: [
          { label: 'Pais', options: [], selectedIndex: 0 },
          { label: 'Ciudad', options: [], selectedIndex: 0 }
        ]
      })"
      x-init="
-       fetch('/api/paises/').then(r => r.json()).then(data => {
+       fetch('/api/paises/').then(r =&gt; r.json()).then(data =&gt; {
          columns[0].options = data;
        });
      "
@@ -98,40 +98,40 @@ def picker_options(request):
        if ($event.detail.columnIndex === 0) {
          const pais = columns[0].options[$event.detail.optionIndex];
          fetch('/api/ciudades/?pais=' + encodeURIComponent(pais))
-           .then(r => r.json())
-           .then(data => {
+           .then(r =&gt; r.json())
+           .then(data =&gt; {
              columns[1].options = data;
              selectedIndexes[1] = 0;
            });
        }
-     ">
-  <button class="ux-button" @click="open()">Seleccionar Ubicacion</button>
+     "&gt;
+  &lt;button class="ux-button" @click="open()"&gt;Seleccionar Ubicacion&lt;/button&gt;
   ...
-</div></pre>
+&lt;/div&gt;</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Enviar seleccion al servidor</h4>
-  <pre class="ux-code-block" data-lang="html"><!-- Enviar valor seleccionado via HTMX -->
-<div x-data="uxPicker({ columns: [...] })"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Enviar valor seleccionado via HTMX --&gt;
+&lt;div x-data="uxPicker({ columns: [...] })"
      @picker-confirm="
        const valores = getValues();
        htmx.ajax('POST', '/api/guardar-seleccion/', {
          values: { seleccion: JSON.stringify(valores) },
          target: '#resultado'
        });
-     ">
+     "&gt;
   ...
-</div>
+&lt;/div&gt;
 
-<!-- O usando un input hidden -->
-<form hx-post="/api/guardar/" hx-target="#resultado">
-  <div x-data="uxPicker({ columns: [...] })"
-       @picker-confirm="$refs.input.value = JSON.stringify(getValues())">
-    <input type="hidden" name="seleccion" x-ref="input">
-    <button type="button" class="ux-button" @click="open()">Seleccionar</button>
+&lt;!-- O usando un input hidden --&gt;
+&lt;form hx-post="/api/guardar/" hx-target="#resultado"&gt;
+  &lt;div x-data="uxPicker({ columns: [...] })"
+       @picker-confirm="$refs.input.value = JSON.stringify(getValues())"&gt;
+    &lt;input type="hidden" name="seleccion" x-ref="input"&gt;
+    &lt;button type="button" class="ux-button" @click="open()"&gt;Seleccionar&lt;/button&gt;
     ...
-  </div>
-  <button type="submit" class="ux-button ux-color-primary">Guardar</button>
-</form></pre>
+  &lt;/div&gt;
+  &lt;button type="submit" class="ux-button ux-color-primary"&gt;Guardar&lt;/button&gt;
+&lt;/form&gt;</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Vista Django para columnas cascada</h4>
   <pre class="ux-code-block" data-lang="python"># views.py
@@ -150,7 +150,7 @@ def guardar_seleccion(request):
     import json
     seleccion = json.loads(request.POST.get('seleccion', '[]'))
     # Procesar seleccion...
-    return HttpResponse('<div class="ux-alert">Guardado!</div>')</pre>
+    return HttpResponse('&lt;div class="ux-alert"&gt;Guardado!&lt;/div&gt;')</pre>
 </section>
 
 <!-- API Table -->
