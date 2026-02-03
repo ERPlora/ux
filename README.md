@@ -11,7 +11,6 @@
 - **164 Components** - Comprehensive library for any application
 - **1400+ Examples** - Interactive code playground with live editing
 - **Vanilla JS Components** - Optional JS classes for interactive components (modal, tabs, accordion, etc.)
-- **Web Components** - Framework-agnostic custom elements (`<ux-modal>`, `<ux-toast>`, `<ux-sheet>`, `<ux-alert>`)
 - **Alpine.js Support** - Full Alpine.js components with utilities ($debounce, $throttle, x-focus-trap, etc.)
 - **Touch-First** - Optimized for mobile (44px touch targets, gestures)
 - **iOS Style** - Pixel-perfect iOS/Ionic design patterns
@@ -50,32 +49,6 @@
 </script>
 ```
 
-### With Web Components
-
-```html
-<!-- CSS + JS -->
-<link rel="stylesheet" href="dist/ux.min.css">
-<script src="dist/ux.min.js"></script>
-
-<!-- Use anywhere - React, Vue, Angular, vanilla HTML -->
-<ux-modal id="my-modal" title="Hello">
-  <p>Modal content here</p>
-</ux-modal>
-
-<button onclick="document.getElementById('my-modal').open()">Open</button>
-
-<!-- Toast notifications -->
-<ux-toast message="Saved!" variant="success" duration="3000"></ux-toast>
-
-<!-- Bottom sheet -->
-<ux-sheet id="my-sheet" side="bottom">
-  <p>Sheet content</p>
-</ux-sheet>
-
-<!-- Alert dialog -->
-<ux-alert id="my-alert" title="Confirm" message="Are you sure?"></ux-alert>
-```
-
 ### With Alpine.js (for demos)
 
 ```html
@@ -105,10 +78,6 @@
 ### Vanilla JS Components
 Interactive components with vanilla JavaScript classes:
 `accordion` · `alert` · `drawer` · `dropdown` · `modal` · `sheet` · `tabs` · `toast` · `tooltip` · `quantity-stepper` · `signature-pad` · `color-picker` · `phone-input` · `autocomplete` · `tag-input` · `otp-input`
-
-### Web Components (Custom Elements)
-Framework-agnostic components that work everywhere:
-`<ux-modal>` · `<ux-toast>` · `<ux-sheet>` · `<ux-alert>`
 
 ### Forms
 `autocomplete` · `checkbox` · `color-picker` · `currency-input` · `form` · `form-wizard` · `input` · `otp-input` · `phone-input` · `radio` · `range` · `searchbar` · `select` · `signature-pad` · `tag-input` · `textarea` · `toggle` · `upload`

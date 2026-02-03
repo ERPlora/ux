@@ -7862,34 +7862,249 @@ function uxShiftCalendar(options = {}) {
 // Work Order Component
 function uxWorkOrder(options = {}) {
   return {
+    // Identification
+    workOrderNumber: options.workOrderNumber || 'WO-0000',
+    workOrderId: options.workOrderId || null,
+
+    // Product info
+    product: options.product || { name: '', sku: '' },
+
+    // Status: 'pending', 'in-progress', 'completed', 'on-hold'
     status: options.status || 'pending',
-    progress: options.progress || 0,
-    tasks: options.tasks || [],
 
-    get completedTasks() {
-      return this.tasks.filter(t => t.completed).length;
+    // Priority: 'low', 'normal', 'high', 'urgent'
+    priority: options.priority || 'normal',
+
+    // Quantities
+    quantityOrdered: options.quantityOrdered || 0,
+    quantityCompleted: options.quantityCompleted || 0,
+
+    // Due date
+    dueDate: options.dueDate || null,
+
+    // Machine/Workstation
+    machine: options.machine || '',
+
+    // Materials (BOM)
+    materials: options.materials || [],
+
+    // Timer
+    startedAt: options.startedAt || null,
+    _elapsedInterval: null,
+    _elapsedSeconds: 0,
+
+    // Labels (i18n)
+    labels: {
+      ordered: 'Ordered',
+      completed: 'Completed',
+      remaining: 'Remaining',
+      progress: 'Progress',
+      materials: 'Materials',
+      start: 'Start',
+      pause: 'Pause',
+      resume: 'Resume',
+      complete: 'Complete',
+      ...options.labels
     },
 
-    get totalTasks() {
-      return this.tasks.length;
+    // Icons
+    icons: {
+      play: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
+      pause: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>',
+      check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+      calendar: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+      clock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+      machine: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01"></path></svg>'
     },
 
-    toggleTask(index) {
-      if (this.tasks[index]) {
-        this.tasks[index].completed = !this.tasks[index].completed;
-        this.updateProgress();
+    init() {
+      // Start timer if in-progress and has startedAt
+      if (this.status === 'in-progress' && this.startedAt) {
+        this._startTimer();
       }
     },
 
-    updateProgress() {
-      this.progress = this.totalTasks > 0
-        ? Math.round((this.completedTasks / this.totalTasks) * 100)
-        : 0;
+    // Computed properties
+    get quantityRemaining() {
+      return Math.max(0, this.quantityOrdered - this.quantityCompleted);
+    },
+
+    get progressPercent() {
+      if (this.quantityOrdered === 0) return 0;
+      return Math.round((this.quantityCompleted / this.quantityOrdered) * 100);
+    },
+
+    get isOverdue() {
+      if (!this.dueDate) return false;
+      return new Date() > new Date(this.dueDate) && this.status !== 'completed';
+    },
+
+    get isDueSoon() {
+      if (!this.dueDate || this.isOverdue) return false;
+      const due = new Date(this.dueDate);
+      const now = new Date();
+      const hoursUntilDue = (due - now) / (1000 * 60 * 60);
+      return hoursUntilDue <= 24 && hoursUntilDue > 0;
+    },
+
+    get formattedDueDate() {
+      if (!this.dueDate) return '';
+      const date = new Date(this.dueDate);
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    },
+
+    get formattedElapsedTime() {
+      const seconds = this._elapsedSeconds;
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      if (h > 0) {
+        return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      }
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    },
+
+    get statusLabel() {
+      const labels = {
+        'pending': 'Pending',
+        'in-progress': 'In Progress',
+        'completed': 'Completed',
+        'on-hold': 'On Hold'
+      };
+      return labels[this.status] || this.status;
+    },
+
+    get priorityLabel() {
+      const labels = {
+        'low': 'Low',
+        'normal': 'Normal',
+        'high': 'High',
+        'urgent': 'Urgent'
+      };
+      return labels[this.priority] || this.priority;
+    },
+
+    get hasShortage() {
+      return this.materials.some(m => m.shortage);
+    },
+
+    // Methods
+    start() {
+      const oldStatus = this.status;
+      this.status = 'in-progress';
+      this.startedAt = new Date();
+      this._startTimer();
+      this.$dispatch('work-order:status-change', {
+        workOrderId: this.workOrderId,
+        oldStatus,
+        newStatus: 'in-progress'
+      });
+    },
+
+    pause() {
+      const oldStatus = this.status;
+      this.status = 'on-hold';
+      this._stopTimer();
+      this.$dispatch('work-order:status-change', {
+        workOrderId: this.workOrderId,
+        oldStatus,
+        newStatus: 'on-hold'
+      });
+    },
+
+    resume() {
+      const oldStatus = this.status;
+      this.status = 'in-progress';
+      this._startTimer();
+      this.$dispatch('work-order:status-change', {
+        workOrderId: this.workOrderId,
+        oldStatus,
+        newStatus: 'in-progress'
+      });
+    },
+
+    complete() {
+      const oldStatus = this.status;
+      this.status = 'completed';
+      this.quantityCompleted = this.quantityOrdered;
+      this._stopTimer();
+      this.$dispatch('work-order:status-change', {
+        workOrderId: this.workOrderId,
+        oldStatus,
+        newStatus: 'completed'
+      });
+    },
+
+    incrementCompleted(n = 1) {
+      const oldQty = this.quantityCompleted;
+      this.quantityCompleted = Math.min(this.quantityOrdered, this.quantityCompleted + n);
+      this.$dispatch('work-order:quantity-change', {
+        workOrderId: this.workOrderId,
+        quantityCompleted: this.quantityCompleted,
+        quantityRemaining: this.quantityRemaining
+      });
+      // Auto-complete if done
+      if (this.quantityCompleted >= this.quantityOrdered) {
+        this.complete();
+      }
+    },
+
+    setCompleted(n) {
+      this.quantityCompleted = Math.min(this.quantityOrdered, Math.max(0, n));
+      this.$dispatch('work-order:quantity-change', {
+        workOrderId: this.workOrderId,
+        quantityCompleted: this.quantityCompleted,
+        quantityRemaining: this.quantityRemaining
+      });
     },
 
     setStatus(status) {
+      const oldStatus = this.status;
       this.status = status;
-      this.$dispatch('statuschange', { status });
+      this.$dispatch('work-order:status-change', {
+        workOrderId: this.workOrderId,
+        oldStatus,
+        newStatus: status
+      });
+    },
+
+    getIcon(name) {
+      return this.icons[name] || '';
+    },
+
+    getData() {
+      return {
+        workOrderNumber: this.workOrderNumber,
+        workOrderId: this.workOrderId,
+        product: this.product,
+        status: this.status,
+        priority: this.priority,
+        quantityOrdered: this.quantityOrdered,
+        quantityCompleted: this.quantityCompleted,
+        quantityRemaining: this.quantityRemaining,
+        progressPercent: this.progressPercent,
+        dueDate: this.dueDate,
+        machine: this.machine,
+        materials: this.materials
+      };
+    },
+
+    _startTimer() {
+      if (this._elapsedInterval) return;
+      // Calculate initial elapsed from startedAt
+      if (this.startedAt) {
+        this._elapsedSeconds = Math.floor((new Date() - new Date(this.startedAt)) / 1000);
+      }
+      this._elapsedInterval = setInterval(() => {
+        this._elapsedSeconds++;
+      }, 1000);
+    },
+
+    _stopTimer() {
+      if (this._elapsedInterval) {
+        clearInterval(this._elapsedInterval);
+        this._elapsedInterval = null;
+      }
     }
   };
 }
@@ -9312,19 +9527,122 @@ function uxCommand(options = {}) {
 // Notification Center Component
 function uxNotificationCenter(options = {}) {
   return {
-    open: false,
+    isOpen: false,
     notifications: options.notifications || [],
+    showFilters: options.showFilters !== false,
+    showFooter: options.showFooter !== false,
+    showLangPicker: false,
+    activeFilter: 'all',
 
+    // Filter options
+    filters: ['all', 'unread', 'success', 'warning', 'error', 'info'],
+    filterLabels: {
+      all: 'Todas',
+      unread: 'No leídas',
+      success: 'Éxito',
+      warning: 'Advertencia',
+      error: 'Error',
+      info: 'Info',
+      ...options.filterLabels
+    },
+
+    // Icons
+    icons: {
+      bell: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>',
+      checkAll: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 7l-8.5 8.5-4-4"></path><path d="M22 7l-8.5 8.5"></path></svg>',
+      close: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+      success: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+      warning: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+      error: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+      info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+      empty: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>'
+    },
+
+    // Computed
     get unreadCount() {
       return this.notifications.filter(n => !n.read).length;
     },
 
+    get filteredNotifications() {
+      let filtered = [...this.notifications];
+
+      // Apply filter
+      if (this.activeFilter === 'unread') {
+        filtered = filtered.filter(n => !n.read);
+      } else if (this.activeFilter !== 'all') {
+        filtered = filtered.filter(n => n.type === this.activeFilter);
+      }
+
+      // Group by date
+      const groups = {};
+      const today = new Date().toDateString();
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+      filtered.forEach(n => {
+        const date = new Date(n.timestamp);
+        const dateStr = date.toDateString();
+        let groupName;
+
+        if (dateStr === today) {
+          groupName = 'Hoy';
+        } else if (dateStr === yesterday) {
+          groupName = 'Ayer';
+        } else {
+          groupName = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
+        }
+
+        if (!groups[groupName]) {
+          groups[groupName] = [];
+        }
+        groups[groupName].push(n);
+      });
+
+      return Object.entries(groups).map(([group, items]) => ({ group, items }));
+    },
+
+    // Methods
     toggle() {
-      this.open = !this.open;
+      this.isOpen = !this.isOpen;
+    },
+
+    open() {
+      this.isOpen = true;
     },
 
     close() {
-      this.open = false;
+      this.isOpen = false;
+    },
+
+    getFilterCount(filter) {
+      if (filter === 'all') return this.notifications.length;
+      if (filter === 'unread') return this.unreadCount;
+      return this.notifications.filter(n => n.type === filter).length;
+    },
+
+    getTypeIcon(type) {
+      return this.icons[type] || this.icons.info;
+    },
+
+    formatTime(timestamp) {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diff = now - date;
+
+      // Less than 1 minute
+      if (diff < 60000) return 'Ahora';
+      // Less than 1 hour
+      if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
+      // Less than 24 hours
+      if (diff < 86400000) return `${Math.floor(diff / 3600000)}h`;
+      // Less than 7 days
+      if (diff < 604800000) return `${Math.floor(diff / 86400000)}d`;
+      // Otherwise show date
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    },
+
+    handleClick(notification) {
+      this.markAsRead(notification.id);
+      this.$dispatch('notification:click', { notification });
     },
 
     markAsRead(id) {
@@ -9343,8 +9661,21 @@ function uxNotificationCenter(options = {}) {
       }
     },
 
-    clear() {
+    clearAll() {
       this.notifications = [];
+    },
+
+    addNotification(notification) {
+      this.notifications.unshift({
+        id: notification.id || Date.now().toString(),
+        title: notification.title,
+        message: notification.message,
+        type: notification.type || 'info',
+        timestamp: notification.timestamp || new Date().toISOString(),
+        read: false,
+        ...notification
+      });
+      this.$dispatch('notification:add', { notification });
     }
   };
 }
