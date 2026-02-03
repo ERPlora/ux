@@ -53,7 +53,7 @@ class UXPlayground extends HTMLElement {
       <div class="ux-playground">
         <div class="ux-playground__preview">${html}</div>
         <div class="ux-playground__toolbar">
-          <button type="button" class="ux-playground__btn" data-action="toggle-code">
+          <button type="button" class="ux-playground__btn" data-action="toggle-code" aria-expanded="false">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
             </svg>
@@ -174,6 +174,7 @@ class UXPlayground extends HTMLElement {
       this._codeVisible = !this._codeVisible;
       codeBlock.style.display = this._codeVisible ? 'block' : 'none';
       toggleBtn.classList.toggle('is-active', this._codeVisible);
+      toggleBtn.setAttribute('aria-expanded', String(this._codeVisible));
     });
 
     copyBtn?.addEventListener('click', async () => {
