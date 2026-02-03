@@ -47,12 +47,15 @@
   </style>
 </head>
 <body class="ux-app" x-data="docsApp()">
+  <!-- Skip to content link -->
+  <a href="#page-content" class="ux-skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;padding:var(--ux-space-sm) var(--ux-space-md);background:var(--ux-primary);color:var(--ux-primary-contrast);text-decoration:none;font-weight:600;border-radius:0 0 var(--ux-border-radius) 0;" onfocus="this.style.position='fixed';this.style.left='0';this.style.top='0';this.style.width='auto';this.style.height='auto'" onblur="this.style.position='absolute';this.style.left='-9999px';this.style.width='1px';this.style.height='1px'">Saltar al contenido</a>
+
   <div class="ux-split-pane" :class="{ 'ux-split-pane--open': sidebarOpen, 'ux-split-pane--collapsed': sidebarCollapsed }">
     <!-- Backdrop (mobile) -->
     <div class="ux-split-pane__backdrop" @click="sidebarOpen = false"></div>
 
     <!-- Sidebar -->
-    <aside class="ux-split-pane__side ux-split-pane__side--glass" aria-label="Menu de navegacion">
+    <aside class="ux-split-pane__side ux-split-pane__side--glass" aria-label="Menú de navegación">
       <!-- Sidebar Header -->
       <div class="ux-navbar ux-navbar--glass">
         <div class="ux-navbar__content">
@@ -76,6 +79,7 @@
           <input type="search"
                  class="ux-searchbar__input"
                  placeholder="Buscar componente..."
+                 aria-label="Buscar componente"
                  x-model="searchQuery"
                  @input="filterMenu()">
         </div>
@@ -85,11 +89,14 @@
       <nav class="ux-scroll" aria-label="Componentes">
         <ul class="ux-menu__list">
           <!-- Getting Started -->
-          <li class="ux-menu__header" x-show="!searchQuery || 'getting started inicio'.includes(searchQuery.toLowerCase())">Getting Started</li>
+          <li x-show="!searchQuery || 'getting started inicio'.includes(searchQuery.toLowerCase())">
+            <div class="ux-menu__header">Getting Started</div>
+          </li>
           <li>
             <a class="ux-menu__item"
                :class="{ 'ux-menu__item--selected': currentPage === 'home' }"
-               href="#"
+               :aria-current="currentPage === 'home' ? 'page' : false"
+               href="#home"
                @click.prevent="loadPage('home', 'Home')">
               <span class="ux-menu__item-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +116,8 @@
                   <li>
                     <a class="ux-menu__item"
                        :class="{ 'ux-menu__item--selected': currentPage === item.page }"
-                       href="#"
+                       :aria-current="currentPage === item.page ? 'page' : false"
+                       :href="'#' + item.page"
                        @click.prevent="loadPage(item.page, item.name)">
                       <span class="ux-menu__item-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" x-html="item.icon"></svg>
@@ -128,10 +136,10 @@
     <!-- Main Content -->
     <main class="ux-split-pane__main">
       <!-- Top Navbar -->
-      <nav class="ux-navbar ux-navbar--sticky ux-navbar--glass" aria-label="Barra de navegacion">
+      <nav class="ux-navbar ux-navbar--sticky ux-navbar--glass" aria-label="Barra de navegación">
         <div class="ux-navbar__content">
           <div class="ux-navbar__start">
-            <button class="ux-navbar__button" @click="window.innerWidth >= 992 ? toggleSidebar() : sidebarOpen = true">
+            <button class="ux-navbar__button" aria-label="Abrir menú de navegación" @click="window.innerWidth >= 992 ? toggleSidebar() : sidebarOpen = true">
               <span class="ux-navbar__back">
                 <span class="ux-navbar__back-icon">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +154,7 @@
             <span class="ux-spinner ux-spinner--sm htmx-indicator" style="margin-left: 8px;"></span>
           </div>
           <div class="ux-navbar__end">
-            <button class="ux-navbar__button" @click="toggleDarkMode()" title="Toggle dark mode">
+            <button class="ux-navbar__button" @click="toggleDarkMode()" :aria-pressed="darkMode.toString()" aria-label="Alternar modo oscuro">
               <template x-if="darkMode">
                 <!-- Sun icon (shown in dark mode) -->
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,7 +175,7 @@
       <!-- Page Content -->
       <div id="page-content" class="ux-content ux-scroll">
         <!-- Home Page (inline) -->
-        <div x-show="currentPage === 'home'" x-cloak class="ux-p-xl">
+        <div x-show="currentPage === 'home'" :aria-hidden="currentPage !== 'home'" x-cloak class="ux-p-xl">
           <div class="container-fluid">
             <div class="row justify-content-center">
               <div class="col-12 col-lg-10 col-xl-8">
@@ -189,7 +197,7 @@
 &lt;!-- JS Helpers (opcional) --&gt;
 &lt;script src="dist/ux.min.js"&gt;&lt;/script&gt;
 
-&lt;!-- Uso basico --&gt;
+&lt;!-- Uso básico --&gt;
 &lt;button class="ux-button ux-color-primary"&gt;Button&lt;/button&gt;
 
 &lt;!-- Modal con data-state --&gt;
@@ -238,8 +246,8 @@
   --ux-primary: #8B5CF6;           /* Violeta */
   --ux-primary-rgb: 139, 92, 246;
   --ux-primary-contrast: #ffffff;
-  --ux-primary-shade: #7C3AED;     /* Mas oscuro */
-  --ux-primary-tint: #A78BFA;      /* Mas claro */
+  --ux-primary-shade: #7C3AED;     /* Más oscuro */
+  --ux-primary-tint: #A78BFA;      /* Más claro */
 }</pre>
                     <pre class="ux-code-block ux-mt-md" data-lang="html">&lt;!-- Aplicar a todo el documento --&gt;
 &lt;body class="ux-theme-custom"&gt;</pre>
@@ -269,10 +277,10 @@
                 <!-- HTMX + Django Card -->
                 <div class="ux-card ux-mb-xl">
                   <div class="ux-card__header">
-                    <h2 class="ux-card__title">Integracion con HTMX + Django</h2>
+                    <h2 class="ux-card__title">Integración con HTMX + Django</h2>
                   </div>
                   <div class="ux-card__content">
-                    <p class="ux-text-secondary ux-mb-md">UX esta optimizado para trabajar con HTMX y Django. Ejemplo de configuracion:</p>
+                    <p class="ux-text-secondary ux-mb-md">UX está optimizado para trabajar con HTMX y Django. Ejemplo de configuración:</p>
                     <pre class="ux-code-block" data-lang="html">&lt;!-- base.html - Template base Django --&gt;
 {% load static %}
 &lt;!DOCTYPE html&gt;
@@ -297,7 +305,7 @@ from django.http import HttpResponse
 def lista_usuarios(request):
     usuarios = Usuario.objects.all()
 
-    # Si es peticion HTMX, retornar solo el fragmento
+    # Si es petición HTMX, retornar solo el fragmento
     if request.headers.get('HX-Request'):
         return render(request, 'partials/usuarios_lista.html', {
             'usuarios': usuarios
@@ -337,7 +345,7 @@ def lista_usuarios(request):
                 </div>
 
                 <!-- Features Grid -->
-                <h2 class="ux-text-lg ux-font-semibold ux-mb-md">Caracteristicas</h2>
+                <h2 class="ux-text-lg ux-font-semibold ux-mb-md">Características</h2>
                 <div class="row g-3 ux-mb-xl">
                   <div class="col-6 col-md-4">
                     <div class="ux-card">
@@ -454,7 +462,7 @@ def lista_usuarios(request):
 
         menu: [
           {
-            name: 'Basicos',
+            name: 'Básicos',
             items: [
               { name: 'Button', page: 'button', icon: '<rect x="3" y="6" width="18" height="12" rx="2" stroke-width="2"/>' },
               { name: 'Button Group', page: 'button-group', icon: '<rect x="2" y="8" width="6" height="8" rx="1" stroke-width="2"/><rect x="9" y="8" width="6" height="8" rx="1" stroke-width="2"/><rect x="16" y="8" width="6" height="8" rx="1" stroke-width="2"/>' },
@@ -513,7 +521,7 @@ def lista_usuarios(request):
             ]
           },
           {
-            name: 'Navegacion',
+            name: 'Navegación',
             items: [
               { name: 'Navbar', page: 'navbar', icon: '<rect x="2" y="4" width="20" height="6" rx="1" stroke-width="2"/>' },
               { name: 'Toolbar', page: 'toolbar', icon: '<rect x="2" y="6" width="20" height="4" rx="1" stroke-width="2"/><rect x="2" y="14" width="20" height="4" rx="1" stroke-width="2"/>' },
