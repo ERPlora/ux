@@ -43,6 +43,25 @@ const componentMap = {
 // UX Global Object
 // ==========================================================
 
+const NODE_TYPES = {
+  ELEMENT: typeof window !== 'undefined' && window.Node ? window.Node.ELEMENT_NODE : 1,
+};
+
+function resolveRoot(root) {
+  if (!root) return document;
+  if (root.querySelectorAll) return root;
+  return document;
+}
+
+function collectNodes(root, selector) {
+  const scope = resolveRoot(root);
+  const nodes = Array.from(scope.querySelectorAll(selector));
+  if (scope && scope.nodeType === NODE_TYPES.ELEMENT && scope.matches(selector)) {
+    nodes.unshift(scope);
+  }
+  return nodes;
+}
+
 const UX = {
   // Version
   version: '2.0.0',
@@ -68,9 +87,11 @@ const UX = {
    * Initialize all components with data-ux="js" or data-ux-{component}
    * Called automatically on DOMContentLoaded
    */
-  init() {
+  init(root = document) {
+    const scope = resolveRoot(root);
+
     // Initialize components with data-ux="js" (class-based detection)
-    document.querySelectorAll('[data-ux="js"]').forEach(el => {
+    collectNodes(scope, '[data-ux="js"]').forEach(el => {
       // Skip if already initialized
       if (this._instances.has(el)) return;
 
@@ -86,14 +107,14 @@ const UX = {
     });
 
     // Initialize components with specific data-ux-{component} attributes
-    this._initByAttribute('data-ux-password', UXPassword);
-    this._initByAttribute('data-ux-range', UXRange);
-    this._initByAttribute('data-ux-otp', UXOtpInput);
-    this._initByAttribute('data-ux-autocomplete', UXAutocomplete);
-    this._initByAttribute('data-ux-tag-input', UXTagInput);
-    this._initByAttribute('data-ux-upload', UXUpload);
-    this._initByAttribute('data-ux-quantity-stepper', UXQuantityStepper);
-    this._initByAttribute('data-ux-signature-pad', UXSignaturePad);
+    this._initByAttribute('data-ux-password', UXPassword, scope);
+    this._initByAttribute('data-ux-range', UXRange, scope);
+    this._initByAttribute('data-ux-otp', UXOtpInput, scope);
+    this._initByAttribute('data-ux-autocomplete', UXAutocomplete, scope);
+    this._initByAttribute('data-ux-tag-input', UXTagInput, scope);
+    this._initByAttribute('data-ux-upload', UXUpload, scope);
+    this._initByAttribute('data-ux-quantity-stepper', UXQuantityStepper, scope);
+    this._initByAttribute('data-ux-signature-pad', UXSignaturePad, scope);
   },
 
   /**
@@ -102,8 +123,8 @@ const UX = {
    * @param {Function} ComponentClass - Component class constructor
    * @private
    */
-  _initByAttribute(attribute, ComponentClass) {
-    document.querySelectorAll(`[${attribute}]`).forEach(el => {
+  _initByAttribute(attribute, ComponentClass, root = document) {
+    collectNodes(root, `[${attribute}]`).forEach(el => {
       if (this._instances.has(el)) return;
       const instance = new ComponentClass(el);
       el._uxComponent = instance;
@@ -184,6 +205,27 @@ const UX = {
 // Auto-initialization
 // ==========================================================
 
+const setupDomListeners = () => {
+  if (typeof document === 'undefined') return;
+  const reinit = (target) => {
+    if (target) {
+      UX.init(target);
+    } else {
+      UX.init();
+    }
+  };
+
+  document.addEventListener('htmx:afterSwap', (event) => {
+    reinit(event.detail?.target || event.target);
+  });
+
+  document.addEventListener('turbo:load', () => reinit());
+
+  document.addEventListener('alpine:initialized', (event) => {
+    reinit(event.target || document);
+  });
+};
+
 if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => UX.init());
@@ -191,6 +233,7 @@ if (typeof document !== 'undefined') {
     // DOM already loaded
     UX.init();
   }
+  setupDomListeners();
 }
 
 // ==========================================================

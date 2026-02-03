@@ -70,6 +70,26 @@
 | ux.min.js | ~40 KB | Vanilla JS + Web Components |
 | alpine-components.js | ~300 KB | Alpine.js components (optional) |
 
+### Docs Sync
+
+After making changes run:
+
+```bash
+npm run docs:sync
+```
+
+This rebuilds the library and copies the latest bundles into `docs/` so GitHub Pages stays in sync.
+
+### TypeScript
+
+Starting with v2.0 the package ships ambient definitions under `types/index.d.ts`. When consuming from TypeScript the root import automatically resolves to those types, so you can do:
+
+```ts
+import UX, { UXModal } from 'ux';
+
+const modal = new UXModal('#my-modal', { closeOnBackdrop: false });
+UX.init();
+```
 ## Components (164)
 
 ### CSS-Only (no JS required)
