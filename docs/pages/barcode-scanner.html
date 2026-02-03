@@ -112,21 +112,21 @@
         </div>
       </div>
 
-      <pre class="ux-code-block" data-lang="html"><div class="ux-barcode-scanner"
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-barcode-scanner"
      x-data="uxBarcodeScanner({ showManualInput: true })"
-     @scanner:detected="handleScan($event.detail)">
+     @scanner:detected="handleScan($event.detail)"&gt;
 
-  <video class="ux-barcode-scanner__video" x-ref="video"></video>
+  &lt;video class="ux-barcode-scanner__video" x-ref="video"&gt;&lt;/video&gt;
 
-  <!-- Overlay con frame y linea de escaneo -->
-  <div class="ux-barcode-scanner__overlay">
-    <div class="ux-barcode-scanner__frame">
-      <div class="ux-barcode-scanner__corners"></div>
-      <div class="ux-barcode-scanner__scan-line"></div>
-    </div>
-  </div>
+  &lt;!-- Overlay con frame y linea de escaneo --&gt;
+  &lt;div class="ux-barcode-scanner__overlay"&gt;
+    &lt;div class="ux-barcode-scanner__frame"&gt;
+      &lt;div class="ux-barcode-scanner__corners"&gt;&lt;/div&gt;
+      &lt;div class="ux-barcode-scanner__scan-line"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
 
-</div></pre>
+&lt;/div&gt;</pre>
     </section>
 
     <section class="component-section">
@@ -216,9 +216,9 @@
           <li><code>scanner:close</code> - Escaner cerrado</li>
         </ul>
       </div>
-      <pre class="ux-code-block" data-lang="html"><div x-data="uxBarcodeScanner()"
-     @scanner:detected="procesarCodigo($event.detail.rawValue)">
-</div></pre>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxBarcodeScanner()"
+     @scanner:detected="procesarCodigo($event.detail.rawValue)"&gt;
+&lt;/div&gt;</pre>
     </section>
 
     <section class="component-section">
@@ -273,31 +273,31 @@
         <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Al detectar un codigo, se hace una peticion HTMX para buscar el producto y mostrarlo.</p>
       </div>
 
-      <pre class="ux-code-block" data-lang="html"><!-- Escaner con busqueda HTMX -->
-<div x-data="uxBarcodeScanner({ continuous: false })"
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Escaner con busqueda HTMX --&gt;
+&lt;div x-data="uxBarcodeScanner({ continuous: false })"
      @scanner:detected="
        $refs.barcodeInput.value = $event.detail.rawValue;
        htmx.trigger($refs.barcodeInput, 'barcode-scan');
-     ">
+     "&gt;
 
-  <video class="ux-barcode-scanner__video" x-ref="video"></video>
-  <div class="ux-barcode-scanner__overlay">...</div>
+  &lt;video class="ux-barcode-scanner__video" x-ref="video"&gt;&lt;/video&gt;
+  &lt;div class="ux-barcode-scanner__overlay"&gt;...&lt;/div&gt;
 
-  <!-- Input oculto para HTMX -->
-  <input type="hidden"
+  &lt;!-- Input oculto para HTMX --&gt;
+  &lt;input type="hidden"
          x-ref="barcodeInput"
          name="barcode"
          hx-get="/api/productos/buscar/"
          hx-trigger="barcode-scan"
          hx-target="#producto-resultado"
-         hx-indicator="#producto-loading">
-</div>
+         hx-indicator="#producto-loading"&gt;
+&lt;/div&gt;
 
-<!-- Resultado del producto -->
-<div id="producto-resultado"></div>
-<div id="producto-loading" class="htmx-indicator">
-  <div class="ux-spinner"></div>
-</div></pre>
+&lt;!-- Resultado del producto --&gt;
+&lt;div id="producto-resultado"&gt;&lt;/div&gt;
+&lt;div id="producto-loading" class="htmx-indicator"&gt;
+  &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
 
       <ux-playground src="examples/barcode-scanner/busqueda-de-producto-al-escanear.html"></ux-playground>
       <div class="demo-box">
@@ -314,7 +314,7 @@ def buscar_producto_por_barcode(request):
     barcode = request.GET.get('barcode', '')
 
     if not barcode:
-        return HttpResponse('<p class="ux-text-secondary">Escanea un codigo</p>')
+        return HttpResponse('&lt;p class="ux-text-secondary"&gt;Escanea un codigo&lt;/p&gt;')
 
     try:
         producto = Producto.objects.get(codigo_barras=barcode)
@@ -323,9 +323,9 @@ def buscar_producto_por_barcode(request):
         })
     except Producto.DoesNotExist:
         return HttpResponse(f'''
-            <div class="ux-alert ux-alert--warning">
+            &lt;div class="ux-alert ux-alert--warning"&gt;
                 Producto no encontrado: {barcode}
-            </div>
+            &lt;/div&gt;
         ''')</pre>
 
       <ux-playground src="examples/barcode-scanner/vista-django.html"></ux-playground>
@@ -334,33 +334,33 @@ def buscar_producto_por_barcode(request):
         <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">HTML que se renderiza al encontrar un producto.</p>
       </div>
 
-      <pre class="ux-code-block" data-lang="html"><!-- partials/producto_card.html -->
-<div class="ux-card">
-  <div class="ux-card__content">
-    <div style="display: flex; gap: var(--ux-space-md);">
-      <img src="{{ producto.imagen.url }}"
+      <pre class="ux-code-block" data-lang="html">&lt;!-- partials/producto_card.html --&gt;
+&lt;div class="ux-card"&gt;
+  &lt;div class="ux-card__content"&gt;
+    &lt;div style="display: flex; gap: var(--ux-space-md);"&gt;
+      &lt;img src="{{ producto.imagen.url }}"
            alt="{{ producto.nombre }}"
-           style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--ux-radius-md);">
-      <div>
-        <h4 style="margin: 0 0 4px;">{{ producto.nombre }}</h4>
-        <p class="ux-text-secondary" style="margin: 0 0 8px;">
+           style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--ux-radius-md);"&gt;
+      &lt;div&gt;
+        &lt;h4 style="margin: 0 0 4px;"&gt;{{ producto.nombre }}&lt;/h4&gt;
+        &lt;p class="ux-text-secondary" style="margin: 0 0 8px;"&gt;
           SKU: {{ producto.sku }} | Codigo: {{ producto.codigo_barras }}
-        </p>
-        <span style="font-size: 1.25rem; font-weight: 600; color: var(--ux-primary);">
+        &lt;/p&gt;
+        &lt;span style="font-size: 1.25rem; font-weight: 600; color: var(--ux-primary);"&gt;
           ${{ producto.precio }}
-        </span>
-      </div>
-    </div>
-  </div>
-  <div class="ux-card__footer">
-    <button class="ux-button ux-color-primary"
+        &lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-card__footer"&gt;
+    &lt;button class="ux-button ux-color-primary"
             hx-post="/api/carrito/agregar/"
             hx-vals='{"producto_id": "{{ producto.id }}"}'
-            hx-swap="none">
+            hx-swap="none"&gt;
       Agregar al carrito
-    </button>
-  </div>
-</div></pre>
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 
       <ux-playground src="examples/barcode-scanner/template-parcial.html"></ux-playground>
       <div class="demo-box">
@@ -368,45 +368,45 @@ def buscar_producto_por_barcode(request):
         <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Para escenarios de inventario donde se escanean muchos productos seguidos.</p>
       </div>
 
-      <pre class="ux-code-block" data-lang="html"><!-- Escaner en modo continuo para inventario -->
-<div x-data="{ productos: [] }">
-  <div class="ux-barcode-scanner"
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Escaner en modo continuo para inventario --&gt;
+&lt;div x-data="{ productos: [] }"&gt;
+  &lt;div class="ux-barcode-scanner"
        x-data="uxBarcodeScanner({ continuous: true, beepOnScan: true })"
        @scanner:detected="
          fetch('/api/productos/buscar/?barcode=' + $event.detail.rawValue)
-           .then(r => r.json())
-           .then(data => {
+           .then(r =&gt; r.json())
+           .then(data =&gt; {
              if (data.producto) {
                productos.push(data.producto);
              }
            })
-       ">
-    <video class="ux-barcode-scanner__video" x-ref="video"></video>
-    <div class="ux-barcode-scanner__overlay">...</div>
-  </div>
+       "&gt;
+    &lt;video class="ux-barcode-scanner__video" x-ref="video"&gt;&lt;/video&gt;
+    &lt;div class="ux-barcode-scanner__overlay"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
 
-  <!-- Lista de productos escaneados -->
-  <ul class="ux-list">
-    <template x-for="producto in productos" :key="producto.id">
-      <li class="ux-list__item">
-        <span x-text="producto.nombre"></span>
-        <span class="ux-badge" x-text="producto.codigo_barras"></span>
-      </li>
-    </template>
-  </ul>
+  &lt;!-- Lista de productos escaneados --&gt;
+  &lt;ul class="ux-list"&gt;
+    &lt;template x-for="producto in productos" :key="producto.id"&gt;
+      &lt;li class="ux-list__item"&gt;
+        &lt;span x-text="producto.nombre"&gt;&lt;/span&gt;
+        &lt;span class="ux-badge" x-text="producto.codigo_barras"&gt;&lt;/span&gt;
+      &lt;/li&gt;
+    &lt;/template&gt;
+  &lt;/ul&gt;
 
-  <!-- Guardar inventario -->
-  <button class="ux-button ux-color-success"
+  &lt;!-- Guardar inventario --&gt;
+  &lt;button class="ux-button ux-color-success"
           @click="
             fetch('/api/inventario/guardar/', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ productos: productos.map(p => p.id) })
+              body: JSON.stringify({ productos: productos.map(p =&gt; p.id) })
             })
-          ">
+          "&gt;
     Guardar inventario
-  </button>
-</div></pre>
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
 
       <ux-playground src="examples/barcode-scanner/agregar-multiples-productos-modo-continuo.html"></ux-playground>
       <div class="demo-box">

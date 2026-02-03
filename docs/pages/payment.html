@@ -108,25 +108,25 @@
       </div>
     </div>
 
-    <pre class="ux-code-block" data-lang="html"><div x-data="uxPayment({
+    <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxPayment({
   total: 45.50,
   methods: [
     { id: 'cash', name: 'Efectivo', icon: 'cash' },
     { id: 'card', name: 'Tarjeta', icon: 'card' },
     { id: 'contactless', name: 'Contactless', icon: 'contactless' }
   ]
-})">
-  <div class="ux-payment-methods">
-    <template x-for="method in methods">
-      <div class="ux-payment-method"
+})"&gt;
+  &lt;div class="ux-payment-methods"&gt;
+    &lt;template x-for="method in methods"&gt;
+      &lt;div class="ux-payment-method"
            :class="{ 'ux-payment-method--selected': selectedMethod === method.id }"
-           @click="selectMethod(method.id)">
-        <div class="ux-payment-method__icon" x-html="getIcon(method.icon)"></div>
-        <span class="ux-payment-method__name" x-text="method.name"></span>
-      </div>
-    </template>
-  </div>
-</div></pre>
+           @click="selectMethod(method.id)"&gt;
+        &lt;div class="ux-payment-method__icon" x-html="getIcon(method.icon)"&gt;&lt;/div&gt;
+        &lt;span class="ux-payment-method__name" x-text="method.name"&gt;&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
   </section>
 
   <!-- Payment with Change Calculator -->
@@ -576,8 +576,8 @@ getIcon(name)                    // Obtener icono SVG</pre>
     </p>
 
     <h3>Formulario de Pago con HTMX</h3>
-    <pre class="ux-code-block" data-lang="html"><!-- Formulario que envía el pago al servidor -->
-<form x-data="uxPayment({
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Formulario que envía el pago al servidor --&gt;
+&lt;form x-data="uxPayment({
   total: {{ order.total }},
   methods: [
     { id: 'cash', name: 'Efectivo', icon: 'cash' },
@@ -588,35 +588,35 @@ getIcon(name)                    // Obtener icono SVG</pre>
   hx-post="{% url 'payments:process' order.id %}"
   hx-target="#payment-result"
   hx-swap="innerHTML"
-  hx-indicator="#payment-spinner">
+  hx-indicator="#payment-spinner"&gt;
 
   {% csrf_token %}
-  <input type="hidden" name="method" x-model="selectedMethod">
-  <input type="hidden" name="amount_received" x-model="amountReceived">
+  &lt;input type="hidden" name="method" x-model="selectedMethod"&gt;
+  &lt;input type="hidden" name="amount_received" x-model="amountReceived"&gt;
 
-  <div class="ux-payment">
-    <div class="ux-payment-methods">
-      <template x-for="method in methods" :key="method.id">
-        <div class="ux-payment-method"
+  &lt;div class="ux-payment"&gt;
+    &lt;div class="ux-payment-methods"&gt;
+      &lt;template x-for="method in methods" :key="method.id"&gt;
+        &lt;div class="ux-payment-method"
              :class="{ 'ux-payment-method--selected': selectedMethod === method.id }"
-             @click="selectMethod(method.id)">
-          <div class="ux-payment-method__icon" x-html="getIcon(method.icon)"></div>
-          <span class="ux-payment-method__name" x-text="method.name"></span>
-        </div>
-      </template>
-    </div>
+             @click="selectMethod(method.id)"&gt;
+          &lt;div class="ux-payment-method__icon" x-html="getIcon(method.icon)"&gt;&lt;/div&gt;
+          &lt;span class="ux-payment-method__name" x-text="method.name"&gt;&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
 
-    <button type="submit"
+    &lt;button type="submit"
             class="ux-button ux-color-success"
             style="width: 100%;"
-            :disabled="!selectedMethod || (selectedMethod === 'cash' && !isPaid)">
-      <span class="ux-spinner ux-spinner--sm" id="payment-spinner"></span>
+            :disabled="!selectedMethod || (selectedMethod === 'cash' &amp;&amp; !isPaid)"&gt;
+      &lt;span class="ux-spinner ux-spinner--sm" id="payment-spinner"&gt;&lt;/span&gt;
       Procesar Pago
-    </button>
-  </div>
-</form>
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;
 
-<div id="payment-result"></div></pre>
+&lt;div id="payment-result"&gt;&lt;/div&gt;</pre>
 
     <h3>Vista Django para procesar pagos</h3>
     <pre class="ux-code-block" data-lang="python"># views.py
@@ -685,8 +685,8 @@ class Payment(models.Model):
         return self.order.payments.count() > 1</pre>
 
     <h3>Pago dividido con HTMX</h3>
-    <pre class="ux-code-block" data-lang="html"><!-- Pago dividido que añade pagos parciales -->
-<div x-data="uxPayment({
+    <pre class="ux-code-block" data-lang="html">&lt;!-- Pago dividido que añade pagos parciales --&gt;
+&lt;div x-data="uxPayment({
   total: {{ order.total }},
   allowSplit: true,
   methods: [
@@ -694,47 +694,47 @@ class Payment(models.Model):
     { id: 'card', name: 'Tarjeta', icon: 'card' },
     { id: 'voucher', name: 'Vale', icon: 'voucher' }
   ]
-})">
-  <div class="ux-payment">
-    <!-- Lista de pagos parciales realizados -->
-    <div id="partial-payments" hx-get="{% url 'payments:partials' order.id %}" hx-trigger="load">
-      <!-- Se carga dinámicamente -->
-    </div>
+})"&gt;
+  &lt;div class="ux-payment"&gt;
+    &lt;!-- Lista de pagos parciales realizados --&gt;
+    &lt;div id="partial-payments" hx-get="{% url 'payments:partials' order.id %}" hx-trigger="load"&gt;
+      &lt;!-- Se carga dinámicamente --&gt;
+    &lt;/div&gt;
 
-    <!-- Formulario para añadir pago parcial -->
-    <form hx-post="{% url 'payments:add_partial' order.id %}"
+    &lt;!-- Formulario para añadir pago parcial --&gt;
+    &lt;form hx-post="{% url 'payments:add_partial' order.id %}"
           hx-target="#partial-payments"
           hx-swap="innerHTML"
-          @htmx:after-request="if(event.detail.successful) { amountReceived = 0; selectedMethod = null; }">
+          @htmx:after-request="if(event.detail.successful) { amountReceived = 0; selectedMethod = null; }"&gt;
       {% csrf_token %}
-      <input type="hidden" name="method" x-model="selectedMethod">
-      <input type="hidden" name="amount" x-model="amountReceived">
+      &lt;input type="hidden" name="method" x-model="selectedMethod"&gt;
+      &lt;input type="hidden" name="amount" x-model="amountReceived"&gt;
 
-      <div class="ux-payment-methods ux-payment-methods--3col">
-        <template x-for="method in methods" :key="method.id">
-          <div class="ux-payment-method"
+      &lt;div class="ux-payment-methods ux-payment-methods--3col"&gt;
+        &lt;template x-for="method in methods" :key="method.id"&gt;
+          &lt;div class="ux-payment-method"
                :class="{ 'ux-payment-method--selected': selectedMethod === method.id }"
-               @click="selectMethod(method.id)">
-            <div class="ux-payment-method__icon" x-html="getIcon(method.icon)"></div>
-            <span class="ux-payment-method__name" x-text="method.name"></span>
-          </div>
-        </template>
-      </div>
+               @click="selectMethod(method.id)"&gt;
+            &lt;div class="ux-payment-method__icon" x-html="getIcon(method.icon)"&gt;&lt;/div&gt;
+            &lt;span class="ux-payment-method__name" x-text="method.name"&gt;&lt;/span&gt;
+          &lt;/div&gt;
+        &lt;/template&gt;
+      &lt;/div&gt;
 
-      <div class="ux-input" style="margin: 1rem 0;">
-        <input type="number" step="0.01" name="amount_input"
+      &lt;div class="ux-input" style="margin: 1rem 0;"&gt;
+        &lt;input type="number" step="0.01" name="amount_input"
                x-model="amountReceived" :max="amountDue"
-               placeholder="0.00">
-        <label>Importe</label>
-      </div>
+               placeholder="0.00"&gt;
+        &lt;label&gt;Importe&lt;/label&gt;
+      &lt;/div&gt;
 
-      <button type="submit" class="ux-button ux-color-primary" style="width: 100%;"
-              :disabled="!selectedMethod || amountReceived <= 0">
+      &lt;button type="submit" class="ux-button ux-color-primary" style="width: 100%;"
+              :disabled="!selectedMethod || amountReceived &lt;= 0"&gt;
         Añadir Pago
-      </button>
-    </form>
-  </div>
-</div></pre>
+      &lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 
     <h3>Vista para pagos parciales</h3>
     <pre class="ux-code-block" data-lang="python"># views.py
@@ -788,47 +788,47 @@ def get_partial_payments(request, order_id):
     )</pre>
 
     <h3>Template para lista de pagos parciales</h3>
-    <pre class="ux-code-block" data-lang="html"><!-- templates/payments/_partials_list.html -->
+    <pre class="ux-code-block" data-lang="html">&lt;!-- templates/payments/_partials_list.html --&gt;
 {% if payments %}
-<div class="ux-payment-split">
+&lt;div class="ux-payment-split"&gt;
   {% for payment in payments %}
-  <div class="ux-payment-split__item">
-    <div class="ux-payment-split__method">
-      <span class="ux-payment-split__method-name">{{ payment.get_method_display }}</span>
-    </div>
-    <span class="ux-payment-split__amount">{{ payment.amount }}€</span>
-    <button class="ux-payment-split__remove"
+  &lt;div class="ux-payment-split__item"&gt;
+    &lt;div class="ux-payment-split__method"&gt;
+      &lt;span class="ux-payment-split__method-name"&gt;{{ payment.get_method_display }}&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;span class="ux-payment-split__amount"&gt;{{ payment.amount }}€&lt;/span&gt;
+    &lt;button class="ux-payment-split__remove"
             hx-delete="{% url 'payments:remove_partial' payment.id %}"
             hx-target="#partial-payments"
             hx-swap="innerHTML"
-            hx-confirm="¿Eliminar este pago?">
-      &times;
-    </button>
-  </div>
+            hx-confirm="¿Eliminar este pago?"&gt;
+      &amp;times;
+    &lt;/button&gt;
+  &lt;/div&gt;
   {% endfor %}
-</div>
+&lt;/div&gt;
 
-<div class="ux-payment-summary">
-  <div class="ux-payment-summary__row">
-    <span class="ux-payment-summary__label">Total</span>
-    <span class="ux-payment-summary__value">{{ order.total }}€</span>
-  </div>
-  <div class="ux-payment-summary__row">
-    <span class="ux-payment-summary__label">Pagado</span>
-    <span class="ux-payment-summary__value">{{ payments|sum:'amount' }}€</span>
-  </div>
-  {% if remaining > 0 %}
-  <div class="ux-payment-summary__row">
-    <span class="ux-payment-summary__label">Pendiente</span>
-    <span class="ux-payment-summary__value" style="color: var(--ux-danger);">{{ remaining }}€</span>
-  </div>
+&lt;div class="ux-payment-summary"&gt;
+  &lt;div class="ux-payment-summary__row"&gt;
+    &lt;span class="ux-payment-summary__label"&gt;Total&lt;/span&gt;
+    &lt;span class="ux-payment-summary__value"&gt;{{ order.total }}€&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-payment-summary__row"&gt;
+    &lt;span class="ux-payment-summary__label"&gt;Pagado&lt;/span&gt;
+    &lt;span class="ux-payment-summary__value"&gt;{{ payments|sum:'amount' }}€&lt;/span&gt;
+  &lt;/div&gt;
+  {% if remaining &gt; 0 %}
+  &lt;div class="ux-payment-summary__row"&gt;
+    &lt;span class="ux-payment-summary__label"&gt;Pendiente&lt;/span&gt;
+    &lt;span class="ux-payment-summary__value" style="color: var(--ux-danger);"&gt;{{ remaining }}€&lt;/span&gt;
+  &lt;/div&gt;
   {% endif %}
-</div>
+&lt;/div&gt;
 
-{% if remaining <= 0 %}
-<div class="ux-alert ux-color-success--soft" style="margin-top: 1rem;">
+{% if remaining &lt;= 0 %}
+&lt;div class="ux-alert ux-color-success--soft" style="margin-top: 1rem;"&gt;
   Pago completado
-</div>
+&lt;/div&gt;
 {% endif %}
 {% endif %}</pre>
 

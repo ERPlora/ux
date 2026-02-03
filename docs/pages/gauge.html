@@ -124,27 +124,27 @@
   <ux-playground src="examples/gauge/htmx-polling.html"></ux-playground>
 
   <h3 style="margin: 2rem 0 1rem; font-size: 1rem;">Polling con HTMX</h3>
-  <pre class="ux-code-block" data-lang="html"><!-- El gauge se actualiza cada 2 segundos -->
-<div hx-get="/api/metrics/cpu/"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- El gauge se actualiza cada 2 segundos --&gt;
+&lt;div hx-get="/api/metrics/cpu/"
      hx-trigger="every 2s"
-     hx-swap="innerHTML">
+     hx-swap="innerHTML"&gt;
   {% include "partials/gauge.html" with value=cpu_usage unit="%" label="CPU" %}
-</div></pre>
+&lt;/div&gt;</pre>
 
   <h3 style="margin: 2rem 0 1rem; font-size: 1rem;">Template Parcial Django (partials/gauge.html)</h3>
-  <pre class="ux-code-block" data-lang="html"><div x-data="uxGauge({ value: {{ value }}, unit: '{{ unit }}', label: '{{ label }}' })"
-     class="ux-gauge ux-gauge--md {% if value >= 80 %}ux-gauge--danger{% elif value >= 50 %}ux-gauge--warning{% else %}ux-gauge--success{% endif %}">
-  <svg class="ux-gauge__svg" :width="size" :height="size * 0.6" :viewBox="`0 0 ${size} ${size * 0.65}`">
-    <path class="ux-gauge__track" :d="arcPath" :stroke-width="strokeWidth" />
-    <path class="ux-gauge__fill" :d="arcPath" :stroke-width="strokeWidth"
-          :stroke-dasharray="circumference" :stroke-dashoffset="dashOffset" />
-  </svg>
-  <div class="ux-gauge__value-container" :style="valueContainerStyle">
-    <span class="ux-gauge__value" x-text="displayValue"></span>
-    <span class="ux-gauge__unit" x-text="unit"></span>
-    <span class="ux-gauge__label" x-text="label"></span>
-  </div>
-</div></pre>
+  <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxGauge({ value: {{ value }}, unit: '{{ unit }}', label: '{{ label }}' })"
+     class="ux-gauge ux-gauge--md {% if value &gt;= 80 %}ux-gauge--danger{% elif value &gt;= 50 %}ux-gauge--warning{% else %}ux-gauge--success{% endif %}"&gt;
+  &lt;svg class="ux-gauge__svg" :width="size" :height="size * 0.6" :viewBox="`0 0 ${size} ${size * 0.65}`"&gt;
+    &lt;path class="ux-gauge__track" :d="arcPath" :stroke-width="strokeWidth" /&gt;
+    &lt;path class="ux-gauge__fill" :d="arcPath" :stroke-width="strokeWidth"
+          :stroke-dasharray="circumference" :stroke-dashoffset="dashOffset" /&gt;
+  &lt;/svg&gt;
+  &lt;div class="ux-gauge__value-container" :style="valueContainerStyle"&gt;
+    &lt;span class="ux-gauge__value" x-text="displayValue"&gt;&lt;/span&gt;
+    &lt;span class="ux-gauge__unit" x-text="unit"&gt;&lt;/span&gt;
+    &lt;span class="ux-gauge__label" x-text="label"&gt;&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 
   <h3 style="margin: 2rem 0 1rem; font-size: 1rem;">Vista Django con API JSON</h3>
   <pre class="ux-code-block" data-lang="python"># views.py
@@ -171,15 +171,15 @@ def metrics_api(request):
     })</pre>
 
   <h3 style="margin: 2rem 0 1rem; font-size: 1rem;">SSE con HTMX Extension</h3>
-  <pre class="ux-code-block" data-lang="html"><!-- Requiere htmx-ext-sse -->
-<script src="https://unpkg.com/htmx-ext-sse@2.0.0/sse.js"></script>
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Requiere htmx-ext-sse --&gt;
+&lt;script src="https://unpkg.com/htmx-ext-sse@2.0.0/sse.js"&gt;&lt;/script&gt;
 
-<!-- Gauge que se actualiza via SSE -->
-<div hx-ext="sse"
+&lt;!-- Gauge que se actualiza via SSE --&gt;
+&lt;div hx-ext="sse"
      sse-connect="/sse/metrics/"
-     sse-swap="temperature">
+     sse-swap="temperature"&gt;
   {% include "partials/gauge.html" with value=initial_temp unit="°C" label="Temp" %}
-</div></pre>
+&lt;/div&gt;</pre>
 
   <h3 style="margin: 2rem 0 1rem; font-size: 1rem;">Vista Django SSE</h3>
   <pre class="ux-code-block" data-lang="python"># views.py
@@ -210,13 +210,13 @@ def sse_metrics(request):
     return response</pre>
 
   <h3 style="margin: 2rem 0 1rem; font-size: 1rem;">Actualizar solo el valor via Alpine.js + Fetch</h3>
-  <pre class="ux-code-block" data-lang="html"><!-- Gauge que actualiza solo el valor sin recargar el HTML -->
-<div x-data="{
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Gauge que actualiza solo el valor sin recargar el HTML --&gt;
+&lt;div x-data="{
        ...uxGauge({ value: {{ initial_value }}, unit: '%', label: 'CPU' }),
 
        // Polling manual
        startPolling() {
-         setInterval(async () => {
+         setInterval(async () =&gt; {
            const res = await fetch('/api/metrics/');
            const data = await res.json();
            this.setValue(data.cpu);
@@ -226,16 +226,16 @@ def sse_metrics(request):
      x-init="startPolling()"
      class="ux-gauge ux-gauge--md"
      :class="{
-       'ux-gauge--success': percentage < 50,
-       'ux-gauge--warning': percentage >= 50 && percentage < 80,
-       'ux-gauge--danger': percentage >= 80
-     }">
-  <!-- SVG del gauge -->
-</div></pre>
+       'ux-gauge--success': percentage &lt; 50,
+       'ux-gauge--warning': percentage &gt;= 50 &amp;&amp; percentage &lt; 80,
+       'ux-gauge--danger': percentage &gt;= 80
+     }"&gt;
+  &lt;!-- SVG del gauge --&gt;
+&lt;/div&gt;</pre>
 
   <h3 style="margin: 2rem 0 1rem; font-size: 1rem;">Dashboard con Multiples Gauges</h3>
-  <pre class="ux-code-block" data-lang="html"><!-- Dashboard que actualiza todos los gauges con una sola peticion -->
-<div x-data="{
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Dashboard que actualiza todos los gauges con una sola peticion --&gt;
+&lt;div x-data="{
        metrics: { cpu: 0, memory: 0, disk: 0 },
        async fetchMetrics() {
          const res = await fetch('/api/metrics/');
@@ -243,40 +243,40 @@ def sse_metrics(request):
        },
        init() {
          this.fetchMetrics();
-         setInterval(() => this.fetchMetrics(), 3000);
+         setInterval(() =&gt; this.fetchMetrics(), 3000);
        }
-     }">
+     }"&gt;
 
-  <div class="row g-4">
-    <!-- CPU Gauge -->
-    <div class="col-md-4">
-      <div x-data="uxGauge({ unit: '%', label: 'CPU' })"
+  &lt;div class="row g-4"&gt;
+    &lt;!-- CPU Gauge --&gt;
+    &lt;div class="col-md-4"&gt;
+      &lt;div x-data="uxGauge({ unit: '%', label: 'CPU' })"
            x-effect="setValue(metrics.cpu)"
            class="ux-gauge ux-gauge--md"
-           :class="percentage >= 80 ? 'ux-gauge--danger' : 'ux-gauge--success'">
-        <!-- SVG -->
-      </div>
-    </div>
+           :class="percentage &gt;= 80 ? 'ux-gauge--danger' : 'ux-gauge--success'"&gt;
+        &lt;!-- SVG --&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
 
-    <!-- Memory Gauge -->
-    <div class="col-md-4">
-      <div x-data="uxGauge({ unit: '%', label: 'Memory' })"
+    &lt;!-- Memory Gauge --&gt;
+    &lt;div class="col-md-4"&gt;
+      &lt;div x-data="uxGauge({ unit: '%', label: 'Memory' })"
            x-effect="setValue(metrics.memory)"
-           class="ux-gauge ux-gauge--md">
-        <!-- SVG -->
-      </div>
-    </div>
+           class="ux-gauge ux-gauge--md"&gt;
+        &lt;!-- SVG --&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
 
-    <!-- Disk Gauge -->
-    <div class="col-md-4">
-      <div x-data="uxGauge({ unit: '%', label: 'Disk' })"
+    &lt;!-- Disk Gauge --&gt;
+    &lt;div class="col-md-4"&gt;
+      &lt;div x-data="uxGauge({ unit: '%', label: 'Disk' })"
            x-effect="setValue(metrics.disk)"
-           class="ux-gauge ux-gauge--md">
-        <!-- SVG -->
-      </div>
-    </div>
-  </div>
-</div></pre>
+           class="ux-gauge ux-gauge--md"&gt;
+        &lt;!-- SVG --&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 </section>
 
 <!-- Alpine.js Options -->

@@ -33,34 +33,34 @@
   <p style="color: var(--ux-text-secondary); margin-bottom: 1rem;">Load gallery images dynamically from Django backend with HTMX.</p>
 
   <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Django Template - Gallery Grid</h3>
-  <pre class="ux-code-block" data-lang="html"><!-- templates/gallery/gallery.html -->
-<div data-lightbox-gallery
+  <pre class="ux-code-block" data-lang="html">&lt;!-- templates/gallery/gallery.html --&gt;
+&lt;div data-lightbox-gallery
      x-data="uxLightbox()"
      hx-get="{% url 'gallery:images' %}"
      hx-trigger="load"
-     hx-target="#gallery-grid">
+     hx-target="#gallery-grid"&gt;
 
-  <div id="gallery-grid" class="demo-grid">
-    <!-- Images loaded via HTMX -->
-  </div>
+  &lt;div id="gallery-grid" class="demo-grid"&gt;
+    &lt;!-- Images loaded via HTMX --&gt;
+  &lt;/div&gt;
 
-  <!-- Lightbox markup (same as basic example) -->
-  <div class="ux-lightbox" :class="{ 'ux-lightbox--open': isOpen }">
+  &lt;!-- Lightbox markup (same as basic example) --&gt;
+  &lt;div class="ux-lightbox" :class="{ 'ux-lightbox--open': isOpen }"&gt;
     ...
-  </div>
-</div></pre>
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 
   <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Django Template - Partial (HTMX Response)</h3>
-  <pre class="ux-code-block" data-lang="html"><!-- templates/gallery/partials/images.html -->
+  <pre class="ux-code-block" data-lang="html">&lt;!-- templates/gallery/partials/images.html --&gt;
 {% for image in images %}
-<div class="demo-image ux-lightbox-trigger"
+&lt;div class="demo-image ux-lightbox-trigger"
      data-lightbox-src="{{ image.file.url }}"
      data-lightbox-thumb="{{ image.thumbnail.url }}"
      data-lightbox-title="{{ image.title }}"
      data-lightbox-desc="{{ image.description }}"
-     @click="open({{ forloop.counter0 }})">
-  <img src="{{ image.thumbnail.url }}" alt="{{ image.title }}">
-</div>
+     @click="open({{ forloop.counter0 }})"&gt;
+  &lt;img src="{{ image.thumbnail.url }}" alt="{{ image.title }}"&gt;
+&lt;/div&gt;
 {% endfor %}</pre>
 
   <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Django View</h3>
@@ -73,54 +73,54 @@ def gallery_images(request):
     return render(request, 'gallery/partials/images.html', {'images': images})</pre>
 
   <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Product Images with Categories</h3>
-  <pre class="ux-code-block" data-lang="html"><!-- Filter buttons -->
-<div class="ux-segment">
-  <button class="ux-segment__button ux-segment__button--active"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Filter buttons --&gt;
+&lt;div class="ux-segment"&gt;
+  &lt;button class="ux-segment__button ux-segment__button--active"
           hx-get="{% url 'gallery:images' %}"
-          hx-target="#gallery-grid">All</button>
+          hx-target="#gallery-grid"&gt;All&lt;/button&gt;
   {% for category in categories %}
-  <button class="ux-segment__button"
+  &lt;button class="ux-segment__button"
           hx-get="{% url 'gallery:images' %}?category={{ category.slug }}"
-          hx-target="#gallery-grid">{{ category.name }}</button>
+          hx-target="#gallery-grid"&gt;{{ category.name }}&lt;/button&gt;
   {% endfor %}
-</div>
+&lt;/div&gt;
 
-<!-- Gallery with dynamic images -->
-<div data-lightbox-gallery x-data="uxLightbox()"
-     @htmx:after-swap.window="$nextTick(() => collectImages())">
-  <div id="gallery-grid" class="demo-grid"></div>
+&lt;!-- Gallery with dynamic images --&gt;
+&lt;div data-lightbox-gallery x-data="uxLightbox()"
+     @htmx:after-swap.window="$nextTick(() =&gt; collectImages())"&gt;
+  &lt;div id="gallery-grid" class="demo-grid"&gt;&lt;/div&gt;
 
-  <div class="ux-lightbox" :class="{ 'ux-lightbox--open': isOpen }">
+  &lt;div class="ux-lightbox" :class="{ 'ux-lightbox--open': isOpen }"&gt;
     ...
-  </div>
-</div></pre>
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 
   <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Infinite Scroll Gallery</h3>
-  <pre class="ux-code-block" data-lang="html"><div data-lightbox-gallery x-data="uxLightbox()"
-     @htmx:after-swap.window="$nextTick(() => collectImages())">
+  <pre class="ux-code-block" data-lang="html">&lt;div data-lightbox-gallery x-data="uxLightbox()"
+     @htmx:after-swap.window="$nextTick(() =&gt; collectImages())"&gt;
 
-  <div id="gallery-grid" class="demo-grid"
+  &lt;div id="gallery-grid" class="demo-grid"
        hx-get="{% url 'gallery:images' %}?page=1"
        hx-trigger="load"
-       hx-swap="beforeend">
-  </div>
+       hx-swap="beforeend"&gt;
+  &lt;/div&gt;
 
-  <!-- Load more trigger -->
-  <div hx-get="{% url 'gallery:images' %}?page={{ next_page }}"
+  &lt;!-- Load more trigger --&gt;
+  &lt;div hx-get="{% url 'gallery:images' %}?page={{ next_page }}"
        hx-trigger="revealed"
        hx-target="#gallery-grid"
        hx-swap="beforeend"
-       hx-indicator="#loading-spinner">
-  </div>
+       hx-indicator="#loading-spinner"&gt;
+  &lt;/div&gt;
 
-  <div id="loading-spinner" class="htmx-indicator">
-    <div class="ux-spinner"></div>
-  </div>
+  &lt;div id="loading-spinner" class="htmx-indicator"&gt;
+    &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+  &lt;/div&gt;
 
-  <div class="ux-lightbox" :class="{ 'ux-lightbox--open': isOpen }">
+  &lt;div class="ux-lightbox" :class="{ 'ux-lightbox--open': isOpen }"&gt;
     ...
-  </div>
-</div></pre>
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 
   <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">Django Model Example</h3>
   <pre class="ux-code-block" data-lang="python"># models.py
@@ -146,29 +146,29 @@ class GalleryImage(models.Model):
         ordering = ['-created_at']</pre>
 
   <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem;">JSON API Response</h3>
-  <pre class="ux-code-block" data-lang="html"><!-- Load images from JSON API -->
-<div x-data="uxLightbox()"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Load images from JSON API --&gt;
+&lt;div x-data="uxLightbox()"
      x-init="fetch('/api/gallery/images/')
-       .then(r => r.json())
-       .then(data => images = data.map(img => ({
+       .then(r =&gt; r.json())
+       .then(data =&gt; images = data.map(img =&gt; ({
          src: img.file_url,
          thumbnail: img.thumbnail_url,
          title: img.title,
          description: img.description
-       })))">
+       })))"&gt;
 
-  <div class="demo-grid">
-    <template x-for="(img, idx) in images" :key="idx">
-      <div class="demo-image" @click="open(idx)">
-        <img :src="img.thumbnail" :alt="img.title">
-      </div>
-    </template>
-  </div>
+  &lt;div class="demo-grid"&gt;
+    &lt;template x-for="(img, idx) in images" :key="idx"&gt;
+      &lt;div class="demo-image" @click="open(idx)"&gt;
+        &lt;img :src="img.thumbnail" :alt="img.title"&gt;
+      &lt;/div&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
 
-  <div class="ux-lightbox" :class="{ 'ux-lightbox--open': isOpen }">
+  &lt;div class="ux-lightbox" :class="{ 'ux-lightbox--open': isOpen }"&gt;
     ...
-  </div>
-</div></pre>
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 </section>
 
 <!-- Keyboard Shortcuts -->

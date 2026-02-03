@@ -154,34 +154,34 @@ removeNode(nodeId)         // Eliminar nodo
 <section class="component-section">
   <h3>Integracion con HTMX</h3>
   <p>Carga diferida de nodos hijos desde el servidor.</p>
-  <pre class="ux-code-block" data-lang="html"><!-- Tree con lazy loading -->
-<div x-data="uxTree({
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Tree con lazy loading --&gt;
+&lt;div x-data="uxTree({
   lazyLoad: true,
-  loadChildren: async (node) => {
+  loadChildren: async (node) =&gt; {
     const response = await fetch(`/api/tree/${node.id}/children`);
     return await response.json();
   },
   data: [
     { id: 'root', label: 'Raiz', children: [] }
   ]
-})">
+})"&gt;
   ...
-</div>
+&lt;/div&gt;
 
-<!-- Con HTMX directo -->
-<div class="ux-tree">
-  <div class="ux-tree__node">
-    <div class="ux-tree__item"
+&lt;!-- Con HTMX directo --&gt;
+&lt;div class="ux-tree"&gt;
+  &lt;div class="ux-tree__node"&gt;
+    &lt;div class="ux-tree__item"
          hx-get="/api/tree/folder1/children"
          hx-target="next .ux-tree__list--nested"
          hx-trigger="click once"
-         hx-swap="innerHTML">
-      <span class="ux-tree__toggle">...</span>
-      <span class="ux-tree__label">Carpeta</span>
-    </div>
-    <ul class="ux-tree__list ux-tree__list--nested"></ul>
-  </div>
-</div></pre>
+         hx-swap="innerHTML"&gt;
+      &lt;span class="ux-tree__toggle"&gt;...&lt;/span&gt;
+      &lt;span class="ux-tree__label"&gt;Carpeta&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;ul class="ux-tree__list ux-tree__list--nested"&gt;&lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 </section>
 
 <!-- HTMX + Django -->
@@ -232,17 +232,17 @@ class TreeNode(models.Model):
         return self.name</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Template Principal</h4>
-  <pre class="ux-code-block" data-lang="html"><!-- templates/tree.html - Template principal -->
-<div class="ux-tree ux-tree--bordered">
+  <pre class="ux-code-block" data-lang="html">&lt;!-- templates/tree.html - Template principal --&gt;
+&lt;div class="ux-tree ux-tree--bordered"&gt;
   {% for node in nodes %}
     {% include "partials/tree_node.html" with node=node %}
   {% endfor %}
-</div></pre>
+&lt;/div&gt;</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Template de Nodo Individual</h4>
-  <pre class="ux-code-block" data-lang="html"><!-- templates/partials/tree_node.html - Nodo individual -->
-<div class="ux-tree__node" id="node-{{ node.id }}">
-  <div class="ux-tree__item"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/tree_node.html - Nodo individual --&gt;
+&lt;div class="ux-tree__node" id="node-{{ node.id }}"&gt;
+  &lt;div class="ux-tree__item"
        {% if node.has_children %}
        hx-get="{% url 'tree_children' node.id %}"
        hx-target="#children-{{ node.id }}"
@@ -250,35 +250,35 @@ class TreeNode(models.Model):
        hx-swap="innerHTML"
        hx-indicator="#loader-{{ node.id }}"
        @click="$el.closest('.ux-tree__node').querySelector('.ux-tree__toggle').classList.toggle('ux-tree__toggle--expanded')"
-       {% endif %}>
-    <span class="ux-tree__toggle {% if not node.has_children %}ux-tree__toggle--empty{% endif %}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="9 18 15 12 9 6"></polyline>
-      </svg>
-    </span>
-    <span class="ux-tree__icon ux-tree__icon--{{ node.icon }}">
+       {% endif %}&gt;
+    &lt;span class="ux-tree__toggle {% if not node.has_children %}ux-tree__toggle--empty{% endif %}"&gt;
+      &lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+        &lt;polyline points="9 18 15 12 9 6"&gt;&lt;/polyline&gt;
+      &lt;/svg&gt;
+    &lt;/span&gt;
+    &lt;span class="ux-tree__icon ux-tree__icon--{{ node.icon }}"&gt;
       {% if node.icon == 'folder' %}
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>
+        &lt;svg viewBox="0 0 24 24" fill="currentColor"&gt;&lt;path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/&gt;&lt;/svg&gt;
       {% else %}
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        &lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;&lt;path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/&gt;&lt;polyline points="14 2 14 8 20 8"/&gt;&lt;/svg&gt;
       {% endif %}
-    </span>
-    <span class="ux-tree__label">{{ node.name }}</span>
-    <span id="loader-{{ node.id }}" class="htmx-indicator ux-spinner ux-spinner--sm"></span>
-  </div>
-  <ul class="ux-tree__list ux-tree__list--nested" id="children-{{ node.id }}"></ul>
-</div></pre>
+    &lt;/span&gt;
+    &lt;span class="ux-tree__label"&gt;{{ node.name }}&lt;/span&gt;
+    &lt;span id="loader-{{ node.id }}" class="htmx-indicator ux-spinner ux-spinner--sm"&gt;&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;ul class="ux-tree__list ux-tree__list--nested" id="children-{{ node.id }}"&gt;&lt;/ul&gt;
+&lt;/div&gt;</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Template de Lista de Hijos</h4>
-  <pre class="ux-code-block" data-lang="html"><!-- templates/partials/tree_nodes.html - Lista de nodos hijos -->
+  <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/tree_nodes.html - Lista de nodos hijos --&gt;
 {% for node in nodes %}
-  <li>
+  &lt;li&gt;
     {% include "partials/tree_node.html" with node=node %}
-  </li>
+  &lt;/li&gt;
 {% empty %}
-  <li class="ux-tree__node ux-tree__node--empty">
-    <span class="ux-text-secondary">Sin elementos</span>
-  </li>
+  &lt;li class="ux-tree__node ux-tree__node--empty"&gt;
+    &lt;span class="ux-text-secondary"&gt;Sin elementos&lt;/span&gt;
+  &lt;/li&gt;
 {% endfor %}</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">URLs Django</h4>
@@ -292,45 +292,45 @@ urlpatterns = [
 ]</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Arbol con Checkboxes</h4>
-  <pre class="ux-code-block" data-lang="html"><!-- Arbol con checkboxes y seleccion multiple (Django + HTMX) -->
-<form hx-post="{% url 'tree_action' %}" hx-target="#result">
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Arbol con checkboxes y seleccion multiple (Django + HTMX) --&gt;
+&lt;form hx-post="{% url 'tree_action' %}" hx-target="#result"&gt;
   {% csrf_token %}
-  <div class="ux-tree ux-tree--bordered">
+  &lt;div class="ux-tree ux-tree--bordered"&gt;
     {% for node in nodes %}
-    <div class="ux-tree__node">
-      <div class="ux-tree__item">
-        <span class="ux-tree__toggle ux-tree__toggle--empty"></span>
-        <label class="ux-tree__checkbox">
-          <input type="checkbox" name="selected_nodes" value="{{ node.id }}">
-          <span class="ux-tree__checkbox-icon"></span>
-        </label>
-        <span class="ux-tree__label">{{ node.name }}</span>
-      </div>
-    </div>
+    &lt;div class="ux-tree__node"&gt;
+      &lt;div class="ux-tree__item"&gt;
+        &lt;span class="ux-tree__toggle ux-tree__toggle--empty"&gt;&lt;/span&gt;
+        &lt;label class="ux-tree__checkbox"&gt;
+          &lt;input type="checkbox" name="selected_nodes" value="{{ node.id }}"&gt;
+          &lt;span class="ux-tree__checkbox-icon"&gt;&lt;/span&gt;
+        &lt;/label&gt;
+        &lt;span class="ux-tree__label"&gt;{{ node.name }}&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
     {% endfor %}
-  </div>
-  <div class="demo-controls" style="margin-top: var(--ux-space-md);">
-    <button type="submit" class="ux-button ux-color-primary">Procesar seleccionados</button>
-  </div>
-</form>
-<div id="result"></div></pre>
+  &lt;/div&gt;
+  &lt;div class="demo-controls" style="margin-top: var(--ux-space-md);"&gt;
+    &lt;button type="submit" class="ux-button ux-color-primary"&gt;Procesar seleccionados&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;
+&lt;div id="result"&gt;&lt;/div&gt;</pre>
 
   <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Arbol con Busqueda</h4>
-  <pre class="ux-code-block" data-lang="html"><!-- Arbol con busqueda en tiempo real (HTMX) -->
-<div class="ux-input" style="margin-bottom: var(--ux-space-md);">
-  <input type="search"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Arbol con busqueda en tiempo real (HTMX) --&gt;
+&lt;div class="ux-input" style="margin-bottom: var(--ux-space-md);"&gt;
+  &lt;input type="search"
          name="q"
          placeholder="Buscar en el arbol..."
          hx-get="{% url 'tree_search' %}"
          hx-trigger="input changed delay:300ms"
-         hx-target="#tree-results">
-  <span class="ux-input__icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-    </svg>
-  </span>
-</div>
-<div id="tree-results" class="ux-tree ux-tree--bordered">
+         hx-target="#tree-results"&gt;
+  &lt;span class="ux-input__icon"&gt;
+    &lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+      &lt;circle cx="11" cy="11" r="8"/&gt;&lt;path d="M21 21l-4.35-4.35"/&gt;
+    &lt;/svg&gt;
+  &lt;/span&gt;
+&lt;/div&gt;
+&lt;div id="tree-results" class="ux-tree ux-tree--bordered"&gt;
   {% include "partials/tree_nodes.html" %}
-</div></pre>
+&lt;/div&gt;</pre>
 </section>

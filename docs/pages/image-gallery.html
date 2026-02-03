@@ -124,10 +124,10 @@
       <li><code>gallery:change</code> - Imagen cambiada ({ index, image })</li>
     </ul>
   </div>
-  <pre class="ux-code-block" data-lang="html"><div x-data="uxImageGallery({ images: [...] })"
+  <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxImageGallery({ images: [...] })"
      @gallery:open="console.log('Abierto:', $event.detail.index)"
-     @gallery:change="trackView($event.detail.image)">
-</div></pre>
+     @gallery:change="trackView($event.detail.image)"&gt;
+&lt;/div&gt;</pre>
 </section>
 
 <section class="component-section">
@@ -138,8 +138,8 @@
     <h4 style="margin-bottom: var(--ux-space-sm); font-weight: 600;">Template Django (galeria.html)</h4>
     <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Renderiza la galeria con imagenes desde el modelo.</p>
   </div>
-  <pre class="ux-code-block" data-lang="html"><!-- templates/galeria.html -->
-<div class="ux-gallery ux-gallery--cols-3"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- templates/galeria.html --&gt;
+&lt;div class="ux-gallery ux-gallery--cols-3"
      x-data="uxImageGallery({
        images: [
          {% for imagen in producto.imagenes.all %}
@@ -151,51 +151,51 @@
          {% endfor %}
        ],
        maxVisible: 4
-     })">
-  <div class="ux-gallery__grid">
-    <template x-for="(image, index) in visibleImages" :key="index">
-      <div class="ux-gallery__item" @click="openLightbox(index)">
-        <img :src="image.thumb || image.src" loading="lazy">
-        <template x-if="index === visibleImages.length - 1 && remainingCount > 0">
-          <div class="ux-gallery__more">+<span x-text="remainingCount"></span></div>
-        </template>
-      </div>
-    </template>
-  </div>
+     })"&gt;
+  &lt;div class="ux-gallery__grid"&gt;
+    &lt;template x-for="(image, index) in visibleImages" :key="index"&gt;
+      &lt;div class="ux-gallery__item" @click="openLightbox(index)"&gt;
+        &lt;img :src="image.thumb || image.src" loading="lazy"&gt;
+        &lt;template x-if="index === visibleImages.length - 1 &amp;&amp; remainingCount &gt; 0"&gt;
+          &lt;div class="ux-gallery__more"&gt;+&lt;span x-text="remainingCount"&gt;&lt;/span&gt;&lt;/div&gt;
+        &lt;/template&gt;
+      &lt;/div&gt;
+    &lt;/template&gt;
+  &lt;/div&gt;
 
-  <!-- Lightbox template... -->
-</div></pre>
+  &lt;!-- Lightbox template... --&gt;
+&lt;/div&gt;</pre>
 
   <div class="demo-box">
     <h4 style="margin-bottom: var(--ux-space-sm); font-weight: 600;">Carga dinamica con HTMX</h4>
     <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Carga la galeria de un producto sin recargar la pagina.</p>
   </div>
-  <pre class="ux-code-block" data-lang="html"><!-- Lista de productos con carga de galeria -->
-<div class="ux-card"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Lista de productos con carga de galeria --&gt;
+&lt;div class="ux-card"
      hx-get="/productos/{{ producto.id }}/galeria/"
      hx-trigger="click"
      hx-target="#galeria-modal .ux-modal__content"
      hx-swap="innerHTML"
-     @htmx:after-swap="$dispatch('modal:open')">
-  <img src="{{ producto.imagen_principal.thumbnail.url }}" alt="{{ producto.nombre }}">
-  <h4>{{ producto.nombre }}</h4>
-  <p>{{ producto.imagenes.count }} imagenes</p>
-</div>
+     @htmx:after-swap="$dispatch('modal:open')"&gt;
+  &lt;img src="{{ producto.imagen_principal.thumbnail.url }}" alt="{{ producto.nombre }}"&gt;
+  &lt;h4&gt;{{ producto.nombre }}&lt;/h4&gt;
+  &lt;p&gt;{{ producto.imagenes.count }} imagenes&lt;/p&gt;
+&lt;/div&gt;
 
-<!-- Modal para mostrar galeria -->
-<div id="galeria-modal"
+&lt;!-- Modal para mostrar galeria --&gt;
+&lt;div id="galeria-modal"
      x-data="uxModal()"
-     @modal:open.window="open()">
-  <div class="ux-modal" x-show="isOpen">
-    <div class="ux-modal__header">
-      <h3>Galeria de Imagenes</h3>
-      <button @click="close()">&times;</button>
-    </div>
-    <div class="ux-modal__content">
-      <!-- Contenido cargado via HTMX -->
-    </div>
-  </div>
-</div></pre>
+     @modal:open.window="open()"&gt;
+  &lt;div class="ux-modal" x-show="isOpen"&gt;
+    &lt;div class="ux-modal__header"&gt;
+      &lt;h3&gt;Galeria de Imagenes&lt;/h3&gt;
+      &lt;button @click="close()"&gt;&amp;times;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="ux-modal__content"&gt;
+      &lt;!-- Contenido cargado via HTMX --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
 
   <div class="demo-box">
     <h4 style="margin-bottom: var(--ux-space-sm); font-weight: 600;">Vista Django</h4>
@@ -252,35 +252,35 @@ class ImagenProducto(models.Model):
     <h4 style="margin-bottom: var(--ux-space-sm); font-weight: 600;">Galeria con Infinite Scroll</h4>
     <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Cargar mas imagenes al hacer scroll.</p>
   </div>
-  <pre class="ux-code-block" data-lang="html"><!-- Galeria con paginacion HTMX -->
-<div id="galeria-container"
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Galeria con paginacion HTMX --&gt;
+&lt;div id="galeria-container"
      x-data="uxImageGallery({ images: [] })"
-     x-init="$watch('images', () => $el.dispatchEvent(new CustomEvent('gallery:updated')))">
+     x-init="$watch('images', () =&gt; $el.dispatchEvent(new CustomEvent('gallery:updated')))"&gt;
 
-  <div class="ux-gallery ux-gallery--cols-4">
-    <div class="ux-gallery__grid"
+  &lt;div class="ux-gallery ux-gallery--cols-4"&gt;
+    &lt;div class="ux-gallery__grid"
          hx-get="/api/imagenes/?page=1"
          hx-trigger="load"
-         hx-swap="innerHTML">
-    </div>
-  </div>
+         hx-swap="innerHTML"&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
 
-  <!-- Trigger para cargar mas -->
-  <div hx-get="/api/imagenes/?page={{ next_page }}"
+  &lt;!-- Trigger para cargar mas --&gt;
+  &lt;div hx-get="/api/imagenes/?page={{ next_page }}"
        hx-trigger="revealed"
        hx-swap="beforeend"
        hx-target=".ux-gallery__grid"
-       class="ux-spinner">
-  </div>
-</div>
+       class="ux-spinner"&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
 
-<!-- Partial que retorna Django (partials/imagen_item.html) -->
+&lt;!-- Partial que retorna Django (partials/imagen_item.html) --&gt;
 {% for imagen in imagenes %}
-<div class="ux-gallery__item"
+&lt;div class="ux-gallery__item"
      @click="openLightbox({{ forloop.counter0 }})"
-     x-init="images.push({ src: '{{ imagen.url }}', title: '{{ imagen.titulo }}' })">
-  <img src="{{ imagen.thumbnail.url }}" loading="lazy">
-</div>
+     x-init="images.push({ src: '{{ imagen.url }}', title: '{{ imagen.titulo }}' })"&gt;
+  &lt;img src="{{ imagen.thumbnail.url }}" loading="lazy"&gt;
+&lt;/div&gt;
 {% endfor %}</pre>
 
 </section>
