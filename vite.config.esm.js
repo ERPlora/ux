@@ -25,9 +25,13 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       emptyOutDir: false,
       lib: {
-        entry: resolve(__dirname, 'src/js/ux.js'),
+        entry: {
+          ux: resolve(__dirname, 'src/js/ux.js'),
+          'ux-core': resolve(__dirname, 'src/js/ux-core.js'),
+        },
         formats: ['es'],
-        fileName: () => 'ux.esm.js',
+        fileName: (_, entryName) =>
+          entryName === 'ux-core' ? 'ux-core.esm.js' : 'ux.esm.js',
       },
       minify: isProduction ? 'terser' : false,
       sourcemap: !isProduction,

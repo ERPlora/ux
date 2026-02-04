@@ -90,6 +90,19 @@ import UX, { UXModal } from 'ux';
 const modal = new UXModal('#my-modal', { closeOnBackdrop: false });
 UX.init();
 ```
+
+### Modular Imports
+
+If you only need the essential interactive pieces (modal, password, range, OTP) use the slimmer build:
+
+```js
+import UXCore, { UXModal } from 'ux/core';
+
+UXCore.init();
+const modal = new UXModal('#welcome-modal');
+```
+
+The `ux/core` entry omits heavier components (upload, signature pad, etc.) so bundlers can tree-shake more aggressively.
 ## Components (164)
 
 ### CSS-Only (no JS required)
