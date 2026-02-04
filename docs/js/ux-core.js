@@ -1,7 +1,7 @@
 /**
  * UX Core helpers for documentation examples.
  * Provides lightweight auto-initialization hooks that mirror
- * the guidance shown in the docs (`{% static 'js/ux-core.js' %}`).
+ * the guidance shown in the docs (served via https://erplora.github.io/ux/js/ux-core.js).
  */
 (function (global) {
   if (typeof document === 'undefined') return;

@@ -6,13 +6,9 @@
  * @license MIT
  */
 
-// Import CSS (Vite will handle this)
 import '../scss/ux.scss';
 
-// Core utilities
-import * as helpers from './core/helpers.js';
-
-// Components
+import { createUX } from './core/ux-factory.js';
 import { UXModal } from './components/modal.js';
 import { UXPassword } from './components/password.js';
 import { UXRange } from './components/range.js';
@@ -23,224 +19,57 @@ import { UXUpload } from './components/upload.js';
 import { UXQuantityStepper } from './components/quantity-stepper.js';
 import { UXSignaturePad } from './components/signature-pad.js';
 
-// ==========================================================
-// Component Registry
-// ==========================================================
-
-const componentMap = {
-  'ux-modal-backdrop': UXModal,
-  'ux-input-password': UXPassword,
-  'ux-range': UXRange,
-  'ux-otp': UXOtpInput,
-  'ux-autocomplete': UXAutocomplete,
-  'ux-tag-input': UXTagInput,
-  'ux-upload': UXUpload,
-  'ux-quantity-stepper': UXQuantityStepper,
-  'ux-signature-pad': UXSignaturePad,
-};
-
-// ==========================================================
-// UX Global Object
-// ==========================================================
-
-const NODE_TYPES = {
-  ELEMENT: typeof window !== 'undefined' && window.Node ? window.Node.ELEMENT_NODE : 1,
-};
-
-function resolveRoot(root) {
-  if (!root) return document;
-  if (root.querySelectorAll) return root;
-  return document;
-}
-
-function collectNodes(root, selector) {
-  const scope = resolveRoot(root);
-  const nodes = Array.from(scope.querySelectorAll(selector));
-  if (scope && scope.nodeType === NODE_TYPES.ELEMENT && scope.matches(selector)) {
-    nodes.unshift(scope);
-  }
-  return nodes;
-}
-
-const UX = {
-  // Version
+const UX = createUX({
   version: '2.0.0',
-
-  // Re-export all helpers
-  ...helpers,
-
-  // Component classes
-  Modal: UXModal,
-  Password: UXPassword,
-  Range: UXRange,
-  OtpInput: UXOtpInput,
-  Autocomplete: UXAutocomplete,
-  TagInput: UXTagInput,
-  Upload: UXUpload,
-  QuantityStepper: UXQuantityStepper,
-  SignaturePad: UXSignaturePad,
-
-  // Component instances registry
-  _instances: new WeakMap(),
-
-  /**
-   * Initialize all components with data-ux="js" or data-ux-{component}
-   * Called automatically on DOMContentLoaded
-   */
-  init(root = document) {
-    const scope = resolveRoot(root);
-
-    // Initialize components with data-ux="js" (class-based detection)
-    collectNodes(scope, '[data-ux="js"]').forEach(el => {
-      // Skip if already initialized
-      if (this._instances.has(el)) return;
-
-      // Find matching component
-      for (const [className, ComponentClass] of Object.entries(componentMap)) {
-        if (el.classList.contains(className)) {
-          const instance = new ComponentClass(el);
-          el._uxComponent = instance;
-          this._instances.set(el, instance);
-          break;
-        }
-      }
-    });
-
-    // Initialize components with specific data-ux-{component} attributes
-    this._initByAttribute('data-ux-password', UXPassword, scope);
-    this._initByAttribute('data-ux-range', UXRange, scope);
-    this._initByAttribute('data-ux-otp', UXOtpInput, scope);
-    this._initByAttribute('data-ux-autocomplete', UXAutocomplete, scope);
-    this._initByAttribute('data-ux-tag-input', UXTagInput, scope);
-    this._initByAttribute('data-ux-upload', UXUpload, scope);
-    this._initByAttribute('data-ux-quantity-stepper', UXQuantityStepper, scope);
-    this._initByAttribute('data-ux-signature-pad', UXSignaturePad, scope);
+  classMap: {
+    'ux-modal-backdrop': UXModal,
+    'ux-input-password': UXPassword,
+    'ux-range': UXRange,
+    'ux-otp': UXOtpInput,
+    'ux-autocomplete': UXAutocomplete,
+    'ux-tag-input': UXTagInput,
+    'ux-upload': UXUpload,
+    'ux-quantity-stepper': UXQuantityStepper,
+    'ux-signature-pad': UXSignaturePad,
   },
-
-  /**
-   * Initialize all elements with a specific attribute
-   * @param {string} attribute - Data attribute to look for
-   * @param {Function} ComponentClass - Component class constructor
-   * @private
-   */
-  _initByAttribute(attribute, ComponentClass, root = document) {
-    collectNodes(root, `[${attribute}]`).forEach(el => {
-      if (this._instances.has(el)) return;
-      const instance = new ComponentClass(el);
-      el._uxComponent = instance;
-      this._instances.set(el, instance);
-    });
+  attributeMap: {
+    'data-ux-password': UXPassword,
+    'data-ux-range': UXRange,
+    'data-ux-otp': UXOtpInput,
+    'data-ux-autocomplete': UXAutocomplete,
+    'data-ux-tag-input': UXTagInput,
+    'data-ux-upload': UXUpload,
+    'data-ux-quantity-stepper': UXQuantityStepper,
+    'data-ux-signature-pad': UXSignaturePad,
   },
-
-  /**
-   * Get component instance from element
-   * @param {HTMLElement|string} selector - Element or selector
-   * @returns {object|undefined} Component instance
-   */
-  get(selector) {
-    const el = typeof selector === 'string' ? document.querySelector(selector) : selector;
-    return el?._uxComponent || this._instances.get(el);
+  manualMap: {
+    modal: UXModal,
+    password: UXPassword,
+    range: UXRange,
+    otp: UXOtpInput,
+    otpinput: UXOtpInput,
+    autocomplete: UXAutocomplete,
+    taginput: UXTagInput,
+    'tag-input': UXTagInput,
+    upload: UXUpload,
+    quantitystepper: UXQuantityStepper,
+    'quantity-stepper': UXQuantityStepper,
+    signaturepad: UXSignaturePad,
+    'signature-pad': UXSignaturePad,
   },
-
-  /**
-   * Create a new component instance manually
-   * @param {string} type - Component type (e.g., 'modal')
-   * @param {HTMLElement|string} element - Element or selector
-   * @param {object} options - Component options
-   * @returns {object} Component instance
-   */
-  create(type, element, options = {}) {
-    const ComponentClass = {
-      modal: UXModal,
-      password: UXPassword,
-      range: UXRange,
-      otp: UXOtpInput,
-      otpinput: UXOtpInput,
-      autocomplete: UXAutocomplete,
-      taginput: UXTagInput,
-      'tag-input': UXTagInput,
-      upload: UXUpload,
-      quantitystepper: UXQuantityStepper,
-      'quantity-stepper': UXQuantityStepper,
-      signaturepad: UXSignaturePad,
-      'signature-pad': UXSignaturePad,
-    }[type.toLowerCase()];
-
-    if (!ComponentClass) {
-      console.warn(`UX: Unknown component type "${type}"`);
-      return null;
-    }
-
-    const el = typeof element === 'string' ? document.querySelector(element) : element;
-    if (!el) {
-      console.warn('UX: Element not found');
-      return null;
-    }
-
-    const instance = new ComponentClass(el, options);
-    el._uxComponent = instance;
-    this._instances.set(el, instance);
-    return instance;
+  exportedComponents: {
+    Modal: UXModal,
+    Password: UXPassword,
+    Range: UXRange,
+    OtpInput: UXOtpInput,
+    Autocomplete: UXAutocomplete,
+    TagInput: UXTagInput,
+    Upload: UXUpload,
+    QuantityStepper: UXQuantityStepper,
+    SignaturePad: UXSignaturePad,
   },
+});
 
-  /**
-   * Destroy a component instance
-   * @param {HTMLElement|string} selector - Element or selector
-   */
-  destroy(selector) {
-    const instance = this.get(selector);
-    if (instance && typeof instance.destroy === 'function') {
-      instance.destroy();
-    }
-
-    const el = typeof selector === 'string' ? document.querySelector(selector) : selector;
-    if (el) {
-      delete el._uxComponent;
-      this._instances.delete(el);
-    }
-  }
-};
-
-// ==========================================================
-// Auto-initialization
-// ==========================================================
-
-const setupDomListeners = () => {
-  if (typeof document === 'undefined') return;
-  const reinit = (target) => {
-    if (target) {
-      UX.init(target);
-    } else {
-      UX.init();
-    }
-  };
-
-  document.addEventListener('htmx:afterSwap', (event) => {
-    reinit(event.detail?.target || event.target);
-  });
-
-  document.addEventListener('turbo:load', () => reinit());
-
-  document.addEventListener('alpine:initialized', (event) => {
-    reinit(event.target || document);
-  });
-};
-
-if (typeof document !== 'undefined') {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => UX.init());
-  } else {
-    // DOM already loaded
-    UX.init();
-  }
-  setupDomListeners();
-}
-
-// ==========================================================
-// Export for different module systems
-// ==========================================================
-
-// ES Modules
 export {
   UX,
   UXModal,
@@ -252,14 +81,10 @@ export {
   UXUpload,
   UXQuantityStepper,
   UXSignaturePad,
-  // Re-export helpers for tree-shaking
-  helpers
 };
 
-// Default export
 export default UX;
 
-// Global for IIFE/browser
 if (typeof window !== 'undefined') {
   window.UX = UX;
 }
