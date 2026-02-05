@@ -11,7 +11,7 @@ UX is a **zero-dependency, framework-agnostic CSS component library** with iOS/I
 <!-- Full bundle -->
 <link rel="stylesheet" href="https://unpkg.com/ux/dist/ux.min.css">
 <!-- Or via GitHub Pages -->
-<link rel="stylesheet" href="https://erplora.github.io/ux/dist/ux.min.css">
+<link rel="stylesheet" href="https://erplora.github.io/ux/ux.min.css">
 
 <!-- Modular (recommended for smaller bundles) -->
 <link rel="stylesheet" href="https://unpkg.com/ux/dist/core.min.css">
