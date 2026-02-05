@@ -8,15 +8,19 @@ UX is a **zero-dependency, framework-agnostic CSS component library** with iOS/I
 
 **CDN Usage:**
 ```html
-<!-- Full bundle -->
-<link rel="stylesheet" href="https://unpkg.com/ux/dist/ux.min.css">
+<!-- Full bundle - via unpkg -->
+<link rel="stylesheet" href="https://unpkg.com/@anthropic/ux-css@latest/dist/ux.min.css">
+
+<!-- Or via jsDelivr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@anthropic/ux-css@latest/dist/ux.min.css">
+
 <!-- Or via GitHub Pages -->
 <link rel="stylesheet" href="https://erplora.github.io/ux/ux.min.css">
 
 <!-- Modular (recommended for smaller bundles) -->
-<link rel="stylesheet" href="https://unpkg.com/ux/dist/core.min.css">
-<link rel="stylesheet" href="https://unpkg.com/ux/dist/bundles/basic.min.css">
-<link rel="stylesheet" href="https://unpkg.com/ux/dist/bundles/forms.min.css">
+<link rel="stylesheet" href="https://unpkg.com/@anthropic/ux-css@latest/dist/core.min.css">
+<link rel="stylesheet" href="https://unpkg.com/@anthropic/ux-css@latest/dist/bundles/basic.min.css">
+<link rel="stylesheet" href="https://unpkg.com/@anthropic/ux-css@latest/dist/bundles/forms.min.css">
 <!-- Add only the bundles you need -->
 ```
 
