@@ -1,0 +1,83 @@
+<!-- Tienda con carrito en Split Pane Right -->
+<div class="ux-page" x-data="{ showCart: true }">
+  <header class="ux-header">
+    <nav class="ux-navbar">
+      <div class="ux-navbar__start">
+        <h1 class="ux-navbar__title">Tienda</h1>
+      </div>
+      <div class="ux-navbar__end">
+        <button class="ux-button ux-button--clear" @click="showCart = !showCart">
+          <span class="ux-icon">shopping_cart</span>
+          <span id="cart-count" class="ux-badge ux-color-danger">{{ cart.count }}</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <div class="ux-split-pane-right" :class="{ 'ux-split-pane-right--open': showCart }">
+    <!-- Contenido principal: Productos -->
+    <main class="ux-split-pane-right__main ux-content ux-padding">
+      <div class="ux-css-grid ux-css-grid--3 ux-gap-md">
+        {% for product in products %}
+        <div class="ux-product-card">
+          <img src="{{ product.image.url }}" class="ux-product-card__image">
+          <div class="ux-product-card__content">
+            <h4>{{ product.name }}</h4>
+            <p class="ux-product-card__price">${{ product.price }}</p>
+          </div>
+          <button class="ux-button ux-color-primary ux-button--block"
+                  hx-post="{% url 'cart_add' product.id %}"
+                  hx-target="#cart-content"
+                  hx-swap="innerHTML">
+            Agregar
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+    </main>
+
+    <!-- Panel derecho: Carrito -->
+    <aside class="ux-split-pane-right__aside">
+      <div class="ux-page">
+        <header class="ux-header">
+          <div class="ux-navbar">
+            <div class="ux-navbar__center">
+              <h2 class="ux-navbar__title">Carrito</h2>
+            </div>
+          </div>
+        </header>
+
+        <main id="cart-content" class="ux-content">
+          {% include 'partials/cart_items.html' %}
+        </main>
+
+        <footer class="ux-footer ux-padding">
+          <div style="display: flex; justify-content: space-between; margin-bottom: var(--ux-space-md);">
+            <strong>Total:</strong>
+            <strong id="cart-total">${{ cart.total }}</strong>
+          </div>
+          <button class="ux-button ux-color-primary ux-button--block"
+                  hx-post="{% url 'checkout' %}"
+                  hx-target="body">
+            Pagar
+          </button>
+        </footer>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Django View para agregar al carrito -->
+<!--
+def cart_add(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    cart = Cart(request)
+    cart.add(product)
+
+    response = render(request, 'partials/cart_items.html', {'cart': cart})
+    # Actualizar contador del carrito
+    response['HX-Trigger'] = json.dumps({
+        'cartUpdated': {'count': cart.count, 'total': str(cart.total)}
+    })
+    return response
+-->
