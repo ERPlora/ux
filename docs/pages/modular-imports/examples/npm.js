@@ -1,8 +1,10 @@
-// Import en tu bundler (Vite, Webpack, etc.)
-import 'ux/core';
-import 'ux/bundles/forms';
-import 'ux/bundles/overlays';
+// Instalar: npm install @anthropic/ux-css
 
-// O componentes individuales
-import 'ux/components/button.css';
-import 'ux/components/modal.css';
+// En tu archivo principal (e.g., main.js)
+import '@anthropic/ux-css/dist/core.min.css';
+import '@anthropic/ux-css/dist/bundles/basic.min.css';
+import '@anthropic/ux-css/dist/bundles/forms.min.css';
+
+// O importar componentes individuales
+import '@anthropic/ux-css/dist/components/button.min.css';
+import '@anthropic/ux-css/dist/components/modal.min.css';
