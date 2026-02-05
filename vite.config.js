@@ -45,7 +45,7 @@ export default defineConfig(() => {
     },
 
     server: {
-      port: 8000,
+      port: 3002,
       open: '/docs/',
       cors: true,
       fs: {
