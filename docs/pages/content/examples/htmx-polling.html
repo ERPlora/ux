@@ -1,0 +1,61 @@
+<!-- Dashboard con actualizacion automatica -->
+<div class="ux-page">
+  <header class="ux-header">
+    <nav class="ux-navbar">
+      <div class="ux-navbar__center">
+        <h1 class="ux-navbar__title">Dashboard</h1>
+      </div>
+      <div class="ux-navbar__end">
+        <span class="ux-badge ux-color-success">En vivo</span>
+      </div>
+    </nav>
+  </header>
+
+  <main class="ux-content ux-padding">
+    <!-- Stats que se actualizan cada 5 segundos -->
+    <div id="live-stats"
+         hx-get="{% url 'dashboard_stats' %}"
+         hx-trigger="every 5s"
+         hx-swap="innerHTML">
+
+      <div class="ux-stats">
+        <div class="ux-stats__item">
+          <span class="ux-stats__value">{{ stats.orders_today }}</span>
+          <span class="ux-stats__label">Pedidos Hoy</span>
+        </div>
+        <div class="ux-stats__item">
+          <span class="ux-stats__value">${{ stats.revenue_today }}</span>
+          <span class="ux-stats__label">Ingresos</span>
+        </div>
+        <div class="ux-stats__item">
+          <span class="ux-stats__value">{{ stats.active_users }}</span>
+          <span class="ux-stats__label">Usuarios Activos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actividad reciente con polling -->
+    <div class="ux-card" style="margin-top: var(--ux-space-lg);">
+      <div class="ux-card__header">
+        <h3 class="ux-card__title">Actividad Reciente</h3>
+      </div>
+      <div id="activity-feed"
+           hx-get="{% url 'activity_feed' %}"
+           hx-trigger="every 10s"
+           hx-swap="innerHTML">
+        {% include 'partials/activity_feed.html' %}
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Django View -->
+<!--
+def dashboard_stats(request):
+    stats = {
+        'orders_today': Order.objects.filter(created__date=date.today()).count(),
+        'revenue_today': Order.objects.filter(created__date=date.today()).aggregate(Sum('total'))['total__sum'] or 0,
+        'active_users': User.objects.filter(last_login__gte=timezone.now() - timedelta(minutes=5)).count()
+    }
+    return render(request, 'partials/stats.html', {'stats': stats})
+-->
