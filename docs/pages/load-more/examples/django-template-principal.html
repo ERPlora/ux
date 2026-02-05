@@ -1,0 +1,27 @@
+<!-- Product List Container -->
+<div id="product-list">
+  {% include "partials/product_items.html" %}
+</div>
+
+<!-- Load More Button with Django Pagination -->
+{% if page_obj.has_next %}
+<div class="ux-load-more" id="load-more-container">
+  <button
+    class="ux-load-more__button"
+    hx-get="?page={{ page_obj.next_page_number }}"
+    hx-target="#product-list"
+    hx-swap="beforeend"
+    hx-indicator=".ux-load-more__spinner"
+    hx-select="#product-items, #load-more-replacement">
+    <span class="htmx-indicator ux-load-more__spinner"></span>
+    <span>Load More</span>
+  </button>
+  <span class="ux-load-more__status">
+    Showing {{ page_obj.paginator.per_page|mul:page_obj.number }} of {{ page_obj.paginator.count }} products
+  </span>
+</div>
+{% else %}
+<div class="ux-load-more ux-load-more--end">
+  <div class="ux-load-more__end-message">All products loaded</div>
+</div>
+{% endif %}

@@ -1,0 +1,51 @@
+<!-- Rich text editor with auto-save -->
+<form hx-post="{% url 'content:save' article.id %}"
+      hx-trigger="rich-text:change delay:2s"
+      hx-swap="none"
+      hx-indicator="#save-indicator">
+  {% csrf_token %}
+
+  <div x-data="uxRichText({
+         placeholder: 'Escribe tu contenido...',
+         content: '{{ article.content|escapejs }}'
+       })"
+       x-init="$refs.editor.innerHTML = content"
+       @rich-text:change="$refs.hidden.value = $event.detail.content">
+
+    <input type="hidden" name="content" x-ref="hidden">
+
+    <div class="ux-rich-text">
+      <div class="ux-rich-text__toolbar">
+        <button type="button" class="ux-rich-text__btn" @click="toggleBold()">B</button>
+        <button type="button" class="ux-rich-text__btn" @click="toggleItalic()">I</button>
+        <!-- More toolbar buttons -->
+      </div>
+      <div class="ux-rich-text__editor"
+           x-ref="editor"
+           contenteditable="true"
+           @input="handleInput()"></div>
+      <textarea class="ux-rich-text__source" x-ref="source"></textarea>
+    </div>
+  </div>
+
+  <div class="ux-rich-text__footer">
+    <span id="save-indicator" class="htmx-indicator">Guardando...</span>
+    <button type="submit" class="ux-button ux-color-primary">Guardar</button>
+  </div>
+</form>
+
+<!-- Load content from server -->
+<div hx-get="{% url 'content:load' article.id %}"
+     hx-trigger="load"
+     hx-swap="innerHTML">
+  <div class="ux-spinner"></div>
+</div>
+
+<!-- Upload image and insert into editor -->
+<form hx-post="{% url 'content:upload-image' %}"
+      hx-encoding="multipart/form-data"
+      hx-swap="none"
+      @htmx:after-request="insertImageFromResponse($event)">
+  {% csrf_token %}
+  <input type="file" name="image" accept="image/*">
+</form>

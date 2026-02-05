@@ -1,0 +1,72 @@
+<div class="ux-pdf-viewer"
+             x-data="uxPdfViewer({ src: 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf' })"
+             style="height: 500px;">
+
+          <!-- Toolbar -->
+          <div class="ux-pdf-viewer__toolbar">
+            <div class="ux-pdf-viewer__toolbar-group">
+              <button class="ux-pdf-viewer__btn" @click="prevPage()" :disabled="currentPage <= 1">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <input type="number" class="ux-pdf-viewer__page-input"
+                     :value="currentPage"
+                     @change="goToPage(parseInt($event.target.value))"
+                     min="1" :max="totalPages">
+              <span class="ux-pdf-viewer__page-total">/ <span x-text="totalPages"></span></span>
+              <button class="ux-pdf-viewer__btn" @click="nextPage()" :disabled="currentPage >= totalPages">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+
+            <div class="ux-pdf-viewer__toolbar-separator"></div>
+
+            <div class="ux-pdf-viewer__toolbar-group">
+              <button class="ux-pdf-viewer__btn" @click="zoomOut()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+              </button>
+              <select class="ux-pdf-viewer__zoom-select" @change="setZoom($event.target.value)" x-model="scale">
+                <template x-for="opt in zoomOptions" :key="opt.value">
+                  <option :value="opt.value" x-text="opt.label"></option>
+                </template>
+              </select>
+              <button class="ux-pdf-viewer__btn" @click="zoomIn()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              </button>
+            </div>
+
+            <div class="ux-pdf-viewer__toolbar-spacer"></div>
+
+            <div class="ux-pdf-viewer__toolbar-group">
+              <button class="ux-pdf-viewer__btn" @click="download()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              </button>
+              <button class="ux-pdf-viewer__btn" @click="print()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              </button>
+              <button class="ux-pdf-viewer__btn" @click="toggleFullscreen()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Container -->
+          <div class="ux-pdf-viewer__container" x-ref="container">
+            <div class="ux-pdf-viewer__page">
+              <canvas x-ref="canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div class="ux-pdf-viewer__loading" x-show="isLoading">
+            <div class="ux-pdf-viewer__loading-spinner"></div>
+            <span class="ux-pdf-viewer__loading-text">Cargando documento...</span>
+          </div>
+
+          <!-- Error -->
+          <div class="ux-pdf-viewer__error" x-show="error" x-cloak>
+            <svg class="ux-pdf-viewer__error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <span class="ux-pdf-viewer__error-text" x-text="error"></span>
+          </div>
+        </div>

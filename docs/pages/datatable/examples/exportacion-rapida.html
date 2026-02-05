@@ -1,0 +1,61 @@
+columns: [
+        { key: 'code', label: 'Codigo' },
+        { key: 'product', label: 'Producto' },
+        { key: 'quantity', label: 'Cantidad', type: 'number' },
+        { key: 'price', label: 'Precio', type: 'number' },
+        { key: 'date', label: 'Fecha', type: 'date' }
+      ],
+      rows: [
+        { id: 1, code: 'PRD-001', product: 'Laptop Pro', quantity: 5, price: 1299.99, date: '2024-01-15' },
+        { id: 2, code: 'PRD-002', product: 'Mouse Wireless', quantity: 50, price: 29.99, date: '2024-01-16' },
+        { id: 3, code: 'PRD-003', product: 'Teclado Mecanico', quantity: 25, price: 89.99, date: '2024-01-17' },
+        { id: 4, code: 'PRD-004', product: 'Monitor 27 pulgadas', quantity: 10, price: 399.99, date: '2024-01-18' }
+      ],
+      selectable: true,
+      paginated: false
+    })" class="ux-datatable ux-datatable--bordered ux-datatable--responsive">
+
+      <!-- Toolbar with Quick Export Buttons -->
+      <div class="ux-datatable__toolbar">
+        <div class="ux-datatable__toolbar-start">
+          <span class="ux-text-sm ux-text-secondary" x-text="selectedRows.length > 0 ? selectedRows.length + ' seleccionados' : rows.length + ' productos'"></span>
+        </div>
+        <div class="ux-datatable__toolbar-end" style="display: flex; gap: var(--ux-space-sm);">
+          <button type="button" class="ux-button ux-button--outline ux-button--sm" @click="quickExportCSV()">
+            <span x-html="getIcon('csv')"></span>
+            CSV
+          </button>
+          <button type="button" class="ux-button ux-button--outline ux-button--sm" @click="quickExportExcel()">
+            <span x-html="getIcon('excel')"></span>
+            Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="ux-datatable__body">
+        <table class="ux-datatable__table">
+          <thead class="ux-datatable__thead">
+            <tr>
+              <th class="ux-datatable__th ux-datatable__th--checkbox">
+                <input type="checkbox" class="ux-checkbox" x-model="selectAll" @change="toggleSelectAll()">
+              </th>
+              <template x-for="col in columns" :key="col.key">
+                <th class="ux-datatable__th" x-text="col.label"></th>
+              </template>
+            </tr>
+          </thead>
+          <tbody class="ux-datatable__tbody">
+            <template x-for="row in rows" :key="row.id">
+              <tr class="ux-datatable__tr" :class="{ 'ux-datatable__tr--selected': isRowSelected(row) }">
+                <td class="ux-datatable__td ux-datatable__td--checkbox" data-label="">
+                  <input type="checkbox" class="ux-checkbox" :checked="isRowSelected(row)" @change="toggleRowSelection(row)">
+                </td>
+                <template x-for="col in columns" :key="col.key">
+                  <td class="ux-datatable__td" :data-label="col.label" x-text="formatCellValue(row, col)"></td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>

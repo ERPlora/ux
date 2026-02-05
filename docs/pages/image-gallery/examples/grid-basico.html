@@ -1,0 +1,47 @@
+<div class="ux-gallery ux-gallery--cols-3"
+     x-data="uxImageGallery({
+       images: [
+         { src: 'https://picsum.photos/800/800?random=1', title: 'Imagen 1' },
+         { src: 'https://picsum.photos/800/800?random=2', title: 'Imagen 2' },
+         { src: 'https://picsum.photos/800/800?random=3', title: 'Imagen 3' },
+         { src: 'https://picsum.photos/800/800?random=4', title: 'Imagen 4' },
+         { src: 'https://picsum.photos/800/800?random=5', title: 'Imagen 5' },
+         { src: 'https://picsum.photos/800/800?random=6', title: 'Imagen 6' }
+       ]
+     })">
+  <div class="ux-gallery__grid">
+    <template x-for="(image, index) in visibleImages" :key="index">
+      <div class="ux-gallery__item" @click="openLightbox(index)" tabindex="0" @keydown.enter="openLightbox(index)">
+        <img :src="image.src" :alt="image.title || 'Image ' + (index + 1)" loading="lazy">
+        <div class="ux-gallery__item-overlay">
+          <span x-html="icons.zoom" class="ux-gallery__item-icon"></span>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <template x-teleport="body">
+    <div class="ux-gallery-lightbox" :class="{ 'ux-gallery-lightbox--open': lightboxOpen }" @click.self="closeLightbox()">
+      <div class="ux-gallery-lightbox__header">
+        <span class="ux-gallery-lightbox__counter" x-text="(currentIndex + 1) + ' / ' + images.length"></span>
+        <div class="ux-gallery-lightbox__actions">
+          <button class="ux-gallery-lightbox__action" @click="closeLightbox()" title="Cerrar">
+            <span x-html="icons.close"></span>
+          </button>
+        </div>
+      </div>
+      <div class="ux-gallery-lightbox__content">
+        <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--prev" @click="prev()" :disabled="!canPrev">
+          <span x-html="icons.prev"></span>
+        </button>
+        <img class="ux-gallery-lightbox__image" :src="currentImage.src" :alt="currentImage.title" @click="toggleZoom()">
+        <button class="ux-gallery-lightbox__nav ux-gallery-lightbox__nav--next" @click="next()" :disabled="!canNext">
+          <span x-html="icons.next"></span>
+        </button>
+      </div>
+      <div class="ux-gallery-lightbox__caption" x-show="currentImage.title">
+        <div class="ux-gallery-lightbox__title" x-text="currentImage.title"></div>
+      </div>
+    </div>
+  </template>
+</div>

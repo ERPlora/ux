@@ -1,0 +1,29 @@
+<div x-data="{ selectedIds: [] }">
+  <div class="ux-autocomplete">
+    <div class="ux-autocomplete__tags">
+      <template x-for="id in selectedIds" :key="id">
+        <span class="ux-autocomplete__tag"
+              hx-get="/api/tag-label/"
+              hx-vals='{"id": id}'
+              hx-trigger="load">
+          <span class="tag-label">Cargando...</span>
+          <button type="button" @click="selectedIds = selectedIds.filter(i => i !== id)">×</button>
+        </span>
+      </template>
+
+      <input type="text"
+             class="ux-autocomplete__tags-input"
+             hx-get="{% url 'search_tags' %}"
+             hx-trigger="input changed delay:300ms"
+             hx-target="#tag-results"
+             placeholder="Agregar etiqueta...">
+    </div>
+
+    <div id="tag-results"></div>
+
+    <!-- Hidden inputs para el form -->
+    <template x-for="id in selectedIds" :key="id">
+      <input type="hidden" name="tags" :value="id">
+    </template>
+  </div>
+</div>

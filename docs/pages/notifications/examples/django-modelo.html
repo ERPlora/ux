@@ -1,0 +1,38 @@
+<div class="demo-box">
+  <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">1. Modelo Django</h4>
+  <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class Notification(models.Model):
+    TYPE_CHOICES = [
+        ('info', 'Info'),
+        ('success', 'Success'),
+        ('warning', 'Warning'),
+        ('error', 'Error'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='info')
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    data = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def to_dict(self):
+        return {
+            'id': str(self.id),
+            'title': self.title,
+            'message': self.message,
+            'type': self.type,
+            'read': self.read,
+            'timestamp': self.created_at.isoformat(),
+            'data': self.data,
+        }</pre>
+</div>

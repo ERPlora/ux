@@ -1,0 +1,63 @@
+# services.py - Servicio de conversión con cache
+from django.core.cache import cache
+from decimal import Decimal
+import requests
+
+class CurrencyService:
+    CACHE_KEY = 'exchange_rates'
+    CACHE_TIMEOUT = 3600  # 1 hora
+
+    @classmethod
+    def get_rates(cls):
+        """Obtiene tasas de cambio con cache."""
+        rates = cache.get(cls.CACHE_KEY)
+        if rates is None:
+            # Usar API externa (ej: exchangerate-api.com)
+            response = requests.get(
+                'https://api.exchangerate-api.com/v4/latest/USD',
+                timeout=5
+            )
+            if response.ok:
+                data = response.json()
+                rates = data.get('rates', {})
+                cache.set(cls.CACHE_KEY, rates, cls.CACHE_TIMEOUT)
+        return rates or {}
+
+    @classmethod
+    def convert(cls, amount, from_currency, to_currency):
+        """Convierte una cantidad entre monedas."""
+        if from_currency == to_currency:
+            return Decimal(str(amount))
+
+        rates = cls.get_rates()
+        # Convertir a USD primero, luego a moneda destino
+        usd_rate = Decimal(str(rates.get(from_currency, 1)))
+        target_rate = Decimal(str(rates.get(to_currency, 1)))
+
+        usd_amount = Decimal(str(amount)) / usd_rate
+        return usd_amount * target_rate
+
+# views.py - Endpoint HTMX
+from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["GET", "POST"])
+def convert_api(request):
+    amount = request.GET.get('amount') or request.POST.get('amount', '0')
+    from_curr = request.GET.get('from_currency') or request.POST.get('from_currency', 'USD')
+    to_curr = request.GET.get('to_currency') or request.POST.get('to_currency', 'EUR')
+
+    try:
+        result = CurrencyService.convert(Decimal(amount), from_curr, to_curr)
+        formatted = f"{result:,.2f}"
+        return HttpResponse(f'''
+            <div class="ux-currency ux-currency--prefix ux-currency--display" style="justify-content: center;">
+                <span class="ux-currency__symbol ux-currency__symbol--prefix">
+                    {get_symbol(to_curr)}
+                </span>
+                <span style="font-size: 2rem; font-weight: 600;">{formatted}</span>
+                <span style="margin-left: 0.5rem; color: var(--ux-text-secondary);">{to_curr}</span>
+            </div>
+        ''')
+    except Exception as e:
+        return HttpResponse(f'<span class="ux-text--danger">Error: {str(e)}</span>', status=400)

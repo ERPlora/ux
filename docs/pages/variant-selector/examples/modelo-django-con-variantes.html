@@ -1,0 +1,45 @@
+<pre class="ux-code-block" data-lang="python" style="margin: 0;"># models.py
+import json
+from django.db import models
+
+class Product(models.Model):
+    name = models.CharField(max_length=200)
+
+    @property
+    def default_variant(self):
+        return self.variants.filter(is_default=True).first() or self.variants.first()
+
+    @property
+    def variants_json(self):
+        """Retorna las variantes en formato JSON para el componente."""
+        return json.dumps([
+            {
+                'value': v.sku,
+                'label': v.name,
+                'price': str(v.price),
+                'stock': v.stock,
+                'available': v.stock > 0,
+                'color': v.color_hex if v.color_hex else None,
+                'image': v.image.url if v.image else None,
+            }
+            for v in self.variants.all()
+        ])
+
+class ProductVariant(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
+    sku = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    compare_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    stock = models.PositiveIntegerField(default=0)
+    color_hex = models.CharField(max_length=7, null=True, blank=True)
+    image = models.ImageField(upload_to='variants/', null=True, blank=True)
+    is_default = models.BooleanField(default=False)
+
+    @property
+    def stock_status(self):
+        if self.stock == 0:
+            return 'out'
+        elif self.stock < 5:
+            return 'low'
+        return 'available'</pre>

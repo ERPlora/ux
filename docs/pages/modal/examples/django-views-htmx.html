@@ -1,0 +1,33 @@
+# views.py
+from django.shortcuts import render, get_object_or_404
+
+def order_detail(request, pk):
+    """
+    Vista que retorna contenido para el modal.
+    Si es una peticion HTMX, retorna solo el fragmento.
+    Si es una peticion normal, retorna la pagina completa.
+    """
+    order = get_object_or_404(Order, pk=pk)
+    context = {'order': order}
+
+    # Detectar si es una peticion HTMX
+    if request.headers.get('HX-Request'):
+        return render(request, 'orders/partials/detail.html', context)
+
+    # Peticion normal: retornar pagina completa
+    return render(request, 'orders/detail.html', context)
+
+
+def order_delete(request, pk):
+    """Vista para eliminar un pedido via HTMX"""
+    order = get_object_or_404(Order, pk=pk)
+
+    if request.method == 'DELETE':
+        order.delete()
+        # Retornar string vacio para que hx-swap="outerHTML" elimine el elemento
+        return HttpResponse('')
+
+    # GET: mostrar confirmacion en modal
+    return render(request, 'orders/partials/delete_confirm.html', {
+        'order': order
+    })

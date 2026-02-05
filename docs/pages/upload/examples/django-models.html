@@ -1,0 +1,86 @@
+# models.py
+from django.db import models
+
+class UploadedFile(models.Model):
+    file = models.FileField(upload_to='uploads/%Y/%m/')
+    original_name = models.CharField(max_length=255)
+    content_type = models.CharField(max_length=100)
+    size = models.PositiveIntegerField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.original_name
+
+
+# forms.py
+from django import forms
+from .models import UploadedFile
+
+class UploadForm(forms.ModelForm):
+    class Meta:
+        model = UploadedFile
+        fields = ['file']
+
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            # Validar tipo
+            allowed = ['image/jpeg', 'image/png', 'application/pdf']
+            if file.content_type not in allowed:
+                raise forms.ValidationError('Tipo de archivo no permitido')
+
+            # Validar tamano (10MB)
+            if file.size > 10 * 1024 * 1024:
+                raise forms.ValidationError('Archivo muy grande (max 10MB)')
+
+        return file
+
+
+# views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST, require_http_methods
+from .forms import UploadForm
+from .models import UploadedFile
+
+@require_POST
+def upload_file(request):
+    form = UploadForm(request.POST, request.FILES)
+
+    if form.is_valid():
+        file = request.FILES['file']
+        obj = form.save(commit=False)
+        obj.original_name = file.name
+        obj.content_type = file.content_type
+        obj.size = file.size
+        obj.save()
+
+        return HttpResponse(f'''
+            <div class="ux-list__item">
+                <div class="ux-list__content">
+                    <p class="ux-list__title">{obj.original_name}</p>
+                    <p class="ux-list__note">{obj.size / 1024:.1f} KB</p>
+                </div>
+                <button class="ux-button ux-button--clear ux-button--sm"
+                        hx-delete="/files/{obj.pk}/delete/"
+                        hx-target="closest .ux-list__item"
+                        hx-swap="outerHTML">
+                    Eliminar
+                </button>
+            </div>
+        ''')
+
+    errors = form.errors.get('file', ['Error al subir archivo'])
+    return HttpResponse(f'''
+        <div class="ux-alert ux-color-danger">{errors[0]}</div>
+    ''', status=400)
+
+
+@require_http_methods(["DELETE"])
+def delete_file(request, pk):
+    try:
+        obj = UploadedFile.objects.get(pk=pk)
+        obj.file.delete()  # Eliminar archivo fisico
+        obj.delete()       # Eliminar registro
+        return HttpResponse('')  # Respuesta vacia = elemento eliminado
+    except UploadedFile.DoesNotExist:
+        return HttpResponse('Archivo no encontrado', status=404)

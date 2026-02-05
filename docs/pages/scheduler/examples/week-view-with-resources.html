@@ -1,0 +1,132 @@
+<div class="ux-scheduler"
+             x-data="uxScheduler({
+               view: 'day',
+               startHour: 8,
+               endHour: 18,
+               businessStartHour: 9,
+               businessEndHour: 17,
+               resources: [
+                 { id: 'room-a', name: 'Room A', info: 'Conference' },
+                 { id: 'room-b', name: 'Room B', info: 'Meeting' },
+                 { id: 'room-c', name: 'Room C', info: 'Training' }
+               ],
+               bookings: [
+                 {
+                   id: 1,
+                   title: 'Board Meeting',
+                   start: new Date(new Date().setHours(9, 0, 0, 0)),
+                   end: new Date(new Date().setHours(11, 0, 0, 0)),
+                   status: 'confirmed',
+                   resourceId: 'room-a'
+                 },
+                 {
+                   id: 2,
+                   title: 'Product Demo',
+                   start: new Date(new Date().setHours(10, 0, 0, 0)),
+                   end: new Date(new Date().setHours(11, 30, 0, 0)),
+                   status: 'confirmed',
+                   resourceId: 'room-b'
+                 },
+                 {
+                   id: 3,
+                   title: 'Training Session',
+                   start: new Date(new Date().setHours(9, 0, 0, 0)),
+                   end: new Date(new Date().setHours(12, 0, 0, 0)),
+                   status: 'pending',
+                   resourceId: 'room-c'
+                 },
+                 {
+                   id: 4,
+                   title: 'Lunch Meeting',
+                   start: new Date(new Date().setHours(12, 0, 0, 0)),
+                   end: new Date(new Date().setHours(13, 0, 0, 0)),
+                   status: 'confirmed',
+                   resourceId: 'room-a'
+                 },
+                 {
+                   id: 5,
+                   title: 'Team Retrospective',
+                   start: new Date(new Date().setHours(14, 0, 0, 0)),
+                   end: new Date(new Date().setHours(15, 30, 0, 0)),
+                   status: 'confirmed',
+                   resourceId: 'room-b'
+                 },
+                 {
+                   id: 6,
+                   title: 'Client Call',
+                   start: new Date(new Date().setHours(15, 0, 0, 0)),
+                   end: new Date(new Date().setHours(16, 0, 0, 0)),
+                   status: 'confirmed',
+                   resourceId: 'room-a'
+                 }
+               ]
+             })"
+             @scheduler:slotclick="alert('Book ' + ($event.detail.resourceId || 'slot') + ' at ' + $event.detail.date.toLocaleTimeString())">
+          <div class="ux-scheduler__header">
+            <div class="ux-scheduler__nav">
+              <button class="ux-scheduler__nav-btn" @click="prev()">
+                <span x-html="icons.chevronLeft"></span>
+              </button>
+              <button class="ux-scheduler__nav-btn" @click="next()">
+                <span x-html="icons.chevronRight"></span>
+              </button>
+              <span class="ux-scheduler__title" x-text="title"></span>
+            </div>
+            <button class="ux-scheduler__today-btn" @click="goToToday()">Today</button>
+          </div>
+
+          <!-- Resource Headers -->
+          <div class="ux-scheduler__resources-header">
+            <div class="ux-scheduler__resources-corner"></div>
+            <template x-for="resource in resources" :key="resource.id">
+              <div class="ux-scheduler__resource-header">
+                <div class="ux-scheduler__resource-avatar" x-text="resource.name.charAt(0)"></div>
+                <div class="ux-scheduler__resource-name" x-text="resource.name"></div>
+                <div class="ux-scheduler__resource-info" x-text="resource.info"></div>
+              </div>
+            </template>
+          </div>
+
+          <div class="ux-scheduler__body" style="max-height: 450px;">
+            <div class="ux-scheduler__grid">
+              <div class="ux-scheduler__times">
+                <template x-for="hour in hours" :key="hour.value">
+                  <div class="ux-scheduler__time" x-text="hour.label"></div>
+                </template>
+              </div>
+
+              <div class="ux-scheduler__columns">
+                <template x-for="resource in resources" :key="resource.id">
+                  <div class="ux-scheduler__day-column">
+                    <template x-for="hour in hours" :key="hour.value">
+                      <div class="ux-scheduler__hour-slot"
+                           :class="{
+                             'ux-scheduler__hour-slot--business': showBusinessHours && hour.isBusiness,
+                             'ux-scheduler__hour-slot--non-business': showBusinessHours && !hour.isBusiness
+                           }"
+                           @click="onSlotClick(currentDate, hour.value, resource.id, $event)">
+                      </div>
+                    </template>
+
+                    <div class="ux-scheduler__now-line"
+                         x-show="isToday(currentDate)"
+                         :style="{ top: nowLineTop + 'px' }"></div>
+
+                    <template x-for="booking in getBookingsForDay(currentDate, resource.id)" :key="booking.id">
+                      <div class="ux-scheduler__booking"
+                           :class="[
+                             'ux-scheduler__booking--' + (booking.status || 'primary'),
+                             { 'ux-scheduler__booking--conflict': hasConflict(booking) }
+                           ]"
+                           :style="getBookingStyle(booking)"
+                           @click="onBookingClick(booking, $event)">
+                        <div class="ux-scheduler__booking-title" x-text="booking.title"></div>
+                        <div class="ux-scheduler__booking-time" x-text="formatTime(booking.start) + ' - ' + formatTime(booking.end)"></div>
+                      </div>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>

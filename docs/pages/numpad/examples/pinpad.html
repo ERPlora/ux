@@ -1,0 +1,59 @@
+<div class="pinpad-demo-bg">
+  <div x-data="uxPinpad({ length: 4, hint: 'Demo PIN: 1234' })"
+       class="ux-pinpad ux-pinpad--glass"
+       @pinpad-submit="
+         setLoading(true);
+         setTimeout(() => {
+           if ($event.detail.pin === '1234') {
+             setSuccess();
+           } else {
+             setError('PIN incorrecto');
+           }
+         }, 1000);
+       ">
+
+    <!-- Label -->
+    <p class="ux-pinpad__label" x-text="label"></p>
+
+    <!-- PIN Dots -->
+    <div class="ux-pinpad__dots">
+      <template x-for="i in length" :key="i">
+        <div class="ux-pinpad__dot" :class="getDotClass(i - 1)"></div>
+      </template>
+    </div>
+
+    <!-- Numpad Grid -->
+    <div class="ux-pinpad__grid">
+      <template x-for="key in keys" :key="key">
+        <button type="button"
+                class="ux-pinpad__key"
+                :class="{ 'ux-pinpad__key--hidden': key === '' }"
+                :disabled="loading"
+                @click="handleKey(key)">
+          <span x-show="key !== 'backspace'" x-text="key"></span>
+          <span x-show="key === 'backspace'" x-html="getBackspaceIcon()"></span>
+        </button>
+      </template>
+    </div>
+
+    <!-- Loading indicator -->
+    <div x-show="loading" class="ux-pinpad__loading">
+      <span class="ux-spinner ux-spinner--sm"></span>
+      <span x-text="loadingText"></span>
+    </div>
+
+    <!-- Error message -->
+    <p x-show="errorMessage" class="ux-pinpad__error" x-text="errorMessage"></p>
+
+    <!-- Hint -->
+    <p x-show="hint && !loading && !errorMessage" class="ux-pinpad__hint" x-text="hint"></p>
+  </div>
+</div>
+
+<style>
+  .pinpad-demo-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: var(--ux-space-lg);
+    border-radius: var(--ux-border-radius-lg);
+  }
+</style>

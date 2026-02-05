@@ -1,0 +1,27 @@
+<!-- Lista de items con menu contextual -->
+{% for item in items %}
+<div class="ux-list__item"
+     x-data="uxContextMenu({
+       items: [
+         { id: 'view', label: 'Ver detalles', icon: 'eye' },
+         { id: 'edit', label: 'Editar', icon: 'edit' },
+         { divider: true },
+         { id: 'delete', label: 'Eliminar', icon: 'trash', danger: true }
+       ]
+     })"
+     @contextmenu.prevent="open($event)"
+     @context-menu:select="
+       if ($event.detail.id === 'view') {
+         htmx.ajax('GET', '{% url \"item_detail\" item.pk %}', '#modal-content');
+       } else if ($event.detail.id === 'edit') {
+         htmx.ajax('GET', '{% url \"item_edit\" item.pk %}', '#modal-content');
+       } else if ($event.detail.id === 'delete') {
+         htmx.ajax('DELETE', '{% url \"item_delete\" item.pk %}', { target: '#item-{{ item.pk }}', swap: 'outerHTML' });
+       }
+     ">
+  {{ item.name }}
+  <div class="ux-context-menu" x-show="isOpen" x-transition :style="menuStyle" @click.outside="close()">
+    <!-- Menu items renderizados por Alpine -->
+  </div>
+</div>
+{% endfor %}

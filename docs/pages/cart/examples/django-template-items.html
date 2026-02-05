@@ -1,0 +1,80 @@
+<!-- templates/cart/partials/cart_items.html -->
+<div class="ux-cart__items">
+  {% if cart.items %}
+    <ul class="ux-cart__items-list">
+      {% for item in cart.items %}
+        <li class="ux-cart-item" id="cart-item-{{ item.id }}">
+          {% if item.image %}
+            <img src="{{ item.image }}" alt="{{ item.name }}" class="ux-cart-item__image">
+          {% else %}
+            <div class="ux-cart-item__image-placeholder">
+              <svg>...</svg>
+            </div>
+          {% endif %}
+
+          <div class="ux-cart-item__content">
+            <h4 class="ux-cart-item__name">{{ item.name }}</h4>
+            <span class="ux-cart-item__unit-price">${{ item.price }} c/u</span>
+
+            <div class="ux-cart-item__qty">
+              <button type="button" class="ux-cart-item__qty-btn"
+                      hx-post="{% url 'update_cart_item' %}"
+                      hx-vals='{"item_id": "{{ item.id }}", "action": "decrement"}'
+                      hx-target="#cart-items-container"
+                      hx-swap="innerHTML">
+                -
+              </button>
+              <span class="ux-cart-item__qty-value">{{ item.quantity }}</span>
+              <button type="button" class="ux-cart-item__qty-btn"
+                      hx-post="{% url 'update_cart_item' %}"
+                      hx-vals='{"item_id": "{{ item.id }}", "action": "increment"}'
+                      hx-target="#cart-items-container"
+                      hx-swap="innerHTML">
+                +
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <span class="ux-cart-item__price">${{ item.line_total }}</span>
+            <button type="button" class="ux-cart-item__remove"
+                    hx-delete="{% url 'remove_cart_item' item.id %}"
+                    hx-target="#cart-item-{{ item.id }}"
+                    hx-swap="outerHTML"
+                    hx-confirm="Eliminar este producto?">
+              <svg>...</svg>
+            </button>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="ux-cart__empty">
+      <p>Tu carrito esta vacio</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Summary -->
+{% if cart.items %}
+<div class="ux-cart-summary">
+  <div class="ux-cart-summary__row">
+    <span class="ux-cart-summary__label">Subtotal</span>
+    <span class="ux-cart-summary__value">${{ cart.subtotal }}</span>
+  </div>
+  {% if discount %}
+  <div class="ux-cart-summary__row ux-cart-summary__row--discount">
+    <span class="ux-cart-summary__label">Descuento</span>
+    <span class="ux-cart-summary__value">-${{ discount }}</span>
+  </div>
+  {% endif %}
+  <div class="ux-cart-summary__row">
+    <span class="ux-cart-summary__label">IVA ({{ tax_rate }}%)</span>
+    <span class="ux-cart-summary__value">${{ cart.tax }}</span>
+  </div>
+  <div class="ux-cart-summary__row ux-cart-summary__row--total">
+    <span class="ux-cart-summary__label">Total</span>
+    <span class="ux-cart-summary__value">${{ cart.total }}</span>
+  </div>
+</div>
+{% endif %}

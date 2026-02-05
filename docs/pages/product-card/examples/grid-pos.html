@@ -1,0 +1,170 @@
+<div class="ux-product-grid ux-product-grid--4"
+     @product-add.window="alert('Agregado: ' + $event.detail.product.name)">
+
+  <!-- Product 1 -->
+  <div x-data="uxProductCard({
+    product: {
+      id: 1,
+      name: 'Cafe Americano',
+      price: 3.50,
+      stock: 100,
+      image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&fit=crop',
+      category: 'Bebidas'
+    },
+    currency: '$'
+  })" class="ux-product-card" :class="{ 'ux-product-card--adding': isAdding }" @click="addToCart()">
+    <div class="ux-product-card__image-wrapper">
+      <img :src="product.image" :alt="product.name" class="ux-product-card__image">
+      <button type="button" class="ux-product-card__quick-add" @click="addToCart($event)" :title="labels.addToCart">
+        <span x-html="getIcon('plus')"></span>
+      </button>
+    </div>
+    <div class="ux-product-card__content">
+      <h4 class="ux-product-card__name" x-text="product.name"></h4>
+      <div class="ux-product-card__price-wrapper">
+        <span class="ux-product-card__price" x-text="formatPrice(product.price)"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product 2 with Sale -->
+  <div x-data="uxProductCard({
+    product: {
+      id: 2,
+      name: 'Cappuccino Grande',
+      price: 4.20,
+      originalPrice: 5.00,
+      stock: 45,
+      image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=300&h=300&fit=crop',
+      category: 'Bebidas'
+    }
+  })" class="ux-product-card" :class="{ 'ux-product-card--adding': isAdding }" @click="addToCart()">
+    <div class="ux-product-card__image-wrapper">
+      <div class="ux-product-card__badges">
+        <span class="ux-product-card__badge ux-product-card__badge--sale">-<span x-text="getDiscountPercent()"></span>%</span>
+      </div>
+      <img :src="product.image" :alt="product.name" class="ux-product-card__image">
+      <button type="button" class="ux-product-card__quick-add" @click="addToCart($event)">
+        <span x-html="getIcon('plus')"></span>
+      </button>
+    </div>
+    <div class="ux-product-card__content">
+      <h4 class="ux-product-card__name" x-text="product.name"></h4>
+      <div class="ux-product-card__price-wrapper">
+        <span class="ux-product-card__price ux-product-card__price--sale" x-text="formatPrice(product.price)"></span>
+        <span class="ux-product-card__price-original" x-text="formatPrice(product.originalPrice)"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product 3 - Low Stock -->
+  <div x-data="uxProductCard({
+    product: {
+      id: 3,
+      name: 'Croissant de Mantequilla',
+      price: 2.80,
+      stock: 3,
+      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=300&h=300&fit=crop',
+      category: 'Panaderia'
+    },
+    lowStockThreshold: 5
+  })" class="ux-product-card" :class="{ 'ux-product-card--adding': isAdding }" @click="addToCart()">
+    <div class="ux-product-card__image-wrapper">
+      <div class="ux-product-card__badges">
+        <span class="ux-product-card__badge ux-product-card__badge--low-stock">Quedan <span x-text="product.stock"></span></span>
+      </div>
+      <img :src="product.image" :alt="product.name" class="ux-product-card__image">
+      <button type="button" class="ux-product-card__quick-add" @click="addToCart($event)">
+        <span x-html="getIcon('plus')"></span>
+      </button>
+    </div>
+    <div class="ux-product-card__content">
+      <h4 class="ux-product-card__name" x-text="product.name"></h4>
+      <div class="ux-product-card__price-wrapper">
+        <span class="ux-product-card__price" x-text="formatPrice(product.price)"></span>
+      </div>
+      <span class="ux-product-card__stock ux-product-card__stock--low" x-text="getStockText()"></span>
+    </div>
+  </div>
+
+  <!-- Product 4 - Out of Stock -->
+  <div x-data="uxProductCard({
+    product: {
+      id: 4,
+      name: 'Sandwich Club Premium',
+      price: 8.50,
+      stock: 0,
+      image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=300&h=300&fit=crop',
+      category: 'Comida'
+    }
+  })" class="ux-product-card ux-product-card--out-of-stock">
+    <div class="ux-product-card__image-wrapper">
+      <div class="ux-product-card__badges">
+        <span class="ux-product-card__badge ux-product-card__badge--out">Agotado</span>
+      </div>
+      <img :src="product.image" :alt="product.name" class="ux-product-card__image">
+    </div>
+    <div class="ux-product-card__content">
+      <h4 class="ux-product-card__name" x-text="product.name"></h4>
+      <div class="ux-product-card__price-wrapper">
+        <span class="ux-product-card__price" x-text="formatPrice(product.price)"></span>
+      </div>
+      <span class="ux-product-card__stock ux-product-card__stock--out" x-text="getStockText()"></span>
+    </div>
+  </div>
+
+  <!-- Product 5 - New -->
+  <div x-data="uxProductCard({
+    product: {
+      id: 5,
+      name: 'Smoothie Tropical',
+      price: 5.90,
+      stock: 50,
+      image: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=300&h=300&fit=crop',
+      category: 'Bebidas'
+    }
+  })" class="ux-product-card" :class="{ 'ux-product-card--adding': isAdding }" @click="addToCart()">
+    <div class="ux-product-card__image-wrapper">
+      <div class="ux-product-card__badges">
+        <span class="ux-product-card__badge ux-product-card__badge--new">Nuevo</span>
+      </div>
+      <img :src="product.image" :alt="product.name" class="ux-product-card__image">
+      <button type="button" class="ux-product-card__quick-add" @click="addToCart($event)">
+        <span x-html="getIcon('plus')"></span>
+      </button>
+    </div>
+    <div class="ux-product-card__content">
+      <h4 class="ux-product-card__name" x-text="product.name"></h4>
+      <div class="ux-product-card__price-wrapper">
+        <span class="ux-product-card__price" x-text="formatPrice(product.price)"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product 6 - No Image -->
+  <div x-data="uxProductCard({
+    product: {
+      id: 6,
+      name: 'Agua Mineral 500ml',
+      price: 1.50,
+      stock: 200,
+      category: 'Bebidas'
+    }
+  })" class="ux-product-card" :class="{ 'ux-product-card--adding': isAdding }" @click="addToCart()">
+    <div class="ux-product-card__image-wrapper">
+      <div class="ux-product-card__placeholder">
+        <span x-html="getIcon('placeholder')"></span>
+      </div>
+      <button type="button" class="ux-product-card__quick-add" @click="addToCart($event)">
+        <span x-html="getIcon('plus')"></span>
+      </button>
+    </div>
+    <div class="ux-product-card__content">
+      <h4 class="ux-product-card__name" x-text="product.name"></h4>
+      <div class="ux-product-card__price-wrapper">
+        <span class="ux-product-card__price" x-text="formatPrice(product.price)"></span>
+      </div>
+    </div>
+  </div>
+
+</div>

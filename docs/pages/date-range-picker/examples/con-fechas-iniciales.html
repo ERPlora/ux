@@ -1,0 +1,84 @@
+<div class="demo-box">
+  <div class="ux-date-range"
+       :class="{ 'ux-date-range--open': isOpen }"
+       x-data="uxDateRangePicker({
+         startDate: new Date(2026, 0, 1),
+         endDate: new Date(2026, 0, 15)
+       })">
+    <button class="ux-date-range__trigger" @click="toggle()">
+      <span x-html="icons.calendar" class="ux-date-range__trigger-icon"></span>
+      <span class="ux-date-range__trigger-text" x-text="displayText || placeholder"></span>
+      <span x-html="icons.chevronDown" class="ux-date-range__trigger-arrow"></span>
+    </button>
+
+    <div class="ux-date-range__panel">
+      <div class="ux-date-range__presets">
+        <template x-for="preset in presets" :key="preset.label">
+          <button class="ux-date-range__preset"
+                  :class="{ 'ux-date-range__preset--active': selectedPreset === preset.label }"
+                  @click="selectPreset(preset)"
+                  x-text="preset.label"></button>
+        </template>
+      </div>
+      <div class="ux-date-range__calendars">
+        <div class="ux-date-range__calendar">
+          <div class="ux-date-range__calendar-header">
+            <button class="ux-date-range__nav-btn" @click="prevMonth('left')">
+              <span x-html="icons.chevronLeft"></span>
+            </button>
+            <span class="ux-date-range__calendar-title" x-text="getMonthTitle(leftMonth)"></span>
+            <button class="ux-date-range__nav-btn" @click="nextMonth('left')">
+              <span x-html="icons.chevronRight"></span>
+            </button>
+          </div>
+          <div class="ux-date-range__weekdays">
+            <template x-for="day in weekdays" :key="day">
+              <span class="ux-date-range__weekday" x-text="day"></span>
+            </template>
+          </div>
+          <div class="ux-date-range__days">
+            <template x-for="(day, idx) in getDays(leftMonth)" :key="'left-' + idx">
+              <button class="ux-date-range__day"
+                      :class="getDayClasses(day)"
+                      @click="selectDay(day.date)"
+                      @mouseenter="hoverDay(day.date)"
+                      x-text="day.date.getDate()"></button>
+            </template>
+          </div>
+        </div>
+        <div class="ux-date-range__calendar">
+          <div class="ux-date-range__calendar-header">
+            <button class="ux-date-range__nav-btn" @click="prevMonth('right')">
+              <span x-html="icons.chevronLeft"></span>
+            </button>
+            <span class="ux-date-range__calendar-title" x-text="getMonthTitle(rightMonth)"></span>
+            <button class="ux-date-range__nav-btn" @click="nextMonth('right')">
+              <span x-html="icons.chevronRight"></span>
+            </button>
+          </div>
+          <div class="ux-date-range__weekdays">
+            <template x-for="day in weekdays" :key="day">
+              <span class="ux-date-range__weekday" x-text="day"></span>
+            </template>
+          </div>
+          <div class="ux-date-range__days">
+            <template x-for="(day, idx) in getDays(rightMonth)" :key="'right-' + idx">
+              <button class="ux-date-range__day"
+                      :class="getDayClasses(day)"
+                      @click="selectDay(day.date)"
+                      @mouseenter="hoverDay(day.date)"
+                      x-text="day.date.getDate()"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+      <div class="ux-date-range__footer">
+        <span class="ux-date-range__selected" x-text="selectedText"></span>
+        <div class="ux-date-range__actions">
+          <button class="ux-date-range__btn ux-date-range__btn--cancel" @click="cancel()">Cancelar</button>
+          <button class="ux-date-range__btn ux-date-range__btn--apply" @click="apply()" :disabled="!canApply">Aplicar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<!-- Preserve filters when loading more -->
+<div class="ux-load-more">
+  <button
+    class="ux-load-more__button"
+    hx-get="?page={{ page_obj.next_page_number }}&category={{ request.GET.category }}&sort={{ request.GET.sort }}"
+    hx-target="#product-list"
+    hx-swap="beforeend">
+    Load More
+  </button>
+</div>
+
+<!-- Or using Alpine.js to build URL dynamically -->
+<div class="ux-load-more"
+     x-data="{
+       page: {{ page_obj.number }},
+       hasNext: {{ page_obj.has_next|yesno:'true,false' }}
+     }">
+  <button
+    x-show="hasNext"
+    class="ux-load-more__button"
+    :hx-get="'?page=' + (page + 1) + '&' + new URLSearchParams(window.location.search).toString()"
+    hx-target="#product-list"
+    hx-swap="beforeend"
+    @htmx:afterRequest="page++; hasNext = $event.detail.xhr.getResponseHeader('X-Has-Next') === 'true'">
+    Load More
+  </button>
+</div>

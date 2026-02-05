@@ -1,0 +1,54 @@
+<!-- Dropdown de acciones masivas -->
+<div x-data="{ selected: [] }">
+  <!-- Dropdown de acciones -->
+  <div class="ux-dropdown" x-data="uxDropdown()" :class="containerClasses">
+    <button class="ux-button ux-color-primary ux-dropdown__trigger"
+            :disabled="selected.length === 0"
+            @click="toggle()" x-bind="triggerAttrs">
+      Acciones (<span x-text="selected.length">0</span>)
+      <span class="ux-dropdown__caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
+    </button>
+
+    <div class="ux-dropdown__menu" role="menu">
+      <button class="ux-dropdown__item"
+              hx-post="/items/bulk/export/"
+              hx-vals="js:{ids: selected}"
+              @click="close()">
+        <span class="ux-dropdown__item-text">Exportar seleccionados</span>
+      </button>
+
+      <button class="ux-dropdown__item"
+              hx-patch="/items/bulk/archive/"
+              hx-vals="js:{ids: selected}"
+              hx-target="#items-list"
+              @click="selected = []; close()">
+        <span class="ux-dropdown__item-text">Archivar seleccionados</span>
+      </button>
+
+      <div class="ux-dropdown__divider"></div>
+
+      <button class="ux-dropdown__item ux-dropdown__item--danger"
+              hx-delete="/items/bulk/delete/"
+              hx-vals="js:{ids: selected}"
+              hx-target="#items-list"
+              hx-confirm="Eliminar los elementos seleccionados?"
+              @click="selected = []; close()">
+        <span class="ux-dropdown__item-text">Eliminar seleccionados</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de items con checkboxes -->
+  <div id="items-list">
+    {% for item in items %}
+    <div class="item-row">
+      <label class="ux-checkbox">
+        <input type="checkbox" :value="{{ item.id }}"
+               x-model="selected">
+        <span class="ux-checkbox__box"></span>
+      </label>
+      <span>{{ item.name }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>

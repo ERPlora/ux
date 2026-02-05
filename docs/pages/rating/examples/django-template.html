@@ -1,0 +1,31 @@
+<!-- templates/products/rating.html -->
+<div x-data="uxRating({ value: {{ product.user_rating|default:0 }} })"
+     class="ux-rating"
+     @mouseleave="onMouseLeave()"
+     @rating-change="$refs.ratingInput.value = $event.detail.value; htmx.trigger($refs.form, 'submit')">
+
+  <form x-ref="form"
+        hx-post="{% url 'products:rate' product.pk %}"
+        hx-trigger="submit"
+        hx-swap="outerHTML"
+        hx-target="closest .ux-rating"
+        hx-indicator="#rating-spinner-{{ product.pk }}">
+    {% csrf_token %}
+    <input type="hidden" name="rating" x-ref="ratingInput" value="{{ product.user_rating|default:0 }}">
+  </form>
+
+  <div class="ux-rating__stars">
+    <template x-for="index in stars" :key="index">
+      <button type="button"
+              class="ux-rating__star"
+              :class="{ 'ux-rating__star--filled': isStarFilled(index), 'ux-rating__star--half': isStarHalf(index) }"
+              @click="setRating(index, $event)"
+              @mousemove="onStarHover(index, $event)"
+              x-html="getStarSvg(index)">
+      </button>
+    </template>
+  </div>
+
+  <span class="ux-rating__value" x-text="value"></span>
+  <span id="rating-spinner-{{ product.pk }}" class="ux-spinner ux-spinner--sm htmx-indicator"></span>
+</div>

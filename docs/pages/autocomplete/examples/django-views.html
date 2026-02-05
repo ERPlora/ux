@@ -1,0 +1,20 @@
+# views.py
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from .models import Product
+
+def search_products(request):
+    query = request.GET.get('search', '').strip()
+
+    if len(query) < 2:
+        return HttpResponse('')
+
+    products = Product.objects.filter(
+        name__icontains=query
+    ).select_related('category')[:10]
+
+    html = render_to_string('partials/product_results.html', {
+        'products': products,
+        'query': query
+    })
+    return HttpResponse(html)

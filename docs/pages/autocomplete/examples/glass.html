@@ -1,0 +1,46 @@
+<div style="background: linear-gradient(135deg, var(--ux-cyan-400), var(--ux-blue-500)); border-radius: 16px; padding: 1.5rem;">
+  <div x-data="uxAutocomplete({
+    items: [
+      { label: 'Dashboard', value: 'dashboard' },
+      { label: 'Settings', value: 'settings' },
+      { label: 'Profile', value: 'profile' },
+      { label: 'Reports', value: 'reports' },
+      { label: 'Analytics', value: 'analytics' }
+    ],
+    placeholder: 'Search...'
+  })">
+    <div class="ux-autocomplete ux-autocomplete--glass" style="max-width: 350px;">
+      <input type="text"
+             class="ux-autocomplete__input"
+             x-ref="input"
+             x-model="query"
+             :placeholder="placeholder"
+             @input="onInput()"
+             @focus="onFocus()"
+             @blur="onBlur()"
+             @keydown="onKeydown($event)"
+             autocomplete="off">
+
+      <button class="ux-autocomplete__clear"
+              :class="{ 'ux-autocomplete__clear--hidden': !query }"
+              @click="clear()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <div class="ux-autocomplete__dropdown"
+           :class="{ 'ux-autocomplete__dropdown--open': isOpen }">
+        <ul class="ux-autocomplete__list">
+          <template x-for="(item, index) in filteredItems" :key="getValue(item)">
+            <li class="ux-autocomplete__item"
+                :class="{ 'ux-autocomplete__item--active': index === activeIndex }"
+                @click="select(item)">
+              <span x-html="highlight(getLabel(item))"></span>
+            </li>
+          </template>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

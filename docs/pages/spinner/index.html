@@ -1,0 +1,143 @@
+<style>
+  .demo-section { margin-bottom: var(--ux-space-xl); padding: 0 var(--ux-space-lg); }
+  .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+  .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+  .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-lg); align-items: center; }
+  .demo-box--dark { background: var(--ux-gray-900); }
+</style>
+
+<!-- Basic Spinner -->
+<section class="component-section">
+  <h3>Spinner Basico</h3>
+  <p>Indicador de carga circular animado.</p>
+  <ux-playground src="pages/spinner/examples/basico.html"></ux-playground>
+</section>
+
+<!-- Sizes -->
+<section class="component-section">
+  <h3>Tamanos</h3>
+  <p>Desde extra small hasta extra large.</p>
+  <ux-playground src="pages/spinner/examples/tamanos.html"></ux-playground>
+</section>
+
+<!-- Colors -->
+<section class="component-section">
+  <h3>Colores</h3>
+  <p>Todos los colores del sistema.</p>
+  <ux-playground src="pages/spinner/examples/colores.html"></ux-playground>
+</section>
+
+<!-- Light/White on dark background -->
+<section class="component-section">
+  <h3>Spinner Claro (para fondos oscuros)</h3>
+  <div class="demo-box demo-box--dark">
+    <ux-playground src="pages/spinner/examples/claro.html"></ux-playground>
+  </div>
+  <pre class="ux-code-block" data-lang="html">&lt;div class="ux-spinner ux-spinner--light"&gt;&lt;/div&gt;
+&lt;div class="ux-spinner ux-spinner--white"&gt;&lt;/div&gt;</pre>
+</section>
+
+<!-- Dots Spinner -->
+<section class="component-section">
+  <h3>Spinner de Puntos</h3>
+  <p>Variante con tres puntos animados.</p>
+  <ux-playground src="pages/spinner/examples/dots.html"></ux-playground>
+</section>
+
+<!-- Bars Spinner -->
+<section class="component-section">
+  <h3>Spinner de Barras</h3>
+  <p>Variante con barras verticales animadas.</p>
+  <ux-playground src="pages/spinner/examples/bars.html"></ux-playground>
+</section>
+
+<!-- iOS Spinner -->
+<section class="component-section">
+  <h3>Spinner iOS Nativo</h3>
+  <p>12 lineas con opacidad graduada (estilo iOS nativo).</p>
+  <ux-playground src="pages/spinner/examples/ios.html"></ux-playground>
+</section>
+
+<!-- With Text -->
+<section class="component-section">
+  <h3>Con Texto</h3>
+  <p>Spinner con mensaje de carga.</p>
+  <ux-playground src="pages/spinner/examples/con-texto.html"></ux-playground>
+</section>
+
+<!-- In Button -->
+<section class="component-section">
+  <h3>En Boton</h3>
+  <p>Spinner inline dentro de un boton.</p>
+  <ux-playground src="pages/spinner/examples/en-boton.html"></ux-playground>
+</section>
+
+<!-- HTMX Integration -->
+<section class="component-section">
+  <h3>Con HTMX</h3>
+  <p>Usar como indicador de HTMX.</p>
+  <pre class="ux-code-block" data-lang="html">&lt;button class="ux-button ux-color-primary"
+        hx-post="/api/data"
+        hx-indicator="#loading"&gt;
+  Cargar
+&lt;/button&gt;
+
+&lt;div id="loading" class="htmx-indicator"&gt;
+  &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+</section>
+
+<!-- HTMX + Django -->
+<section class="component-section">
+  <h3>HTMX + Django</h3>
+  <p>Spinners como indicadores de carga con HTMX y Django.</p>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Template Django con indicador</h4>
+  <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/lista_datos.html --&gt;
+&lt;button class="ux-button ux-color-primary"
+        hx-get="{% url 'cargar_datos' %}"
+        hx-target="#contenido"
+        hx-indicator="#spinner-carga"&gt;
+  Cargar Datos
+&lt;/button&gt;
+
+&lt;div id="spinner-carga" class="htmx-indicator"&gt;
+  &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="contenido"&gt;&lt;/div&gt;</pre>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Vista Django</h4>
+  <pre class="ux-code-block" data-lang="python"># views.py
+import time
+from django.shortcuts import render
+
+def cargar_datos(request):
+    # Simular carga lenta
+    time.sleep(1)
+
+    datos = Modelo.objects.all()
+    return render(request, 'partials/datos_lista.html', {
+        'datos': datos
+    })</pre>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Boton con spinner integrado</h4>
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Boton que muestra spinner mientras procesa --&gt;
+&lt;button class="ux-button ux-color-primary"
+        hx-post="{% url 'guardar_formulario' %}"
+        hx-target="#resultado"
+        hx-disabled-elt="this"&gt;
+  &lt;span class="htmx-indicator"&gt;
+    &lt;span class="ux-spinner ux-spinner--xs ux-spinner--white ux-spinner--inline"&gt;&lt;/span&gt;
+  &lt;/span&gt;
+  &lt;span class="htmx-hide-on-request"&gt;Guardar&lt;/span&gt;
+  &lt;span class="htmx-show-on-request"&gt;Guardando...&lt;/span&gt;
+&lt;/button&gt;</pre>
+</section>
+
+<!-- Full Page Overlay -->
+<section class="component-section">
+  <h3>Overlay de Pagina Completa</h3>
+  <p>Para bloquear la UI mientras se carga.</p>
+  <ux-playground src="pages/spinner/examples/overlay.html"></ux-playground>
+</section>

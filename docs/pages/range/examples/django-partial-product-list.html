@@ -1,0 +1,51 @@
+<!-- templates/products/partials/product_list.html -->
+<div class="product-list-header">
+  <p class="ux-text-secondary">{{ total_count }} productos encontrados</p>
+</div>
+
+<div class="product-grid">
+  {% for product in products %}
+  <div class="ux-card">
+    <div class="ux-card__media">
+      <img src="{{ product.image.url }}" alt="{{ product.name }}">
+    </div>
+    <div class="ux-card__content">
+      <h3 class="ux-card__title">{{ product.name }}</h3>
+      <p class="ux-card__subtitle">{{ product.category.name }}</p>
+      <div class="product-price">
+        {% if product.discount_price %}
+        <span class="price-original">${{ product.price }}</span>
+        <span class="price-discount">${{ product.discount_price }}</span>
+        {% else %}
+        <span class="price">${{ product.price }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="ux-card__actions">
+      <button class="ux-button ux-color-primary"
+              hx-post="{% url 'cart:add' product.id %}"
+              hx-target="#cart-count"
+              hx-swap="innerHTML">
+        Agregar al carrito
+      </button>
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty-state">
+    <p>No se encontraron productos en este rango de precio.</p>
+    <button class="ux-button" onclick="resetFilters()">Limpiar filtros</button>
+  </div>
+  {% endfor %}
+</div>
+
+{% if products.has_other_pages %}
+<div class="pagination">
+  <button class="ux-button ux-button--outline"
+          hx-get="?page={{ products.next_page_number }}&price_min={{ price_min }}&price_max={{ price_max }}"
+          hx-target="#product-results"
+          hx-swap="innerHTML"
+          {% if not products.has_next %}disabled{% endif %}>
+    Cargar mas
+  </button>
+</div>
+{% endif %}

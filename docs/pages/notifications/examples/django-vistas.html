@@ -1,0 +1,51 @@
+<div class="demo-box">
+  <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">2. Vistas Django (HTMX)</h4>
+  <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth.decorators import login_required
+from .models import Notification
+
+@login_required
+@require_GET
+def notification_list(request):
+    """Retorna lista de notificaciones como HTML parcial para HTMX"""
+    notifications = Notification.objects.filter(user=request.user)[:50]
+    return render(request, 'notifications/_list.html', {
+        'notifications': notifications
+    })
+
+@login_required
+@require_GET
+def notification_count(request):
+    """Retorna contador de no leidas para polling"""
+    count = Notification.objects.filter(user=request.user, read=False).count()
+    if count > 99:
+        count = '99+'
+    return HttpResponse(f'<span class="ux-notification-trigger__badge">{count}</span>')
+
+@login_required
+@require_POST
+def mark_as_read(request, notification_id):
+    """Marca una notificacion como leida"""
+    Notification.objects.filter(
+        id=notification_id,
+        user=request.user
+    ).update(read=True)
+    return HttpResponse(status=204)
+
+@login_required
+@require_POST
+def mark_all_read(request):
+    """Marca todas las notificaciones como leidas"""
+    Notification.objects.filter(user=request.user, read=False).update(read=True)
+    return HttpResponse(status=204)
+
+@login_required
+@require_POST
+def clear_all(request):
+    """Elimina todas las notificaciones"""
+    Notification.objects.filter(user=request.user).delete()
+    return render(request, 'notifications/_empty.html')</pre>
+</div>

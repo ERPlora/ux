@@ -1,0 +1,18 @@
+# views.py - Add custom header for pagination state
+def product_list(request):
+    products = Product.objects.all()
+    paginator = Paginator(products, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    if request.headers.get('HX-Request'):
+        response = render(request, 'partials/product_items.html', {
+            'page_obj': page_obj,
+        })
+        # Add header for client-side state management
+        response['X-Has-Next'] = str(page_obj.has_next()).lower()
+        response['X-Current-Page'] = str(page_obj.number)
+        response['X-Total-Pages'] = str(paginator.num_pages)
+        return response
+
+    return render(request, 'products/list.html', {'page_obj': page_obj})

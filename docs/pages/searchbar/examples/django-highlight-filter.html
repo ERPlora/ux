@@ -1,0 +1,18 @@
+# templatetags/search_tags.py
+from django import template
+from django.utils.safestring import mark_safe
+import re
+
+register = template.Library()
+
+@register.filter
+def highlight(text, query):
+    """Resalta las coincidencias de busqueda en el texto"""
+    if not query:
+        return text
+    pattern = re.compile(f'({re.escape(query)})', re.IGNORECASE)
+    highlighted = pattern.sub(
+        r'<span class="ux-searchbar__highlight">\1</span>',
+        str(text)
+    )
+    return mark_safe(highlighted)

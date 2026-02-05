@@ -1,0 +1,41 @@
+<div x-data="{
+       ...uxContextMenu({
+         items: [
+           { id: 'edit', label: 'Editar', icon: 'edit' },
+           { id: 'duplicate', label: 'Duplicar', icon: 'copy' },
+           { divider: true },
+           { id: 'delete', label: 'Eliminar', icon: 'trash', danger: true }
+         ]
+       }),
+       confirmDelete: false,
+       itemId: '{{ item.pk }}'
+     }"
+     @contextmenu.prevent="open($event)"
+     @context-menu:select="
+       if ($event.detail.id === 'delete') {
+         confirmDelete = true;
+       } else if ($event.detail.id === 'edit') {
+         htmx.ajax('GET', '/items/' + itemId + '/edit/', '#modal-content');
+       }
+     ">
+
+  <!-- Alert de confirmacion -->
+  <template x-if="confirmDelete">
+    <div class="ux-alert">
+      <div class="ux-alert__content">
+        <h3>Confirmar eliminacion</h3>
+        <p>Esta accion no se puede deshacer.</p>
+      </div>
+      <div class="ux-alert__actions">
+        <button class="ux-button" @click="confirmDelete = false">Cancelar</button>
+        <button class="ux-button ux-color-danger"
+                hx-delete="{% url 'item_delete' item.pk %}"
+                hx-target="#item-{{ item.pk }}"
+                hx-swap="outerHTML"
+                @click="confirmDelete = false">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </template>
+</div>

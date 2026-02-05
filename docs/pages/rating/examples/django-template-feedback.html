@@ -1,0 +1,27 @@
+<!-- Rating que muestra mensaje de confirmacion -->
+<div id="rating-container-{{ product.pk }}">
+  <div x-data="uxRating({ value: {{ product.user_rating|default:0 }} })"
+       class="ux-rating"
+       @mouseleave="onMouseLeave()">
+
+    <div class="ux-rating__stars">
+      <template x-for="index in stars" :key="index">
+        <button type="button"
+                class="ux-rating__star"
+                :class="{ 'ux-rating__star--filled': isStarFilled(index) }"
+                @click="setRating(index, $event)"
+                @mousemove="onStarHover(index, $event)"
+                hx-post="{% url 'products:rate' product.pk %}"
+                hx-vals='js:{"rating": index + 1}'
+                hx-target="#rating-feedback-{{ product.pk }}"
+                hx-swap="innerHTML"
+                x-html="getStarSvg(index)">
+        </button>
+      </template>
+    </div>
+
+    <span class="ux-rating__value" x-text="value"></span>
+  </div>
+
+  <div id="rating-feedback-{{ product.pk }}" style="margin-top: var(--ux-space-sm);"></div>
+</div>

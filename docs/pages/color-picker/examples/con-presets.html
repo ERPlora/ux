@@ -1,0 +1,47 @@
+<div class="ux-color-picker" x-data="uxColorPicker({
+  value: '#ef4444',
+  presets: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#000000', '#ffffff']
+})">
+  <button class="ux-color-picker__trigger" @click="toggle()">
+    <span class="ux-color-picker__swatch" :style="{ background: displayValue }"></span>
+    <span class="ux-color-picker__value" x-text="displayValue"></span>
+  </button>
+
+  <div class="ux-color-picker__dropdown" x-show="isOpen" x-transition @click.outside="close()">
+    <div class="ux-color-picker__spectrum"
+         :style="{ background: `hsl(${hue}, 100%, 50%)` }"
+         @mousedown="onSpectrumMouseDown"
+         @touchstart.prevent="onSpectrumTouchStart">
+      <div class="ux-color-picker__spectrum-white"></div>
+      <div class="ux-color-picker__spectrum-black"></div>
+      <div class="ux-color-picker__spectrum-cursor"
+           :style="{ left: saturation + '%', top: (100 - lightness * 2) + '%' }"></div>
+    </div>
+
+    <div class="ux-color-picker__slider ux-color-picker__slider--hue"
+         @mousedown="onHueMouseDown"
+         @touchstart.prevent="onHueTouchStart">
+      <div class="ux-color-picker__slider-track"></div>
+      <div class="ux-color-picker__slider-thumb" :style="{ left: (hue / 360 * 100) + '%' }"></div>
+    </div>
+
+    <div class="ux-color-picker__input-group">
+      <input type="text" class="ux-color-picker__input" :value="displayValue" @change="setFromInput($event.target.value)">
+      <button class="ux-color-picker__format-btn" @click="cycleFormat()" x-text="format.toUpperCase()"></button>
+    </div>
+
+    <div class="ux-color-picker__presets">
+      <template x-for="preset in presets" :key="preset">
+        <button class="ux-color-picker__preset"
+                :style="{ background: preset }"
+                :class="{ 'ux-color-picker__preset--active': value === preset }"
+                @click="setValue(preset)"></button>
+      </template>
+    </div>
+  </div>
+
+  <div class="color-preview" style="display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem;">
+    <div class="color-swatch" style="width: 48px; height: 48px; border-radius: 8px; border: 1px solid var(--ux-border-color);" :style="{ background: displayValue }"></div>
+    <span x-text="displayValue"></span>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+# forms.py
+from django import forms
+import base64
+
+class SignatureForm(forms.Form):
+    name = forms.CharField(max_length=100)
+    signature = forms.CharField(widget=forms.HiddenInput())
+
+    def clean_signature(self):
+        signature = self.cleaned_data.get('signature')
+
+        if not signature:
+            raise forms.ValidationError('La firma es requerida')
+
+        # Validar formato base64
+        if not signature.startswith('data:image/'):
+            raise forms.ValidationError('Formato de firma inválido')
+
+        try:
+            format, imgstr = signature.split(';base64,')
+            base64.b64decode(imgstr)
+        except Exception:
+            raise forms.ValidationError('Firma corrupta')
+
+        return signature
+
+
+# views.py
+from .forms import SignatureForm
+
+def sign_document(request):
+    if request.method == 'POST':
+        form = SignatureForm(request.POST)
+        if form.is_valid():
+            # Procesar firma válida
+            pass
+    else:
+        form = SignatureForm()
+
+    return render(request, 'sign.html', {'form': form})

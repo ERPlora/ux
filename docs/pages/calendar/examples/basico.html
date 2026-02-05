@@ -1,0 +1,54 @@
+<div x-data="uxCalendar()" @calendar:select="selectedDisplay = $event.detail.formatted">
+  <div class="ux-calendar">
+    <!-- Header -->
+    <div class="ux-calendar__header">
+      <button class="ux-calendar__nav-btn" @click="prevMonth()" x-html="icons.prev"></button>
+      <span class="ux-calendar__title" x-text="currentMonthYear"></span>
+      <button class="ux-calendar__nav-btn" @click="nextMonth()" x-html="icons.next"></button>
+    </div>
+
+    <!-- Weekdays -->
+    <div class="ux-calendar__weekdays">
+      <template x-for="day in weekdays" :key="day">
+        <div class="ux-calendar__weekday" x-text="day"></div>
+      </template>
+    </div>
+
+    <!-- Days -->
+    <div class="ux-calendar__days">
+      <template x-for="dayObj in calendarDays" :key="dayObj.date.toISOString()">
+        <button class="ux-calendar__day"
+                :class="{
+                  'ux-calendar__day--other-month': dayObj.isOtherMonth && showOtherMonths,
+                  'ux-calendar__day--today': dayObj.isToday,
+                  'ux-calendar__day--selected': dayObj.isSelected,
+                  'ux-calendar__day--disabled': dayObj.isDisabled
+                }"
+                :style="dayObj.isOtherMonth && !showOtherMonths ? 'visibility: hidden' : ''"
+                @click="selectDate(dayObj)"
+                x-text="dayObj.day">
+        </button>
+      </template>
+    </div>
+
+    <!-- Footer -->
+    <div class="ux-calendar__footer" x-show="showFooter">
+      <button class="ux-calendar__today-btn" @click="goToToday()">Hoy</button>
+      <button class="ux-calendar__clear-btn" @click="clearSelection()" x-show="selectedDate">Limpiar</button>
+    </div>
+  </div>
+
+  <div class="result-display" x-data="{ selectedDisplay: null }" x-show="selectedDate">
+    Fecha seleccionada: <strong x-text="formatDate(selectedDate)"></strong>
+  </div>
+</div>
+
+<style>
+  .result-display {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--ux-surface-secondary);
+    border-radius: 8px;
+    font-size: 0.875rem;
+  }
+</style>

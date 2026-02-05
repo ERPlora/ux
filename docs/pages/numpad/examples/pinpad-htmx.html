@@ -1,0 +1,42 @@
+<div x-data="uxPinpad({ length: 4, label: 'Ingrese PIN de empleado' })"
+     class="ux-pinpad"
+     @pinpad-submit="
+       setLoading(true);
+       htmx.ajax('POST', '/api/validate-pin', {
+         values: { pin: $event.detail.pin },
+         target: '#pin-htmx-result'
+       }).then(() => {
+         // El servidor deberia responder con HX-Trigger para setSuccess o setError
+         setLoading(false);
+       });
+     ">
+
+  <p class="ux-pinpad__label" x-text="label"></p>
+
+  <div class="ux-pinpad__dots">
+    <template x-for="i in length" :key="i">
+      <div class="ux-pinpad__dot" :class="getDotClass(i - 1)"></div>
+    </template>
+  </div>
+
+  <div class="ux-pinpad__grid">
+    <template x-for="key in keys" :key="key">
+      <button type="button"
+              class="ux-pinpad__key"
+              :class="{ 'ux-pinpad__key--hidden': key === '' }"
+              :disabled="loading"
+              @click="handleKey(key)">
+        <span x-show="key !== 'backspace'" x-text="key"></span>
+        <span x-show="key === 'backspace'" x-html="getBackspaceIcon()"></span>
+      </button>
+    </template>
+  </div>
+
+  <div x-show="loading" class="ux-pinpad__loading">
+    <span class="ux-spinner ux-spinner--sm"></span>
+    <span x-text="loadingText"></span>
+  </div>
+
+  <p x-show="errorMessage" class="ux-pinpad__error" x-text="errorMessage"></p>
+</div>
+<div id="pin-htmx-result" style="padding: var(--ux-space-md); text-align: center;"></div>

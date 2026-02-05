@@ -1,0 +1,71 @@
+<div class="demo-calendar" x-data="{
+  ...uxShiftCalendar({ shifts: [], showLegend: false }),
+  newShiftData: null
+}" @shift-calendar:create="newShiftData = $event.detail">
+  <div class="ux-shift-calendar">
+    <div class="ux-shift-calendar__header">
+      <div class="ux-shift-calendar__header-start">
+        <div class="ux-shift-calendar__nav">
+          <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(-1)" x-html="icons.prev"></button>
+          <button class="ux-shift-calendar__nav-btn" @click="navigateWeek(1)" x-html="icons.next"></button>
+        </div>
+      </div>
+      <div class="ux-shift-calendar__header-center">
+        <span class="ux-shift-calendar__title" x-text="weekRangeTitle"></span>
+      </div>
+      <div class="ux-shift-calendar__header-end">
+        <button class="ux-shift-calendar__today-btn" @click="goToToday()">Hoy</button>
+      </div>
+    </div>
+
+    <div class="ux-shift-calendar__grid-wrapper">
+      <div class="ux-shift-calendar__grid">
+        <div class="ux-shift-calendar__corner"></div>
+        <template x-for="(date, dayIndex) in weekDates" :key="dayIndex">
+          <div class="ux-shift-calendar__day-header"
+               :class="{ 'ux-shift-calendar__day-header--today': isToday(date) }">
+            <span class="ux-shift-calendar__day-name" x-text="dayNames[date.getDay()]"></span>
+            <span class="ux-shift-calendar__day-number" x-text="date.getDate()"></span>
+          </div>
+        </template>
+
+        <template x-for="slot in timeSlots" :key="slot.hour">
+          <template x-for="(colIndex) in [0,1,2,3,4,5,6,7]" :key="colIndex">
+            <template x-if="colIndex === 0">
+              <div class="ux-shift-calendar__time-slot">
+                <span x-text="slot.label"></span>
+              </div>
+            </template>
+            <template x-if="colIndex > 0">
+              <div class="ux-shift-calendar__cell"
+                   :class="{
+                     'ux-shift-calendar__cell--selecting': isSelecting && selectionStart?.date === formatDate(weekDates[colIndex - 1])
+                   }"
+                   @mousedown="onCellMouseDown(weekDates[colIndex - 1], slot.hour, $event)"
+                   @mousemove="onCellMouseMove(weekDates[colIndex - 1], slot.hour, $event)">
+              </div>
+            </template>
+          </template>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-display" x-show="newShiftData">
+    Nuevo turno a crear:
+    <strong x-text="newShiftData?.date"></strong> de
+    <span x-text="newShiftData?.startTime"></span> a
+    <span x-text="newShiftData?.endTime"></span>
+  </div>
+</div>
+
+<style>
+.demo-calendar { height: 600px; }
+.result-display {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--ux-surface-secondary);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+</style>

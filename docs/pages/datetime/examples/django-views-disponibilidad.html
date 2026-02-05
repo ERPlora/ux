@@ -1,0 +1,28 @@
+# views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+from datetime import datetime
+
+@require_POST
+def check_availability(request):
+    date_str = request.POST.get('booking_date')
+    if not date_str:
+        return HttpResponse('<span class="ux-text-secondary">Selecciona una fecha</span>')
+
+    booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+
+    # Verificar disponibilidad en la base de datos
+    is_available = not Booking.objects.filter(
+        date=booking_date,
+        status='confirmed'
+    ).exists()
+
+    if is_available:
+        return HttpResponse(
+            '<span class="ux-badge ux-color-success--soft">'
+            'Fecha disponible</span>'
+        )
+    return HttpResponse(
+        '<span class="ux-badge ux-color-danger--soft">'
+        'Fecha no disponible</span>'
+    )

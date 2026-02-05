@@ -1,0 +1,59 @@
+<div x-data="{
+  ...uxAutocomplete({
+    items: ['Option A', 'Option B', 'Option C', 'Option D'],
+    placeholder: 'Search...'
+  }),
+  eventLog: []
+}"
+@autocomplete:select="eventLog.unshift('select: ' + $event.detail.value)"
+@autocomplete:input="eventLog.unshift('input: ' + $event.detail.query)"
+@autocomplete:clear="eventLog.unshift('clear')">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="ux-autocomplete">
+        <input type="text"
+               class="ux-autocomplete__input"
+               x-ref="input"
+               x-model="query"
+               :placeholder="placeholder"
+               @input="onInput()"
+               @focus="onFocus()"
+               @blur="onBlur()"
+               @keydown="onKeydown($event)"
+               autocomplete="off">
+
+        <button class="ux-autocomplete__clear"
+                :class="{ 'ux-autocomplete__clear--hidden': !query }"
+                @click="clear()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <div class="ux-autocomplete__dropdown"
+             :class="{ 'ux-autocomplete__dropdown--open': isOpen }">
+          <ul class="ux-autocomplete__list">
+            <template x-for="(item, index) in filteredItems" :key="item">
+              <li class="ux-autocomplete__item"
+                  :class="{ 'ux-autocomplete__item--active': index === activeIndex }"
+                  @click="select(item)">
+                <span x-html="highlight(item)"></span>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h4 style="font-size: 0.875rem; margin-bottom: 0.5rem;">Event Log:</h4>
+      <div class="event-log" style="font-family: monospace; font-size: 0.75rem; background: var(--ux-gray-900); color: var(--ux-green-400); padding: 0.75rem; border-radius: 8px; max-height: 150px; overflow-y: auto;">
+        <template x-for="(event, i) in eventLog.slice(0, 10)" :key="i">
+          <div x-text="event"></div>
+        </template>
+        <div x-show="eventLog.length === 0" style="color: var(--ux-gray-500);">
+          Escribe para ver eventos...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

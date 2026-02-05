@@ -1,0 +1,17 @@
+from django.shortcuts import render
+from django.views.decorators.http import require_GET
+from .models import Category
+
+@require_GET
+def mega_menu_categories(request):
+    """Return mega menu categories as HTML partial."""
+    categories = Category.objects.prefetch_related(
+        'products'
+    ).filter(
+        is_active=True,
+        show_in_menu=True
+    ).order_by('order')[:6]  # Limit to 6 categories for 3x2 grid
+
+    return render(request, 'partials/mega_menu_categories.html', {
+        'categories': categories
+    })

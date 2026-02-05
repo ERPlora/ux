@@ -1,0 +1,57 @@
+<div class="demo-box">
+  <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">8. Server-Sent Events (SSE) - Alternativa Ligera</h4>
+  <pre class="ux-code-block" data-lang="python"># views.py - SSE endpoint
+import json
+from django.http import StreamingHttpResponse
+from django.contrib.auth.decorators import login_required
+import time
+
+@login_required
+def notification_stream(request):
+    """Stream de notificaciones usando SSE"""
+    def event_stream():
+        last_id = 0
+        while True:
+            # Verificar nuevas notificaciones
+            notifications = Notification.objects.filter(
+                user=request.user,
+                id__gt=last_id
+            ).order_by('id')
+
+            for notif in notifications:
+                last_id = notif.id
+                data = json.dumps(notif.to_dict())
+                yield f"event: notification\ndata: {data}\n\n"
+
+            time.sleep(2)  # Polling cada 2 segundos
+
+    response = StreamingHttpResponse(
+        event_stream(),
+        content_type='text/event-stream'
+    )
+    response['Cache-Control'] = 'no-cache'
+    response['X-Accel-Buffering'] = 'no'
+    return response</pre>
+  <pre class="ux-code-block" data-lang="html"><!-- Cliente SSE -->
+<script>
+const eventSource = new EventSource('/notifications/stream/');
+
+eventSource.addEventListener('notification', (event) => {
+  const notification = JSON.parse(event.data);
+
+  // Agregar a la lista via Alpine.js
+  Alpine.store('notifications').add(notification);
+
+  // O refrescar via HTMX
+  htmx.trigger('#notif-list', 'refresh');
+});
+
+eventSource.onerror = () => {
+  // Reconectar automaticamente
+  setTimeout(() => {
+    eventSource.close();
+    location.reload();
+  }, 5000);
+};
+</script></pre>
+</div>

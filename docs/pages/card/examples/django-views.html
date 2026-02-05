@@ -1,0 +1,35 @@
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
+from .models import Product
+
+def products_list(request):
+    """Lista de productos con paginacion para HTMX."""
+    products = Product.objects.filter(active=True).order_by('-created_at')
+    paginator = Paginator(products, 12)  # 12 cards por pagina
+
+    page = request.GET.get('page', 1)
+    products_page = paginator.get_page(page)
+
+    context = {
+        'products': products_page,
+        'has_next': products_page.has_next(),
+        'next_page': products_page.next_page_number() if products_page.has_next() else None,
+    }
+
+    # Si es peticion HTMX, retornar solo las cards
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/products_cards.html', context)
+
+    # Si es peticion normal, retornar pagina completa
+    return render(request, 'products_list.html', context)
+
+
+def product_detail(request, pk):
+    """Detalle de producto para cargar en modal via HTMX."""
+    product = get_object_or_404(Product, pk=pk)
+
+    # Siempre retorna HTML parcial para el modal
+    return render(request, 'partials/product_detail.html', {
+        'product': product
+    })

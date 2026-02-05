@@ -1,0 +1,79 @@
+<div x-data="{
+  ...uxDatatable({
+    columns: [
+      { key: 'id', label: '#', type: 'number' },
+      { key: 'title', label: 'Pedido' },
+      { key: 'customer', label: 'Cliente' },
+      { key: 'amount', label: 'Total', type: 'number' },
+      { key: 'status', label: 'Estado' },
+      { key: 'date', label: 'Fecha', type: 'date' }
+    ],
+    rows: [
+      { id: 1001, title: 'Pedido #1001', customer: 'Juan Garcia', amount: 299.99, status: 'completed', date: '2024-01-15' },
+      { id: 1002, title: 'Pedido #1002', customer: 'Maria Lopez', amount: 149.50, status: 'pending', date: '2024-01-16' },
+      { id: 1003, title: 'Pedido #1003', customer: 'Carlos Ruiz', amount: 599.00, status: 'processing', date: '2024-01-16' },
+      { id: 1004, title: 'Pedido #1004', customer: 'Ana Torres', amount: 89.99, status: 'cancelled', date: '2024-01-17' }
+    ],
+    paginated: false
+  }),
+  getStatusClass(status) {
+    const classes = {
+      'completed': 'ux-badge--success',
+      'pending': 'ux-badge--warning',
+      'processing': 'ux-badge--primary',
+      'cancelled': 'ux-badge--danger'
+    };
+    return classes[status] || 'ux-badge--secondary';
+  },
+  getStatusLabel(status) {
+    const labels = {
+      'completed': 'Completado',
+      'pending': 'Pendiente',
+      'processing': 'Procesando',
+      'cancelled': 'Cancelado'
+    };
+    return labels[status] || status;
+  },
+  formatAmount(amount) {
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
+  },
+  formatDate(date) {
+    return new Date(date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+}" class="ux-datatable ux-datatable--bordered ux-datatable--striped ux-datatable--responsive">
+
+  <div class="ux-datatable__body">
+    <table class="ux-datatable__table">
+      <thead class="ux-datatable__thead">
+        <tr>
+          <th class="ux-datatable__th">#</th>
+          <th class="ux-datatable__th">Pedido</th>
+          <th class="ux-datatable__th">Cliente</th>
+          <th class="ux-datatable__th ux-datatable__th--right">Total</th>
+          <th class="ux-datatable__th ux-datatable__th--center">Estado</th>
+          <th class="ux-datatable__th">Fecha</th>
+        </tr>
+      </thead>
+      <tbody class="ux-datatable__tbody">
+        <template x-for="row in rows" :key="row.id">
+          <tr class="ux-datatable__tr ux-datatable__tr--clickable" @click="onRowClick(row, $event)">
+            <td class="ux-datatable__td" data-label="#">
+              <span class="ux-text-secondary" x-text="row.id"></span>
+            </td>
+            <td class="ux-datatable__td ux-datatable__td--primary" data-label="Pedido">
+              <strong x-text="row.title"></strong>
+            </td>
+            <td class="ux-datatable__td" data-label="Cliente" x-text="row.customer"></td>
+            <td class="ux-datatable__td ux-datatable__td--right" data-label="Total">
+              <strong x-text="formatAmount(row.amount)"></strong>
+            </td>
+            <td class="ux-datatable__td ux-datatable__td--center" data-label="Estado">
+              <span class="ux-badge ux-badge--soft" :class="getStatusClass(row.status)" x-text="getStatusLabel(row.status)"></span>
+            </td>
+            <td class="ux-datatable__td" data-label="Fecha" x-text="formatDate(row.date)"></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </div>
+</div>

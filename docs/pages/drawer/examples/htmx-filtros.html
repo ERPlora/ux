@@ -1,0 +1,53 @@
+<div x-data="uxDrawer({ position: 'right' })">
+  <button class="ux-button" @click="open()">Filtros</button>
+
+  <template x-teleport="body">
+    <div class="ux-drawer-backdrop" :class="backdropClasses" @click.self="onBackdropClick()">
+      <div class="ux-drawer ux-drawer--lg" :class="drawerClasses">
+        <div class="ux-drawer__header">
+          <h3 class="ux-drawer__title">Filtros</h3>
+          <button class="ux-drawer__close" @click="close()">&times;</button>
+        </div>
+        <form class="ux-drawer__content ux-drawer__content--padded"
+              hx-get="/products/"
+              hx-target="#product-list"
+              hx-trigger="change delay:300ms"
+              hx-indicator="#filter-spinner">
+
+          <div class="ux-input">
+            <select name="category">
+              <option value="">Todas las categorias</option>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+            <label>Categoria</label>
+          </div>
+
+          <div class="ux-input" style="margin-top: var(--ux-space-md);">
+            <input type="number" name="min_price" placeholder=" ">
+            <label>Precio minimo</label>
+          </div>
+
+          <div class="ux-input" style="margin-top: var(--ux-space-md);">
+            <input type="number" name="max_price" placeholder=" ">
+            <label>Precio maximo</label>
+          </div>
+
+          <label class="ux-checkbox" style="margin-top: var(--ux-space-md);">
+            <input type="checkbox" name="in_stock" value="1">
+            <span class="ux-checkbox__box"></span>
+            Solo disponibles
+          </label>
+        </form>
+        <div class="ux-drawer__footer">
+          <button class="ux-button" type="reset" form="filter-form">Limpiar</button>
+          <button class="ux-button ux-color-primary" @click="close()">
+            <span id="filter-spinner" class="ux-spinner htmx-indicator"></span>
+            Aplicar
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+</div>

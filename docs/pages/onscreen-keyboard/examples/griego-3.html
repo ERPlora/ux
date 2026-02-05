@@ -1,0 +1,117 @@
+<style>
+  .keyboard-demo-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1.125rem;
+    border: 2px solid var(--ux-border-color);
+    border-radius: 12px;
+    background: var(--ux-surface);
+    color: var(--ux-text);
+    transition: border-color 0.2s;
+  }
+  .keyboard-demo-input:focus {
+    outline: none;
+    border-color: var(--ux-primary);
+  }
+  .keyboard-trigger-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--ux-text);
+    background: var(--ux-surface);
+    border: 1px solid var(--ux-border-color);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .keyboard-trigger-btn svg {
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+  }
+</style>
+
+<div x-data="uxOnscreenKeyboard({
+  languages: ['en', 'es', 'fr', 'de'],
+  defaultLanguage: 'es',
+  targetSelector: '#basic-input'
+})">
+  <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem;">
+    <input type="text"
+           id="basic-input"
+           class="keyboard-demo-input"
+           placeholder="Escribe aqui..."
+           @focus="open()"
+           style="flex: 1;">
+    <button class="keyboard-trigger-btn" @click="toggle()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="4" width="20" height="16" rx="2"/>
+        <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Keyboard Sheet -->
+  <div class="ux-osk-sheet" :class="{ 'ux-osk-sheet--open': isOpen }">
+    <div class="ux-osk-sheet__container">
+      <div class="ux-osk-sheet__header">
+        <div class="ux-osk-sheet__actions">
+          <button class="ux-onscreen-keyboard__lang-btn"
+                  @click="showLangPicker = !showLangPicker"
+                  @mousedown.prevent>
+            <span class="ux-onscreen-keyboard__lang-icon" x-html="icons.globe"></span>
+            <span x-text="currentLanguage.toUpperCase()"></span>
+          </button>
+        </div>
+        <span class="ux-osk-sheet__title" x-text="currentLayout?.name || 'Keyboard'"></span>
+        <div class="ux-osk-sheet__actions">
+          <button class="ux-osk-sheet__btn ux-osk-sheet__btn--close"
+                  @click="close()"
+                  @mousedown.prevent
+                  x-html="icons.close">
+          </button>
+        </div>
+      </div>
+
+      <div class="ux-onscreen-keyboard__lang-picker"
+           x-show="showLangPicker"
+           x-transition
+           style="position: relative; top: 0; left: 0; right: 0; margin: 0; border-radius: 0; border-left: none; border-right: none;">
+        <template x-for="lang in availableLayouts" :key="lang.code">
+          <div class="ux-onscreen-keyboard__lang-option"
+               :class="{ 'active': lang.code === currentLanguage }"
+               @click="selectLanguage(lang.code)">
+            <span x-text="lang.code.toUpperCase()"></span>
+            <span x-text="lang.name"></span>
+          </div>
+        </template>
+      </div>
+
+      <div class="ux-osk-sheet__content">
+        <div class="ux-onscreen-keyboard">
+          <template x-for="(row, rowIndex) in currentRows" :key="rowIndex">
+            <div class="ux-onscreen-keyboard__row">
+              <template x-for="(key, keyIndex) in row" :key="keyIndex">
+                <button :class="getKeyClass(key)"
+                        @click="pressKey(key, $event)"
+                        @mousedown.prevent>
+                  <template x-if="isSpecialKey(key) && isSpecialKeyIcon(key)">
+                    <span class="ux-onscreen-keyboard__key-icon" x-html="getSpecialKeyContent(key)"></span>
+                  </template>
+                  <template x-if="isSpecialKey(key) && !isSpecialKeyIcon(key)">
+                    <span x-text="getSpecialKeyContent(key)"></span>
+                  </template>
+                  <template x-if="!isSpecialKey(key)">
+                    <span x-text="displayKey(key)"></span>
+                  </template>
+                </button>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

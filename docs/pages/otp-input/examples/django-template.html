@@ -1,0 +1,64 @@
+<!-- templates/auth/otp_verify.html -->
+<div id="otp-container"
+     x-data="uxOtpInput({
+       length: 6,
+       type: 'number',
+       resendEnabled: true,
+       resendCooldown: 60
+     })"
+     @otp:complete="$refs.form.requestSubmit()"
+     @otp:resend="htmx.trigger('#resend-btn', 'click')">
+
+  <h2>Verificar tu cuenta</h2>
+  <p>Introduce el codigo de 6 digitos enviado a tu telefono</p>
+
+  <form x-ref="form"
+        hx-post="{% url 'otp_verify' %}"
+        hx-target="#otp-container"
+        hx-swap="outerHTML"
+        hx-indicator="#otp-loading">
+    {% csrf_token %}
+    <input type="hidden" name="otp_code" :value="getValue()">
+
+    <div class="ux-otp" :class="{
+      'ux-otp--error': '{{ form.errors.otp_code }}',
+      'ux-otp--loading': $el.closest('[hx-indicator]')?.classList.contains('htmx-request')
+    }">
+      <template x-for="(_, index) in length" :key="index">
+        <input type="tel"
+               inputmode="numeric"
+               maxlength="1"
+               class="ux-otp__field"
+               :class="{ 'ux-otp__field--filled': values[index] }"
+               :value="values[index]"
+               :disabled="disabled"
+               @input="onInput(index, $event)"
+               @keydown="onKeyDown(index, $event)"
+               @paste="onPaste(index, $event)">
+      </template>
+    </div>
+
+    {% if form.errors.otp_code %}
+    <p class="ux-otp__helper ux-otp__helper--error">
+      {{ form.errors.otp_code.0 }}
+    </p>
+    {% endif %}
+
+    <div id="otp-loading" class="htmx-indicator">
+      <span class="ux-spinner ux-spinner--sm"></span>
+      Verificando...
+    </div>
+  </form>
+
+  <div class="ux-otp__resend">
+    <span>No recibiste el codigo?</span>
+    <button id="resend-btn"
+            class="ux-otp__resend-btn"
+            :disabled="!canResend()"
+            hx-post="{% url 'otp_resend' %}"
+            hx-swap="none">
+      <span x-show="canResend()">Reenviar</span>
+      <span x-show="!canResend()" x-text="'Reenviar en ' + formatTime(resendTimer)"></span>
+    </button>
+  </div>
+</div>

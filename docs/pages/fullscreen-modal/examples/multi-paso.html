@@ -1,0 +1,59 @@
+<div x-data="uxFullscreenModal({ totalSteps: 3 })">
+  <button class="ux-button ux-color-primary" @click="open()">Start Onboarding</button>
+
+  <div class="ux-fullscreen-modal" :class="{ 'ux-fullscreen-modal--open': isOpen }">
+    <header class="ux-fullscreen-modal__header">
+      <div class="ux-fullscreen-modal__header-start">
+        <button class="ux-fullscreen-modal__close" @click="close()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="ux-fullscreen-modal__header-center">
+        <div class="ux-fullscreen-modal__steps">
+          <template x-for="step in totalSteps" :key="step">
+            <div class="ux-fullscreen-modal__step-dot"
+                 :class="{
+                   'ux-fullscreen-modal__step-dot--active': isStepActive(step - 1),
+                   'ux-fullscreen-modal__step-dot--completed': isStepCompleted(step - 1)
+                 }"></div>
+          </template>
+        </div>
+      </div>
+      <div class="ux-fullscreen-modal__header-end">
+        <button class="ux-button ux-button--clear ux-button--sm" @click="close()">Skip</button>
+      </div>
+    </header>
+    <div class="ux-fullscreen-modal__content ux-fullscreen-modal__content--centered">
+      <div style="text-align: center; max-width: 400px;">
+        <template x-if="currentStep === 0">
+          <div>
+            <div style="font-size: 3rem; margin-bottom: 1rem;">&#x1F44B;</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Welcome!</h3>
+            <p style="color: var(--ux-text-secondary);">Let's get you started with our app in just a few steps.</p>
+          </div>
+        </template>
+        <template x-if="currentStep === 1">
+          <div>
+            <div style="font-size: 3rem; margin-bottom: 1rem;">&#x2699;&#xFE0F;</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Customize</h3>
+            <p style="color: var(--ux-text-secondary);">Set up your preferences to personalize your experience.</p>
+          </div>
+        </template>
+        <template x-if="currentStep === 2">
+          <div>
+            <div style="font-size: 3rem; margin-bottom: 1rem;">&#x1F389;</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">You're Ready!</h3>
+            <p style="color: var(--ux-text-secondary);">Everything is set up. Enjoy using the app!</p>
+          </div>
+        </template>
+      </div>
+    </div>
+    <footer class="ux-fullscreen-modal__footer ux-fullscreen-modal__footer--spaced">
+      <button class="ux-button" @click="prevStep()" x-show="currentStep > 0">Back</button>
+      <div x-show="currentStep === 0"></div>
+      <button class="ux-button ux-color-primary" @click="currentStep < totalSteps - 1 ? nextStep() : close()">
+        <span x-text="currentStep < totalSteps - 1 ? 'Next' : 'Get Started'"></span>
+      </button>
+    </footer>
+  </div>
+</div>

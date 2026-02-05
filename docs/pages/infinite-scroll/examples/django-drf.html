@@ -1,0 +1,25 @@
+# views.py con DRF
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
+class InfiniteScrollPagination(PageNumberPagination):
+    page_size = 10
+    page_query_param = 'page'
+
+@api_view(['GET'])
+def item_api_list(request):
+    items = Item.objects.all().order_by('-created_at')
+    paginator = InfiniteScrollPagination()
+    page = paginator.paginate_queryset(items, request)
+
+    # Para HTMX, retornar HTML directamente
+    if request.headers.get('HX-Request'):
+        return render(request, 'items/_items_partial.html', {
+            'items': page,
+            'page': paginator.page,
+        })
+
+    # Para API JSON normal
+    serializer = ItemSerializer(page, many=True)
+    return paginator.get_paginated_response(serializer.data)
