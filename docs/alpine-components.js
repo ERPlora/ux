@@ -6136,6 +6136,17 @@ function uxImg(options = {}) {
     error: false,
     placeholder: options.placeholder || '',
 
+    // Computed properties for templates
+    get isLoaded() {
+      return !this.loading && !this.error;
+    },
+
+    get containerClass() {
+      if (this.error) return 'ux-img--error';
+      if (this.loading) return 'ux-img--loading';
+      return 'ux-img--loaded';
+    },
+
     init() {
       if (this.src) {
         this.loadImage();
