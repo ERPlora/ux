@@ -1,0 +1,15 @@
+<p><strong>Vista Django basica:</strong></p>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from .models import Item
+
+def item_list(request):
+    items = Item.objects.all().order_by('-created_at')
+
+    # Si es request HTMX, devolver solo el fragmento
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/item_list.html', {'items': items})
+
+    # Request normal, devolver pagina completa
+    return render(request, 'items/list.html', {'items': items})</pre>

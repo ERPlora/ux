@@ -24,8 +24,14 @@
 ### CSS Only (Recommended)
 
 ```html
-<!-- Just CSS - works with any framework -->
+<!-- Full bundle - all components -->
 <link rel="stylesheet" href="dist/ux.min.css">
+
+<!-- Or modular (smaller bundle sizes) -->
+<link rel="stylesheet" href="dist/core.min.css">
+<link rel="stylesheet" href="dist/bundles/basic.min.css">
+<link rel="stylesheet" href="dist/bundles/forms.min.css">
+<!-- Add only the bundles you need -->
 
 <!-- Optional: Bootstrap Grid for layout -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
@@ -66,7 +72,20 @@
 
 | Bundle | Size | Description |
 |--------|------|-------------|
-| ux.min.css | ~1.1 MB | All CSS styles |
+| ux.min.css | ~1.1 MB | Full CSS bundle (all components) |
+| core.min.css | 83 KB | Variables, mixins, utilities, themes |
+| bundles/basic.min.css | 77 KB | button, badge, avatar, spinner, progress, chip |
+| bundles/forms.min.css | 180 KB | input, select, checkbox, toggle, datetime, etc. |
+| bundles/navigation.min.css | 113 KB | navbar, tabs, menu, breadcrumbs, pagination |
+| bundles/overlays.min.css | 95 KB | modal, sheet, drawer, toast, popover |
+| bundles/data.min.css | 137 KB | datatable, calendar, charts, code-block |
+| bundles/layout.min.css | 141 KB | card, list, accordion, kanban, dashboard-grid |
+| bundles/feedback.min.css | 61 KB | skeleton, banner, callout, fab |
+| bundles/media.min.css | 89 KB | gallery, carousel, video, image-zoom |
+| bundles/pos.min.css | 111 KB | cart, numpad, receipt, calculator |
+| bundles/hr.min.css | 92 KB | employee-card, time-clock, attendance |
+| bundles/manufacturing.min.css | 104 KB | work-order, machine-status, gantt |
+| bundles/utils.min.css | 21 KB | alpine-utils, keyboard, electron |
 | ux.min.js | ~40 KB | Vanilla JS + Web Components |
 | alpine-components.js | ~300 KB | Alpine.js components (optional) |
 
@@ -91,18 +110,32 @@ const modal = new UXModal('#my-modal', { closeOnBackdrop: false });
 UX.init();
 ```
 
-### Modular Imports
+### Modular CSS Imports
 
-If you only need the essential interactive pieces (modal, password, range, OTP) use the slimmer build:
+Load only the component categories you need:
 
-```js
-import UXCore, { UXModal } from 'ux/core';
-
-UXCore.init();
-const modal = new UXModal('#welcome-modal');
+```html
+<!-- CDN -->
+<link rel="stylesheet" href="https://unpkg.com/ux/dist/core.min.css">
+<link rel="stylesheet" href="https://unpkg.com/ux/dist/bundles/basic.min.css">
+<link rel="stylesheet" href="https://unpkg.com/ux/dist/bundles/forms.min.css">
 ```
 
-The `ux/core` entry omits heavier components (upload, signature pad, etc.) so bundlers can tree-shake more aggressively.
+```js
+// NPM package imports
+import 'ux/core';           // Required: variables, utilities, themes
+import 'ux/bundles/basic';  // button, badge, avatar, spinner, etc.
+import 'ux/bundles/forms';  // input, select, checkbox, toggle, etc.
+```
+
+**Available bundles:** `basic`, `forms`, `navigation`, `overlays`, `data`, `feedback`, `media`, `layout`, `pos`, `hr`, `manufacturing`, `utils`
+
+### Build Modular Bundles
+
+```bash
+# Generate all modular bundles in dist/
+npm run build:modular
+```
 ## Components (164)
 
 ### CSS-Only (no JS required)
