@@ -1,0 +1,95 @@
+<pre class="ux-code-block" data-lang="javascript">// Configuracion
+uxBatchTracker({
+  // Identification
+  batchNumber: 'BATCH-2024-00156',
+  lotNumber: 'LOT-A1B2C3',
+  productName: 'Product Name',
+  productSku: 'SKU-001',
+
+  // Status: created, in-progress, qc, completed, shipped, rejected, quarantine
+  status: 'in-progress',
+  statusHistory: [],
+
+  // Quantities
+  initialQuantity: 1000,
+  currentQuantity: 985,
+  rejectedQuantity: 15,
+  unit: 'units',
+
+  // Dates (ISO format)
+  createdAt: '2024-01-15T08:30:00',
+  manufacturedDate: '2024-01-15',
+  expiryDate: '2025-01-15',
+
+  // Location
+  location: {
+    name: 'Warehouse A',
+    zone: 'Zone 3',
+    shelf: 'Shelf 12',
+    bin: 'Bin 4'
+  },
+
+  // Relationships
+  parentBatches: [{ number: 'RAW-001', product: 'Raw Material' }],
+  childBatches: [{ number: 'PKG-001', product: 'Packaged Product' }],
+
+  // Traceability links
+  traceLinks: [
+    { type: 'po', label: 'Production Order', value: 'PO-001' },
+    { type: 'qc', label: 'QC Report', value: 'QC-001' }
+  ],
+
+  // History log
+  history: [
+    { timestamp: '2024-01-15T16:45:00', action: 'Status changed', user: 'System' }
+  ],
+
+  // Timeline steps
+  timelineSteps: [
+    { id: 'created', title: 'Created', icon: 'plus' },
+    { id: 'in-progress', title: 'In Progress', icon: 'cog' },
+    { id: 'qc', title: 'QC Check', icon: 'check-circle' },
+    { id: 'completed', title: 'Completed', icon: 'package' },
+    { id: 'shipped', title: 'Shipped', icon: 'truck' }
+  ],
+
+  // Search
+  batches: [],       // Array of batches for search
+  searchQuery: '',
+
+  // QR
+  showQR: true,
+  qrData: null
+})
+
+// Computed Properties
+yieldPercentage        // (currentQuantity / initialQuantity) * 100
+rejectedPercentage     // (rejectedQuantity / initialQuantity) * 100
+daysUntilExpiry        // Days until expiry date
+expiryStatus           // 'ok', 'warning', 'danger', 'expired', 'none'
+statusIndex            // Index of current status in timeline
+
+// Methods
+getStatusLabel(status)      // Get readable status label
+isStepCompleted(index)      // Check if timeline step is completed
+isStepActive(index)         // Check if timeline step is active
+isStepPending(index)        // Check if timeline step is pending
+getStepState(index)         // Get step state (completed/active/pending/error)
+formatDate(date)            // Format date (DD MMM YYYY)
+formatDateTime(date)        // Format datetime (DD MMM YYYY, HH:mm)
+filterBatches()             // Filter batches by search query
+selectBatch(batch)          // Select a batch (dispatches event)
+viewParentBatch(batch)      // View parent batch
+viewChildBatch(batch)       // View child batch
+viewTraceLink(link)         // View trace link
+updateStatus(newStatus)     // Update batch status
+addHistoryEntry(action, user, details)  // Add history entry
+generateQRData()            // Generate QR code data JSON
+
+// Events
+@batch:select              // { batch } - Batch selected
+@batch:view-parent         // { batch } - Parent batch clicked
+@batch:view-child          // { batch } - Child batch clicked
+@batch:trace               // { link } - Trace link clicked
+@batch:status-change       // { oldStatus, newStatus } - Status changed
+@batch:history-add         // { action, user, details } - History entry added</pre>

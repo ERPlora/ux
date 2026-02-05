@@ -1,0 +1,84 @@
+<style>
+  .demo-section { margin-bottom: var(--ux-space-xl); }
+  .demo-section h3 { font-size: var(--ux-font-size-lg); font-weight: 600; margin-bottom: var(--ux-space-md); color: var(--ux-text); }
+  .demo-section p { font-size: var(--ux-font-size-md); color: var(--ux-text-secondary); margin-bottom: var(--ux-space-md); }
+  .demo-box { background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); padding: var(--ux-space-lg); margin-bottom: var(--ux-space-md); display: flex; flex-wrap: wrap; gap: var(--ux-space-md); align-items: center; }
+</style>
+
+<section class="component-section">
+  <h3>Colores</h3>
+  <p>Sin clase de color, usa primary por defecto. Usa <code>.ux-color-{color}</code> para otros colores.</p>
+  <ux-playground src="pages/badge/examples/colores.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Tamanos</h3>
+  <ux-playground src="pages/badge/examples/tamanos.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Variantes</h3>
+  <p>Usa <code>.ux-color-*--outline</code> o <code>.ux-color-*--soft</code> para variantes.</p>
+  <ux-playground src="pages/badge/examples/variantes.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Badge con Boton (Notificacion)</h3>
+  <p>Usa <code>.ux-badge-container</code> para posicionar badges sobre botones o iconos.</p>
+  <ux-playground src="pages/badge/examples/con-boton.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Con Icono</h3>
+  <ux-playground src="pages/badge/examples/con-icono.html"></ux-playground>
+</section>
+
+<!-- HTMX + Django -->
+<section class="component-section">
+  <h3>HTMX + Django</h3>
+  <p>Badges dinamicos con actualizacion via HTMX.</p>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Template Django - Contador de notificaciones</h4>
+  <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/notificaciones_badge.html --&gt;
+&lt;span id="notificaciones-badge"
+      class="ux-badge ux-color-danger ux-badge--sm"
+      hx-get="{% url 'contar_notificaciones' %}"
+      hx-trigger="every 30s"
+      hx-swap="innerHTML"&gt;
+  {{ count }}
+&lt;/span&gt;</pre>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Vista Django</h4>
+  <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+
+def contar_notificaciones(request):
+    count = Notificacion.objects.filter(
+        usuario=request.user,
+        leida=False
+    ).count()
+
+    # Si es 0, retornar vacio para ocultar badge
+    if count == 0:
+        return HttpResponse('')
+
+    return HttpResponse(str(count))</pre>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-lg) 0 var(--ux-space-sm);">Badge de estado dinamico</h4>
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Badge que cambia segun estado del pedido --&gt;
+&lt;span id="estado-pedido-{{ pedido.id }}"
+      hx-get="{% url 'estado_pedido' pedido.id %}"
+      hx-trigger="load, every 10s"
+      hx-swap="outerHTML"&gt;
+  &lt;span class="ux-spinner ux-spinner--sm"&gt;&lt;/span&gt;
+&lt;/span&gt;
+
+&lt;!-- partials/estado_pedido.html --&gt;
+{% if pedido.estado == 'pendiente' %}
+  &lt;span class="ux-badge ux-color-warning"&gt;Pendiente&lt;/span&gt;
+{% elif pedido.estado == 'procesando' %}
+  &lt;span class="ux-badge ux-color-primary"&gt;Procesando&lt;/span&gt;
+{% elif pedido.estado == 'completado' %}
+  &lt;span class="ux-badge ux-color-success"&gt;Completado&lt;/span&gt;
+{% endif %}</pre>
+</section>

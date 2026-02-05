@@ -1,0 +1,31 @@
+<!-- Lista de tareas con acciones HTMX -->
+<div id="task-list">
+  {% for task in tasks %}
+  <div class="ux-list__item task-row" id="task-{{ task.id }}">
+    <span>{{ task.title }}</span>
+    <div class="ux-list__end">
+      <button class="ux-button ux-button--sm"
+              hx-patch="/tasks/{{ task.id }}/toggle/"
+              hx-target="#task-{{ task.id }}"
+              hx-swap="outerHTML">
+        {% if task.completed %}Reabrir{% else %}Completar{% endif %}
+      </button>
+      <button class="ux-button ux-button--sm ux-color-danger"
+              hx-delete="/tasks/{{ task.id }}/"
+              hx-target="#task-{{ task.id }}"
+              hx-swap="outerHTML swap:0.3s">
+        Eliminar
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Formulario para nueva tarea -->
+<form hx-post="/tasks/create/"
+      hx-target="#task-list"
+      hx-swap="beforeend"
+      hx-on::after-request="this.reset()">
+  <input type="text" name="title" class="ux-input" placeholder="Nueva tarea..." required>
+  <button type="submit" class="ux-button ux-color-primary">Agregar</button>
+</form>

@@ -1,0 +1,276 @@
+<!-- Loading Basico -->
+<section class="component-section">
+  <h3>Loading Basico</h3>
+  <p>Indicador de carga con backdrop estilo iOS.</p>
+  <ux-playground src="pages/loading/examples/basico.html"></ux-playground>
+</section>
+
+<!-- Tipos de Spinner -->
+<section class="component-section">
+  <h3>Tipos de Spinner</h3>
+  <p>Tres estilos de spinner: default, iOS (dots) y dots (bouncing).</p>
+  <ux-playground src="pages/loading/examples/tipos-spinner.html"></ux-playground>
+</section>
+
+<!-- Tamanos -->
+<section class="component-section">
+  <h3>Tamanos</h3>
+  <p>Tres tamanos disponibles: sm, default, lg.</p>
+  <ux-playground src="pages/loading/examples/tamanos.html"></ux-playground>
+</section>
+
+<!-- Variante Oscura -->
+<section class="component-section">
+  <h3>Variante Oscura</h3>
+  <p>Loading con fondo oscuro para fondos claros.</p>
+  <ux-playground src="pages/loading/examples/variante-oscura.html"></ux-playground>
+</section>
+
+<!-- Loading Inline -->
+<section class="component-section">
+  <h3>Loading Inline</h3>
+  <p>Spinner pequeno para usar dentro del contenido.</p>
+  <ux-playground src="pages/loading/examples/inline.html"></ux-playground>
+</section>
+
+<!-- Loading Overlay -->
+<section class="component-section">
+  <h3>Loading Overlay</h3>
+  <p>Overlay para cubrir un contenedor especifico.</p>
+  <ux-playground src="pages/loading/examples/overlay.html"></ux-playground>
+</section>
+
+<!-- Componente Alpine -->
+<section class="component-section">
+  <h3>Componente Alpine</h3>
+  <p>Uso con Alpine.js para control programatico.</p>
+  <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxLoading({ message: 'Cargando...' })"&gt;
+  &lt;button @click="show()"&gt;Mostrar&lt;/button&gt;
+  &lt;button @click="show({ message: 'Guardando...' })"&gt;Con mensaje&lt;/button&gt;
+  &lt;button @click="hide()"&gt;Ocultar&lt;/button&gt;
+
+  &lt;!-- Backdrop y loading --&gt;
+  &lt;div class="ux-loading-backdrop"
+       :class="{ 'ux-loading-backdrop--open': isOpen }"&gt;
+    &lt;div class="ux-loading"&gt;
+      &lt;div class="ux-loading__spinner" :class="'ux-loading__spinner--' + spinner"&gt;&lt;/div&gt;
+      &lt;div class="ux-loading__message" x-text="message"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</section>
+
+<!-- HTMX + Django -->
+<section class="component-section">
+  <h3>HTMX + Django</h3>
+  <p>Integracion con HTMX usando indicadores de carga automaticos.</p>
+
+  <h4 class="demo-subtitle">Indicador en Boton</h4>
+  <p>El spinner se muestra dentro del boton mientras se procesa la peticion.</p>
+  <pre class="ux-code-block" data-lang="html">&lt;button class="ux-button ux-color-primary"
+        hx-post="/api/save/"
+        hx-swap="outerHTML"&gt;
+  &lt;span class="htmx-indicator"&gt;
+    &lt;div class="ux-loading-inline__spinner"&gt;&lt;/div&gt;
+  &lt;/span&gt;
+  Guardar
+&lt;/button&gt;</pre>
+
+  <h4 class="demo-subtitle">Overlay en Contenedor</h4>
+  <p>Cubre el contenedor completo durante la carga.</p>
+  <pre class="ux-code-block" data-lang="html">&lt;div id="user-list" style="position: relative;"&gt;
+  &lt;!-- Lista de usuarios --&gt;
+  {% for user in users %}
+    &lt;div class="ux-list__item"&gt;{{ user.name }}&lt;/div&gt;
+  {% endfor %}
+
+  &lt;!-- Overlay indicator --&gt;
+  &lt;div class="ux-loading-overlay htmx-indicator"&gt;
+    &lt;div class="ux-loading-inline"&gt;
+      &lt;div class="ux-loading-inline__spinner"&gt;&lt;/div&gt;
+      &lt;span class="ux-loading-inline__text"&gt;Cargando...&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;button class="ux-button"
+        hx-get="/api/users/"
+        hx-target="#user-list"
+        hx-indicator="#user-list .ux-loading-overlay"&gt;
+  Actualizar Lista
+&lt;/button&gt;</pre>
+
+  <h4 class="demo-subtitle">Loading Global (Backdrop)</h4>
+  <p>Muestra un loading de pantalla completa para operaciones importantes.</p>
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Loading global en el body --&gt;
+&lt;div id="global-loading" class="ux-loading-backdrop htmx-indicator"&gt;
+  &lt;div class="ux-loading"&gt;
+    &lt;div class="ux-loading__spinner"&gt;&lt;/div&gt;
+    &lt;div class="ux-loading__message"&gt;Procesando...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Formulario que usa el loading global --&gt;
+&lt;form hx-post="/api/checkout/"
+      hx-indicator="#global-loading"&gt;
+  &lt;!-- campos del formulario --&gt;
+  &lt;button type="submit" class="ux-button ux-color-primary"&gt;
+    Completar Compra
+  &lt;/button&gt;
+&lt;/form&gt;</pre>
+
+  <h4 class="demo-subtitle">Vista Django con HTMX</h4>
+  <p>Ejemplo de vista Django que responde a peticiones HTMX.</p>
+  <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
+import time
+
+@require_http_methods(["POST"])
+def save_data(request):
+    # Simular procesamiento
+    time.sleep(1)
+
+    # Detectar si es peticion HTMX
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/success_message.html', {
+            'message': 'Datos guardados correctamente'
+        })
+
+    return redirect('dashboard')</pre>
+
+  <h4 class="demo-subtitle">CSS para HTMX Indicators</h4>
+  <p>HTMX oculta automaticamente los elementos con clase <code>htmx-indicator</code> y los muestra durante las peticiones.</p>
+  <pre class="ux-code-block" data-lang="css">/* HTMX ya incluye estos estilos, pero puedes personalizarlos */
+.htmx-indicator {
+  opacity: 0;
+  transition: opacity 200ms ease-in;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+  opacity: 1;
+}
+
+/* Para overlay, agregar clase visible */
+.htmx-request .ux-loading-overlay.htmx-indicator {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}</pre>
+
+  <h4 class="demo-subtitle">Tabla con Loading</h4>
+  <p>Ejemplo de DataTable con loading al paginar o filtrar.</p>
+  <pre class="ux-code-block" data-lang="html">&lt;div id="data-container" style="position: relative;"&gt;
+  &lt;table class="ux-datatable"&gt;
+    &lt;thead&gt;
+      &lt;tr&gt;
+        &lt;th&gt;Nombre&lt;/th&gt;
+        &lt;th&gt;Email&lt;/th&gt;
+        &lt;th&gt;Estado&lt;/th&gt;
+      &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody id="table-body"
+           hx-get="/api/users/?page=1"
+           hx-trigger="load"
+           hx-indicator="#table-loading"&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+
+  &lt;div id="table-loading" class="ux-loading-overlay htmx-indicator"&gt;
+    &lt;div class="ux-loading-inline"&gt;
+      &lt;div class="ux-loading-inline__spinner"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Paginacion --&gt;
+&lt;div class="ux-pagination"&gt;
+  &lt;button hx-get="/api/users/?page=2"
+          hx-target="#table-body"
+          hx-indicator="#table-loading"&gt;
+    Siguiente
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+</section>
+
+<!-- API Alpine -->
+<section class="component-section">
+  <h3>API Alpine</h3>
+  <div class="ux-table-responsive">
+    <table class="demo-api-table">
+      <thead>
+        <tr>
+          <th>Metodo/Propiedad</th>
+          <th>Descripcion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>show(options)</code></td>
+          <td>Muestra el loading. Options: { message, spinner }</td>
+        </tr>
+        <tr>
+          <td><code>hide()</code></td>
+          <td>Oculta el loading</td>
+        </tr>
+        <tr>
+          <td><code>present(options)</code></td>
+          <td>Alias de show()</td>
+        </tr>
+        <tr>
+          <td><code>dismiss()</code></td>
+          <td>Alias de hide()</td>
+        </tr>
+        <tr>
+          <td><code>during(asyncFn, options)</code></td>
+          <td>Muestra loading durante una funcion async</td>
+        </tr>
+        <tr>
+          <td><code>showWithTimeout(options, ms)</code></td>
+          <td>Muestra loading con timeout maximo</td>
+        </tr>
+        <tr>
+          <td><code>isOpen</code></td>
+          <td>Boolean - estado de visibilidad</td>
+        </tr>
+        <tr>
+          <td><code>message</code></td>
+          <td>String - mensaje actual</td>
+        </tr>
+        <tr>
+          <td><code>spinner</code></td>
+          <td>String - tipo de spinner (default, ios, dots)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Clases CSS -->
+<section class="component-section">
+  <h3>Clases CSS</h3>
+  <div class="ux-table-responsive">
+    <table class="demo-api-table">
+      <thead>
+        <tr>
+          <th>Clase</th>
+          <th>Descripcion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>.ux-loading-backdrop</code></td><td>Contenedor con fondo oscuro</td></tr>
+        <tr><td><code>.ux-loading-backdrop--open</code></td><td>Estado visible</td></tr>
+        <tr><td><code>.ux-loading-backdrop--transparent</code></td><td>Fondo transparente</td></tr>
+        <tr><td><code>.ux-loading</code></td><td>Contenedor del spinner</td></tr>
+        <tr><td><code>.ux-loading--sm</code></td><td>Tamano pequeno</td></tr>
+        <tr><td><code>.ux-loading--lg</code></td><td>Tamano grande</td></tr>
+        <tr><td><code>.ux-loading--dark</code></td><td>Fondo oscuro</td></tr>
+        <tr><td><code>.ux-loading__spinner--ios</code></td><td>Spinner estilo iOS</td></tr>
+        <tr><td><code>.ux-loading__spinner--dots</code></td><td>Spinner de puntos</td></tr>
+        <tr><td><code>.ux-loading-inline</code></td><td>Loading inline</td></tr>
+        <tr><td><code>.ux-loading-overlay</code></td><td>Overlay para contenedores</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,0 +1,33 @@
+# views.py
+from django.shortcuts import render
+from django.db.models import Q
+from .models import Product
+
+def product_search(request):
+    """Vista de busqueda con debounce (manejado por HTMX)"""
+    query = request.GET.get('q', '').strip()
+
+    if not query:
+        # Sin query: mostrar busquedas recientes del usuario
+        recent = request.session.get('recent_searches', [])[:5]
+        return render(request, 'partials/search_recent.html', {
+            'recent_searches': recent
+        })
+
+    # Buscar productos
+    products = Product.objects.filter(
+        Q(name__icontains=query) |
+        Q(sku__icontains=query) |
+        Q(category__name__icontains=query)
+    ).select_related('category')[:10]
+
+    # Guardar en busquedas recientes
+    recent = request.session.get('recent_searches', [])
+    if query not in recent:
+        recent.insert(0, query)
+        request.session['recent_searches'] = recent[:10]
+
+    return render(request, 'partials/search_results.html', {
+        'products': products,
+        'query': query
+    })

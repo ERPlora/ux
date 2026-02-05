@@ -1,0 +1,74 @@
+<h3 style="font-size: 1rem; margin-bottom: 1rem;">Real-time Updates with Polling</h3>
+      <pre class="ux-code-block" data-lang="html"><!-- Production Line with HTMX polling -->
+<div hx-get="/api/production-line/1/"
+     hx-trigger="every 5s"
+     hx-swap="outerHTML">
+  {% include "manufacturing/partials/production_line.html" with line=line %}
+</div></pre>
+
+      <h3 style="font-size: 1rem; margin: 1.5rem 0 1rem;">Django Template Partial</h3>
+      <pre class="ux-code-block" data-lang="html"><!-- manufacturing/partials/production_line.html -->
+<div x-data="uxProductionLine({
+  name: '{{ line.name }}',
+  status: '{{ line.status }}',
+  target: {{ line.daily_target }},
+  actual: {{ line.current_output }},
+  efficiency: {{ line.efficiency }},
+  speed: {{ line.speed }},
+  downtime: {{ line.downtime_minutes }},
+  stations: {{ line.stations_json|safe }}
+})" class="ux-production-line">
+  <!-- ... component markup ... -->
+</div></pre>
+
+      <h3 style="font-size: 1rem; margin: 1.5rem 0 1rem;">Django View</h3>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import JsonResponse
+import json
+
+def production_line_partial(request, line_id):
+    line = ProductionLine.objects.get(id=line_id)
+    stations = line.stations.all()
+
+    context = {
+        'line': {
+            'name': line.name,
+            'status': line.status,
+            'daily_target': line.daily_target,
+            'current_output': line.current_output,
+            'efficiency': float(line.efficiency),
+            'speed': line.speed,
+            'downtime_minutes': line.calculate_downtime(),
+            'stations_json': json.dumps([
+                {
+                    'name': s.name,
+                    'status': s.status,
+                    'output': s.output,
+                    'alerts': s.alerts.count()
+                }
+                for s in stations
+            ])
+        }
+    }
+    return render(request, 'manufacturing/partials/production_line.html', context)</pre>
+
+      <h3 style="font-size: 1rem; margin: 1.5rem 0 1rem;">WebSocket for Real-time Updates</h3>
+      <pre class="ux-code-block" data-lang="html"><!-- Using Alpine.js with WebSocket -->
+<div x-data="{
+  ...uxProductionLine({ /* initial config */ }),
+
+  ws: null,
+  connect() {
+    this.ws = new WebSocket('wss://example.com/ws/production/1/');
+    this.ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      this.updateMetrics(data);
+      if (data.stations) {
+        data.stations.forEach((s, i) => this.updateStation(i, s));
+      }
+    };
+  }
+}" x-init="connect()" class="ux-production-line">
+  <!-- ... component markup ... -->
+</div></pre>

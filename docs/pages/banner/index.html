@@ -1,0 +1,212 @@
+<h2 style="margin-bottom: var(--ux-space-lg);">Banner</h2>
+<p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xl);">Barra de notificacion dismissable estilo iOS para mensajes importantes.</p>
+
+<section class="component-section">
+  <h3>Colores</h3>
+  <p>Variantes de color: info, success, warning, danger.</p>
+  <ux-playground src="pages/banner/examples/colores.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Con Titulo y Mensaje</h3>
+  <ux-playground src="pages/banner/examples/con-titulo.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Filled Variants</h3>
+  <p>Fondo solido de color.</p>
+  <ux-playground src="pages/banner/examples/filled.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Inline Variant (Card Style)</h3>
+  <ux-playground src="pages/banner/examples/inline.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Glass Variant</h3>
+  <ux-playground src="pages/banner/examples/glass.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Dismissible (con Alpine.js)</h3>
+  <ux-playground src="pages/banner/examples/dismissible.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>Auto Dismiss</h3>
+  <ux-playground src="pages/banner/examples/auto-dismiss.html"></ux-playground>
+</section>
+
+<section class="component-section">
+  <h3>HTMX + Django</h3>
+  <p>Banners promocionales dinamicos cargados desde el servidor.</p>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Banner promocional con HTMX</h4>
+  <pre class="ux-code-block" data-lang="html">&lt;!-- Carga el banner activo al iniciar --&gt;
+&lt;div id="promo-banner"
+     hx-get="/api/promotions/active/"
+     hx-trigger="load"
+     hx-swap="innerHTML"&gt;
+&lt;/div&gt;
+
+&lt;!-- Banner con dismiss que notifica al servidor --&gt;
+&lt;div class="ux-banner ux-banner--info ux-banner--inline"
+     x-data="uxBanner()"
+     x-show="visible"
+     x-transition&gt;
+  &lt;span class="ux-banner__icon"&gt;...&lt;/span&gt;
+  &lt;div class="ux-banner__content"&gt;
+    &lt;p class="ux-banner__title"&gt;Oferta Especial&lt;/p&gt;
+    &lt;p class="ux-banner__message"&gt;20% de descuento en tu primera compra&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-banner__actions"&gt;
+    &lt;button class="ux-banner__action"
+            hx-post="/api/promotions/123/click/"
+            hx-swap="none"&gt;
+      Ver Oferta
+    &lt;/button&gt;
+  &lt;/div&gt;
+  &lt;button class="ux-banner__close"
+          @click="dismiss()"
+          hx-post="/api/promotions/123/dismiss/"
+          hx-swap="none"&gt;
+    &lt;svg&gt;...&lt;/svg&gt;
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Django View</h4>
+  <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from .models import Promotion
+
+def active_promotion(request):
+    """Retorna el banner de la promocion activa."""
+    promo = Promotion.objects.filter(
+        is_active=True,
+        start_date__lte=timezone.now(),
+        end_date__gte=timezone.now()
+    ).first()
+
+    if not promo:
+        return HttpResponse('')
+
+    # Verificar si el usuario ya lo descarto
+    if request.user.is_authenticated:
+        if promo.dismissed_by.filter(id=request.user.id).exists():
+            return HttpResponse('')
+
+    html = render_to_string('partials/promo_banner.html', {
+        'promo': promo
+    })
+    return HttpResponse(html)
+
+def dismiss_promotion(request, promo_id):
+    """Marca la promocion como descartada para el usuario."""
+    if request.user.is_authenticated:
+        promo = Promotion.objects.get(id=promo_id)
+        promo.dismissed_by.add(request.user)
+    return HttpResponse(status=204)
+
+def click_promotion(request, promo_id):
+    """Registra un click en la promocion."""
+    Promotion.objects.filter(id=promo_id).update(
+        clicks=F('clicks') + 1
+    )
+    return HttpResponse(status=204)</pre>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Django Template Partial</h4>
+  <pre class="ux-code-block" data-lang="html">&lt;!-- templates/partials/promo_banner.html --&gt;
+{% if promo %}
+&lt;div class="ux-banner ux-banner--{{ promo.variant }}-filled ux-banner--inline"
+     x-data="uxBanner()"
+     x-show="visible"
+     x-transition&gt;
+  &lt;span class="ux-banner__icon"&gt;
+    {% if promo.icon %}
+      {{ promo.icon|safe }}
+    {% else %}
+      &lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2"&gt;
+        &lt;path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/&gt;
+      &lt;/svg&gt;
+    {% endif %}
+  &lt;/span&gt;
+  &lt;div class="ux-banner__content"&gt;
+    {% if promo.title %}
+      &lt;p class="ux-banner__title"&gt;{{ promo.title }}&lt;/p&gt;
+    {% endif %}
+    &lt;p class="ux-banner__message"&gt;{{ promo.message }}&lt;/p&gt;
+  &lt;/div&gt;
+  {% if promo.action_url %}
+  &lt;div class="ux-banner__actions"&gt;
+    &lt;a href="{{ promo.action_url }}"
+       class="ux-banner__action"
+       hx-post="{% url 'promotion_click' promo.id %}"
+       hx-swap="none"&gt;
+      {{ promo.action_text|default:"Ver mas" }}
+    &lt;/a&gt;
+  &lt;/div&gt;
+  {% endif %}
+  &lt;button class="ux-banner__close"
+          @click="dismiss()"
+          hx-post="{% url 'promotion_dismiss' promo.id %}"
+          hx-swap="none"&gt;
+    &lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2"&gt;
+      &lt;line x1="18" y1="6" x2="6" y2="18"/&gt;
+      &lt;line x1="6" y1="6" x2="18" y2="18"/&gt;
+    &lt;/svg&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+{% endif %}</pre>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">Django Model</h4>
+  <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class Promotion(models.Model):
+    VARIANT_CHOICES = [
+        ('info', 'Info'),
+        ('success', 'Success'),
+        ('warning', 'Warning'),
+        ('danger', 'Danger'),
+    ]
+
+    title = models.CharField(max_length=100, blank=True)
+    message = models.CharField(max_length=255)
+    variant = models.CharField(max_length=20, choices=VARIANT_CHOICES, default='info')
+    icon = models.TextField(blank=True, help_text='SVG icon HTML')
+    action_url = models.URLField(blank=True)
+    action_text = models.CharField(max_length=50, blank=True)
+
+    is_active = models.BooleanField(default=True)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+
+    clicks = models.PositiveIntegerField(default=0)
+    dismissed_by = models.ManyToManyField(User, blank=True, related_name='dismissed_promos')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title or self.message[:50]</pre>
+
+  <h4 style="font-size: var(--ux-font-size-md); margin: var(--ux-space-md) 0;">URLs</h4>
+  <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('api/promotions/active/', views.active_promotion, name='active_promotion'),
+    path('api/promotions/<int:promo_id>/dismiss/', views.dismiss_promotion, name='promotion_dismiss'),
+    path('api/promotions/<int:promo_id>/click/', views.click_promotion, name='promotion_click'),
+]</pre>
+</section>

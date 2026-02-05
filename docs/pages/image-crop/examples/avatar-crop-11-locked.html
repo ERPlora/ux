@@ -1,0 +1,53 @@
+<div class="ux-image-crop ux-image-crop--compact ux-image-crop--aspect-locked" :class="{ 'ux-image-crop--loading': isLoading }">
+          <div class="ux-image-crop__canvas"
+               :class="{ 'ux-image-crop__canvas--empty': !imageLoaded }"
+               x-ref="canvas"
+               @click="!imageLoaded && $refs.fileInput.click()">
+
+            <template x-if="!imageLoaded && !isLoading">
+              <div class="ux-image-crop__placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <p class="ux-image-crop__placeholder-text">Upload avatar</p>
+              </div>
+            </template>
+
+            <template x-if="imageLoaded">
+              <div class="ux-image-crop__image-container">
+                <img :src="imageSrc" class="ux-image-crop__image" :style="{ transform: imageTransform }" alt="Avatar">
+
+                <div class="ux-image-crop__crop-area"
+                     x-ref="cropArea"
+                     :style="cropAreaStyle"
+                     @mousedown="onCropMouseDown($event)"
+                     @touchstart.prevent="onCropTouchStart($event)">
+                  <div class="ux-image-crop__grid ux-image-crop__grid--thirds"></div>
+                  <div class="ux-image-crop__handles">
+                    <div class="ux-image-crop__handle ux-image-crop__handle--nw" @mousedown.stop="onHandleMouseDown($event, 'nw')" @touchstart.stop.prevent="onHandleTouchStart($event, 'nw')"></div>
+                    <div class="ux-image-crop__handle ux-image-crop__handle--ne" @mousedown.stop="onHandleMouseDown($event, 'ne')" @touchstart.stop.prevent="onHandleTouchStart($event, 'ne')"></div>
+                    <div class="ux-image-crop__handle ux-image-crop__handle--sw" @mousedown.stop="onHandleMouseDown($event, 'sw')" @touchstart.stop.prevent="onHandleTouchStart($event, 'sw')"></div>
+                    <div class="ux-image-crop__handle ux-image-crop__handle--se" @mousedown.stop="onHandleMouseDown($event, 'se')" @touchstart.stop.prevent="onHandleTouchStart($event, 'se')"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <div class="ux-image-crop__controls" x-show="imageLoaded">
+            <div class="ux-image-crop__control-row">
+              <span class="ux-image-crop__control-label">Zoom</span>
+              <div class="ux-image-crop__control-group">
+                <input type="range" class="ux-image-crop__slider" min="0.5" max="3" step="0.1" x-model="zoom">
+                <span class="ux-image-crop__control-value" x-text="zoomPercent + '%'"></span>
+              </div>
+            </div>
+            <div class="ux-image-crop__actions">
+              <button class="ux-button ux-button--outline ux-button--sm" @click="$refs.fileInput.click()">Change</button>
+              <button class="ux-button ux-color-primary ux-button--sm">Save Avatar</button>
+            </div>
+          </div>
+
+          <input type="file" x-ref="fileInput" accept="image/*" style="display: none;" @change="onFileSelect($event)">
+        </div>

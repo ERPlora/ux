@@ -1,0 +1,37 @@
+<!-- Template: carousel_productos.html -->
+<div x-data="uxCarousel({ slidesPerView: 4 })"
+     class="ux-carousel ux-carousel--show-4 ux-carousel--show-md-2 ux-carousel--show-sm-1 ux-carousel--gap-md">
+
+  <button class="ux-carousel__nav ux-carousel__nav--prev" @click="prev()" :disabled="!canGoPrev">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+    </svg>
+  </button>
+  <button class="ux-carousel__nav ux-carousel__nav--next" @click="next()" :disabled="!canGoNext">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+    </svg>
+  </button>
+
+  <div class="ux-carousel__viewport" x-ref="viewport">
+    <div class="ux-carousel__track" x-ref="track" :style="{ transform: `translateX(${translateX}%)` }">
+      {% for producto in productos %}
+      <div class="ux-carousel__slide">
+        <div class="ux-card">
+          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" style="width: 100%; height: 150px; object-fit: cover;">
+          <div class="ux-card__content">
+            <h4>{{ producto.nombre }}</h4>
+            <p class="ux-text-primary ux-font-bold">${{ producto.precio }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="ux-carousel__pagination">
+    <template x-for="(dot, i) in paginationDots" :key="i">
+      <button class="ux-carousel__dot" :class="{ 'ux-carousel__dot--active': getCurrentPage() === i }" @click="goToPage(i)"></button>
+    </template>
+  </div>
+</div>

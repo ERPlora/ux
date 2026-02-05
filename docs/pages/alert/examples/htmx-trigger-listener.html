@@ -1,0 +1,29 @@
+<!-- Listener global para alertas -->
+<div x-data="{
+       alert: null,
+       show: false
+     }"
+     @show-alert.window="alert = $event.detail; show = true">
+
+  <template x-teleport="body">
+    <div class="ux-alert-backdrop" :class="show && 'ux-alert-backdrop--open'">
+      <div class="ux-alert">
+        <div class="ux-alert__content">
+          <div class="ux-alert__icon" :class="'ux-alert__icon--' + alert?.type">...</div>
+          <h2 class="ux-alert__title" x-text="alert?.title"></h2>
+          <p class="ux-alert__message" x-text="alert?.message"></p>
+        </div>
+        <div class="ux-alert__buttons">
+          <button class="ux-alert__button ux-alert__button--primary" @click="show = false">OK</button>
+        </div>
+      </div>
+    </div>
+  </template>
+</div>
+
+<script>
+  // Convertir HX-Trigger a evento Alpine
+  document.body.addEventListener('showAlert', (e) => {
+    window.dispatchEvent(new CustomEvent('show-alert', { detail: e.detail }));
+  });
+</script>

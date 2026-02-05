@@ -1,0 +1,29 @@
+def item_list_partial(request):
+    """Vista parcial con soporte de filtros"""
+    items = Item.objects.all()
+
+    # Aplicar filtros
+    q = request.GET.get('q', '')
+    category = request.GET.get('category', '')
+
+    if q:
+        items = items.filter(name__icontains=q)
+    if category:
+        items = items.filter(category_id=category)
+
+    items = items.order_by('-created_at')
+
+    # Paginar
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(items, 10)
+    page = paginator.get_page(page_number)
+
+    # Preservar query params para siguiente pagina
+    query_params = request.GET.copy()
+    query_params['page'] = page.next_page_number() if page.has_next else ''
+
+    return render(request, 'items/_items_partial.html', {
+        'page': page,
+        'items': page.object_list,
+        'query_string': query_params.urlencode()
+    })

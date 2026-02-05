@@ -1,0 +1,32 @@
+# views.py
+import re
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
+
+def highlight_match(text, query):
+    """Resalta las coincidencias del query en el texto."""
+    if not query:
+        return escape(text)
+
+    escaped_text = escape(text)
+    escaped_query = escape(query)
+    pattern = re.compile(f'({re.escape(escaped_query)})', re.IGNORECASE)
+    return mark_safe(pattern.sub(r'<mark class="ux-autocomplete__highlight">\1</mark>', escaped_text))
+
+def search_products(request):
+    query = request.GET.get('search', '').strip()
+
+    if len(query) < 2:
+        return HttpResponse('')
+
+    products = Product.objects.filter(name__icontains=query)[:10]
+
+    # Agregar nombres resaltados
+    results = [{
+        'product': p,
+        'highlighted_name': highlight_match(p.name, query)
+    } for p in products]
+
+    return render(request, 'partials/product_results.html', {
+        'results': results
+    })

@@ -1,0 +1,57 @@
+<div x-data="uxAutocomplete({
+  items: [
+    { label: 'Madrid', value: 'madrid', description: 'Capital de España', icon: '🏛️' },
+    { label: 'Barcelona', value: 'barcelona', description: 'Cataluña, España', icon: '⛱️' },
+    { label: 'Valencia', value: 'valencia', description: 'Comunidad Valenciana', icon: '🍊' },
+    { label: 'Sevilla', value: 'sevilla', description: 'Andalucía, España', icon: '🌞' },
+    { label: 'Bilbao', value: 'bilbao', description: 'País Vasco, España', icon: '🏔️' },
+    { label: 'Málaga', value: 'malaga', description: 'Costa del Sol', icon: '🏖️' },
+    { label: 'Zaragoza', value: 'zaragoza', description: 'Aragón, España', icon: '⛪' },
+    { label: 'Palma', value: 'palma', description: 'Islas Baleares', icon: '🌴' }
+  ],
+  placeholder: 'Buscar ciudad...'
+})">
+  <div class="ux-autocomplete" style="max-width: 400px;">
+    <input type="text"
+           class="ux-autocomplete__input"
+           x-ref="input"
+           x-model="query"
+           :placeholder="placeholder"
+           @input="onInput()"
+           @focus="onFocus()"
+           @blur="onBlur()"
+           @keydown="onKeydown($event)"
+           autocomplete="off">
+
+    <button class="ux-autocomplete__clear"
+            :class="{ 'ux-autocomplete__clear--hidden': !query }"
+            @click="clear()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <div class="ux-autocomplete__dropdown"
+         :class="{ 'ux-autocomplete__dropdown--open': isOpen }">
+      <ul class="ux-autocomplete__list" x-show="filteredItems.length > 0">
+        <template x-for="(item, index) in filteredItems" :key="getValue(item)">
+          <li class="ux-autocomplete__item"
+              :class="{ 'ux-autocomplete__item--active': index === activeIndex }"
+              @click="select(item)"
+              @mouseenter="activeIndex = index">
+            <span style="font-size: 1.5rem; margin-right: 0.5rem;" x-text="item.icon"></span>
+            <div class="ux-autocomplete__item-content">
+              <div class="ux-autocomplete__item-label" x-html="highlight(getLabel(item))"></div>
+              <div class="ux-autocomplete__item-description" x-html="highlight(getDescription(item))"></div>
+            </div>
+          </li>
+        </template>
+      </ul>
+
+      <div class="ux-autocomplete__empty" x-show="filteredItems.length === 0 && query.length >= minChars">
+        <div class="ux-autocomplete__empty-icon" x-html="icons.empty"></div>
+        <span class="ux-autocomplete__empty-text" x-text="emptyText"></span>
+      </div>
+    </div>
+  </div>
+</div>

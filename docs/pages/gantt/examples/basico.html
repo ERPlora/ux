@@ -1,0 +1,211 @@
+<div class="demo-box" style="height: 400px;" x-data="uxGantt({
+  tasks: [
+    {
+      id: 1,
+      name: 'Project Planning',
+      start: '2025-01-06',
+      end: '2025-01-12',
+      progress: 100,
+      status: 'completed'
+    },
+    {
+      id: 2,
+      name: 'Design Phase',
+      start: '2025-01-13',
+      end: '2025-01-24',
+      progress: 75,
+      status: 'in-progress'
+    },
+    {
+      id: 3,
+      name: 'Development Sprint 1',
+      start: '2025-01-20',
+      end: '2025-02-07',
+      progress: 30,
+      status: 'in-progress'
+    },
+    {
+      id: 4,
+      name: 'Development Sprint 2',
+      start: '2025-02-10',
+      end: '2025-02-28',
+      progress: 0,
+      status: 'not-started'
+    },
+    {
+      id: 5,
+      name: 'Testing',
+      start: '2025-02-24',
+      end: '2025-03-07',
+      progress: 0,
+      status: 'not-started'
+    },
+    {
+      id: 6,
+      name: 'Launch',
+      type: 'milestone',
+      date: '2025-03-10',
+      status: 'not-started'
+    }
+  ],
+  zoom: 'week'
+})">
+  <div class="ux-gantt">
+    <!-- Toolbar -->
+    <div class="ux-gantt__toolbar">
+      <div class="ux-gantt__toolbar-start">
+        <h4 class="ux-gantt__title">Project Timeline</h4>
+      </div>
+      <div class="ux-gantt__toolbar-end">
+        <button class="ux-gantt__today-btn" @click="scrollToToday()">
+          Today
+        </button>
+        <div class="ux-gantt__zoom-controls">
+          <button class="ux-gantt__zoom-btn"
+                  :class="{'ux-gantt__zoom-btn--active': zoom === 'day'}"
+                  @click="setZoom('day')">Day</button>
+          <button class="ux-gantt__zoom-btn"
+                  :class="{'ux-gantt__zoom-btn--active': zoom === 'week'}"
+                  @click="setZoom('week')">Week</button>
+          <button class="ux-gantt__zoom-btn"
+                  :class="{'ux-gantt__zoom-btn--active': zoom === 'month'}"
+                  @click="setZoom('month')">Month</button>
+        </div>
+        <button class="ux-gantt__nav-btn" @click="navigate('prev')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="ux-gantt__nav-btn" @click="navigate('next')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="ux-gantt__body" style="height: 300px;">
+      <!-- Tasks Panel -->
+      <div class="ux-gantt__tasks" :style="{width: taskPanelWidth + 'px'}">
+        <div class="ux-gantt__tasks-header">Tasks</div>
+        <div class="ux-gantt__tasks-body" x-ref="tasksBody">
+          <template x-for="task in flattenedTasks" :key="task.id">
+            <div class="ux-gantt__task-row"
+                 :class="{'ux-gantt__task-row--selected': selectedTask === task.id}"
+                 @click="selectTask(task)">
+              <div class="ux-gantt__task-indent" :style="{width: (task._level * 20) + 'px'}"></div>
+              <template x-if="task._hasChildren">
+                <button class="ux-gantt__task-expand"
+                        :class="{'ux-gantt__task-expand--expanded': expandedGroups.has(task.id)}"
+                        @click.stop="toggleGroup(task.id)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+              </template>
+              <span class="ux-gantt__task-name" x-text="task.name"></span>
+              <template x-if="task.type === 'milestone'">
+                <span class="ux-badge ux-badge--sm ux-color-warning--soft">Milestone</span>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Resizer -->
+      <div class="ux-gantt__resizer"
+           :class="{'ux-gantt__resizer--active': isResizing}"
+           :style="{left: taskPanelWidth + 'px'}"
+           @mousedown="startResize($event)"></div>
+
+      <!-- Chart Area -->
+      <div class="ux-gantt__chart">
+        <div class="ux-gantt__chart-scroll" x-ref="chartScroll">
+          <div class="ux-gantt__chart-inner" :style="{width: chartWidth + 'px'}">
+            <!-- Header -->
+            <div class="ux-gantt__header">
+              <div class="ux-gantt__header-row ux-gantt__header-row--primary">
+                <template x-for="(date, index) in timelineDates" :key="'primary-' + index">
+                  <div class="ux-gantt__header-cell ux-gantt__header-cell--primary"
+                       :style="{width: cellWidth + 'px'}"
+                       x-text="formatHeaderDate(date, true)"></div>
+                </template>
+              </div>
+              <div class="ux-gantt__header-row">
+                <template x-for="(date, index) in timelineDates" :key="'secondary-' + index">
+                  <div class="ux-gantt__header-cell"
+                       :class="{
+                         'ux-gantt__header-cell--today': isToday(date),
+                         'ux-gantt__header-cell--weekend': zoom === 'day' && isWeekend(date)
+                       }"
+                       :style="{width: cellWidth + 'px'}"
+                       x-text="formatHeaderDate(date, false)"></div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Grid & Bars -->
+            <div class="ux-gantt__bars">
+              <template x-for="task in flattenedTasks" :key="'bar-' + task.id">
+                <div class="ux-gantt__bar-row">
+                  <template x-if="task.type === 'milestone'">
+                    <div class="ux-gantt__milestone"
+                         :class="{'ux-gantt__milestone--completed': task.status === 'completed'}"
+                         :style="getBarStyle(task)"
+                         @mouseenter="showTooltip(task, $event)"
+                         @mouseleave="hideTooltip()"
+                         @click="selectTask(task)"></div>
+                  </template>
+                  <template x-if="task.type !== 'milestone'">
+                    <div :class="getBarClass(task)"
+                         :style="getBarStyle(task)"
+                         @mouseenter="showTooltip(task, $event)"
+                         @mouseleave="hideTooltip()"
+                         @click="selectTask(task)"
+                         @mousedown="startDrag(task, 'move', $event)">
+                      <div class="ux-gantt__bar-progress"
+                           :style="{width: (task.progress || 0) + '%'}"></div>
+                      <span class="ux-gantt__bar-label" x-text="task.name"></span>
+                      <div class="ux-gantt__bar-handle ux-gantt__bar-handle--start"
+                           @mousedown.stop="startDrag(task, 'resize-start', $event)"></div>
+                      <div class="ux-gantt__bar-handle ux-gantt__bar-handle--end"
+                           @mousedown.stop="startDrag(task, 'resize-end', $event)"></div>
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </div>
+
+            <!-- Today Line -->
+            <template x-if="showToday && todayPosition !== null">
+              <div class="ux-gantt__today-line" :style="{left: todayPosition + 'px'}"></div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooltip -->
+  <div class="ux-gantt__tooltip"
+       :class="{'ux-gantt__tooltip--visible': tooltip.visible}"
+       :style="{left: tooltip.x + 'px', top: tooltip.y + 'px'}"
+       x-show="tooltip.visible">
+    <template x-if="tooltip.task">
+      <div>
+        <div class="ux-gantt__tooltip-title" x-text="tooltip.task.name"></div>
+        <div class="ux-gantt__tooltip-dates">
+          <template x-if="tooltip.task.type === 'milestone'">
+            <span x-text="formatDate(tooltip.task.date)"></span>
+          </template>
+          <template x-if="tooltip.task.type !== 'milestone'">
+            <span x-text="formatDate(tooltip.task.start) + ' - ' + formatDate(tooltip.task.end)"></span>
+          </template>
+        </div>
+        <template x-if="tooltip.task.progress !== undefined">
+          <div class="ux-gantt__tooltip-progress">
+            <div class="ux-gantt__tooltip-progress-bar">
+              <div class="ux-gantt__tooltip-progress-fill" :style="{width: tooltip.task.progress + '%'}"></div>
+            </div>
+            <span x-text="tooltip.task.progress + '%'"></span>
+          </div>
+        </template>
+      </div>
+    </template>
+  </div>
+</div>

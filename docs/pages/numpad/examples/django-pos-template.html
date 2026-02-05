@@ -1,0 +1,70 @@
+<!-- templates/pos/cash_payment.html -->
+{% load static %}
+
+<div class="pos-payment-panel">
+  <div class="order-summary">
+    <h4>Orden #{{ order.id }}</h4>
+    <p class="order-total">Total: ${{ order.total|floatformat:2 }}</p>
+  </div>
+
+  <form hx-post="{% url 'pos:process_payment' %}"
+        hx-target="#payment-result"
+        hx-indicator="#payment-loading">
+    {% csrf_token %}
+    <input type="hidden" name="order_id" value="{{ order.id }}">
+
+    <div x-data="uxNumpad({
+      allowDecimal: true,
+      decimals: 2,
+      quickAmounts: [20, 50, 100, 200, 500]
+    })" class="ux-numpad"
+         @numpad-change="$refs.amount.value = $event.detail.numericValue">
+
+      <div class="ux-numpad__display ux-numpad__display--lg">
+        <span class="ux-numpad__display-label">Efectivo recibido</span>
+        <span class="ux-numpad__display-currency">$</span>
+        <span class="ux-numpad__display-value" x-text="displayValue"></span>
+      </div>
+
+      <input type="hidden" name="amount" x-ref="amount" value="0">
+
+      <!-- Quick amounts -->
+      <div class="ux-numpad__quick-amounts">
+        <template x-for="amt in quickAmounts" :key="amt">
+          <button type="button" class="ux-numpad__quick-btn"
+                  @click="setQuickAmount(amt)">
+            $<span x-text="amt"></span>
+          </button>
+        </template>
+      </div>
+
+      <!-- Numpad grid -->
+      <div class="ux-numpad__grid">
+        <template x-for="key in ['7','8','9','4','5','6','1','2','3']">
+          <button type="button" class="ux-numpad__key"
+                  @click="appendDigit(key)" x-text="key"></button>
+        </template>
+        <button type="button" class="ux-numpad__key ux-numpad__key--danger"
+                @click="clear()">C</button>
+        <button type="button" class="ux-numpad__key"
+                @click="appendDigit('0')">0</button>
+        <button type="button" class="ux-numpad__key ux-numpad__key--action"
+                @click="appendDecimal()">.</button>
+      </div>
+
+      <!-- Change calculation -->
+      <div class="change-display" x-show="getNumericValue() >= {{ order.total }}">
+        Cambio: $<span x-text="(getNumericValue() - {{ order.total }}).toFixed(2)"></span>
+      </div>
+
+      <button type="submit" class="ux-button ux-color-success"
+              style="width: 100%;"
+              :disabled="getNumericValue() < {{ order.total }}">
+        <span class="ux-spinner htmx-indicator" id="payment-loading"></span>
+        Cobrar
+      </button>
+    </div>
+  </form>
+
+  <div id="payment-result"></div>
+</div>

@@ -1,0 +1,47 @@
+<pre class="ux-code-block" data-lang="python"># views.py
+import csv
+from django.http import HttpResponse
+
+def export_users_csv(request):
+    # Obtener queryset con los mismos filtros que la tabla
+    queryset = User.objects.all()
+
+    search = request.GET.get('q', '')
+    if search:
+        queryset = queryset.filter(
+            Q(name__icontains=search) |
+            Q(email__icontains=search)
+        )
+
+    status = request.GET.get('status')
+    if status:
+        queryset = queryset.filter(is_active=(status == 'active'))
+
+    # Generar CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="usuarios.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Nombre', 'Email', 'Estado', 'Departamento', 'Fecha Creacion'])
+
+    for user in queryset:
+        writer.writerow([
+            user.name,
+            user.email,
+            'Activo' if user.is_active else 'Inactivo',
+            user.department.name if user.department else '',
+            user.created_at.strftime('%Y-%m-%d')
+        ])
+
+    return response
+
+
+# Template - Boton de exportar
+<button class="ux-button ux-button--outline ux-button--sm"
+        hx-get="{% url 'users:export' %}?q={{ current_filters.q }}&status={{ current_filters.status }}"
+        hx-swap="none">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+  </svg>
+  Exportar CSV
+</button></pre>

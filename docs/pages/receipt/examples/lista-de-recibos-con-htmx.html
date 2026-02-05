@@ -1,0 +1,40 @@
+<h4 style="margin-bottom: var(--ux-space-md);">Generacion de PDF (WeasyPrint)</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py (adicional)
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML, CSS
+
+def receipt_pdf(request, pk):
+    """Generar PDF del recibo."""
+    receipt = get_object_or_404(Receipt, pk=pk)
+    company = Company.objects.first()
+
+    context = {
+        'receipt': receipt,
+        'company': company,
+    }
+
+    html_string = render_to_string('receipts/receipt_pdf.html', context)
+
+    # CSS para formato de ticket termico
+    css = CSS(string='''
+        @page {
+            size: 80mm auto;
+            margin: 5mm;
+        }
+        body {
+            font-family: monospace;
+            font-size: 10pt;
+        }
+        .ux-receipt {
+            width: 100%;
+        }
+    ''')
+
+    html = HTML(string=html_string)
+    pdf = html.write_pdf(stylesheets=[css])
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="ticket-{receipt.number}.pdf"'
+
+    return response</pre>

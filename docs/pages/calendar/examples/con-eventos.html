@@ -1,0 +1,71 @@
+<div style="display: grid; grid-template-columns: 1fr auto; gap: 1.5rem; align-items: start;">
+  <div x-data="uxCalendar({
+    events: [
+      { date: new Date().toISOString().split('T')[0], color: 'primary', title: 'Hoy' },
+      { date: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0], color: 'success', title: 'Reunion' },
+      { date: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0], color: 'warning', title: 'Deadline' },
+      { date: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0], color: 'danger', title: 'Urgente' },
+      { date: new Date(Date.now() + 86400000 * 10).toISOString().split('T')[0], color: 'primary', title: 'Evento' }
+    ]
+  })">
+    <div class="ux-calendar">
+      <div class="ux-calendar__header">
+        <button class="ux-calendar__nav-btn" @click="prevMonth()" x-html="icons.prev"></button>
+        <span class="ux-calendar__title" x-text="currentMonthYear"></span>
+        <button class="ux-calendar__nav-btn" @click="nextMonth()" x-html="icons.next"></button>
+      </div>
+
+      <div class="ux-calendar__weekdays">
+        <template x-for="day in weekdays" :key="day">
+          <div class="ux-calendar__weekday" x-text="day"></div>
+        </template>
+      </div>
+
+      <div class="ux-calendar__days">
+        <template x-for="dayObj in calendarDays" :key="dayObj.date.toISOString()">
+          <button class="ux-calendar__day"
+                  :class="{
+                    'ux-calendar__day--other-month': dayObj.isOtherMonth,
+                    'ux-calendar__day--today': dayObj.isToday,
+                    'ux-calendar__day--selected': dayObj.isSelected
+                  }"
+                  @click="selectDate(dayObj)">
+            <span x-text="dayObj.day"></span>
+            <div class="ux-calendar__day-events" x-show="dayObj.events.length > 0">
+              <template x-for="event in dayObj.events.slice(0, 3)" :key="event.title">
+                <span class="ux-calendar__day-event"
+                      :class="'ux-calendar__day-event--' + (event.color || 'primary')"></span>
+              </template>
+            </div>
+          </button>
+        </template>
+      </div>
+
+      <div class="ux-calendar__footer">
+        <button class="ux-calendar__today-btn" @click="goToToday()">Hoy</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Leyenda</h3>
+    <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ux-primary);"></span>
+        Evento normal
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ux-success);"></span>
+        Completado
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ux-warning);"></span>
+        Pendiente
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--ux-danger);"></span>
+        Urgente
+      </div>
+    </div>
+  </div>
+</div>

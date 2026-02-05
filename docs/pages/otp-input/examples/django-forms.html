@@ -1,0 +1,15 @@
+# forms.py
+from django import forms
+
+class OTPVerifyForm(forms.Form):
+    otp_code = forms.CharField(
+        max_length=6,
+        min_length=6,
+        widget=forms.HiddenInput()
+    )
+
+    def clean_otp_code(self):
+        code = self.cleaned_data.get('otp_code', '')
+        if not code.isdigit():
+            raise forms.ValidationError('El codigo debe contener solo numeros')
+        return code

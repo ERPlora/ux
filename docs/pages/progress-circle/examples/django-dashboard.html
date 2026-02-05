@@ -1,0 +1,42 @@
+<!-- templates/dashboard/stats.html -->
+<div class="row"
+     hx-get="/dashboard/stats/"
+     hx-trigger="load, every 30s"
+     hx-swap="innerHTML">
+
+  <div class="col-6 col-md-3">
+    <div x-data="uxProgressCircle({ value: {{ cpu_usage }} })">
+      <div class="ux-progress-circle ux-progress-circle--sm
+                  {% if cpu_usage > 90 %}ux-progress-circle--danger
+                  {% elif cpu_usage > 70 %}ux-progress-circle--warning
+                  {% else %}ux-progress-circle--success{% endif %}">
+        <svg class="ux-progress-circle__svg" viewBox="0 0 80 80">
+          <circle class="ux-progress-circle__bg" cx="40" cy="40" r="34"/>
+          <circle class="ux-progress-circle__fill" cx="40" cy="40" r="34"
+                  :stroke-dasharray="2 * Math.PI * 34"
+                  :stroke-dashoffset="2 * Math.PI * 34 * (1 - percentage / 100)"/>
+        </svg>
+        <div class="ux-progress-circle__content">
+          <span class="ux-progress-circle__value" x-text="displayValue"></span>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: 0.5rem;">CPU</p>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div x-data="uxProgressCircle({ value: {{ memory_usage }} })">
+      <!-- Similar structure for memory -->
+    </div>
+  </div>
+
+</div>
+
+<!-- views.py -->
+def dashboard_stats(request):
+    return render(request, 'dashboard/stats.html', {
+        'cpu_usage': get_cpu_usage(),
+        'memory_usage': get_memory_usage(),
+        'disk_usage': get_disk_usage(),
+        'network_usage': get_network_usage()
+    })

@@ -1,0 +1,443 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text);
+    }
+    .demo-section p {
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      padding: var(--ux-space-lg);
+      margin-bottom: var(--ux-space-md);
+    }
+    .result-display {
+      margin-top: var(--ux-space-md);
+      padding: var(--ux-space-md);
+      background: var(--ux-gray-100);
+      border-radius: var(--ux-radius-md);
+      font-family: monospace;
+    }
+  </style>
+
+<section class="component-section">
+      <h3>Barcode Scanner</h3>
+      <p>Escaner de codigos de barras y QR usando la camara del dispositivo. Utiliza la API BarcodeDetector del navegador.</p>
+
+      <ux-playground src="pages/barcode-scanner/examples/barcode-scanner.html"></ux-playground>
+      <div class="demo-box" x-data="{ scannedCode: null, scannedFormat: null }">
+        <div class="ux-barcode-scanner"
+             x-data="uxBarcodeScanner({ showManualInput: true, beepOnScan: true })"
+             @scanner:detected="scannedCode = $event.detail.rawValue; scannedFormat = $event.detail.format"
+             style="max-width: 500px; margin: 0 auto;">
+
+          <!-- Video -->
+          <video class="ux-barcode-scanner__video"
+                 x-ref="video"
+                 playsinline
+                 muted></video>
+
+          <!-- Overlay -->
+          <div class="ux-barcode-scanner__overlay">
+            <div class="ux-barcode-scanner__frame">
+              <div class="ux-barcode-scanner__corners"></div>
+              <div class="ux-barcode-scanner__scan-line" x-show="isActive"></div>
+            </div>
+            <p class="ux-barcode-scanner__instructions">Coloca el codigo dentro del marco</p>
+          </div>
+
+          <!-- Result -->
+          <div class="ux-barcode-scanner__result" x-show="lastResult" x-cloak>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span x-text="lastResult?.rawValue"></span>
+          </div>
+
+          <!-- Controls -->
+          <div class="ux-barcode-scanner__controls">
+            <button class="ux-barcode-scanner__btn" @click="toggleCamera()" title="Cambiar camara">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </button>
+            <button class="ux-barcode-scanner__btn"
+                    @click="toggleTorch()"
+                    x-show="hasTorch"
+                    :class="{ 'active': torchOn }"
+                    title="Linterna">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Manual input -->
+          <div class="ux-barcode-scanner__manual" x-show="showManualInput">
+            <input type="text"
+                   class="ux-barcode-scanner__manual-input"
+                   placeholder="Ingresar codigo manual"
+                   x-model="manualCode"
+                   @keyup.enter="submitManual()">
+            <button class="ux-barcode-scanner__manual-submit" @click="submitManual()">OK</button>
+          </div>
+
+          <!-- Loading -->
+          <div class="ux-barcode-scanner__loading" x-show="isLoading">
+            <div class="ux-barcode-scanner__loading-spinner"></div>
+            <span class="ux-barcode-scanner__loading-text">Iniciando camara...</span>
+          </div>
+
+          <!-- Error -->
+          <div class="ux-barcode-scanner__error" x-show="error" x-cloak>
+            <svg class="ux-barcode-scanner__error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <span class="ux-barcode-scanner__error-text" x-text="error"></span>
+            <span class="ux-barcode-scanner__error-hint">Usa el campo de entrada manual como alternativa</span>
+          </div>
+        </div>
+
+        <!-- Resultado escaneado -->
+        <div class="result-display" x-show="scannedCode">
+          <strong>Ultimo codigo escaneado:</strong><br>
+          <span x-text="scannedCode"></span>
+          <span class="ux-barcode-scanner__format" x-text="scannedFormat" style="margin-left: 8px;"></span>
+        </div>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-barcode-scanner"
+     x-data="uxBarcodeScanner({ showManualInput: true })"
+     @scanner:detected="handleScan($event.detail)"&gt;
+
+  &lt;video class="ux-barcode-scanner__video" x-ref="video"&gt;&lt;/video&gt;
+
+  &lt;!-- Overlay con frame y linea de escaneo --&gt;
+  &lt;div class="ux-barcode-scanner__overlay"&gt;
+    &lt;div class="ux-barcode-scanner__frame"&gt;
+      &lt;div class="ux-barcode-scanner__corners"&gt;&lt;/div&gt;
+      &lt;div class="ux-barcode-scanner__scan-line"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+&lt;/div&gt;</pre>
+    </section>
+
+    <section class="component-section">
+      <h3>Opciones</h3>
+      <p>Configuracion disponible para el escaner.</p>
+      <ux-playground src="pages/barcode-scanner/examples/opciones.html"></ux-playground>
+      <div class="demo-box">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm);">Opcion</th>
+              <th style="padding: var(--ux-space-sm);">Tipo</th>
+              <th style="padding: var(--ux-space-sm);">Default</th>
+              <th style="padding: var(--ux-space-sm);">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>formats</code></td>
+              <td style="padding: var(--ux-space-sm);">array</td>
+              <td style="padding: var(--ux-space-sm);">[varios]</td>
+              <td style="padding: var(--ux-space-sm);">Formatos de codigo a detectar</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>continuous</code></td>
+              <td style="padding: var(--ux-space-sm);">boolean</td>
+              <td style="padding: var(--ux-space-sm);">false</td>
+              <td style="padding: var(--ux-space-sm);">Continuar escaneando despues de detectar</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>beepOnScan</code></td>
+              <td style="padding: var(--ux-space-sm);">boolean</td>
+              <td style="padding: var(--ux-space-sm);">true</td>
+              <td style="padding: var(--ux-space-sm);">Reproducir sonido al detectar</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>vibrate</code></td>
+              <td style="padding: var(--ux-space-sm);">boolean</td>
+              <td style="padding: var(--ux-space-sm);">true</td>
+              <td style="padding: var(--ux-space-sm);">Vibrar al detectar (movil)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>showManualInput</code></td>
+              <td style="padding: var(--ux-space-sm);">boolean</td>
+              <td style="padding: var(--ux-space-sm);">true</td>
+              <td style="padding: var(--ux-space-sm);">Mostrar campo de entrada manual</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>fullscreen</code></td>
+              <td style="padding: var(--ux-space-sm);">boolean</td>
+              <td style="padding: var(--ux-space-sm);">false</td>
+              <td style="padding: var(--ux-space-sm);">Iniciar en pantalla completa</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="component-section">
+      <h3>Formatos Soportados</h3>
+      <p>El escaner puede detectar los siguientes formatos de codigo.</p>
+      <ux-playground src="pages/barcode-scanner/examples/formatos-soportados.html"></ux-playground>
+      <div class="demo-box" style="display: flex; flex-wrap: wrap; gap: var(--ux-space-sm);">
+        <span class="ux-barcode-scanner__format" style="background: var(--ux-primary-tint); color: var(--ux-primary); padding: 4px 12px; border-radius: var(--ux-radius-sm);">EAN-13</span>
+        <span class="ux-barcode-scanner__format" style="background: var(--ux-primary-tint); color: var(--ux-primary); padding: 4px 12px; border-radius: var(--ux-radius-sm);">EAN-8</span>
+        <span class="ux-barcode-scanner__format" style="background: var(--ux-primary-tint); color: var(--ux-primary); padding: 4px 12px; border-radius: var(--ux-radius-sm);">UPC-A</span>
+        <span class="ux-barcode-scanner__format" style="background: var(--ux-primary-tint); color: var(--ux-primary); padding: 4px 12px; border-radius: var(--ux-radius-sm);">UPC-E</span>
+        <span class="ux-barcode-scanner__format" style="background: var(--ux-primary-tint); color: var(--ux-primary); padding: 4px 12px; border-radius: var(--ux-radius-sm);">Code 128</span>
+        <span class="ux-barcode-scanner__format" style="background: var(--ux-primary-tint); color: var(--ux-primary); padding: 4px 12px; border-radius: var(--ux-radius-sm);">Code 39</span>
+        <span class="ux-barcode-scanner__format" style="background: var(--ux-primary-tint); color: var(--ux-primary); padding: 4px 12px; border-radius: var(--ux-radius-sm);">Code 93</span>
+        <span class="ux-barcode-scanner__format" style="background: var(--ux-primary-tint); color: var(--ux-primary); padding: 4px 12px; border-radius: var(--ux-radius-sm);">Codabar</span>
+        <span class="ux-barcode-scanner__format" style="background: var(--ux-success-tint); color: var(--ux-success); padding: 4px 12px; border-radius: var(--ux-radius-sm);">QR Code</span>
+        <span class="ux-barcode-scanner__format" style="background: var(--ux-success-tint); color: var(--ux-success); padding: 4px 12px; border-radius: var(--ux-radius-sm);">Data Matrix</span>
+      </div>
+    </section>
+
+    <section class="component-section">
+      <h3>Eventos</h3>
+      <p>Eventos emitidos por el escaner.</p>
+      <ux-playground src="pages/barcode-scanner/examples/eventos.html"></ux-playground>
+      <div class="demo-box">
+        <ul style="margin: 0; padding-left: var(--ux-space-lg);">
+          <li><code>scanner:detected</code> - Codigo detectado ({ rawValue, format, timestamp })</li>
+          <li><code>scanner:started</code> - Escaner iniciado</li>
+          <li><code>scanner:stopped</code> - Escaner detenido</li>
+          <li><code>scanner:error</code> - Error ({ error })</li>
+          <li><code>scanner:close</code> - Escaner cerrado</li>
+        </ul>
+      </div>
+      <pre class="ux-code-block" data-lang="html">&lt;div x-data="uxBarcodeScanner()"
+     @scanner:detected="procesarCodigo($event.detail.rawValue)"&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <section class="component-section">
+      <h3>Metodos</h3>
+      <p>Metodos disponibles para controlar el escaner.</p>
+      <ux-playground src="pages/barcode-scanner/examples/metodos.html"></ux-playground>
+      <div class="demo-box">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--ux-border-color);">
+              <th style="padding: var(--ux-space-sm);">Metodo</th>
+              <th style="padding: var(--ux-space-sm);">Descripcion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>start()</code></td>
+              <td style="padding: var(--ux-space-sm);">Inicia el escaner</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>stop()</code></td>
+              <td style="padding: var(--ux-space-sm);">Detiene el escaner</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>toggleCamera()</code></td>
+              <td style="padding: var(--ux-space-sm);">Alterna entre camara frontal/trasera</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>toggleTorch()</code></td>
+              <td style="padding: var(--ux-space-sm);">Activa/desactiva linterna</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>submitManual()</code></td>
+              <td style="padding: var(--ux-space-sm);">Envia codigo manual</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--ux-border-color);">
+              <td style="padding: var(--ux-space-sm);"><code>toggleFullscreen()</code></td>
+              <td style="padding: var(--ux-space-sm);">Alterna pantalla completa</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="component-section">
+      <h3>HTMX + Django</h3>
+      <p>Integra el escaner con HTMX para buscar productos por codigo de barras en tiempo real.</p>
+
+      <ux-playground src="pages/barcode-scanner/examples/htmx-django.html"></ux-playground>
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm);">Busqueda de producto al escanear</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Al detectar un codigo, se hace una peticion HTMX para buscar el producto y mostrarlo.</p>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Escaner con busqueda HTMX --&gt;
+&lt;div x-data="uxBarcodeScanner({ continuous: false })"
+     @scanner:detected="
+       $refs.barcodeInput.value = $event.detail.rawValue;
+       htmx.trigger($refs.barcodeInput, 'barcode-scan');
+     "&gt;
+
+  &lt;video class="ux-barcode-scanner__video" x-ref="video"&gt;&lt;/video&gt;
+  &lt;div class="ux-barcode-scanner__overlay"&gt;...&lt;/div&gt;
+
+  &lt;!-- Input oculto para HTMX --&gt;
+  &lt;input type="hidden"
+         x-ref="barcodeInput"
+         name="barcode"
+         hx-get="/api/productos/buscar/"
+         hx-trigger="barcode-scan"
+         hx-target="#producto-resultado"
+         hx-indicator="#producto-loading"&gt;
+&lt;/div&gt;
+
+&lt;!-- Resultado del producto --&gt;
+&lt;div id="producto-resultado"&gt;&lt;/div&gt;
+&lt;div id="producto-loading" class="htmx-indicator"&gt;
+  &lt;div class="ux-spinner"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <ux-playground src="pages/barcode-scanner/examples/busqueda-de-producto-al-escanear.html"></ux-playground>
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm);">Vista Django</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Endpoint que busca el producto y devuelve HTML parcial.</p>
+      </div>
+
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from .models import Producto
+
+def buscar_producto_por_barcode(request):
+    barcode = request.GET.get('barcode', '')
+
+    if not barcode:
+        return HttpResponse('&lt;p class="ux-text-secondary"&gt;Escanea un codigo&lt;/p&gt;')
+
+    try:
+        producto = Producto.objects.get(codigo_barras=barcode)
+        return render(request, 'partials/producto_card.html', {
+            'producto': producto
+        })
+    except Producto.DoesNotExist:
+        return HttpResponse(f'''
+            &lt;div class="ux-alert ux-alert--warning"&gt;
+                Producto no encontrado: {barcode}
+            &lt;/div&gt;
+        ''')</pre>
+
+      <ux-playground src="pages/barcode-scanner/examples/vista-django.html"></ux-playground>
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm);">Template parcial</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">HTML que se renderiza al encontrar un producto.</p>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- partials/producto_card.html --&gt;
+&lt;div class="ux-card"&gt;
+  &lt;div class="ux-card__content"&gt;
+    &lt;div style="display: flex; gap: var(--ux-space-md);"&gt;
+      &lt;img src="{{ producto.imagen.url }}"
+           alt="{{ producto.nombre }}"
+           style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--ux-radius-md);"&gt;
+      &lt;div&gt;
+        &lt;h4 style="margin: 0 0 4px;"&gt;{{ producto.nombre }}&lt;/h4&gt;
+        &lt;p class="ux-text-secondary" style="margin: 0 0 8px;"&gt;
+          SKU: {{ producto.sku }} | Codigo: {{ producto.codigo_barras }}
+        &lt;/p&gt;
+        &lt;span style="font-size: 1.25rem; font-weight: 600; color: var(--ux-primary);"&gt;
+          ${{ producto.precio }}
+        &lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="ux-card__footer"&gt;
+    &lt;button class="ux-button ux-color-primary"
+            hx-post="/api/carrito/agregar/"
+            hx-vals='{"producto_id": "{{ producto.id }}"}'
+            hx-swap="none"&gt;
+      Agregar al carrito
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <ux-playground src="pages/barcode-scanner/examples/template-parcial.html"></ux-playground>
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm);">Agregar multiples productos (modo continuo)</h4>
+        <p style="font-size: var(--ux-font-size-sm); color: var(--ux-text-secondary);">Para escenarios de inventario donde se escanean muchos productos seguidos.</p>
+      </div>
+
+      <pre class="ux-code-block" data-lang="html">&lt;!-- Escaner en modo continuo para inventario --&gt;
+&lt;div x-data="{ productos: [] }"&gt;
+  &lt;div class="ux-barcode-scanner"
+       x-data="uxBarcodeScanner({ continuous: true, beepOnScan: true })"
+       @scanner:detected="
+         fetch('/api/productos/buscar/?barcode=' + $event.detail.rawValue)
+           .then(r =&gt; r.json())
+           .then(data =&gt; {
+             if (data.producto) {
+               productos.push(data.producto);
+             }
+           })
+       "&gt;
+    &lt;video class="ux-barcode-scanner__video" x-ref="video"&gt;&lt;/video&gt;
+    &lt;div class="ux-barcode-scanner__overlay"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Lista de productos escaneados --&gt;
+  &lt;ul class="ux-list"&gt;
+    &lt;template x-for="producto in productos" :key="producto.id"&gt;
+      &lt;li class="ux-list__item"&gt;
+        &lt;span x-text="producto.nombre"&gt;&lt;/span&gt;
+        &lt;span class="ux-badge" x-text="producto.codigo_barras"&gt;&lt;/span&gt;
+      &lt;/li&gt;
+    &lt;/template&gt;
+  &lt;/ul&gt;
+
+  &lt;!-- Guardar inventario --&gt;
+  &lt;button class="ux-button ux-color-success"
+          @click="
+            fetch('/api/inventario/guardar/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ productos: productos.map(p =&gt; p.id) })
+            })
+          "&gt;
+    Guardar inventario
+  &lt;/button&gt;
+&lt;/div&gt;</pre>
+
+      <ux-playground src="pages/barcode-scanner/examples/agregar-multiples-productos-modo-continuo.html"></ux-playground>
+      <div class="demo-box">
+        <h4 style="margin-bottom: var(--ux-space-sm);">URLs Django</h4>
+      </div>
+
+      <pre class="ux-code-block" data-lang="python"># urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('api/productos/buscar/', views.buscar_producto_por_barcode, name='buscar_producto'),
+    path('api/carrito/agregar/', views.agregar_al_carrito, name='agregar_carrito'),
+    path('api/inventario/guardar/', views.guardar_inventario, name='guardar_inventario'),
+]</pre>
+    </section>
+
+    <section class="component-section">
+      <h3>Compatibilidad</h3>
+      <p>El escaner utiliza la API BarcodeDetector que esta disponible en navegadores modernos.</p>
+      <ux-playground src="pages/barcode-scanner/examples/compatibilidad.html"></ux-playground>
+      <div class="demo-box">
+        <p style="margin: 0;"><strong>Navegadores soportados:</strong></p>
+        <ul style="margin: var(--ux-space-sm) 0 0; padding-left: var(--ux-space-lg);">
+          <li>Chrome 83+ (Android, Desktop)</li>
+          <li>Edge 83+</li>
+          <li>Opera 69+</li>
+          <li>Safari 17+ (iOS, macOS) - parcial</li>
+        </ul>
+        <p style="margin-top: var(--ux-space-md); color: var(--ux-text-secondary);">
+          <em>Para navegadores no soportados, el campo de entrada manual proporciona una alternativa.</em>
+        </p>
+      </div>
+    </section>

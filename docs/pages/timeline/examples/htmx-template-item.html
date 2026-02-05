@@ -1,0 +1,40 @@
+<!-- templates/activity/_timeline_item.html -->
+<div class="ux-timeline__item"
+     id="activity-{{ activity.id }}"
+     hx-get="/activity/{{ activity.id }}/detail/"
+     hx-trigger="click"
+     hx-target="#activity-detail-modal .ux-modal__content"
+     hx-swap="innerHTML"
+     @click="$dispatch('open-modal', 'activity-detail')">
+
+  <div class="ux-timeline__marker ux-timeline__marker--icon ux-timeline__marker--{{ activity.get_color }}">
+    {% include "icons/" + activity.get_icon + ".svg" %}
+  </div>
+
+  <div class="ux-timeline__content">
+    <div class="ux-timeline__header">
+      <h4 class="ux-timeline__title">
+        <strong>{{ activity.user.get_full_name|default:activity.user.username }}</strong>
+        {{ activity.get_action_display|lower }}
+        {% if activity.target_model %}
+        <span class="ux-text-secondary">{{ activity.target_model }}</span>
+        {% endif %}
+      </h4>
+      <span class="ux-timeline__time">
+        {{ activity.created_at|timesince }} ago
+      </span>
+    </div>
+
+    {% if activity.description %}
+    <p class="ux-timeline__subtitle">{{ activity.description|truncatewords:15 }}</p>
+    {% endif %}
+
+    {% if activity.metadata.preview %}
+    <div class="ux-timeline__body">
+      <div class="ux-card ux-card--sm">
+        {{ activity.metadata.preview|safe }}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>

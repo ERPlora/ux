@@ -1,0 +1,30 @@
+<table class="ux-datatable">
+  <tbody>
+    {% for row in rows %}
+    <tr id="row-{{ row.pk }}"
+        x-data="uxContextMenu({
+          items: [
+            { id: 'view', label: 'Ver', icon: 'eye', url: '{% url \"row_detail\" row.pk %}' },
+            { id: 'edit', label: 'Editar', icon: 'edit', url: '{% url \"row_edit\" row.pk %}' },
+            { id: 'clone', label: 'Clonar', icon: 'copy', url: '{% url \"row_clone\" row.pk %}' },
+            { divider: true },
+            { id: 'archive', label: 'Archivar', icon: 'archive', url: '{% url \"row_archive\" row.pk %}' },
+            { id: 'delete', label: 'Eliminar', icon: 'trash', danger: true, url: '{% url \"row_delete\" row.pk %}' }
+          ]
+        })"
+        @contextmenu.prevent="open($event)"
+        @context-menu:select="
+          const action = $event.detail;
+          if (action.id === 'delete') {
+            htmx.ajax('DELETE', action.url, { target: '#row-{{ row.pk }}', swap: 'outerHTML' });
+          } else {
+            htmx.ajax('GET', action.url, '#modal-content');
+          }
+        ">
+      <td>{{ row.name }}</td>
+      <td>{{ row.status }}</td>
+      <td>{{ row.date }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

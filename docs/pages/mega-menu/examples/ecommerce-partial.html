@@ -1,0 +1,59 @@
+<header class="ux-mega-menu__header">
+  <h2 class="ux-mega-menu__header-title">Shop by Category</h2>
+</header>
+<div class="ux-mega-menu__content">
+  <div class="ux-mega-menu__grid" style="grid-template-columns: repeat(4, 1fr) 250px;">
+    {% for category in categories %}
+    <div class="ux-mega-menu__section">
+      <h3 class="ux-mega-menu__section-title">{{ category.name }}</h3>
+      <ul class="ux-mega-menu__section-list">
+        {% for subcategory in category.children.all|slice:":6" %}
+        <li>
+          <a href="{% url 'category' subcategory.slug %}" class="ux-mega-menu__item">
+            <div class="ux-mega-menu__item-content">
+              <p class="ux-mega-menu__item-title">{{ subcategory.name }}</p>
+            </div>
+            {% if subcategory.product_count %}
+            <span style="color: var(--ux-text-tertiary); font-size: 0.75rem;">
+              ({{ subcategory.product_count }})
+            </span>
+            {% endif %}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'category' category.slug %}" class="ux-mega-menu__section-link">
+        View all
+      </a>
+    </div>
+    {% endfor %}
+
+    <!-- Promo Section -->
+    <div class="ux-mega-menu__section">
+      <div class="ux-mega-menu__promo">
+        {% if featured_product %}
+        <img src="{{ featured_product.image.url }}"
+             alt="{{ featured_product.name }}"
+             style="width: 100%; border-radius: 8px; margin-bottom: 1rem;">
+        <h4 class="ux-mega-menu__promo-title">{{ featured_product.name }}</h4>
+        <p class="ux-mega-menu__promo-desc">{{ featured_product.promo_text }}</p>
+        <a href="{% url 'product' featured_product.slug %}" class="ux-mega-menu__promo-action">
+          Shop Now
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7"></path>
+          </svg>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="ux-mega-menu__footer">
+  <a href="{% url 'all_categories' %}" class="ux-mega-menu__footer-link">
+    Browse all categories
+    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+  </a>
+  <a href="{% url 'deals' %}" class="ux-mega-menu__footer-link" style="color: var(--ux-danger);">
+    Today's Deals
+  </a>
+</footer>

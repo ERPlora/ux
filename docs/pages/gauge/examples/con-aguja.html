@@ -1,0 +1,35 @@
+<div class="demo-box" style="text-align: center;">
+  <div x-data="uxGauge({ value: 65, size: 240, strokeWidth: 20, unit: 'mph', label: 'Speed', showNeedle: true })"
+       class="ux-gauge ux-gauge--lg">
+    <svg class="ux-gauge__svg" :width="size" :height="size * 0.65" :viewBox="`0 0 ${size} ${size * 0.7}`">
+      <!-- Track -->
+      <path class="ux-gauge__track" :d="arcPath" :stroke-width="strokeWidth" />
+
+      <!-- Fill -->
+      <path class="ux-gauge__fill" :d="arcPath" :stroke-width="strokeWidth"
+            :stroke-dasharray="circumference" :stroke-dashoffset="dashOffset" />
+
+      <!-- Needle -->
+      <g :transform="`translate(${center}, ${center})`" x-show="showNeedle">
+        <path class="ux-gauge__needle" :d="needlePath"
+              :transform="`rotate(${needleAngle + 90})`" />
+        <circle class="ux-gauge__needle-center" cx="0" cy="0" r="8" />
+      </g>
+    </svg>
+
+    <div class="ux-gauge__value-container" :style="valueContainerStyle">
+      <span class="ux-gauge__value" x-text="displayValue"></span>
+      <span class="ux-gauge__unit" x-text="unit"></span>
+    </div>
+
+    <div class="ux-gauge__labels">
+      <span class="ux-gauge__min" x-text="min"></span>
+      <span class="ux-gauge__max" x-text="max"></span>
+    </div>
+
+    <div style="margin-top: 1rem;">
+      <input type="range" min="0" max="100" :value="value" @input="setValue(parseInt($event.target.value))"
+             style="width: 200px;">
+    </div>
+  </div>
+</div>

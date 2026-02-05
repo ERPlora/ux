@@ -1,0 +1,69 @@
+<div x-data="uxKanban({
+  columns: [
+    { id: 'todo', title: 'Por hacer', color: 'var(--ux-gray-500)', cards: [] },
+    { id: 'progress', title: 'En progreso', color: 'var(--ux-blue-500)', cards: [] },
+    { id: 'review', title: 'En revision', color: 'var(--ux-amber-500)', cards: [] },
+    { id: 'done', title: 'Completado', color: 'var(--ux-green-500)', cards: [] }
+  ],
+  cards: [
+    { id: 1, columnId: 'todo', title: 'Disenar mockups de la nueva feature' },
+    { id: 2, columnId: 'todo', title: 'Revisar documentacion del API' },
+    { id: 3, columnId: 'progress', title: 'Implementar login con OAuth' },
+    { id: 4, columnId: 'progress', title: 'Crear tests unitarios' },
+    { id: 5, columnId: 'review', title: 'Refactorizar modulo de pagos' },
+    { id: 6, columnId: 'done', title: 'Configurar CI/CD pipeline' },
+    { id: 7, columnId: 'done', title: 'Actualizar dependencias' }
+  ]
+})" class="ux-kanban"
+   @kanban:move.window="console.log('Card moved:', $event.detail)">
+
+  <template x-for="column in columns" :key="column.id">
+    <div class="ux-kanban__column"
+         :class="{ 'ux-kanban__column--drag-over': isColumnDragOver(column.id) }"
+         @dragover="onDragOver(column.id, $event)"
+         @dragleave="onDragLeave(column.id, $event)"
+         @drop="onDrop(column.id, null, $event)">
+
+      <!-- Column Header -->
+      <div class="ux-kanban__column-header">
+        <div class="ux-kanban__column-header-start">
+          <div class="ux-kanban__column-color" :style="{ background: column.color }"></div>
+          <h4 class="ux-kanban__column-title" x-text="column.title"></h4>
+          <span class="ux-kanban__column-count" x-text="getColumnCount(column.id)"></span>
+        </div>
+        <div class="ux-kanban__column-actions">
+          <button class="ux-kanban__column-btn" title="Mas opciones">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="12" cy="5" r="1"/>
+              <circle cx="12" cy="19" r="1"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Column Body -->
+      <div class="ux-kanban__column-body" :data-empty-text="emptyText">
+        <template x-for="card in column.cards" :key="card.id">
+          <div class="ux-kanban__card"
+               draggable="true"
+               @dragstart="onDragStart(card, column.id, $event)"
+               @dragend="onDragEnd($event)"
+               @click="onCardClick(card, column.id, $event)">
+            <h5 class="ux-kanban__card-title" x-text="card.title"></h5>
+          </div>
+        </template>
+      </div>
+
+      <!-- Column Footer -->
+      <div class="ux-kanban__column-footer" x-show="allowAddCards">
+        <button class="ux-kanban__add-btn" @click="addCard(column.id, { title: 'Nueva tarea' })">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Agregar tarjeta
+        </button>
+      </div>
+    </div>
+  </template>
+</div>

@@ -1,0 +1,61 @@
+<div x-data="uxAutocomplete({
+  items: [
+    { label: 'Design', value: 'design' },
+    { label: 'Development', value: 'development' },
+    { label: 'Marketing', value: 'marketing' },
+    { label: 'Sales', value: 'sales' },
+    { label: 'Support', value: 'support' },
+    { label: 'Finance', value: 'finance' },
+    { label: 'HR', value: 'hr' },
+    { label: 'Legal', value: 'legal' }
+  ],
+  placeholder: 'Add skills...',
+  multiple: true
+})">
+  <div class="ux-autocomplete" style="max-width: 500px;">
+    <div class="ux-autocomplete__tags" @click="$refs.input.focus()">
+      <template x-for="(item, index) in selectedItems" :key="getValue(item)">
+        <span class="ux-autocomplete__tag">
+          <span x-text="getLabel(item)"></span>
+          <button class="ux-autocomplete__tag-remove" @click.stop="removeSelected(index)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </span>
+      </template>
+      <input type="text"
+             class="ux-autocomplete__tags-input"
+             x-ref="input"
+             x-model="query"
+             :placeholder="selectedItems.length === 0 ? placeholder : ''"
+             @input="onInput()"
+             @focus="onFocus()"
+             @blur="onBlur()"
+             @keydown="onKeydown($event)"
+             autocomplete="off">
+    </div>
+
+    <div class="ux-autocomplete__dropdown"
+         :class="{ 'ux-autocomplete__dropdown--open': isOpen }">
+      <ul class="ux-autocomplete__list" x-show="filteredItems.length > 0">
+        <template x-for="(item, index) in filteredItems" :key="getValue(item)">
+          <li class="ux-autocomplete__item"
+              :class="{ 'ux-autocomplete__item--active': index === activeIndex }"
+              @click="select(item)"
+              @mouseenter="activeIndex = index">
+            <span class="ux-autocomplete__item-label" x-html="highlight(getLabel(item))"></span>
+          </li>
+        </template>
+      </ul>
+
+      <div class="ux-autocomplete__empty" x-show="filteredItems.length === 0 && query.length >= minChars">
+        <span class="ux-autocomplete__empty-text" x-text="emptyText"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-display" x-show="selectedItems.length > 0" style="margin-top: 1rem; padding: 0.75rem; background: var(--ux-surface-secondary); border-radius: 8px; font-size: 0.875rem;">
+    Valores: <strong x-text="selectedItems.map(i => getValue(i)).join(', ')"></strong>
+  </div>
+</div>

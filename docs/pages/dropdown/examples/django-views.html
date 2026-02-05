@@ -1,0 +1,36 @@
+# views.py
+from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["GET"])
+def item_edit(request, item_id):
+    """Retorna formulario de edicion para cargar en modal"""
+    item = get_object_or_404(Item, id=item_id)
+    return render(request, 'partials/item_form.html', {'item': item})
+
+@require_http_methods(["POST"])
+def item_duplicate(request, item_id):
+    """Duplica item y retorna HTML del nuevo elemento"""
+    item = get_object_or_404(Item, id=item_id)
+    new_item = Item.objects.create(
+        name=f"{item.name} (copia)",
+        **{f: getattr(item, f) for f in ['field1', 'field2']}
+    )
+    return render(request, 'partials/item_row.html', {'item': new_item})
+
+@require_http_methods(["DELETE"])
+def item_delete(request, item_id):
+    """Elimina item y retorna respuesta vacia"""
+    item = get_object_or_404(Item, id=item_id)
+    item.delete()
+    return HttpResponse('')
+
+@require_http_methods(["PATCH"])
+def item_status(request, item_id):
+    """Actualiza estado del item"""
+    item = get_object_or_404(Item, id=item_id)
+    import json
+    data = json.loads(request.body)
+    item.status = data.get('status', item.status)
+    item.save()
+    return HttpResponse('')

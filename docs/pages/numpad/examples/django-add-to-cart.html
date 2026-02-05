@@ -1,0 +1,51 @@
+<!-- templates/pos/add_to_cart.html -->
+
+<div class="product-quantity-modal">
+  <div class="product-info">
+    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+    <h4>{{ product.name }}</h4>
+    <p class="product-price">${{ product.price|floatformat:2 }}</p>
+  </div>
+
+  <form hx-post="{% url 'pos:add_to_cart' %}"
+        hx-target="#cart-items"
+        hx-swap="beforeend"
+        hx-on::after-request="this.closest('.ux-modal').dispatchEvent(new CustomEvent('close'))">
+    {% csrf_token %}
+    <input type="hidden" name="product_id" value="{{ product.id }}">
+
+    <div x-data="uxNumpad({ maxLength: 3, initialValue: '1' })"
+         class="ux-numpad ux-numpad--sm"
+         @numpad-change="$refs.qty.value = $event.detail.value || '1'">
+
+      <div class="ux-numpad__display ux-numpad__display--sm">
+        <span class="ux-numpad__display-label">Cantidad</span>
+        <span class="ux-numpad__display-value" x-text="displayValue || '1'"></span>
+      </div>
+
+      <input type="hidden" name="quantity" x-ref="qty" value="1">
+
+      <div class="ux-numpad__grid">
+        <template x-for="key in ['7','8','9','4','5','6','1','2','3']">
+          <button type="button" class="ux-numpad__key"
+                  @click="appendDigit(key)" x-text="key"></button>
+        </template>
+        <button type="button" class="ux-numpad__key ux-numpad__key--action"
+                @click="clear()">C</button>
+        <button type="button" class="ux-numpad__key"
+                @click="appendDigit('0')">0</button>
+        <button type="button" class="ux-numpad__key ux-numpad__key--action"
+                @click="backspace()">&#9003;</button>
+      </div>
+
+      <!-- Subtotal preview -->
+      <div class="subtotal-preview">
+        Subtotal: $<span x-text="((getNumericValue() || 1) * {{ product.price }}).toFixed(2)"></span>
+      </div>
+
+      <button type="submit" class="ux-button ux-color-primary" style="width: 100%;">
+        Agregar al carrito
+      </button>
+    </div>
+  </form>
+</div>

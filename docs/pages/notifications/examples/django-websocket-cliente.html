@@ -1,0 +1,73 @@
+<div class="demo-box">
+  <h4 style="font-size: var(--ux-font-size-md); font-weight: 600; margin-bottom: var(--ux-space-sm);">7. Cliente WebSocket + Alpine.js</h4>
+  <pre class="ux-code-block" data-lang="html"><!-- Componente con WebSocket -->
+<div x-data="{
+  isOpen: false,
+  notifications: [],
+  unreadCount: 0,
+  ws: null,
+
+  init() {
+    this.connectWebSocket();
+    this.loadNotifications();
+  },
+
+  connectWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    this.ws = new WebSocket(`${protocol}//${window.location.host}/ws/notifications/`);
+
+    this.ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'new') {
+        this.notifications.unshift(data.notification);
+        this.unreadCount++;
+        this.showToast(data.notification);
+      }
+    };
+
+    this.ws.onclose = () => {
+      // Reconectar despues de 3 segundos
+      setTimeout(() => this.connectWebSocket(), 3000);
+    };
+  },
+
+  async loadNotifications() {
+    const response = await fetch('/api/notifications/');
+    const data = await response.json();
+    this.notifications = data.notifications;
+    this.unreadCount = data.unread_count;
+  },
+
+  showToast(notification) {
+    // Mostrar toast con la nueva notificacion
+    window.dispatchEvent(new CustomEvent('toast:show', {
+      detail: {
+        message: notification.title,
+        type: notification.type,
+        duration: 5000
+      }
+    }));
+  }
+}">
+  <!-- Trigger -->
+  <button class="ux-notification-trigger" @click="isOpen = !isOpen">
+    <svg>...</svg>
+    <span x-show="unreadCount > 0"
+          class="ux-notification-trigger__badge"
+          x-text="unreadCount > 99 ? '99+' : unreadCount"></span>
+  </button>
+
+  <!-- Panel con notificaciones en tiempo real -->
+  <div class="ux-notification-panel" :class="{ 'ux-notification-panel--open': isOpen }">
+    <!-- ... contenido del panel ... -->
+    <ul class="ux-notification-panel__list">
+      <template x-for="notification in notifications" :key="notification.id">
+        <li class="ux-notification-item"
+            :class="{ 'ux-notification-item--unread': !notification.read }">
+          <!-- ... contenido de notificacion ... -->
+        </li>
+      </template>
+    </ul>
+  </div>
+</div></pre>
+</div>

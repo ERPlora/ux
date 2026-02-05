@@ -1,0 +1,40 @@
+<!-- templates/products/list.html -->
+{% load static %}
+
+<!-- Filtros por categoria -->
+<div class="ux-segment" style="margin-bottom: var(--ux-space-md);">
+  <button class="ux-segment__button ux-segment__button--active"
+          hx-get="{% url 'products:list' %}?category=all"
+          hx-target="#product-grid"
+          hx-swap="innerHTML">
+    Todos
+  </button>
+  {% for category in categories %}
+  <button class="ux-segment__button"
+          hx-get="{% url 'products:list' %}?category={{ category.slug }}"
+          hx-target="#product-grid"
+          hx-swap="innerHTML">
+    {{ category.name }}
+  </button>
+  {% endfor %}
+</div>
+
+<!-- Busqueda -->
+<input type="search"
+       name="q"
+       class="ux-searchbar__input"
+       placeholder="Buscar productos..."
+       hx-get="{% url 'products:search' %}"
+       hx-trigger="input changed delay:300ms"
+       hx-target="#product-grid"
+       hx-indicator="#search-spinner">
+
+<!-- Grid de productos -->
+<div id="product-grid" class="ux-product-grid ux-product-grid--4">
+  {% include 'partials/product_grid.html' %}
+</div>
+
+<!-- Resumen del carrito -->
+<div id="cart-summary">
+  {% include 'partials/cart_summary.html' %}
+</div>

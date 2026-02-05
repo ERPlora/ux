@@ -1,0 +1,82 @@
+<div x-data="uxPerformanceMeter({
+        employee: { name: 'Lisa Park', role: 'Product Manager', department: 'Product' },
+        score: 88,
+        trend: 4,
+        period: 'quarterly',
+        periods: ['monthly', 'quarterly', 'yearly'],
+        categories: [
+          { name: 'Strategy', score: 90, trend: 5 },
+          { name: 'Execution', score: 86, trend: 3 },
+          { name: 'Stakeholder Management', score: 88, trend: 6 }
+        ]
+      })"
+      @performance-meter:period-change="console.log('Period changed:', $event.detail.period)"
+      class="ux-performance-meter">
+
+        <div class="ux-performance-meter__header">
+          <div class="ux-performance-meter__avatar" style="background: var(--ux-indigo-500);">
+            <span x-text="getInitials()"></span>
+          </div>
+          <div class="ux-performance-meter__employee-info">
+            <h3 class="ux-performance-meter__employee-name" x-text="employee.name"></h3>
+            <p class="ux-performance-meter__employee-role" x-text="employee.role"></p>
+          </div>
+        </div>
+
+        <!-- Period Selector -->
+        <div class="ux-performance-meter__period-selector">
+          <template x-for="p in periods" :key="p">
+            <button class="ux-performance-meter__period-btn"
+                    :class="{'ux-performance-meter__period-btn--active': period === p}"
+                    @click="setPeriod(p)"
+                    x-text="p.charAt(0).toUpperCase() + p.slice(1)"></button>
+          </template>
+        </div>
+
+        <div class="ux-performance-meter__score-section">
+          <div class="ux-performance-meter__score-gauge">
+            <svg class="ux-performance-meter__score-svg" viewBox="0 0 100 100">
+              <circle class="ux-performance-meter__score-track" cx="50" cy="50" :r="gaugeRadius"></circle>
+              <circle class="ux-performance-meter__score-fill"
+                      :class="'ux-performance-meter__score-fill--' + scoreLevel"
+                      cx="50" cy="50"
+                      :r="gaugeRadius"
+                      :stroke-dasharray="gaugeCircumference"
+                      :stroke-dashoffset="gaugeDashOffset"></circle>
+            </svg>
+            <div class="ux-performance-meter__score-value">
+              <span class="ux-performance-meter__score-number" x-text="displayScore"></span>
+              <span class="ux-performance-meter__score-max">%</span>
+              <div class="ux-performance-meter__score-label" x-text="period + ' score'"></div>
+            </div>
+          </div>
+
+          <div class="ux-performance-meter__score-summary">
+            <span class="ux-performance-meter__score-status"
+                  :class="'ux-performance-meter__score-status--' + scoreLevel"
+                  x-text="scoreLevelLabel"></span>
+            <span class="ux-performance-meter__trend ux-performance-meter__trend--up">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              +4% vs previous
+            </span>
+          </div>
+        </div>
+
+        <div class="ux-performance-meter__categories">
+          <template x-for="(cat, index) in categories" :key="index">
+            <div class="ux-performance-meter__category">
+              <div class="ux-performance-meter__category-header">
+                <span class="ux-performance-meter__category-name" x-text="cat.name"></span>
+                <span class="ux-performance-meter__category-value" x-text="cat.score + '%'"></span>
+              </div>
+              <div class="ux-performance-meter__category-bar">
+                <div class="ux-performance-meter__category-fill"
+                     :class="'ux-performance-meter__category-fill--' + getCategoryLevel(cat.score)"
+                     :style="'width: ' + cat.score + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>

@@ -1,0 +1,64 @@
+<h4 style="margin-bottom: var(--ux-space-md);">Vista Django</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from .models import Batch, BatchHistory
+
+def batch_list(request):
+    """Lista de batches con busqueda."""
+    query = request.GET.get('q', '')
+    batches = Batch.objects.select_related('product', 'location')
+
+    if query:
+        batches = batches.filter(
+            models.Q(batch_number__icontains=query) |
+            models.Q(lot_number__icontains=query) |
+            models.Q(product__name__icontains=query) |
+            models.Q(product__sku__icontains=query)
+        )
+
+    batches = batches[:50]
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'batches/partials/batch_list.html', {'batches': batches})
+
+    return render(request, 'batches/batch_list.html', {'batches': batches, 'query': query})
+
+
+def batch_detail(request, pk):
+    """Detalle de un batch."""
+    batch = get_object_or_404(
+        Batch.objects.select_related('product', 'location')
+        .prefetch_related('history', 'trace_links', 'parent_batches', 'child_batches'),
+        pk=pk
+    )
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'batches/partials/batch_card.html', {'batch': batch})
+
+    return render(request, 'batches/batch_detail.html', {'batch': batch})
+
+
+def batch_update_status(request, pk):
+    """Actualizar estado del batch via HTMX."""
+    batch = get_object_or_404(Batch, pk=pk)
+    new_status = request.POST.get('status')
+
+    if new_status and new_status in dict(Batch.STATUS_CHOICES):
+        old_status = batch.status
+        batch.status = new_status
+        batch.save()
+
+        BatchHistory.objects.create(
+            batch=batch,
+            action=f'Status changed from {old_status} to {new_status}',
+            user=request.user if request.user.is_authenticated else None
+        )
+
+    return render(request, 'batches/partials/batch_status.html', {'batch': batch})
+
+
+def batch_timeline(request, pk):
+    """Timeline de un batch."""
+    batch = get_object_or_404(Batch, pk=pk)
+    return render(request, 'batches/partials/batch_timeline.html', {'batch': batch})</pre>

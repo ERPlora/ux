@@ -1,0 +1,1131 @@
+<style>
+    .demo-section { margin-bottom: var(--ux-space-xl); }
+    .demo-section h3 {
+      font-size: var(--ux-font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--ux-space-md);
+      color: var(--ux-text);
+    }
+    .demo-section p {
+      font-size: var(--ux-font-size-md);
+      color: var(--ux-text-secondary);
+      margin-bottom: var(--ux-space-md);
+    }
+    .demo-box {
+      background: var(--ux-surface);
+      border-radius: var(--ux-border-radius-lg);
+      margin-bottom: var(--ux-space-md);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: var(--ux-space-md);
+    }
+    th, td {
+      padding: var(--ux-space-sm) var(--ux-space-md);
+      text-align: left;
+      border-bottom: 1px solid var(--ux-border-color);
+    }
+    th {
+      font-weight: 600;
+      color: var(--ux-text);
+    }
+    td {
+      color: var(--ux-text-secondary);
+    }
+    td code {
+      background: var(--ux-gray-100);
+      padding: 2px 6px;
+      border-radius: var(--ux-border-radius-sm);
+      font-size: var(--ux-font-size-sm);
+    }
+  </style>
+
+<h1 style="margin-bottom: var(--ux-space-sm);">Scheduler</h1>
+    <p style="color: var(--ux-text-secondary); margin-bottom: var(--ux-space-xl);">A powerful booking and appointment scheduler with day, week, and month views, resource columns, and drag-to-create functionality.</p>
+
+    <!-- Basic Day View -->
+    <section class="component-section">
+      <h3>Day View</h3>
+      <p>Basic day view showing appointments for a single day. Click on a time slot to create a new booking, or click on an existing booking to edit it.</p>
+      <ux-playground src="pages/scheduler/examples/day-view.html"></ux-playground>
+      <div class="demo-box">
+        <div class="ux-scheduler"
+             x-data="uxScheduler({
+               view: 'day',
+               startHour: 7,
+               endHour: 20,
+               businessStartHour: 9,
+               businessEndHour: 17,
+               bookings: [
+                 {
+                   id: 1,
+                   title: 'Team Standup',
+                   start: new Date(new Date().setHours(9, 0, 0, 0)),
+                   end: new Date(new Date().setHours(9, 30, 0, 0)),
+                   status: 'confirmed'
+                 },
+                 {
+                   id: 2,
+                   title: 'Client Meeting - Project Review',
+                   start: new Date(new Date().setHours(10, 0, 0, 0)),
+                   end: new Date(new Date().setHours(11, 30, 0, 0)),
+                   status: 'confirmed'
+                 },
+                 {
+                   id: 3,
+                   title: 'Lunch Break',
+                   start: new Date(new Date().setHours(12, 30, 0, 0)),
+                   end: new Date(new Date().setHours(13, 30, 0, 0)),
+                   status: 'pending'
+                 },
+                 {
+                   id: 4,
+                   title: 'Interview - Senior Developer',
+                   start: new Date(new Date().setHours(14, 0, 0, 0)),
+                   end: new Date(new Date().setHours(15, 0, 0, 0)),
+                   status: 'confirmed'
+                 },
+                 {
+                   id: 5,
+                   title: 'Cancelled Meeting',
+                   start: new Date(new Date().setHours(16, 0, 0, 0)),
+                   end: new Date(new Date().setHours(16, 30, 0, 0)),
+                   status: 'cancelled'
+                 }
+               ]
+             })"
+             @scheduler:bookingclick="alert('Booking: ' + $event.detail.booking.title)"
+             @scheduler:slotclick="alert('Create booking at: ' + $event.detail.date.toLocaleTimeString())">
+          <!-- Header -->
+          <div class="ux-scheduler__header">
+            <div class="ux-scheduler__nav">
+              <button class="ux-scheduler__nav-btn" @click="prev()">
+                <span x-html="icons.chevronLeft"></span>
+              </button>
+              <button class="ux-scheduler__nav-btn" @click="next()">
+                <span x-html="icons.chevronRight"></span>
+              </button>
+              <span class="ux-scheduler__title" x-text="title"></span>
+            </div>
+            <button class="ux-scheduler__today-btn" @click="goToToday()">Today</button>
+            <div class="ux-scheduler__view-toggle">
+              <button class="ux-scheduler__view-btn"
+                      :class="{ 'ux-scheduler__view-btn--active': view === 'day' }"
+                      @click="setView('day')">Day</button>
+              <button class="ux-scheduler__view-btn"
+                      :class="{ 'ux-scheduler__view-btn--active': view === 'week' }"
+                      @click="setView('week')">Week</button>
+              <button class="ux-scheduler__view-btn"
+                      :class="{ 'ux-scheduler__view-btn--active': view === 'month' }"
+                      @click="setView('month')">Month</button>
+            </div>
+          </div>
+
+          <!-- Day View -->
+          <template x-if="view === 'day'">
+            <div class="ux-scheduler__body" style="max-height: 500px;">
+              <div class="ux-scheduler__grid">
+                <!-- Time Column -->
+                <div class="ux-scheduler__times">
+                  <template x-for="hour in hours" :key="hour.value">
+                    <div class="ux-scheduler__time" x-text="hour.label"></div>
+                  </template>
+                </div>
+
+                <!-- Day Column -->
+                <div class="ux-scheduler__columns">
+                  <div class="ux-scheduler__day-column">
+                    <template x-for="hour in hours" :key="hour.value">
+                      <div class="ux-scheduler__hour-slot"
+                           :class="{
+                             'ux-scheduler__hour-slot--business': showBusinessHours && hour.isBusiness,
+                             'ux-scheduler__hour-slot--non-business': showBusinessHours && !hour.isBusiness
+                           }"
+                           @click="onSlotClick(currentDate, hour.value, null, $event)"
+                           @mousedown="onDragStart(currentDate, hour.value, null, $event)"
+                           @mousemove="onDragMove(currentDate, hour.value, $event)"
+                           @mouseup="onDragEnd()">
+                      </div>
+                    </template>
+
+                    <!-- Now Line -->
+                    <div class="ux-scheduler__now-line"
+                         x-show="isToday(currentDate)"
+                         :style="{ top: nowLineTop + 'px' }"></div>
+
+                    <!-- Bookings -->
+                    <template x-for="booking in getBookingsForDay(currentDate)" :key="booking.id">
+                      <div class="ux-scheduler__booking"
+                           :class="'ux-scheduler__booking--' + (booking.status || 'primary')"
+                           :style="getBookingStyle(booking)"
+                           @click="onBookingClick(booking, $event)">
+                        <div class="ux-scheduler__booking-title" x-text="booking.title"></div>
+                        <div class="ux-scheduler__booking-time" x-text="formatTime(booking.start) + ' - ' + formatTime(booking.end)"></div>
+                      </div>
+                    </template>
+
+                    <!-- Drag Preview -->
+                    <div class="ux-scheduler__drag-preview"
+                         x-show="isDragging && isSameDay(dragColumn, currentDate)"
+                         :style="getDragPreviewStyle()"
+                         x-text="getDragPreviewText()">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- Week View -->
+          <template x-if="view === 'week'">
+            <div>
+              <!-- Day Headers -->
+              <div class="ux-scheduler__day-headers">
+                <div class="ux-scheduler__corner"></div>
+                <template x-for="day in weekDays" :key="day.date.toISOString()">
+                  <div class="ux-scheduler__day-header"
+                       :class="{
+                         'ux-scheduler__day-header--today': day.isToday,
+                         'ux-scheduler__day-header--weekend': day.isWeekend,
+                         'ux-scheduler__day-header--selected': day.isSelected
+                       }"
+                       @click="selectDay(day.date)">
+                    <span class="ux-scheduler__day-name" x-text="day.name"></span>
+                    <span class="ux-scheduler__day-number" x-text="day.number"></span>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Grid -->
+              <div class="ux-scheduler__body" style="max-height: 500px;">
+                <div class="ux-scheduler__grid">
+                  <div class="ux-scheduler__times">
+                    <template x-for="hour in hours" :key="hour.value">
+                      <div class="ux-scheduler__time" x-text="hour.label"></div>
+                    </template>
+                  </div>
+
+                  <div class="ux-scheduler__columns">
+                    <template x-for="day in weekDays" :key="'col-' + day.date.toISOString()">
+                      <div class="ux-scheduler__day-column"
+                           :class="{ 'ux-scheduler__day-column--weekend': day.isWeekend }">
+                        <template x-for="hour in hours" :key="hour.value">
+                          <div class="ux-scheduler__hour-slot"
+                               :class="{
+                                 'ux-scheduler__hour-slot--business': showBusinessHours && hour.isBusiness,
+                                 'ux-scheduler__hour-slot--non-business': showBusinessHours && !hour.isBusiness
+                               }"
+                               @click="onSlotClick(day.date, hour.value, null, $event)">
+                          </div>
+                        </template>
+
+                        <div class="ux-scheduler__now-line"
+                             x-show="shouldShowNowLine(day.date)"
+                             :style="{ top: nowLineTop + 'px' }"></div>
+
+                        <template x-for="booking in getBookingsForDay(day.date)" :key="booking.id">
+                          <div class="ux-scheduler__booking"
+                               :class="'ux-scheduler__booking--' + (booking.status || 'primary')"
+                               :style="getBookingStyle(booking)"
+                               @click="onBookingClick(booking, $event)">
+                            <div class="ux-scheduler__booking-title" x-text="booking.title"></div>
+                            <div class="ux-scheduler__booking-time" x-text="formatTime(booking.start) + ' - ' + formatTime(booking.end)"></div>
+                          </div>
+                        </template>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- Month View -->
+          <template x-if="view === 'month'">
+            <div class="ux-scheduler__body">
+              <div class="ux-scheduler__month-grid">
+                <template x-for="dayName in dayNames" :key="dayName">
+                  <div class="ux-scheduler__month-header" x-text="dayName"></div>
+                </template>
+              </div>
+              <div class="ux-scheduler__month-grid">
+                <template x-for="day in monthDays" :key="day.date.toISOString()">
+                  <div class="ux-scheduler__month-day"
+                       :class="{
+                         'ux-scheduler__month-day--other': day.isOtherMonth,
+                         'ux-scheduler__month-day--today': day.isToday,
+                         'ux-scheduler__month-day--weekend': day.isWeekend
+                       }"
+                       @click="selectDay(day.date)">
+                    <span class="ux-scheduler__month-day-number" x-text="day.number"></span>
+                    <template x-for="booking in getBookingsForMonthDay(day.date, 2).visible" :key="booking.id">
+                      <div class="ux-scheduler__month-booking"
+                           :class="'ux-scheduler__month-booking--' + (booking.status || 'confirmed')"
+                           @click.stop="onBookingClick(booking, $event)"
+                           x-text="booking.title">
+                      </div>
+                    </template>
+                    <div class="ux-scheduler__month-more"
+                         x-show="getBookingsForMonthDay(day.date, 2).more > 0"
+                         x-text="'+' + getBookingsForMonthDay(day.date, 2).more + ' more'">
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <!-- Week View with Resources -->
+    <section class="component-section">
+      <h3>Week View with Resources</h3>
+      <p>Display multiple resources (staff, rooms, equipment) as columns. Ideal for salon bookings, meeting room reservations, or equipment scheduling.</p>
+      <ux-playground src="pages/scheduler/examples/week-view-with-resources.html"></ux-playground>
+      <div class="demo-box">
+        <div class="ux-scheduler"
+             x-data="uxScheduler({
+               view: 'day',
+               startHour: 8,
+               endHour: 18,
+               businessStartHour: 9,
+               businessEndHour: 17,
+               resources: [
+                 { id: 'room-a', name: 'Room A', info: 'Conference' },
+                 { id: 'room-b', name: 'Room B', info: 'Meeting' },
+                 { id: 'room-c', name: 'Room C', info: 'Training' }
+               ],
+               bookings: [
+                 {
+                   id: 1,
+                   title: 'Board Meeting',
+                   start: new Date(new Date().setHours(9, 0, 0, 0)),
+                   end: new Date(new Date().setHours(11, 0, 0, 0)),
+                   status: 'confirmed',
+                   resourceId: 'room-a'
+                 },
+                 {
+                   id: 2,
+                   title: 'Product Demo',
+                   start: new Date(new Date().setHours(10, 0, 0, 0)),
+                   end: new Date(new Date().setHours(11, 30, 0, 0)),
+                   status: 'confirmed',
+                   resourceId: 'room-b'
+                 },
+                 {
+                   id: 3,
+                   title: 'Training Session',
+                   start: new Date(new Date().setHours(9, 0, 0, 0)),
+                   end: new Date(new Date().setHours(12, 0, 0, 0)),
+                   status: 'pending',
+                   resourceId: 'room-c'
+                 },
+                 {
+                   id: 4,
+                   title: 'Lunch Meeting',
+                   start: new Date(new Date().setHours(12, 0, 0, 0)),
+                   end: new Date(new Date().setHours(13, 0, 0, 0)),
+                   status: 'confirmed',
+                   resourceId: 'room-a'
+                 },
+                 {
+                   id: 5,
+                   title: 'Team Retrospective',
+                   start: new Date(new Date().setHours(14, 0, 0, 0)),
+                   end: new Date(new Date().setHours(15, 30, 0, 0)),
+                   status: 'confirmed',
+                   resourceId: 'room-b'
+                 },
+                 {
+                   id: 6,
+                   title: 'Client Call',
+                   start: new Date(new Date().setHours(15, 0, 0, 0)),
+                   end: new Date(new Date().setHours(16, 0, 0, 0)),
+                   status: 'confirmed',
+                   resourceId: 'room-a'
+                 }
+               ]
+             })"
+             @scheduler:slotclick="alert('Book ' + ($event.detail.resourceId || 'slot') + ' at ' + $event.detail.date.toLocaleTimeString())">
+          <div class="ux-scheduler__header">
+            <div class="ux-scheduler__nav">
+              <button class="ux-scheduler__nav-btn" @click="prev()">
+                <span x-html="icons.chevronLeft"></span>
+              </button>
+              <button class="ux-scheduler__nav-btn" @click="next()">
+                <span x-html="icons.chevronRight"></span>
+              </button>
+              <span class="ux-scheduler__title" x-text="title"></span>
+            </div>
+            <button class="ux-scheduler__today-btn" @click="goToToday()">Today</button>
+          </div>
+
+          <!-- Resource Headers -->
+          <div class="ux-scheduler__resources-header">
+            <div class="ux-scheduler__resources-corner"></div>
+            <template x-for="resource in resources" :key="resource.id">
+              <div class="ux-scheduler__resource-header">
+                <div class="ux-scheduler__resource-avatar" x-text="resource.name.charAt(0)"></div>
+                <div class="ux-scheduler__resource-name" x-text="resource.name"></div>
+                <div class="ux-scheduler__resource-info" x-text="resource.info"></div>
+              </div>
+            </template>
+          </div>
+
+          <div class="ux-scheduler__body" style="max-height: 450px;">
+            <div class="ux-scheduler__grid">
+              <div class="ux-scheduler__times">
+                <template x-for="hour in hours" :key="hour.value">
+                  <div class="ux-scheduler__time" x-text="hour.label"></div>
+                </template>
+              </div>
+
+              <div class="ux-scheduler__columns">
+                <template x-for="resource in resources" :key="resource.id">
+                  <div class="ux-scheduler__day-column">
+                    <template x-for="hour in hours" :key="hour.value">
+                      <div class="ux-scheduler__hour-slot"
+                           :class="{
+                             'ux-scheduler__hour-slot--business': showBusinessHours && hour.isBusiness,
+                             'ux-scheduler__hour-slot--non-business': showBusinessHours && !hour.isBusiness
+                           }"
+                           @click="onSlotClick(currentDate, hour.value, resource.id, $event)">
+                      </div>
+                    </template>
+
+                    <div class="ux-scheduler__now-line"
+                         x-show="isToday(currentDate)"
+                         :style="{ top: nowLineTop + 'px' }"></div>
+
+                    <template x-for="booking in getBookingsForDay(currentDate, resource.id)" :key="booking.id">
+                      <div class="ux-scheduler__booking"
+                           :class="[
+                             'ux-scheduler__booking--' + (booking.status || 'primary'),
+                             { 'ux-scheduler__booking--conflict': hasConflict(booking) }
+                           ]"
+                           :style="getBookingStyle(booking)"
+                           @click="onBookingClick(booking, $event)">
+                        <div class="ux-scheduler__booking-title" x-text="booking.title"></div>
+                        <div class="ux-scheduler__booking-time" x-text="formatTime(booking.start) + ' - ' + formatTime(booking.end)"></div>
+                      </div>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Different Interval Sizes -->
+    <section class="component-section">
+      <h3>15-Minute Intervals</h3>
+      <p>Use <code>interval: 15</code> for finer granularity. The scheduler shows quarter-hour lines for more precise booking.</p>
+      <ux-playground src="pages/scheduler/examples/15-minute-intervals.html"></ux-playground>
+      <div class="demo-box">
+        <div class="ux-scheduler ux-scheduler--interval-15"
+             x-data="uxScheduler({
+               view: 'day',
+               interval: 15,
+               startHour: 9,
+               endHour: 13,
+               showBusinessHours: false,
+               bookings: [
+                 {
+                   id: 1,
+                   title: 'Quick Sync',
+                   start: new Date(new Date().setHours(9, 0, 0, 0)),
+                   end: new Date(new Date().setHours(9, 15, 0, 0)),
+                   status: 'confirmed'
+                 },
+                 {
+                   id: 2,
+                   title: 'Code Review',
+                   start: new Date(new Date().setHours(9, 30, 0, 0)),
+                   end: new Date(new Date().setHours(10, 0, 0, 0)),
+                   status: 'confirmed'
+                 },
+                 {
+                   id: 3,
+                   title: 'Sprint Planning',
+                   start: new Date(new Date().setHours(10, 15, 0, 0)),
+                   end: new Date(new Date().setHours(11, 0, 0, 0)),
+                   status: 'pending'
+                 },
+                 {
+                   id: 4,
+                   title: 'Design Discussion',
+                   start: new Date(new Date().setHours(11, 15, 0, 0)),
+                   end: new Date(new Date().setHours(12, 0, 0, 0)),
+                   status: 'confirmed'
+                 }
+               ]
+             })"
+             @scheduler:createbooking="alert('Create booking: ' + $event.detail.start.toLocaleTimeString() + ' - ' + $event.detail.end.toLocaleTimeString())">
+          <div class="ux-scheduler__header">
+            <div class="ux-scheduler__nav">
+              <button class="ux-scheduler__nav-btn" @click="prev()">
+                <span x-html="icons.chevronLeft"></span>
+              </button>
+              <button class="ux-scheduler__nav-btn" @click="next()">
+                <span x-html="icons.chevronRight"></span>
+              </button>
+              <span class="ux-scheduler__title" x-text="title"></span>
+            </div>
+            <button class="ux-scheduler__today-btn" @click="goToToday()">Today</button>
+          </div>
+
+          <div class="ux-scheduler__body" style="max-height: 300px;">
+            <div class="ux-scheduler__grid">
+              <div class="ux-scheduler__times">
+                <template x-for="hour in hours" :key="hour.value">
+                  <div class="ux-scheduler__time" x-text="hour.label"></div>
+                </template>
+              </div>
+
+              <div class="ux-scheduler__columns">
+                <div class="ux-scheduler__day-column">
+                  <template x-for="hour in hours" :key="hour.value">
+                    <div class="ux-scheduler__hour-slot"
+                         @click="onSlotClick(currentDate, hour.value, null, $event)"
+                         @mousedown="onDragStart(currentDate, hour.value, null, $event)"
+                         @mousemove="onDragMove(currentDate, hour.value, $event)"
+                         @mouseup="onDragEnd()">
+                    </div>
+                  </template>
+
+                  <div class="ux-scheduler__now-line"
+                       x-show="isToday(currentDate)"
+                       :style="{ top: nowLineTop + 'px' }"></div>
+
+                  <template x-for="booking in getBookingsForDay(currentDate)" :key="booking.id">
+                    <div class="ux-scheduler__booking"
+                         :class="'ux-scheduler__booking--' + (booking.status || 'primary')"
+                         :style="getBookingStyle(booking)"
+                         @click="onBookingClick(booking, $event)">
+                      <div class="ux-scheduler__booking-title" x-text="booking.title"></div>
+                      <div class="ux-scheduler__booking-time" x-text="formatTime(booking.start) + ' - ' + formatTime(booking.end)"></div>
+                    </div>
+                  </template>
+
+                  <div class="ux-scheduler__drag-preview"
+                       x-show="isDragging"
+                       :style="getDragPreviewStyle()"
+                       x-text="getDragPreviewText()">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top: var(--ux-space-sm); font-size: var(--ux-font-size-sm); color: var(--ux-text-tertiary);">Drag on the time grid to create a new booking.</p>
+    </section>
+
+    <!-- Glass Variant -->
+    <section class="component-section">
+      <h3>Glass Variant</h3>
+      <p>Use the <code>ux-scheduler--glass</code> class for a frosted glass appearance following iOS design language.</p>
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: var(--ux-space-lg); border-radius: var(--ux-radius-lg);">
+        <div class="ux-scheduler ux-scheduler--glass"
+             x-data="uxScheduler({
+               view: 'day',
+               startHour: 9,
+               endHour: 17,
+               showBusinessHours: false,
+               bookings: [
+                 {
+                   id: 1,
+                   title: 'Morning Meeting',
+                   start: new Date(new Date().setHours(9, 30, 0, 0)),
+                   end: new Date(new Date().setHours(10, 30, 0, 0)),
+                   status: 'confirmed'
+                 },
+                 {
+                   id: 2,
+                   title: 'Lunch with Client',
+                   start: new Date(new Date().setHours(12, 0, 0, 0)),
+                   end: new Date(new Date().setHours(13, 30, 0, 0)),
+                   status: 'pending'
+                 },
+                 {
+                   id: 3,
+                   title: 'Project Review',
+                   start: new Date(new Date().setHours(14, 0, 0, 0)),
+                   end: new Date(new Date().setHours(15, 30, 0, 0)),
+                   status: 'confirmed'
+                 }
+               ]
+             })">
+          <div class="ux-scheduler__header">
+            <div class="ux-scheduler__nav">
+              <button class="ux-scheduler__nav-btn" @click="prev()">
+                <span x-html="icons.chevronLeft"></span>
+              </button>
+              <button class="ux-scheduler__nav-btn" @click="next()">
+                <span x-html="icons.chevronRight"></span>
+              </button>
+              <span class="ux-scheduler__title" x-text="title"></span>
+            </div>
+            <button class="ux-scheduler__today-btn" @click="goToToday()">Today</button>
+            <div class="ux-scheduler__view-toggle">
+              <button class="ux-scheduler__view-btn"
+                      :class="{ 'ux-scheduler__view-btn--active': view === 'day' }"
+                      @click="setView('day')">Day</button>
+              <button class="ux-scheduler__view-btn"
+                      :class="{ 'ux-scheduler__view-btn--active': view === 'week' }"
+                      @click="setView('week')">Week</button>
+            </div>
+          </div>
+
+          <template x-if="view === 'day'">
+            <div class="ux-scheduler__body" style="max-height: 400px;">
+              <div class="ux-scheduler__grid">
+                <div class="ux-scheduler__times">
+                  <template x-for="hour in hours" :key="hour.value">
+                    <div class="ux-scheduler__time" x-text="hour.label"></div>
+                  </template>
+                </div>
+
+                <div class="ux-scheduler__columns">
+                  <div class="ux-scheduler__day-column">
+                    <template x-for="hour in hours" :key="hour.value">
+                      <div class="ux-scheduler__hour-slot"></div>
+                    </template>
+
+                    <div class="ux-scheduler__now-line"
+                         x-show="isToday(currentDate)"
+                         :style="{ top: nowLineTop + 'px' }"></div>
+
+                    <template x-for="booking in getBookingsForDay(currentDate)" :key="booking.id">
+                      <div class="ux-scheduler__booking"
+                           :class="'ux-scheduler__booking--' + (booking.status || 'primary')"
+                           :style="getBookingStyle(booking)">
+                        <div class="ux-scheduler__booking-title" x-text="booking.title"></div>
+                        <div class="ux-scheduler__booking-time" x-text="formatTime(booking.start) + ' - ' + formatTime(booking.end)"></div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template x-if="view === 'week'">
+            <div>
+              <div class="ux-scheduler__day-headers">
+                <div class="ux-scheduler__corner"></div>
+                <template x-for="day in weekDays" :key="day.date.toISOString()">
+                  <div class="ux-scheduler__day-header"
+                       :class="{
+                         'ux-scheduler__day-header--today': day.isToday,
+                         'ux-scheduler__day-header--weekend': day.isWeekend
+                       }"
+                       @click="selectDay(day.date)">
+                    <span class="ux-scheduler__day-name" x-text="day.name"></span>
+                    <span class="ux-scheduler__day-number" x-text="day.number"></span>
+                  </div>
+                </template>
+              </div>
+
+              <div class="ux-scheduler__body" style="max-height: 400px;">
+                <div class="ux-scheduler__grid">
+                  <div class="ux-scheduler__times">
+                    <template x-for="hour in hours" :key="hour.value">
+                      <div class="ux-scheduler__time" x-text="hour.label"></div>
+                    </template>
+                  </div>
+
+                  <div class="ux-scheduler__columns">
+                    <template x-for="day in weekDays" :key="'col-' + day.date.toISOString()">
+                      <div class="ux-scheduler__day-column"
+                           :class="{ 'ux-scheduler__day-column--weekend': day.isWeekend }">
+                        <template x-for="hour in hours" :key="hour.value">
+                          <div class="ux-scheduler__hour-slot"></div>
+                        </template>
+
+                        <div class="ux-scheduler__now-line"
+                             x-show="shouldShowNowLine(day.date)"
+                             :style="{ top: nowLineTop + 'px' }"></div>
+
+                        <template x-for="booking in getBookingsForDay(day.date)" :key="booking.id">
+                          <div class="ux-scheduler__booking"
+                               :class="'ux-scheduler__booking--' + (booking.status || 'primary')"
+                               :style="getBookingStyle(booking)">
+                            <div class="ux-scheduler__booking-title" x-text="booking.title"></div>
+                          </div>
+                        </template>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <!-- Booking Statuses -->
+    <section class="component-section">
+      <h3>Booking Statuses</h3>
+      <p>Different visual styles for booking states: confirmed, pending, cancelled, and blocked.</p>
+      <ux-playground src="pages/scheduler/examples/booking-statuses.html"></ux-playground>
+      <div class="demo-box" style="padding: var(--ux-space-lg);">
+        <div style="display: flex; flex-wrap: wrap; gap: var(--ux-space-md);">
+          <div style="flex: 1; min-width: 150px;">
+            <div class="ux-scheduler__booking ux-scheduler__booking--confirmed" style="position: static; height: auto; padding: 0.5rem;">
+              <div class="ux-scheduler__booking-title">Confirmed</div>
+              <div class="ux-scheduler__booking-time">status: 'confirmed'</div>
+            </div>
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <div class="ux-scheduler__booking ux-scheduler__booking--pending" style="position: static; height: auto; padding: 0.5rem;">
+              <div class="ux-scheduler__booking-title">Pending</div>
+              <div class="ux-scheduler__booking-time">status: 'pending'</div>
+            </div>
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <div class="ux-scheduler__booking ux-scheduler__booking--cancelled" style="position: static; height: auto; padding: 0.5rem;">
+              <div class="ux-scheduler__booking-title">Cancelled</div>
+              <div class="ux-scheduler__booking-time">status: 'cancelled'</div>
+            </div>
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <div class="ux-scheduler__booking ux-scheduler__booking--blocked" style="position: static; height: auto; padding: 0.5rem;">
+              <div class="ux-scheduler__booking-title">Blocked</div>
+              <div class="ux-scheduler__booking-time">status: 'blocked'</div>
+            </div>
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <div class="ux-scheduler__booking ux-scheduler__booking--primary" style="position: static; height: auto; padding: 0.5rem;">
+              <div class="ux-scheduler__booking-title">Primary</div>
+              <div class="ux-scheduler__booking-time">status: 'primary'</div>
+            </div>
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <div class="ux-scheduler__booking ux-scheduler__booking--danger" style="position: static; height: auto; padding: 0.5rem;">
+              <div class="ux-scheduler__booking-title">Danger</div>
+              <div class="ux-scheduler__booking-time">status: 'danger'</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Usage -->
+    <section class="component-section">
+      <h3>Usage</h3>
+      <pre class="ux-code-block" data-lang="html">&lt;div class="ux-scheduler"
+     x-data="uxScheduler({
+       view: 'week',
+       startHour: 8,
+       endHour: 18,
+       interval: 30,
+       businessStartHour: 9,
+       businessEndHour: 17,
+       resources: [
+         { id: 'room-1', name: 'Room A', info: 'Conference' }
+       ],
+       bookings: [
+         {
+           id: 1,
+           title: 'Meeting',
+           start: new Date('2026-01-10T09:00:00'),
+           end: new Date('2026-01-10T10:30:00'),
+           status: 'confirmed',
+           resourceId: 'room-1'
+         }
+       ]
+     })"
+     @scheduler:slotclick="handleSlotClick($event.detail)"
+     @scheduler:bookingclick="handleBookingClick($event.detail.booking)"
+     @scheduler:createbooking="handleCreateBooking($event.detail)"&gt;
+  &lt;!-- Header, Grid, etc. --&gt;
+&lt;/div&gt;</pre>
+    </section>
+
+    <!-- Booking Format -->
+    <section class="component-section">
+      <h3>Booking Format</h3>
+      <p>Bookings require the following structure.</p>
+      <pre class="ux-code-block" data-lang="javascript">const booking = {
+  id: 1,                              // Unique ID
+  title: 'Team Meeting',              // Display title
+  start: new Date('2026-01-10T09:00'), // Start date/time
+  end: new Date('2026-01-10T10:30'),   // End date/time
+  status: 'confirmed',                 // confirmed, pending, cancelled, blocked, primary, danger
+  resourceId: 'room-1'                 // Optional: resource ID for multi-resource views
+};</pre>
+    </section>
+
+    <!-- Options -->
+    <section class="component-section">
+      <h3>Options</h3>
+      <div style="background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); overflow: hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>view</code></td><td>String</td><td>'week'</td><td>'day', 'week', or 'month'</td></tr>
+            <tr><td><code>interval</code></td><td>Number</td><td>30</td><td>Time slot interval in minutes (15, 30, 60)</td></tr>
+            <tr><td><code>startHour</code></td><td>Number</td><td>0</td><td>First visible hour (0-23)</td></tr>
+            <tr><td><code>endHour</code></td><td>Number</td><td>24</td><td>Last visible hour (1-24)</td></tr>
+            <tr><td><code>businessStartHour</code></td><td>Number</td><td>9</td><td>Business hours start</td></tr>
+            <tr><td><code>businessEndHour</code></td><td>Number</td><td>17</td><td>Business hours end</td></tr>
+            <tr><td><code>showBusinessHours</code></td><td>Boolean</td><td>true</td><td>Highlight business hours</td></tr>
+            <tr><td><code>hourHeight</code></td><td>Number</td><td>60</td><td>Height of each hour in pixels</td></tr>
+            <tr><td><code>weekStartsOn</code></td><td>Number</td><td>0</td><td>Week start day (0=Sunday, 1=Monday)</td></tr>
+            <tr><td><code>resources</code></td><td>Array</td><td>[]</td><td>Array of resource objects</td></tr>
+            <tr><td><code>bookings</code></td><td>Array</td><td>[]</td><td>Array of booking objects</td></tr>
+            <tr><td><code>initialDate</code></td><td>Date</td><td>new Date()</td><td>Initial date to display</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Events -->
+    <section class="component-section">
+      <h3>Events</h3>
+      <div style="background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); overflow: hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Detail</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>scheduler:navigate</code></td><td>{ date, view }</td><td>Navigation to new date</td></tr>
+            <tr><td><code>scheduler:viewchange</code></td><td>{ view }</td><td>View mode changed</td></tr>
+            <tr><td><code>scheduler:dayselect</code></td><td>{ date }</td><td>Day selected</td></tr>
+            <tr><td><code>scheduler:slotclick</code></td><td>{ date, resourceId, hour, minutes }</td><td>Time slot clicked</td></tr>
+            <tr><td><code>scheduler:bookingclick</code></td><td>{ booking }</td><td>Booking clicked</td></tr>
+            <tr><td><code>scheduler:createbooking</code></td><td>{ start, end, resourceId }</td><td>Drag to create completed</td></tr>
+            <tr><td><code>scheduler:bookingadd</code></td><td>{ booking }</td><td>Booking added</td></tr>
+            <tr><td><code>scheduler:bookingupdate</code></td><td>{ booking, updates }</td><td>Booking updated</td></tr>
+            <tr><td><code>scheduler:bookingremove</code></td><td>{ booking }</td><td>Booking removed</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Methods -->
+    <section class="component-section">
+      <h3>Methods</h3>
+      <div style="background: var(--ux-surface); border-radius: var(--ux-border-radius-lg); overflow: hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>prev()</code></td><td>Go to previous day/week/month</td></tr>
+            <tr><td><code>next()</code></td><td>Go to next day/week/month</td></tr>
+            <tr><td><code>goToToday()</code></td><td>Navigate to today</td></tr>
+            <tr><td><code>setView(view)</code></td><td>Change view ('day', 'week', 'month')</td></tr>
+            <tr><td><code>selectDay(date)</code></td><td>Select a specific day</td></tr>
+            <tr><td><code>addBooking(data)</code></td><td>Add a new booking</td></tr>
+            <tr><td><code>updateBooking(id, updates)</code></td><td>Update existing booking</td></tr>
+            <tr><td><code>removeBooking(id)</code></td><td>Remove a booking</td></tr>
+            <tr><td><code>setBookings(bookings)</code></td><td>Replace all bookings</td></tr>
+            <tr><td><code>getBookingsForDay(date, resourceId?)</code></td><td>Get bookings for a day</td></tr>
+            <tr><td><code>hasConflict(booking)</code></td><td>Check if booking conflicts with others</td></tr>
+            <tr><td><code>setResources(resources)</code></td><td>Set resource columns</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CSS Classes -->
+    <section class="component-section">
+      <h3>CSS Classes</h3>
+      <pre class="ux-code-block" data-lang="css">/* Container */
+.ux-scheduler                       /* Main container */
+.ux-scheduler--glass                /* Glass morphism variant */
+.ux-scheduler--interval-15          /* 15-minute interval markers */
+
+/* Header */
+.ux-scheduler__header               /* Header container */
+.ux-scheduler__nav                  /* Navigation controls */
+.ux-scheduler__nav-btn              /* Prev/Next buttons */
+.ux-scheduler__title                /* Current date title */
+.ux-scheduler__today-btn            /* Today button */
+.ux-scheduler__view-toggle          /* View toggle container */
+.ux-scheduler__view-btn             /* View button */
+.ux-scheduler__view-btn--active     /* Active view */
+
+/* Day Headers */
+.ux-scheduler__day-headers          /* Day headers row */
+.ux-scheduler__day-header           /* Individual day header */
+.ux-scheduler__day-header--today    /* Today's header */
+.ux-scheduler__day-header--weekend  /* Weekend header */
+.ux-scheduler__day-name             /* Day name (Mon, Tue...) */
+.ux-scheduler__day-number           /* Day number */
+
+/* Resource Headers */
+.ux-scheduler__resources-header     /* Resource headers row */
+.ux-scheduler__resource-header      /* Individual resource header */
+.ux-scheduler__resource-name        /* Resource name */
+.ux-scheduler__resource-info        /* Resource info text */
+.ux-scheduler__resource-avatar      /* Resource avatar */
+
+/* Grid */
+.ux-scheduler__body                 /* Scrollable body */
+.ux-scheduler__grid                 /* Time grid */
+.ux-scheduler__times                /* Time column */
+.ux-scheduler__time                 /* Time label */
+.ux-scheduler__columns              /* Day/resource columns */
+.ux-scheduler__day-column           /* Individual column */
+.ux-scheduler__day-column--weekend  /* Weekend column */
+
+/* Hour Slots */
+.ux-scheduler__hour-slot            /* Hour slot */
+.ux-scheduler__hour-slot--business  /* Business hours */
+.ux-scheduler__hour-slot--non-business /* Non-business hours */
+
+/* Now Line */
+.ux-scheduler__now-line             /* Current time indicator */
+
+/* Bookings */
+.ux-scheduler__booking              /* Booking block */
+.ux-scheduler__booking--confirmed   /* Confirmed status */
+.ux-scheduler__booking--pending     /* Pending status */
+.ux-scheduler__booking--cancelled   /* Cancelled status */
+.ux-scheduler__booking--blocked     /* Blocked status */
+.ux-scheduler__booking--primary     /* Primary color */
+.ux-scheduler__booking--danger      /* Danger color */
+.ux-scheduler__booking--conflict    /* Conflict indicator */
+.ux-scheduler__booking-title        /* Booking title */
+.ux-scheduler__booking-time         /* Booking time */
+
+/* Drag Preview */
+.ux-scheduler__drag-preview         /* Drag to create preview */
+
+/* Month View */
+.ux-scheduler__month-grid           /* Month grid */
+.ux-scheduler__month-header         /* Weekday header */
+.ux-scheduler__month-day            /* Day cell */
+.ux-scheduler__month-day--today     /* Today's cell */
+.ux-scheduler__month-day--other     /* Other month's day */
+.ux-scheduler__month-day-number     /* Day number */
+.ux-scheduler__month-booking        /* Compact booking in month view */
+.ux-scheduler__month-more           /* "+X more" link */</pre>
+    </section>
+
+    <!-- HTMX + Django -->
+    <section class="component-section">
+      <h3>HTMX + Django Integration</h3>
+      <p>Example backend integration for a booking system.</p>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Django Model</h4>
+      <pre class="ux-code-block" data-lang="python"># models.py
+from django.db import models
+
+class Resource(models.Model):
+    name = models.CharField(max_length=100)
+    info = models.CharField(max_length=200, blank=True)
+    avatar = models.ImageField(upload_to='resources/', blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+class Booking(models.Model):
+    STATUS_CHOICES = [
+        ('confirmed', 'Confirmed'),
+        ('pending', 'Pending'),
+        ('cancelled', 'Cancelled'),
+        ('blocked', 'Blocked'),
+    ]
+
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE, null=True, blank=True)
+    title = models.CharField(max_length=200)
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    notes = models.TextField(blank=True)
+    customer_name = models.CharField(max_length=100, blank=True)
+    customer_email = models.EmailField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['start']
+
+    def __str__(self):
+        return f"{self.title} - {self.start.strftime('%Y-%m-%d %H:%M')}"</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Django Views</h4>
+      <pre class="ux-code-block" data-lang="python"># views.py
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.http import require_GET, require_POST
+from datetime import datetime, timedelta
+from .models import Booking, Resource
+import json
+
+@require_GET
+def scheduler_view(request):
+    """Render the scheduler page."""
+    resources = Resource.objects.filter(is_active=True)
+    return render(request, 'scheduler/index.html', {'resources': resources})
+
+@require_GET
+def get_bookings(request):
+    """Get bookings for a date range (JSON API)."""
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+    resource_id = request.GET.get('resource_id')
+
+    bookings = Booking.objects.all()
+
+    if start_date:
+        bookings = bookings.filter(start__gte=datetime.fromisoformat(start_date))
+    if end_date:
+        bookings = bookings.filter(end__lte=datetime.fromisoformat(end_date))
+    if resource_id:
+        bookings = bookings.filter(resource_id=resource_id)
+
+    data = [{
+        'id': b.id,
+        'title': b.title,
+        'start': b.start.isoformat(),
+        'end': b.end.isoformat(),
+        'status': b.status,
+        'resourceId': b.resource_id,
+    } for b in bookings]
+
+    return JsonResponse({'bookings': data})
+
+@require_POST
+def create_booking(request):
+    """Create a new booking (JSON API)."""
+    data = json.loads(request.body)
+
+    booking = Booking.objects.create(
+        title=data['title'],
+        start=datetime.fromisoformat(data['start']),
+        end=datetime.fromisoformat(data['end']),
+        status=data.get('status', 'pending'),
+        resource_id=data.get('resourceId'),
+        customer_name=data.get('customerName', ''),
+        customer_email=data.get('customerEmail', ''),
+        notes=data.get('notes', ''),
+    )
+
+    return JsonResponse({
+        'id': booking.id,
+        'title': booking.title,
+        'start': booking.start.isoformat(),
+        'end': booking.end.isoformat(),
+        'status': booking.status,
+        'resourceId': booking.resource_id,
+    })
+
+@require_POST
+def update_booking(request, booking_id):
+    """Update a booking."""
+    booking = get_object_or_404(Booking, pk=booking_id)
+    data = json.loads(request.body)
+
+    if 'title' in data:
+        booking.title = data['title']
+    if 'start' in data:
+        booking.start = datetime.fromisoformat(data['start'])
+    if 'end' in data:
+        booking.end = datetime.fromisoformat(data['end'])
+    if 'status' in data:
+        booking.status = data['status']
+    if 'resourceId' in data:
+        booking.resource_id = data['resourceId']
+
+    booking.save()
+
+    return JsonResponse({'success': True})
+
+@require_POST
+def delete_booking(request, booking_id):
+    """Delete a booking."""
+    Booking.objects.filter(id=booking_id).delete()
+    return JsonResponse({'success': True})</pre>
+
+      <h4 style="margin-top: var(--ux-space-lg); margin-bottom: var(--ux-space-sm); font-weight: 600;">Template with HTMX</h4>
+      <pre class="ux-code-block" data-lang="html">&lt;!-- templates/scheduler/index.html --&gt;
+&lt;div class="ux-scheduler"
+     x-data="uxScheduler({
+       view: 'week',
+       startHour: 8,
+       endHour: 18,
+       resources: {{ resources_json|safe }},
+       bookings: []
+     })"
+     x-init="loadBookings()"
+     @scheduler:navigate="loadBookings()"
+     @scheduler:slotclick="openBookingModal($event.detail)"
+     @scheduler:bookingclick="openEditModal($event.detail.booking)"
+     @scheduler:createbooking="openBookingModal($event.detail)"&gt;
+
+  &lt;!-- Scheduler content... --&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+// Extend component with API integration
+document.addEventListener('alpine:init', () =&gt; {
+  Alpine.data('uxScheduler', (options) =&gt; ({
+    ...window.UX._components.uxScheduler(options),
+
+    async loadBookings() {
+      const start = this.getWeekStart(this.currentDate);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 7);
+
+      const response = await fetch(
+        `/api/bookings/?start=${start.toISOString()}&amp;end=${end.toISOString()}`
+      );
+      const data = await response.json();
+
+      this.bookings = data.bookings.map(b =&gt; ({
+        ...b,
+        start: new Date(b.start),
+        end: new Date(b.end)
+      }));
+    },
+
+    async openBookingModal(detail) {
+      // Open modal with booking form
+      const modal = document.getElementById('booking-modal');
+      modal.querySelector('[name="start"]').value = detail.start.toISOString().slice(0, 16);
+      modal.querySelector('[name="end"]').value = detail.end?.toISOString().slice(0, 16) || '';
+      modal.querySelector('[name="resourceId"]').value = detail.resourceId || '';
+      modal.classList.add('ux-modal--open');
+    },
+
+    async saveBooking(formData) {
+      const response = await fetch('/api/bookings/create/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(formData))
+      });
+
+      if (response.ok) {
+        await this.loadBookings();
+        document.getElementById('booking-modal').classList.remove('ux-modal--open');
+      }
+    }
+  }));
+});
+&lt;/script&gt;</pre>
+    </section>

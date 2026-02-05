@@ -1,0 +1,39 @@
+<pre class="ux-code-block" data-lang="html" style="margin: 0;"><!-- Template Django: product_detail.html -->
+<div x-data="uxVariantSelector({
+       label: 'Talla',
+       options: {{ product.variants_json|safe }},
+       selected: '{{ product.default_variant.sku }}'
+     })"
+     @variant:change="$refs.variantInput.value = $event.detail.value; htmx.trigger($refs.priceContainer, 'refresh')">
+
+  <input type="hidden" name="variant" x-ref="variantInput" :value="selected">
+
+  <div class="ux-variant-selector">
+    <div class="ux-variant-selector__label">
+      <span x-text="label"></span>
+      <span class="ux-variant-selector__selected" x-text="selectedOption?.label"></span>
+    </div>
+    <div class="ux-variant-selector__options">
+      <template x-for="opt in options" :key="opt.value">
+        <button class="ux-variant-selector__option"
+                :class="{
+                  'ux-variant-selector__option--selected': isSelected(opt.value),
+                  'ux-variant-selector__option--unavailable': opt.available === false
+                }"
+                @click="select(opt.value)"
+                x-text="opt.label">
+        </button>
+      </template>
+    </div>
+  </div>
+
+  <!-- Contenedor de precio actualizado via HTMX -->
+  <div id="price-container"
+       x-ref="priceContainer"
+       hx-get="{% url 'product_price' product.id %}"
+       hx-trigger="refresh"
+       hx-vals="js:{variant: document.querySelector('[name=variant]').value}"
+       hx-swap="innerHTML">
+    {% include 'partials/product_price.html' with variant=product.default_variant %}
+  </div>
+</div></pre>

@@ -1,0 +1,54 @@
+# models.py - Modelo opcional para comandos personalizados
+from django.db import models
+
+class Command(models.Model):
+    CATEGORY_CHOICES = [
+        ('navigation', 'Navegacion'),
+        ('action', 'Acciones'),
+        ('settings', 'Configuracion'),
+    ]
+
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=255, blank=True)
+    url = models.CharField(max_length=255)
+    icon = models.CharField(max_length=50, default='command')
+    shortcut = models.CharField(max_length=50, blank=True)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    keywords = models.TextField(blank=True, help_text='Palabras clave separadas por coma')
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'title']
+
+    def matches(self, query):
+        """Verifica si el comando coincide con la busqueda"""
+        query = query.lower()
+        if query in self.title.lower():
+            return True
+        if query in self.description.lower():
+            return True
+        keywords = [k.strip() for k in self.keywords.split(',')]
+        return any(query in k.lower() for k in keywords)
+
+# views.py - Busqueda con modelo
+def command_search(request):
+    query = request.GET.get('q', '').strip()
+
+    if query:
+        commands = Command.objects.filter(is_active=True)
+        results = [
+            {
+                'title': cmd.title,
+                'description': cmd.description,
+                'url': cmd.url,
+                'icon': cmd.icon,
+                'shortcut': cmd.shortcut,
+                'category': cmd.get_category_display()
+            }
+            for cmd in commands if cmd.matches(query)
+        ]
+    else:
+        results = []
+
+    return render(request, 'partials/command_results.html', {'results': results})

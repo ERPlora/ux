@@ -1,0 +1,38 @@
+<!-- templates/partials/producto_actions.html -->
+<div class="ux-action-sheet__group">
+  <div class="ux-action-sheet__header">
+    <h4 class="ux-action-sheet__title">{{ producto.nombre }}</h4>
+    <p class="ux-action-sheet__message">${{ producto.precio }}</p>
+  </div>
+
+  {% for action in actions %}
+  <button class="ux-action-sheet__button"
+          hx-post="{{ action.url }}"
+          hx-swap="none"
+          @click="showActions = false">
+    <span class="ux-action-sheet__button-icon">
+      {% include 'icons/'|add:action.icon|add:'.svg' %}
+    </span>
+    {{ action.label }}
+  </button>
+  {% endfor %}
+
+  {% if request.user.is_staff %}
+  <button class="ux-action-sheet__button ux-action-sheet__button--destructive"
+          hx-delete="{% url 'producto_delete' producto.id %}"
+          hx-confirm="Eliminar {{ producto.nombre }}?"
+          @click="showActions = false">
+    <span class="ux-action-sheet__button-icon">
+      {% include 'icons/trash.svg' %}
+    </span>
+    Eliminar producto
+  </button>
+  {% endif %}
+</div>
+
+<div class="ux-action-sheet__group">
+  <button class="ux-action-sheet__button ux-action-sheet__button--cancel"
+          @click="showActions = false">
+    Cancelar
+  </button>
+</div>

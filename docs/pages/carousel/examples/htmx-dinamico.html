@@ -1,0 +1,37 @@
+<!-- Carousel que carga slides dinamicamente por categoria -->
+<div class="ux-segment ux-mb-md">
+  <button class="ux-segment__button ux-segment__button--active"
+          hx-get="/api/productos/carousel/?categoria=destacados"
+          hx-target="#carousel-slides"
+          hx-swap="innerHTML">
+    Destacados
+  </button>
+  <button class="ux-segment__button"
+          hx-get="/api/productos/carousel/?categoria=ofertas"
+          hx-target="#carousel-slides"
+          hx-swap="innerHTML">
+    Ofertas
+  </button>
+  <button class="ux-segment__button"
+          hx-get="/api/productos/carousel/?categoria=nuevos"
+          hx-target="#carousel-slides"
+          hx-swap="innerHTML">
+    Nuevos
+  </button>
+</div>
+
+<div x-data="uxCarousel({ slidesPerView: 3 })"
+     class="ux-carousel ux-carousel--show-3 ux-carousel--show-sm-1 ux-carousel--gap-md"
+     @htmx:after-swap.window="$nextTick(() => init())">
+
+  <button class="ux-carousel__nav ux-carousel__nav--prev" @click="prev()" :disabled="!canGoPrev">...</button>
+  <button class="ux-carousel__nav ux-carousel__nav--next" @click="next()" :disabled="!canGoNext">...</button>
+
+  <div class="ux-carousel__viewport" x-ref="viewport">
+    <div id="carousel-slides" class="ux-carousel__track" x-ref="track" :style="{ transform: `translateX(${translateX}%)` }"
+         hx-get="/api/productos/carousel/?categoria=destacados"
+         hx-trigger="load">
+      <!-- Slides cargados via HTMX -->
+    </div>
+  </div>
+</div>
