@@ -2,7 +2,7 @@
 
 **Zero-dependency, framework-agnostic CSS component library** with iOS/Ionic-style design. Works with any framework: HTMX, React, Vue, Radix UI, or vanilla JavaScript.
 
-**[Live Demo](https://erplora.github.io/ux/docs/)** | [Documentation](docs/index.html)
+**[Live Demo](https://erplora.github.io/ux/)** | [Documentation](docs/index.html)
 
 ## Features
 
