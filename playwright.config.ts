@@ -28,7 +28,7 @@ export default defineConfig({
   /* Shared settings for all projects */
   use: {
     /* Base URL for the docs server */
-    baseURL: 'http://localhost:8000',
+    baseURL: 'http://localhost',
 
     /* Collect trace when retrying the failed test */
     trace: 'on-first-retry',
@@ -136,10 +136,5 @@ export default defineConfig({
   ],
 
   /* Run local dev server before starting the tests */
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:8000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 30000,
-  },
+  /* No webServer: tests serve docs assets from disk via request routing */
 });
