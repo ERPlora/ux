@@ -404,6 +404,8 @@ function uxTabs(options = {}) {
     tabsId: options.id || 'tabs-' + Math.random().toString(36).substr(2, 9),
     orientation: options.orientation || 'horizontal',
     _totalTabs: 0,
+    _indicatorWidth: 0,
+    _indicatorLeft: 0,
 
     init() {
       // Count tabs on init
@@ -412,7 +414,25 @@ function uxTabs(options = {}) {
         if (tablist) {
           this._totalTabs = tablist.querySelectorAll('[role="tab"]').length;
         }
+        this.updateIndicator();
       });
+    },
+
+    updateIndicator() {
+      this.$nextTick(() => {
+        const activeTab = this.$el.querySelector('[role="tab"][aria-selected="true"], .ux-tabs__tab--active, .ux-tab-button--active');
+        if (activeTab) {
+          this._indicatorWidth = activeTab.offsetWidth;
+          this._indicatorLeft = activeTab.offsetLeft;
+        }
+      });
+    },
+
+    get indicatorStyle() {
+      return {
+        width: `${this._indicatorWidth}px`,
+        transform: `translateX(${this._indicatorLeft}px)`
+      };
     },
 
     // Generate unique IDs for ARIA relationships
@@ -465,10 +485,11 @@ function uxTabs(options = {}) {
       if (oldTab !== index) {
         this.$dispatch('tabs:change', { index, previousIndex: oldTab });
 
-        // Focus the new tab
+        // Focus the new tab and update indicator
         this.$nextTick(() => {
           const tab = document.getElementById(this.getTabId(index));
           if (tab) tab.focus();
+          this.updateIndicator();
         });
       }
     },
@@ -2253,11 +2274,87 @@ function uxCalendar(options = {}) {
 // Datetime Picker Component
 // ========================================
 function uxDatetime(options = {}) {
+  const now = new Date();
+  const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const weekdayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
   return {
     isOpen: false,
     date: options.date || null,
     time: options.time || null,
     showTime: options.showTime !== false,
+    mode: options.mode || 'datetime', // 'date', 'time', 'datetime'
+    currentMonth: options.month ?? now.getMonth(),
+    currentYear: options.year ?? now.getFullYear(),
+    selectedDate: options.selectedDate || null,
+
+    // Month names array
+    months: monthNames,
+
+    // Weekday names array
+    weekdays: weekdayNames,
+
+    // Generate years array for year picker
+    get years() {
+      const currentYear = new Date().getFullYear();
+      const years = [];
+      for (let y = currentYear - 50; y <= currentYear + 10; y++) {
+        years.push(y);
+      }
+      return years;
+    },
+
+    // Days in current month for calendar grid
+    get daysInMonth() {
+      const days = [];
+      const year = this.currentYear;
+      const month = this.currentMonth;
+
+      // First day of month
+      const firstDay = new Date(year, month, 1);
+      const startDayOfWeek = firstDay.getDay();
+
+      // Days from previous month
+      const prevMonth = month === 0 ? 11 : month - 1;
+      const prevYear = month === 0 ? year - 1 : year;
+      const daysInPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
+
+      for (let i = startDayOfWeek - 1; i >= 0; i--) {
+        days.push({
+          day: daysInPrevMonth - i,
+          month: prevMonth,
+          year: prevYear,
+          isOtherMonth: true
+        });
+      }
+
+      // Days in current month
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      for (let d = 1; d <= totalDays; d++) {
+        days.push({
+          day: d,
+          month: month,
+          year: year,
+          isOtherMonth: false
+        });
+      }
+
+      // Days from next month to fill grid
+      const remaining = 42 - days.length;
+      const nextMonth = month === 11 ? 0 : month + 1;
+      const nextYear = month === 11 ? year + 1 : year;
+      for (let d = 1; d <= remaining; d++) {
+        days.push({
+          day: d,
+          month: nextMonth,
+          year: nextYear,
+          isOtherMonth: true
+        });
+      }
+
+      return days;
+    },
 
     open() {
       this.isOpen = true;
@@ -2271,8 +2368,47 @@ function uxDatetime(options = {}) {
       this.isOpen = !this.isOpen;
     },
 
+    prevMonth() {
+      if (this.currentMonth === 0) {
+        this.currentMonth = 11;
+        this.currentYear--;
+      } else {
+        this.currentMonth--;
+      }
+    },
+
+    nextMonth() {
+      if (this.currentMonth === 11) {
+        this.currentMonth = 0;
+        this.currentYear++;
+      } else {
+        this.currentMonth++;
+      }
+    },
+
+    isToday(dateObj) {
+      const today = new Date();
+      return dateObj.day === today.getDate() &&
+             dateObj.month === today.getMonth() &&
+             dateObj.year === today.getFullYear();
+    },
+
+    isSelected(dateObj) {
+      if (!this.selectedDate) return false;
+      return dateObj.day === this.selectedDate.getDate() &&
+             dateObj.month === this.selectedDate.getMonth() &&
+             dateObj.year === this.selectedDate.getFullYear();
+    },
+
+    selectDate(dateObj) {
+      this.selectedDate = new Date(dateObj.year, dateObj.month, dateObj.day);
+      this.date = this.selectedDate;
+      this.$dispatch('change', { date: this.date, time: this.time });
+    },
+
     setDate(date) {
       this.date = date;
+      this.selectedDate = date;
       this.$dispatch('change', { date: this.date, time: this.time });
     },
 
@@ -2282,12 +2418,18 @@ function uxDatetime(options = {}) {
     },
 
     get formattedValue() {
-      if (!this.date) return '';
-      let str = this.date.toLocaleDateString();
+      if (!this.date && !this.selectedDate) return '';
+      const d = this.date || this.selectedDate;
+      let str = d.toLocaleDateString();
       if (this.showTime && this.time) {
         str += ' ' + this.time;
       }
       return str;
+    },
+
+    // Alias for templates that use displayValue
+    get displayValue() {
+      return this.formattedValue || 'Seleccionar fecha';
     }
   };
 }
@@ -2298,6 +2440,12 @@ function uxDatetime(options = {}) {
 function uxSegment(options = {}) {
   return {
     selected: options.selected || 0,
+    _indicatorWidth: 0,
+    _indicatorLeft: 0,
+
+    init() {
+      this.$nextTick(() => this.updateIndicator());
+    },
 
     isSelected(index) {
       return this.selected === index;
@@ -2306,6 +2454,22 @@ function uxSegment(options = {}) {
     select(index) {
       this.selected = index;
       this.$dispatch('change', index);
+      this.$nextTick(() => this.updateIndicator());
+    },
+
+    updateIndicator() {
+      const activeBtn = this.$el.querySelector('.ux-segment__button--active, [aria-checked="true"]');
+      if (activeBtn) {
+        this._indicatorWidth = activeBtn.offsetWidth;
+        this._indicatorLeft = activeBtn.offsetLeft;
+      }
+    },
+
+    get indicatorStyle() {
+      return {
+        width: `${this._indicatorWidth}px`,
+        transform: `translateX(${this._indicatorLeft}px)`
+      };
     }
   };
 }
@@ -2451,6 +2615,11 @@ function uxProgress(options = {}) {
 
     get percentage() {
       return Math.min(100, Math.max(0, (this.value / this.max) * 100));
+    },
+
+    // Alias for templates that use percent
+    get percent() {
+      return this.percentage;
     },
 
     setValue(val) {
