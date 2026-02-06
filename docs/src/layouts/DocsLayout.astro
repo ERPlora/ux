@@ -1,0 +1,206 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+const navigation = [
+  {
+    title: 'Getting Started',
+    items: [
+      { name: 'Installation', href: '/ux/' },
+    ],
+  },
+  {
+    title: 'Layout',
+    items: [
+      { name: 'App / Page / Drawer', href: '/ux/components/layout/' },
+    ],
+  },
+  {
+    title: 'Actions',
+    items: [
+      { name: 'Button', href: '/ux/components/button/' },
+    ],
+  },
+  {
+    title: 'Data Display',
+    items: [
+      { name: 'Badge', href: '/ux/components/badge/' },
+      { name: 'Card', href: '/ux/components/card/' },
+    ],
+  },
+  {
+    title: 'Navigation',
+    items: [
+      { name: 'Menu', href: '/ux/components/menu/' },
+      { name: 'Navbar', href: '/ux/components/navbar/' },
+      { name: 'Tabs', href: '/ux/components/tabs/' },
+    ],
+  },
+  {
+    title: 'Data Input',
+    items: [
+      { name: 'Input', href: '/ux/components/input/' },
+    ],
+  },
+  {
+    title: 'Feedback',
+    items: [
+      { name: 'Alert', href: '/ux/components/alert/' },
+      { name: 'Toast', href: '/ux/components/toast/' },
+    ],
+  },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} - UX Components</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/svg+xml" href="/ux/favicon.svg" />
+    <script is:inline>
+      (function() {
+        var t = localStorage.getItem('theme');
+        if (t) document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
+  </head>
+  <body>
+    <div class="app" x-data="{ sidebarOpen: false, sidebarCollapsed: false }">
+      <div class="page">
+
+        <!-- Page Header -->
+        <header class="header">
+          <div class="flex items-center h-14 px-4 gap-3">
+            <!-- Mobile toggle -->
+            <button
+              class="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-base-200 transition-colors"
+              @click="sidebarOpen = !sidebarOpen"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+            <!-- Desktop toggle -->
+            <button
+              class="hidden lg:flex items-center justify-center w-10 h-10 rounded-lg hover:bg-base-200 transition-colors"
+              @click="sidebarCollapsed = !sidebarCollapsed"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+
+            <a href="/ux/" class="text-lg font-bold">UX <span class="text-sm font-normal text-base-content/60">v3</span></a>
+
+            <div class="flex-1"></div>
+
+            <!-- Theme selector -->
+            <div class="relative" x-data="{ open: false }" @click.away="open = false">
+              <button
+                @click="open = !open"
+                class="flex items-center gap-1.5 text-sm text-base-content/60 hover:text-base-content transition-colors px-2 py-1.5 rounded-lg hover:bg-base-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z" />
+                </svg>
+                <span class="hidden sm:inline" x-text="
+                  document.documentElement.getAttribute('data-theme') === 'dark' ? 'Dark' :
+                  document.documentElement.getAttribute('data-theme') === 'erplora' ? 'ERPlora' :
+                  document.documentElement.getAttribute('data-theme') === 'ocean' ? 'Ocean' :
+                  document.documentElement.getAttribute('data-theme') === 'light' ? 'Light' : 'Auto'
+                ">Auto</span>
+              </button>
+              <div
+                x-show="open"
+                x-transition.opacity
+                class="absolute right-0 top-full mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg py-1 min-w-35 z-600"
+              >
+                <button @click="document.documentElement.removeAttribute('data-theme'); localStorage.removeItem('theme'); open = false; $el.closest('[x-data]').dispatchEvent(new Event('theme-changed'))" class="w-full text-left px-3 py-1.5 text-sm hover:bg-base-200 transition-colors">Auto</button>
+                <button @click="document.documentElement.setAttribute('data-theme', 'light'); localStorage.setItem('theme', 'light'); open = false; $el.closest('[x-data]').dispatchEvent(new Event('theme-changed'))" class="w-full text-left px-3 py-1.5 text-sm hover:bg-base-200 transition-colors">Light</button>
+                <button @click="document.documentElement.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); open = false; $el.closest('[x-data]').dispatchEvent(new Event('theme-changed'))" class="w-full text-left px-3 py-1.5 text-sm hover:bg-base-200 transition-colors">Dark</button>
+                <button @click="document.documentElement.setAttribute('data-theme', 'erplora'); localStorage.setItem('theme', 'erplora'); open = false; $el.closest('[x-data]').dispatchEvent(new Event('theme-changed'))" class="w-full text-left px-3 py-1.5 text-sm hover:bg-base-200 transition-colors">ERPlora</button>
+                <button @click="document.documentElement.setAttribute('data-theme', 'ocean'); localStorage.setItem('theme', 'ocean'); open = false; $el.closest('[x-data]').dispatchEvent(new Event('theme-changed'))" class="w-full text-left px-3 py-1.5 text-sm hover:bg-base-200 transition-colors">Ocean</button>
+              </div>
+            </div>
+
+            <a href="https://github.com/ERPlora/ux" target="_blank" class="text-sm text-base-content/60 hover:text-base-content transition-colors">
+              GitHub
+            </a>
+          </div>
+        </header>
+
+        <!-- Backdrop (mobile) -->
+        <div
+          class="drawer-backdrop"
+          :class="sidebarOpen ? 'drawer-backdrop-open' : ''"
+          @click="sidebarOpen = false"
+        ></div>
+
+        <!-- Sidebar Drawer -->
+        <aside
+          class="drawer drawer-start"
+          :class="{
+            'drawer-collapsed': sidebarCollapsed,
+            'drawer-open': sidebarOpen
+          }"
+          style="--drawer-width: 250px;"
+        >
+          <div class="content">
+            <nav class="p-3 space-y-5">
+              {navigation.map((section) => (
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3">
+                    {section.title}
+                  </h3>
+                  <ul class="space-y-0.5">
+                    {section.items.map((item) => (
+                      <li>
+                        <a
+                          href={item.href}
+                          class:list={[
+                            'block px-3 py-1.5 rounded-lg text-sm transition-colors',
+                            currentPath === item.href
+                              ? 'bg-primary text-primary-content font-medium'
+                              : 'hover:bg-base-200 text-base-content/70',
+                          ]}
+                        >
+                          {item.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </nav>
+          </div>
+          <div class="footer">
+            <span class="text-xs text-base-content/40">UX v3.0</span>
+          </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+          <div class="p-6 max-w-4xl">
+            <h1 class="text-2xl font-bold mb-6">{title}</h1>
+            <slot />
+          </div>
+        </main>
+
+      </div>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/app.css';
+</style>

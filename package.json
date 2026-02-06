@@ -1,66 +1,38 @@
 {
   "name": "ux",
-  "version": "2.0.0",
-  "description": "Zero-dependency, framework-agnostic CSS component library with iOS-style design. Works with HTMX, React, Vue, or vanilla JavaScript.",
+  "version": "3.0.0",
+  "description": "Semantic CSS component library compiled with Tailwind v4. Dual output: semantic classes + Tailwind utilities. Zero dependencies for consumers.",
   "main": "dist/ux.js",
-  "module": "dist/ux.esm.js",
   "style": "dist/ux.css",
-  "types": "types/index.d.ts",
   "type": "module",
   "exports": {
-    ".": {
-      "import": "./dist/ux.esm.js",
-      "require": "./dist/ux.js"
-    },
+    ".": "./dist/ux.js",
     "./css": "./dist/ux.css",
     "./css/min": "./dist/ux.min.css",
-    "./core": "./dist/core.min.css",
-    "./bundles/basic": "./dist/bundles/basic.min.css",
-    "./bundles/forms": "./dist/bundles/forms.min.css",
-    "./bundles/navigation": "./dist/bundles/navigation.min.css",
-    "./bundles/overlays": "./dist/bundles/overlays.min.css",
-    "./bundles/data": "./dist/bundles/data.min.css",
-    "./bundles/feedback": "./dist/bundles/feedback.min.css",
-    "./bundles/media": "./dist/bundles/media.min.css",
-    "./bundles/layout": "./dist/bundles/layout.min.css",
-    "./bundles/pos": "./dist/bundles/pos.min.css",
-    "./bundles/hr": "./dist/bundles/hr.min.css",
-    "./bundles/manufacturing": "./dist/bundles/manufacturing.min.css",
-    "./bundles/utils": "./dist/bundles/utils.min.css",
-    "./components/*": "./dist/components/*.css",
-    "./scss": "./src/scss/ux.scss",
-    "./scss/core": "./src/scss/core.scss"
+    "./tw": "./dist/tw.css",
+    "./tw/min": "./dist/tw.min.css",
+    "./full": "./dist/ux-full.css",
+    "./full/min": "./dist/ux-full.min.css"
   },
   "files": [
     "dist",
-    "src",
-    "types"
+    "src"
   ],
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
-    "dev": "vite",
-    "build": "npm run build:clean && npm run build:esm && npm run build:iife && npm run build:minify && npm run build:copy",
-    "build:clean": "rm -rf dist && mkdir -p dist",
-    "build:esm": "vite build --config vite.config.esm.js",
-    "build:iife": "vite build --config vite.config.iife.js",
-    "build:minify": "npm run build:minify:css && npm run build:minify:js",
-    "build:minify:css": "lightningcss --minify dist/ux.css -o dist/ux.min.css",
-    "build:minify:js": "terser dist/ux.js -o dist/ux.min.js --compress --mangle",
-    "build:modular": "node build-modular.js",
-    "build:copy": "mkdir -p public && cp dist/ux.css dist/ux.min.css dist/ux.js dist/ux.min.js dist/ux.esm.js public/",
-    "docs:copy": "cp dist/ux.css dist/ux.min.css dist/ux.js dist/ux.min.js dist/ux.esm.js docs/",
-    "docs:sync": "npm run build && npm run docs:copy",
-    "preview": "vite preview",
-    "serve": "python3 -m http.server 8000",
+    "dev": "npx @tailwindcss/cli -i src/css/ux.css -o dist/ux.css --watch",
+    "dev:tw": "npx @tailwindcss/cli -i src/css/tw.css -o dist/tw.css --watch",
+
+    "build": "npm run build:css && npm run build:js",
+    "build:css": "npm run build:semantic && npm run build:tw && npm run build:full",
+    "build:semantic": "npx @tailwindcss/cli -i src/css/ux.css -o dist/ux.css && npx lightningcss --minify dist/ux.css -o dist/ux.min.css",
+    "build:tw": "npx @tailwindcss/cli -i src/css/tw.css -o dist/tw.css && npx lightningcss --minify dist/tw.css -o dist/tw.min.css",
+    "build:full": "cat dist/ux.css dist/tw.css > dist/ux-full.css && npx lightningcss --minify dist/ux-full.css -o dist/ux-full.min.css",
+    "build:js": "echo 'TODO: JS build'",
+
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:chromium": "playwright test --project=chromium",
-    "test:firefox": "playwright test --project=firefox",
-    "test:webkit": "playwright test --project=webkit",
-    "test:mobile": "playwright test --project=mobile-chrome --project=mobile-safari",
     "test:debug": "playwright test --debug",
     "test:report": "playwright show-report"
   },
@@ -72,10 +44,10 @@
     "css",
     "ui",
     "components",
-    "ios",
+    "tailwind",
     "htmx",
     "framework-agnostic",
-    "vanilla-js"
+    "semantic-classes"
   ],
   "author": "ERPlora",
   "license": "MIT",
@@ -84,11 +56,13 @@
   },
   "homepage": "https://github.com/ERPlora/ux#readme",
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
-    "@types/node": "^25.0.3",
-    "lightningcss-cli": "^1.30.1",
-    "sass": "^1.97.3",
-    "terser": "^5.46.0",
-    "vite": "^7.3.1"
+    "@tailwindcss/cli": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "@iconify/tailwind": "^1.2.0",
+    "@iconify-json/mdi-light": "^1.0.0",
+    "@iconify-json/lucide": "^1.0.0",
+    "@iconify-json/heroicons": "^1.0.0",
+    "lightningcss-cli": "^1.30.0",
+    "@playwright/test": "^1.57.0"
   }
 }
