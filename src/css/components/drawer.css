@@ -1,9 +1,37 @@
 /* UX v3 - Drawer (responsive sidebar/panel) */
 /* Desktop: inline (content resizes) */
-/* Mobile: overlay with backdrop */
+/* Mobile: overlay with backdrop via checkbox toggle (no JS needed) */
 /* Uses generic .header, .content, .footer from structure.css */
+/*
+   Usage (checkbox, no JS):
+   <input type="checkbox" id="drawer" class="drawer-toggle">
+   <div class="page">
+     <header class="header">
+       <label for="drawer" class="btn btn-ghost">☰</label>
+     </header>
+     <aside class="drawer drawer-start">...</aside>
+     <label for="drawer" class="drawer-backdrop"></label>
+     <main class="content">...</main>
+   </div>
+
+   Usage (class-based, for JS frameworks):
+   <aside class="drawer drawer-start drawer-open">...</aside>
+   <div class="drawer-backdrop drawer-backdrop-open"></div>
+*/
 
 @layer components {
+
+  /* =============================================
+     Drawer toggle (hidden checkbox)
+     ============================================= */
+
+  .drawer-toggle {
+    position: fixed;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
 
   /* =============================================
      Drawer base
@@ -118,7 +146,7 @@
   .drawer-xl { --drawer-width: 480px; }
 
   /* =============================================
-     Drawer backdrop (mobile only)
+     Drawer backdrop
      ============================================= */
 
   .drawer-backdrop {
@@ -132,11 +160,35 @@
     transition: opacity 300ms var(--ease-ios),
                 visibility 300ms var(--ease-ios);
     -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
   }
 
+  /* Class-based open (for JS frameworks) */
   .drawer-backdrop-open {
     opacity: 1;
     visibility: visible;
+  }
+}
+
+/* =============================================
+   Desktop: checkbox toggle collapses drawer
+   ============================================= */
+
+@media (min-width: 992px) {
+  /* When checkbox is unchecked, collapse the drawer on desktop */
+  .drawer-toggle:not(:checked) ~ .page .drawer,
+  .drawer-toggle:not(:checked) ~ .app .page .drawer {
+    width: 0;
+    border-width: 0;
+    overflow: hidden;
+  }
+
+  .drawer-toggle:not(:checked) ~ .page .drawer.drawer-top,
+  .drawer-toggle:not(:checked) ~ .page .drawer.drawer-bottom,
+  .drawer-toggle:not(:checked) ~ .app .page .drawer.drawer-top,
+  .drawer-toggle:not(:checked) ~ .app .page .drawer.drawer-bottom {
+    height: 0;
+    width: 100%;
   }
 }
 
@@ -199,21 +251,52 @@
     grid-row: auto;
   }
 
-  /* Open state on mobile - visible */
-  .drawer-open.drawer-start {
+  /* =============================================
+     Open state — class-based (JS frameworks)
+     ============================================= */
+
+  .drawer-open.drawer-start { transform: translateX(0); }
+  .drawer-open.drawer-end { transform: translateX(0); }
+  .drawer-open.drawer-top { transform: translateY(0); }
+  .drawer-open.drawer-bottom { transform: translateY(0); }
+
+  /* =============================================
+     Open state — checkbox toggle (no JS)
+     ============================================= */
+
+  .drawer-toggle:checked ~ .page .drawer.drawer-start,
+  .drawer-toggle:checked ~ .page .drawer-start,
+  .drawer-toggle:checked ~ .app .page .drawer.drawer-start,
+  .drawer-toggle:checked ~ .app .page .drawer-start {
     transform: translateX(0);
   }
 
-  .drawer-open.drawer-end {
+  .drawer-toggle:checked ~ .page .drawer.drawer-end,
+  .drawer-toggle:checked ~ .page .drawer-end,
+  .drawer-toggle:checked ~ .app .page .drawer.drawer-end,
+  .drawer-toggle:checked ~ .app .page .drawer-end {
     transform: translateX(0);
   }
 
-  .drawer-open.drawer-top {
+  .drawer-toggle:checked ~ .page .drawer.drawer-top,
+  .drawer-toggle:checked ~ .page .drawer-top,
+  .drawer-toggle:checked ~ .app .page .drawer.drawer-top,
+  .drawer-toggle:checked ~ .app .page .drawer-top {
     transform: translateY(0);
   }
 
-  .drawer-open.drawer-bottom {
+  .drawer-toggle:checked ~ .page .drawer.drawer-bottom,
+  .drawer-toggle:checked ~ .page .drawer-bottom,
+  .drawer-toggle:checked ~ .app .page .drawer.drawer-bottom,
+  .drawer-toggle:checked ~ .app .page .drawer-bottom {
     transform: translateY(0);
+  }
+
+  /* Backdrop open via checkbox */
+  .drawer-toggle:checked ~ .page .drawer-backdrop,
+  .drawer-toggle:checked ~ .app .page .drawer-backdrop {
+    opacity: 1;
+    visibility: visible;
   }
 
   /* Collapsed is same as closed on mobile */
