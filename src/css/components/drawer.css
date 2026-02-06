@@ -1,0 +1,240 @@
+/* UX v3 - Drawer (responsive sidebar/panel) */
+/* Desktop: inline (content resizes) */
+/* Mobile: overlay with backdrop */
+/* Uses generic .header, .content, .footer from structure.css */
+
+@layer components {
+
+  /* =============================================
+     Drawer base
+     ============================================= */
+
+  .drawer {
+    --drawer-width: 280px;
+
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: var(--drawer-width);
+    height: 100%;
+    background-color: var(--color-base-100);
+    overflow: hidden;
+    transition: width 350ms var(--ease-ios),
+                transform 350ms var(--ease-ios);
+    will-change: width, transform;
+
+    /* Glass variant */
+    &.glass {
+      background: var(--color-glass-bg);
+      backdrop-filter: blur(var(--blur-glass)) saturate(180%);
+      -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(180%);
+    }
+  }
+
+  /* =============================================
+     Drawer positions
+     ============================================= */
+
+  .drawer-start {
+    order: -1;
+    border-right: var(--border) solid var(--color-base-300);
+
+    &.glass {
+      border-right-color: var(--color-glass-border);
+    }
+  }
+
+  .drawer-end {
+    order: 99;
+    border-left: var(--border) solid var(--color-base-300);
+
+    &.glass {
+      border-left-color: var(--color-glass-border);
+    }
+  }
+
+  .drawer-top {
+    --drawer-width: auto;
+    --drawer-height: 240px;
+
+    width: 100%;
+    height: var(--drawer-height);
+    flex-shrink: 0;
+    border-bottom: var(--border) solid var(--color-base-300);
+    transition: height 350ms var(--ease-ios),
+                transform 350ms var(--ease-ios);
+    will-change: height, transform;
+  }
+
+  .drawer-bottom {
+    --drawer-width: auto;
+    --drawer-height: 240px;
+
+    width: 100%;
+    height: var(--drawer-height);
+    flex-shrink: 0;
+    border-top: var(--border) solid var(--color-base-300);
+    transition: height 350ms var(--ease-ios),
+                transform 350ms var(--ease-ios);
+    will-change: height, transform;
+  }
+
+  /* =============================================
+     Drawer title (utility class)
+     ============================================= */
+
+  .drawer-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-base-content);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* =============================================
+     Drawer collapsed state (desktop)
+     ============================================= */
+
+  .drawer-collapsed {
+    width: 0;
+    border-width: 0;
+    overflow: hidden;
+  }
+
+  .drawer-collapsed.drawer-top,
+  .drawer-collapsed.drawer-bottom {
+    height: 0;
+    width: 100%;
+  }
+
+  /* =============================================
+     Drawer size variants
+     ============================================= */
+
+  .drawer-sm { --drawer-width: 220px; }
+  .drawer-lg { --drawer-width: 360px; }
+  .drawer-xl { --drawer-width: 480px; }
+
+  /* =============================================
+     Drawer backdrop (mobile only)
+     ============================================= */
+
+  .drawer-backdrop {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 400;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 300ms var(--ease-ios),
+                visibility 300ms var(--ease-ios);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .drawer-backdrop-open {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* =============================================
+   Mobile: drawer becomes overlay
+   ============================================= */
+
+@media (max-width: 991px) {
+  /* On mobile, drawers overlay the page (absolute to .page) */
+  .drawer.drawer-start,
+  .drawer.drawer-end {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 500;
+    width: var(--drawer-width);
+    max-width: calc(100% - 3rem);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    /* Reset grid placement on mobile */
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .drawer.drawer-start {
+    left: 0;
+    transform: translateX(-100%);
+  }
+
+  .drawer.drawer-end {
+    right: 0;
+    left: auto;
+    transform: translateX(100%);
+  }
+
+  .drawer.drawer-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 500;
+    height: var(--drawer-height);
+    max-height: 70%;
+    transform: translateY(-100%);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .drawer.drawer-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 500;
+    height: var(--drawer-height);
+    max-height: 70%;
+    transform: translateY(100%);
+    box-shadow: 0 -10px 50px -12px rgba(0, 0, 0, 0.25);
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  /* Open state on mobile - visible */
+  .drawer-open.drawer-start {
+    transform: translateX(0);
+  }
+
+  .drawer-open.drawer-end {
+    transform: translateX(0);
+  }
+
+  .drawer-open.drawer-top {
+    transform: translateY(0);
+  }
+
+  .drawer-open.drawer-bottom {
+    transform: translateY(0);
+  }
+
+  /* Collapsed is same as closed on mobile */
+  .drawer-collapsed.drawer-start { transform: translateX(-100%); }
+  .drawer-collapsed.drawer-end   { transform: translateX(100%); }
+  .drawer-collapsed.drawer-top   { transform: translateY(-100%); }
+  .drawer-collapsed.drawer-bottom { transform: translateY(100%); }
+
+  /* Backdrop visible on mobile */
+  .drawer-backdrop {
+    display: block;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer,
+  .drawer-backdrop {
+    transition: none;
+  }
+}
