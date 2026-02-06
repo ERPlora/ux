@@ -7,7 +7,7 @@ Semantic CSS component library built with Tailwind v4. Zero dependencies for con
 ## Features
 
 - **Zero Dependencies** - Single CSS file, no JavaScript required
-- **Framework Agnostic** - Works with HTMX, React, Vue, Alpine.js, or vanilla JS
+- **Framework Agnostic** - Works with HTMX, React, Vue, or vanilla JS
 - **Dual Output** - Semantic classes (`btn btn-primary`) or Tailwind utilities (`bg-primary text-primary-content`)
 - **OKLCH Colors** - Perceptually uniform color system with 4 themes
 - **Dark Mode** - Automatic via `prefers-color-scheme` + manual via `data-theme="dark"`

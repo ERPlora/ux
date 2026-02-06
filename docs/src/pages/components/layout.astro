@@ -49,22 +49,23 @@ import CodePreview from '../../components/CodePreview.astro';
 </div>`}
   />
 
-  <!-- Drawer without header/footer (Ionic-style padding) -->
+  <!-- Drawer with toggle (CSS-only checkbox) -->
   <CodePreview
-    title="Drawer without header/footer"
+    title="Drawer with toggle (no JS)"
     height="380px"
-    semantic={`<div class="app" x-data="{ drawerOpen: false, drawerCollapsed: false }">
+    semantic={`<input type="checkbox" id="drawer-1" class="drawer-toggle" checked />
+<div class="app">
   <div class="page">
     <header class="header">
-      <button @click="drawerCollapsed = !drawerCollapsed" style="background:none; border:1px solid var(--color-base-300); border-radius:0.375rem; padding:0.25rem 0.5rem; cursor:pointer; font-size:0.75rem;">
+      <label for="drawer-1" style="background:none; border:1px solid var(--color-base-300); border-radius:0.375rem; padding:0.25rem 0.5rem; cursor:pointer; font-size:0.75rem;">
         Toggle Drawer
-      </button>
+      </label>
       <div style="font-weight: 600;">My App</div>
     </header>
 
-    <div class="drawer-backdrop" :class="drawerOpen ? 'drawer-backdrop-open' : ''" @click="drawerOpen = false"></div>
+    <label for="drawer-1" class="drawer-backdrop"></label>
 
-    <aside class="drawer drawer-start" :class="{ 'drawer-collapsed': drawerCollapsed, 'drawer-open': drawerOpen }">
+    <aside class="drawer drawer-start">
       <div class="content" style="padding: 1rem 0.75rem;">
         <nav>
           <a href="#" style="display:block; padding:0.625rem 1rem; border-radius:0.5rem; font-size:0.9375rem;">Home</a>
@@ -93,23 +94,67 @@ import CodePreview from '../../components/CodePreview.astro';
     </footer>
   </div>
 </div>`}
-    js={`// Desktop: toggle collapse/expand
-drawer.classList.toggle('drawer-collapsed');
+    tailwind={`<div class="flex flex-col h-dvh overflow-hidden bg-base-100">
+  <div class="relative grid grid-cols-[auto_1fr] grid-rows-[auto_1fr_auto] flex-1 min-h-0 overflow-hidden">
+    <header class="col-span-2 sticky top-0 z-50 shrink-0 flex items-center gap-3 px-4 py-3 bg-base-100 border-b border-base-300">
+      <button onclick="this.closest('.relative').querySelector('aside').classList.toggle('hidden')" class="text-xs border border-base-300 rounded-md px-2 py-1 cursor-pointer">
+        Toggle Drawer
+      </button>
+      <span class="font-semibold">My App</span>
+    </header>
 
-// Mobile: toggle overlay
-drawer.classList.toggle('drawer-open');
-backdrop.classList.toggle('drawer-backdrop-open');`}
+    <aside class="w-64 border-r border-base-300 bg-base-100 overflow-y-auto">
+      <nav class="p-3 space-y-1">
+        <a href="#" class="block px-4 py-2.5 rounded-lg text-sm">Home</a>
+        <a href="#" class="block px-4 py-2.5 rounded-lg text-sm">Settings</a>
+        <a href="#" class="block px-4 py-2.5 rounded-lg text-sm">Profile</a>
+        <a href="#" class="block px-4 py-2.5 rounded-lg text-sm">About</a>
+      </nav>
+    </aside>
+
+    <main class="flex-1 min-w-0 overflow-y-auto flex flex-col">
+      <div class="shrink-0 flex items-center px-4 py-3">
+        <span class="font-medium">Dashboard</span>
+      </div>
+      <div class="flex-1 p-4">
+        <p>Main scrollable area.</p>
+      </div>
+      <div class="shrink-0 flex items-center px-4 py-2 border-t border-base-300">
+        <span class="text-xs opacity-50">Footer</span>
+      </div>
+    </main>
+
+    <footer class="col-span-2 sticky bottom-0 z-50 shrink-0 px-4 py-3 bg-base-100 border-t border-base-300 text-center text-sm">
+      Tabbar
+    </footer>
+  </div>
+</div>`}
+    js={`// No JavaScript needed — uses CSS checkbox toggle:
+// <input type="checkbox" id="d" class="drawer-toggle">
+// <label for="d">Toggle</label>
+// <label for="d" class="drawer-backdrop"></label>
+//
+// CSS handles everything:
+// .drawer-toggle:checked ~ .app .page .drawer { transform: translateX(0); }
+// .drawer-toggle:checked ~ .app .page .drawer-backdrop { opacity: 1; }
+//
+// Optional: JS alternative for frameworks
+// const drawer = document.querySelector('.drawer');
+// drawer.classList.toggle('drawer-collapsed');  // desktop
+// drawer.classList.toggle('drawer-open');        // mobile
+// backdrop.classList.toggle('drawer-backdrop-open');`}
   />
 
   <!-- Drawer with header and footer -->
   <CodePreview
     title="Drawer with header & footer"
     height="380px"
-    semantic={`<div class="app" x-data="{ drawerOpen: false, drawerCollapsed: false }">
+    semantic={`<input type="checkbox" id="drawer-2" class="drawer-toggle" checked />
+<div class="app">
   <div class="page">
-    <div class="drawer-backdrop" :class="drawerOpen ? 'drawer-backdrop-open' : ''" @click="drawerOpen = false"></div>
+    <label for="drawer-2" class="drawer-backdrop"></label>
 
-    <aside class="drawer drawer-start" :class="{ 'drawer-collapsed': drawerCollapsed, 'drawer-open': drawerOpen }">
+    <aside class="drawer drawer-start">
       <div class="header">
         <h2 class="drawer-title">Menu</h2>
       </div>
@@ -127,9 +172,9 @@ backdrop.classList.toggle('drawer-backdrop-open');`}
 
     <main class="content" style="padding: 1rem; background: var(--color-base-200);">
       <div class="header no-border" style="background: var(--color-base-100); border-radius: 0.5rem 0.5rem 0 0;">
-        <button @click="drawerCollapsed = !drawerCollapsed" style="background:none; border:1px solid var(--color-base-300); border-radius:0.375rem; padding:0.25rem 0.5rem; cursor:pointer; font-size:0.75rem;">
+        <label for="drawer-2" style="background:none; border:1px solid var(--color-base-300); border-radius:0.375rem; padding:0.25rem 0.5rem; cursor:pointer; font-size:0.75rem;">
           Toggle Drawer
-        </button>
+        </label>
         <span style="font-weight: 500;">Orders</span>
       </div>
       <div class="content" style="padding: 1rem; background: var(--color-base-100);">
@@ -142,23 +187,60 @@ backdrop.classList.toggle('drawer-backdrop-open');`}
     </main>
   </div>
 </div>`}
-    js={`// Desktop: toggle collapse/expand
-drawer.classList.toggle('drawer-collapsed');
+    tailwind={`<div class="flex flex-col h-dvh overflow-hidden bg-base-100">
+  <div class="relative grid grid-cols-[auto_1fr] grid-rows-[1fr] flex-1 min-h-0 overflow-hidden">
+    <aside class="w-64 flex flex-col border-r border-base-300 bg-base-100">
+      <div class="shrink-0 flex items-center px-4 py-3 border-b border-base-300">
+        <h2 class="font-semibold text-sm">Menu</h2>
+      </div>
+      <nav class="flex-1 overflow-y-auto p-2 space-y-0.5">
+        <a href="#" class="block px-3 py-2 text-sm rounded-lg">Home</a>
+        <a href="#" class="block px-3 py-2 text-sm rounded-lg">Settings</a>
+        <a href="#" class="block px-3 py-2 text-sm rounded-lg">Profile</a>
+      </nav>
+      <div class="shrink-0 flex items-center px-4 py-2 border-t border-base-300">
+        <span class="text-xs opacity-50">v3.0</span>
+      </div>
+    </aside>
 
-// Mobile: toggle overlay
-drawer.classList.toggle('drawer-open');
-backdrop.classList.toggle('drawer-backdrop-open');`}
+    <main class="flex-1 min-w-0 overflow-y-auto p-4 bg-base-200">
+      <div class="bg-base-100 rounded-lg flex flex-col min-h-full">
+        <div class="shrink-0 flex items-center gap-3 px-4 py-3">
+          <button onclick="this.closest('.relative').querySelector('aside').classList.toggle('hidden')" class="text-xs border border-base-300 rounded-md px-2 py-1 cursor-pointer">
+            Toggle Drawer
+          </button>
+          <span class="font-medium">Orders</span>
+        </div>
+        <div class="flex-1 p-4">
+          <p>Content area with its own header, content, and footer.</p>
+        </div>
+        <div class="shrink-0 flex items-center px-4 py-2 border-t border-base-300">
+          <span class="text-xs opacity-50">Footer</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>`}
+    js={`// No JavaScript needed — uses CSS checkbox toggle.
+// The <label for="drawer-id"> toggles the hidden checkbox,
+// and CSS :checked selector shows/hides the drawer.
+//
+// Optional: JS alternative for frameworks
+// const drawer = document.querySelector('.drawer');
+// drawer.classList.toggle('drawer-collapsed');  // desktop
+// drawer.classList.toggle('drawer-open');        // mobile
+// backdrop.classList.toggle('drawer-backdrop-open');`}
   />
 
   <!-- Size Variants -->
   <CodePreview
     title="Drawer Sizes"
     height="320px"
-    semantic={`<div class="app" x-data="{ size: '' }">
+    semantic={`<div class="app">
   <div class="page">
-    <aside class="drawer drawer-start" :class="size" style="--drawer-width: 280px;">
+    <aside class="drawer drawer-start" style="--drawer-width: 280px;">
       <div class="header">
-        <h2 class="drawer-title" x-text="size || 'default (280px)'"></h2>
+        <h2 class="drawer-title">default (280px)</h2>
       </div>
       <div class="content" style="padding: 0.75rem;">
         <nav>
@@ -171,37 +253,38 @@ backdrop.classList.toggle('drawer-backdrop-open');`}
     <main class="content" style="padding: 1rem;">
       <p style="font-weight: 500; margin-bottom: 0.75rem;">Select drawer size:</p>
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-        <button @click="size = 'drawer-sm'" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">sm (220px)</button>
-        <button @click="size = ''" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">default (280px)</button>
-        <button @click="size = 'drawer-lg'" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">lg (360px)</button>
-        <button @click="size = 'drawer-xl'" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">xl (480px)</button>
+        <button onclick="var d=this.closest('.page').querySelector('.drawer');d.className='drawer drawer-start drawer-sm';d.querySelector('.drawer-title').textContent='drawer-sm (220px)'" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">sm (220px)</button>
+        <button onclick="var d=this.closest('.page').querySelector('.drawer');d.className='drawer drawer-start';d.querySelector('.drawer-title').textContent='default (280px)'" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">default (280px)</button>
+        <button onclick="var d=this.closest('.page').querySelector('.drawer');d.className='drawer drawer-start drawer-lg';d.querySelector('.drawer-title').textContent='drawer-lg (360px)'" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">lg (360px)</button>
+        <button onclick="var d=this.closest('.page').querySelector('.drawer');d.className='drawer drawer-start drawer-xl';d.querySelector('.drawer-title').textContent='drawer-xl (480px)'" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">xl (480px)</button>
       </div>
     </main>
   </div>
 </div>`}
-    js={`// Size classes
-drawer.classList.add('drawer-sm');  // 220px
-drawer.classList.add('drawer-lg');  // 360px
-drawer.classList.add('drawer-xl');  // 480px
-
-// Or custom width
-drawer.style.setProperty('--drawer-width', '400px');`}
+    js={`// Size classes (CSS only, no JS needed for sizes):
+// <aside class="drawer drawer-start drawer-sm">  // 220px
+// <aside class="drawer drawer-start">             // 280px (default)
+// <aside class="drawer drawer-start drawer-lg">   // 360px
+// <aside class="drawer drawer-start drawer-xl">   // 480px
+//
+// Or custom width via CSS variable:
+// <aside class="drawer drawer-start" style="--drawer-width: 400px;">`}
   />
 
   <!-- All Positions -->
   <CodePreview
     title="All Drawer Positions"
     height="360px"
-    semantic={`<div class="app" x-data="{ pos: 'start', collapsed: true }">
+    semantic={`<div class="app">
   <div class="page">
-    <aside class="drawer drawer-start" :class="{ 'drawer-collapsed': pos !== 'start' || collapsed }" style="--drawer-width: 180px;">
+    <aside class="drawer drawer-start drawer-collapsed" style="--drawer-width: 180px;">
       <div class="header"><h2 class="drawer-title">Left</h2></div>
       <div class="content" style="padding: 0.75rem;">
         <p style="font-size: 0.8125rem;">drawer-start</p>
       </div>
     </aside>
 
-    <aside class="drawer drawer-end" :class="{ 'drawer-collapsed': pos !== 'end' || collapsed }" style="--drawer-width: 180px;">
+    <aside class="drawer drawer-end drawer-collapsed" style="--drawer-width: 180px;">
       <div class="header"><h2 class="drawer-title">Right</h2></div>
       <div class="content" style="padding: 0.75rem;">
         <p style="font-size: 0.8125rem;">drawer-end</p>
@@ -211,19 +294,25 @@ drawer.style.setProperty('--drawer-width', '400px');`}
     <main class="content" style="padding: 1rem;">
       <p style="font-weight: 500; margin-bottom: 0.75rem;">Select position:</p>
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-        <button @click="pos = 'start'; collapsed = false" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">Left (start)</button>
-        <button @click="pos = 'end'; collapsed = false" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">Right (end)</button>
-        <button @click="collapsed = true" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">Close all</button>
+        <button onclick="var ds=this.closest('.page').querySelectorAll('.drawer');ds[0].classList.remove('drawer-collapsed');ds[1].classList.add('drawer-collapsed')" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">Left (start)</button>
+        <button onclick="var ds=this.closest('.page').querySelectorAll('.drawer');ds[1].classList.remove('drawer-collapsed');ds[0].classList.add('drawer-collapsed')" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">Right (end)</button>
+        <button onclick="this.closest('.page').querySelectorAll('.drawer').forEach(function(d){d.classList.add('drawer-collapsed')})" style="padding: 0.375rem 0.75rem; border: 1px solid var(--color-base-300); border-radius: 0.375rem; cursor: pointer; background: none; font-size: 0.8125rem;">Close all</button>
       </div>
       <p style="opacity: 0.5; font-size: 0.8125rem;">drawer-top and drawer-bottom also available for horizontal drawers.</p>
     </main>
   </div>
 </div>`}
-    js={`// Positions
-<aside class="drawer drawer-start">  // Left
-<aside class="drawer drawer-end">    // Right
-<aside class="drawer drawer-top">    // Top
-<aside class="drawer drawer-bottom"> // Bottom`}
+    js={`// Position classes (CSS only, no JS needed):
+// <aside class="drawer drawer-start">   // Left
+// <aside class="drawer drawer-end">     // Right
+// <aside class="drawer drawer-top">     // Top
+// <aside class="drawer drawer-bottom">  // Bottom
+//
+// Collapse/expand (toggle visibility):
+// <aside class="drawer drawer-start drawer-collapsed">
+//
+// Optional: JS to toggle collapse
+// drawer.classList.toggle('drawer-collapsed');`}
   />
 
   <!-- Glass Variant -->
@@ -258,10 +347,10 @@ drawer.style.setProperty('--drawer-width', '400px');`}
     </footer>
   </div>
 </div>`}
-    js={`// Add glass class to any structural component
-<header class="header glass">
-<footer class="footer glass">
-<aside class="drawer drawer-start glass">`}
+    js={`// No JS needed — just add the .glass class:
+// <header class="header glass">
+// <footer class="footer glass">
+// <aside class="drawer drawer-start glass">`}
   />
 
   <!-- Classes Reference -->
@@ -315,15 +404,17 @@ drawer.style.setProperty('--drawer-width', '400px');`}
         </thead>
         <tbody>
           <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer</td><td class="py-2 px-3">Sidebar panel base</td></tr>
+          <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-toggle</td><td class="py-2 px-3">Hidden checkbox for CSS-only toggle</td></tr>
           <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-start</td><td class="py-2 px-3">Left position</td></tr>
           <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-end</td><td class="py-2 px-3">Right position</td></tr>
           <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-top</td><td class="py-2 px-3">Top position</td></tr>
           <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-bottom</td><td class="py-2 px-3">Bottom position</td></tr>
           <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-title</td><td class="py-2 px-3">Title text styling</td></tr>
           <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-collapsed</td><td class="py-2 px-3">Desktop: width 0, content expands</td></tr>
-          <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-open</td><td class="py-2 px-3">Mobile: visible as overlay</td></tr>
+          <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-open</td><td class="py-2 px-3">Mobile: visible as overlay (class-based, for JS)</td></tr>
           <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-sm / lg / xl</td><td class="py-2 px-3">Size variants (220/360/480px)</td></tr>
-          <tr><td class="py-2 px-3 font-mono text-xs">drawer-backdrop</td><td class="py-2 px-3">Overlay backdrop (mobile)</td></tr>
+          <tr class="border-b border-base-300/50"><td class="py-2 px-3 font-mono text-xs">drawer-backdrop</td><td class="py-2 px-3">Overlay backdrop (mobile, use as label)</td></tr>
+          <tr><td class="py-2 px-3 font-mono text-xs">drawer-backdrop-open</td><td class="py-2 px-3">Show backdrop (class-based, for JS)</td></tr>
         </tbody>
       </table>
     </div>
