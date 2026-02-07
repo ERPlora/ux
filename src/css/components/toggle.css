@@ -1,0 +1,206 @@
+/* UX v3 - Toggle / Switch Component */
+/* iOS-style on/off switches */
+
+@layer components {
+
+  /* =============================================
+     Base toggle (label wrapper)
+     ============================================= */
+
+  .toggle {
+    --toggle-w: 51px;
+    --toggle-h: 31px;
+    --toggle-thumb: 27px;
+    --toggle-travel: 20px;
+    --toggle-color: var(--c, var(--color-primary));
+
+    @apply inline-flex items-center gap-3 cursor-pointer select-none;
+  }
+
+  /* =============================================
+     Hidden native input
+     ============================================= */
+
+  .toggle input[type="checkbox"] {
+    @apply absolute opacity-0 pointer-events-none;
+    width: 0;
+    height: 0;
+
+    /* Checked state */
+    &:checked + .toggle-track {
+      background-color: var(--toggle-color);
+
+      & .toggle-thumb {
+        transform: translateX(var(--toggle-travel));
+      }
+    }
+
+    /* Active press — stretch thumb */
+    &:active + .toggle-track .toggle-thumb {
+      width: calc(var(--toggle-thumb) + 4px);
+    }
+
+    &:checked:active + .toggle-track .toggle-thumb {
+      transform: translateX(calc(var(--toggle-travel) - 4px));
+    }
+
+    /* Focus-visible */
+    &:focus-visible + .toggle-track {
+      @apply outline-2 outline-offset-2;
+      outline-color: var(--toggle-color);
+    }
+
+    /* Disabled */
+    &:disabled + .toggle-track {
+      @apply opacity-50 cursor-not-allowed;
+
+      & .toggle-thumb {
+        box-shadow: none;
+      }
+    }
+  }
+
+  /* =============================================
+     Track
+     ============================================= */
+
+  .toggle-track {
+    @apply relative shrink-0;
+    width: var(--toggle-w);
+    height: var(--toggle-h);
+    background-color: var(--color-base-300);
+    border-radius: calc(var(--toggle-h) / 2);
+    transition: background-color 0.2s;
+  }
+
+  /* =============================================
+     Thumb (knob)
+     ============================================= */
+
+  .toggle-thumb {
+    @apply absolute rounded-full;
+    top: 2px;
+    left: 2px;
+    width: var(--toggle-thumb);
+    height: var(--toggle-thumb);
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+                width 0.15s;
+  }
+
+  /* =============================================
+     Track icons (optional sun/moon etc.)
+     ============================================= */
+
+  .toggle-track-icons {
+    @apply flex items-center justify-between;
+    padding: 0 8px;
+  }
+
+  .toggle-icon {
+    @apply size-3.5;
+    color: white;
+    opacity: 0.8;
+    z-index: 0;
+
+    & svg {
+      @apply size-full;
+    }
+  }
+
+  /* =============================================
+     Label & description
+     ============================================= */
+
+  .toggle-label {
+    @apply text-base;
+    color: var(--color-base-content);
+  }
+
+  .toggle-label-left {
+    @apply order-first;
+  }
+
+  .toggle-description {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  /* =============================================
+     Disabled
+     ============================================= */
+
+  .toggle-disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  .toggle:active .toggle-thumb {
+    width: calc(var(--toggle-thumb) + 4px);
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .toggle-sm {
+    --toggle-w: 40px;
+    --toggle-h: 24px;
+    --toggle-thumb: 20px;
+    --toggle-travel: 16px;
+  }
+
+  .toggle-lg {
+    --toggle-w: 64px;
+    --toggle-h: 38px;
+    --toggle-thumb: 34px;
+    --toggle-travel: 26px;
+  }
+
+  /* =============================================
+     Color composition
+     ============================================= */
+
+  .toggle.color-primary,
+  .toggle.color-secondary,
+  .toggle.color-accent,
+  .toggle.color-neutral,
+  .toggle.color-info,
+  .toggle.color-success,
+  .toggle.color-warning,
+  .toggle.color-error {
+    --toggle-color: var(--c);
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .toggle.glass .toggle-track {
+    @apply glass;
+    border: 0.5px solid var(--glass-border);
+  }
+
+  .toggle.glass .toggle-thumb {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .toggle.glass input[type="checkbox"]:checked + .toggle-track {
+    background-color: var(--toggle-color);
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle-track {
+    transition: none;
+  }
+
+  .toggle-thumb {
+    transition: none;
+  }
+}

@@ -1,0 +1,267 @@
+/* UX v3 - Radio Component */
+/* Custom styled radio buttons with label support */
+
+@layer components {
+
+  /* =============================================
+     Base radio (label wrapper)
+     ============================================= */
+
+  .radio {
+    --radio-size: 1.5rem;
+    --radio-dot: 0.75rem;
+    --radio-color: var(--c, var(--color-primary));
+
+    @apply inline-flex items-start gap-3 cursor-pointer select-none;
+    min-height: 2.75rem;
+    padding: 0.25rem 0;
+  }
+
+  /* =============================================
+     Hidden native input
+     ============================================= */
+
+  .radio-input {
+    @apply absolute opacity-0;
+    width: 0;
+    height: 0;
+
+    /* Checked state */
+    &:checked + .radio-circle {
+      border-color: var(--radio-color);
+
+      & .radio-dot {
+        transform: scale(1);
+      }
+    }
+
+    /* Focus-visible */
+    &:focus-visible + .radio-circle {
+      @apply outline-2 outline-offset-2;
+      outline-color: var(--radio-color);
+    }
+
+    /* Disabled */
+    &:disabled + .radio-circle {
+      @apply opacity-50 cursor-not-allowed;
+    }
+  }
+
+  /* =============================================
+     Visual circle
+     ============================================= */
+
+  .radio-circle {
+    @apply relative flex items-center justify-center shrink-0 rounded-full;
+    width: var(--radio-size);
+    height: var(--radio-size);
+    border: 2px solid var(--color-base-300);
+    transition: border-color 0.15s, transform 0.15s;
+
+    /* Expanded touch target */
+    &::before {
+      content: '';
+      @apply absolute rounded-full;
+      inset: -10px;
+      z-index: 1;
+    }
+  }
+
+  /* =============================================
+     Inner dot
+     ============================================= */
+
+  .radio-dot {
+    @apply rounded-full;
+    width: var(--radio-dot);
+    height: var(--radio-dot);
+    background-color: var(--radio-color);
+    transform: scale(0);
+    transition: transform 0.15s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  /* =============================================
+     Label & description
+     ============================================= */
+
+  .radio-label {
+    @apply text-base leading-snug;
+    color: var(--color-base-content);
+    padding-top: 2px;
+  }
+
+  .radio-description {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  /* =============================================
+     States
+     ============================================= */
+
+  .radio:hover .radio-circle {
+    border-color: var(--radio-color);
+  }
+
+  .radio:active .radio-circle {
+    transform: scale(0.9);
+  }
+
+  .radio-disabled,
+  .radio:has(.radio-input:disabled) {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .radio-sm {
+    --radio-size: 1.125rem;
+    --radio-dot: 0.5rem;
+  }
+
+  .radio-lg {
+    --radio-size: 1.75rem;
+    --radio-dot: 1rem;
+  }
+
+  /* =============================================
+     Color composition
+     ============================================= */
+
+  .radio.color-primary,
+  .radio.color-secondary,
+  .radio.color-accent,
+  .radio.color-neutral,
+  .radio.color-info,
+  .radio.color-success,
+  .radio.color-warning,
+  .radio.color-error {
+    --radio-color: var(--c);
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .radio.glass .radio-circle {
+    @apply glass;
+    border: 0.5px solid var(--glass-border);
+  }
+
+  .radio.glass .radio-input:checked + .radio-circle {
+    border-color: var(--radio-color);
+  }
+
+  /* =============================================
+     Radio group
+     ============================================= */
+
+  .radio-group {
+    @apply flex flex-col gap-2;
+  }
+
+  .radio-group-horizontal {
+    @apply flex-row flex-wrap gap-6;
+  }
+
+  .radio-group-label {
+    @apply text-sm font-medium;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-bottom: 0.5rem;
+  }
+
+  .radio-group-error {
+    @apply text-sm;
+    color: var(--color-error);
+    margin-top: 0.25rem;
+  }
+
+  /* =============================================
+     Radio card (selectable card)
+     ============================================= */
+
+  .radio-card {
+    @apply relative cursor-pointer;
+    padding: 1rem;
+    background-color: var(--color-base-100);
+    border: 2px solid var(--color-base-300);
+    border-radius: var(--radius-box);
+    transition: border-color 0.15s, background-color 0.15s;
+
+    &:hover {
+      border-color: var(--radio-color, var(--color-primary));
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .radio-card-selected,
+  .radio-card[aria-checked="true"] {
+    border-color: var(--radio-color, var(--color-primary));
+    background-color: color-mix(in oklch, var(--radio-color, var(--color-primary)) 5%, var(--color-base-100));
+
+    & .radio-card-check {
+      @apply opacity-100;
+      transform: scale(1);
+    }
+  }
+
+  .radio-card-check {
+    @apply absolute flex items-center justify-center rounded-full opacity-0;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: var(--radio-color, var(--color-primary));
+    color: var(--c-fg, var(--color-primary-content));
+    transform: scale(0);
+    transition: opacity 0.15s, transform 0.15s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    & svg {
+      @apply size-3.5;
+    }
+  }
+
+  .radio-card-title {
+    @apply text-base font-medium;
+    color: var(--color-base-content);
+    margin-bottom: 0.25rem;
+  }
+
+  .radio-card-description {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .radio-card-group {
+    @apply grid gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .radio-circle {
+    transition: none;
+  }
+
+  .radio-dot {
+    transition: none;
+  }
+
+  .radio-card {
+    transition: none;
+  }
+
+  .radio-card-check {
+    transition: none;
+  }
+}

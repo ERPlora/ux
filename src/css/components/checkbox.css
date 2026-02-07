@@ -1,0 +1,241 @@
+/* UX v3 - Checkbox Component */
+/* Custom styled checkbox with label support */
+
+@layer components {
+
+  /* =============================================
+     Base checkbox (label wrapper)
+     ============================================= */
+
+  .checkbox {
+    --checkbox-size: 1.5rem;
+    --checkbox-radius: 0.375rem;
+    --checkbox-color: var(--c, var(--color-primary));
+    --checkbox-color-fg: var(--c-fg, var(--color-primary-content));
+
+    @apply inline-flex items-start gap-3 cursor-pointer select-none;
+    min-height: 2.75rem;
+    padding: 0.25rem 0;
+  }
+
+  /* =============================================
+     Hidden native input
+     ============================================= */
+
+  .checkbox-input {
+    @apply absolute opacity-0;
+    width: 0;
+    height: 0;
+
+    /* Checked state */
+    &:checked + .checkbox-box {
+      background-color: var(--checkbox-color);
+      border-color: var(--checkbox-color);
+
+      & .checkbox-mark {
+        @apply block;
+        animation: checkbox-pop 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      }
+    }
+
+    /* Focus-visible */
+    &:focus-visible + .checkbox-box {
+      @apply outline-2 outline-offset-2;
+      outline-color: var(--checkbox-color);
+    }
+
+    /* Indeterminate */
+    &:indeterminate + .checkbox-box {
+      background-color: var(--checkbox-color);
+      border-color: var(--checkbox-color);
+
+      & .checkbox-mark {
+        @apply hidden;
+      }
+
+      &::after {
+        content: '';
+        @apply block rounded-full;
+        width: 12px;
+        height: 2px;
+        background-color: var(--checkbox-color-fg);
+      }
+    }
+
+    /* Disabled */
+    &:disabled + .checkbox-box {
+      @apply opacity-50 cursor-not-allowed;
+    }
+  }
+
+  /* =============================================
+     Visual box
+     ============================================= */
+
+  .checkbox-box {
+    @apply relative flex items-center justify-center shrink-0;
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+    border: 2px solid var(--color-base-300);
+    border-radius: var(--checkbox-radius);
+    transition: background-color 0.15s, border-color 0.15s, transform 0.15s;
+
+    /* Expanded touch target */
+    &::before {
+      content: '';
+      @apply absolute;
+      inset: -10px;
+      z-index: 1;
+    }
+  }
+
+  /* =============================================
+     Checkmark icon
+     ============================================= */
+
+  .checkbox-mark {
+    @apply hidden;
+    width: 14px;
+    height: 14px;
+    color: var(--checkbox-color-fg);
+
+    & svg {
+      @apply size-full;
+    }
+  }
+
+  /* =============================================
+     Label & description
+     ============================================= */
+
+  .checkbox-label {
+    @apply text-base leading-snug;
+    color: var(--color-base-content);
+    padding-top: 2px;
+  }
+
+  .checkbox-description {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  /* =============================================
+     States
+     ============================================= */
+
+  .checkbox:hover .checkbox-box {
+    border-color: var(--checkbox-color);
+  }
+
+  .checkbox:active .checkbox-box {
+    transform: scale(0.9);
+  }
+
+  .checkbox-disabled,
+  .checkbox:has(.checkbox-input:disabled) {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .checkbox-sm {
+    --checkbox-size: 1.125rem;
+
+    & .checkbox-mark {
+      width: 10px;
+      height: 10px;
+    }
+  }
+
+  .checkbox-lg {
+    --checkbox-size: 1.75rem;
+
+    & .checkbox-mark {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  /* =============================================
+     Round variant
+     ============================================= */
+
+  .checkbox-round .checkbox-box {
+    @apply rounded-full;
+  }
+
+  /* =============================================
+     Color composition
+     ============================================= */
+
+  .checkbox.color-primary,
+  .checkbox.color-secondary,
+  .checkbox.color-accent,
+  .checkbox.color-neutral,
+  .checkbox.color-info,
+  .checkbox.color-success,
+  .checkbox.color-warning,
+  .checkbox.color-error {
+    --checkbox-color: var(--c);
+    --checkbox-color-fg: var(--c-fg);
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .checkbox.glass .checkbox-box {
+    @apply glass;
+    border: 0.5px solid var(--glass-border);
+  }
+
+  .checkbox.glass .checkbox-input:checked + .checkbox-box {
+    background-color: var(--checkbox-color);
+    border-color: var(--checkbox-color);
+  }
+
+  /* =============================================
+     Checkbox group
+     ============================================= */
+
+  .checkbox-group {
+    @apply flex flex-col gap-2;
+  }
+
+  .checkbox-group-horizontal {
+    @apply flex-row flex-wrap gap-6;
+  }
+
+  .checkbox-group-label {
+    @apply text-sm font-medium;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* =============================================
+   Keyframes
+   ============================================= */
+
+@keyframes checkbox-pop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .checkbox-box {
+    transition: none;
+  }
+
+  .checkbox-input:checked + .checkbox-box .checkbox-mark {
+    animation: none;
+  }
+}
