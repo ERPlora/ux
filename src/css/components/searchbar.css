@@ -1,0 +1,230 @@
+/* Searchbar — search input with icon, clear button, cancel, results dropdown */
+
+@layer components {
+
+  /* ---- Base ---- */
+  .searchbar {
+    @apply relative flex items-center w-full p-2;
+  }
+
+  .searchbar-container {
+    @apply relative flex items-center flex-1 px-3 bg-base-200 rounded-field;
+    min-height: var(--touch-target, 44px);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .searchbar-focused .searchbar-container {
+    @apply bg-base-100;
+    box-shadow: 0 0 0 2px var(--color-primary);
+  }
+
+  .searchbar-icon {
+    @apply flex items-center justify-center size-5 text-base-content/40 shrink-0;
+  }
+  .searchbar-icon svg {
+    @apply size-full;
+  }
+
+  .searchbar-input {
+    @apply flex-1 w-full px-2 text-base text-base-content bg-transparent border-none outline-none;
+    height: var(--touch-target, 44px);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .searchbar-input::placeholder {
+    @apply text-base-content/40;
+  }
+  .searchbar-input::-webkit-search-cancel-button,
+  .searchbar-input::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* ---- Clear Button ---- */
+  .searchbar-clear {
+    @apply flex items-center justify-center size-5 p-0 border-none rounded-full text-white cursor-pointer shrink-0;
+    background: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .searchbar-clear svg {
+    @apply size-3;
+  }
+  .searchbar-clear:hover {
+    background: color-mix(in oklch, var(--color-base-content) 55%, transparent);
+  }
+  .searchbar-clear:active {
+    transform: scale(0.9);
+  }
+  .searchbar-has-value .searchbar-clear {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* ---- Cancel Button (iOS style) ---- */
+  .searchbar-cancel {
+    @apply px-3 text-base bg-transparent border-none cursor-pointer whitespace-nowrap;
+    color: var(--color-primary);
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    transition: opacity 0.2s ease, max-width 0.2s ease, padding 0.2s ease;
+  }
+  .searchbar-cancel:hover {
+    color: color-mix(in oklch, var(--color-primary) 80%, black);
+  }
+  .searchbar-cancel:active {
+    @apply opacity-70;
+  }
+  .searchbar-focused .searchbar-cancel,
+  .searchbar-show-cancel .searchbar-cancel {
+    opacity: 1;
+    max-width: 100px;
+  }
+
+  /* ---- Variants ---- */
+  .searchbar-rounded .searchbar-container {
+    border-radius: 18px;
+  }
+  .searchbar-outline .searchbar-container {
+    @apply bg-transparent border border-base-300;
+  }
+  .searchbar-outline.searchbar-focused .searchbar-container {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-primary) 15%, transparent);
+  }
+  .searchbar-filled .searchbar-container {
+    @apply bg-base-200;
+  }
+
+  /* ---- Glass ---- */
+  .searchbar.glass .searchbar-container {
+    @apply glass;
+    border: 0.5px solid var(--glass-border, rgba(255,255,255,0.18));
+  }
+  .searchbar.glass.searchbar-focused .searchbar-container {
+    background: var(--glass-bg, rgba(255,255,255,0.72));
+  }
+
+  /* ---- Sizes ---- */
+  .searchbar-sm .searchbar-container {
+    min-height: 32px;
+  }
+  .searchbar-sm .searchbar-input {
+    @apply h-8 text-sm;
+  }
+  .searchbar-lg .searchbar-container {
+    @apply px-4;
+    min-height: 48px;
+  }
+  .searchbar-lg .searchbar-input {
+    @apply h-12 text-lg;
+  }
+  .searchbar-lg .searchbar-icon {
+    @apply size-6;
+  }
+
+  /* ---- Results Dropdown ---- */
+  .searchbar-results {
+    @apply absolute left-2 right-2 bg-base-100 border border-base-300 rounded-field shadow-lg overflow-y-auto z-100;
+    top: calc(100% + 4px);
+    max-height: 300px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .searchbar-result {
+    @apply flex items-center px-4 py-3 cursor-pointer;
+    transition: background-color 0.15s ease;
+  }
+  .searchbar-result:hover {
+    @apply bg-base-200;
+  }
+  .searchbar-result:active {
+    background: color-mix(in oklch, var(--color-primary) 10%, transparent);
+  }
+
+  .searchbar-result-icon {
+    @apply size-5 mr-3 text-base-content/60;
+  }
+  .searchbar-result-icon svg {
+    @apply size-full;
+  }
+
+  .searchbar-result-content {
+    @apply flex-1 min-w-0;
+  }
+  .searchbar-result-title {
+    @apply text-base text-base-content truncate;
+  }
+  .searchbar-result-subtitle {
+    @apply text-sm text-base-content/60 mt-0.5 truncate;
+  }
+
+  .searchbar-highlight {
+    @apply rounded-sm;
+    background: color-mix(in oklch, var(--color-warning) 30%, transparent);
+  }
+
+  .searchbar-no-results {
+    @apply p-4 text-center text-sm text-base-content/40;
+  }
+  .searchbar-loading {
+    @apply flex items-center justify-center p-4;
+  }
+
+  /* ---- Recent Searches ---- */
+  .searchbar-recent {
+    @apply py-2;
+  }
+  .searchbar-recent-header {
+    @apply flex items-center justify-between px-4 py-2;
+  }
+  .searchbar-recent-title {
+    @apply text-xs font-semibold text-base-content/40 uppercase tracking-wider;
+  }
+  .searchbar-recent-clear {
+    @apply text-sm bg-transparent border-none cursor-pointer p-0;
+    color: var(--color-primary);
+  }
+  .searchbar-recent-item {
+    @apply flex items-center px-4 py-2 cursor-pointer;
+    transition: background-color 0.15s ease;
+  }
+  .searchbar-recent-item:hover {
+    @apply bg-base-200;
+  }
+  .searchbar-recent-item:hover .searchbar-recent-item-remove {
+    @apply opacity-100;
+  }
+  .searchbar-recent-item-icon {
+    @apply size-4 mr-3 text-base-content/40;
+  }
+  .searchbar-recent-item-text {
+    @apply flex-1 text-base text-base-content;
+  }
+  .searchbar-recent-item-remove {
+    @apply size-5 p-0 border-none bg-transparent text-base-content/40 cursor-pointer opacity-0;
+    transition: opacity 0.15s ease;
+  }
+
+  /* ---- Disabled ---- */
+  .searchbar-disabled .searchbar-container {
+    @apply opacity-50 cursor-not-allowed;
+  }
+  .searchbar-disabled .searchbar-input {
+    @apply cursor-not-allowed;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .searchbar-container,
+  .searchbar-clear,
+  .searchbar-cancel,
+  .searchbar-result,
+  .searchbar-recent-item,
+  .searchbar-recent-item-remove {
+    transition: none;
+  }
+}
