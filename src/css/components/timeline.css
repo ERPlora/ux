@@ -1,0 +1,369 @@
+/* UX v3 - Timeline Component */
+/* Vertical / horizontal timeline with markers, content cards, and activity feed */
+
+@layer components {
+
+  /* =============================================
+     Timeline container (vertical default)
+     ============================================= */
+
+  .timeline {
+    @apply relative;
+    padding-left: 2rem;
+
+    /* Vertical line */
+    &::before {
+      content: '';
+      @apply absolute top-0 bottom-0;
+      left: 11px;
+      width: 2px;
+      background-color: var(--color-base-300);
+    }
+  }
+
+  /* =============================================
+     Timeline item
+     ============================================= */
+
+  .timeline-item {
+    @apply relative;
+    padding-bottom: 1.5rem;
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  /* =============================================
+     Marker (dot on the line)
+     ============================================= */
+
+  .timeline-marker {
+    @apply absolute flex items-center justify-center rounded-full;
+    left: calc(-2rem + 4px);
+    top: 0;
+    width: 16px;
+    height: 16px;
+    background-color: var(--color-base-100);
+    border: 2px solid var(--color-base-300);
+    z-index: 1;
+  }
+
+  /* Dot variant (filled, no border) */
+  .timeline-marker-dot {
+    width: 12px;
+    height: 12px;
+    left: calc(-2rem + 6px);
+    background-color: var(--color-primary);
+    border: none;
+  }
+
+  /* Icon variant (larger) */
+  .timeline-marker-icon {
+    width: 32px;
+    height: 32px;
+    left: calc(-2rem - 4px);
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+    border: none;
+
+    & > svg {
+      @apply size-4;
+    }
+  }
+
+  /* Marker colors */
+  .timeline-marker.color-primary  { background-color: var(--color-primary);  border-color: var(--color-primary);  }
+  .timeline-marker.color-success  { background-color: var(--color-success);  border-color: var(--color-success);  }
+  .timeline-marker.color-warning  { background-color: var(--color-warning);  border-color: var(--color-warning);  }
+  .timeline-marker.color-error    { background-color: var(--color-error);    border-color: var(--color-error);    }
+  .timeline-marker.color-secondary { background-color: var(--color-base-400); border-color: var(--color-base-400); }
+
+  /* =============================================
+     Content card
+     ============================================= */
+
+  .timeline-content {
+    background-color: var(--color-base-100);
+    border: var(--border) solid var(--color-base-200);
+    border-radius: var(--radius-box);
+    padding: 1rem;
+  }
+
+  .timeline-header {
+    @apply flex items-start justify-between gap-2;
+    margin-bottom: 0.25rem;
+  }
+
+  .timeline-title {
+    @apply text-base font-semibold text-base-content m-0;
+  }
+
+  .timeline-time {
+    @apply text-xs whitespace-nowrap;
+    color: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+  }
+
+  .timeline-subtitle {
+    @apply text-sm m-0;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .timeline-body {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 70%, transparent);
+    margin-top: 0.5rem;
+
+    & p {
+      margin: 0 0 0.25rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .timeline-footer {
+    @apply flex items-center gap-2;
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: var(--border) solid var(--color-base-200);
+  }
+
+  /* =============================================
+     Simple (no card)
+     ============================================= */
+
+  .timeline-simple {
+    & .timeline-content {
+      @apply bg-transparent border-none p-0;
+      padding-left: 0.5rem;
+    }
+
+    & .timeline-footer {
+      border-top: none;
+      padding-top: 0;
+    }
+  }
+
+  /* =============================================
+     Compact
+     ============================================= */
+
+  .timeline-compact {
+    & .timeline-item {
+      padding-bottom: 1rem;
+    }
+
+    & .timeline-content {
+      padding: 0.5rem;
+    }
+
+    & .timeline-title {
+      @apply text-sm;
+    }
+
+    & .timeline-body {
+      @apply text-xs;
+    }
+  }
+
+  /* =============================================
+     Activity feed (icon-based, no card)
+     ============================================= */
+
+  .timeline-activity {
+    padding-left: 2.5rem;
+
+    & .timeline-marker {
+      left: calc(-2.5rem + 4px);
+      width: 32px;
+      height: 32px;
+      background-color: var(--color-base-200);
+      border: none;
+
+      & > svg {
+        @apply size-4;
+        color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+      }
+    }
+
+    & .timeline-content {
+      @apply bg-transparent border-none p-0;
+    }
+
+    & .timeline-title {
+      @apply text-sm font-normal;
+
+      & strong {
+        @apply font-semibold text-base-content;
+      }
+    }
+
+    & .timeline-time {
+      @apply block;
+      margin-top: 2px;
+    }
+  }
+
+  /* =============================================
+     Horizontal
+     ============================================= */
+
+  .timeline-horizontal {
+    @apply flex;
+    overflow-x: auto;
+    padding: 2rem 0 1rem;
+    padding-left: 0;
+    gap: 0;
+    -webkit-overflow-scrolling: touch;
+
+    &::before {
+      content: '';
+      @apply absolute left-0 right-0;
+      top: 11px;
+      height: 2px;
+      width: auto;
+      bottom: auto;
+      background-color: var(--color-base-300);
+    }
+
+    & .timeline-item {
+      flex: 0 0 auto;
+      min-width: 200px;
+      max-width: 280px;
+      padding-bottom: 0;
+      padding-right: 1.5rem;
+
+      &:last-child {
+        padding-right: 0;
+      }
+    }
+
+    & .timeline-marker {
+      left: 50%;
+      top: calc(-2rem + 4px);
+      transform: translateX(-50%);
+    }
+
+    & .timeline-marker-icon {
+      top: calc(-2rem - 4px);
+    }
+
+    & .timeline-content {
+      height: 100%;
+    }
+  }
+
+  /* =============================================
+     Alternating (zigzag)
+     ============================================= */
+
+  .timeline-alternating {
+    padding-left: 0;
+
+    &::before {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    & .timeline-item {
+      width: 50%;
+      padding-right: 2rem;
+      padding-left: 0;
+
+      &:nth-child(even) {
+        margin-left: 50%;
+        padding-left: 2rem;
+        padding-right: 0;
+
+        & .timeline-marker {
+          left: calc(-2rem + 4px);
+          right: auto;
+        }
+
+        & .timeline-marker-icon {
+          left: calc(-2rem - 4px);
+        }
+      }
+    }
+
+    & .timeline-marker {
+      left: auto;
+      right: calc(-2rem + 4px);
+    }
+
+    & .timeline-marker-icon {
+      right: calc(-2rem - 4px);
+    }
+  }
+
+  /* Mobile: collapse alternating to vertical */
+  @media (max-width: 767px) {
+    .timeline-alternating {
+      padding-left: 2rem;
+
+      &::before {
+        left: 11px;
+        transform: none;
+      }
+
+      & .timeline-item,
+      & .timeline-item:nth-child(even) {
+        width: 100%;
+        margin-left: 0;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      & .timeline-marker,
+      & .timeline-item:nth-child(even) .timeline-marker {
+        left: calc(-2rem + 4px);
+        right: auto;
+      }
+
+      & .timeline-marker-icon,
+      & .timeline-item:nth-child(even) .timeline-marker-icon {
+        left: calc(-2rem - 4px);
+        right: auto;
+      }
+    }
+  }
+
+  /* =============================================
+     Active item
+     ============================================= */
+
+  .timeline-item-active {
+    & .timeline-content {
+      border-color: var(--color-primary);
+      background-color: color-mix(in oklch, var(--color-primary) 5%, transparent);
+    }
+
+    & .timeline-marker {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px color-mix(in oklch, var(--color-primary) 20%, transparent);
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .timeline.glass .timeline-content,
+  .timeline-content.glass {
+    @apply glass;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-item,
+  .timeline-content {
+    transition: none;
+  }
+}

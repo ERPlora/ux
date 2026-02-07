@@ -1,0 +1,264 @@
+/* UX v3 - FAB (Floating Action Button) Component */
+/* Fixed-position button with speed-dial actions */
+
+@layer components {
+
+  /* =============================================
+     FAB Container — positions the button group
+     ============================================= */
+
+  .fab {
+    @apply fixed z-100 flex flex-col items-center;
+    gap: 0.75rem;
+  }
+
+  /* Positions */
+  .fab-bottom-end {
+    right: 1.5rem;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+
+  .fab-bottom-start {
+    left: 1.5rem;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+
+  .fab-bottom-center {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+
+  .fab-top-end {
+    right: 1.5rem;
+    top: calc(1.5rem + env(safe-area-inset-top));
+  }
+
+  .fab-top-start {
+    left: 1.5rem;
+    top: calc(1.5rem + env(safe-area-inset-top));
+  }
+
+  /* =============================================
+     Main FAB button
+     ============================================= */
+
+  .fab-btn {
+    @apply flex items-center justify-center p-0 border-none rounded-full cursor-pointer;
+    width: 56px;
+    height: 56px;
+    background-color: var(--c, var(--color-primary));
+    color: var(--c-fg, var(--color-primary-content));
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    & > svg {
+      @apply size-6;
+    }
+  }
+
+  /* Sizes */
+  .fab-btn-sm {
+    width: 40px;
+    height: 40px;
+
+    & > svg {
+      @apply size-5;
+    }
+  }
+
+  .fab-btn-lg {
+    width: 64px;
+    height: 64px;
+
+    & > svg {
+      @apply size-7;
+    }
+  }
+
+  /* Extended (with label) */
+  .fab-btn-extended {
+    @apply gap-2;
+    width: auto;
+    height: 48px;
+    padding: 0 1.25rem 0 1rem;
+    border-radius: 1.5rem;
+  }
+
+  .fab-btn-label {
+    @apply text-sm font-semibold whitespace-nowrap;
+  }
+
+  /* Rotate icon when speed dial is open */
+  .fab.is-open > .fab-btn > svg {
+    transform: rotate(45deg);
+    transition: transform 0.2s;
+  }
+
+  /* =============================================
+     Speed dial list
+     ============================================= */
+
+  .fab-list {
+    @apply flex flex-col-reverse items-center;
+    gap: 0.75rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+  }
+
+  .fab.is-open > .fab-list {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .fab-list-item {
+    @apply flex items-center;
+    gap: 0.75rem;
+    opacity: 0;
+    transform: translateY(1.25rem) scale(0.8);
+    transition: opacity 0.15s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .fab.is-open > .fab-list > .fab-list-item {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+
+    &:nth-child(1) { transition-delay: 0ms; }
+    &:nth-child(2) { transition-delay: 50ms; }
+    &:nth-child(3) { transition-delay: 100ms; }
+    &:nth-child(4) { transition-delay: 150ms; }
+    &:nth-child(5) { transition-delay: 200ms; }
+  }
+
+  .fab-list-label {
+    @apply text-sm font-medium whitespace-nowrap;
+    padding: 0.25rem 0.75rem;
+    background-color: var(--color-neutral);
+    color: var(--color-neutral-content);
+    border-radius: var(--radius-field);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Mini buttons in speed dial */
+  .fab-mini-btn {
+    @apply flex items-center justify-center p-0 border-none rounded-full cursor-pointer;
+    width: 40px;
+    height: 40px;
+    background-color: var(--c, var(--color-base-100));
+    color: var(--c-fg, var(--color-base-content));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: transform 0.15s, box-shadow 0.15s;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    & > svg {
+      @apply size-5;
+    }
+  }
+
+  /* Label on end side */
+  .fab-bottom-end .fab-list-label,
+  .fab-top-end .fab-list-label {
+    order: -1;
+  }
+
+  /* =============================================
+     Backdrop (when speed dial is open)
+     ============================================= */
+
+  .fab-backdrop {
+    @apply fixed inset-0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 99;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+  }
+
+  .fab.is-open ~ .fab-backdrop,
+  .fab-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* =============================================
+     Badge on FAB
+     ============================================= */
+
+  .fab-badge {
+    @apply absolute flex items-center justify-center;
+    top: -4px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background-color: var(--color-error);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 10px;
+  }
+
+  /* =============================================
+     Hide on scroll
+     ============================================= */
+
+  .fab-hide-on-scroll {
+    transition: transform 0.2s, opacity 0.2s;
+  }
+
+  .fab-hidden {
+    transform: translateY(100px);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .fab-bottom-center.fab-hidden {
+    transform: translateX(-50%) translateY(100px);
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .fab-btn.glass {
+    @apply glass;
+    color: var(--color-base-content);
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .fab-btn,
+  .fab-list,
+  .fab-list-item,
+  .fab-backdrop {
+    transition: none;
+  }
+}

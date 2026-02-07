@@ -1,0 +1,218 @@
+/* UX v3 - Toast Component */
+/* Notification toasts with positioning */
+/* Consumes color variables from colors.css: --c, --c-fg */
+
+@layer components {
+
+  /* =============================================
+     Toast container (positioning wrapper)
+     ============================================= */
+
+  .toast {
+    @apply fixed z-500 flex flex-col gap-2 pointer-events-none p-4;
+  }
+
+  /* Position modifiers */
+  .toast-top {
+    @apply top-0;
+  }
+
+  .toast-bottom {
+    @apply bottom-0;
+  }
+
+  .toast-center {
+    @apply left-1/2;
+    transform: translateX(-50%);
+  }
+
+  .toast-start {
+    @apply left-0;
+  }
+
+  .toast-end {
+    @apply right-0;
+  }
+
+  .toast-middle {
+    @apply top-1/2;
+    transform: translateY(-50%);
+  }
+
+  /* Combined positions */
+  .toast-top.toast-center {
+    transform: translateX(-50%);
+  }
+
+  .toast-middle.toast-center {
+    transform: translate(-50%, -50%);
+  }
+
+  /* Safe areas */
+  .toast-top {
+    padding-top: calc(1rem + env(safe-area-inset-top));
+  }
+
+  .toast-bottom {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+
+  /* =============================================
+     Toast item (the actual notification)
+     ============================================= */
+
+  .toast-item {
+    @apply flex items-center gap-3 rounded-box shadow-lg pointer-events-auto text-sm;
+    min-width: 200px;
+    max-width: 420px;
+    padding: 0.875rem 1.25rem;
+    background-color: var(--color-neutral);
+    color: var(--color-neutral-content);
+  }
+
+  /* =============================================
+     Color variants
+     ============================================= */
+
+  .toast-item.color-info,
+  .toast-item.color-success,
+  .toast-item.color-warning,
+  .toast-item.color-error {
+    background-color: var(--c);
+    color: var(--c-fg);
+  }
+
+  /* Light variant — white bg with colored icon */
+  .toast-light {
+    background-color: var(--color-base-100);
+    color: var(--color-base-content);
+    border: var(--border) solid var(--color-base-300);
+  }
+
+  /* =============================================
+     Child elements
+     ============================================= */
+
+  .toast-icon {
+    @apply size-5 shrink-0;
+  }
+
+  .toast-content {
+    @apply flex-1 min-w-0;
+  }
+
+  .toast-title {
+    @apply font-semibold;
+    margin-bottom: 2px;
+  }
+
+  .toast-message {
+    @apply text-sm;
+    line-height: 1.5;
+  }
+
+  .toast-action {
+    @apply shrink-0 px-2 py-1 border-none rounded-md cursor-pointer font-semibold text-sm;
+    background: transparent;
+    color: inherit;
+    opacity: 0.9;
+    transition: background-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  .toast-light .toast-action {
+    color: var(--color-primary);
+
+    &:hover {
+      background-color: var(--color-base-200);
+    }
+  }
+
+  .toast-close {
+    @apply inline-flex items-center justify-center size-7 p-0 border-none rounded-md cursor-pointer shrink-0;
+    background: transparent;
+    color: inherit;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    & > svg {
+      @apply size-4;
+    }
+  }
+
+  /* =============================================
+     Progress bar (auto-dismiss indicator)
+     ============================================= */
+
+  .toast-progress {
+    @apply absolute bottom-0 left-0 right-0 h-0.5 overflow-hidden;
+    border-radius: 0 0 var(--radius-box) var(--radius-box);
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .toast-progress-bar {
+    @apply h-full;
+    background-color: rgba(255, 255, 255, 0.7);
+    transition: width linear;
+  }
+
+  .toast-light .toast-progress {
+    background-color: var(--color-base-200);
+  }
+
+  .toast-light .toast-progress-bar {
+    background-color: var(--color-primary);
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .toast-item.glass {
+    @apply glass text-base-content;
+  }
+}
+
+/* =============================================
+   Mobile full-width
+   ============================================= */
+
+@media (max-width: 480px) {
+  .toast-top.toast-center,
+  .toast-bottom.toast-center {
+    left: 0;
+    right: 0;
+    transform: none;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .toast-item {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-action,
+  .toast-close {
+    transition: none;
+  }
+
+  .toast-progress-bar {
+    transition: none;
+  }
+}

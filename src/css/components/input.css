@@ -1,0 +1,258 @@
+/* UX v3 - Input Component */
+/* Text inputs, styled directly or as composition wrapper */
+
+@layer components {
+
+  /* =============================================
+     Base input (applied to <input> or <label> wrapper)
+     ============================================= */
+
+  .input {
+    @apply w-full appearance-none outline-none;
+    height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--color-base-content);
+    background-color: var(--color-base-100);
+    border: var(--border) solid var(--color-base-300);
+    border-radius: var(--radius-field);
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &::placeholder {
+      color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    }
+
+    &:hover {
+      border-color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    }
+
+    &:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 15%, transparent);
+    }
+
+    &:disabled {
+      @apply opacity-50 cursor-not-allowed;
+      background-color: var(--color-base-200);
+    }
+
+    &[readonly] {
+      background-color: var(--color-base-200);
+      cursor: default;
+    }
+  }
+
+  /* =============================================
+     Wrapper mode — <label class="input"> wraps child elements
+     Like daisyUI: <label class="input"><svg/><input class="grow"/><kbd/></label>
+     ============================================= */
+
+  label.input {
+    @apply inline-flex items-center gap-2;
+    height: 2.75rem;
+
+    & > input,
+    & > select {
+      @apply grow appearance-none outline-none border-none bg-transparent;
+      font-size: inherit;
+      color: inherit;
+      height: 100%;
+      min-width: 0;
+    }
+
+    & > svg {
+      @apply size-5 shrink-0 opacity-50;
+    }
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .input-sm {
+    height: 2.25rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
+  }
+
+  .input-lg {
+    height: 3.25rem;
+    padding: 0.625rem 1rem;
+    font-size: 1.125rem;
+  }
+
+  /* =============================================
+     Variants
+     ============================================= */
+
+  .input-filled {
+    background-color: var(--color-base-200);
+    border-color: transparent;
+    border-radius: var(--radius-field) var(--radius-field) 0 0;
+    border-bottom: 2px solid var(--color-base-300);
+
+    &:focus {
+      border-bottom-color: var(--color-primary);
+      box-shadow: none;
+    }
+  }
+
+  .input-ghost {
+    @apply bg-transparent border-transparent;
+
+    &:focus {
+      @apply bg-transparent;
+      border-color: var(--color-primary);
+    }
+  }
+
+  .input-underline {
+    @apply bg-transparent border-transparent rounded-none;
+    padding-left: 0;
+    padding-right: 0;
+    border-bottom: var(--border) solid var(--color-base-300);
+
+    &:focus {
+      border-bottom-color: var(--color-primary);
+      border-bottom-width: 2px;
+      box-shadow: none;
+    }
+  }
+
+  /* =============================================
+     States (applied to wrapper or input)
+     ============================================= */
+
+  .input-error,
+  .input-error .input {
+    border-color: var(--color-error);
+
+    &:focus {
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-error) 15%, transparent);
+    }
+  }
+
+  .input-success,
+  .input-success .input {
+    border-color: var(--color-success);
+
+    &:focus {
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-success) 15%, transparent);
+    }
+  }
+
+  /* =============================================
+     Label, helper, error text
+     ============================================= */
+
+  .input-label {
+    @apply block text-sm font-medium;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-bottom: 0.25rem;
+  }
+
+  .input-label-required::after {
+    content: ' *';
+    color: var(--color-error);
+  }
+
+  .input-helper {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  .input-error-text {
+    @apply text-sm;
+    color: var(--color-error);
+    margin-top: 0.25rem;
+  }
+
+  /* =============================================
+     Input group (vertical field container)
+     ============================================= */
+
+  .input-group {
+    @apply flex flex-col w-full;
+  }
+
+  /* =============================================
+     Floating label
+     ============================================= */
+
+  .input-floating {
+    @apply relative;
+
+    & > .input {
+      padding-top: 1.25rem;
+      padding-bottom: 0.25rem;
+    }
+
+    & > .input-label {
+      @apply absolute pointer-events-none;
+      top: 50%;
+      left: 0.75rem;
+      transform: translateY(-50%);
+      margin: 0;
+      font-size: 1rem;
+      color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+      transition: top 0.15s, font-size 0.15s, color 0.15s, transform 0.15s;
+    }
+
+    & > .input:focus ~ .input-label,
+    & > .input:not(:placeholder-shown) ~ .input-label {
+      top: 0;
+      transform: translateY(-50%);
+      font-size: 0.75rem;
+      color: var(--color-primary);
+      background: var(--color-base-100);
+      padding: 0 0.25rem;
+    }
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .input.glass {
+    @apply glass;
+    border: 0.5px solid var(--glass-border);
+
+    &:focus {
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+  }
+
+  /* =============================================
+     Color composition
+     ============================================= */
+
+  .input.color-primary,
+  .input.color-secondary,
+  .input.color-accent,
+  .input.color-info,
+  .input.color-success,
+  .input.color-warning,
+  .input.color-error {
+    border-color: var(--c);
+
+    &:focus {
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--c) 15%, transparent);
+    }
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: none;
+  }
+
+  .input-floating > .input-label {
+    transition: none;
+  }
+}
