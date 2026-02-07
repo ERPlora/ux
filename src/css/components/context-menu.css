@@ -1,0 +1,329 @@
+/* UX v3 - Context Menu Component */
+/* Right-click context menus with items, sections, submenus */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .context-menu {
+    @apply fixed overflow-y-auto p-1;
+    z-index: 600;
+    min-width: 180px;
+    max-width: 280px;
+    max-height: calc(100dvh - 32px);
+    overscroll-behavior: contain;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 2px 10px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transform-origin: top left;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  }
+
+  /* Open state */
+  .context-menu-open {
+    @apply opacity-100 visible;
+    transform: scale(1);
+  }
+
+  /* Transform origin variants */
+  .context-menu-origin-tr { transform-origin: top right; }
+  .context-menu-origin-bl { transform-origin: bottom left; }
+  .context-menu-origin-br { transform-origin: bottom right; }
+
+  /* =============================================
+     Item
+     ============================================= */
+
+  .context-menu-item {
+    @apply flex items-center gap-2 w-full text-left border-none bg-transparent cursor-pointer text-sm;
+    min-height: 36px;
+    padding: 0 0.75rem;
+    color: var(--color-base-content);
+    border-radius: var(--radius-field, 0.5rem);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease;
+    text-decoration: none;
+  }
+
+  .context-menu-item:hover,
+  .context-menu-item:focus {
+    background-color: var(--color-base-200);
+    @apply outline-none;
+  }
+
+  .context-menu-item:active {
+    background-color: var(--color-base-300);
+  }
+
+  .context-menu-item:focus-visible {
+    @apply outline-2 outline-primary -outline-offset-2;
+  }
+
+  /* Sub-elements */
+  .context-menu-item-icon {
+    @apply size-4.5 shrink-0;
+    opacity: 0.7;
+
+    & svg {
+      @apply w-full h-full;
+    }
+  }
+
+  .context-menu-item-text {
+    @apply flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+
+  .context-menu-item-shortcut {
+    @apply text-xs ml-auto pl-4;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  .context-menu-item-arrow {
+    @apply size-3.5 ml-auto shrink-0;
+    opacity: 0.5;
+
+    & svg {
+      @apply w-full h-full;
+    }
+  }
+
+  /* Danger item */
+  .context-menu-item-danger {
+    color: var(--color-error);
+
+    &:hover,
+    &:focus {
+      background-color: color-mix(in oklch, var(--color-error) 10%, transparent);
+    }
+
+    & .context-menu-item-icon {
+      @apply opacity-100;
+    }
+  }
+
+  /* Disabled */
+  .context-menu-item-disabled,
+  .context-menu-item:disabled {
+    @apply opacity-40 pointer-events-none cursor-not-allowed;
+  }
+
+  /* Selected */
+  .context-menu-item-selected {
+    color: var(--color-primary);
+
+    & .context-menu-item-icon {
+      @apply opacity-100;
+    }
+  }
+
+  /* Active (keyboard nav) */
+  .context-menu-item-active {
+    background-color: var(--color-base-200);
+  }
+
+  /* =============================================
+     Divider
+     ============================================= */
+
+  .context-menu-divider {
+    @apply my-1;
+    height: 1px;
+    background-color: var(--color-base-300);
+  }
+
+  /* =============================================
+     Section label
+     ============================================= */
+
+  .context-menu-section {
+    @apply text-xs font-semibold uppercase tracking-wide select-none;
+    padding: 0.5rem 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+
+    &:not(:first-child) {
+      @apply mt-1;
+    }
+  }
+
+  /* =============================================
+     Submenu
+     ============================================= */
+
+  .context-menu-submenu {
+    @apply relative;
+
+    & > .context-menu-item::after {
+      content: '';
+      @apply size-3.5 ml-auto shrink-0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.5;
+    }
+  }
+
+  .context-menu-submenu-content {
+    @apply absolute p-1;
+    left: 100%;
+    top: 0;
+    margin-left: 4px;
+    min-width: 180px;
+    max-width: 280px;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 2px 10px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95) translateX(-8px);
+    transform-origin: left top;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  }
+
+  .context-menu-submenu-content-left {
+    left: auto;
+    right: 100%;
+    margin-left: 0;
+    margin-right: 4px;
+    transform-origin: right top;
+    transform: scale(0.95) translateX(8px);
+  }
+
+  .context-menu-submenu:hover > .context-menu-submenu-content,
+  .context-menu-submenu-open > .context-menu-submenu-content {
+    @apply opacity-100 visible;
+    transform: scale(1) translateX(0);
+  }
+
+  /* =============================================
+     Compact variant
+     ============================================= */
+
+  .context-menu-compact {
+    @apply p-0.5;
+
+    & .context-menu-item {
+      min-height: 32px;
+      @apply text-xs;
+    }
+
+    & .context-menu-item-icon {
+      @apply size-3.5;
+    }
+  }
+
+  /* =============================================
+     Large variant
+     ============================================= */
+
+  .context-menu-lg {
+    min-width: 220px;
+
+    & .context-menu-item {
+      min-height: 44px;
+      @apply text-base;
+    }
+
+    & .context-menu-item-icon {
+      @apply size-5;
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .context-menu.glass {
+    @apply glass;
+    border-color: rgba(255, 255, 255, 0.18);
+
+    & .context-menu-item:hover,
+    & .context-menu-item:focus {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    & .context-menu-item:active {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    & .context-menu-divider {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    & .context-menu-submenu-content {
+      @apply glass;
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+  }
+
+  /* =============================================
+     Backdrop
+     ============================================= */
+
+  .context-menu-backdrop {
+    @apply fixed inset-0;
+    z-index: 599;
+    background: transparent;
+  }
+
+  .context-menu-backdrop-visible {
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* =============================================
+   Mobile
+   ============================================= */
+
+@media (max-width: 767px) {
+  .context-menu-item {
+    min-height: 44px;
+    font-size: 0.9375rem;
+  }
+
+  .context-menu-submenu-content {
+    position: static;
+    margin-left: 0;
+    margin-top: 4px;
+    padding-left: 1rem;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    backdrop-filter: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .context-menu {
+    transition: opacity 0.1s ease, visibility 0.1s ease;
+    transform: none !important;
+  }
+
+  .context-menu-open {
+    transform: none !important;
+  }
+
+  .context-menu-submenu-content {
+    transition: opacity 0.1s ease, visibility 0.1s ease;
+    transform: none !important;
+  }
+
+  .context-menu-submenu:hover > .context-menu-submenu-content,
+  .context-menu-submenu-open > .context-menu-submenu-content {
+    transform: none !important;
+  }
+}
