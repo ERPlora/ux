@@ -1,0 +1,536 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Pin Pad">
+  <p class="text-base-content/70 mb-6">Full-screen PIN entry for authentication, employee login, and secure access. Supports loading, error, and success states with animated dot indicators.</p>
+
+  <CodePreview
+    title="Basic Pin Pad"
+    height="520px"
+    semantic={`<div class="pinpad">
+  <p class="pinpad-label">Enter your PIN</p>
+  <div class="pinpad-dots">
+    <div class="pinpad-dot pinpad-dot-filled"></div>
+    <div class="pinpad-dot pinpad-dot-filled"></div>
+    <div class="pinpad-dot"></div>
+    <div class="pinpad-dot"></div>
+  </div>
+  <div class="pinpad-grid">
+    <button class="pinpad-key">1</button>
+    <button class="pinpad-key">2</button>
+    <button class="pinpad-key">3</button>
+    <button class="pinpad-key">4</button>
+    <button class="pinpad-key">5</button>
+    <button class="pinpad-key">6</button>
+    <button class="pinpad-key">7</button>
+    <button class="pinpad-key">8</button>
+    <button class="pinpad-key">9</button>
+    <button class="pinpad-key pinpad-key-hidden"></button>
+    <button class="pinpad-key">0</button>
+    <button class="pinpad-key">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l-7-7 7-7M19 12H5"/></svg>
+    </button>
+  </div>
+  <p class="pinpad-hint">4 digits</p>
+</div>`}
+    tailwind={`<div class="flex flex-col items-center gap-6 p-6">
+  <p class="text-sm text-base-content/60 m-0">Enter your PIN</p>
+  <div class="flex gap-4">
+    <div class="w-4.5 h-4.5 rounded-full bg-primary border-2 border-primary scale-115 shadow-[0_0_12px_var(--color-primary)]"></div>
+    <div class="w-4.5 h-4.5 rounded-full bg-primary border-2 border-primary scale-115 shadow-[0_0_12px_var(--color-primary)]"></div>
+    <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-base-300"></div>
+    <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-base-300"></div>
+  </div>
+  <div class="grid grid-cols-3 gap-3 max-w-70">
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">1</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">2</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">3</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">4</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">5</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">6</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">7</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">8</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">9</button>
+    <div class="invisible"></div>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">0</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">&larr;</button>
+  </div>
+  <p class="text-xs text-base-content/40 m-0">4 digits</p>
+</div>`}
+    js={`// PIN pad logic
+let pin = '';
+const dots = document.querySelectorAll('.pinpad-dot');
+
+document.querySelectorAll('.pinpad-key').forEach(key => {
+  key.addEventListener('click', () => {
+    const val = key.textContent.trim();
+    if (key.querySelector('svg') || val === '\u2190') {
+      pin = pin.slice(0, -1);
+    } else if (pin.length < 4) {
+      pin += val;
+    }
+    // Update dots
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('pinpad-dot-filled', i < pin.length);
+    });
+    // Auto-submit when complete
+    if (pin.length === 4) {
+      console.log('PIN entered:', pin);
+    }
+  });
+});`}
+  />
+
+  <CodePreview
+    title="With Avatar & Title"
+    height="580px"
+    semantic={`<div class="pinpad">
+  <div class="pinpad-avatar">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+  </div>
+  <h2 class="pinpad-title">Welcome Back</h2>
+  <p class="pinpad-label">Enter PIN to continue</p>
+  <div class="pinpad-dots">
+    <div class="pinpad-dot"></div>
+    <div class="pinpad-dot"></div>
+    <div class="pinpad-dot"></div>
+    <div class="pinpad-dot"></div>
+  </div>
+  <div class="pinpad-grid">
+    <button class="pinpad-key">1</button>
+    <button class="pinpad-key">2</button>
+    <button class="pinpad-key">3</button>
+    <button class="pinpad-key">4</button>
+    <button class="pinpad-key">5</button>
+    <button class="pinpad-key">6</button>
+    <button class="pinpad-key">7</button>
+    <button class="pinpad-key">8</button>
+    <button class="pinpad-key">9</button>
+    <button class="pinpad-key pinpad-key-hidden"></button>
+    <button class="pinpad-key">0</button>
+    <button class="pinpad-key">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l-7-7 7-7M19 12H5"/></svg>
+    </button>
+  </div>
+</div>`}
+    tailwind={`<div class="flex flex-col items-center gap-6 p-6">
+  <div class="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-base-200">
+    <svg class="w-8 h-8 text-base-content/50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+  </div>
+  <h2 class="text-xl font-semibold m-0 text-center">Welcome Back</h2>
+  <p class="text-sm text-base-content/60 m-0">Enter PIN to continue</p>
+  <div class="flex gap-4">
+    <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-base-300"></div>
+    <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-base-300"></div>
+    <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-base-300"></div>
+    <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-base-300"></div>
+  </div>
+  <div class="grid grid-cols-3 gap-3 max-w-70">
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">1</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">2</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">3</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">4</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">5</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">6</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">7</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">8</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">9</button>
+    <div class="invisible"></div>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">0</button>
+    <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">&larr;</button>
+  </div>
+</div>`}
+    js={`// No additional JS needed for avatar variant — same PIN logic applies`}
+  />
+
+  <CodePreview
+    title="Error & Success States"
+    height="560px"
+    semantic={`<div style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;">
+  <!-- Error State -->
+  <div class="pinpad">
+    <p class="pinpad-label">Enter your PIN</p>
+    <div class="pinpad-dots">
+      <div class="pinpad-dot pinpad-dot-error"></div>
+      <div class="pinpad-dot pinpad-dot-error"></div>
+      <div class="pinpad-dot pinpad-dot-error"></div>
+      <div class="pinpad-dot pinpad-dot-error"></div>
+    </div>
+    <p class="pinpad-error">Incorrect PIN. Try again.</p>
+    <div class="pinpad-grid">
+      <button class="pinpad-key">1</button>
+      <button class="pinpad-key">2</button>
+      <button class="pinpad-key">3</button>
+      <button class="pinpad-key">4</button>
+      <button class="pinpad-key">5</button>
+      <button class="pinpad-key">6</button>
+      <button class="pinpad-key">7</button>
+      <button class="pinpad-key">8</button>
+      <button class="pinpad-key">9</button>
+      <button class="pinpad-key pinpad-key-hidden"></button>
+      <button class="pinpad-key">0</button>
+      <button class="pinpad-key">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l-7-7 7-7M19 12H5"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Success State -->
+  <div class="pinpad">
+    <p class="pinpad-label">PIN Verified</p>
+    <div class="pinpad-dots">
+      <div class="pinpad-dot pinpad-dot-success"></div>
+      <div class="pinpad-dot pinpad-dot-success"></div>
+      <div class="pinpad-dot pinpad-dot-success"></div>
+      <div class="pinpad-dot pinpad-dot-success"></div>
+    </div>
+    <p class="pinpad-success">Access granted</p>
+    <div class="pinpad-grid">
+      <button class="pinpad-key" disabled>1</button>
+      <button class="pinpad-key" disabled>2</button>
+      <button class="pinpad-key" disabled>3</button>
+      <button class="pinpad-key" disabled>4</button>
+      <button class="pinpad-key" disabled>5</button>
+      <button class="pinpad-key" disabled>6</button>
+      <button class="pinpad-key" disabled>7</button>
+      <button class="pinpad-key" disabled>8</button>
+      <button class="pinpad-key" disabled>9</button>
+      <button class="pinpad-key pinpad-key-hidden" disabled></button>
+      <button class="pinpad-key" disabled>0</button>
+      <button class="pinpad-key" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l-7-7 7-7M19 12H5"/></svg>
+      </button>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;">
+  <!-- Error State -->
+  <div class="flex flex-col items-center gap-6 p-6">
+    <p class="text-sm text-base-content/60 m-0">Enter your PIN</p>
+    <div class="flex gap-4">
+      <div class="w-4.5 h-4.5 rounded-full bg-error border-2 border-error shadow-[0_0_12px_var(--color-error)]"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-error border-2 border-error shadow-[0_0_12px_var(--color-error)]"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-error border-2 border-error shadow-[0_0_12px_var(--color-error)]"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-error border-2 border-error shadow-[0_0_12px_var(--color-error)]"></div>
+    </div>
+    <p class="text-sm text-error m-0">Incorrect PIN. Try again.</p>
+  </div>
+
+  <!-- Success State -->
+  <div class="flex flex-col items-center gap-6 p-6">
+    <p class="text-sm text-base-content/60 m-0">PIN Verified</p>
+    <div class="flex gap-4">
+      <div class="w-4.5 h-4.5 rounded-full bg-success border-2 border-success shadow-[0_0_12px_var(--color-success)]"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-success border-2 border-success shadow-[0_0_12px_var(--color-success)]"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-success border-2 border-success shadow-[0_0_12px_var(--color-success)]"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-success border-2 border-success shadow-[0_0_12px_var(--color-success)]"></div>
+    </div>
+    <p class="text-sm text-success m-0">Access granted</p>
+  </div>
+</div>`}
+    js={`// Error state: shake dots and show message
+function showError(message) {
+  const dots = document.querySelectorAll('.pinpad-dot');
+  dots.forEach(dot => {
+    dot.classList.remove('pinpad-dot-filled');
+    dot.classList.add('pinpad-dot-error');
+  });
+  document.querySelector('.pinpad-error').textContent = message;
+  setTimeout(() => {
+    dots.forEach(d => d.classList.remove('pinpad-dot-error'));
+    pin = '';
+  }, 1000);
+}
+
+// Success state
+function showSuccess() {
+  document.querySelectorAll('.pinpad-dot').forEach(d => {
+    d.classList.remove('pinpad-dot-filled');
+    d.classList.add('pinpad-dot-success');
+  });
+  document.querySelectorAll('.pinpad-key').forEach(k => k.disabled = true);
+}`}
+  />
+
+  <CodePreview
+    title="Fullscreen PIN Screen"
+    height="620px"
+    semantic={`<!-- In the preview, shown as contained. In production use position: fixed -->
+<div class="pinpad-screen" data-state="open" style="position: relative; min-height: 560px;">
+  <div class="pinpad">
+    <div class="pinpad-avatar">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+    </div>
+    <h2 class="pinpad-title">Employee Login</h2>
+    <p class="pinpad-label">Enter your 4-digit PIN</p>
+    <div class="pinpad-dots">
+      <div class="pinpad-dot"></div>
+      <div class="pinpad-dot"></div>
+      <div class="pinpad-dot"></div>
+      <div class="pinpad-dot"></div>
+    </div>
+    <div class="pinpad-grid">
+      <button class="pinpad-key">1</button>
+      <button class="pinpad-key">2</button>
+      <button class="pinpad-key">3</button>
+      <button class="pinpad-key">4</button>
+      <button class="pinpad-key">5</button>
+      <button class="pinpad-key">6</button>
+      <button class="pinpad-key">7</button>
+      <button class="pinpad-key">8</button>
+      <button class="pinpad-key">9</button>
+      <button class="pinpad-key pinpad-key-hidden"></button>
+      <button class="pinpad-key">0</button>
+      <button class="pinpad-key">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l-7-7 7-7M19 12H5"/></svg>
+      </button>
+    </div>
+    <p class="pinpad-hint">Demo PIN: 1234</p>
+  </div>
+</div>`}
+    tailwind={`<!-- pinpad-screen is fixed fullscreen by default. Use data-state to show/hide -->
+<div class="relative flex items-center justify-center bg-base-100 min-h-[560px]">
+  <div class="flex flex-col items-center gap-6 p-6">
+    <div class="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-base-200">
+      <svg class="w-8 h-8 text-base-content/50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+    </div>
+    <h2 class="text-xl font-semibold m-0">Employee Login</h2>
+    <p class="text-sm text-base-content/60 m-0">Enter your 4-digit PIN</p>
+    <div class="flex gap-4">
+      <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-base-300"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-base-300"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-base-300"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-base-300"></div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 max-w-70">
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">1</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">2</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">3</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">4</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">5</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">6</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">7</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">8</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">9</button>
+      <div class="invisible"></div>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">0</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">&larr;</button>
+    </div>
+    <p class="text-xs text-base-content/40 m-0">Demo PIN: 1234</p>
+  </div>
+</div>`}
+    js={`// Open/close fullscreen PIN screen
+// <button onclick="document.getElementById('pin-screen').dataset.state='open'">Login</button>
+// <div id="pin-screen" class="pinpad-screen" data-state="closed">...</div>
+
+const screen = document.getElementById('pin-screen');
+let pin = '';
+
+screen.querySelectorAll('.pinpad-key').forEach(key => {
+  key.addEventListener('click', () => {
+    const val = key.textContent.trim();
+    if (key.querySelector('svg')) pin = pin.slice(0, -1);
+    else if (pin.length < 4) pin += val;
+
+    screen.querySelectorAll('.pinpad-dot').forEach((dot, i) => {
+      dot.classList.toggle('pinpad-dot-filled', i < pin.length);
+    });
+
+    if (pin.length === 4) {
+      if (pin === '1234') {
+        screen.dataset.state = 'closed'; // Hide screen
+      } else {
+        screen.querySelectorAll('.pinpad-dot').forEach(d => d.classList.add('pinpad-dot-error'));
+        setTimeout(() => {
+          screen.querySelectorAll('.pinpad-dot').forEach(d => d.className = 'pinpad-dot');
+          pin = '';
+        }, 1000);
+      }
+    }
+  });
+});`}
+  />
+
+  <CodePreview
+    title="Sizes"
+    height="520px"
+    semantic={`<div style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; align-items: flex-start;">
+  <!-- Small -->
+  <div class="pinpad pinpad-sm">
+    <p class="pinpad-label">Small</p>
+    <div class="pinpad-dots">
+      <div class="pinpad-dot pinpad-dot-filled"></div>
+      <div class="pinpad-dot"></div>
+      <div class="pinpad-dot"></div>
+      <div class="pinpad-dot"></div>
+    </div>
+    <div class="pinpad-grid">
+      <button class="pinpad-key">1</button>
+      <button class="pinpad-key">2</button>
+      <button class="pinpad-key">3</button>
+      <button class="pinpad-key">4</button>
+      <button class="pinpad-key">5</button>
+      <button class="pinpad-key">6</button>
+      <button class="pinpad-key">7</button>
+      <button class="pinpad-key">8</button>
+      <button class="pinpad-key">9</button>
+      <button class="pinpad-key pinpad-key-hidden"></button>
+      <button class="pinpad-key">0</button>
+      <button class="pinpad-key">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l-7-7 7-7M19 12H5"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Large (6-digit) -->
+  <div class="pinpad pinpad-lg">
+    <p class="pinpad-label">Large (6 digits)</p>
+    <div class="pinpad-dots">
+      <div class="pinpad-dot pinpad-dot-filled"></div>
+      <div class="pinpad-dot pinpad-dot-filled"></div>
+      <div class="pinpad-dot pinpad-dot-filled"></div>
+      <div class="pinpad-dot"></div>
+      <div class="pinpad-dot"></div>
+      <div class="pinpad-dot"></div>
+    </div>
+    <div class="pinpad-grid">
+      <button class="pinpad-key">1</button>
+      <button class="pinpad-key">2</button>
+      <button class="pinpad-key">3</button>
+      <button class="pinpad-key">4</button>
+      <button class="pinpad-key">5</button>
+      <button class="pinpad-key">6</button>
+      <button class="pinpad-key">7</button>
+      <button class="pinpad-key">8</button>
+      <button class="pinpad-key">9</button>
+      <button class="pinpad-key pinpad-key-hidden"></button>
+      <button class="pinpad-key">0</button>
+      <button class="pinpad-key">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l-7-7 7-7M19 12H5"/></svg>
+      </button>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; align-items: flex-start;">
+  <!-- Small -->
+  <div class="flex flex-col items-center gap-4 p-4">
+    <p class="text-sm text-base-content/60 m-0">Small</p>
+    <div class="flex gap-4">
+      <div class="w-3.5 h-3.5 rounded-full bg-primary border-2 border-primary"></div>
+      <div class="w-3.5 h-3.5 rounded-full bg-transparent border-2 border-base-300"></div>
+      <div class="w-3.5 h-3.5 rounded-full bg-transparent border-2 border-base-300"></div>
+      <div class="w-3.5 h-3.5 rounded-full bg-transparent border-2 border-base-300"></div>
+    </div>
+    <div class="grid grid-cols-3 gap-2 max-w-55">
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">1</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">2</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">3</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">4</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">5</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">6</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">7</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">8</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">9</button>
+      <div class="invisible"></div>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">0</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-14 h-14 text-xl font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">&larr;</button>
+    </div>
+  </div>
+
+  <!-- Large -->
+  <div class="flex flex-col items-center gap-8 p-8">
+    <p class="text-sm text-base-content/60 m-0">Large (6 digits)</p>
+    <div class="flex gap-4">
+      <div class="w-5.5 h-5.5 rounded-full bg-primary border-2 border-primary"></div>
+      <div class="w-5.5 h-5.5 rounded-full bg-primary border-2 border-primary"></div>
+      <div class="w-5.5 h-5.5 rounded-full bg-primary border-2 border-primary"></div>
+      <div class="w-5.5 h-5.5 rounded-full bg-transparent border-2 border-base-300"></div>
+      <div class="w-5.5 h-5.5 rounded-full bg-transparent border-2 border-base-300"></div>
+      <div class="w-5.5 h-5.5 rounded-full bg-transparent border-2 border-base-300"></div>
+    </div>
+    <div class="grid grid-cols-3 gap-4 max-w-80">
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">1</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">2</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">3</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">4</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">5</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">6</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">7</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">8</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">9</button>
+      <div class="invisible"></div>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">0</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-21 h-21 text-[1.75rem] font-medium hover:bg-base-content/5 active:scale-92 cursor-pointer">&larr;</button>
+    </div>
+  </div>
+</div>`}
+    js={`// Size is CSS-only via pinpad-sm / pinpad-lg classes.
+// 6-digit PIN: just add more dots and change the length check
+const PIN_LENGTH = 6;
+if (pin.length === PIN_LENGTH) { verifyPin(pin); }`}
+  />
+
+  <CodePreview
+    title="Glass (Dark Background)"
+    height="560px"
+    semantic={`<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: var(--radius-box, 0.75rem); min-height: 500px; display: flex; align-items: center; justify-content: center;">
+  <div class="pinpad pinpad-screen-dark">
+    <p class="pinpad-label">Enter PIN</p>
+    <div class="pinpad-dots">
+      <div class="pinpad-dot pinpad-dot-filled"></div>
+      <div class="pinpad-dot pinpad-dot-filled"></div>
+      <div class="pinpad-dot pinpad-dot-filled"></div>
+      <div class="pinpad-dot"></div>
+    </div>
+    <div class="pinpad-grid">
+      <button class="pinpad-key">1</button>
+      <button class="pinpad-key">2</button>
+      <button class="pinpad-key">3</button>
+      <button class="pinpad-key">4</button>
+      <button class="pinpad-key">5</button>
+      <button class="pinpad-key">6</button>
+      <button class="pinpad-key">7</button>
+      <button class="pinpad-key">8</button>
+      <button class="pinpad-key">9</button>
+      <button class="pinpad-key pinpad-key-hidden"></button>
+      <button class="pinpad-key">0</button>
+      <button class="pinpad-key">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l-7-7 7-7M19 12H5"/></svg>
+      </button>
+    </div>
+    <p class="pinpad-hint">4 digits</p>
+  </div>
+</div>`}
+    tailwind={`<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 0.75rem; min-height: 500px; display: flex; align-items: center; justify-content: center;">
+  <div class="flex flex-col items-center gap-6 p-6 text-white">
+    <p class="text-sm text-white/60 m-0">Enter PIN</p>
+    <div class="flex gap-4">
+      <div class="w-4.5 h-4.5 rounded-full bg-primary border-2 border-primary scale-115 shadow-[0_0_12px_var(--color-primary)]"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-primary border-2 border-primary scale-115 shadow-[0_0_12px_var(--color-primary)]"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-primary border-2 border-primary scale-115 shadow-[0_0_12px_var(--color-primary)]"></div>
+      <div class="w-4.5 h-4.5 rounded-full bg-transparent border-2 border-white/30"></div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 max-w-70">
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">1</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">2</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">3</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">4</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">5</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">6</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">7</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">8</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">9</button>
+      <div class="invisible"></div>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">0</button>
+      <button class="flex items-center justify-center bg-transparent border-none rounded-full w-18 h-18 text-2xl font-medium text-white hover:bg-white/8 active:scale-92 cursor-pointer">&larr;</button>
+    </div>
+    <p class="text-xs text-white/40 m-0">4 digits</p>
+  </div>
+</div>`}
+    js={`// Glass/dark variant is CSS-only via pinpad-screen-dark class.
+// For fullscreen glass: combine pinpad-screen + glass + pinpad-screen-dark
+// <div class="pinpad-screen glass pinpad-screen-dark" style="background: linear-gradient(...);">`}
+  />
+</DocsLayout>

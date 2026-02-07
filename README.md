@@ -1,12 +1,12 @@
 # UX - Universal eXtensions
 
-Semantic CSS component library built with Tailwind v4. **154 components**, zero dependencies for consumers.
+Semantic CSS component library built with Tailwind v4. **155 components**, zero dependencies for consumers.
 
 **[Live Demo & Docs](https://erplora.github.io/ux/)**
 
 ## Features
 
-- **154 Components** — from buttons to Gantt charts, POS terminals to HR dashboards
+- **155 Components** — from buttons to Gantt charts, POS terminals to HR dashboards
 - **Zero Dependencies** — single CSS file via CDN, no JavaScript required
 - **Framework Agnostic** — works with Django, HTMX, React, Vue, or vanilla JS
 - **Dual Output** — semantic classes (`btn btn-primary`) or Tailwind utilities (`bg-primary text-primary-content`)
@@ -91,7 +91,7 @@ document.documentElement.setAttribute('data-theme', 'dark');
 
 Each color has a `-content` variant for text contrast (e.g. `--color-primary-content`).
 
-## Components (154)
+## Components (155)
 
 ### Basic (14)
 `btn`, `btn-group`, `badge`, `avatar`, `chip`, `loading`, `skeleton`, `divider`, `fab`, `spinner`, `icon-btn`, `back-button`, `menu-button`, `split-button`
@@ -120,8 +120,8 @@ Each color has a `-content` variant for text contrast (e.g. `--color-primary-con
 ### Interaction (7)
 `toggle-group`, `filter-chip`, `scroll-area`, `infinite-scroll`, `load-more`, `swipe`, `reorder`
 
-### POS / Retail (16)
-`numpad`, `calculator`, `product-card`, `cart`, `order-ticket`, `payment`, `receipt`, `stock-indicator`, `quantity-badge`, `variant-selector`, `virtual-keyboard`, `kds-order`, `category-tabs`, `keyboard`, `onscreen-keyboard`, `reorder`
+### POS / Retail (17)
+`numpad`, `pinpad`, `calculator`, `product-card`, `cart`, `order-ticket`, `payment`, `receipt`, `stock-indicator`, `quantity-badge`, `variant-selector`, `virtual-keyboard`, `kds-order`, `category-tabs`, `keyboard`, `onscreen-keyboard`, `reorder`
 
 ### HR / Employees (7)
 `employee-card`, `time-clock`, `shift-calendar`, `attendance-list`, `leave-request`, `org-chart`, `performance-meter`
@@ -183,7 +183,7 @@ ux/
 │   ├── tw.css                  # Tailwind utilities entry point
 │   ├── utilities.css           # Custom @utility (glass, touch-target, etc.)
 │   ├── themes/                 # dark.css, erplora.css, ocean.css
-│   └── components/             # 154 component CSS files
+│   └── components/             # 155 component CSS files
 ├── dist/                       # Build output (CDN-ready)
 │   ├── ux.css / ux.min.css     # Semantic classes
 │   ├── tw.css / tw.min.css     # Tailwind utilities

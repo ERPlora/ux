@@ -4,18 +4,18 @@ import CodePreview from '../../components/CodePreview.astro';
 ---
 
 <DocsLayout title="Split Pane">
-  <p class="text-base-content/70 mb-6">Two-panel layout with main content and a collapsible side panel. Uses a hidden checkbox — <strong>no JavaScript needed</strong>. On desktop: side-by-side with a hover-reveal divider toggle. On mobile (&lt;992px): the side panel slides in as an overlay.</p>
+  <p class="text-base-content/70 mb-6">Two-panel layout with main content and a collapsible side panel. Uses a hidden checkbox — <strong>no JavaScript needed</strong>. On desktop: side-by-side with a divider toggle. On mobile (&lt;992px): toggles between panels (main vs side, full-width each).</p>
 
   <CodePreview
     title="Collapsible with Divider (No JS)"
     height="350px"
-    semantic={`<!-- Hidden checkbox controls the panel (checked = open) -->
+    semantic={`<!-- Hidden checkbox controls the panel (checked = side visible) -->
 <input type="checkbox" id="sp-demo1" class="split-pane-toggle" checked>
 
 <div class="split-pane" style="height: 300px; border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem);">
   <div class="split-pane-main" style="padding: 1rem;">
     <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Main Content</h4>
-    <p style="color: var(--color-base-content); opacity: 0.7;">Hover over the border between panels to reveal the toggle button. Click it to collapse/expand the side panel. No JavaScript required.</p>
+    <p style="color: var(--color-base-content); opacity: 0.7;">Click the toggle on the divider bar to collapse/expand the side panel. No JavaScript required.</p>
   </div>
   <div class="split-pane-divider">
     <label for="sp-demo1" class="split-pane-divider-btn" aria-label="Toggle side panel">
@@ -27,26 +27,27 @@ import CodePreview from '../../components/CodePreview.astro';
     <p style="color: var(--color-base-content); opacity: 0.7;">This panel collapses smoothly with CSS transitions.</p>
   </div>
 </div>`}
-    tailwind={`<!-- Hidden checkbox (checked = panel visible) -->
-<input type="checkbox" id="sp-tw1" class="sr-only" checked>
+    tailwind={`<input type="checkbox" id="sp-tw1" class="split-pane-toggle" checked>
 
-<div class="flex flex-row h-75 border border-base-300 rounded-box relative">
-  <div class="flex-1 min-w-0 p-4">
+<div class="flex flex-row h-75 w-full relative overflow-hidden border border-base-300 rounded-box">
+  <div class="flex-1 min-w-0 flex flex-col overflow-auto p-4">
     <h4 class="font-semibold mb-2">Main Content</h4>
-    <p class="text-base-content/70">Hover over the border to reveal the toggle. No JS required.</p>
+    <p class="text-base-content/70">Click the divider toggle to collapse/expand. No JS required.</p>
   </div>
-  <div class="shrink-0 flex flex-col items-center justify-center" style="width: 0; z-index: 2;">
-    <label for="sp-tw1" class="flex items-center justify-center w-5 h-8 rounded-md bg-base-200 border border-base-300 text-base-content opacity-0 hover:opacity-100 cursor-pointer transition-opacity" aria-label="Toggle panel">
+  <div class="shrink-0 flex flex-col items-center justify-center bg-base-200 hover:bg-base-300 relative z-[2] transition-colors" style="width: 24px;">
+    <label for="sp-tw1" class="flex items-center justify-center cursor-pointer rounded-md bg-base-300 text-base-content opacity-60 hover:opacity-100 hover:bg-base-content hover:text-base-100 transition-all" style="width: 20px; height: 2.5rem;" aria-label="Toggle panel">
       <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </label>
   </div>
-  <div class="w-80 shrink-0 h-full flex flex-col overflow-hidden border-l border-base-300 bg-base-100 p-4 transition-all duration-200">
+  <div class="w-80 shrink-0 h-full flex flex-col overflow-hidden bg-base-100 border-l border-base-300 p-4 transition-all duration-200">
     <h4 class="font-semibold mb-2">Side Panel</h4>
     <p class="text-base-content/70">Collapses smoothly.</p>
   </div>
 </div>`}
     js={`// No JavaScript needed! The hidden checkbox handles everything.
-// checked = panel visible, unchecked = collapsed.
+//
+// Desktop: checked = side visible, unchecked = collapsed.
+// Mobile (<992px): toggles full-width between main and side.
 //
 // Structure:
 // <input type="checkbox" id="sp" class="split-pane-toggle" checked>
@@ -56,14 +57,11 @@ import CodePreview from '../../components/CodePreview.astro';
 //     <label for="sp" class="split-pane-divider-btn">chevron</label>
 //   </div>
 //   <div class="split-pane-side">...</div>
-// </div>
-//
-// The toggle button appears when hovering over the divider area.
-// On mobile (<992px), the side panel slides in as an overlay.`}
+// </div>`}
   />
 
   <CodePreview
-    title="Left Panel with Divider (No JS)"
+    title="Left Panel with Divider"
     height="350px"
     semantic={`<input type="checkbox" id="sp-left1" class="split-pane-toggle" checked>
 
@@ -82,15 +80,15 @@ import CodePreview from '../../components/CodePreview.astro';
     <p style="color: var(--color-base-content); opacity: 0.7;">The chevron direction flips automatically for left-side panels.</p>
   </div>
 </div>`}
-    tailwind={`<input type="checkbox" id="sp-lefttw1" class="sr-only" checked>
+    tailwind={`<input type="checkbox" id="sp-lefttw1" class="split-pane-toggle" checked>
 
-<div class="flex flex-row h-75 border border-base-300 rounded-box relative">
-  <div class="shrink-0 h-full flex flex-col overflow-hidden order-first border-r border-base-300 bg-base-100 p-4 transition-all duration-200" style="width: 240px;">
+<div class="flex flex-row h-75 w-full relative overflow-hidden border border-base-300 rounded-box">
+  <div class="shrink-0 h-full flex flex-col overflow-hidden order-first bg-base-100 border-r border-base-300 p-4 transition-all duration-200" style="width: 240px;">
     <h4 class="font-semibold mb-2">Navigation</h4>
     <p class="text-base-content/70">Left side panel.</p>
   </div>
-  <div class="shrink-0 flex flex-col items-center justify-center" style="width: 0; z-index: 2;">
-    <label for="sp-lefttw1" class="flex items-center justify-center w-5 h-8 rounded-md bg-base-200 border border-base-300 text-base-content opacity-0 hover:opacity-100 cursor-pointer transition-opacity" aria-label="Toggle navigation">
+  <div class="shrink-0 flex flex-col items-center justify-center bg-base-200 hover:bg-base-300 relative z-[2] transition-colors" style="width: 24px;">
+    <label for="sp-lefttw1" class="flex items-center justify-center cursor-pointer rounded-md bg-base-300 text-base-content opacity-60 hover:opacity-100 hover:bg-base-content hover:text-base-100 transition-all" style="width: 20px; height: 2.5rem;" aria-label="Toggle navigation">
       <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </label>
   </div>
@@ -112,7 +110,7 @@ import CodePreview from '../../components/CodePreview.astro';
 <div class="split-pane" style="height: 300px; border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem);">
   <div class="split-pane-main" style="padding: 1rem;">
     <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Main Content</h4>
-    <p style="color: var(--color-base-content); opacity: 0.7;">The side panel starts collapsed. Hover over the right edge and click the toggle to expand it.</p>
+    <p style="color: var(--color-base-content); opacity: 0.7;">The side panel starts collapsed. Click the toggle on the divider to expand it.</p>
   </div>
   <div class="split-pane-divider">
     <label for="sp-closed1" class="split-pane-divider-btn" aria-label="Toggle side panel">
@@ -124,20 +122,19 @@ import CodePreview from '../../components/CodePreview.astro';
     <p style="color: var(--color-base-content); opacity: 0.7;">Revealed when expanded.</p>
   </div>
 </div>`}
-    tailwind={`<!-- No "checked" = starts collapsed -->
-<input type="checkbox" id="sp-closedtw1" class="sr-only">
+    tailwind={`<input type="checkbox" id="sp-closedtw1" class="split-pane-toggle">
 
-<div class="flex flex-row h-75 border border-base-300 rounded-box relative">
+<div class="flex flex-row h-75 w-full relative overflow-hidden border border-base-300 rounded-box">
   <div class="flex-1 min-w-0 p-4">
     <h4 class="font-semibold mb-2">Main Content</h4>
-    <p class="text-base-content/70">Side panel starts collapsed. Hover over the right edge to reveal the toggle.</p>
+    <p class="text-base-content/70">Side panel starts collapsed. Click the divider toggle to expand.</p>
   </div>
-  <div class="shrink-0 flex flex-col items-center justify-center" style="width: 0; z-index: 2;">
-    <label for="sp-closedtw1" class="flex items-center justify-center w-5 h-8 rounded-md bg-base-200 border border-base-300 text-base-content opacity-0 hover:opacity-100 cursor-pointer transition-opacity">
+  <div class="shrink-0 flex flex-col items-center justify-center bg-base-200 hover:bg-base-300 relative z-[2] transition-colors" style="width: 24px;">
+    <label for="sp-closedtw1" class="flex items-center justify-center cursor-pointer rounded-md bg-base-300 text-base-content opacity-60 hover:opacity-100 hover:bg-base-content hover:text-base-100 transition-all" style="width: 20px; height: 2.5rem;">
       <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </label>
   </div>
-  <div class="w-80 shrink-0 h-full flex flex-col overflow-hidden border-l border-base-300 bg-base-100 p-4 transition-all duration-200">
+  <div class="w-80 shrink-0 h-full flex flex-col overflow-hidden bg-base-100 border-l border-base-300 p-4 transition-all duration-200">
     <h4 class="font-semibold mb-2">Side Panel</h4>
     <p class="text-base-content/70">Revealed when expanded.</p>
   </div>
@@ -146,44 +143,6 @@ import CodePreview from '../../components/CodePreview.astro';
 // <input type="checkbox" id="sp" class="split-pane-toggle">
 // vs checked (starts open):
 // <input type="checkbox" id="sp" class="split-pane-toggle" checked>`}
-  />
-
-  <CodePreview
-    title="Custom Width"
-    semantic={`<input type="checkbox" id="sp-wide1" class="split-pane-toggle" checked>
-
-<div class="split-pane" style="height: 250px; border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem);">
-  <div class="split-pane-main" style="padding: 1rem;">
-    <p style="font-weight: 600;">Main area</p>
-  </div>
-  <div class="split-pane-divider">
-    <label for="sp-wide1" class="split-pane-divider-btn" aria-label="Toggle panel">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </label>
-  </div>
-  <div class="split-pane-side" style="--split-pane-width: 400px; padding: 1rem;">
-    <p style="font-weight: 600;">Wide panel (400px)</p>
-    <p style="color: var(--color-base-content); opacity: 0.7; margin-top: 0.5rem;">Set width via --split-pane-width custom property.</p>
-  </div>
-</div>`}
-    tailwind={`<input type="checkbox" id="sp-widetw1" class="sr-only" checked>
-
-<div class="flex flex-row h-62.5 border border-base-300 rounded-box relative">
-  <div class="flex-1 min-w-0 p-4">
-    <p class="font-semibold">Main area</p>
-  </div>
-  <div class="shrink-0 flex flex-col items-center justify-center" style="width: 0; z-index: 2;">
-    <label for="sp-widetw1" class="flex items-center justify-center w-5 h-8 rounded-md bg-base-200 border border-base-300 text-base-content opacity-0 hover:opacity-100 cursor-pointer transition-opacity">
-      <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </label>
-  </div>
-  <div class="shrink-0 h-full flex flex-col overflow-hidden border-l border-base-300 bg-base-100 p-4 transition-all duration-200" style="width: 400px;">
-    <p class="font-semibold">Wide panel (400px)</p>
-    <p class="text-base-content/70 mt-2">Set width via inline style or CSS variable.</p>
-  </div>
-</div>`}
-    js={`// Custom width via CSS variable:
-// <div class="split-pane-side" style="--split-pane-width: 400px;">`}
   />
 
   <CodePreview
@@ -196,8 +155,8 @@ import CodePreview from '../../components/CodePreview.astro';
       <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Main Content</h4>
       <p style="opacity: 0.8;">Glass side panel on a gradient background.</p>
     </div>
-    <div class="split-pane-divider" style="background-color: rgba(255,255,255,0.18);">
-      <label for="sp-glass1" class="split-pane-divider-btn" style="background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.2); color: white; opacity: 0.7;" aria-label="Toggle panel">
+    <div class="split-pane-divider" style="background-color: rgba(255,255,255,0.1);">
+      <label for="sp-glass1" class="split-pane-divider-btn" style="background: rgba(255,255,255,0.2); color: white;" aria-label="Toggle panel">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </label>
     </div>
@@ -208,17 +167,17 @@ import CodePreview from '../../components/CodePreview.astro';
   </div>
 </div>`}
     tailwind={`<div class="p-6 rounded-box" style="background: linear-gradient(135deg, var(--color-primary), var(--color-info));">
-  <div class="flex flex-row h-62.5 rounded-box">
+  <div class="flex flex-row h-62.5 w-full relative overflow-hidden rounded-box">
     <div class="flex-1 min-w-0 p-4 text-white">
       <h4 class="font-semibold mb-2">Main Content</h4>
       <p class="opacity-80">Glass side panel on a gradient background.</p>
     </div>
-    <div class="shrink-0 flex flex-col items-center justify-center" style="width: 0; background: rgba(255,255,255,0.18); z-index: 2;">
-      <div class="flex items-center justify-center w-5 h-8 rounded-md text-white/70 hover:text-white cursor-pointer transition-opacity" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);">
+    <div class="shrink-0 flex flex-col items-center justify-center relative z-[2]" style="width: 24px; background: rgba(255,255,255,0.1);">
+      <div class="flex items-center justify-center cursor-pointer rounded-md text-white opacity-70 hover:opacity-100 transition-all" style="width: 20px; height: 2.5rem; background: rgba(255,255,255,0.2);">
         <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
-    <div class="shrink-0 w-80 h-full flex flex-col overflow-hidden glass border-l p-4 text-white" style="border-color: rgba(255,255,255,0.18);">
+    <div class="shrink-0 w-80 h-full flex flex-col overflow-hidden glass p-4 text-white" style="border-color: rgba(255,255,255,0.18);">
       <h4 class="font-semibold mb-2">Glass Panel</h4>
       <p class="opacity-80">Frosted glass side panel.</p>
     </div>
@@ -229,48 +188,421 @@ import CodePreview from '../../components/CodePreview.astro';
 // <div class="split-pane-side glass">...</div>`}
   />
 
-  <CodePreview
-    title="Mobile Overlay with Backdrop"
-    height="200px"
-    semantic={`<!-- On mobile (<992px), the side panel slides in as a fixed overlay.
-     Include a backdrop label so tapping outside closes the panel. -->
+  <h2 class="text-xl font-bold mt-10 mb-4">POS Sales Screen</h2>
+  <p class="text-base-content/70 mb-6">Real-world example: point-of-sale with products on the left and cart on the right. On desktop the split-pane shows both. On mobile the cart is hidden — a basket badge in the header opens a full-screen cart overlay (above the header) with a back button to close it. No JavaScript needed.</p>
 
-<input type="checkbox" id="sp-mobile1" class="split-pane-toggle">
-<div class="split-pane">
-  <div class="split-pane-main" style="padding: 1rem;">
-    <p style="color: var(--color-base-content); opacity: 0.7; font-size: 0.875rem;">Resize your browser below 992px to see the overlay behavior. The backdrop closes the panel when tapped.</p>
-  </div>
-  <div class="split-pane-divider">
-    <label for="sp-mobile1" class="split-pane-divider-btn" aria-label="Toggle panel">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  <CodePreview
+    title="POS — Products + Cart"
+    height="600px"
+    noFrame={true}
+    semantic={`<style>
+  /* POS demo wrapper: override CodePreview's noFrame flex layout */
+  .pos-demo { display: flex; flex-direction: column; width: 100%; margin: -1.5rem; width: calc(100% + 3rem); position: relative; }
+
+  /* Cart overlay: hidden checkbox + full-screen panel (mobile only) */
+  .pos-cart-toggle { position: fixed; height: 0; width: 0; appearance: none; opacity: 0; pointer-events: none; }
+
+  /* Mobile cart overlay */
+  @media (max-width: 991px) {
+    .pos-cart-overlay {
+      position: absolute; inset: 0; z-index: 9999;
+      background: var(--color-base-100);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+    .pos-cart-toggle:checked ~ .pos-cart-overlay {
+      transform: translateX(0);
+    }
+    /* Hide the split-pane side panel & divider on mobile */
+    .pos-split .split-pane-side { display: none !important; }
+    .pos-split .split-pane-divider { display: none !important; }
+    /* Keep main content visible (override split-pane toggle behavior) */
+    .pos-split .split-pane-main { display: flex !important; flex: 1 !important; }
+  }
+
+  /* Desktop: hide overlay, hide basket badge */
+  @media (min-width: 992px) {
+    .pos-cart-overlay { display: none; }
+    .pos-cart-badge { display: none; }
+  }
+</style>
+
+<div class="pos-demo" style="height: 550px;">
+<!-- Checkbox for mobile cart overlay -->
+<input type="checkbox" id="pos-cart" class="pos-cart-toggle">
+
+<!-- Cart overlay (mobile only, covers everything including header) -->
+<div class="pos-cart-overlay">
+  <div class="header" style="border-bottom: 1px solid var(--color-base-300);">
+    <label for="pos-cart" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; color: var(--color-primary);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.25rem; height: 1.25rem;"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
     </label>
+    <span style="font-weight: 600;">Cart</span>
+    <span style="width: 3rem;"></span>
   </div>
-  <label for="sp-mobile1" class="split-pane-backdrop" aria-label="Close panel"></label>
-  <div class="split-pane-side" style="padding: 1rem;">
-    <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Side Panel</h4>
-    <p style="color: var(--color-base-content); opacity: 0.7;">Tapping the dark backdrop closes this panel on mobile.</p>
+  <div class="cart" style="border-radius: 0; flex: 1; display: flex; flex-direction: column;">
+    <div class="cart-items" style="flex: 1;">
+      <div class="cart-item">
+        <div class="cart-item-content">
+          <p class="cart-item-name">Cappuccino</p>
+          <div class="cart-item-qty">
+            <button class="cart-item-qty-btn">-</button>
+            <span class="cart-item-qty-value">2</span>
+            <button class="cart-item-qty-btn">+</button>
+          </div>
+        </div>
+        <span class="cart-item-price">$9.00</span>
+      </div>
+      <div class="cart-item">
+        <div class="cart-item-content">
+          <p class="cart-item-name">Club Sandwich</p>
+          <div class="cart-item-qty">
+            <button class="cart-item-qty-btn">-</button>
+            <span class="cart-item-qty-value">1</span>
+            <button class="cart-item-qty-btn">+</button>
+          </div>
+        </div>
+        <span class="cart-item-price">$8.50</span>
+      </div>
+    </div>
+    <div class="cart-summary">
+      <div class="cart-summary-row">
+        <span class="cart-summary-label">Subtotal</span>
+        <span class="cart-summary-value">$17.50</span>
+      </div>
+      <div class="cart-summary-row">
+        <span class="cart-summary-label">Tax (10%)</span>
+        <span class="cart-summary-value">$1.75</span>
+      </div>
+      <div class="cart-summary-row cart-summary-row-total">
+        <span class="cart-summary-label">Total</span>
+        <span class="cart-summary-value">$19.25</span>
+      </div>
+    </div>
+    <div class="cart-actions">
+      <button class="btn color-primary" style="width: 100%;">Charge $19.25</button>
+    </div>
   </div>
+</div>
+
+<div class="app" style="height: 100%;">
+  <div class="page">
+    <div class="header">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 1.25rem; height: 1.25rem;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span style="font-weight: 600;">Quick POS</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <!-- Cart badge: opens overlay on mobile -->
+        <label for="pos-cart" class="quantity-badge pos-cart-badge" style="cursor: pointer;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 1.25rem; height: 1.25rem;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span class="quantity-badge-count">3</span>
+        </label>
+        <span style="font-size: 0.75rem; opacity: 0.5;">Cashier: Ana</span>
+      </div>
+    </div>
+    <div class="content" style="padding: 0; overflow: hidden;">
+      <!-- Checkbox for desktop split-pane (must be sibling of .split-pane) -->
+      <input type="checkbox" id="pos-split" class="split-pane-toggle" checked>
+      <div class="split-pane pos-split" style="--split-pane-width: 360px;">
+        <div class="split-pane-main" style="padding: 1rem;">
+          <div style="margin-bottom: 1rem;">
+            <input type="text" class="input" placeholder="Search products..." style="width: 100%;">
+          </div>
+          <div class="category-tabs" style="margin-bottom: 1rem;">
+            <button class="category-tabs-item category-tabs-item-active">All</button>
+            <button class="category-tabs-item">Drinks</button>
+            <button class="category-tabs-item">Food</button>
+            <button class="category-tabs-item">Snacks</button>
+          </div>
+          <div class="product-grid product-grid-3">
+            <div class="product-card">
+              <div class="product-card-image-wrapper"><div class="product-card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div></div>
+              <div class="product-card-content"><p class="product-card-name">Cappuccino</p><p class="product-card-price">$4.50</p></div>
+            </div>
+            <div class="product-card">
+              <div class="product-card-image-wrapper"><div class="product-card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg></div></div>
+              <div class="product-card-content"><p class="product-card-name">Orange Juice</p><p class="product-card-price">$3.00</p></div>
+            </div>
+            <div class="product-card">
+              <div class="product-card-image-wrapper"><div class="product-card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div></div>
+              <div class="product-card-content"><p class="product-card-name">Club Sandwich</p><p class="product-card-price">$8.50</p></div>
+            </div>
+            <div class="product-card">
+              <div class="product-card-image-wrapper"><div class="product-card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div>
+              <div class="product-card-content"><p class="product-card-name">Croissant</p><p class="product-card-price">$2.80</p></div>
+            </div>
+            <div class="product-card">
+              <div class="product-card-image-wrapper"><div class="product-card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div></div>
+              <div class="product-card-content"><p class="product-card-name">Espresso</p><p class="product-card-price">$2.50</p></div>
+            </div>
+            <div class="product-card">
+              <div class="product-card-image-wrapper"><div class="product-card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div></div>
+              <div class="product-card-content"><p class="product-card-name">Caesar Salad</p><p class="product-card-price">$9.90</p></div>
+            </div>
+          </div>
+        </div>
+        <!-- Desktop divider -->
+        <div class="split-pane-divider">
+          <label for="pos-split" class="split-pane-divider-btn" aria-label="Toggle cart">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </label>
+        </div>
+        <!-- Desktop cart side panel -->
+        <div class="split-pane-side">
+          <div class="cart" style="border-radius: 0;">
+            <div class="cart-header">
+              <h3 class="cart-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 1.25rem; height: 1.25rem;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                Cart <span class="cart-count">3</span>
+              </h3>
+              <button class="cart-clear">Clear</button>
+            </div>
+            <div class="cart-items">
+              <div class="cart-item">
+                <div class="cart-item-content"><p class="cart-item-name">Cappuccino</p><div class="cart-item-qty"><button class="cart-item-qty-btn">-</button><span class="cart-item-qty-value">2</span><button class="cart-item-qty-btn">+</button></div></div>
+                <span class="cart-item-price">$9.00</span>
+              </div>
+              <div class="cart-item">
+                <div class="cart-item-content"><p class="cart-item-name">Club Sandwich</p><div class="cart-item-qty"><button class="cart-item-qty-btn">-</button><span class="cart-item-qty-value">1</span><button class="cart-item-qty-btn">+</button></div></div>
+                <span class="cart-item-price">$8.50</span>
+              </div>
+            </div>
+            <div class="cart-summary">
+              <div class="cart-summary-row"><span class="cart-summary-label">Subtotal</span><span class="cart-summary-value">$17.50</span></div>
+              <div class="cart-summary-row"><span class="cart-summary-label">Tax (10%)</span><span class="cart-summary-value">$1.75</span></div>
+              <div class="cart-summary-row cart-summary-row-total"><span class="cart-summary-label">Total</span><span class="cart-summary-value">$19.25</span></div>
+            </div>
+            <div class="cart-actions">
+              <button class="btn color-primary" style="width: 100%;">Charge $19.25</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </div>`}
-    tailwind={`<!-- On mobile, panel becomes a fixed overlay with dark backdrop. -->
-<input type="checkbox" id="sp-mobiletw1" class="sr-only">
-<div class="flex flex-row h-full w-full relative">
-  <div class="flex-1 min-w-0 p-4">
-    <p class="text-base-content/70 text-sm">Resize below 992px to see overlay behavior.</p>
+    tailwind={`<style>
+  .pos-demo-tw { display: flex; flex-direction: column; width: 100%; margin: -1.5rem; width: calc(100% + 3rem); position: relative; }
+  .pos-cart-toggle-tw { position: fixed; height: 0; width: 0; appearance: none; opacity: 0; pointer-events: none; }
+
+  @media (max-width: 991px) {
+    .pos-cart-overlay-tw {
+      position: absolute; inset: 0; z-index: 9999;
+      background: var(--color-base-100);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+    .pos-cart-toggle-tw:checked ~ .pos-cart-overlay-tw { transform: translateX(0); }
+    .pos-tw-side { display: none !important; }
+    .pos-tw-divider { display: none !important; }
+    .pos-tw-main { display: flex !important; flex: 1 !important; }
+  }
+  @media (min-width: 992px) {
+    .pos-cart-overlay-tw { display: none; }
+    .pos-cart-badge-tw { display: none; }
+  }
+</style>
+
+<div class="pos-demo-tw" style="height: 550px;">
+<input type="checkbox" id="pos-cart-tw" class="pos-cart-toggle-tw">
+
+<!-- Mobile cart overlay -->
+<div class="pos-cart-overlay-tw">
+  <div class="w-full flex items-center justify-between shrink-0 gap-2 px-4 py-3 min-h-12 border-b border-base-300 bg-base-100">
+    <label for="pos-cart-tw" class="flex items-center gap-2 cursor-pointer text-sm text-primary">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </label>
+    <span class="font-semibold">Cart</span>
+    <span class="w-12"></span>
   </div>
-  <!-- Backdrop: a label that unchecks the checkbox on tap -->
-  <label for="sp-mobiletw1" class="hidden fixed inset-0 bg-black/40 z-40" aria-label="Close panel"></label>
-  <div class="w-80 shrink-0 h-full flex flex-col overflow-hidden border-l border-base-300 bg-base-100 p-4">
-    <h4 class="font-semibold mb-2">Side Panel</h4>
-    <p class="text-base-content/70">Tapping backdrop closes panel on mobile.</p>
+  <div class="flex flex-col flex-1 overflow-hidden bg-base-100">
+    <div class="flex-1 overflow-y-auto" style="-webkit-overflow-scrolling: touch;">
+      <div class="flex items-start gap-4 p-4 border-b border-base-300 bg-base-100">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium m-0 mb-1 text-base-content">Cappuccino</p>
+          <div class="flex items-center gap-1 mt-1">
+            <button class="flex items-center justify-center p-0 cursor-pointer bg-base-200 border border-base-300 text-base-content" style="width: 28px; height: 28px; border-radius: var(--radius-field, 0.25rem);">-</button>
+            <span class="text-sm font-medium text-center text-base-content" style="min-width: 32px;">2</span>
+            <button class="flex items-center justify-center p-0 cursor-pointer bg-base-200 border border-base-300 text-base-content" style="width: 28px; height: 28px; border-radius: var(--radius-field, 0.25rem);">+</button>
+          </div>
+        </div>
+        <span class="font-semibold text-right whitespace-nowrap text-base-content" style="font-variant-numeric: tabular-nums;">$9.00</span>
+      </div>
+      <div class="flex items-start gap-4 p-4 bg-base-100">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium m-0 mb-1 text-base-content">Club Sandwich</p>
+          <div class="flex items-center gap-1 mt-1">
+            <button class="flex items-center justify-center p-0 cursor-pointer bg-base-200 border border-base-300 text-base-content" style="width: 28px; height: 28px; border-radius: var(--radius-field, 0.25rem);">-</button>
+            <span class="text-sm font-medium text-center text-base-content" style="min-width: 32px;">1</span>
+            <button class="flex items-center justify-center p-0 cursor-pointer bg-base-200 border border-base-300 text-base-content" style="width: 28px; height: 28px; border-radius: var(--radius-field, 0.25rem);">+</button>
+          </div>
+        </div>
+        <span class="font-semibold text-right whitespace-nowrap text-base-content" style="font-variant-numeric: tabular-nums;">$8.50</span>
+      </div>
+    </div>
+    <div class="shrink-0 bg-base-200 border-t border-base-300 px-6 py-4">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm text-base-content/60">Subtotal</span>
+        <span class="text-sm text-base-content" style="font-variant-numeric: tabular-nums;">$17.50</span>
+      </div>
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm text-base-content/60">Tax (10%)</span>
+        <span class="text-sm text-base-content" style="font-variant-numeric: tabular-nums;">$1.75</span>
+      </div>
+      <div class="flex justify-between items-center pt-4 mt-2 border-t-2 border-base-300">
+        <span class="font-semibold text-base-content">Total</span>
+        <span class="text-xl font-bold text-primary">$19.25</span>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2 shrink-0 bg-base-100 border-t border-base-300 px-6 py-4">
+      <button class="btn color-primary w-full">Charge $19.25</button>
+    </div>
   </div>
+</div>
+
+<!-- App shell using Tailwind utilities -->
+<div class="flex flex-col bg-base-100 h-full">
+  <div class="relative grid flex-1 w-full h-full min-h-0 overflow-hidden" style="grid-template-columns: auto 1fr auto; grid-template-rows: auto 1fr auto;">
+    <!-- Header -->
+    <div class="w-full flex items-center justify-between shrink-0 gap-2 px-4 py-3 min-h-12 border-b border-base-300 bg-base-100 sticky top-0 z-200" style="grid-column: 1 / -1; grid-row: 1;">
+      <div class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span class="font-semibold">Quick POS</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <label for="pos-cart-tw" class="relative inline-flex cursor-pointer pos-cart-badge-tw">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span class="absolute flex items-center justify-center font-semibold text-white rounded-full" style="top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; background: var(--color-error); font-size: 11px; line-height: 1; border: 2px solid var(--color-base-100);">3</span>
+        </label>
+        <span class="text-xs opacity-50">Cashier: Ana</span>
+      </div>
+    </div>
+    <!-- Content -->
+    <div class="min-w-0 min-h-0 overflow-hidden" style="grid-column: 2; grid-row: 2;">
+      <input type="checkbox" id="pos-split-tw" class="split-pane-toggle" checked>
+      <div class="flex flex-row w-full relative overflow-hidden h-full">
+        <!-- Main: Products -->
+        <div class="flex-1 min-w-0 flex flex-col overflow-auto p-4 pos-tw-main h-full">
+          <div class="mb-4">
+            <input type="text" class="input w-full" placeholder="Search products...">
+          </div>
+          <div class="flex items-center relative overflow-x-auto mb-4 bg-base-100 gap-2 px-4 py-2" style="scrollbar-width: none;">
+            <button class="relative flex items-center justify-center whitespace-nowrap cursor-pointer border-none bg-transparent font-medium text-sm text-primary" style="flex: 0 0 auto; min-height: 48px; padding: 0.5rem 1.5rem;">All</button>
+            <button class="relative flex items-center justify-center whitespace-nowrap cursor-pointer border-none bg-transparent font-medium text-sm text-base-content/60" style="flex: 0 0 auto; min-height: 48px; padding: 0.5rem 1.5rem;">Drinks</button>
+            <button class="relative flex items-center justify-center whitespace-nowrap cursor-pointer border-none bg-transparent font-medium text-sm text-base-content/60" style="flex: 0 0 auto; min-height: 48px; padding: 0.5rem 1.5rem;">Food</button>
+            <button class="relative flex items-center justify-center whitespace-nowrap cursor-pointer border-none bg-transparent font-medium text-sm text-base-content/60" style="flex: 0 0 auto; min-height: 48px; padding: 0.5rem 1.5rem;">Snacks</button>
+          </div>
+          <div class="grid gap-4 grid-cols-3">
+            <div class="flex flex-col overflow-hidden cursor-pointer select-none border border-base-300 bg-base-100 rounded-box transition-all active:scale-[0.97]">
+              <div class="relative overflow-hidden bg-base-200 aspect-square"><div class="flex items-center justify-center w-full h-full bg-linear-to-br from-base-200 to-base-300 text-base-content/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 opacity-50"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div></div>
+              <div class="flex flex-col flex-1 gap-1 p-2"><p class="text-sm font-medium m-0 text-base-content">Cappuccino</p><p class="text-lg font-bold text-base-content" style="font-variant-numeric: tabular-nums;">$4.50</p></div>
+            </div>
+            <div class="flex flex-col overflow-hidden cursor-pointer select-none border border-base-300 bg-base-100 rounded-box transition-all active:scale-[0.97]">
+              <div class="relative overflow-hidden bg-base-200 aspect-square"><div class="flex items-center justify-center w-full h-full bg-linear-to-br from-base-200 to-base-300 text-base-content/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 opacity-50"><circle cx="12" cy="12" r="10"/></svg></div></div>
+              <div class="flex flex-col flex-1 gap-1 p-2"><p class="text-sm font-medium m-0 text-base-content">Orange Juice</p><p class="text-lg font-bold text-base-content" style="font-variant-numeric: tabular-nums;">$3.00</p></div>
+            </div>
+            <div class="flex flex-col overflow-hidden cursor-pointer select-none border border-base-300 bg-base-100 rounded-box transition-all active:scale-[0.97]">
+              <div class="relative overflow-hidden bg-base-200 aspect-square"><div class="flex items-center justify-center w-full h-full bg-linear-to-br from-base-200 to-base-300 text-base-content/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 opacity-50"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div></div>
+              <div class="flex flex-col flex-1 gap-1 p-2"><p class="text-sm font-medium m-0 text-base-content">Club Sandwich</p><p class="text-lg font-bold text-base-content" style="font-variant-numeric: tabular-nums;">$8.50</p></div>
+            </div>
+            <div class="flex flex-col overflow-hidden cursor-pointer select-none border border-base-300 bg-base-100 rounded-box transition-all active:scale-[0.97]">
+              <div class="relative overflow-hidden bg-base-200 aspect-square"><div class="flex items-center justify-center w-full h-full bg-linear-to-br from-base-200 to-base-300 text-base-content/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 opacity-50"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div>
+              <div class="flex flex-col flex-1 gap-1 p-2"><p class="text-sm font-medium m-0 text-base-content">Croissant</p><p class="text-lg font-bold text-base-content" style="font-variant-numeric: tabular-nums;">$2.80</p></div>
+            </div>
+            <div class="flex flex-col overflow-hidden cursor-pointer select-none border border-base-300 bg-base-100 rounded-box transition-all active:scale-[0.97]">
+              <div class="relative overflow-hidden bg-base-200 aspect-square"><div class="flex items-center justify-center w-full h-full bg-linear-to-br from-base-200 to-base-300 text-base-content/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 opacity-50"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div></div>
+              <div class="flex flex-col flex-1 gap-1 p-2"><p class="text-sm font-medium m-0 text-base-content">Espresso</p><p class="text-lg font-bold text-base-content" style="font-variant-numeric: tabular-nums;">$2.50</p></div>
+            </div>
+            <div class="flex flex-col overflow-hidden cursor-pointer select-none border border-base-300 bg-base-100 rounded-box transition-all active:scale-[0.97]">
+              <div class="relative overflow-hidden bg-base-200 aspect-square"><div class="flex items-center justify-center w-full h-full bg-linear-to-br from-base-200 to-base-300 text-base-content/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 opacity-50"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div></div>
+              <div class="flex flex-col flex-1 gap-1 p-2"><p class="text-sm font-medium m-0 text-base-content">Caesar Salad</p><p class="text-lg font-bold text-base-content" style="font-variant-numeric: tabular-nums;">$9.90</p></div>
+            </div>
+          </div>
+        </div>
+        <!-- Divider -->
+        <div class="shrink-0 flex flex-col items-center justify-center relative bg-base-200 hover:bg-base-300 transition-colors pos-tw-divider" style="width: 24px; z-index: 2;">
+          <label for="pos-split-tw" class="flex items-center justify-center cursor-pointer bg-base-300 text-base-content opacity-60 hover:opacity-100 hover:bg-base-content hover:text-base-100 transition-all" style="width: 20px; height: 2.5rem; border-radius: 0.375rem;" aria-label="Toggle cart">
+            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </label>
+        </div>
+        <!-- Side: Cart -->
+        <div class="shrink-0 flex flex-col overflow-hidden bg-base-100 border-l border-base-300 pos-tw-side" style="width: 360px; height: 100%; transition: width 0.2s ease, opacity 0.2s ease;">
+          <div class="flex items-center justify-between shrink-0 border-b border-base-300 bg-base-100 px-6 py-4">
+            <h3 class="flex items-center gap-2 text-lg font-semibold m-0 text-base-content">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              Cart <span class="inline-flex items-center justify-center text-sm font-semibold rounded-full" style="min-width: 24px; height: 24px; padding: 0 0.25rem; background-color: var(--color-primary); color: var(--color-primary-content, white);">3</span>
+            </h3>
+            <button class="flex items-center gap-1 text-sm bg-transparent border-none cursor-pointer text-error" style="padding: 0.25rem 0.5rem; border-radius: var(--radius-field, 0.25rem);">Clear</button>
+          </div>
+          <div class="flex-1 overflow-y-auto overflow-x-hidden" style="-webkit-overflow-scrolling: touch;">
+            <div class="flex items-start gap-4 p-4 border-b border-base-300 bg-base-100">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium m-0 mb-1 text-base-content">Cappuccino</p>
+                <div class="flex items-center gap-1 mt-1">
+                  <button class="flex items-center justify-center p-0 cursor-pointer bg-base-200 border border-base-300 text-base-content" style="width: 28px; height: 28px; border-radius: var(--radius-field, 0.25rem);">-</button>
+                  <span class="text-sm font-medium text-center text-base-content" style="min-width: 32px;">2</span>
+                  <button class="flex items-center justify-center p-0 cursor-pointer bg-base-200 border border-base-300 text-base-content" style="width: 28px; height: 28px; border-radius: var(--radius-field, 0.25rem);">+</button>
+                </div>
+              </div>
+              <span class="font-semibold text-right whitespace-nowrap text-base-content" style="font-variant-numeric: tabular-nums;">$9.00</span>
+            </div>
+            <div class="flex items-start gap-4 p-4 bg-base-100">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium m-0 mb-1 text-base-content">Club Sandwich</p>
+                <div class="flex items-center gap-1 mt-1">
+                  <button class="flex items-center justify-center p-0 cursor-pointer bg-base-200 border border-base-300 text-base-content" style="width: 28px; height: 28px; border-radius: var(--radius-field, 0.25rem);">-</button>
+                  <span class="text-sm font-medium text-center text-base-content" style="min-width: 32px;">1</span>
+                  <button class="flex items-center justify-center p-0 cursor-pointer bg-base-200 border border-base-300 text-base-content" style="width: 28px; height: 28px; border-radius: var(--radius-field, 0.25rem);">+</button>
+                </div>
+              </div>
+              <span class="font-semibold text-right whitespace-nowrap text-base-content" style="font-variant-numeric: tabular-nums;">$8.50</span>
+            </div>
+          </div>
+          <div class="shrink-0 bg-base-200 border-t border-base-300 px-6 py-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm text-base-content/60">Subtotal</span>
+              <span class="text-sm text-base-content" style="font-variant-numeric: tabular-nums;">$17.50</span>
+            </div>
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm text-base-content/60">Tax (10%)</span>
+              <span class="text-sm text-base-content" style="font-variant-numeric: tabular-nums;">$1.75</span>
+            </div>
+            <div class="flex justify-between items-center pt-4 mt-2 border-t-2 border-base-300">
+              <span class="font-semibold text-base-content">Total</span>
+              <span class="text-xl font-bold text-primary">$19.25</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2 shrink-0 bg-base-100 border-t border-base-300 px-6 py-4">
+            <button class="btn color-primary w-full">Charge $19.25</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </div>`}
-    js={`// Mobile overlay uses the same checkbox — no extra JS needed.
+    js={`// POS layout: split-pane for desktop + full-screen overlay for mobile.
+// TWO separate checkboxes, both CSS-only, no JavaScript:
 //
-// Add a <label> backdrop inside .split-pane:
-//   <label for="sp" class="split-pane-backdrop"></label>
+// 1. split-pane-toggle (desktop): controls the side panel collapse/expand
+// 2. pos-cart-toggle (mobile): controls the full-screen cart overlay
 //
-// Clicking the backdrop unchecks the checkbox, which:
-// 1. Slides the panel off-screen (transform)
-// 2. Hides the backdrop (opacity: 0)`}
+// Mobile behavior:
+//   - Side panel & divider are hidden via CSS
+//   - Header shows a basket badge with item count
+//   - Tapping the badge checks the overlay checkbox
+//   - Cart overlay slides in from the right (z-index: 9999, above header)
+//   - Back button in overlay unchecks the checkbox to close
+//
+// Desktop behavior:
+//   - Overlay is display:none, badge is hidden
+//   - Split-pane shows both panels side-by-side
+//   - Divider toggle collapses/expands the cart`}
   />
 </DocsLayout>

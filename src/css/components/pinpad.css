@@ -1,0 +1,295 @@
+/* UX v3 - Pin Pad Component */
+/* Full-screen PIN entry with dots, circular keys, loading/error/success states, glass variant */
+
+@layer components {
+
+  /* =============================================
+     Screen (Fullscreen Overlay)
+     ============================================= */
+
+  .pinpad-screen {
+    @apply fixed inset-0 flex items-center justify-center z-50;
+    background-color: var(--color-base-100);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .pinpad-screen[data-state="closed"] {
+    @apply opacity-0 invisible pointer-events-none;
+  }
+
+  .pinpad-screen[data-state="open"] {
+    @apply opacity-100 visible;
+  }
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .pinpad {
+    @apply flex flex-col items-center gap-6 p-6;
+  }
+
+  /* =============================================
+     Title / Label
+     ============================================= */
+
+  .pinpad-title {
+    @apply text-xl font-semibold m-0 text-center;
+    color: var(--color-base-content);
+  }
+
+  .pinpad-label {
+    @apply text-sm m-0 text-center;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Avatar / Icon area (optional, above title)
+     ============================================= */
+
+  .pinpad-avatar {
+    @apply rounded-full overflow-hidden flex items-center justify-center shrink-0;
+    width: 64px;
+    height: 64px;
+    background-color: var(--color-base-200);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    svg {
+      width: 32px;
+      height: 32px;
+      max-width: 32px;
+      max-height: 32px;
+      color: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+    }
+  }
+
+  /* =============================================
+     Dots
+     ============================================= */
+
+  .pinpad-dots {
+    @apply flex gap-4;
+  }
+
+  .pinpad-dot {
+    @apply rounded-full;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--color-base-300);
+    background: transparent;
+    transition: all 0.2s ease;
+  }
+
+  .pinpad-dot-filled {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    transform: scale(1.15);
+    box-shadow: 0 0 12px color-mix(in oklch, var(--color-primary) 40%, transparent);
+  }
+
+  .pinpad-dot-error {
+    background: var(--color-error);
+    border-color: var(--color-error);
+    box-shadow: 0 0 12px color-mix(in oklch, var(--color-error) 40%, transparent);
+    animation: pinpad-shake 0.5s ease;
+  }
+
+  .pinpad-dot-success {
+    background: var(--color-success);
+    border-color: var(--color-success);
+    box-shadow: 0 0 12px color-mix(in oklch, var(--color-success) 40%, transparent);
+  }
+
+  /* =============================================
+     Grid
+     ============================================= */
+
+  .pinpad-grid {
+    @apply grid gap-3;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 280px;
+  }
+
+  /* =============================================
+     Keys
+     ============================================= */
+
+  .pinpad-key {
+    @apply flex items-center justify-center rounded-full cursor-pointer select-none font-medium;
+    width: 72px;
+    height: 72px;
+    font-size: 1.5rem;
+    color: var(--color-base-content);
+    background-color: color-mix(in oklch, var(--color-base-content) 5%, transparent);
+    border: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+    }
+
+    &:active {
+      transform: scale(0.92);
+      background-color: color-mix(in oklch, var(--color-base-content) 15%, transparent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      @apply opacity-40 cursor-not-allowed pointer-events-none;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+      max-width: 24px;
+      max-height: 24px;
+    }
+  }
+
+  .pinpad-key-hidden {
+    @apply invisible pointer-events-none;
+  }
+
+  /* =============================================
+     Feedback (hint, error, loading)
+     ============================================= */
+
+  .pinpad-hint {
+    @apply text-xs m-0 text-center;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .pinpad-error {
+    @apply text-sm m-0 text-center;
+    color: var(--color-error);
+  }
+
+  .pinpad-success {
+    @apply text-sm m-0 text-center;
+    color: var(--color-success);
+  }
+
+  .pinpad-loading {
+    @apply flex items-center justify-center gap-2 text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Size Variants
+     ============================================= */
+
+  .pinpad-sm {
+    @apply gap-4 p-4;
+
+    .pinpad-dot { width: 14px; height: 14px; }
+    .pinpad-key { width: 56px; height: 56px; font-size: 1.25rem; }
+    .pinpad-key svg { width: 20px; height: 20px; max-width: 20px; max-height: 20px; }
+    .pinpad-grid { max-width: 220px; @apply gap-2; }
+  }
+
+  .pinpad-lg {
+    @apply gap-8 p-8;
+
+    .pinpad-dot { width: 22px; height: 22px; }
+    .pinpad-key { width: 84px; height: 84px; font-size: 1.75rem; }
+    .pinpad-key svg { width: 28px; height: 28px; max-width: 28px; max-height: 28px; }
+    .pinpad-grid { max-width: 320px; @apply gap-4; }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .pinpad.glass,
+  .pinpad-screen.glass {
+    @apply glass;
+
+    .pinpad-key {
+      &:hover {
+        background-color: color-mix(in oklch, var(--color-base-content) 8%, transparent);
+      }
+      &:active {
+        background-color: color-mix(in oklch, var(--color-base-content) 15%, transparent);
+      }
+    }
+
+    .pinpad-dot {
+      border-color: color-mix(in oklch, var(--color-base-content) 20%, transparent);
+    }
+  }
+
+  /* Dark glass (on gradient backgrounds) */
+  .pinpad-screen-dark {
+    @apply text-white;
+
+    .pinpad-title,
+    .pinpad-key { @apply text-white; }
+    .pinpad-label { color: rgba(255, 255, 255, 0.6); }
+    .pinpad-hint { color: rgba(255, 255, 255, 0.4); }
+    .pinpad-dot { border-color: rgba(255, 255, 255, 0.3); }
+    .pinpad-key { background-color: rgba(255, 255, 255, 0.08); }
+    .pinpad-key:hover { background-color: rgba(255, 255, 255, 0.15); }
+    .pinpad-key:active { background-color: rgba(255, 255, 255, 0.22); }
+  }
+}
+
+/* =============================================
+   Keyframes (outside @layer)
+   ============================================= */
+
+@keyframes pinpad-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .pinpad-key {
+    width: 64px;
+    height: 64px;
+  }
+
+  .pinpad-grid {
+    max-width: 260px;
+  }
+
+  .pinpad-lg .pinpad-key {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .pinpad-key,
+  .pinpad-dot {
+    transition: none;
+  }
+
+  .pinpad-dot-error {
+    animation: none;
+  }
+
+  .pinpad-screen {
+    transition: none;
+  }
+}
