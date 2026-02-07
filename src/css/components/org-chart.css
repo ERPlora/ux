@@ -1,0 +1,555 @@
+/* Org Chart */
+/* Organizational hierarchy tree with pan/zoom, search, connectors, and node cards */
+
+@layer components {
+
+  /* =============================================
+     Base container
+     ============================================= */
+
+  .org-chart {
+    --oc-node-width: 180px;
+    --oc-node-min-height: 80px;
+    --oc-node-padding: 1rem;
+    --oc-node-gap: 2rem;
+    --oc-level-gap: 60px;
+    --oc-connector-width: 2px;
+    --oc-connector-color: var(--color-base-300);
+    --oc-transition: 0.2s;
+
+    @apply relative w-full overflow-hidden select-none;
+    height: 100%;
+    min-height: 400px;
+    background: var(--color-base-200);
+    border-radius: var(--radius-box, 0.75rem);
+  }
+
+  /* =============================================
+     Viewport & canvas
+     ============================================= */
+
+  .org-chart-viewport {
+    @apply absolute inset-0 overflow-hidden cursor-grab;
+
+    &:active {
+      @apply cursor-grabbing;
+    }
+  }
+
+  .org-chart-canvas {
+    @apply absolute flex flex-col items-center;
+    padding: 2.5rem;
+    transform-origin: center center;
+    transition: transform var(--oc-transition) ease-out;
+    min-width: 100%;
+    min-height: 100%;
+  }
+
+  .org-chart-canvas-dragging {
+    transition: none;
+  }
+
+  /* =============================================
+     Controls
+     ============================================= */
+
+  .org-chart-controls {
+    @apply absolute flex flex-col;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    gap: 0.25rem;
+    z-index: 10;
+  }
+
+  .org-chart-control {
+    @apply flex items-center justify-center cursor-pointer;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: none;
+    border-radius: var(--radius-field, 0.5rem);
+    background: var(--color-base-100);
+    color: var(--color-base-content);
+    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-base-content) 8%, transparent);
+    transition: all 0.15s ease-out;
+
+    &:hover {
+      background: var(--color-base-200);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    & > svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  .org-chart-zoom-level {
+    @apply text-center;
+    font-size: 0.75rem;
+    padding: 0.25rem;
+    background: var(--color-base-100);
+    border-radius: var(--radius-field, 0.25rem);
+    box-shadow: 0 1px 3px color-mix(in oklch, var(--color-base-content) 6%, transparent);
+    min-width: 2.5rem;
+  }
+
+  /* =============================================
+     Search
+     ============================================= */
+
+  .org-chart-search {
+    @apply absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    z-index: 10;
+    width: 280px;
+    max-width: calc(100% - 4rem);
+  }
+
+  .org-chart-search-input {
+    @apply w-full outline-none;
+    height: 2.5rem;
+    padding: 0 1rem 0 2.5rem;
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+    background: var(--color-base-100);
+    font-size: 0.875rem;
+    color: var(--color-base-content);
+    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-base-content) 8%, transparent);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 4px 12px color-mix(in oklch, var(--color-base-content) 8%, transparent),
+                  0 0 0 3px color-mix(in oklch, var(--color-primary) 20%, transparent);
+    }
+
+    &::placeholder {
+      color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    }
+  }
+
+  .org-chart-search-icon {
+    @apply absolute pointer-events-none;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.125rem;
+    height: 1.125rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Tree structure
+     ============================================= */
+
+  .org-chart-tree {
+    @apply flex flex-col items-center;
+  }
+
+  .org-chart-branch {
+    @apply relative flex flex-col items-center;
+
+    /* Vertical line from horizontal bar to child */
+    &::before {
+      content: '';
+      @apply absolute;
+      top: 0;
+      left: 50%;
+      width: var(--oc-connector-width);
+      height: calc(var(--oc-level-gap) / 2);
+      background: var(--oc-connector-color);
+      transform: translateX(-50%);
+    }
+  }
+
+  /* First branch hides the line going up */
+  .org-chart-tree > .org-chart-branch::before {
+    @apply hidden;
+  }
+
+  .org-chart-children {
+    @apply flex relative;
+    gap: var(--oc-node-gap);
+    padding-top: var(--oc-level-gap);
+  }
+
+  .org-chart-children-collapsed {
+    @apply hidden;
+  }
+
+  /* =============================================
+     Node
+     ============================================= */
+
+  .org-chart-node {
+    @apply relative flex flex-col items-center text-center cursor-pointer;
+    width: var(--oc-node-width);
+    min-height: var(--oc-node-min-height);
+    padding: var(--oc-node-padding);
+    background: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+    box-shadow: 0 1px 3px color-mix(in oklch, var(--color-base-content) 6%, transparent);
+    transition: all 0.15s ease-out;
+
+    &:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 4px 12px color-mix(in oklch, var(--color-base-content) 8%, transparent);
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.98);
+    }
+  }
+
+  .org-chart-node-selected {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 20%, transparent),
+                0 4px 12px color-mix(in oklch, var(--color-base-content) 8%, transparent);
+  }
+
+  .org-chart-node-highlighted {
+    border-color: var(--color-warning);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-warning) 20%, transparent),
+                0 4px 12px color-mix(in oklch, var(--color-base-content) 8%, transparent);
+    animation: org-chart-pulse 1.5s ease-in-out infinite;
+  }
+
+  .org-chart-node-collapsed {
+    opacity: 0.7;
+  }
+
+  /* Node avatar */
+  .org-chart-avatar {
+    @apply rounded-full overflow-hidden flex items-center justify-center font-semibold uppercase shrink-0;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 0.5rem;
+    background: var(--color-neutral);
+    color: var(--color-neutral-content);
+    font-size: 1.125rem;
+
+    & > img {
+      @apply w-full h-full object-cover;
+    }
+  }
+
+  /* Node info */
+  .org-chart-name {
+    @apply font-semibold;
+    font-size: 0.875rem;
+    color: var(--color-base-content);
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+    word-break: break-word;
+  }
+
+  .org-chart-title {
+    font-size: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  .org-chart-department {
+    font-size: 0.625rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    margin-top: 0.25rem;
+    padding: 2px 8px;
+    background: var(--color-base-200);
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  /* Expand/collapse toggle */
+  .org-chart-toggle {
+    @apply absolute flex items-center justify-center rounded-full cursor-pointer;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--color-base-300);
+    background: var(--color-base-100);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    z-index: 5;
+    transition: all 0.15s ease;
+
+    &:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      transform: translateX(-50%) scale(1.1);
+    }
+
+    & > svg {
+      width: 0.875rem;
+      height: 0.875rem;
+      transition: transform 0.15s ease;
+    }
+  }
+
+  .org-chart-toggle-collapsed > svg {
+    transform: rotate(-90deg);
+  }
+
+  /* Child count badge */
+  .org-chart-count {
+    @apply absolute flex items-center justify-center font-semibold;
+    bottom: -8px;
+    right: -8px;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: var(--color-primary);
+    color: var(--color-primary-content);
+    font-size: 0.6875rem;
+    box-shadow: 0 1px 3px color-mix(in oklch, var(--color-base-content) 6%, transparent);
+  }
+
+  /* =============================================
+     Connectors (CSS lines)
+     ============================================= */
+
+  .org-chart-connector {
+    @apply absolute pointer-events-none;
+  }
+
+  .org-chart-connector-vertical {
+    left: 50%;
+    top: 100%;
+    width: var(--oc-connector-width);
+    height: calc(var(--oc-level-gap) / 2);
+    background: var(--oc-connector-color);
+    transform: translateX(-50%);
+  }
+
+  .org-chart-connector-horizontal {
+    @apply absolute;
+    top: calc(var(--oc-level-gap) / 2);
+    height: var(--oc-connector-width);
+    background: var(--oc-connector-color);
+    transform: translateY(-50%);
+  }
+
+  /* =============================================
+     Horizontal layout
+     ============================================= */
+
+  .org-chart-horizontal {
+    & .org-chart-tree {
+      @apply flex-row;
+    }
+
+    & .org-chart-branch {
+      @apply flex-row;
+
+      &::before {
+        top: 50%;
+        left: 0;
+        width: calc(var(--oc-level-gap) / 2);
+        height: var(--oc-connector-width);
+        transform: translateY(-50%);
+      }
+    }
+
+    & .org-chart-children {
+      @apply flex-col;
+      padding-top: 0;
+      padding-left: var(--oc-level-gap);
+    }
+
+    & .org-chart-connector-vertical {
+      top: 50%;
+      left: 100%;
+      width: calc(var(--oc-level-gap) / 2);
+      height: var(--oc-connector-width);
+      transform: translateY(-50%);
+    }
+
+    & .org-chart-connector-horizontal {
+      left: calc(var(--oc-level-gap) / 2);
+      top: 0;
+      width: var(--oc-connector-width);
+      transform: translateX(-50%);
+    }
+
+    & .org-chart-toggle {
+      bottom: auto;
+      left: auto;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+
+      &:hover {
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      & > svg {
+        transform: rotate(90deg);
+      }
+    }
+
+    & .org-chart-toggle-collapsed > svg {
+      transform: rotate(0deg);
+    }
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .org-chart.glass {
+    background: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+
+    & .org-chart-node {
+      background: color-mix(in oklch, var(--color-base-100) 72%, transparent);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-color: color-mix(in oklch, var(--color-base-content) 12%, transparent);
+      box-shadow: 0 8px 32px color-mix(in oklch, black 8%, transparent);
+
+      &:hover {
+        box-shadow: 0 8px 32px color-mix(in oklch, black 8%, transparent),
+                    0 8px 32px color-mix(in oklch, black 10%, transparent);
+      }
+    }
+
+    & .org-chart-control,
+    & .org-chart-search-input,
+    & .org-chart-zoom-level {
+      background: color-mix(in oklch, var(--color-base-100) 72%, transparent);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid color-mix(in oklch, var(--color-base-content) 12%, transparent);
+    }
+
+    & .org-chart-toggle {
+      background: color-mix(in oklch, var(--color-base-100) 72%, transparent);
+      border-color: color-mix(in oklch, var(--color-base-content) 12%, transparent);
+    }
+  }
+
+  /* =============================================
+     Compact mode
+     ============================================= */
+
+  .org-chart-compact {
+    --oc-node-width: 140px;
+    --oc-node-min-height: 60px;
+    --oc-node-padding: 0.5rem;
+    --oc-node-gap: 1rem;
+    --oc-level-gap: 40px;
+
+    & .org-chart-avatar {
+      width: 2.25rem;
+      height: 2.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    & .org-chart-name {
+      font-size: 0.75rem;
+    }
+
+    & .org-chart-title {
+      font-size: 0.625rem;
+    }
+
+    & .org-chart-toggle {
+      width: 1.25rem;
+      height: 1.25rem;
+      bottom: -10px;
+
+      & > svg {
+        width: 0.75rem;
+        height: 0.75rem;
+      }
+    }
+  }
+
+  /* =============================================
+     Size variants
+     ============================================= */
+
+  .org-chart-sm {
+    --oc-node-width: 120px;
+    --oc-node-min-height: 50px;
+    --oc-node-gap: 0.5rem;
+    --oc-level-gap: 30px;
+  }
+
+  .org-chart-lg {
+    --oc-node-width: 220px;
+    --oc-node-min-height: 100px;
+    --oc-node-gap: 2.5rem;
+    --oc-level-gap: 80px;
+  }
+}
+
+/* =============================================
+   Keyframes
+   ============================================= */
+
+@keyframes org-chart-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-warning) 20%, transparent),
+                0 4px 12px color-mix(in oklch, var(--color-base-content) 8%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in oklch, var(--color-warning) 20%, transparent),
+                0 8px 24px color-mix(in oklch, var(--color-base-content) 12%, transparent);
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .org-chart-canvas {
+    transition: none;
+  }
+
+  .org-chart-node,
+  .org-chart-control,
+  .org-chart-toggle {
+    transition: none;
+  }
+
+  .org-chart-node-highlighted {
+    animation: none;
+  }
+}
+
+/* =============================================
+   Print
+   ============================================= */
+
+@media print {
+  .org-chart {
+    overflow: visible;
+    height: auto;
+    min-height: auto;
+  }
+
+  .org-chart-controls,
+  .org-chart-search {
+    display: none;
+  }
+
+  .org-chart-canvas {
+    position: static;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,129 @@
+/* UX v3 - Stock Indicator Component */
+/* Stock status badges with dot, label, count for POS/retail */
+
+@layer components {
+
+  /* =============================================
+     Base
+     ============================================= */
+
+  .stock-indicator {
+    @apply inline-flex items-center whitespace-nowrap;
+    gap: 0.25rem;
+    height: 24px;
+    padding: 0 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: var(--radius-field, 0.25rem);
+    background: transparent;
+    transition: opacity 0.15s ease;
+  }
+
+  /* =============================================
+     Child Elements
+     ============================================= */
+
+  .stock-indicator-dot {
+    @apply shrink-0 rounded-full;
+    width: 8px;
+    height: 8px;
+    background: currentColor;
+  }
+
+  .stock-indicator-label {
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .stock-indicator-count {
+    @apply font-semibold;
+    color: var(--color-base-content);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* =============================================
+     State Modifiers
+     ============================================= */
+
+  .stock-indicator-in-stock {
+    color: var(--color-success);
+
+    .stock-indicator-label { color: var(--color-success); }
+  }
+
+  .stock-indicator-low-stock {
+    color: var(--color-warning);
+
+    .stock-indicator-label { color: var(--color-warning); }
+    .stock-indicator-dot { animation: stock-pulse 2s ease-in-out infinite; }
+  }
+
+  .stock-indicator-out-of-stock {
+    color: var(--color-error);
+
+    .stock-indicator-label { color: var(--color-error); }
+  }
+
+  .stock-indicator-backorder {
+    color: var(--color-primary);
+
+    .stock-indicator-label { color: var(--color-primary); }
+  }
+
+  /* =============================================
+     Variant Modifiers
+     ============================================= */
+
+  /* Compact - dot only */
+  .stock-indicator-compact {
+    @apply p-0 h-auto gap-0;
+
+    .stock-indicator-label,
+    .stock-indicator-count { @apply hidden; }
+  }
+
+  /* Badge - pill shape with background */
+  .stock-indicator-badge {
+    @apply rounded-full;
+    padding: 0 0.5rem;
+
+    &.stock-indicator-in-stock {
+      background: color-mix(in oklch, var(--color-success) 12%, transparent);
+    }
+
+    &.stock-indicator-low-stock {
+      background: color-mix(in oklch, var(--color-warning) 12%, transparent);
+    }
+
+    &.stock-indicator-out-of-stock {
+      background: color-mix(in oklch, var(--color-error) 12%, transparent);
+    }
+
+    &.stock-indicator-backorder {
+      background: color-mix(in oklch, var(--color-primary) 12%, transparent);
+    }
+  }
+}
+
+/* =============================================
+   Keyframes (outside @layer)
+   ============================================= */
+
+@keyframes stock-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .stock-indicator-low-stock .stock-indicator-dot {
+    animation: none;
+  }
+
+  .stock-indicator {
+    transition: none;
+  }
+}

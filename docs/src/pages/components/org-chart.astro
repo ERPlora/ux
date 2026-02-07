@@ -1,0 +1,537 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Org Chart">
+  <p class="text-base-content/70 mb-6">Organizational hierarchy tree with node cards, connectors, expand/collapse toggles, search, pan/zoom controls, and horizontal layout.</p>
+
+  <CodePreview
+    title="Basic Tree"
+    height="520px"
+    semantic={`<div class="org-chart" style="min-height:480px;">
+  <div class="org-chart-viewport">
+    <div class="org-chart-canvas" style="position:relative;">
+      <div class="org-chart-tree">
+        <!-- Root -->
+        <div class="org-chart-branch">
+          <div class="org-chart-node">
+            <div class="org-chart-avatar">AV</div>
+            <div class="org-chart-name">Ana Vidal</div>
+            <div class="org-chart-title">CEO</div>
+            <span class="org-chart-department">ERPlora</span>
+            <div class="org-chart-connector org-chart-connector-vertical"></div>
+            <button class="org-chart-toggle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <span class="org-chart-count">3</span>
+          </div>
+
+          <!-- Children -->
+          <div class="org-chart-children">
+            <!-- CTO -->
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">LM</div>
+                <div class="org-chart-name">Luis Martinez</div>
+                <div class="org-chart-title">CTO</div>
+                <span class="org-chart-department">Engineering</span>
+                <div class="org-chart-connector org-chart-connector-vertical"></div>
+                <button class="org-chart-toggle">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <span class="org-chart-count">2</span>
+              </div>
+              <div class="org-chart-children">
+                <div class="org-chart-branch">
+                  <div class="org-chart-node">
+                    <div class="org-chart-avatar">DK</div>
+                    <div class="org-chart-name">Diana Kim</div>
+                    <div class="org-chart-title">Lead Frontend</div>
+                    <span class="org-chart-department">Engineering</span>
+                  </div>
+                </div>
+                <div class="org-chart-branch">
+                  <div class="org-chart-node">
+                    <div class="org-chart-avatar">PR</div>
+                    <div class="org-chart-name">Pedro Ruiz</div>
+                    <div class="org-chart-title">Lead Backend</div>
+                    <span class="org-chart-department">Engineering</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CFO -->
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">CM</div>
+                <div class="org-chart-name">Clara Moreno</div>
+                <div class="org-chart-title">CFO</div>
+                <span class="org-chart-department">Finance</span>
+              </div>
+            </div>
+
+            <!-- VP Design -->
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">TN</div>
+                <div class="org-chart-name">Tomas Navarro</div>
+                <div class="org-chart-title">VP Design</div>
+                <span class="org-chart-department">Design</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="org-chart-controls">
+    <button class="org-chart-control" title="Zoom in">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+    <span class="org-chart-zoom-level">100%</span>
+    <button class="org-chart-control" title="Zoom out">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+    </button>
+    <button class="org-chart-control" title="Fit to screen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="org-chart-search">
+    <svg class="org-chart-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input class="org-chart-search-input" type="text" placeholder="Search employees...">
+  </div>
+</div>`}
+    tailwind={`<div class="relative w-full overflow-hidden select-none bg-base-200 rounded-box" style="min-height:480px;">
+  <div class="absolute inset-0 overflow-hidden cursor-grab">
+    <div class="absolute flex flex-col items-center p-10 min-w-full min-h-full">
+      <!-- Root node -->
+      <div class="flex flex-col items-center">
+        <div class="relative flex flex-col items-center text-center w-44 p-4 bg-base-100 border border-base-300 rounded-box shadow-sm cursor-pointer hover:border-primary hover:-translate-y-0.5 transition-all">
+          <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">AV</div>
+          <div class="font-semibold text-sm">Ana Vidal</div>
+          <div class="text-xs text-base-content/60">CEO</div>
+          <span class="text-[0.625rem] text-base-content/40 mt-1 px-2 py-0.5 bg-base-200 rounded">ERPlora</span>
+        </div>
+        <!-- Children row -->
+        <div class="flex gap-8 pt-14 relative">
+          <div class="flex flex-col items-center">
+            <div class="relative flex flex-col items-center text-center w-44 p-4 bg-base-100 border border-base-300 rounded-box shadow-sm cursor-pointer hover:border-primary hover:-translate-y-0.5 transition-all">
+              <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">LM</div>
+              <div class="font-semibold text-sm">Luis Martinez</div>
+              <div class="text-xs text-base-content/60">CTO</div>
+              <span class="text-[0.625rem] text-base-content/40 mt-1 px-2 py-0.5 bg-base-200 rounded">Engineering</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="relative flex flex-col items-center text-center w-44 p-4 bg-base-100 border border-base-300 rounded-box shadow-sm cursor-pointer hover:border-primary hover:-translate-y-0.5 transition-all">
+              <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">CM</div>
+              <div class="font-semibold text-sm">Clara Moreno</div>
+              <div class="text-xs text-base-content/60">CFO</div>
+              <span class="text-[0.625rem] text-base-content/40 mt-1 px-2 py-0.5 bg-base-200 rounded">Finance</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="relative flex flex-col items-center text-center w-44 p-4 bg-base-100 border border-base-300 rounded-box shadow-sm cursor-pointer hover:border-primary hover:-translate-y-0.5 transition-all">
+              <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">TN</div>
+              <div class="font-semibold text-sm">Tomas Navarro</div>
+              <div class="text-xs text-base-content/60">VP Design</div>
+              <span class="text-[0.625rem] text-base-content/40 mt-1 px-2 py-0.5 bg-base-200 rounded">Design</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Controls -->
+  <div class="absolute bottom-6 right-6 flex flex-col gap-1 z-10">
+    <button class="flex items-center justify-center w-10 h-10 bg-base-100 rounded-lg shadow-md hover:bg-base-200">+</button>
+    <span class="text-center text-xs py-1 bg-base-100 rounded shadow-sm min-w-10">100%</span>
+    <button class="flex items-center justify-center w-10 h-10 bg-base-100 rounded-lg shadow-md hover:bg-base-200">&minus;</button>
+  </div>
+</div>`}
+    js={`// Pan and zoom
+const viewport = document.querySelector('.org-chart-viewport');
+const canvas = document.querySelector('.org-chart-canvas');
+let scale = 1, panX = 0, panY = 0, isDragging = false, startX, startY;
+
+viewport?.addEventListener('mousedown', e => {
+  isDragging = true;
+  startX = e.clientX - panX;
+  startY = e.clientY - panY;
+  canvas.classList.add('org-chart-canvas-dragging');
+});
+
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  panX = e.clientX - startX;
+  panY = e.clientY - startY;
+  canvas.style.transform = \`translate(\${panX}px, \${panY}px) scale(\${scale})\`;
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+  canvas?.classList.remove('org-chart-canvas-dragging');
+});
+
+// Zoom controls
+document.querySelectorAll('.org-chart-control').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const title = btn.getAttribute('title');
+    if (title === 'Zoom in') scale = Math.min(scale + 0.1, 2);
+    if (title === 'Zoom out') scale = Math.max(scale - 0.1, 0.3);
+    if (title === 'Fit to screen') { scale = 1; panX = 0; panY = 0; }
+    canvas.style.transform = \`translate(\${panX}px, \${panY}px) scale(\${scale})\`;
+    document.querySelector('.org-chart-zoom-level').textContent =
+      Math.round(scale * 100) + '%';
+  });
+});
+
+// Toggle expand/collapse
+document.querySelectorAll('.org-chart-toggle').forEach(toggle => {
+  toggle.addEventListener('click', e => {
+    e.stopPropagation();
+    const branch = toggle.closest('.org-chart-branch');
+    const children = branch.querySelector('.org-chart-children');
+    if (children) {
+      children.classList.toggle('org-chart-children-collapsed');
+      toggle.classList.toggle('org-chart-toggle-collapsed');
+    }
+  });
+});`}
+  />
+
+  <CodePreview
+    title="Horizontal Layout"
+    height="420px"
+    semantic={`<div class="org-chart org-chart-horizontal" style="min-height:400px;">
+  <div class="org-chart-viewport">
+    <div class="org-chart-canvas" style="position:relative;flex-direction:row;">
+      <div class="org-chart-tree">
+        <div class="org-chart-branch">
+          <div class="org-chart-node">
+            <div class="org-chart-avatar">AV</div>
+            <div class="org-chart-name">Ana Vidal</div>
+            <div class="org-chart-title">CEO</div>
+            <span class="org-chart-department">ERPlora</span>
+            <div class="org-chart-connector org-chart-connector-vertical"></div>
+            <button class="org-chart-toggle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
+          <div class="org-chart-children">
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">LM</div>
+                <div class="org-chart-name">Luis Martinez</div>
+                <div class="org-chart-title">CTO</div>
+                <span class="org-chart-department">Engineering</span>
+              </div>
+            </div>
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">CM</div>
+                <div class="org-chart-name">Clara Moreno</div>
+                <div class="org-chart-title">CFO</div>
+                <span class="org-chart-department">Finance</span>
+              </div>
+            </div>
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">TN</div>
+                <div class="org-chart-name">Tomas Navarro</div>
+                <div class="org-chart-title">VP Design</div>
+                <span class="org-chart-department">Design</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="relative w-full overflow-hidden select-none bg-base-200 rounded-box" style="min-height:400px;">
+  <div class="absolute inset-0 overflow-hidden cursor-grab">
+    <div class="absolute flex flex-row items-center p-10 min-w-full min-h-full">
+      <!-- Root node left, children stacked right -->
+      <div class="flex flex-col items-center text-center w-44 p-4 bg-base-100 border border-base-300 rounded-box shadow-sm">
+        <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">AV</div>
+        <div class="font-semibold text-sm">Ana Vidal</div>
+        <div class="text-xs text-base-content/60">CEO</div>
+      </div>
+      <div class="flex flex-col gap-8 pl-14">
+        <div class="flex flex-col items-center text-center w-44 p-4 bg-base-100 border border-base-300 rounded-box shadow-sm">
+          <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">LM</div>
+          <div class="font-semibold text-sm">Luis Martinez</div>
+          <div class="text-xs text-base-content/60">CTO</div>
+        </div>
+        <div class="flex flex-col items-center text-center w-44 p-4 bg-base-100 border border-base-300 rounded-box shadow-sm">
+          <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">CM</div>
+          <div class="font-semibold text-sm">Clara Moreno</div>
+          <div class="text-xs text-base-content/60">CFO</div>
+        </div>
+        <div class="flex flex-col items-center text-center w-44 p-4 bg-base-100 border border-base-300 rounded-box shadow-sm">
+          <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">TN</div>
+          <div class="font-semibold text-sm">Tomas Navarro</div>
+          <div class="text-xs text-base-content/60">VP Design</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Horizontal layout just adds the modifier class
+const chart = document.querySelector('.org-chart');
+chart.classList.add('org-chart-horizontal');
+// Same pan/zoom/toggle logic applies`}
+  />
+
+  <CodePreview
+    title="Compact Variant"
+    height="420px"
+    semantic={`<div class="org-chart org-chart-compact" style="min-height:400px;">
+  <div class="org-chart-viewport">
+    <div class="org-chart-canvas" style="position:relative;">
+      <div class="org-chart-tree">
+        <div class="org-chart-branch">
+          <div class="org-chart-node">
+            <div class="org-chart-avatar">AV</div>
+            <div class="org-chart-name">Ana Vidal</div>
+            <div class="org-chart-title">CEO</div>
+            <div class="org-chart-connector org-chart-connector-vertical"></div>
+          </div>
+          <div class="org-chart-children">
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">LM</div>
+                <div class="org-chart-name">Luis Martinez</div>
+                <div class="org-chart-title">CTO</div>
+                <div class="org-chart-connector org-chart-connector-vertical"></div>
+              </div>
+              <div class="org-chart-children">
+                <div class="org-chart-branch">
+                  <div class="org-chart-node">
+                    <div class="org-chart-avatar">DK</div>
+                    <div class="org-chart-name">Diana Kim</div>
+                    <div class="org-chart-title">Frontend</div>
+                  </div>
+                </div>
+                <div class="org-chart-branch">
+                  <div class="org-chart-node">
+                    <div class="org-chart-avatar">PR</div>
+                    <div class="org-chart-name">Pedro Ruiz</div>
+                    <div class="org-chart-title">Backend</div>
+                  </div>
+                </div>
+                <div class="org-chart-branch">
+                  <div class="org-chart-node">
+                    <div class="org-chart-avatar">JL</div>
+                    <div class="org-chart-name">Julia Lopez</div>
+                    <div class="org-chart-title">QA Lead</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">CM</div>
+                <div class="org-chart-name">Clara Moreno</div>
+                <div class="org-chart-title">CFO</div>
+              </div>
+            </div>
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">TN</div>
+                <div class="org-chart-name">Tomas Navarro</div>
+                <div class="org-chart-title">VP Design</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Compact uses smaller nodes (140px wide) and tighter spacing -->
+<div class="relative w-full overflow-hidden select-none bg-base-200 rounded-box" style="min-height:400px;">
+  <div class="absolute inset-0 overflow-hidden cursor-grab">
+    <div class="absolute flex flex-col items-center p-6 min-w-full min-h-full">
+      <div class="flex flex-col items-center text-center w-36 p-2 bg-base-100 border border-base-300 rounded-box shadow-sm">
+        <div class="w-9 h-9 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold mb-1">AV</div>
+        <div class="font-semibold text-xs">Ana Vidal</div>
+        <div class="text-[0.625rem] text-base-content/60">CEO</div>
+      </div>
+      <div class="flex gap-4 pt-10">
+        <div class="flex flex-col items-center text-center w-36 p-2 bg-base-100 border border-base-300 rounded-box shadow-sm">
+          <div class="w-9 h-9 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold mb-1">LM</div>
+          <div class="font-semibold text-xs">Luis Martinez</div>
+          <div class="text-[0.625rem] text-base-content/60">CTO</div>
+        </div>
+        <div class="flex flex-col items-center text-center w-36 p-2 bg-base-100 border border-base-300 rounded-box shadow-sm">
+          <div class="w-9 h-9 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold mb-1">CM</div>
+          <div class="font-semibold text-xs">Clara Moreno</div>
+          <div class="text-[0.625rem] text-base-content/60">CFO</div>
+        </div>
+        <div class="flex flex-col items-center text-center w-36 p-2 bg-base-100 border border-base-300 rounded-box shadow-sm">
+          <div class="w-9 h-9 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold mb-1">TN</div>
+          <div class="font-semibold text-xs">Tomas Navarro</div>
+          <div class="text-[0.625rem] text-base-content/60">VP Design</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Compact mode uses smaller nodes and tighter gaps
+const chart = document.querySelector('.org-chart');
+chart.classList.add('org-chart-compact');
+// All expand/collapse and pan/zoom logic remains the same`}
+  />
+
+  <CodePreview
+    title="Glass Variant"
+    height="420px"
+    semantic={`<div class="org-chart glass" style="min-height:400px;background-image:linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <div class="org-chart-viewport">
+    <div class="org-chart-canvas" style="position:relative;">
+      <div class="org-chart-tree">
+        <div class="org-chart-branch">
+          <div class="org-chart-node">
+            <div class="org-chart-avatar">AV</div>
+            <div class="org-chart-name">Ana Vidal</div>
+            <div class="org-chart-title">CEO</div>
+            <span class="org-chart-department">ERPlora</span>
+            <div class="org-chart-connector org-chart-connector-vertical"></div>
+          </div>
+          <div class="org-chart-children">
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">LM</div>
+                <div class="org-chart-name">Luis Martinez</div>
+                <div class="org-chart-title">CTO</div>
+                <span class="org-chart-department">Engineering</span>
+              </div>
+            </div>
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">CM</div>
+                <div class="org-chart-name">Clara Moreno</div>
+                <div class="org-chart-title">CFO</div>
+                <span class="org-chart-department">Finance</span>
+              </div>
+            </div>
+            <div class="org-chart-branch">
+              <div class="org-chart-node">
+                <div class="org-chart-avatar">TN</div>
+                <div class="org-chart-name">Tomas Navarro</div>
+                <div class="org-chart-title">VP Design</div>
+                <span class="org-chart-department">Design</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="org-chart-controls">
+    <button class="org-chart-control" title="Zoom in">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+    <span class="org-chart-zoom-level">100%</span>
+    <button class="org-chart-control" title="Zoom out">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+    </button>
+  </div>
+
+  <div class="org-chart-search">
+    <svg class="org-chart-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input class="org-chart-search-input" type="text" placeholder="Search employees...">
+  </div>
+</div>`}
+    tailwind={`<!-- Glass variant uses backdrop-filter blur on nodes over a gradient background -->
+<div class="relative w-full overflow-hidden select-none rounded-box" style="min-height:400px;background-image:linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <div class="absolute inset-0 overflow-hidden cursor-grab">
+    <div class="absolute flex flex-col items-center p-10 min-w-full min-h-full">
+      <div class="flex flex-col items-center">
+        <div class="flex flex-col items-center text-center w-44 p-4 bg-base-100/72 backdrop-blur-xl border border-white/12 rounded-box shadow-lg">
+          <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">AV</div>
+          <div class="font-semibold text-sm">Ana Vidal</div>
+          <div class="text-xs text-base-content/60">CEO</div>
+        </div>
+        <div class="flex gap-8 pt-14">
+          <div class="flex flex-col items-center text-center w-44 p-4 bg-base-100/72 backdrop-blur-xl border border-white/12 rounded-box shadow-lg">
+            <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">LM</div>
+            <div class="font-semibold text-sm">Luis Martinez</div>
+            <div class="text-xs text-base-content/60">CTO</div>
+          </div>
+          <div class="flex flex-col items-center text-center w-44 p-4 bg-base-100/72 backdrop-blur-xl border border-white/12 rounded-box shadow-lg">
+            <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">CM</div>
+            <div class="font-semibold text-sm">Clara Moreno</div>
+            <div class="text-xs text-base-content/60">CFO</div>
+          </div>
+          <div class="flex flex-col items-center text-center w-44 p-4 bg-base-100/72 backdrop-blur-xl border border-white/12 rounded-box shadow-lg">
+            <div class="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-lg mb-2">TN</div>
+            <div class="font-semibold text-sm">Tomas Navarro</div>
+            <div class="text-xs text-base-content/60">VP Design</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Glass variant is purely CSS, add .glass to the container
+const chart = document.querySelector('.org-chart');
+chart.classList.add('glass');
+// All interactive logic (pan, zoom, toggle) works identically`}
+  />
+
+  <!-- Classes Reference Table -->
+  <div class="overflow-x-auto mt-12">
+    <h2 class="text-xl font-semibold mb-4">Classes Reference</h2>
+    <table class="table w-full">
+      <thead>
+        <tr>
+          <th>Class</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>.org-chart</code></td><td>Base container with background, overflow hidden, min-height</td></tr>
+        <tr><td><code>.org-chart-horizontal</code></td><td>Horizontal (left-to-right) tree layout</td></tr>
+        <tr><td><code>.org-chart-compact</code></td><td>Compact variant with smaller nodes and tighter gaps</td></tr>
+        <tr><td><code>.org-chart-sm</code></td><td>Small size variant (120px nodes)</td></tr>
+        <tr><td><code>.org-chart-lg</code></td><td>Large size variant (220px nodes)</td></tr>
+        <tr><td><code>.org-chart.glass</code></td><td>Glass morphism variant with translucent nodes</td></tr>
+        <tr><td><code>.org-chart-viewport</code></td><td>Pannable viewport layer (absolute, inset-0)</td></tr>
+        <tr><td><code>.org-chart-canvas</code></td><td>Transformable canvas for pan/zoom</td></tr>
+        <tr><td><code>.org-chart-canvas-dragging</code></td><td>Disables transition during drag</td></tr>
+        <tr><td><code>.org-chart-tree</code></td><td>Flex column container for branches</td></tr>
+        <tr><td><code>.org-chart-branch</code></td><td>Branch wrapper with vertical connector line</td></tr>
+        <tr><td><code>.org-chart-children</code></td><td>Flex row of child branches</td></tr>
+        <tr><td><code>.org-chart-children-collapsed</code></td><td>Hides children (collapsed state)</td></tr>
+        <tr><td><code>.org-chart-node</code></td><td>Node card with hover/active states</td></tr>
+        <tr><td><code>.org-chart-node-selected</code></td><td>Primary border ring on selected node</td></tr>
+        <tr><td><code>.org-chart-node-highlighted</code></td><td>Warning pulse animation on search match</td></tr>
+        <tr><td><code>.org-chart-avatar</code></td><td>Circular avatar inside node</td></tr>
+        <tr><td><code>.org-chart-name</code></td><td>Employee name text</td></tr>
+        <tr><td><code>.org-chart-title</code></td><td>Job title text</td></tr>
+        <tr><td><code>.org-chart-department</code></td><td>Department badge pill</td></tr>
+        <tr><td><code>.org-chart-toggle</code></td><td>Expand/collapse button at bottom of node</td></tr>
+        <tr><td><code>.org-chart-toggle-collapsed</code></td><td>Rotated chevron for collapsed state</td></tr>
+        <tr><td><code>.org-chart-count</code></td><td>Child count badge (bottom-right of node)</td></tr>
+        <tr><td><code>.org-chart-connector-vertical</code></td><td>Vertical connector line from node to children</td></tr>
+        <tr><td><code>.org-chart-connector-horizontal</code></td><td>Horizontal connector line between siblings</td></tr>
+        <tr><td><code>.org-chart-controls</code></td><td>Zoom/fit controls container (bottom-right)</td></tr>
+        <tr><td><code>.org-chart-control</code></td><td>Individual control button</td></tr>
+        <tr><td><code>.org-chart-zoom-level</code></td><td>Zoom percentage display</td></tr>
+        <tr><td><code>.org-chart-search</code></td><td>Search bar container (top-left)</td></tr>
+        <tr><td><code>.org-chart-search-input</code></td><td>Search text input</td></tr>
+        <tr><td><code>.org-chart-search-icon</code></td><td>Magnifying glass icon in search</td></tr>
+      </tbody>
+    </table>
+  </div>
+</DocsLayout>

@@ -1,0 +1,545 @@
+/* Performance Meter */
+/* HR performance visualization with gauge, category bars, trends, and goal tracking */
+
+@layer components {
+
+  /* =============================================
+     Base container
+     ============================================= */
+
+  .performance-meter {
+    --pm-padding: 1.5rem;
+    --pm-gap: 1rem;
+    --pm-score-size: 120px;
+    --pm-bar-height: 8px;
+    --pm-bar-radius: 4px;
+
+    @apply flex flex-col;
+    gap: var(--pm-gap);
+    padding: var(--pm-padding);
+    background: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+  }
+
+  /* =============================================
+     Employee header
+     ============================================= */
+
+  .performance-meter-header {
+    @apply flex items-center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .performance-meter-avatar {
+    @apply rounded-full flex items-center justify-center font-semibold uppercase overflow-hidden shrink-0;
+    width: 3.5rem;
+    height: 3.5rem;
+    background: var(--color-neutral);
+    color: var(--color-neutral-content);
+    font-size: 1.25rem;
+
+    & > img {
+      @apply w-full h-full object-cover;
+    }
+  }
+
+  .performance-meter-employee-info {
+    @apply flex-1 min-w-0;
+  }
+
+  .performance-meter-employee-name {
+    @apply font-semibold;
+    font-size: 1.125rem;
+    color: var(--color-base-content);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .performance-meter-employee-role {
+    font-size: 0.875rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin: 0;
+  }
+
+  .performance-meter-employee-department {
+    font-size: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    margin: 0;
+  }
+
+  .performance-meter-period-badge {
+    @apply inline-flex items-center font-medium shrink-0;
+    gap: 4px;
+    padding: 6px 12px;
+    background: var(--color-base-200);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Score display (gauge)
+     ============================================= */
+
+  .performance-meter-score-section {
+    @apply flex items-center justify-center;
+    gap: 2rem;
+    padding: 1rem 0;
+  }
+
+  .performance-meter-score-gauge {
+    @apply relative;
+    width: var(--pm-score-size);
+    height: var(--pm-score-size);
+  }
+
+  .performance-meter-score-svg {
+    @apply w-full h-full;
+    transform: rotate(-90deg);
+  }
+
+  .performance-meter-score-track {
+    fill: none;
+    stroke: var(--color-base-200);
+    stroke-width: 10;
+  }
+
+  .performance-meter-score-fill {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease;
+  }
+
+  .performance-meter-score-fill-excellent { stroke: var(--color-success); }
+  .performance-meter-score-fill-good      { stroke: var(--color-primary); }
+  .performance-meter-score-fill-average   { stroke: var(--color-warning); }
+  .performance-meter-score-fill-poor      { stroke: var(--color-error); }
+
+  .performance-meter-score-value {
+    @apply absolute text-center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .performance-meter-score-number {
+    @apply font-bold;
+    font-size: 2rem;
+    color: var(--color-base-content);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .performance-meter-score-max {
+    @apply font-medium;
+    font-size: 0.875rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .performance-meter-score-label {
+    @apply uppercase;
+    font-size: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Score summary */
+  .performance-meter-score-summary {
+    @apply flex flex-col;
+    gap: 0.5rem;
+  }
+
+  .performance-meter-score-status {
+    @apply inline-flex items-center font-semibold;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+  }
+
+  .performance-meter-score-status-excellent { background: color-mix(in oklch, var(--color-success) 10%, transparent); color: var(--color-success); }
+  .performance-meter-score-status-good      { background: color-mix(in oklch, var(--color-primary) 10%, transparent); color: var(--color-primary); }
+  .performance-meter-score-status-average   { background: color-mix(in oklch, var(--color-warning) 10%, transparent); color: var(--color-warning); }
+  .performance-meter-score-status-poor      { background: color-mix(in oklch, var(--color-error) 10%, transparent);   color: var(--color-error); }
+
+  .performance-meter-trend {
+    @apply inline-flex items-center font-medium;
+    gap: 4px;
+    font-size: 0.875rem;
+
+    & > svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  .performance-meter-trend-up      { color: var(--color-success); }
+  .performance-meter-trend-down    { color: var(--color-error); }
+  .performance-meter-trend-neutral { color: color-mix(in oklch, var(--color-base-content) 60%, transparent); }
+
+  /* =============================================
+     Goal vs actual
+     ============================================= */
+
+  .performance-meter-goal-section {
+    @apply flex items-center;
+    gap: 1.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-base-200);
+    border-radius: var(--radius-field, 0.5rem);
+  }
+
+  .performance-meter-goal-item {
+    @apply flex flex-col items-center flex-1;
+  }
+
+  .performance-meter-goal-label {
+    @apply uppercase;
+    font-size: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    letter-spacing: 0.05em;
+  }
+
+  .performance-meter-goal-value {
+    @apply font-bold;
+    font-size: 1.25rem;
+    color: var(--color-base-content);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .performance-meter-goal-divider {
+    width: 1px;
+    height: 2.5rem;
+    background: var(--color-base-300);
+  }
+
+  .performance-meter-goal-diff {
+    @apply font-semibold;
+    font-size: 0.875rem;
+  }
+
+  .performance-meter-goal-diff-positive { color: var(--color-success); }
+  .performance-meter-goal-diff-negative { color: var(--color-error); }
+
+  /* =============================================
+     Category breakdown
+     ============================================= */
+
+  .performance-meter-categories {
+    @apply flex flex-col;
+    gap: 1rem;
+  }
+
+  .performance-meter-categories-title {
+    @apply font-semibold;
+    font-size: 0.875rem;
+    color: var(--color-base-content);
+    margin: 0;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .performance-meter-category {
+    @apply flex flex-col;
+    gap: 6px;
+  }
+
+  .performance-meter-category-header {
+    @apply flex items-center justify-between;
+  }
+
+  .performance-meter-category-name {
+    @apply flex items-center font-medium;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--color-base-content);
+  }
+
+  .performance-meter-category-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .performance-meter-category-score {
+    @apply flex items-center;
+    gap: 8px;
+  }
+
+  .performance-meter-category-value {
+    @apply font-semibold text-right;
+    font-size: 0.875rem;
+    color: var(--color-base-content);
+    font-variant-numeric: tabular-nums;
+    min-width: 2.25rem;
+  }
+
+  .performance-meter-category-trend {
+    @apply flex items-center font-medium;
+    gap: 2px;
+    font-size: 0.75rem;
+
+    & > svg {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+  }
+
+  .performance-meter-category-trend-up      { color: var(--color-success); }
+  .performance-meter-category-trend-down    { color: var(--color-error); }
+  .performance-meter-category-trend-neutral { color: color-mix(in oklch, var(--color-base-content) 40%, transparent); }
+
+  .performance-meter-category-bar {
+    @apply overflow-hidden;
+    height: var(--pm-bar-height);
+    background: var(--color-base-200);
+    border-radius: var(--pm-bar-radius);
+  }
+
+  .performance-meter-category-fill {
+    @apply h-full;
+    border-radius: var(--pm-bar-radius);
+    transition: width 0.8s ease;
+  }
+
+  .performance-meter-category-fill-excellent { background: var(--color-success); }
+  .performance-meter-category-fill-good      { background: var(--color-primary); }
+  .performance-meter-category-fill-average   { background: var(--color-warning); }
+  .performance-meter-category-fill-poor      { background: var(--color-error); }
+
+  /* =============================================
+     Period selector
+     ============================================= */
+
+  .performance-meter-period-selector {
+    @apply flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--color-base-200);
+    border-radius: var(--radius-field, 0.5rem);
+  }
+
+  .performance-meter-period-btn {
+    @apply flex-1 cursor-pointer font-medium;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-field, 0.25rem);
+    font-size: 0.875rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    transition: all 0.15s ease;
+
+    &:hover {
+      color: var(--color-base-content);
+      background: color-mix(in oklch, var(--color-primary) 5%, transparent);
+    }
+  }
+
+  .performance-meter-period-btn-active {
+    background: var(--color-base-100);
+    color: var(--color-base-content);
+    box-shadow: 0 1px 3px color-mix(in oklch, var(--color-base-content) 6%, transparent);
+  }
+
+  /* =============================================
+     Size variants
+     ============================================= */
+
+  .performance-meter-compact {
+    --pm-padding: 1rem;
+    --pm-gap: 0.5rem;
+    --pm-score-size: 80px;
+
+    & .performance-meter-score-number {
+      font-size: 1.5rem;
+    }
+
+    & .performance-meter-avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1rem;
+    }
+
+    & .performance-meter-score-svg .performance-meter-score-track,
+    & .performance-meter-score-svg .performance-meter-score-fill {
+      stroke-width: 8;
+    }
+  }
+
+  .performance-meter-lg {
+    --pm-padding: 2rem;
+    --pm-gap: 1.5rem;
+    --pm-score-size: 160px;
+
+    & .performance-meter-score-number {
+      font-size: 2.5rem;
+    }
+
+    & .performance-meter-avatar {
+      width: 4.5rem;
+      height: 4.5rem;
+      font-size: 1.5rem;
+    }
+  }
+
+  /* =============================================
+     Score-only variant
+     ============================================= */
+
+  .performance-meter-score-only {
+    padding: 1rem;
+
+    & .performance-meter-score-section {
+      padding: 0;
+    }
+  }
+
+  /* =============================================
+     Inline variant (horizontal)
+     ============================================= */
+
+  .performance-meter-inline {
+    @apply flex-row items-center flex-wrap;
+
+    & .performance-meter-header {
+      @apply flex-1;
+      min-width: 200px;
+      border-bottom: none;
+      padding-bottom: 0;
+      padding-right: 1rem;
+      border-right: 1px solid var(--color-base-300);
+    }
+
+    & .performance-meter-score-section {
+      padding: 0 1rem;
+    }
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .performance-meter.glass {
+    border-color: color-mix(in oklch, var(--color-base-content) 12%, transparent);
+
+    & .performance-meter-score-track {
+      stroke: color-mix(in oklch, var(--color-base-100) 85%, transparent);
+    }
+
+    & .performance-meter-goal-section,
+    & .performance-meter-period-selector {
+      background: color-mix(in oklch, white 10%, transparent);
+    }
+
+    & .performance-meter-category-bar {
+      background: color-mix(in oklch, white 15%, transparent);
+    }
+  }
+
+  /* =============================================
+     Animated variant
+     ============================================= */
+
+  .performance-meter-animated .performance-meter-score-fill {
+    animation: perf-meter-fill 1.2s ease forwards;
+  }
+
+  .performance-meter-animated .performance-meter-category-fill {
+    animation: perf-meter-bar-fill 0.8s ease forwards;
+  }
+}
+
+/* =============================================
+   Keyframes
+   ============================================= */
+
+@keyframes perf-meter-fill {
+  from {
+    stroke-dashoffset: var(--perf-circumference);
+  }
+}
+
+@keyframes perf-meter-bar-fill {
+  from {
+    width: 0;
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .performance-meter-score-section {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .performance-meter-score-summary {
+    align-items: center;
+    text-align: center;
+  }
+
+  .performance-meter-inline {
+    flex-direction: column;
+  }
+
+  .performance-meter-inline .performance-meter-header {
+    border-right: none;
+    border-bottom: 1px solid var(--color-base-300);
+    padding-right: 0;
+    padding-bottom: 1rem;
+    width: 100%;
+  }
+
+  .performance-meter-goal-section {
+    flex-wrap: wrap;
+  }
+
+  .performance-meter-goal-divider {
+    display: none;
+  }
+
+  .performance-meter-goal-item {
+    min-width: 80px;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .performance-meter-score-fill,
+  .performance-meter-category-fill {
+    transition: none;
+  }
+
+  .performance-meter-animated .performance-meter-score-fill,
+  .performance-meter-animated .performance-meter-category-fill {
+    animation: none;
+  }
+}
+
+/* =============================================
+   Print
+   ============================================= */
+
+@media print {
+  .performance-meter {
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+
+  .performance-meter.glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: #f9f9f9;
+  }
+}

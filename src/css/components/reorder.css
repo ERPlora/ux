@@ -1,0 +1,124 @@
+@layer components {
+  /* ============================================
+     Reorder Group
+     ============================================ */
+
+  .reorder-group { @apply relative select-none; }
+  .reorder-group-disabled { @apply pointer-events-none; }
+
+  .reorder-group-inset {
+    @apply mx-6 overflow-hidden;
+    border-radius: var(--radius-box, 0.75rem);
+    background: var(--color-base-100);
+  }
+  .reorder-group-inset .reorder-item { border-bottom: 1px solid var(--color-base-300); }
+  .reorder-group-inset .reorder-item:last-child { @apply border-b-0; }
+
+  .reorder-group-cards .reorder-item {
+    @apply mb-2;
+    border-radius: var(--radius-box, 0.75rem);
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.06);
+  }
+  .reorder-group-cards .reorder-item-dragging { box-shadow: 0 12px 32px oklch(0 0 0 / 0.15); }
+
+  .reorder-group-editing .reorder-item { @apply pl-0; }
+  .reorder-group-editing .reorder-handle { animation: reorder-handle-appear 0.3s ease; }
+  .reorder-group-editing .reorder-delete { width: 44px; }
+  .reorder-group:not(.reorder-group-editing) .reorder-handle { @apply hidden; }
+
+  .reorder-group-horizontal { @apply flex flex-wrap gap-2; }
+  .reorder-group-horizontal .reorder-item { @apply flex-none; }
+  .reorder-group-horizontal .reorder-indicator { width: 2px; height: auto; top: 0; bottom: 0; }
+  .reorder-group-horizontal .reorder-indicator-left { left: -1px; right: auto; }
+  .reorder-group-horizontal .reorder-indicator-right { right: -1px; left: auto; }
+
+  /* ============================================
+     Reorder Item
+     ============================================ */
+
+  .reorder-item {
+    @apply relative flex items-center;
+    background: var(--color-base-100);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    will-change: transform;
+  }
+  .reorder-item-dragging { @apply z-100 opacity-90; box-shadow: 0 12px 32px oklch(0 0 0 / 0.15); transform: scale(1.02); }
+  .reorder-item-ghost { @apply opacity-30; }
+  .reorder-item-disabled .reorder-handle { @apply opacity-30 cursor-not-allowed; }
+  .reorder-item-moving-up { animation: reorder-move-up 0.15s ease; }
+  .reorder-item-moving-down { animation: reorder-move-down 0.15s ease; }
+  .reorder-item-content { @apply flex-1 min-w-0; }
+
+  /* ============================================
+     Reorder Handle
+     ============================================ */
+
+  .reorder-handle {
+    @apply flex items-center justify-center p-4 cursor-grab;
+    width: 44px; height: 44px;
+    color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .reorder-handle:active { @apply cursor-grabbing; }
+  .reorder-handle-icon { @apply size-5; }
+  .reorder-handle-icon svg { @apply size-full; }
+  .reorder-handle-lines { @apply flex-col; gap: 3px; }
+  .reorder-handle-line { @apply w-4 rounded-sm; height: 2px; background: color-mix(in oklch, var(--color-base-content) 30%, transparent); }
+
+  /* ============================================
+     Drop Indicator
+     ============================================ */
+
+  .reorder-indicator {
+    @apply absolute left-0 right-0;
+    height: 2px;
+    background: var(--color-primary);
+    transform: scaleX(0);
+    transition: transform 0.15s ease;
+  }
+  .reorder-indicator-top { top: -1px; }
+  .reorder-indicator-bottom { bottom: -1px; }
+  .reorder-indicator-active { transform: scaleX(1); }
+
+  /* ============================================
+     Delete Button
+     ============================================ */
+
+  .reorder-delete {
+    @apply flex items-center justify-center h-full border-none cursor-pointer overflow-hidden;
+    width: 0;
+    background: var(--color-error);
+    color: white;
+    transition: width 0.15s ease;
+  }
+  .reorder-delete-icon { @apply size-5; }
+  .reorder-delete-icon svg { @apply size-full; }
+
+  /* ============================================
+     Animations
+     ============================================ */
+
+  @keyframes reorder-move-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  @keyframes reorder-move-down {
+    from { transform: translateY(-100%); }
+    to   { transform: translateY(0); }
+  }
+
+  @keyframes reorder-handle-appear {
+    from { opacity: 0; transform: translateX(-20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reorder-item { transition: none; }
+    .reorder-delete { transition: none; }
+    .reorder-indicator { transition: none; }
+    .reorder-item-moving-up, .reorder-item-moving-down { animation: none; }
+    .reorder-group-editing .reorder-handle { animation: none; }
+  }
+}

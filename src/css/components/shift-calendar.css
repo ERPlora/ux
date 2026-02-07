@@ -1,0 +1,533 @@
+/* Shift Calendar */
+/* Weekly shift scheduling grid with drag-and-drop, time slots, and shift blocks */
+
+@layer components {
+
+  /* =============================================
+     Base container
+     ============================================= */
+
+  .shift-calendar {
+    --sc-time-width: 60px;
+    --sc-day-min-width: 120px;
+    --sc-row-height: 48px;
+    --sc-header-height: 60px;
+    --sc-shift-radius: var(--radius-field, 0.5rem);
+
+    @apply flex flex-col w-full overflow-hidden select-none;
+    background: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+  }
+
+  /* =============================================
+     Header (navigation & filters)
+     ============================================= */
+
+  .shift-calendar-header {
+    @apply flex items-center justify-between shrink-0;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--color-base-100);
+    border-bottom: 1px solid var(--color-base-300);
+    min-height: var(--sc-header-height);
+  }
+
+  .shift-calendar-header-start {
+    @apply flex items-center;
+    gap: 0.5rem;
+  }
+
+  .shift-calendar-header-center {
+    @apply flex items-center;
+    gap: 1rem;
+  }
+
+  .shift-calendar-header-end {
+    @apply flex items-center;
+    gap: 0.5rem;
+  }
+
+  .shift-calendar-title {
+    @apply font-semibold whitespace-nowrap;
+    font-size: 1.125rem;
+    color: var(--color-base-content);
+  }
+
+  .shift-calendar-subtitle {
+    font-size: 0.875rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .shift-calendar-nav {
+    @apply flex items-center;
+    gap: 0.25rem;
+  }
+
+  .shift-calendar-nav-btn {
+    @apply flex items-center justify-center cursor-pointer;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: var(--color-base-200);
+    border: none;
+    border-radius: var(--radius-field, 0.5rem);
+    color: var(--color-base-content);
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: var(--color-base-300);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    & > svg {
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+  }
+
+  .shift-calendar-today-btn {
+    @apply cursor-pointer font-medium;
+    padding: 0.25rem 1rem;
+    background: transparent;
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.5rem);
+    color: var(--color-base-content);
+    font-size: 0.875rem;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: var(--color-base-200);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+  }
+
+  /* Filter */
+  .shift-calendar-filter {
+    @apply relative;
+  }
+
+  .shift-calendar-filter-btn {
+    @apply flex items-center cursor-pointer;
+    gap: 0.25rem;
+    padding: 0.25rem 1rem;
+    background: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.5rem);
+    color: var(--color-base-content);
+    font-size: 0.875rem;
+    transition: all 0.15s ease;
+
+    &:hover {
+      border-color: var(--color-primary);
+    }
+
+    & > svg {
+      width: 1rem;
+      height: 1rem;
+      color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    }
+  }
+
+  .shift-calendar-filter-badge {
+    @apply inline-flex items-center justify-center font-semibold;
+    min-width: 1.125rem;
+    height: 1.125rem;
+    padding: 0 4px;
+    background: var(--color-primary);
+    color: var(--color-primary-content);
+    border-radius: 9px;
+    font-size: 0.6875rem;
+  }
+
+  /* =============================================
+     Grid
+     ============================================= */
+
+  .shift-calendar-grid-wrapper {
+    @apply flex-1 overflow-auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .shift-calendar-grid {
+    @apply grid;
+    grid-template-columns: var(--sc-time-width) repeat(7, minmax(var(--sc-day-min-width), 1fr));
+    min-width: fit-content;
+  }
+
+  /* =============================================
+     Day headers
+     ============================================= */
+
+  .shift-calendar-days-header {
+    display: contents;
+  }
+
+  .shift-calendar-corner {
+    @apply sticky;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    background: var(--color-base-100);
+    border-bottom: 1px solid var(--color-base-300);
+    border-right: 1px solid var(--color-base-300);
+  }
+
+  .shift-calendar-day-header {
+    @apply sticky flex flex-col items-center justify-center;
+    top: 0;
+    z-index: 2;
+    padding: 0.5rem;
+    background: var(--color-base-100);
+    border-bottom: 1px solid var(--color-base-300);
+    border-right: 1px solid var(--color-base-300);
+    min-height: 56px;
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  .shift-calendar-day-header-today {
+    & .shift-calendar-day-number {
+      @apply flex items-center justify-center rounded-full;
+      width: 2rem;
+      height: 2rem;
+      background: var(--color-primary);
+      color: var(--color-primary-content);
+    }
+  }
+
+  .shift-calendar-day-header-weekend {
+    background: var(--color-base-200);
+
+    & .shift-calendar-day-name {
+      color: var(--color-error);
+    }
+  }
+
+  .shift-calendar-day-name {
+    @apply font-semibold uppercase;
+    font-size: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    letter-spacing: 0.025em;
+  }
+
+  .shift-calendar-day-number {
+    @apply font-semibold;
+    font-size: 1.25rem;
+    color: var(--color-base-content);
+    line-height: 1.2;
+  }
+
+  /* =============================================
+     Time column
+     ============================================= */
+
+  .shift-calendar-time-slot {
+    @apply sticky flex items-start justify-end font-medium;
+    left: 0;
+    z-index: 1;
+    padding: 0.25rem 0.5rem;
+    background: var(--color-base-100);
+    border-right: 1px solid var(--color-base-300);
+    border-bottom: 1px solid var(--color-base-300);
+    font-size: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    height: var(--sc-row-height);
+  }
+
+  .shift-calendar-time-slot-half {
+    border-bottom-style: dashed;
+  }
+
+  /* =============================================
+     Grid cells
+     ============================================= */
+
+  .shift-calendar-cell {
+    @apply relative;
+    min-height: var(--sc-row-height);
+    border-right: 1px solid var(--color-base-300);
+    border-bottom: 1px solid var(--color-base-300);
+    transition: background 0.15s ease;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &:hover {
+      background: color-mix(in oklch, var(--color-primary) 3%, transparent);
+    }
+  }
+
+  .shift-calendar-cell-half {
+    border-bottom-style: dashed;
+  }
+
+  .shift-calendar-cell-weekend {
+    background: var(--color-base-200);
+  }
+
+  .shift-calendar-cell-drag-over {
+    background: color-mix(in oklch, var(--color-primary) 8%, transparent);
+  }
+
+  .shift-calendar-cell-selecting {
+    background: color-mix(in oklch, var(--color-primary) 12%, transparent);
+  }
+
+  /* =============================================
+     Shift blocks
+     ============================================= */
+
+  .shift-calendar-shift {
+    @apply absolute cursor-pointer overflow-hidden;
+    left: 2px;
+    right: 2px;
+    min-height: 24px;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--sc-shift-radius);
+    z-index: 1;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: scale(1.01);
+      box-shadow: 0 4px 12px color-mix(in oklch, black 15%, transparent);
+      z-index: 2;
+    }
+
+    &:active {
+      transform: scale(0.99);
+    }
+  }
+
+  .shift-calendar-shift-dragging {
+    opacity: 0.7;
+    box-shadow: 0 8px 24px color-mix(in oklch, black 20%, transparent);
+    z-index: 10;
+  }
+
+  /* Shift types */
+  .shift-calendar-shift-morning {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #451a03;
+  }
+
+  .shift-calendar-shift-afternoon {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: white;
+  }
+
+  .shift-calendar-shift-night {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+  }
+
+  .shift-calendar-shift-full-day {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: white;
+  }
+
+  .shift-calendar-shift-overtime {
+    background: linear-gradient(135deg, #fb923c, #f97316);
+    color: white;
+  }
+
+  .shift-calendar-shift-off {
+    background: linear-gradient(135deg, #d1d5db, #9ca3af);
+    color: #374151;
+  }
+
+  .shift-calendar-shift-custom {
+    background: var(--shift-bg, var(--color-primary));
+    color: var(--shift-color, white);
+  }
+
+  /* Shift content */
+  .shift-calendar-shift-name {
+    @apply font-semibold truncate;
+    font-size: 0.8125rem;
+    color: inherit;
+    line-height: 1.3;
+  }
+
+  .shift-calendar-shift-time {
+    @apply truncate;
+    font-size: 0.6875rem;
+    opacity: 0.85;
+  }
+
+  .shift-calendar-shift-department {
+    @apply truncate;
+    font-size: 0.625rem;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+
+  /* =============================================
+     Selection overlay
+     ============================================= */
+
+  .shift-calendar-selection {
+    @apply absolute pointer-events-none;
+    background: color-mix(in oklch, var(--color-primary) 20%, transparent);
+    border: 2px dashed var(--color-primary);
+    border-radius: var(--sc-shift-radius);
+    z-index: 5;
+  }
+
+  /* =============================================
+     Empty state
+     ============================================= */
+
+  .shift-calendar-empty {
+    @apply flex flex-col items-center justify-center text-center;
+    padding: 2.5rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .shift-calendar-empty-icon {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  .shift-calendar-empty-text {
+    font-size: 0.9375rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .shift-calendar-empty-hint {
+    font-size: 0.8125rem;
+    opacity: 0.7;
+  }
+
+  /* =============================================
+     Legend
+     ============================================= */
+
+  .shift-calendar-legend {
+    @apply flex items-center flex-wrap shrink-0;
+    gap: 1rem;
+    padding: 0.5rem 1.5rem;
+    background: var(--color-base-200);
+    border-top: 1px solid var(--color-base-300);
+  }
+
+  .shift-calendar-legend-item {
+    @apply flex items-center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .shift-calendar-legend-color {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 3px;
+  }
+
+  .shift-calendar-legend-color-morning   { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+  .shift-calendar-legend-color-afternoon { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+  .shift-calendar-legend-color-night     { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+
+  /* =============================================
+     Compact variant
+     ============================================= */
+
+  .shift-calendar-compact {
+    --sc-row-height: 36px;
+    --sc-time-width: 50px;
+
+    & .shift-calendar-shift-department {
+      @apply hidden;
+    }
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .shift-calendar.glass {
+    border-color: color-mix(in oklch, var(--color-base-content) 12%, transparent);
+
+    & .shift-calendar-header,
+    & .shift-calendar-corner,
+    & .shift-calendar-day-header,
+    & .shift-calendar-time-slot,
+    & .shift-calendar-legend {
+      background: transparent;
+    }
+
+    & .shift-calendar-cell-weekend,
+    & .shift-calendar-day-header-weekend {
+      background: color-mix(in oklch, var(--color-base-content) 5%, transparent);
+    }
+
+    & .shift-calendar-nav-btn,
+    & .shift-calendar-today-btn,
+    & .shift-calendar-filter-btn {
+      background: color-mix(in oklch, white 10%, transparent);
+      border-color: color-mix(in oklch, var(--color-base-content) 12%, transparent);
+
+      &:hover {
+        background: color-mix(in oklch, white 20%, transparent);
+      }
+    }
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .shift-calendar-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .shift-calendar-header-center {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .shift-calendar-title {
+    font-size: 1rem;
+  }
+
+  .shift-calendar-grid {
+    grid-template-columns: var(--sc-time-width) repeat(7, 100px);
+  }
+
+  .shift-calendar-shift-name {
+    font-size: 0.75rem;
+  }
+
+  .shift-calendar-shift-time,
+  .shift-calendar-shift-department {
+    display: none;
+  }
+
+  .shift-calendar-legend {
+    justify-content: center;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .shift-calendar-shift,
+  .shift-calendar-nav-btn,
+  .shift-calendar-cell {
+    transition: none;
+  }
+}

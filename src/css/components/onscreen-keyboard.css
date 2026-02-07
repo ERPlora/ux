@@ -1,0 +1,196 @@
+@layer components {
+  /* ============================================
+     Onscreen Keyboard
+     ============================================ */
+
+  .osk {
+    @apply relative w-full select-none;
+    touch-action: manipulation;
+    --osk-key-height: 48px;
+    --osk-gap: 6px;
+    --osk-padding: 8px;
+    padding: var(--osk-padding);
+    background: var(--color-base-200);
+    border-radius: var(--radius-box, 0.75rem);
+  }
+
+  .osk-inline { @apply rounded-none bg-transparent; }
+  .osk-compact { --osk-key-height: 40px; --osk-gap: 4px; --osk-padding: 6px; }
+  .osk-lg { --osk-key-height: 56px; --osk-gap: 8px; --osk-padding: 12px; }
+
+  .osk-header {
+    @apply flex items-center justify-between pb-2 mb-1;
+    padding-inline: var(--osk-gap);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .osk-title {
+    @apply text-xs font-semibold uppercase tracking-wide;
+    color: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+  }
+
+  .osk-lang-btn {
+    @apply flex items-center gap-1 text-sm font-medium px-2 py-1 rounded-md cursor-pointer border;
+    background: var(--color-base-100);
+    border-color: var(--color-base-300);
+    color: var(--color-base-content);
+    transition: background 0.15s ease;
+  }
+
+  .osk-lang-btn:hover { background: var(--color-base-200); }
+  .osk-lang-btn:active { @apply scale-97; }
+
+  .osk-row {
+    @apply flex justify-center;
+    gap: var(--osk-gap);
+    margin-bottom: var(--osk-gap);
+  }
+  .osk-row:last-child { @apply mb-0; }
+
+  .osk-key {
+    @apply flex items-center justify-center text-lg font-medium border-none cursor-pointer shrink-0;
+    min-width: var(--osk-key-height);
+    height: var(--osk-key-height);
+    padding-inline: 0.5rem;
+    background: var(--color-base-100);
+    color: var(--color-base-content);
+    border-radius: var(--radius-field, 0.25rem);
+    box-shadow: 0 1px 2px oklch(0 0 0 / 0.08);
+    flex: 1;
+    max-width: 60px;
+    transition: background 0.15s ease, transform 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .osk-key:focus { @apply outline-none; }
+  .osk-key:hover { background: var(--color-base-200); }
+  .osk-key:active {
+    @apply scale-92;
+    background: var(--color-primary);
+    color: var(--color-primary-content);
+  }
+
+  .osk-key-special {
+    @apply text-sm font-semibold;
+    background: var(--color-base-300);
+    max-width: none;
+    flex: 1.5;
+  }
+  .osk-key-special:hover { background: color-mix(in oklch, var(--color-base-300) 80%, black); }
+
+  .osk-key-shift { flex: 1.5; }
+  .osk-key-shift.active { background: var(--color-primary); color: var(--color-primary-content); }
+  .osk-key-shift.caps-lock {
+    background: var(--color-primary);
+    color: var(--color-primary-content);
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-primary) 70%, black);
+  }
+
+  .osk-key-space { flex: 5; max-width: none; }
+  .osk-key-backspace { flex: 1.5; }
+  .osk-key-enter {
+    flex: 2;
+    background: var(--color-primary);
+    color: var(--color-primary-content);
+  }
+  .osk-key-enter:hover { background: color-mix(in oklch, var(--color-primary) 85%, black); }
+  .osk-key-numbers { flex: 1.25; }
+  .osk-key-icon { @apply size-5.5; }
+
+  .osk-key-alt {
+    @apply absolute top-1 right-1.5 font-normal;
+    font-size: 0.625rem;
+    color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+  }
+
+  .osk-lang-picker {
+    @apply absolute left-0 right-0 z-100 overflow-y-auto;
+    top: 100%;
+    margin-top: 0.25rem;
+    background: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+    box-shadow: 0 8px 24px oklch(0 0 0 / 0.12);
+    max-height: 200px;
+    margin-inline: var(--osk-padding);
+  }
+
+  .osk-lang-option {
+    @apply flex items-center gap-2 px-4 py-2 text-sm cursor-pointer;
+    color: var(--color-base-content);
+    transition: background 0.15s ease;
+  }
+  .osk-lang-option:hover { background: var(--color-base-200); }
+  .osk-lang-option.active {
+    background: color-mix(in oklch, var(--color-primary) 15%, transparent);
+    color: var(--color-primary);
+  }
+
+  .osk-preview {
+    @apply fixed flex items-center justify-center text-2xl font-semibold pointer-events-none z-700;
+    min-width: 56px;
+    height: 56px;
+    padding-inline: 1rem;
+    background: var(--color-base-100);
+    color: var(--color-base-content);
+    border-radius: var(--radius-box, 0.75rem);
+    box-shadow: 0 8px 32px oklch(0 0 0 / 0.15);
+    transform: translate(-50%, -100%) translateY(-16px);
+  }
+
+  /* OSK Sheet */
+  .osk-sheet {
+    @apply fixed left-0 right-0 bottom-0 z-500;
+    transform: translateY(100%);
+    transition: transform 300ms ease-out;
+    padding-bottom: env(safe-area-inset-bottom);
+    will-change: transform;
+  }
+  .osk-sheet-open { transform: translateY(0); }
+
+  .osk-sheet-container {
+    @apply glass;
+    border-radius: 1rem 1rem 0 0;
+    border-top: 0.5px solid oklch(1 0 0 / 0.18);
+    box-shadow: 0 -4px 32px oklch(0 0 0 / 0.15);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .osk-sheet-header {
+    @apply flex items-center justify-between px-4 py-2;
+    border-bottom: 0.5px solid oklch(1 0 0 / 0.18);
+  }
+  .osk-sheet-title { @apply text-sm font-semibold; color: var(--color-base-content); }
+  .osk-sheet-actions { @apply flex items-center gap-2; }
+  .osk-sheet-btn {
+    @apply flex items-center justify-center px-3 py-1 text-sm font-medium bg-transparent border-none rounded-md cursor-pointer;
+    color: var(--color-primary);
+    transition: background 0.15s ease;
+  }
+  .osk-sheet-btn:hover { background: color-mix(in oklch, var(--color-primary) 10%, transparent); }
+  .osk-sheet-btn-close { @apply size-9 p-0 rounded-full; color: color-mix(in oklch, var(--color-base-content) 60%, transparent); }
+  .osk-sheet-btn-close:hover { background: var(--color-base-200); }
+  .osk-sheet-btn-close svg { @apply size-5; }
+  .osk-sheet-content { @apply p-2; }
+  .osk-sheet-content .osk { @apply bg-transparent rounded-none p-0; }
+
+  /* Glass */
+  .osk.glass { @apply glass; }
+  .osk.glass .osk-key { background: oklch(1 0 0 / 0.6); }
+  .osk.glass .osk-key-special { background: oklch(1 0 0 / 0.4); }
+  [data-theme="dark"] .osk.glass .osk-key { background: oklch(1 0 0 / 0.1); }
+  [data-theme="dark"] .osk.glass .osk-key-special { background: oklch(1 0 0 / 0.05); }
+
+  @media (max-width: 400px) {
+    .osk { --osk-key-height: 42px; --osk-gap: 4px; }
+    .osk-key { @apply text-base; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .osk-key { transition: none; }
+    .osk-key:active { transform: none; }
+    .osk-sheet { transition: none; }
+  }
+}
