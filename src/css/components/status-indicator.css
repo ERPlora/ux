@@ -1,0 +1,154 @@
+/* UX v3 - Status Indicator Component */
+/* Simple dot + label for inline status display with color variants, sizes, pulse, and filled/outline styles */
+
+@layer components {
+
+  /* =============================================
+     Base Status Indicator
+     ============================================= */
+
+  .status-indicator {
+    --si-color: var(--color-neutral);
+    --si-dot: 8px;
+
+    @apply inline-flex items-center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--color-base-content);
+  }
+
+  /* =============================================
+     Dot
+     ============================================= */
+
+  .status-indicator-dot {
+    @apply rounded-full shrink-0;
+    width: var(--si-dot);
+    height: var(--si-dot);
+    background-color: var(--si-color);
+  }
+
+  /* =============================================
+     Color Variants
+     ============================================= */
+
+  .status-indicator-success   { --si-color: var(--color-success); }
+  .status-indicator-warning   { --si-color: var(--color-warning); }
+  .status-indicator-error,
+  .status-indicator-danger     { --si-color: var(--color-error); }
+  .status-indicator-info       { --si-color: var(--color-info); }
+  .status-indicator-neutral    { --si-color: var(--color-neutral); }
+  .status-indicator-offline    { --si-color: var(--color-neutral); }
+  .status-indicator-online     { --si-color: var(--color-success); }
+  .status-indicator-busy       { --si-color: var(--color-error); }
+  .status-indicator-away       { --si-color: var(--color-warning); }
+  .status-indicator-pending    { --si-color: var(--color-warning); }
+  .status-indicator-active     { --si-color: var(--color-success); }
+  .status-indicator-inactive   { --si-color: var(--color-neutral); }
+
+  /* =============================================
+     Pulse Animation
+     ============================================= */
+
+  .status-indicator-pulse .status-indicator-dot {
+    @apply relative;
+
+    &::before {
+      content: '';
+      @apply absolute inset-0 rounded-full;
+      background-color: inherit;
+      animation: status-indicator-pulse 2s ease-in-out infinite;
+    }
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .status-indicator-sm {
+    --si-dot: 6px;
+    font-size: 0.75rem;
+  }
+
+  .status-indicator-lg {
+    --si-dot: 10px;
+    font-size: 1rem;
+  }
+
+  /* =============================================
+     Dot Only (hide label)
+     ============================================= */
+
+  .status-indicator-dot-only .status-indicator-label {
+    @apply hidden;
+  }
+
+  /* =============================================
+     Filled Variant (tinted background pill)
+     ============================================= */
+
+  .status-indicator-filled {
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    background-color: color-mix(in oklch, var(--si-color) 10%, transparent);
+    color: var(--si-color);
+  }
+
+  /* =============================================
+     Outline Variant
+     ============================================= */
+
+  .status-indicator-outline {
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid var(--si-color);
+    color: var(--si-color);
+  }
+
+  /* =============================================
+     Ring (for avatar overlays)
+     ============================================= */
+
+  .status-indicator-ring .status-indicator-dot {
+    box-shadow: 0 0 0 2px var(--color-base-100);
+  }
+
+  /* =============================================
+     Animation
+     ============================================= */
+
+  @keyframes status-indicator-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(2);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .status-indicator-hide-label-mobile .status-indicator-label {
+    @apply hidden;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .status-indicator-pulse .status-indicator-dot::before {
+    animation: none;
+  }
+}

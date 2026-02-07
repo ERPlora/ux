@@ -1,0 +1,661 @@
+/* UX v3 - Video Player Component */
+/* Video player with custom controls, progress, volume, speed, fullscreen, poster overlay */
+
+@layer components {
+
+  /* =============================================
+     Base Container
+     ============================================= */
+
+  .video-player {
+    --video-controls-bg: rgba(0, 0, 0, 0.6);
+    --video-controls-color: #ffffff;
+    --video-progress-bg: rgba(255, 255, 255, 0.3);
+    --video-progress-fill: var(--color-primary);
+    --video-progress-buffer: rgba(255, 255, 255, 0.5);
+    --video-btn-size: 44px;
+    --video-btn-size-sm: 36px;
+
+    @apply relative w-full overflow-hidden select-none;
+    background-color: #000;
+    border-radius: var(--radius-box, 0.75rem);
+    line-height: 0;
+
+    &:focus-within {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  /* =============================================
+     Video Element
+     ============================================= */
+
+  .video-player-video {
+    @apply block w-full;
+    height: auto;
+    object-fit: contain;
+    background-color: #000;
+  }
+
+  .video-player-cover .video-player-video {
+    object-fit: cover;
+  }
+
+  /* Aspect Ratios */
+  .video-player-16-9 { aspect-ratio: 16 / 9; }
+  .video-player-4-3  { aspect-ratio: 4 / 3; }
+  .video-player-1-1  { aspect-ratio: 1 / 1; }
+
+  .video-player-16-9 .video-player-video,
+  .video-player-4-3 .video-player-video,
+  .video-player-1-1 .video-player-video {
+    @apply absolute inset-0 w-full h-full;
+  }
+
+  /* =============================================
+     Poster Overlay
+     ============================================= */
+
+  .video-player-poster {
+    @apply absolute inset-0 flex items-center justify-center cursor-pointer;
+    background-size: cover;
+    background-position: center;
+    background-color: #000;
+    z-index: 5;
+    transition: opacity 0.2s ease;
+  }
+
+  .video-player-poster-hidden {
+    @apply opacity-0 pointer-events-none;
+  }
+
+  .video-player-poster-play {
+    @apply flex items-center justify-center rounded-full cursor-pointer;
+    width: 72px;
+    height: 72px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+
+    &:hover {
+      transform: scale(1.1);
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    & svg {
+      @apply size-8;
+      margin-left: 4px;
+    }
+  }
+
+  /* =============================================
+     Loading Overlay
+     ============================================= */
+
+  .video-player-loading {
+    @apply absolute inset-0 flex items-center justify-center;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+  }
+
+  .video-player-is-loading .video-player-loading {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .video-player-spinner {
+    @apply rounded-full;
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    animation: video-player-spin 0.8s linear infinite;
+  }
+
+  /* =============================================
+     Controls Wrapper
+     ============================================= */
+
+  .video-player-controls {
+    @apply absolute bottom-0 left-0 right-0 flex flex-col;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    padding: 1.5rem 1rem 0.5rem;
+    z-index: 15;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  .video-player:hover .video-player-controls,
+  .video-player-controls-visible .video-player-controls,
+  .video-player:focus-within .video-player-controls {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .video-player-controls-always .video-player-controls {
+    @apply relative;
+    opacity: 1;
+    visibility: visible;
+    background: var(--color-base-200);
+    padding: 0.5rem 1rem;
+  }
+
+  /* =============================================
+     Progress Bar
+     ============================================= */
+
+  .video-player-progress-wrapper {
+    @apply relative w-full flex items-center cursor-pointer;
+    height: 20px;
+    touch-action: none;
+
+    &:hover .video-player-progress,
+    &:active .video-player-progress {
+      height: 6px;
+    }
+
+    &:hover .video-player-progress-thumb,
+    &:active .video-player-progress-thumb {
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  .video-player-progress {
+    @apply relative w-full overflow-hidden;
+    height: 4px;
+    background: var(--video-progress-bg);
+    border-radius: 2px;
+    transition: height 0.15s ease;
+  }
+
+  .video-player-progress-buffer {
+    @apply absolute top-0 left-0 h-full;
+    background: var(--video-progress-buffer);
+    border-radius: 2px;
+  }
+
+  .video-player-progress-fill {
+    @apply absolute top-0 left-0 h-full;
+    background: var(--video-progress-fill);
+    border-radius: 2px;
+    transition: width 0.1s linear;
+  }
+
+  .video-player-progress-thumb {
+    @apply absolute rounded-full;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.15s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  /* =============================================
+     Controls Bar
+     ============================================= */
+
+  .video-player-controls-bar {
+    @apply flex items-center gap-1;
+    margin-top: 0.25rem;
+  }
+
+  .video-player-controls-left {
+    @apply flex items-center gap-1;
+  }
+
+  .video-player-controls-center {
+    @apply flex-1 flex items-center justify-center;
+  }
+
+  .video-player-controls-right {
+    @apply flex items-center gap-1;
+  }
+
+  /* =============================================
+     Control Buttons
+     ============================================= */
+
+  .video-player-btn {
+    @apply flex items-center justify-center bg-transparent border-none cursor-pointer;
+    width: var(--video-btn-size);
+    height: var(--video-btn-size);
+    min-width: var(--video-btn-size);
+    border-radius: var(--radius-field, 0.5rem);
+    color: var(--video-controls-color);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    & svg {
+      @apply size-6;
+    }
+  }
+
+  .video-player-btn-sm {
+    width: var(--video-btn-size-sm);
+    height: var(--video-btn-size-sm);
+    min-width: var(--video-btn-size-sm);
+
+    & svg {
+      @apply size-5;
+    }
+  }
+
+  /* =============================================
+     Time Display
+     ============================================= */
+
+  .video-player-time {
+    @apply flex items-center gap-1 text-sm font-medium whitespace-nowrap;
+    color: var(--video-controls-color);
+    font-variant-numeric: tabular-nums;
+    padding: 0 0.25rem;
+  }
+
+  .video-player-time-separator {
+    opacity: 0.6;
+  }
+
+  /* =============================================
+     Volume Control
+     ============================================= */
+
+  .video-player-volume {
+    @apply flex items-center gap-1;
+  }
+
+  .video-player-volume-slider-wrapper {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.2s ease;
+  }
+
+  .video-player-volume:hover .video-player-volume-slider-wrapper,
+  .video-player-volume-slider-wrapper:focus-within {
+    width: 80px;
+  }
+
+  .video-player-volume-slider {
+    @apply cursor-pointer;
+    width: 80px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--video-progress-bg);
+    border-radius: 2px;
+    outline: none;
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    &::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  /* =============================================
+     Speed Control
+     ============================================= */
+
+  .video-player-speed {
+    @apply relative;
+  }
+
+  .video-player-speed-btn {
+    @apply flex items-center justify-center bg-transparent border-none cursor-pointer text-sm font-semibold;
+    min-width: 44px;
+    height: var(--video-btn-size);
+    padding: 0 0.5rem;
+    border-radius: var(--radius-field, 0.5rem);
+    color: var(--video-controls-color);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .video-player-speed-menu {
+    @apply absolute;
+    bottom: calc(100% + 0.25rem);
+    right: 0;
+    min-width: 100px;
+    background: var(--video-controls-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--radius-box, 0.75rem);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.25rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    z-index: 20;
+    transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+  }
+
+  .video-player-speed-menu-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .video-player-speed-option {
+    @apply flex items-center justify-between w-full bg-transparent border-none cursor-pointer text-sm text-left;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-field, 0.5rem);
+    color: var(--video-controls-color);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .video-player-speed-option-active {
+    color: var(--color-primary);
+
+    &::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--color-primary);
+      border-radius: 50%;
+    }
+  }
+
+  /* =============================================
+     Fullscreen
+     ============================================= */
+
+  .video-player-fullscreen {
+    @apply fixed inset-0;
+    z-index: 9999;
+    border-radius: 0;
+    background: #000;
+
+    & .video-player-video {
+      @apply w-full h-full;
+      object-fit: contain;
+    }
+  }
+
+  /* =============================================
+     PiP Indicator
+     ============================================= */
+
+  .video-player-pip-indicator {
+    @apply absolute flex items-center justify-center gap-2;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: var(--radius-box, 0.75rem);
+    color: #fff;
+    z-index: 20;
+
+    & svg {
+      @apply size-6;
+    }
+  }
+
+  /* =============================================
+     Center Play Overlay
+     ============================================= */
+
+  .video-player-center-play {
+    @apply absolute inset-0 flex items-center justify-center cursor-pointer;
+    z-index: 8;
+  }
+
+  .video-player-center-play-btn {
+    @apply flex items-center justify-center border-none rounded-full cursor-pointer;
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #fff;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    & svg {
+      @apply size-9;
+      margin-left: 4px;
+    }
+  }
+
+  .video-player:hover .video-player-center-play-btn,
+  .video-player-paused .video-player-center-play-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .video-player-playing .video-player-center-play {
+    @apply hidden;
+  }
+
+  /* =============================================
+     Tooltip
+     ============================================= */
+
+  .video-player-tooltip {
+    @apply absolute text-xs font-medium whitespace-nowrap pointer-events-none;
+    bottom: calc(100% + 8px);
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: var(--radius-field, 0.5rem);
+    color: #fff;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+  }
+
+  .video-player-progress-wrapper:hover .video-player-tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* =============================================
+     Size Variants
+     ============================================= */
+
+  .video-player-sm {
+    --video-btn-size: 36px;
+    --video-btn-size-sm: 32px;
+  }
+
+  .video-player-lg {
+    --video-btn-size: 52px;
+    --video-btn-size-sm: 44px;
+  }
+
+  /* =============================================
+     Minimal Variant
+     ============================================= */
+
+  .video-player-minimal {
+    & .video-player-controls-bar {
+      @apply hidden;
+    }
+
+    & .video-player-controls {
+      padding: 0.5rem;
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .video-player.glass {
+    & .video-player-controls {
+      background: linear-gradient(transparent, color-mix(in oklch, var(--color-base-100) 72%, transparent));
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+
+    & .video-player-controls-bar {
+      color: var(--color-base-content);
+    }
+
+    & .video-player-btn {
+      color: var(--color-base-content);
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    & .video-player-time {
+      color: var(--color-base-content);
+    }
+
+    & .video-player-progress {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    & .video-player-progress-buffer {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    & .video-player-progress-thumb {
+      background: var(--color-primary);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    & .video-player-speed-menu {
+      @apply glass;
+      border-color: var(--glass-border);
+    }
+
+    & .video-player-speed-btn,
+    & .video-player-speed-option {
+      color: var(--color-base-content);
+    }
+
+    & .video-player-speed-option:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+/* =============================================
+   Keyframes
+   ============================================= */
+
+@keyframes video-player-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .video-player-controls {
+    padding: 1rem 0.5rem 0.25rem;
+  }
+
+  .video-player-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+
+    & svg {
+      @apply size-5;
+    }
+  }
+
+  .video-player-time {
+    @apply text-xs;
+  }
+
+  .video-player-volume-slider-wrapper {
+    @apply hidden;
+  }
+
+  .video-player-center-play-btn {
+    width: 64px;
+    height: 64px;
+
+    & svg {
+      @apply size-7;
+    }
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .video-player-controls,
+  .video-player-poster,
+  .video-player-loading,
+  .video-player-poster-play,
+  .video-player-btn,
+  .video-player-progress,
+  .video-player-progress-thumb,
+  .video-player-speed-menu,
+  .video-player-tooltip,
+  .video-player-center-play-btn {
+    transition: none;
+  }
+
+  .video-player-spinner {
+    animation: none;
+  }
+}

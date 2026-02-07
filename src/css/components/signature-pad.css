@@ -1,0 +1,190 @@
+/* UX v3 - Signature Pad Component */
+/* Canvas-based signature capture with guide line, actions, sizes, states */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .signature-pad {
+    @apply flex flex-col;
+  }
+
+  /* =============================================
+     Canvas container
+     ============================================= */
+
+  .signature-pad-container {
+    @apply relative overflow-hidden;
+    border: 2px solid var(--color-base-300);
+    border-radius: var(--radius-box);
+    background-color: var(--color-base-100);
+  }
+
+  .signature-pad-canvas {
+    @apply block w-full;
+    height: 200px;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  /* =============================================
+     Guide line
+     ============================================= */
+
+  .signature-pad-guide {
+    @apply absolute pointer-events-none;
+    left: 10%;
+    right: 10%;
+    bottom: 30%;
+    height: 1px;
+    background-color: var(--color-base-300);
+
+    &::before {
+      content: 'x';
+      @apply absolute;
+      left: -10px;
+      bottom: -2px;
+      font-size: 0.75rem;
+      color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    }
+  }
+
+  /* =============================================
+     Placeholder
+     ============================================= */
+
+  .signature-pad-placeholder {
+    @apply absolute top-1/2 left-1/2 flex flex-col items-center gap-2 pointer-events-none;
+    transform: translate(-50%, -50%);
+    font-size: 0.875rem;
+    color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    transition: opacity 0.15s ease;
+
+    & svg {
+      @apply size-8 opacity-50;
+    }
+  }
+
+  .signature-pad-signed .signature-pad-placeholder {
+    @apply opacity-0;
+  }
+
+  /* =============================================
+     Actions
+     ============================================= */
+
+  .signature-pad-actions {
+    @apply flex justify-end gap-2 mt-2;
+  }
+
+  .signature-pad-btn {
+    @apply inline-flex items-center justify-center gap-1.5 cursor-pointer;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: var(--color-base-content);
+    background-color: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-300);
+    }
+
+    &:disabled {
+      @apply opacity-50 cursor-not-allowed;
+    }
+
+    & svg {
+      @apply size-4;
+    }
+  }
+
+  .signature-pad-btn-primary {
+    @apply text-white;
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-primary) 85%, black);
+    }
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .signature-pad-sm .signature-pad-canvas {
+    height: 150px;
+  }
+
+  .signature-pad-lg .signature-pad-canvas {
+    height: 300px;
+  }
+
+  /* =============================================
+     States
+     ============================================= */
+
+  .signature-pad-disabled .signature-pad-container {
+    @apply opacity-60;
+    background-color: var(--color-base-200);
+  }
+
+  .signature-pad-disabled .signature-pad-canvas {
+    @apply cursor-not-allowed pointer-events-none;
+  }
+
+  .signature-pad-error .signature-pad-container {
+    border-color: var(--color-error);
+  }
+
+  .signature-pad-readonly .signature-pad-canvas {
+    @apply cursor-default pointer-events-none;
+  }
+
+  .signature-pad-readonly .signature-pad-guide,
+  .signature-pad-readonly .signature-pad-placeholder {
+    @apply hidden;
+  }
+
+  /* =============================================
+     Label & helper
+     ============================================= */
+
+  .signature-pad-label {
+    @apply block text-sm font-medium mb-1;
+    color: var(--color-base-content);
+  }
+
+  .signature-pad-helper {
+    @apply text-xs mt-1;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .signature-pad-helper-error {
+    color: var(--color-error);
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .signature-pad.glass .signature-pad-container {
+    @apply glass;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .signature-pad-placeholder,
+  .signature-pad-btn {
+    transition: none;
+  }
+}

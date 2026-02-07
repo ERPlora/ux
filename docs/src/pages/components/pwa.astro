@@ -1,0 +1,146 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="PWA">
+  <p class="text-base-content/70 mb-6">Progressive Web App helpers: online/offline status bar, install banner, update prompt, offline overlay, and cached indicator.</p>
+
+  <CodePreview
+    title="Online / Offline Status Bar"
+    semantic={`<div class="pwa-status pwa-status-offline pwa-status-visible">
+  You are offline
+</div>
+
+<div class="pwa-status pwa-status-online pwa-status-visible" style="position:relative; margin-top:0.5rem;">
+  Back online
+</div>`}
+    tailwind={`<div class="fixed top-0 left-0 right-0 text-center font-medium py-2 px-4 text-sm bg-error text-error-content z-50" style="position:relative">
+  You are offline
+</div>
+
+<div class="fixed top-0 left-0 right-0 text-center font-medium py-2 px-4 text-sm bg-success text-success-content z-50" style="position:relative; margin-top:0.5rem;">
+  Back online
+</div>`}
+    js={`// Show: el.classList.add('pwa-status-visible');
+// Hide: el.classList.remove('pwa-status-visible');
+// Detect: window.addEventListener('online', ...);
+// Detect: window.addEventListener('offline', ...);`}
+  />
+
+  <CodePreview
+    title="Install Banner"
+    semantic={`<div class="pwa-install pwa-install-visible" style="position:relative; transform:none;">
+  <div class="pwa-install-content">
+    <img class="pwa-install-icon" src="https://placehold.co/48" alt="App icon" />
+    <div class="pwa-install-text">
+      <div class="pwa-install-title">Install My App</div>
+      <div class="pwa-install-subtitle">Add to home screen for a better experience</div>
+    </div>
+    <div class="pwa-install-actions">
+      <button class="btn btn-sm color-primary">Install</button>
+      <button class="btn btn-sm btn-ghost">Later</button>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="fixed bottom-0 left-0 right-0 bg-base-100 border-t border-base-200 p-6 shadow-lg z-40" style="position:relative;">
+  <div class="flex items-center gap-4 max-w-[600px] mx-auto">
+    <img class="w-12 h-12 rounded-lg shrink-0 object-contain" src="https://placehold.co/48" alt="App icon" />
+    <div class="flex-1 min-w-0">
+      <div class="font-semibold text-base-content">Install My App</div>
+      <div class="text-sm text-base-content/60">Add to home screen for a better experience</div>
+    </div>
+    <div class="flex gap-2 shrink-0">
+      <button class="btn btn-sm color-primary">Install</button>
+      <button class="btn btn-sm btn-ghost">Later</button>
+    </div>
+  </div>
+</div>`}
+    js={`// Show install banner with beforeinstallprompt:
+// let deferredPrompt;
+// window.addEventListener('beforeinstallprompt', (e) => &#123;
+//   e.preventDefault();
+//   deferredPrompt = e;
+//   banner.classList.add('pwa-install-visible');
+// &#125;);
+// installBtn.onclick = () => deferredPrompt.prompt();`}
+  />
+
+  <CodePreview
+    title="Update Available"
+    semantic={`<div class="pwa-update pwa-update-visible" style="position:relative; transform:none;">
+  <span class="pwa-update-text">A new version is available</span>
+  <button class="pwa-update-btn">Update now</button>
+</div>`}
+    tailwind={`<div class="flex items-center justify-between bg-primary text-primary-content rounded-box p-4 gap-4 shadow-lg" style="position:relative;">
+  <span class="text-sm font-medium">A new version is available</span>
+  <button class="border-none font-medium cursor-pointer text-sm py-1 px-4 rounded-field" style="background:rgba(255,255,255,0.2); color:inherit;">Update now</button>
+</div>`}
+    js={`// Service worker update flow:
+// navigator.serviceWorker.addEventListener('controllerchange', () => &#123;
+//   banner.classList.add('pwa-update-visible');
+// &#125;);
+// updateBtn.onclick = () => window.location.reload();`}
+  />
+
+  <CodePreview
+    title="Offline Overlay"
+    semantic={`<div class="pwa-offline-overlay pwa-offline-overlay-visible" style="position:relative; min-height:200px;">
+  <svg class="pwa-offline-overlay-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+  <div class="pwa-offline-overlay-title">No Internet Connection</div>
+  <div class="pwa-offline-overlay-subtitle">Check your network settings and try again</div>
+</div>`}
+    tailwind={`<div class="flex flex-col items-center justify-center text-center bg-base-100 p-8" style="min-height:200px;">
+  <svg class="w-20 h-20 mb-6 text-base-content/40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+  <div class="text-xl font-semibold text-base-content mb-2">No Internet Connection</div>
+  <div class="text-base-content/60 max-w-[300px]">Check your network settings and try again</div>
+</div>`}
+    js={`// Show overlay when offline:
+// window.addEventListener('offline', () => &#123;
+//   overlay.classList.add('pwa-offline-overlay-visible');
+// &#125;);
+// window.addEventListener('online', () => &#123;
+//   overlay.classList.remove('pwa-offline-overlay-visible');
+// &#125;);`}
+  />
+
+  <CodePreview
+    title="Cached Indicator"
+    semantic={`<span class="pwa-cached">
+  <svg class="pwa-cached-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  Available offline
+</span>`}
+    tailwind={`<span class="inline-flex items-center gap-1 py-1 px-2 text-xs font-medium rounded-field text-success" style="background-color: color-mix(in oklch, var(--color-success) 12%, transparent);">
+  <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  Available offline
+</span>`}
+    js={`// No JavaScript required for display`}
+  />
+
+  <div class="overflow-x-auto mt-8">
+    <table class="table">
+      <thead><tr><th>Class</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>.pwa-status</code></td><td>Fixed top status bar (hidden by default)</td></tr>
+        <tr><td><code>.pwa-status-visible</code></td><td>Show the status bar (slides down)</td></tr>
+        <tr><td><code>.pwa-status-offline</code></td><td>Red/error background</td></tr>
+        <tr><td><code>.pwa-status-online</code></td><td>Green/success background</td></tr>
+        <tr><td><code>.pwa-install</code></td><td>Fixed bottom install banner (hidden by default)</td></tr>
+        <tr><td><code>.pwa-install-visible</code></td><td>Show install banner (slides up)</td></tr>
+        <tr><td><code>.pwa-install-content</code></td><td>Content flex container</td></tr>
+        <tr><td><code>.pwa-install-icon</code></td><td>App icon (48px)</td></tr>
+        <tr><td><code>.pwa-install-title</code></td><td>Bold app name</td></tr>
+        <tr><td><code>.pwa-install-subtitle</code></td><td>Description text</td></tr>
+        <tr><td><code>.pwa-install-actions</code></td><td>Button group</td></tr>
+        <tr><td><code>.pwa-update</code></td><td>Floating update banner (hidden by default)</td></tr>
+        <tr><td><code>.pwa-update-visible</code></td><td>Show update banner</td></tr>
+        <tr><td><code>.pwa-update-btn</code></td><td>Semi-transparent action button</td></tr>
+        <tr><td><code>.pwa-offline-overlay</code></td><td>Full-screen offline overlay (hidden by default)</td></tr>
+        <tr><td><code>.pwa-offline-overlay-visible</code></td><td>Show overlay</td></tr>
+        <tr><td><code>.pwa-cached</code></td><td>Inline cached/available-offline badge</td></tr>
+        <tr><td><code>.pwa-install.glass</code></td><td>Glass morphism install banner</td></tr>
+        <tr><td><code>.pwa-update.glass</code></td><td>Glass morphism update banner</td></tr>
+      </tbody>
+    </table>
+  </div>
+</DocsLayout>

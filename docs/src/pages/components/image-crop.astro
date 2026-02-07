@@ -1,0 +1,169 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Image Crop">
+  <p class="text-base-content/70 mb-6">Image cropping interface with draggable crop area, resize handles, rule-of-thirds grid, aspect ratio presets, zoom slider, and rotate controls.</p>
+
+  <CodePreview
+    title="Basic Image Crop"
+    semantic={`<div class="image-crop" style="max-width: 500px;">
+  <div class="image-crop-canvas">
+    <div class="image-crop-image-container">
+      <div style="width: 400px; height: 260px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 4px;"></div>
+    </div>
+    <div class="image-crop-area" style="top: 20%; left: 15%; width: 70%; height: 60%;">
+      <div class="image-crop-grid image-crop-grid-thirds" style="opacity: 1;"></div>
+      <div class="image-crop-handles">
+        <div class="image-crop-handle image-crop-handle-nw"></div>
+        <div class="image-crop-handle image-crop-handle-ne"></div>
+        <div class="image-crop-handle image-crop-handle-sw"></div>
+        <div class="image-crop-handle image-crop-handle-se"></div>
+        <div class="image-crop-handle image-crop-handle-n"></div>
+        <div class="image-crop-handle image-crop-handle-s"></div>
+        <div class="image-crop-handle image-crop-handle-w"></div>
+        <div class="image-crop-handle image-crop-handle-e"></div>
+      </div>
+    </div>
+  </div>
+  <div class="image-crop-controls">
+    <div class="image-crop-control-row">
+      <div class="image-crop-control-group">
+        <span class="image-crop-control-label">Zoom</span>
+        <input class="image-crop-slider" type="range" min="1" max="3" step="0.1" value="1"/>
+      </div>
+    </div>
+    <div class="image-crop-control-row">
+      <div class="image-crop-aspect-buttons">
+        <button class="image-crop-aspect-btn">Free</button>
+        <button class="image-crop-aspect-btn image-crop-aspect-btn-active">1:1</button>
+        <button class="image-crop-aspect-btn">4:3</button>
+        <button class="image-crop-aspect-btn">16:9</button>
+      </div>
+      <div class="image-crop-rotate-buttons">
+        <button class="image-crop-rotate-btn" aria-label="Rotate left">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        </button>
+        <button class="image-crop-rotate-btn" aria-label="Rotate right">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="image-crop-actions">
+      <button class="btn color-base-300" style="padding: 0.5rem 1rem;">Cancel</button>
+      <button class="btn color-primary" style="padding: 0.5rem 1rem;">Apply</button>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="relative w-full max-w-[500px] overflow-hidden rounded-box bg-neutral select-none" style="touch-action: none;">
+  <div class="relative w-full flex items-center justify-center overflow-hidden" style="min-height: 260px;">
+    <div style="width: 400px; height: 260px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 4px;"></div>
+    <div class="absolute cursor-move" style="top: 20%; left: 15%; width: 70%; height: 60%; border: 2px solid white; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);">
+      <div class="absolute inset-0 pointer-events-none" style="background-image: linear-gradient(to right, rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.3) 1px, transparent 1px); background-size: 33.333% 33.333%;"></div>
+      <div class="absolute w-5 h-5 bg-white border-2 border-primary rounded-full" style="top: 0; left: 0; transform: translate(-50%, -50%); cursor: nwse-resize;"></div>
+      <div class="absolute w-5 h-5 bg-white border-2 border-primary rounded-full" style="top: 0; left: 100%; transform: translate(-50%, -50%); cursor: nesw-resize;"></div>
+      <div class="absolute w-5 h-5 bg-white border-2 border-primary rounded-full" style="top: 100%; left: 0; transform: translate(-50%, -50%); cursor: nesw-resize;"></div>
+      <div class="absolute w-5 h-5 bg-white border-2 border-primary rounded-full" style="top: 100%; left: 100%; transform: translate(-50%, -50%); cursor: nwse-resize;"></div>
+    </div>
+  </div>
+  <div class="flex flex-col gap-4 p-4 bg-base-100 border-t border-base-300">
+    <div class="flex items-center gap-4">
+      <span class="text-sm font-medium text-base-content/60 min-w-[50px]">Zoom</span>
+      <input type="range" min="1" max="3" step="0.1" value="1" class="flex-1 h-1 rounded-sm accent-primary"/>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="flex gap-1 flex-wrap">
+        <button class="text-sm font-medium px-2 py-1 rounded border border-base-300 bg-base-200 text-base-content/60 cursor-pointer hover:bg-base-300">Free</button>
+        <button class="text-sm font-medium px-2 py-1 rounded border border-primary bg-primary text-primary-content cursor-pointer">1:1</button>
+        <button class="text-sm font-medium px-2 py-1 rounded border border-base-300 bg-base-200 text-base-content/60 cursor-pointer hover:bg-base-300">4:3</button>
+        <button class="text-sm font-medium px-2 py-1 rounded border border-base-300 bg-base-200 text-base-content/60 cursor-pointer hover:bg-base-300">16:9</button>
+      </div>
+    </div>
+    <div class="flex gap-2 justify-end pt-2 border-t border-base-300">
+      <button class="px-4 py-2 rounded-lg border border-base-300 bg-base-100 text-base-content cursor-pointer hover:bg-base-200 text-sm">Cancel</button>
+      <button class="px-4 py-2 rounded-lg bg-primary text-primary-content border-none cursor-pointer text-sm font-medium">Apply</button>
+    </div>
+  </div>
+</div>`}
+    js={`// Image crop requires JS for drag/resize logic:
+// cropArea.onmousedown = (e) => &#123;
+//   const startX = e.clientX, startY = e.clientY;
+//   document.onmousemove = (e) => &#123;
+//     const dx = e.clientX - startX;
+//     const dy = e.clientY - startY;
+//     // Update cropArea position
+//   &#125;;
+// &#125;;
+// handle.onmousedown = (e) => &#123; /* resize logic */ &#125;;`}
+  />
+
+  <CodePreview
+    title="Circle Crop & Preview"
+    semantic={`<div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+  <div class="image-crop image-crop-circle" style="max-width: 300px; flex: 1;">
+    <div class="image-crop-canvas" style="min-height: 200px;">
+      <div class="image-crop-image-container">
+        <div style="width: 260px; height: 200px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 4px;"></div>
+      </div>
+      <div class="image-crop-area" style="top: 10%; left: 20%; width: 60%; height: 80%; border-radius: 50%;"></div>
+    </div>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+    <div class="image-crop-preview image-crop-preview-md image-crop-preview-circle">
+      <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f093fb, #f5576c);"></div>
+    </div>
+    <div class="image-crop-preview image-crop-preview-sm image-crop-preview-circle">
+      <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f093fb, #f5576c);"></div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="flex gap-6 items-start">
+  <div class="relative w-full max-w-[300px] overflow-hidden rounded-box bg-neutral select-none flex-1">
+    <div class="relative w-full flex items-center justify-center overflow-hidden" style="min-height: 200px;">
+      <div style="width: 260px; height: 200px; background: linear-gradient(135deg, #f093fb, #f5576c); border-radius: 4px;"></div>
+      <div class="absolute cursor-move rounded-full" style="top: 10%; left: 20%; width: 60%; height: 80%; border: 2px solid white; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);"></div>
+    </div>
+  </div>
+  <div class="flex flex-col gap-2">
+    <div class="w-[120px] h-[120px] rounded-full overflow-hidden border border-base-300 bg-base-200">
+      <div class="size-full" style="background: linear-gradient(135deg, #f093fb, #f5576c);"></div>
+    </div>
+    <div class="w-[80px] h-[80px] rounded-full overflow-hidden border border-base-300 bg-base-200">
+      <div class="size-full" style="background: linear-gradient(135deg, #f093fb, #f5576c);"></div>
+    </div>
+  </div>
+</div>`}
+    js={`// For circle crops, use the same drag logic but constrain to square:
+// const size = Math.min(width, height);
+// Apply canvas.toBlob() with circular clipping path for export.`}
+  />
+
+  <CodePreview
+    title="Empty State"
+    semantic={`<div class="image-crop" style="max-width: 400px;">
+  <div class="image-crop-canvas image-crop-canvas-empty" style="min-height: 200px;">
+    <div class="image-crop-placeholder">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <div class="image-crop-placeholder-text">Drop an image here</div>
+      <div class="image-crop-placeholder-hint">or click to browse</div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="relative w-full max-w-[400px] overflow-hidden rounded-box bg-neutral select-none">
+  <div class="flex flex-col items-center justify-center gap-2 p-8 text-center cursor-pointer" style="min-height: 200px; border: 2px dashed rgba(255,255,255,0.2); background: rgba(255,255,255,0.05);">
+    <svg class="size-12 opacity-60 text-base-content/40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    <div class="text-base font-medium text-base-content/40">Drop an image here</div>
+    <div class="text-sm text-base-content/30">or click to browse</div>
+  </div>
+</div>`}
+    js={`// Handle file drop:
+// canvas.ondrop = (e) => &#123;
+//   e.preventDefault();
+//   const file = e.dataTransfer.files[0];
+//   const reader = new FileReader();
+//   reader.onload = (e) => &#123; img.src = e.target.result; &#125;;
+//   reader.readAsDataURL(file);
+// &#125;;`}
+  />
+</DocsLayout>

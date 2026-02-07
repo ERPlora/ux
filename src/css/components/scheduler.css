@@ -1,0 +1,688 @@
+/* UX v3 - Scheduler Component */
+/* Resource scheduler with week/day/month views, bookings, time grid, drag-to-create */
+
+@layer components {
+
+  /* =============================================
+     Variables
+     ============================================= */
+
+  .scheduler {
+    --scheduler-hour-height: 60px;
+    --scheduler-time-width: 60px;
+    --scheduler-resource-width: 200px;
+  }
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .scheduler {
+    @apply flex flex-col overflow-hidden;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 1rem);
+  }
+
+  /* Glass */
+  .scheduler.glass {
+    @apply glass;
+    border-color: var(--color-glass-border);
+
+    .scheduler-header {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+      border-bottom-color: var(--color-glass-border);
+    }
+
+    .scheduler-day-headers {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+    }
+
+    .scheduler-times {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+    }
+
+    .scheduler-resource-header {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+    }
+
+    .scheduler-nav-btn,
+    .scheduler-view-toggle {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+    }
+
+    .scheduler-view-btn-active {
+      background-color: color-mix(in oklch, var(--color-base-100) 85%, transparent);
+    }
+  }
+
+  /* =============================================
+     Header
+     ============================================= */
+
+  .scheduler-header {
+    @apply flex items-center justify-between flex-wrap shrink-0;
+    padding: 1rem;
+    gap: 0.75rem;
+    background-color: var(--color-base-100);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .scheduler-nav {
+    @apply flex items-center gap-2;
+  }
+
+  .scheduler-nav-btn {
+    @apply flex items-center justify-center border-none cursor-pointer;
+    width: 36px;
+    height: 36px;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.5rem);
+    color: var(--color-base-content);
+    transition: background-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      background-color: var(--color-base-300);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    svg { @apply w-4.5 h-4.5; }
+  }
+
+  .scheduler-title {
+    @apply font-semibold;
+    font-size: 1.125rem;
+    color: var(--color-base-content);
+  }
+
+  .scheduler-today-btn {
+    @apply text-sm font-medium cursor-pointer bg-transparent;
+    padding: 0.5rem 1rem;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-field, 0.5rem);
+    transition: background-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+    }
+  }
+
+  .scheduler-view-toggle {
+    @apply flex;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.5rem);
+    padding: 0.25rem;
+  }
+
+  .scheduler-view-btn {
+    @apply text-sm font-medium border-none cursor-pointer bg-transparent;
+    padding: 0.5rem 1rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    border-radius: var(--radius-field, 0.25rem);
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      color: var(--color-base-content);
+    }
+  }
+
+  .scheduler-view-btn-active {
+    background-color: var(--color-base-100);
+    color: var(--color-base-content);
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.06);
+  }
+
+  /* =============================================
+     Resource Headers
+     ============================================= */
+
+  .scheduler-resources-header {
+    @apply flex sticky top-0;
+    border-bottom: 1px solid var(--color-base-300);
+    background-color: var(--color-base-100);
+    z-index: 15;
+  }
+
+  .scheduler-resources-corner {
+    @apply shrink-0;
+    width: var(--scheduler-time-width);
+    min-width: var(--scheduler-time-width);
+    border-right: 1px solid var(--color-base-300);
+  }
+
+  .scheduler-resource-header {
+    @apply flex-1 text-center;
+    min-width: var(--scheduler-resource-width);
+    padding: 0.75rem;
+    border-right: 1px solid var(--color-base-300);
+    background-color: var(--color-base-200);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  .scheduler-resource-name {
+    @apply text-sm font-semibold;
+    color: var(--color-base-content);
+  }
+
+  .scheduler-resource-info {
+    @apply text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  .scheduler-resource-avatar {
+    @apply flex items-center justify-center font-semibold text-xs;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin: 0 auto 0.5rem;
+    background-color: var(--color-base-300);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+
+    img {
+      @apply w-full h-full rounded-full object-cover;
+    }
+  }
+
+  /* =============================================
+     Day Headers
+     ============================================= */
+
+  .scheduler-day-headers {
+    @apply flex sticky top-0;
+    border-bottom: 1px solid var(--color-base-300);
+    background-color: var(--color-base-100);
+    z-index: 10;
+  }
+
+  .scheduler-corner {
+    @apply shrink-0;
+    width: var(--scheduler-time-width);
+    min-width: var(--scheduler-time-width);
+    border-right: 1px solid var(--color-base-300);
+  }
+
+  .scheduler-day-header {
+    @apply flex-1 flex flex-col items-center justify-center text-center cursor-pointer;
+    min-width: 100px;
+    padding: 0.75rem 0.5rem;
+    border-right: 1px solid var(--color-base-300);
+    transition: background-color 0.15s ease;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &:hover {
+      background-color: var(--color-base-200);
+    }
+  }
+
+  .scheduler-day-header-today .scheduler-day-number {
+    background-color: var(--color-primary);
+    color: white;
+  }
+
+  .scheduler-day-header-selected {
+    background-color: color-mix(in oklch, var(--color-primary) 5%, transparent);
+  }
+
+  .scheduler-day-header-weekend {
+    background-color: var(--color-base-200);
+  }
+
+  .scheduler-day-name {
+    @apply text-xs font-medium uppercase;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-bottom: 0.25rem;
+  }
+
+  .scheduler-day-number {
+    @apply flex items-center justify-center font-semibold;
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    color: var(--color-base-content);
+    border-radius: 9999px;
+  }
+
+  /* =============================================
+     Grid Container
+     ============================================= */
+
+  .scheduler-body {
+    @apply flex-1 overflow-auto relative;
+  }
+
+  .scheduler-grid {
+    @apply flex relative;
+    min-height: calc(var(--scheduler-hour-height) * 24);
+  }
+
+  /* =============================================
+     Time Column
+     ============================================= */
+
+  .scheduler-times {
+    @apply shrink-0 sticky left-0;
+    width: var(--scheduler-time-width);
+    min-width: var(--scheduler-time-width);
+    border-right: 1px solid var(--color-base-300);
+    background-color: var(--color-base-100);
+    z-index: 5;
+  }
+
+  .scheduler-time {
+    @apply flex items-start justify-end text-xs;
+    height: var(--scheduler-hour-height);
+    padding: 0 0.5rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    transform: translateY(-0.5em);
+  }
+
+  /* =============================================
+     Day Columns
+     ============================================= */
+
+  .scheduler-columns {
+    @apply flex flex-1;
+  }
+
+  .scheduler-day-column {
+    @apply flex-1 relative;
+    min-width: 100px;
+    border-right: 1px solid var(--color-base-300);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  .scheduler-day-column-weekend {
+    background-color: var(--color-base-200);
+  }
+
+  /* =============================================
+     Hour Slots
+     ============================================= */
+
+  .scheduler-hour-slot {
+    @apply relative cursor-pointer;
+    height: var(--scheduler-hour-height);
+    border-bottom: 1px solid var(--color-base-300);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-primary) 3%, transparent);
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    /* Half hour dashed line */
+    &::after {
+      content: '';
+      @apply block;
+      height: 50%;
+      border-bottom: 1px dashed color-mix(in oklch, var(--color-base-content) 8%, transparent);
+    }
+  }
+
+  .scheduler-hour-slot-business {
+    background-color: var(--color-base-100);
+  }
+
+  .scheduler-hour-slot-non-business {
+    background-color: var(--color-base-200);
+  }
+
+  /* 15-min interval lines */
+  .scheduler-interval-15 .scheduler-hour-slot {
+    &::before {
+      content: '';
+      @apply absolute left-0 right-0;
+      top: 25%;
+      border-bottom: 1px dotted color-mix(in oklch, var(--color-base-content) 8%, transparent);
+    }
+
+    &::after {
+      @apply absolute left-0 right-0;
+      top: 75%;
+      height: auto;
+      border-bottom: 1px dotted color-mix(in oklch, var(--color-base-content) 8%, transparent);
+    }
+  }
+
+  /* =============================================
+     Current Time Indicator
+     ============================================= */
+
+  .scheduler-now-line {
+    @apply absolute left-0 right-0 pointer-events-none;
+    height: 2px;
+    background-color: var(--color-error);
+    z-index: 8;
+
+    &::before {
+      content: '';
+      @apply absolute rounded-full;
+      left: -5px;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-error);
+    }
+  }
+
+  /* =============================================
+     Bookings / Events
+     ============================================= */
+
+  .scheduler-booking {
+    @apply absolute overflow-hidden cursor-pointer text-xs;
+    left: 2px;
+    right: 2px;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-field, 0.25rem);
+    z-index: 2;
+    border-left: 3px solid;
+    min-height: 20px;
+    transition: all 0.15s ease;
+
+    &:hover {
+      z-index: 3;
+      box-shadow: 0 4px 12px oklch(0 0 0 / 0.15);
+      transform: scale(1.02);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .scheduler-booking-title {
+    @apply font-semibold whitespace-nowrap overflow-hidden text-ellipsis;
+    line-height: 1.3;
+  }
+
+  .scheduler-booking-time {
+    @apply opacity-85;
+    font-size: 0.6875rem;
+    margin-top: 1px;
+  }
+
+  .scheduler-booking-resource {
+    @apply opacity-70;
+    font-size: 0.6875rem;
+    margin-top: 2px;
+  }
+
+  /* Booking Status Colors */
+  .scheduler-booking-confirmed {
+    background-color: color-mix(in oklch, var(--color-success) 90%, transparent);
+    color: white;
+    border-left-color: color-mix(in oklch, var(--color-success) 80%, black);
+  }
+
+  .scheduler-booking-pending {
+    background-color: color-mix(in oklch, var(--color-warning) 90%, transparent);
+    color: var(--color-warning-content);
+    border-left-color: color-mix(in oklch, var(--color-warning) 80%, black);
+  }
+
+  .scheduler-booking-cancelled {
+    @apply line-through opacity-70;
+    background-color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    border-left-color: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+  }
+
+  .scheduler-booking-blocked {
+    @apply cursor-not-allowed;
+    background-color: var(--color-base-200);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    border-left-color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .scheduler-booking-primary {
+    background-color: color-mix(in oklch, var(--color-primary) 90%, transparent);
+    color: white;
+    border-left-color: color-mix(in oklch, var(--color-primary) 80%, black);
+  }
+
+  .scheduler-booking-error {
+    background-color: color-mix(in oklch, var(--color-error) 90%, transparent);
+    color: white;
+    border-left-color: color-mix(in oklch, var(--color-error) 80%, black);
+  }
+
+  /* Conflict indicator */
+  .scheduler-booking-conflict {
+    box-shadow: 0 0 0 2px var(--color-error), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+
+    &::after {
+      content: '!';
+      @apply absolute flex items-center justify-center rounded-full font-bold;
+      top: 2px;
+      right: 4px;
+      width: 14px;
+      height: 14px;
+      background-color: var(--color-error);
+      color: white;
+      font-size: 10px;
+    }
+  }
+
+  /* =============================================
+     Drag to Create
+     ============================================= */
+
+  .scheduler-drag-preview {
+    @apply absolute flex items-center justify-center text-xs font-medium pointer-events-none;
+    left: 4px;
+    right: 4px;
+    background-color: color-mix(in oklch, var(--color-primary) 30%, transparent);
+    border: 2px dashed var(--color-primary);
+    border-radius: var(--radius-field, 0.25rem);
+    color: var(--color-primary);
+    z-index: 6;
+  }
+
+  /* =============================================
+     Month View
+     ============================================= */
+
+  .scheduler-month-grid {
+    @apply grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .scheduler-month-header {
+    @apply text-center text-xs font-semibold uppercase;
+    padding: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    background-color: var(--color-base-200);
+    border-right: 1px solid var(--color-base-300);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  .scheduler-month-day {
+    @apply cursor-pointer;
+    min-height: 100px;
+    padding: 0.5rem;
+    border-right: 1px solid var(--color-base-300);
+    border-bottom: 1px solid var(--color-base-300);
+    transition: background-color 0.15s ease;
+
+    &:nth-child(7n) {
+      border-right: none;
+    }
+
+    &:hover {
+      background-color: var(--color-base-200);
+    }
+  }
+
+  .scheduler-month-day-other {
+    @apply opacity-50;
+    background-color: var(--color-base-200);
+  }
+
+  .scheduler-month-day-today {
+    background-color: color-mix(in oklch, var(--color-primary) 5%, transparent);
+
+    .scheduler-month-day-number {
+      background-color: var(--color-primary);
+      color: white;
+    }
+  }
+
+  .scheduler-month-day-weekend {
+    background-color: var(--color-base-200);
+  }
+
+  .scheduler-month-day-number {
+    @apply inline-flex items-center justify-center font-medium;
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+    color: var(--color-base-content);
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+  }
+
+  .scheduler-month-booking {
+    @apply whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer;
+    padding: 2px 6px;
+    margin-bottom: 2px;
+    border-radius: var(--radius-field, 0.25rem);
+    font-size: 0.6875rem;
+  }
+
+  .scheduler-month-booking-confirmed {
+    background-color: color-mix(in oklch, var(--color-success) 20%, transparent);
+    color: color-mix(in oklch, var(--color-success) 80%, black);
+  }
+
+  .scheduler-month-booking-pending {
+    background-color: color-mix(in oklch, var(--color-warning) 20%, transparent);
+    color: color-mix(in oklch, var(--color-warning) 80%, black);
+  }
+
+  .scheduler-month-more {
+    @apply cursor-pointer;
+    font-size: 0.6875rem;
+    color: var(--color-primary);
+    padding: 2px 6px;
+
+    &:hover {
+      @apply underline;
+    }
+  }
+
+  /* =============================================
+     Empty State
+     ============================================= */
+
+  .scheduler-empty {
+    @apply flex flex-col items-center justify-center text-center;
+    padding: 3rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .scheduler-empty-icon {
+    @apply w-12 h-12;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    margin-bottom: 1rem;
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .scheduler {
+    --scheduler-time-width: 45px;
+    --scheduler-hour-height: 50px;
+    --scheduler-resource-width: 120px;
+  }
+
+  .scheduler-header {
+    @apply flex-wrap gap-2;
+    padding: 0.75rem;
+  }
+
+  .scheduler-view-toggle {
+    @apply w-full justify-center;
+    order: -1;
+  }
+
+  .scheduler-day-header {
+    min-width: 60px;
+  }
+
+  .scheduler-day-name {
+    font-size: 0.625rem;
+  }
+
+  .scheduler-day-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+  }
+
+  .scheduler-booking {
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.25rem;
+  }
+
+  .scheduler-booking-time {
+    @apply hidden;
+  }
+
+  .scheduler-month-day {
+    min-height: 60px;
+    padding: 0.25rem;
+  }
+
+  .scheduler-month-day-number {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .scheduler-nav-btn,
+  .scheduler-today-btn,
+  .scheduler-view-btn,
+  .scheduler-booking,
+  .scheduler-hour-slot,
+  .scheduler-day-header {
+    transition: none;
+  }
+
+  .scheduler-booking:hover {
+    transform: none;
+  }
+}

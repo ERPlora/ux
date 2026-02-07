@@ -1,0 +1,400 @@
+/* UX v3 - Image Zoom Component */
+/* Image zoom with lens (magnifying glass), side preview, inner zoom, fullscreen zoom */
+
+@layer components {
+
+  /* =============================================
+     Base Container
+     ============================================= */
+
+  .image-zoom {
+    @apply relative inline-block overflow-visible;
+    cursor: zoom-in;
+    line-height: 0;
+  }
+
+  .image-zoom-active {
+    cursor: none;
+  }
+
+  .image-zoom-fullscreen-active {
+    cursor: pointer;
+  }
+
+  .image-zoom-loading .image-zoom-img {
+    opacity: 0.5;
+  }
+
+  /* =============================================
+     Image
+     ============================================= */
+
+  .image-zoom-img {
+    @apply block max-w-full select-none;
+    height: auto;
+    -webkit-user-drag: none;
+  }
+
+  /* =============================================
+     Lens Mode (Magnifying Glass)
+     ============================================= */
+
+  .image-zoom-lens {
+    @apply absolute rounded-full overflow-hidden pointer-events-none;
+    width: 150px;
+    height: 150px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    background-repeat: no-repeat;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -50%) scale(0.8);
+    z-index: 50;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  }
+
+  .image-zoom-active .image-zoom-lens {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* Lens square variant */
+  .image-zoom-lens-square .image-zoom-lens {
+    border-radius: var(--radius-field, 0.5rem);
+  }
+
+  /* =============================================
+     Result Window (Side Preview)
+     ============================================= */
+
+  .image-zoom-result {
+    @apply absolute overflow-hidden pointer-events-none;
+    top: 0;
+    left: calc(100% + 1rem);
+    width: 400px;
+    height: 400px;
+    background-repeat: no-repeat;
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.5rem);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    background-color: var(--color-base-100);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-10px);
+    z-index: 50;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  }
+
+  .image-zoom-active .image-zoom-result {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
+
+  /* Result position variants */
+  .image-zoom-result-left .image-zoom-result {
+    left: auto;
+    right: calc(100% + 1rem);
+    transform: translateX(10px);
+  }
+
+  .image-zoom-result-left.image-zoom-active .image-zoom-result {
+    transform: translateX(0);
+  }
+
+  .image-zoom-result-top .image-zoom-result {
+    top: auto;
+    bottom: calc(100% + 1rem);
+    left: 50%;
+    transform: translate(-50%, 10px);
+  }
+
+  .image-zoom-result-top.image-zoom-active .image-zoom-result {
+    transform: translate(-50%, 0);
+  }
+
+  .image-zoom-result-bottom .image-zoom-result {
+    top: calc(100% + 1rem);
+    left: 50%;
+    transform: translate(-50%, -10px);
+  }
+
+  .image-zoom-result-bottom.image-zoom-active .image-zoom-result {
+    transform: translate(-50%, 0);
+  }
+
+  /* =============================================
+     Inner Zoom Mode
+     ============================================= */
+
+  .image-zoom-inner-mode .image-zoom-inner {
+    @apply absolute inset-0 pointer-events-none;
+    background-repeat: no-repeat;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  .image-zoom-inner-mode.image-zoom-active .image-zoom-inner {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* =============================================
+     Zoom Icon Overlay
+     ============================================= */
+
+  .image-zoom-icon {
+    @apply absolute flex items-center justify-center rounded-full pointer-events-none;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    opacity: 0.8;
+    transition: opacity 0.15s ease;
+
+    & svg {
+      @apply size-[18px];
+    }
+  }
+
+  .image-zoom:hover .image-zoom-icon {
+    opacity: 1;
+  }
+
+  .image-zoom-active .image-zoom-icon {
+    opacity: 0;
+  }
+
+  /* =============================================
+     Loading Spinner
+     ============================================= */
+
+  .image-zoom-spinner {
+    @apply absolute rounded-full;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    animation: image-zoom-spin 0.8s linear infinite;
+  }
+
+  /* =============================================
+     Fullscreen Mode
+     ============================================= */
+
+  .image-zoom-fullscreen {
+    @apply fixed inset-0 flex items-center justify-center;
+    z-index: 50;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1), visibility 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .image-zoom-fullscreen-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .image-zoom-fullscreen-hide-ui {
+    & .image-zoom-fullscreen-header {
+      @apply opacity-0 pointer-events-none;
+    }
+
+    & .image-zoom-fullscreen-controls {
+      @apply opacity-0 pointer-events-none;
+    }
+  }
+
+  .image-zoom-fullscreen-panning .image-zoom-fullscreen-image-wrapper {
+    transition: none;
+  }
+
+  .image-zoom-fullscreen-zoomed .image-zoom-fullscreen-image {
+    max-width: none;
+    max-height: none;
+  }
+
+  .image-zoom-fullscreen-backdrop {
+    @apply absolute inset-0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: -1;
+  }
+
+  .image-zoom-fullscreen-container {
+    @apply relative w-full h-full flex flex-col overflow-hidden;
+  }
+
+  /* Fullscreen Header */
+  .image-zoom-fullscreen-header {
+    @apply absolute top-0 left-0 right-0 flex items-center justify-between;
+    padding: 1rem;
+    padding-top: max(1rem, env(safe-area-inset-top));
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+    z-index: 10;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  .image-zoom-fullscreen-title {
+    @apply text-base font-medium m-0;
+    color: white;
+  }
+
+  .image-zoom-fullscreen-zoom-level {
+    @apply text-sm;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  /* Fullscreen Image */
+  .image-zoom-fullscreen-image-container {
+    @apply flex-1 flex items-center justify-center overflow-hidden cursor-grab;
+    touch-action: none;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .image-zoom-fullscreen-image-wrapper {
+    @apply relative flex items-center justify-center;
+    will-change: transform;
+    transition: transform 0.2s ease;
+  }
+
+  .image-zoom-fullscreen-image {
+    @apply max-w-full object-contain select-none;
+    max-height: calc(100dvh - 120px);
+    -webkit-user-drag: none;
+  }
+
+  /* Fullscreen Controls */
+  .image-zoom-fullscreen-controls {
+    @apply absolute flex items-center gap-2;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 9999px;
+    z-index: 10;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  .image-zoom-fullscreen-btn {
+    @apply flex items-center justify-center border-none rounded-full cursor-pointer;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    &:active {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    &:disabled {
+      @apply opacity-40 cursor-not-allowed;
+    }
+
+    & svg {
+      @apply size-[22px];
+    }
+  }
+
+  .image-zoom-fullscreen-zoom-display {
+    @apply text-sm font-medium text-center;
+    color: white;
+    min-width: 48px;
+  }
+
+  /* Close Button */
+  .image-zoom-fullscreen-close {
+    @apply absolute flex items-center justify-center border-none rounded-full cursor-pointer;
+    top: max(1rem, env(safe-area-inset-top));
+    right: 1rem;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    z-index: 11;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    & svg {
+      @apply size-6;
+    }
+  }
+}
+
+/* =============================================
+   Keyframes
+   ============================================= */
+
+@keyframes image-zoom-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .image-zoom-result {
+    @apply hidden;
+  }
+
+  .image-zoom-lens {
+    width: 120px;
+    height: 120px;
+  }
+
+  .image-zoom-fullscreen-btn {
+    width: 40px;
+    height: 40px;
+
+    & svg {
+      @apply size-5;
+    }
+  }
+
+  .image-zoom-fullscreen-controls {
+    bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .image-zoom-lens,
+  .image-zoom-result,
+  .image-zoom-inner,
+  .image-zoom-fullscreen,
+  .image-zoom-fullscreen-image-wrapper {
+    transition: none;
+  }
+
+  .image-zoom-spinner {
+    animation: none;
+  }
+}

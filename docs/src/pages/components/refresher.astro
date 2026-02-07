@@ -1,0 +1,121 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Refresher">
+  <p class="text-base-content/70 mb-6">Pull-to-refresh indicator with spinner, arrow, progress circle, and completion states. Pair with touch/gesture JS for full interaction.</p>
+
+  <CodePreview
+    title="Default Spinner"
+    semantic={`<div style="position:relative; height:120px; overflow:hidden; border:1px solid var(--color-base-200); border-radius:var(--radius-box);">
+  <div class="refresher refresher-refreshing">
+    <div class="refresher-content">
+      <div class="refresher-spinner"></div>
+      <span class="refresher-text">Refreshing...</span>
+    </div>
+  </div>
+  <div class="refresher-container refresher-container-refreshing" style="padding:1rem;">
+    <p class="text-base-content/60 text-sm">List content shifts down while refreshing</p>
+  </div>
+</div>`}
+    tailwind={`<div style="position:relative; height:120px; overflow:hidden; border:1px solid var(--color-base-200); border-radius:var(--radius-box);">
+  <div class="absolute top-0 left-0 right-0 flex items-center justify-center h-[60px] z-10 pointer-events-none">
+    <div class="flex flex-col items-center gap-1">
+      <div class="size-6 rounded-full border-2 border-base-200 border-t-primary animate-spin"></div>
+      <span class="text-xs text-base-content/40">Refreshing...</span>
+    </div>
+  </div>
+  <div class="relative" style="transform:translateY(60px); padding:1rem;">
+    <p class="text-base-content/60 text-sm">List content shifts down while refreshing</p>
+  </div>
+</div>`}
+    js={`// Pull-to-refresh with JS:
+// let startY = 0;
+// container.addEventListener('touchstart', (e) => &#123;
+//   startY = e.touches[0].clientY;
+// &#125;);
+// container.addEventListener('touchmove', (e) => &#123;
+//   const delta = e.touches[0].clientY - startY;
+//   if (delta > 0) refresher.style.transform = ...;
+// &#125;);
+// container.addEventListener('touchend', () => &#123;
+//   // trigger refresh if pulled far enough
+// &#125;);`}
+  />
+
+  <CodePreview
+    title="Pulling State (Arrow)"
+    semantic={`<div style="position:relative; height:100px; overflow:hidden; border:1px solid var(--color-base-200); border-radius:var(--radius-box);">
+  <div class="refresher refresher-pulling">
+    <div class="refresher-content">
+      <svg class="refresher-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      <span class="refresher-text">Pull to refresh</span>
+    </div>
+  </div>
+  <div class="refresher-container" style="padding:1rem;">
+    <p class="text-base-content/60 text-sm">Pull down to refresh content</p>
+  </div>
+</div>`}
+    tailwind={`<div style="position:relative; height:100px; overflow:hidden; border:1px solid var(--color-base-200); border-radius:var(--radius-box);">
+  <div class="absolute top-0 left-0 right-0 flex items-center justify-center h-[60px] z-10 pointer-events-none">
+    <div class="flex flex-col items-center gap-1">
+      <svg class="size-6 text-base-content/50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      <span class="text-xs text-base-content/40">Pull to refresh</span>
+    </div>
+  </div>
+  <div style="padding:1rem;">
+    <p class="text-base-content/60 text-sm">Pull down to refresh content</p>
+  </div>
+</div>`}
+    js={`// Arrow rotates 180deg when ready to release:
+// refresher.classList.replace('refresher-pulling', 'refresher-ready');`}
+  />
+
+  <CodePreview
+    title="Complete State"
+    semantic={`<div style="position:relative; height:80px; overflow:hidden; border:1px solid var(--color-base-200); border-radius:var(--radius-box);">
+  <div class="refresher refresher-refreshing refresher-complete">
+    <div class="refresher-content">
+      <svg class="refresher-check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div style="position:relative; height:80px; overflow:hidden; border:1px solid var(--color-base-200); border-radius:var(--radius-box);">
+  <div class="absolute top-0 left-0 right-0 flex items-center justify-center h-[60px] z-10 pointer-events-none">
+    <svg class="size-6 text-success" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  </div>
+</div>`}
+    js={`// After data loads, show complete briefly:
+// refresher.classList.add('refresher-complete');
+// setTimeout(() => &#123;
+//   refresher.classList.remove('refresher-refreshing', 'refresher-complete');
+//   container.classList.remove('refresher-container-refreshing');
+// &#125;, 800);`}
+  />
+
+  <div class="overflow-x-auto mt-8">
+    <table class="table">
+      <thead><tr><th>Class</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>.refresher</code></td><td>Base refresher container (hidden above content)</td></tr>
+        <tr><td><code>.refresher-pulling</code></td><td>User is pulling down</td></tr>
+        <tr><td><code>.refresher-ready</code></td><td>Ready to release (arrow rotated)</td></tr>
+        <tr><td><code>.refresher-refreshing</code></td><td>Actively refreshing (visible)</td></tr>
+        <tr><td><code>.refresher-complete</code></td><td>Refresh complete (success color)</td></tr>
+        <tr><td><code>.refresher-content</code></td><td>Inner content wrapper</td></tr>
+        <tr><td><code>.refresher-icon</code></td><td>Arrow icon (24px)</td></tr>
+        <tr><td><code>.refresher-spinner</code></td><td>Spinning circle indicator</td></tr>
+        <tr><td><code>.refresher-spinner-ios</code></td><td>iOS-style segmented spinner</td></tr>
+        <tr><td><code>.refresher-text</code></td><td>Status text (e.g. "Pull to refresh")</td></tr>
+        <tr><td><code>.refresher-check</code></td><td>Success checkmark icon</td></tr>
+        <tr><td><code>.refresher-progress</code></td><td>SVG progress circle wrapper</td></tr>
+        <tr><td><code>.refresher-progress-circle</code></td><td>SVG circle stroke</td></tr>
+        <tr><td><code>.refresher-backdrop</code></td><td>Optional gradient backdrop feedback</td></tr>
+        <tr><td><code>.refresher-container</code></td><td>Content container that shifts down</td></tr>
+        <tr><td><code>.refresher-container-pulling</code></td><td>Disable transition during drag</td></tr>
+        <tr><td><code>.refresher-container-refreshing</code></td><td>Content shifted down 60px</td></tr>
+      </tbody>
+    </table>
+  </div>
+</DocsLayout>

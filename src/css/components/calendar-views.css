@@ -1,0 +1,384 @@
+/* UX v3 - Calendar Views Component */
+/* Week/day time grid with hour slots, events, all-day section, current time indicator */
+
+@layer components {
+
+  /* =============================================
+     Variables
+     ============================================= */
+
+  .calendar-view {
+    --cv-hour-height: 60px;
+    --cv-time-width: 60px;
+    --cv-header-height: 80px;
+  }
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .calendar-view {
+    @apply overflow-hidden;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 1rem);
+  }
+
+  /* =============================================
+     Header
+     ============================================= */
+
+  .calendar-view-header {
+    @apply flex items-center justify-between flex-wrap gap-3;
+    padding: 1rem;
+    background-color: var(--color-base-100);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .calendar-view-nav {
+    @apply flex items-center gap-2;
+  }
+
+  .calendar-view-nav-btn {
+    @apply flex items-center justify-center border-none cursor-pointer;
+    width: 36px;
+    height: 36px;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.5rem);
+    color: var(--color-base-content);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-300);
+    }
+
+    svg { @apply w-4.5 h-4.5; }
+  }
+
+  .calendar-view-title {
+    @apply font-semibold;
+    font-size: 1.125rem;
+    color: var(--color-base-content);
+  }
+
+  .calendar-view-today-btn {
+    @apply text-sm font-medium cursor-pointer bg-transparent;
+    padding: 0.5rem 1rem;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-field, 0.5rem);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+    }
+  }
+
+  .calendar-view-toggle {
+    @apply flex;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.5rem);
+    padding: 0.25rem;
+  }
+
+  .calendar-view-btn {
+    @apply text-sm font-medium border-none cursor-pointer bg-transparent;
+    padding: 0.5rem 1rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    border-radius: var(--radius-field, 0.25rem);
+    transition: all 0.15s ease;
+
+    &:hover {
+      color: var(--color-base-content);
+    }
+  }
+
+  .calendar-view-btn-active {
+    background-color: var(--color-base-100);
+    color: var(--color-base-content);
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.06);
+  }
+
+  /* =============================================
+     Day Headers
+     ============================================= */
+
+  .calendar-view-day-headers {
+    @apply grid sticky top-0;
+    grid-template-columns: var(--cv-time-width) repeat(7, 1fr);
+    border-bottom: 1px solid var(--color-base-300);
+    background-color: var(--color-base-100);
+    z-index: 10;
+  }
+
+  .calendar-view-day-headers-single {
+    grid-template-columns: var(--cv-time-width) 1fr;
+  }
+
+  .calendar-view-corner {
+    border-right: 1px solid var(--color-base-300);
+  }
+
+  .calendar-view-day-header {
+    @apply flex flex-col items-center justify-center text-center;
+    padding: 0.75rem 0.5rem;
+    border-right: 1px solid var(--color-base-300);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  .calendar-view-day-header-today .calendar-view-day-number {
+    background-color: var(--color-primary);
+    color: white;
+  }
+
+  .calendar-view-day-header-selected .calendar-view-day-number {
+    background-color: var(--color-primary);
+    color: white;
+  }
+
+  .calendar-view-day-name {
+    @apply text-xs font-medium uppercase;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-bottom: 0.25rem;
+  }
+
+  .calendar-view-day-number {
+    @apply flex items-center justify-center font-semibold;
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    color: var(--color-base-content);
+    border-radius: 9999px;
+  }
+
+  /* =============================================
+     Time Grid
+     ============================================= */
+
+  .calendar-view-grid {
+    @apply grid relative;
+    grid-template-columns: var(--cv-time-width) repeat(7, 1fr);
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  .calendar-view-grid-single {
+    grid-template-columns: var(--cv-time-width) 1fr;
+  }
+
+  .calendar-view-times {
+    border-right: 1px solid var(--color-base-300);
+  }
+
+  .calendar-view-time {
+    @apply flex items-start justify-end text-xs;
+    height: var(--cv-hour-height);
+    padding: 0 0.5rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    transform: translateY(-0.5em);
+  }
+
+  .calendar-view-day-column {
+    @apply relative;
+    border-right: 1px solid var(--color-base-300);
+    min-height: calc(var(--cv-hour-height) * 24);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  .calendar-view-hour-slot {
+    height: var(--cv-hour-height);
+    border-bottom: 1px solid var(--color-base-300);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    /* Half hour dashed line */
+    &::after {
+      content: '';
+      @apply block;
+      height: 50%;
+      border-bottom: 1px dashed color-mix(in oklch, var(--color-base-content) 8%, transparent);
+    }
+  }
+
+  /* =============================================
+     Current Time Indicator
+     ============================================= */
+
+  .calendar-view-now-line {
+    @apply absolute left-0 right-0 pointer-events-none;
+    height: 2px;
+    background-color: var(--color-error);
+    z-index: 5;
+
+    &::before {
+      content: '';
+      @apply absolute rounded-full;
+      left: -5px;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-error);
+    }
+  }
+
+  /* =============================================
+     Events
+     ============================================= */
+
+  .calendar-view-event {
+    @apply absolute overflow-hidden cursor-pointer text-xs;
+    left: 2px;
+    right: 2px;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-field, 0.25rem);
+    z-index: 2;
+    transition: box-shadow 0.15s ease;
+
+    &:hover {
+      z-index: 3;
+      box-shadow: 0 4px 12px oklch(0 0 0 / 0.15);
+    }
+  }
+
+  /* Event Colors */
+  .calendar-view-event-primary {
+    background-color: color-mix(in oklch, var(--color-primary) 90%, transparent);
+    color: white;
+    border-left: 3px solid color-mix(in oklch, var(--color-primary) 80%, black);
+  }
+
+  .calendar-view-event-success {
+    background-color: color-mix(in oklch, var(--color-success) 90%, transparent);
+    color: white;
+    border-left: 3px solid color-mix(in oklch, var(--color-success) 80%, black);
+  }
+
+  .calendar-view-event-error {
+    background-color: color-mix(in oklch, var(--color-error) 90%, transparent);
+    color: white;
+    border-left: 3px solid color-mix(in oklch, var(--color-error) 80%, black);
+  }
+
+  .calendar-view-event-warning {
+    background-color: color-mix(in oklch, var(--color-warning) 90%, transparent);
+    color: var(--color-warning-content);
+    border-left: 3px solid color-mix(in oklch, var(--color-warning) 80%, black);
+  }
+
+  .calendar-view-event-secondary {
+    background-color: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+    color: white;
+    border-left: 3px solid color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .calendar-view-event-title {
+    @apply font-semibold whitespace-nowrap overflow-hidden text-ellipsis;
+  }
+
+  .calendar-view-event-time {
+    @apply opacity-80;
+    font-size: 0.6875rem;
+  }
+
+  /* =============================================
+     All-Day Events
+     ============================================= */
+
+  .calendar-view-all-day {
+    @apply grid;
+    grid-template-columns: var(--cv-time-width) repeat(7, 1fr);
+    padding: 0.25rem 0;
+    border-bottom: 1px solid var(--color-base-300);
+    background-color: var(--color-base-200);
+  }
+
+  .calendar-view-all-day-single {
+    grid-template-columns: var(--cv-time-width) 1fr;
+  }
+
+  .calendar-view-all-day-label {
+    @apply text-right;
+    font-size: 0.6875rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    padding: 0.25rem 0.5rem;
+  }
+
+  .calendar-view-all-day-events {
+    @apply flex flex-wrap;
+    gap: 0.25rem;
+    padding: 0 0.25rem;
+  }
+
+  .calendar-view-all-day-event {
+    @apply text-xs font-medium cursor-pointer;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  /* =============================================
+     Empty State
+     ============================================= */
+
+  .calendar-view-empty {
+    @apply flex flex-col items-center justify-center text-center;
+    padding: 3rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .calendar-view-empty-icon {
+    @apply w-12 h-12;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    margin-bottom: 1rem;
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .calendar-view {
+    --cv-time-width: 45px;
+    --cv-hour-height: 50px;
+  }
+
+  .calendar-view-header {
+    @apply flex-wrap gap-2;
+  }
+
+  .calendar-view-day-name {
+    font-size: 0.625rem;
+  }
+
+  .calendar-view-day-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+  }
+
+  .calendar-view-toggle {
+    @apply w-full justify-center;
+    order: -1;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .calendar-view-nav-btn,
+  .calendar-view-today-btn,
+  .calendar-view-btn,
+  .calendar-view-event {
+    transition: none;
+  }
+}

@@ -1,0 +1,194 @@
+/* UX v3 - Swipe Component */
+/* Swipe-to-reveal actions, drag handles, draggable items, drop zones, gesture feedback */
+
+@layer components {
+
+  /* =============================================
+     Swipe Container
+     ============================================= */
+
+  .swipe-container {
+    @apply relative overflow-hidden;
+    touch-action: pan-y;
+  }
+
+  /* =============================================
+     Swipe Content (the visible row)
+     ============================================= */
+
+  .swipe-content {
+    @apply relative;
+    background-color: var(--color-base-100);
+    transition: transform 0.2s var(--ease-ios);
+    will-change: transform;
+  }
+
+  .swipe-content-swiping {
+    transition: none;
+  }
+
+  /* =============================================
+     Swipe Actions (behind content)
+     ============================================= */
+
+  .swipe-actions {
+    @apply absolute top-0 bottom-0 flex items-stretch;
+  }
+
+  .swipe-actions-start {
+    @apply left-0;
+    transform: translateX(-100%);
+  }
+
+  .swipe-actions-end {
+    @apply right-0;
+    transform: translateX(100%);
+  }
+
+  /* =============================================
+     Individual Action Button
+     ============================================= */
+
+  .swipe-action {
+    @apply flex items-center justify-center text-white font-medium cursor-pointer;
+    min-width: 80px;
+    padding: 0 1.5rem;
+    transition: background-color 0.15s;
+  }
+
+  .swipe-action-delete  { background-color: var(--color-error); }
+  .swipe-action-archive { background-color: var(--color-warning); }
+  .swipe-action-pin     { background-color: var(--color-primary); }
+  .swipe-action-more    { background-color: var(--color-neutral); }
+
+  .swipe-action-icon {
+    @apply size-6;
+
+    & > svg {
+      @apply size-full;
+    }
+  }
+
+  /* =============================================
+     Drag Handle
+     ============================================= */
+
+  .drag-handle {
+    @apply flex items-center justify-center cursor-grab;
+    padding: 1rem;
+    color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .drag-handle-icon {
+    @apply size-5;
+  }
+
+  /* =============================================
+     Draggable Item
+     ============================================= */
+
+  .draggable {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .draggable-dragging {
+    z-index: 100;
+    @apply opacity-80;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  }
+
+  .draggable-over {
+    background-color: color-mix(in oklch, var(--color-primary) 8%, transparent);
+  }
+
+  /* =============================================
+     Drop Zone
+     ============================================= */
+
+  .drop-zone {
+    transition: background-color 0.15s, border-color 0.15s;
+  }
+
+  .drop-zone-active {
+    background-color: color-mix(in oklch, var(--color-primary) 8%, transparent);
+    border-color: var(--color-primary);
+  }
+
+  /* =============================================
+     Long Press Indicator
+     ============================================= */
+
+  .long-press-indicator {
+    @apply absolute rounded-full pointer-events-none;
+    width: 40px;
+    height: 40px;
+    background-color: color-mix(in oklch, var(--color-primary) 20%, transparent);
+    transform: scale(0);
+  }
+
+  .long-press-indicator-active {
+    animation: long-press-pulse 0.5s ease-out;
+  }
+
+  /* =============================================
+     Gesture Feedback Toast
+     ============================================= */
+
+  .gesture-feedback {
+    @apply fixed pointer-events-none font-medium opacity-0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1.5rem 2rem;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: var(--radius-box);
+    font-size: 1.125rem;
+    z-index: 10000;
+    transition: opacity 0.15s;
+  }
+
+  .gesture-feedback-visible {
+    @apply opacity-100;
+  }
+}
+
+/* =============================================
+   Animations
+   ============================================= */
+
+@keyframes long-press-pulse {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .swipe-content,
+  .drop-zone,
+  .swipe-action,
+  .gesture-feedback {
+    transition: none;
+  }
+
+  .long-press-indicator-active {
+    animation: none;
+  }
+}

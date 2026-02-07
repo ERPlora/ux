@@ -1,0 +1,589 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="System Monitor">
+  <p class="text-base-content/70 mb-6">System resource monitoring cards with circular gauges, usage bars, status indicators, and process lists for CPU, memory, disk, and network.</p>
+
+  <CodePreview
+    title="Combined Dashboard Card"
+    height="560px"
+    semantic={`<div class="p-6 bg-base-200">
+  <div class="sys-monitor-card" style="max-width: 560px;">
+    <div class="sys-monitor-card-header">
+      <div class="sys-monitor-card-title">System Resources</div>
+      <span class="sys-monitor-status sys-monitor-status-healthy">
+        <span class="sys-monitor-status-dot"></span> All Normal
+      </span>
+    </div>
+
+    <!-- Gauges row -->
+    <div style="display: flex; justify-content: space-around; padding: 1rem 0;">
+      <!-- CPU -->
+      <div class="sys-monitor-card-cpu" style="display: flex; flex-direction: column; align-items: center;">
+        <div class="sys-monitor-gauge-ring">
+          <svg class="sys-monitor-gauge-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle class="sys-monitor-gauge-bg" cx="60" cy="60" r="52" />
+            <circle class="sys-monitor-gauge-fill" cx="60" cy="60" r="52"
+                    stroke-dasharray="327" stroke-dashoffset="118" />
+          </svg>
+          <div class="sys-monitor-gauge-value">
+            <span class="sys-monitor-gauge-percent">64%</span>
+            <span class="sys-monitor-gauge-label">CPU</span>
+          </div>
+        </div>
+        <div style="font-size: 0.75rem; opacity: 0.5; margin-top: 0.5rem;">8 cores &middot; 3.2 GHz</div>
+      </div>
+
+      <!-- Memory -->
+      <div class="sys-monitor-card-memory" style="display: flex; flex-direction: column; align-items: center;">
+        <div class="sys-monitor-gauge-ring">
+          <svg class="sys-monitor-gauge-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle class="sys-monitor-gauge-bg" cx="60" cy="60" r="52" />
+            <circle class="sys-monitor-gauge-fill" cx="60" cy="60" r="52"
+                    stroke-dasharray="327" stroke-dashoffset="72" />
+          </svg>
+          <div class="sys-monitor-gauge-value">
+            <span class="sys-monitor-gauge-percent">78%</span>
+            <span class="sys-monitor-gauge-label">RAM</span>
+          </div>
+        </div>
+        <div style="font-size: 0.75rem; opacity: 0.5; margin-top: 0.5rem;">12.4 / 16 GB</div>
+      </div>
+
+      <!-- Disk -->
+      <div class="sys-monitor-card-disk" style="display: flex; flex-direction: column; align-items: center;">
+        <div class="sys-monitor-gauge-ring">
+          <svg class="sys-monitor-gauge-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle class="sys-monitor-gauge-bg" cx="60" cy="60" r="52" />
+            <circle class="sys-monitor-gauge-fill" cx="60" cy="60" r="52"
+                    stroke-dasharray="327" stroke-dashoffset="39" />
+          </svg>
+          <div class="sys-monitor-gauge-value">
+            <span class="sys-monitor-gauge-percent">88%</span>
+            <span class="sys-monitor-gauge-label">Disk</span>
+          </div>
+        </div>
+        <div style="font-size: 0.75rem; opacity: 0.5; margin-top: 0.5rem;">440 / 500 GB</div>
+      </div>
+    </div>
+
+    <!-- Bar details -->
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--color-base-300);">
+      <div class="sys-monitor-bar sys-monitor-card-cpu">
+        <div class="sys-monitor-bar-header">
+          <span class="sys-monitor-bar-label">CPU</span>
+          <span class="sys-monitor-bar-value">64%</span>
+        </div>
+        <div class="sys-monitor-bar-track">
+          <div class="sys-monitor-bar-fill" style="width: 64%;"></div>
+        </div>
+      </div>
+      <div class="sys-monitor-bar sys-monitor-card-memory">
+        <div class="sys-monitor-bar-header">
+          <span class="sys-monitor-bar-label">Memory</span>
+          <span class="sys-monitor-bar-value">12.4 / 16 GB</span>
+        </div>
+        <div class="sys-monitor-bar-track">
+          <div class="sys-monitor-bar-fill" style="width: 78%;"></div>
+        </div>
+      </div>
+      <div class="sys-monitor-bar sys-monitor-bar-warn">
+        <div class="sys-monitor-bar-header">
+          <span class="sys-monitor-bar-label">Disk</span>
+          <span class="sys-monitor-bar-value">440 / 500 GB</span>
+        </div>
+        <div class="sys-monitor-bar-track">
+          <div class="sys-monitor-bar-fill" style="width: 88%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="p-6 bg-base-200">
+  <div class="bg-base-100 border border-base-300 rounded-box p-5" style="max-width: 560px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+      <span class="font-semibold text-sm">System Resources</span>
+      <span style="display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; font-weight: 500; color: var(--color-success);">
+        <span style="width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--color-success);"></span> All Normal
+      </span>
+    </div>
+
+    <!-- Gauges -->
+    <div style="display: flex; justify-content: space-around; padding: 1rem 0;">
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <div style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 120px;">
+          <svg style="width: 100%; height: 100%; transform: rotate(-90deg);" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-base-200)" stroke-width="8" />
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-primary)" stroke-width="8" stroke-linecap="round"
+                    stroke-dasharray="327" stroke-dashoffset="118" />
+          </svg>
+          <div style="position: absolute; display: flex; flex-direction: column; align-items: center;">
+            <span style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums;">64%</span>
+            <span style="font-size: 0.6875rem; font-weight: 500; opacity: 0.5;">CPU</span>
+          </div>
+        </div>
+        <span style="font-size: 0.75rem; opacity: 0.5; margin-top: 0.5rem;">8 cores</span>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <div style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 120px;">
+          <svg style="width: 100%; height: 100%; transform: rotate(-90deg);" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-base-200)" stroke-width="8" />
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-warning)" stroke-width="8" stroke-linecap="round"
+                    stroke-dasharray="327" stroke-dashoffset="72" />
+          </svg>
+          <div style="position: absolute; display: flex; flex-direction: column; align-items: center;">
+            <span style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums;">78%</span>
+            <span style="font-size: 0.6875rem; font-weight: 500; opacity: 0.5;">RAM</span>
+          </div>
+        </div>
+        <span style="font-size: 0.75rem; opacity: 0.5; margin-top: 0.5rem;">12.4 / 16 GB</span>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <div style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 120px;">
+          <svg style="width: 100%; height: 100%; transform: rotate(-90deg);" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-base-200)" stroke-width="8" />
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-success)" stroke-width="8" stroke-linecap="round"
+                    stroke-dasharray="327" stroke-dashoffset="39" />
+          </svg>
+          <div style="position: absolute; display: flex; flex-direction: column; align-items: center;">
+            <span style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums;">88%</span>
+            <span style="font-size: 0.6875rem; font-weight: 500; opacity: 0.5;">Disk</span>
+          </div>
+        </div>
+        <span style="font-size: 0.75rem; opacity: 0.5; margin-top: 0.5rem;">440 / 500 GB</span>
+      </div>
+    </div>
+
+    <!-- Bars -->
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--color-base-300);">
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; margin-bottom: 0.25rem;"><span style="font-weight: 500; opacity: 0.7;">CPU</span><span style="font-weight: 600; font-variant-numeric: tabular-nums;">64%</span></div>
+        <div style="width: 100%; height: 6px; background: var(--color-base-200); border-radius: 3px; overflow: hidden;"><div style="height: 100%; width: 64%; background: var(--color-primary); border-radius: 3px;"></div></div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; margin-bottom: 0.25rem;"><span style="font-weight: 500; opacity: 0.7;">Memory</span><span style="font-weight: 600; font-variant-numeric: tabular-nums;">12.4 / 16 GB</span></div>
+        <div style="width: 100%; height: 6px; background: var(--color-base-200); border-radius: 3px; overflow: hidden;"><div style="height: 100%; width: 78%; background: var(--color-warning); border-radius: 3px;"></div></div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; margin-bottom: 0.25rem;"><span style="font-weight: 500; opacity: 0.7;">Disk</span><span style="font-weight: 600; font-variant-numeric: tabular-nums;">440 / 500 GB</span></div>
+        <div style="width: 100%; height: 6px; background: var(--color-base-200); border-radius: 3px; overflow: hidden;"><div style="height: 100%; width: 88%; background: var(--color-warning); border-radius: 3px;"></div></div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Update gauge:
+// const circumference = 2 * Math.PI * 52; // ~327
+// const offset = circumference * (1 - pct);
+// circle.setAttribute('stroke-dashoffset', offset);
+
+// Poll via HTMX:
+// <div hx-get="/api/system/stats" hx-trigger="every 5s" hx-swap="innerHTML">`}
+  />
+
+  <CodePreview
+    title="Individual Resource Cards"
+    height="520px"
+    semantic={`<div class="p-6 bg-base-200">
+  <div class="sys-monitor">
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+      <!-- CPU -->
+      <div class="sys-monitor-card sys-monitor-card-cpu">
+        <div class="sys-monitor-card-header">
+          <div class="sys-monitor-card-title">
+            <span class="sys-monitor-card-title-icon">
+              <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></svg>
+            </span>
+            CPU
+          </div>
+          <span class="sys-monitor-status sys-monitor-status-healthy">
+            <span class="sys-monitor-status-dot"></span> Normal
+          </span>
+        </div>
+        <div class="sys-monitor-gauge">
+          <div class="sys-monitor-gauge-ring">
+            <svg class="sys-monitor-gauge-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+              <circle class="sys-monitor-gauge-bg" cx="60" cy="60" r="52" />
+              <circle class="sys-monitor-gauge-fill" cx="60" cy="60" r="52"
+                      stroke-dasharray="327" stroke-dashoffset="118" />
+            </svg>
+            <div class="sys-monitor-gauge-value">
+              <span class="sys-monitor-gauge-percent">64%</span>
+              <span class="sys-monitor-gauge-label">Usage</span>
+            </div>
+          </div>
+        </div>
+        <div class="sys-monitor-details">
+          <div class="sys-monitor-detail">
+            <span class="sys-monitor-detail-label">Cores</span>
+            <span class="sys-monitor-detail-value">8 cores</span>
+          </div>
+          <div class="sys-monitor-detail">
+            <span class="sys-monitor-detail-label">Speed</span>
+            <span class="sys-monitor-detail-value">3.2 GHz</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Memory -->
+      <div class="sys-monitor-card sys-monitor-card-memory">
+        <div class="sys-monitor-card-header">
+          <div class="sys-monitor-card-title">
+            <span class="sys-monitor-card-title-icon">
+              <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 19v-8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8"/><path d="M6 19h12"/><path d="M4 19h16"/><path d="M10 5V3"/><path d="M14 5V3"/></svg>
+            </span>
+            Memory
+          </div>
+          <span class="sys-monitor-card-badge">12.4 / 16 GB</span>
+        </div>
+        <div class="sys-monitor-gauge">
+          <div class="sys-monitor-gauge-ring">
+            <svg class="sys-monitor-gauge-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+              <circle class="sys-monitor-gauge-bg" cx="60" cy="60" r="52" />
+              <circle class="sys-monitor-gauge-fill" cx="60" cy="60" r="52"
+                      stroke-dasharray="327" stroke-dashoffset="72" />
+            </svg>
+            <div class="sys-monitor-gauge-value">
+              <span class="sys-monitor-gauge-percent">78%</span>
+              <span class="sys-monitor-gauge-label">Used</span>
+            </div>
+          </div>
+        </div>
+        <div class="sys-monitor-details">
+          <div class="sys-monitor-detail">
+            <span class="sys-monitor-detail-label">Cached</span>
+            <span class="sys-monitor-detail-value">3.1 GB</span>
+          </div>
+          <div class="sys-monitor-detail">
+            <span class="sys-monitor-detail-label">Swap</span>
+            <span class="sys-monitor-detail-value">0.2 GB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Disk -->
+      <div class="sys-monitor-card sys-monitor-card-disk">
+        <div class="sys-monitor-card-header">
+          <div class="sys-monitor-card-title">
+            <span class="sys-monitor-card-title-icon">
+              <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </span>
+            Disk
+          </div>
+          <span class="sys-monitor-status sys-monitor-status-warning">
+            <span class="sys-monitor-status-dot"></span> High
+          </span>
+        </div>
+        <div class="sys-monitor-gauge">
+          <div class="sys-monitor-gauge-ring">
+            <svg class="sys-monitor-gauge-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+              <circle class="sys-monitor-gauge-bg" cx="60" cy="60" r="52" />
+              <circle class="sys-monitor-gauge-fill" cx="60" cy="60" r="52"
+                      stroke-dasharray="327" stroke-dashoffset="39" />
+            </svg>
+            <div class="sys-monitor-gauge-value">
+              <span class="sys-monitor-gauge-percent">88%</span>
+              <span class="sys-monitor-gauge-label">Full</span>
+            </div>
+          </div>
+        </div>
+        <div class="sys-monitor-details">
+          <div class="sys-monitor-detail">
+            <span class="sys-monitor-detail-label">Used</span>
+            <span class="sys-monitor-detail-value">440 GB</span>
+          </div>
+          <div class="sys-monitor-detail">
+            <span class="sys-monitor-detail-label">Free</span>
+            <span class="sys-monitor-detail-value">60 GB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="p-6 bg-base-200">
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+    <!-- CPU -->
+    <div style="display: flex; flex-direction: column; background: var(--color-base-100); border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); padding: 1.25rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.875rem;">
+          <span style="display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: var(--radius-field, 0.5rem); background: color-mix(in oklch, var(--color-primary) 10%, transparent); color: var(--color-primary);">
+            <svg style="width: 1rem; height: 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+          </span>CPU
+        </div>
+        <span style="display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; font-weight: 500; color: var(--color-success);"><span style="width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--color-success);"></span> Normal</span>
+      </div>
+      <div style="display: flex; justify-content: center; padding: 1rem 0;">
+        <div style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 120px;">
+          <svg style="width: 100%; height: 100%; transform: rotate(-90deg);" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-base-200)" stroke-width="8" />
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-primary)" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="118" />
+          </svg>
+          <div style="position: absolute; display: flex; flex-direction: column; align-items: center;"><span style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums;">64%</span><span style="font-size: 0.6875rem; font-weight: 500; opacity: 0.5;">Usage</span></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span style="opacity: 0.6;">Cores</span><span style="font-weight: 500;">8</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span style="opacity: 0.6;">Speed</span><span style="font-weight: 500;">3.2 GHz</span></div>
+      </div>
+    </div>
+    <!-- Memory -->
+    <div style="display: flex; flex-direction: column; background: var(--color-base-100); border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); padding: 1.25rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.875rem;">
+          <span style="display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: var(--radius-field, 0.5rem); background: color-mix(in oklch, var(--color-warning) 10%, transparent); color: var(--color-warning);">
+            <svg style="width: 1rem; height: 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="M6 19v-8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8"/><path d="M4 19h16"/></svg>
+          </span>Memory
+        </div>
+        <span style="display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; font-size: 0.75rem; font-weight: 600; border-radius: 9999px; background: color-mix(in oklch, var(--color-warning) 10%, transparent); color: var(--color-warning);">12.4 / 16 GB</span>
+      </div>
+      <div style="display: flex; justify-content: center; padding: 1rem 0;">
+        <div style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 120px;">
+          <svg style="width: 100%; height: 100%; transform: rotate(-90deg);" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-base-200)" stroke-width="8" />
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-warning)" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="72" />
+          </svg>
+          <div style="position: absolute; display: flex; flex-direction: column; align-items: center;"><span style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums;">78%</span><span style="font-size: 0.6875rem; font-weight: 500; opacity: 0.5;">Used</span></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span style="opacity: 0.6;">Cached</span><span style="font-weight: 500;">3.1 GB</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span style="opacity: 0.6;">Swap</span><span style="font-weight: 500;">0.2 GB</span></div>
+      </div>
+    </div>
+    <!-- Disk -->
+    <div style="display: flex; flex-direction: column; background: var(--color-base-100); border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); padding: 1.25rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.875rem;">
+          <span style="display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: var(--radius-field, 0.5rem); background: color-mix(in oklch, var(--color-success) 10%, transparent); color: var(--color-success);">
+            <svg style="width: 1rem; height: 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </span>Disk
+        </div>
+        <span style="display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; font-weight: 500; color: var(--color-warning);"><span style="width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--color-warning);"></span> High</span>
+      </div>
+      <div style="display: flex; justify-content: center; padding: 1rem 0;">
+        <div style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 120px;">
+          <svg style="width: 100%; height: 100%; transform: rotate(-90deg);" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-base-200)" stroke-width="8" />
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-success)" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="39" />
+          </svg>
+          <div style="position: absolute; display: flex; flex-direction: column; align-items: center;"><span style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums;">88%</span><span style="font-size: 0.6875rem; font-weight: 500; opacity: 0.5;">Full</span></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span style="opacity: 0.6;">Used</span><span style="font-weight: 500;">440 GB</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;"><span style="opacity: 0.6;">Free</span><span style="font-weight: 500;">60 GB</span></div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Update gauge value:
+// const circumference = 2 * Math.PI * 52; // ~327
+// const offset = circumference * (1 - pct);
+// circle.setAttribute('stroke-dashoffset', offset);`}
+  />
+
+  <CodePreview
+    title="Bar Usage (Compact)"
+    height="320px"
+    semantic={`<div class="p-6 bg-base-200">
+  <div class="sys-monitor" style="max-width: 480px;">
+    <div class="sys-monitor-card">
+      <div class="sys-monitor-card-header">
+        <div class="sys-monitor-card-title">System Resources</div>
+        <span class="sys-monitor-status sys-monitor-status-healthy">
+          <span class="sys-monitor-status-dot"></span> All Normal
+        </span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+        <div class="sys-monitor-bar sys-monitor-card-cpu">
+          <div class="sys-monitor-bar-header">
+            <span class="sys-monitor-bar-label">CPU</span>
+            <span class="sys-monitor-bar-value">64%</span>
+          </div>
+          <div class="sys-monitor-bar-track">
+            <div class="sys-monitor-bar-fill" style="width: 64%;"></div>
+          </div>
+        </div>
+        <div class="sys-monitor-bar sys-monitor-card-memory">
+          <div class="sys-monitor-bar-header">
+            <span class="sys-monitor-bar-label">Memory</span>
+            <span class="sys-monitor-bar-value">12.4 / 16 GB</span>
+          </div>
+          <div class="sys-monitor-bar-track">
+            <div class="sys-monitor-bar-fill" style="width: 78%;"></div>
+          </div>
+        </div>
+        <div class="sys-monitor-bar sys-monitor-bar-warn">
+          <div class="sys-monitor-bar-header">
+            <span class="sys-monitor-bar-label">Disk</span>
+            <span class="sys-monitor-bar-value">440 / 500 GB</span>
+          </div>
+          <div class="sys-monitor-bar-track">
+            <div class="sys-monitor-bar-fill" style="width: 88%;"></div>
+          </div>
+        </div>
+        <div class="sys-monitor-bar sys-monitor-card-network">
+          <div class="sys-monitor-bar-header">
+            <span class="sys-monitor-bar-label">Network</span>
+            <span class="sys-monitor-bar-value">24 Mbps</span>
+          </div>
+          <div class="sys-monitor-bar-track">
+            <div class="sys-monitor-bar-fill" style="width: 24%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="p-6 bg-base-200">
+  <div style="background: var(--color-base-100); border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); padding: 1.25rem; max-width: 480px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+      <span style="font-weight: 600; font-size: 0.875rem;">System Resources</span>
+      <span style="display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; font-weight: 500; color: var(--color-success);">
+        <span style="width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--color-success);"></span> All Normal
+      </span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; margin-bottom: 0.25rem;"><span style="font-weight: 500; opacity: 0.7;">CPU</span><span style="font-weight: 600; font-variant-numeric: tabular-nums;">64%</span></div>
+        <div style="width: 100%; height: 6px; background: var(--color-base-200); border-radius: 3px; overflow: hidden;"><div style="height: 100%; width: 64%; background: var(--color-primary); border-radius: 3px;"></div></div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; margin-bottom: 0.25rem;"><span style="font-weight: 500; opacity: 0.7;">Memory</span><span style="font-weight: 600; font-variant-numeric: tabular-nums;">12.4 / 16 GB</span></div>
+        <div style="width: 100%; height: 6px; background: var(--color-base-200); border-radius: 3px; overflow: hidden;"><div style="height: 100%; width: 78%; background: var(--color-warning); border-radius: 3px;"></div></div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; margin-bottom: 0.25rem;"><span style="font-weight: 500; opacity: 0.7;">Disk</span><span style="font-weight: 600; font-variant-numeric: tabular-nums;">440 / 500 GB</span></div>
+        <div style="width: 100%; height: 6px; background: var(--color-base-200); border-radius: 3px; overflow: hidden;"><div style="height: 100%; width: 88%; background: var(--color-warning); border-radius: 3px;"></div></div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; margin-bottom: 0.25rem;"><span style="font-weight: 500; opacity: 0.7;">Network</span><span style="font-weight: 600; font-variant-numeric: tabular-nums;">24 Mbps</span></div>
+        <div style="width: 100%; height: 6px; background: var(--color-base-200); border-radius: 3px; overflow: hidden;"><div style="height: 100%; width: 24%; background: var(--color-info); border-radius: 3px;"></div></div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Auto-color by threshold:
+// if (pct > 90) el.classList.add('sys-monitor-bar-critical');
+// else if (pct > 75) el.classList.add('sys-monitor-bar-warn');
+// else el.classList.add('sys-monitor-bar-ok');`}
+  />
+
+  <CodePreview
+    title="Process List"
+    height="360px"
+    semantic={`<div class="p-6 bg-base-200">
+  <div class="sys-monitor" style="max-width: 420px;">
+    <div class="sys-monitor-card sys-monitor-card-cpu">
+      <div class="sys-monitor-card-header">
+        <div class="sys-monitor-card-title">Top Processes</div>
+        <span style="font-size: 0.75rem; opacity: 0.5;">CPU %</span>
+      </div>
+      <div class="sys-monitor-processes" style="margin-top: 0.5rem;">
+        <div class="sys-monitor-process">
+          <span class="sys-monitor-process-name">python3</span>
+          <span class="sys-monitor-process-usage">34.2%</span>
+          <div class="sys-monitor-process-bar">
+            <div class="sys-monitor-process-bar-fill" style="width: 34%;"></div>
+          </div>
+        </div>
+        <div class="sys-monitor-process">
+          <span class="sys-monitor-process-name">node</span>
+          <span class="sys-monitor-process-usage">18.7%</span>
+          <div class="sys-monitor-process-bar">
+            <div class="sys-monitor-process-bar-fill" style="width: 19%;"></div>
+          </div>
+        </div>
+        <div class="sys-monitor-process">
+          <span class="sys-monitor-process-name">postgresql</span>
+          <span class="sys-monitor-process-usage">12.1%</span>
+          <div class="sys-monitor-process-bar">
+            <div class="sys-monitor-process-bar-fill" style="width: 12%;"></div>
+          </div>
+        </div>
+        <div class="sys-monitor-process">
+          <span class="sys-monitor-process-name">nginx</span>
+          <span class="sys-monitor-process-usage">4.3%</span>
+          <div class="sys-monitor-process-bar">
+            <div class="sys-monitor-process-bar-fill" style="width: 4%;"></div>
+          </div>
+        </div>
+        <div class="sys-monitor-process">
+          <span class="sys-monitor-process-name">redis-server</span>
+          <span class="sys-monitor-process-usage">2.1%</span>
+          <div class="sys-monitor-process-bar">
+            <div class="sys-monitor-process-bar-fill" style="width: 2%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="p-6 bg-base-200">
+  <div style="background: var(--color-base-100); border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); padding: 1.25rem; max-width: 420px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+      <span style="font-weight: 600; font-size: 0.875rem;">Top Processes</span>
+      <span style="font-size: 0.75rem; opacity: 0.5;">CPU %</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.375rem 0; font-size: 0.8125rem;">
+        <span style="flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">python3</span>
+        <span style="font-weight: 600; font-variant-numeric: tabular-nums; opacity: 0.7; min-width: 3rem; text-align: right;">34.2%</span>
+        <div style="width: 60px; height: 4px; background: var(--color-base-200); border-radius: 2px; overflow: hidden; flex-shrink: 0;"><div style="height: 100%; width: 34%; background: var(--color-primary); border-radius: 2px;"></div></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.375rem 0; font-size: 0.8125rem;">
+        <span style="flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">node</span>
+        <span style="font-weight: 600; font-variant-numeric: tabular-nums; opacity: 0.7; min-width: 3rem; text-align: right;">18.7%</span>
+        <div style="width: 60px; height: 4px; background: var(--color-base-200); border-radius: 2px; overflow: hidden; flex-shrink: 0;"><div style="height: 100%; width: 19%; background: var(--color-primary); border-radius: 2px;"></div></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.375rem 0; font-size: 0.8125rem;">
+        <span style="flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">postgresql</span>
+        <span style="font-weight: 600; font-variant-numeric: tabular-nums; opacity: 0.7; min-width: 3rem; text-align: right;">12.1%</span>
+        <div style="width: 60px; height: 4px; background: var(--color-base-200); border-radius: 2px; overflow: hidden; flex-shrink: 0;"><div style="height: 100%; width: 12%; background: var(--color-primary); border-radius: 2px;"></div></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.375rem 0; font-size: 0.8125rem;">
+        <span style="flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">nginx</span>
+        <span style="font-weight: 600; font-variant-numeric: tabular-nums; opacity: 0.7; min-width: 3rem; text-align: right;">4.3%</span>
+        <div style="width: 60px; height: 4px; background: var(--color-base-200); border-radius: 2px; overflow: hidden; flex-shrink: 0;"><div style="height: 100%; width: 4%; background: var(--color-primary); border-radius: 2px;"></div></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.375rem 0; font-size: 0.8125rem;">
+        <span style="flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">redis-server</span>
+        <span style="font-weight: 600; font-variant-numeric: tabular-nums; opacity: 0.7; min-width: 3rem; text-align: right;">2.1%</span>
+        <div style="width: 60px; height: 4px; background: var(--color-base-200); border-radius: 2px; overflow: hidden; flex-shrink: 0;"><div style="height: 100%; width: 2%; background: var(--color-primary); border-radius: 2px;"></div></div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Sort processes: processes.sort((a, b) => b.cpu - a.cpu);
+// Poll: hx-get="/api/system/processes" hx-trigger="every 3s"`}
+  />
+
+  <div class="overflow-x-auto mt-8">
+    <table class="table">
+      <thead><tr><th>Class</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>.sys-monitor</code></td><td>Base container</td></tr>
+        <tr><td><code>.sys-monitor-grid</code></td><td>Auto-fit grid for cards</td></tr>
+        <tr><td><code>.sys-monitor-card</code></td><td>Resource card container</td></tr>
+        <tr><td><code>.sys-monitor-card-cpu / -memory / -disk / -network</code></td><td>Color variants (primary / warning / success / info)</td></tr>
+        <tr><td><code>.sys-monitor-card-title-icon</code></td><td>Colored icon container</td></tr>
+        <tr><td><code>.sys-monitor-card-badge</code></td><td>Value badge (e.g. "12.4 / 16 GB")</td></tr>
+        <tr><td><code>.sys-monitor-gauge-ring</code></td><td>SVG ring wrapper (120x120)</td></tr>
+        <tr><td><code>.sys-monitor-gauge-svg</code></td><td>SVG element (rotated -90deg)</td></tr>
+        <tr><td><code>.sys-monitor-gauge-bg</code></td><td>Background circle</td></tr>
+        <tr><td><code>.sys-monitor-gauge-fill</code></td><td>Colored fill (stroke-dashoffset)</td></tr>
+        <tr><td><code>.sys-monitor-gauge-percent</code></td><td>Percentage text</td></tr>
+        <tr><td><code>.sys-monitor-bar</code></td><td>Horizontal bar container</td></tr>
+        <tr><td><code>.sys-monitor-bar-track / -fill</code></td><td>Track + fill bar (width %)</td></tr>
+        <tr><td><code>.sys-monitor-bar-ok / -warn / -critical</code></td><td>Threshold color states</td></tr>
+        <tr><td><code>.sys-monitor-status-healthy / -warning / -critical</code></td><td>Status colors with pulse</td></tr>
+        <tr><td><code>.sys-monitor-processes</code></td><td>Process list container</td></tr>
+        <tr><td><code>.sys-monitor-process</code></td><td>Process row (name + % + bar)</td></tr>
+        <tr><td><code>.sys-monitor-compact</code></td><td>Compact size variant</td></tr>
+        <tr><td><code>.sys-monitor.glass</code></td><td>Glass morphism variant</td></tr>
+      </tbody>
+    </table>
+  </div>
+</DocsLayout>

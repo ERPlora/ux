@@ -1,0 +1,445 @@
+/* UX v3 - Image Crop Component */
+/* Image cropping UI with crop area, grid overlay, resize handles, aspect ratio, zoom, rotate controls */
+
+@layer components {
+
+  /* =============================================
+     Base Container
+     ============================================= */
+
+  .image-crop {
+    @apply relative w-full overflow-hidden select-none;
+    max-width: 600px;
+    background-color: var(--color-neutral, #111);
+    border-radius: var(--radius-box, 0.75rem);
+    touch-action: none;
+  }
+
+  /* =============================================
+     Variants
+     ============================================= */
+
+  .image-crop-compact .image-crop-canvas {
+    min-height: 200px;
+  }
+
+  .image-crop-compact .image-crop-controls {
+    padding: 0.5rem;
+  }
+
+  .image-crop-lg .image-crop-canvas {
+    min-height: 400px;
+  }
+
+  .image-crop-fullscreen {
+    @apply fixed inset-0;
+    max-width: none;
+    border-radius: 0;
+    z-index: 50;
+
+    & .image-crop-canvas {
+      @apply flex-1;
+      min-height: 0;
+    }
+  }
+
+  .image-crop-circle .image-crop-area {
+    @apply rounded-full;
+
+    &::after {
+      content: '';
+      @apply absolute pointer-events-none;
+      inset: -2px;
+      border: 2px solid white;
+      border-radius: 50%;
+    }
+  }
+
+  .image-crop-disabled {
+    @apply opacity-60 pointer-events-none;
+  }
+
+  .image-crop-dragging .image-crop-grid,
+  .image-crop-active .image-crop-grid {
+    opacity: 1;
+  }
+
+  .image-crop-aspect-locked {
+    & .image-crop-handle-n,
+    & .image-crop-handle-s,
+    & .image-crop-handle-w,
+    & .image-crop-handle-e {
+      @apply hidden;
+    }
+  }
+
+  /* =============================================
+     Loading State
+     ============================================= */
+
+  .image-crop-loading .image-crop-canvas::after {
+    content: '';
+    @apply absolute rounded-full;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    border: 3px solid color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    border-top-color: var(--color-primary);
+    animation: image-crop-spin 0.8s linear infinite;
+  }
+
+  /* =============================================
+     Canvas / Workspace
+     ============================================= */
+
+  .image-crop-canvas {
+    @apply relative w-full flex items-center justify-center overflow-hidden;
+    min-height: 300px;
+    background-color: var(--color-neutral, #111);
+  }
+
+  .image-crop-canvas-empty {
+    min-height: 200px;
+    border: 2px dashed color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    background-color: color-mix(in oklch, var(--color-base-content) 8%, transparent);
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--color-primary);
+      background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+    }
+  }
+
+  .image-crop-placeholder {
+    @apply flex flex-col items-center justify-center gap-2 text-center;
+    padding: 2rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+
+    & svg {
+      @apply size-12;
+      opacity: 0.6;
+    }
+  }
+
+  .image-crop-placeholder-text {
+    @apply text-base font-medium;
+  }
+
+  .image-crop-placeholder-hint {
+    @apply text-sm;
+    opacity: 0.7;
+  }
+
+  /* Image */
+  .image-crop-image-container {
+    @apply relative flex items-center justify-center w-full h-full;
+  }
+
+  .image-crop-image {
+    @apply max-w-full max-h-full pointer-events-none;
+    transform-origin: center center;
+  }
+
+  /* =============================================
+     Overlay
+     ============================================= */
+
+  .image-crop-overlay {
+    @apply absolute inset-0 pointer-events-none;
+  }
+
+  .image-crop-overlay-bg {
+    @apply absolute inset-0 pointer-events-none;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  /* =============================================
+     Crop Area
+     ============================================= */
+
+  .image-crop-area {
+    @apply absolute cursor-move;
+    border: 2px solid white;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+    touch-action: none;
+
+    &::before {
+      content: '';
+      @apply absolute inset-0 bg-transparent;
+    }
+  }
+
+  /* Grid Lines */
+  .image-crop-grid {
+    @apply absolute inset-0 pointer-events-none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .image-crop-grid-thirds {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+    background-size: 33.333% 33.333%;
+    background-position: center;
+  }
+
+  .image-crop-area:hover .image-crop-grid {
+    opacity: 1;
+  }
+
+  /* =============================================
+     Resize Handles
+     ============================================= */
+
+  .image-crop-handles {
+    @apply absolute inset-0 pointer-events-none;
+  }
+
+  .image-crop-handle {
+    @apply absolute rounded-full pointer-events-auto cursor-pointer;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border: 2px solid var(--color-primary);
+    transform: translate(-50%, -50%);
+    touch-action: none;
+    transition: transform 0.15s ease;
+
+    &:hover,
+    &:active {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+  }
+
+  /* Corner handles */
+  .image-crop-handle-nw { top: 0; left: 0; cursor: nwse-resize; }
+  .image-crop-handle-ne { top: 0; left: 100%; cursor: nesw-resize; }
+  .image-crop-handle-sw { top: 100%; left: 0; cursor: nesw-resize; }
+  .image-crop-handle-se { top: 100%; left: 100%; cursor: nwse-resize; }
+
+  /* Edge handles */
+  .image-crop-handle-n { top: 0; left: 50%; cursor: ns-resize; }
+  .image-crop-handle-s { top: 100%; left: 50%; cursor: ns-resize; }
+  .image-crop-handle-w { top: 50%; left: 0; cursor: ew-resize; }
+  .image-crop-handle-e { top: 50%; left: 100%; cursor: ew-resize; }
+
+  /* =============================================
+     Controls Bar
+     ============================================= */
+
+  .image-crop-controls {
+    @apply flex flex-col gap-4;
+    padding: 1rem;
+    background-color: var(--color-base-100);
+    border-top: 1px solid var(--color-base-300);
+  }
+
+  .image-crop-control-row {
+    @apply flex items-center gap-4;
+  }
+
+  .image-crop-control-group {
+    @apply flex items-center gap-2 flex-1;
+  }
+
+  .image-crop-control-label {
+    @apply text-sm font-medium;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    min-width: 50px;
+  }
+
+  .image-crop-control-value {
+    @apply text-sm font-semibold text-right;
+    color: var(--color-base-content);
+    min-width: 40px;
+  }
+
+  /* Zoom Slider */
+  .image-crop-slider {
+    @apply flex-1 cursor-pointer;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--color-base-300);
+    border-radius: 2px;
+    outline: none;
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    &::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+    }
+  }
+
+  /* Aspect Ratio Buttons */
+  .image-crop-aspect-buttons {
+    @apply flex gap-1 flex-wrap;
+  }
+
+  .image-crop-aspect-btn {
+    @apply text-sm font-medium cursor-pointer;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.25rem);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-300);
+      color: var(--color-base-content);
+    }
+  }
+
+  .image-crop-aspect-btn-active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-content, white);
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-primary) 85%, black);
+      color: var(--color-primary-content, white);
+    }
+  }
+
+  /* Rotate Buttons */
+  .image-crop-rotate-buttons {
+    @apply flex gap-1;
+  }
+
+  .image-crop-rotate-btn {
+    @apply flex items-center justify-center cursor-pointer;
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.25rem);
+    color: var(--color-base-content);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-300);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    & svg {
+      @apply size-5;
+    }
+  }
+
+  /* Action Buttons */
+  .image-crop-actions {
+    @apply flex gap-2 justify-end pt-2;
+    border-top: 1px solid var(--color-base-300);
+  }
+
+  /* =============================================
+     Preview
+     ============================================= */
+
+  .image-crop-preview {
+    @apply relative overflow-hidden;
+    background-color: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.5rem);
+  }
+
+  .image-crop-preview-sm { width: 80px; height: 80px; }
+  .image-crop-preview-md { width: 120px; height: 120px; }
+  .image-crop-preview-lg { width: 200px; height: 200px; }
+  .image-crop-preview-circle { border-radius: 50%; }
+
+  .image-crop-preview-label {
+    @apply absolute text-xs font-medium;
+    top: 0.25rem;
+    left: 0.25rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    background-color: color-mix(in oklch, var(--color-base-100) 90%, transparent);
+    padding: 2px 6px;
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  .image-crop-preview-image {
+    @apply size-full object-contain;
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .image-crop.glass {
+    & .image-crop-controls {
+      @apply glass;
+      border-color: var(--glass-border);
+    }
+
+    & .image-crop-aspect-btn,
+    & .image-crop-rotate-btn {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+      border-color: var(--glass-border);
+    }
+  }
+}
+
+/* =============================================
+   Keyframes
+   ============================================= */
+
+@keyframes image-crop-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .image-crop-handle {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .image-crop-handle,
+  .image-crop-slider::-webkit-slider-thumb,
+  .image-crop-aspect-btn,
+  .image-crop-rotate-btn,
+  .image-crop-grid {
+    transition: none;
+  }
+
+  .image-crop-loading .image-crop-canvas::after {
+    animation: none;
+  }
+}

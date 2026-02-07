@@ -1,0 +1,580 @@
+/* UX v3 - Event Card Component */
+/* Calendar event card with category colors, time, location, and attendees */
+
+@layer components {
+
+  /* =============================================
+     Base event card
+     ============================================= */
+
+  .event-card {
+    @apply relative flex flex-col overflow-hidden;
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Category color bar (left border) */
+    &::before {
+      content: '';
+      @apply absolute left-0 top-0 bottom-0 w-1;
+      background-color: var(--event-color, var(--color-primary));
+      border-radius: var(--radius-box) 0 0 var(--radius-box);
+    }
+  }
+
+  /* =============================================
+     Category color variants
+     ============================================= */
+
+  .event-card-work { --event-color: var(--color-info); }
+  .event-card-personal { --event-color: var(--color-success); }
+  .event-card-meeting { --event-color: oklch(0.55 0.24 300); }
+  .event-card-deadline { --event-color: var(--color-error); }
+  .event-card-reminder { --event-color: var(--color-warning); }
+  .event-card-holiday { --event-color: oklch(0.65 0.18 55); }
+  .event-card-travel { --event-color: oklch(0.65 0.15 200); }
+  .event-card-health { --event-color: oklch(0.6 0.2 350); }
+  .event-card-social { --event-color: oklch(0.55 0.22 280); }
+  .event-card-other { --event-color: color-mix(in oklch, var(--color-base-content) 40%, transparent); }
+
+  /* =============================================
+     Header
+     ============================================= */
+
+  .event-card-header {
+    @apply flex items-start justify-between gap-2;
+    padding: 0.75rem 1rem 0.5rem;
+    padding-left: calc(1rem + 8px);
+  }
+
+  .event-card-header-content {
+    @apply flex-1 min-w-0;
+  }
+
+  .event-card-header-actions {
+    @apply flex items-center gap-1 shrink-0;
+  }
+
+  /* =============================================
+     Title & description
+     ============================================= */
+
+  .event-card-title {
+    @apply text-sm font-semibold m-0 truncate;
+    color: var(--color-base-content);
+    line-height: 1.3;
+
+    & a {
+      @apply no-underline;
+      color: inherit;
+
+      &:hover {
+        color: var(--color-primary);
+      }
+    }
+  }
+
+  .event-card-description {
+    @apply text-xs mt-1;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  /* =============================================
+     Content area
+     ============================================= */
+
+  .event-card-content {
+    @apply flex flex-col gap-2;
+    padding: 0 1rem 0.75rem;
+    padding-left: calc(1rem + 8px);
+  }
+
+  /* =============================================
+     Meta row (time, location, etc.)
+     ============================================= */
+
+  .event-card-meta {
+    @apply flex flex-wrap items-center text-xs;
+    gap: 0.5rem 1rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .event-card-meta-item {
+    @apply inline-flex items-center gap-1;
+
+    & svg {
+      @apply w-4 h-4 shrink-0 opacity-70;
+    }
+  }
+
+  /* =============================================
+     Time display
+     ============================================= */
+
+  .event-card-time {
+    @apply inline-flex items-center gap-1 font-medium;
+    color: var(--color-base-content);
+
+    & svg {
+      @apply w-4 h-4;
+      color: var(--event-color, var(--color-primary));
+    }
+  }
+
+  .event-card-time-range {
+    @apply flex items-center gap-1;
+  }
+
+  .event-card-time-separator {
+    color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+  }
+
+  /* =============================================
+     Duration badge
+     ============================================= */
+
+  .event-card-duration {
+    @apply inline-flex items-center gap-1 text-xs font-medium rounded-full;
+    padding: 2px 8px;
+    background-color: var(--color-base-200);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+
+    & svg {
+      @apply w-3 h-3;
+    }
+  }
+
+  /* =============================================
+     Location
+     ============================================= */
+
+  .event-card-location {
+    @apply inline-flex items-center gap-1 text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+
+    & svg {
+      @apply w-4 h-4 shrink-0;
+      color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    }
+
+    & a {
+      @apply no-underline;
+      color: var(--color-primary);
+
+      &:hover {
+        @apply underline;
+      }
+    }
+  }
+
+  /* =============================================
+     Attendees (avatar stack)
+     ============================================= */
+
+  .event-card-attendees {
+    @apply flex items-center gap-2;
+  }
+
+  .event-card-attendees-stack {
+    @apply flex flex-row-reverse;
+
+    & .avatar {
+      @apply w-7 h-7;
+      font-size: 10px;
+      margin-left: -8px;
+      border: 2px solid var(--color-base-100);
+      box-sizing: content-box;
+
+      &:last-child {
+        @apply ml-0;
+      }
+    }
+  }
+
+  .event-card-attendees-more {
+    @apply inline-flex items-center justify-center w-7 h-7 rounded-full font-semibold;
+    font-size: 10px;
+    margin-left: -8px;
+    background-color: var(--color-base-200);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    border: 2px solid var(--color-base-100);
+    box-sizing: content-box;
+  }
+
+  .event-card-attendees-label {
+    @apply text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Category tag
+     ============================================= */
+
+  .event-card-category {
+    @apply inline-flex items-center gap-1 text-xs font-medium rounded-full;
+    padding: 2px 8px;
+    background-color: color-mix(in oklch, var(--event-color, var(--color-primary)) 12%, transparent);
+    color: var(--event-color, var(--color-primary));
+
+    &::before {
+      content: '';
+      @apply w-1.5 h-1.5 rounded-full;
+      background-color: var(--event-color, var(--color-primary));
+    }
+  }
+
+  /* =============================================
+     Indicators
+     ============================================= */
+
+  .event-card-indicators {
+    @apply flex items-center gap-1;
+  }
+
+  .event-card-indicator {
+    @apply inline-flex items-center justify-center w-5 h-5 rounded-full;
+    background-color: var(--color-base-200);
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+
+    & svg {
+      @apply w-3 h-3;
+    }
+  }
+
+  .event-card-indicator-reminder {
+    background-color: color-mix(in oklch, var(--color-warning) 15%, transparent);
+    color: var(--color-warning);
+  }
+
+  .event-card-indicator-recurring {
+    background-color: color-mix(in oklch, var(--color-info) 15%, transparent);
+    color: var(--color-info);
+  }
+
+  /* =============================================
+     Footer
+     ============================================= */
+
+  .event-card-footer {
+    @apply flex items-center justify-between gap-2;
+    padding: 0.5rem 1rem;
+    padding-left: calc(1rem + 8px);
+    border-top: 1px solid var(--color-base-300);
+  }
+
+  .event-card-footer-start,
+  .event-card-footer-end {
+    @apply flex items-center gap-1;
+  }
+
+  .event-card-footer-end {
+    @apply ml-auto;
+  }
+
+  /* =============================================
+     RSVP status
+     ============================================= */
+
+  .event-card-rsvp {
+    @apply inline-flex items-center gap-1 text-xs font-medium rounded-full;
+    padding: 4px 10px;
+
+    & svg {
+      @apply w-3.5 h-3.5;
+    }
+  }
+
+  .event-card-rsvp-going {
+    background-color: color-mix(in oklch, var(--color-success) 12%, transparent);
+    color: var(--color-success);
+  }
+
+  .event-card-rsvp-maybe {
+    background-color: color-mix(in oklch, var(--color-warning) 12%, transparent);
+    color: var(--color-warning);
+  }
+
+  .event-card-rsvp-declined {
+    background-color: color-mix(in oklch, var(--color-error) 12%, transparent);
+    color: var(--color-error);
+  }
+
+  .event-card-rsvp-pending {
+    background-color: var(--color-base-200);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Compact variant
+     ============================================= */
+
+  .event-card-compact {
+    @apply flex-row items-center;
+    padding: 0.25rem 0.5rem;
+    padding-left: calc(0.5rem + 6px);
+    gap: 0.5rem;
+    min-height: 32px;
+    box-shadow: none;
+    border: 1px solid var(--color-base-300);
+
+    &::before {
+      @apply w-0.5;
+    }
+
+    &:hover {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    & .event-card-header {
+      @apply p-0 flex-1 min-w-0;
+    }
+
+    & .event-card-title {
+      @apply text-xs;
+    }
+
+    & .event-card-content,
+    & .event-card-footer,
+    & .event-card-description {
+      @apply hidden;
+    }
+
+    & .event-card-time {
+      @apply text-xs font-normal whitespace-nowrap;
+      color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+
+      & svg {
+        @apply hidden;
+      }
+    }
+
+    & .event-card-indicators {
+      @apply shrink-0;
+    }
+
+    & .event-card-indicator {
+      @apply w-4 h-4;
+
+      & svg {
+        @apply w-2.5 h-2.5;
+      }
+    }
+  }
+
+  /* =============================================
+     All-day variant
+     ============================================= */
+
+  .event-card-all-day {
+    background-color: color-mix(in oklch, var(--event-color, var(--color-primary)) 8%, var(--color-base-100));
+    border-left: none;
+
+    &::before {
+      @apply hidden;
+    }
+
+    & .event-card-title {
+      color: var(--event-color, var(--color-primary));
+    }
+
+    & .event-card-time {
+      @apply hidden;
+    }
+  }
+
+  .event-card-all-day-badge {
+    @apply hidden;
+  }
+
+  .event-card-all-day .event-card-all-day-badge {
+    @apply inline-flex items-center text-xs font-medium text-white rounded-full;
+    padding: 2px 8px;
+    background-color: var(--event-color, var(--color-primary));
+  }
+
+  /* =============================================
+     State variants
+     ============================================= */
+
+  .event-card-clickable {
+    @apply cursor-pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .event-card-past {
+    @apply opacity-60;
+
+    &::before {
+      @apply opacity-50;
+    }
+  }
+
+  .event-card-cancelled {
+    @apply opacity-50;
+
+    & .event-card-title {
+      @apply line-through;
+      color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    }
+  }
+
+  /* =============================================
+     Size variants
+     ============================================= */
+
+  .event-card-sm {
+    & .event-card-header {
+      padding: 0.5rem 0.5rem 0.25rem;
+      padding-left: calc(0.5rem + 6px);
+    }
+
+    & .event-card-content {
+      padding: 0 0.5rem 0.5rem;
+      padding-left: calc(0.5rem + 6px);
+    }
+
+    & .event-card-title {
+      @apply text-xs;
+    }
+
+    & .event-card-description {
+      font-size: 0.6875rem;
+    }
+
+    &::before {
+      @apply w-0.5;
+    }
+  }
+
+  .event-card-lg {
+    & .event-card-header {
+      padding: 1rem 1.5rem 0.75rem;
+      padding-left: calc(1.5rem + 10px);
+    }
+
+    & .event-card-content {
+      @apply gap-3;
+      padding: 0 1.5rem 1.5rem;
+      padding-left: calc(1.5rem + 10px);
+    }
+
+    & .event-card-footer {
+      padding: 0.75rem 1.5rem;
+      padding-left: calc(1.5rem + 10px);
+    }
+
+    & .event-card-title {
+      @apply text-base;
+    }
+
+    &::before {
+      width: 5px;
+    }
+  }
+
+  /* =============================================
+     Outline variant
+     ============================================= */
+
+  .event-card-outline {
+    @apply shadow-none;
+    border: 1px solid var(--color-base-300);
+
+    &:hover {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      border-color: var(--event-color, var(--color-primary));
+    }
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .event-card.glass {
+    @apply glass;
+    border: 0.5px solid var(--glass-border, rgba(255,255,255,0.18));
+
+    &::before {
+      background-color: var(--event-color, var(--color-primary));
+    }
+
+    & .event-card-footer {
+      border-top-color: var(--glass-border, rgba(255,255,255,0.18));
+    }
+
+    & .event-card-duration,
+    & .event-card-indicator,
+    & .event-card-attendees-more {
+      background: var(--glass-bg-thin, rgba(255,255,255,0.5));
+    }
+  }
+
+  /* =============================================
+     Grid & list layouts
+     ============================================= */
+
+  .event-card-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+
+    & .event-card {
+      @apply m-0;
+    }
+  }
+
+  .event-card-list {
+    @apply flex flex-col gap-2;
+
+    & .event-card {
+      @apply m-0;
+    }
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .event-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event-card-meta {
+    @apply flex-col items-start;
+    gap: 0.25rem;
+  }
+
+  .event-card-footer {
+    @apply flex-wrap;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .event-card {
+    transition: none;
+  }
+
+  .event-card-clickable:active {
+    transform: none;
+  }
+}
