@@ -1,0 +1,140 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Infinite Scroll & Load More">
+  <p class="text-base-content/70 mb-6">Loading indicators for infinite scroll, load more buttons with variants, progress bars, and end/error states.</p>
+
+  <CodePreview
+    title="Infinite Scroll Loading"
+    semantic={`<div class="infinite-scroll">
+  <div class="infinite-scroll-spinner">
+    <div class="infinite-scroll-icon"></div>
+    <span class="infinite-scroll-text">Loading more items...</span>
+  </div>
+</div>`}
+    tailwind={`<div class="flex flex-col items-center p-6">
+  <div class="flex items-center gap-4">
+    <div class="w-6 h-6 border-2 border-base-300 border-t-primary rounded-full animate-spin"></div>
+    <span class="text-sm text-base-content/60">Loading more items...</span>
+  </div>
+</div>`}
+    js={`// Infinite scroll with IntersectionObserver:
+const sentinel = document.querySelector('.infinite-scroll');
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    loadMoreItems(); // Your data fetching function
+  }
+});
+observer.observe(sentinel);`}
+  />
+
+  <CodePreview
+    title="End & Error States"
+    semantic={`<div class="flex flex-col gap-4">
+  <!-- End state -->
+  <div class="infinite-scroll infinite-scroll-complete">
+    <div class="infinite-scroll-end-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <span class="infinite-scroll-end-text">You've reached the end</span>
+  </div>
+
+  <!-- Error state -->
+  <div class="infinite-scroll infinite-scroll-error">
+    <span class="infinite-scroll-error-text">Failed to load more items</span>
+    <button class="infinite-scroll-retry">Try again</button>
+  </div>
+</div>`}
+    tailwind={`<!-- infinite-scroll-complete: muted styling for end state -->
+<!-- infinite-scroll-error: red text + retry button -->`}
+    js={`// Retry button handler:
+document.querySelector('.infinite-scroll-retry').addEventListener('click', () => {
+  loadMoreItems(); // Retry your data fetch
+});`}
+  />
+
+  <CodePreview
+    title="Scroll Progress Bar"
+    semantic={`<div style="position: relative; height: 8px; border-radius: 4px; overflow: hidden;">
+  <div class="scroll-progress" style="position: relative;">
+    <div class="scroll-progress-bar" style="width: 65%;"></div>
+  </div>
+</div>`}
+    tailwind={`<div class="relative h-[3px] bg-base-300 rounded-full overflow-hidden">
+  <div class="h-full bg-primary rounded-full" style="width: 65%;"></div>
+</div>`}
+    js={`// Update scroll progress:
+window.addEventListener('scroll', () => {
+  const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  document.querySelector('.scroll-progress-bar').style.width = pct + '%';
+});`}
+  />
+
+  <CodePreview
+    title="Load More Button"
+    semantic={`<div class="flex flex-col gap-4">
+  <!-- Default (outline) -->
+  <div class="load-more">
+    <button class="load-more-btn">Load More</button>
+    <span class="load-more-status">Showing 10 of 48 items</span>
+  </div>
+
+  <!-- Filled -->
+  <div class="load-more load-more-filled">
+    <button class="load-more-btn">Load More</button>
+  </div>
+
+  <!-- Soft -->
+  <div class="load-more load-more-soft">
+    <button class="load-more-btn">Load More</button>
+  </div>
+
+  <!-- Ghost -->
+  <div class="load-more load-more-ghost">
+    <button class="load-more-btn">Load More</button>
+  </div>
+</div>`}
+    tailwind={`<!-- load-more-filled: solid primary background -->
+<!-- load-more-soft: light primary background -->
+<!-- load-more-ghost: no border, just text -->`}
+    js={`// Load more click handler:
+document.querySelector('.load-more-btn').addEventListener('click', async () => {
+  container.classList.add('load-more-loading');
+  await fetchMoreItems();
+  container.classList.remove('load-more-loading');
+});`}
+  />
+
+  <CodePreview
+    title="Load More with Progress"
+    semantic={`<div class="load-more">
+  <button class="load-more-btn">Load More</button>
+  <div class="load-more-progress">
+    <div class="load-more-progress-bar">
+      <div class="load-more-progress-fill" style="width: 40%;"></div>
+    </div>
+    <span>20 of 50</span>
+  </div>
+</div>
+
+<!-- Loading state -->
+<div class="load-more load-more-loading">
+  <button class="load-more-btn">
+    <span class="load-more-spinner"></span>
+    Loading...
+  </button>
+</div>
+
+<!-- End state -->
+<div class="load-more load-more-end">
+  <button class="load-more-btn">Load More</button>
+  <div class="load-more-end-message">All items loaded</div>
+</div>`}
+    tailwind={`<!-- load-more-progress: shows items loaded / total -->
+<!-- load-more-loading: disables button, shows spinner -->
+<!-- load-more-end: hides button, shows end message -->`}
+    js={`// No JavaScript required for visual states — toggle classes as needed`}
+  />
+</DocsLayout>

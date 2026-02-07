@@ -1,0 +1,254 @@
+/* UX v3 - Form Wizard Component */
+/* Multi-step form with progress indicators, step panels, and navigation */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .form-wizard {
+    @apply flex flex-col w-full;
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box, 0.75rem);
+  }
+
+  /* =============================================
+     Steps header
+     ============================================= */
+
+  .form-wizard-steps {
+    @apply flex items-start justify-between relative;
+    padding: 1.5rem 2rem;
+    background-color: var(--color-base-200);
+    border-bottom: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem) var(--radius-box, 0.75rem) 0 0;
+
+    /* Connector line */
+    &::before {
+      content: '';
+      @apply absolute;
+      top: calc(1.5rem + 18px);
+      left: calc(2rem + 18px);
+      right: calc(2rem + 18px);
+      height: 2px;
+      background-color: var(--color-base-300);
+      z-index: 0;
+    }
+  }
+
+  /* Progress line (fills as steps complete) */
+  .form-wizard-progress-line {
+    @apply absolute;
+    top: calc(1.5rem + 18px);
+    left: calc(2rem + 18px);
+    height: 2px;
+    background-color: var(--color-primary);
+    z-index: 1;
+    transition: width 0.2s ease;
+  }
+
+  /* =============================================
+     Step
+     ============================================= */
+
+  .form-wizard-step {
+    @apply flex flex-col items-center relative z-[2] flex-1 cursor-pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover .form-wizard-step-indicator {
+      border-color: var(--color-primary);
+      transform: scale(1.08);
+    }
+  }
+
+  .form-wizard-step-disabled {
+    @apply cursor-not-allowed pointer-events-none;
+
+    & .form-wizard-step-indicator,
+    & .form-wizard-step-label {
+      @apply opacity-50;
+    }
+  }
+
+  /* Step indicator circle */
+  .form-wizard-step-indicator {
+    @apply flex items-center justify-center text-sm font-semibold;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--color-base-100);
+    border: 2px solid var(--color-base-300);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
+
+    & svg {
+      @apply w-4.5 h-4.5;
+    }
+  }
+
+  /* Step label */
+  .form-wizard-step-label {
+    @apply text-sm font-medium text-center;
+    margin-top: 0.5rem;
+    max-width: 100px;
+    line-height: 1.3;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    transition: color 0.15s;
+  }
+
+  /* Active step */
+  .form-wizard-step-active .form-wizard-step-indicator {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-content);
+    box-shadow: 0 2px 8px color-mix(in oklch, var(--color-primary) 35%, transparent);
+  }
+
+  .form-wizard-step-active .form-wizard-step-label {
+    color: var(--color-primary);
+    @apply font-semibold;
+  }
+
+  /* Completed step */
+  .form-wizard-step-completed .form-wizard-step-indicator {
+    background-color: var(--color-success);
+    border-color: var(--color-success);
+    color: var(--color-success-content);
+  }
+
+  .form-wizard-step-completed .form-wizard-step-label {
+    color: var(--color-success);
+  }
+
+  /* Error step */
+  .form-wizard-step-error .form-wizard-step-indicator {
+    background-color: var(--color-error);
+    border-color: var(--color-error);
+    color: var(--color-error-content);
+  }
+
+  .form-wizard-step-error .form-wizard-step-label {
+    color: var(--color-error);
+  }
+
+  /* =============================================
+     Content area
+     ============================================= */
+
+  .form-wizard-content {
+    @apply flex-1;
+    padding: 2rem;
+    min-height: 200px;
+  }
+
+  .form-wizard-panel {
+    @apply hidden;
+  }
+
+  .form-wizard-panel-active {
+    @apply block;
+    animation: form-wizard-fade-in 0.2s ease;
+  }
+
+  .form-wizard-panel-title {
+    @apply text-xl font-semibold m-0;
+    color: var(--color-base-content);
+    margin-bottom: 0.25rem;
+  }
+
+  .form-wizard-panel-subtitle {
+    @apply text-sm m-0;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-bottom: 1.5rem;
+  }
+
+  /* =============================================
+     Actions footer
+     ============================================= */
+
+  .form-wizard-actions {
+    @apply flex justify-between items-center gap-4;
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--color-base-300);
+    background-color: var(--color-base-200);
+    border-radius: 0 0 var(--radius-box, 0.75rem) var(--radius-box, 0.75rem);
+  }
+
+  .form-wizard-actions-start,
+  .form-wizard-actions-end {
+    @apply flex gap-2;
+  }
+
+  .form-wizard-progress-text {
+    @apply text-sm mx-auto;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .form-wizard.glass {
+    @apply glass;
+
+    & .form-wizard-steps {
+      background: transparent;
+      border-bottom-color: rgba(255, 255, 255, 0.18);
+    }
+
+    & .form-wizard-actions {
+      background: transparent;
+      border-top-color: rgba(255, 255, 255, 0.18);
+    }
+  }
+}
+
+@keyframes form-wizard-fade-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* =============================================
+   Mobile
+   ============================================= */
+
+@media (max-width: 767px) {
+  .form-wizard-steps {
+    @apply overflow-x-auto;
+    padding: 1rem 1.5rem;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  .form-wizard-step-label {
+    @apply hidden;
+  }
+
+  .form-wizard-step-active .form-wizard-step-label {
+    @apply block;
+  }
+
+  .form-wizard-content {
+    padding: 1.5rem;
+  }
+
+  .form-wizard-actions {
+    padding: 1rem 1.5rem;
+    @apply flex-wrap;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .form-wizard-step-indicator,
+  .form-wizard-progress-line,
+  .form-wizard-panel {
+    transition: none;
+    animation: none;
+  }
+}
