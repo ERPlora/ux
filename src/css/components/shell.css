@@ -1,0 +1,304 @@
+/* UX v3 - Shell Component */
+/* Application layout shell with navbar, sidebar, main content, and bottom nav */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .shell {
+    @apply flex flex-col;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: var(--color-base-100);
+  }
+
+  /* =============================================
+     Navbar
+     ============================================= */
+
+  .shell-navbar {
+    @apply sticky top-0 flex items-center gap-4;
+    z-index: 20;
+    height: 3.5rem;
+    padding: 0 1.5rem;
+    background-color: var(--color-base-100);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .shell-navbar-toggle {
+    @apply hidden items-center justify-center p-0 border-none bg-transparent cursor-pointer;
+    width: 2.25rem;
+    height: 2.25rem;
+    color: var(--color-base-content);
+    border-radius: var(--radius-field, 0.5rem);
+    transition: background-color 0.15s;
+
+    &:hover {
+      background-color: var(--color-base-200);
+    }
+
+    & svg {
+      @apply w-5 h-5;
+    }
+  }
+
+  .shell-navbar-brand {
+    @apply text-lg font-semibold;
+    color: var(--color-base-content);
+  }
+
+  .shell-navbar-content {
+    @apply flex-1;
+  }
+
+  .shell-navbar-actions {
+    @apply flex items-center gap-2;
+  }
+
+  /* =============================================
+     Sidebar
+     ============================================= */
+
+  .shell-with-sidebar {
+    --shell-sidebar-w: 260px;
+    --shell-sidebar-collapsed-w: 60px;
+
+    & .shell-navbar-toggle {
+      @apply flex;
+    }
+  }
+
+  .shell-sidebar {
+    @apply fixed overflow-y-auto overflow-x-hidden;
+    top: 3.5rem;
+    left: 0;
+    bottom: 0;
+    width: var(--shell-sidebar-w);
+    background-color: var(--color-base-100);
+    border-right: 1px solid var(--color-base-300);
+    z-index: 30;
+    transition: width 0.2s ease, transform 0.2s ease;
+  }
+
+  .shell-sidebar-nav {
+    padding: 0.5rem 0;
+  }
+
+  /* Sidebar header */
+  .shell-sidebar-header {
+    @apply flex items-center gap-4 overflow-hidden;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--color-base-300);
+    min-height: 3.5rem;
+  }
+
+  .shell-sidebar-logo {
+    @apply shrink-0;
+    width: 2rem;
+    height: 2rem;
+    object-fit: contain;
+    transition: width 0.2s ease, height 0.2s ease;
+  }
+
+  .shell-sidebar-title {
+    @apply flex-1 font-semibold truncate;
+    color: var(--color-base-content);
+    opacity: 1;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+  }
+
+  /* Sidebar item */
+  .shell-sidebar-item {
+    @apply flex items-center gap-4 overflow-hidden whitespace-nowrap no-underline;
+    padding: 0.75rem 1.5rem;
+    color: color-mix(in oklch, var(--color-base-content) 70%, transparent);
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover {
+      background-color: var(--color-base-200);
+      color: var(--color-base-content);
+    }
+  }
+
+  .shell-sidebar-item-active {
+    color: var(--color-primary);
+    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+  }
+
+  .shell-sidebar-item-icon {
+    @apply flex items-center justify-center shrink-0;
+    width: 1.5rem;
+    height: 1.5rem;
+
+    & svg {
+      @apply w-5 h-5;
+    }
+  }
+
+  .shell-sidebar-item-text {
+    @apply flex-1 overflow-hidden text-ellipsis;
+  }
+
+  /* Collapsed sidebar */
+  .shell-sidebar-collapsed .shell-sidebar {
+    width: var(--shell-sidebar-collapsed-w);
+  }
+
+  .shell-sidebar-collapsed .shell-sidebar-header {
+    @apply justify-center;
+    padding: 1rem 0.5rem;
+  }
+
+  .shell-sidebar-collapsed .shell-sidebar-logo {
+    width: calc(var(--shell-sidebar-collapsed-w) - 1.5rem);
+    height: calc(var(--shell-sidebar-collapsed-w) - 1.5rem);
+    max-width: 2.5rem;
+    max-height: 2.5rem;
+  }
+
+  .shell-sidebar-collapsed .shell-sidebar-title {
+    @apply opacity-0 invisible w-0 overflow-hidden;
+  }
+
+  .shell-sidebar-collapsed .shell-sidebar-item-text {
+    @apply opacity-0 invisible;
+  }
+
+  /* Sidebar backdrop (mobile) */
+  .shell-sidebar-backdrop {
+    @apply hidden fixed inset-0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 29;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+  }
+
+  /* =============================================
+     Main content
+     ============================================= */
+
+  .shell-main {
+    @apply flex-1 overflow-y-auto overflow-x-hidden;
+  }
+
+  .shell-with-sidebar .shell-main {
+    margin-left: var(--shell-sidebar-w);
+    transition: margin-left 0.2s ease;
+  }
+
+  .shell-sidebar-collapsed .shell-main {
+    margin-left: var(--shell-sidebar-collapsed-w);
+  }
+
+  /* =============================================
+     Toolbar
+     ============================================= */
+
+  .shell-toolbar {
+    @apply flex items-center gap-4;
+    height: 3.5rem;
+    padding: 0 1.5rem;
+    background-color: var(--color-base-100);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  /* =============================================
+     Bottom nav
+     ============================================= */
+
+  .shell-bottom-nav {
+    @apply hidden fixed bottom-0 left-0 right-0;
+    height: calc(50px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background-color: var(--color-base-100);
+    border-top: 1px solid var(--color-base-300);
+    z-index: 20;
+  }
+
+  .shell-bottom-nav-items {
+    @apply flex items-center justify-around;
+    height: 50px;
+  }
+
+  .shell-bottom-nav-item {
+    @apply flex flex-col items-center justify-center gap-0.5 no-underline;
+    padding: 0.25rem;
+    min-width: 4rem;
+    font-size: 10px;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+
+    & svg {
+      @apply w-6 h-6;
+    }
+  }
+
+  .shell-bottom-nav-item-active {
+    color: var(--color-primary);
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .shell.glass .shell-navbar,
+  .shell.glass .shell-sidebar,
+  .shell.glass .shell-toolbar,
+  .shell.glass .shell-bottom-nav {
+    @apply glass;
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+}
+
+/* =============================================
+   Mobile
+   ============================================= */
+
+@media (max-width: 767px) {
+  .shell-with-sidebar .shell-sidebar {
+    transform: translateX(-100%);
+    width: var(--shell-sidebar-w);
+  }
+
+  .shell-sidebar-open .shell-sidebar {
+    transform: translateX(0);
+  }
+
+  .shell-with-sidebar .shell-sidebar-backdrop {
+    @apply block;
+  }
+
+  .shell-sidebar-open .shell-sidebar-backdrop {
+    @apply opacity-100 visible;
+  }
+
+  .shell-with-sidebar .shell-main,
+  .shell-sidebar-collapsed .shell-main {
+    margin-left: 0;
+  }
+
+  .shell-bottom-nav {
+    @apply block;
+  }
+
+  .shell-with-bottom-nav .shell-main {
+    padding-bottom: calc(50px + env(safe-area-inset-bottom));
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .shell-sidebar,
+  .shell-sidebar-logo,
+  .shell-sidebar-title,
+  .shell-sidebar-item,
+  .shell-sidebar-backdrop,
+  .shell-navbar-toggle {
+    transition: none;
+  }
+}

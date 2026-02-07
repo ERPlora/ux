@@ -1,0 +1,246 @@
+/* UX v3 - Masonry Component */
+/* CSS-only masonry grid layout with column variants, overlays, and animations */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .masonry {
+    --masonry-cols: 3;
+    --masonry-gap: 1rem;
+  }
+
+  .masonry-grid {
+    @apply block;
+    column-count: var(--masonry-cols);
+    column-gap: var(--masonry-gap);
+  }
+
+  /* =============================================
+     Column variants
+     ============================================= */
+
+  .masonry-cols-2 { --masonry-cols: 2; }
+  .masonry-cols-3 { --masonry-cols: 3; }
+  .masonry-cols-4 { --masonry-cols: 4; }
+  .masonry-cols-5 { --masonry-cols: 5; }
+  .masonry-cols-6 { --masonry-cols: 6; }
+
+  /* =============================================
+     Gap variants
+     ============================================= */
+
+  .masonry-gap-none { --masonry-gap: 0; }
+  .masonry-gap-xs { --masonry-gap: 0.25rem; }
+  .masonry-gap-sm { --masonry-gap: 0.5rem; }
+  .masonry-gap-md { --masonry-gap: 1rem; }
+  .masonry-gap-lg { --masonry-gap: 1.5rem; }
+  .masonry-gap-xl { --masonry-gap: 2rem; }
+
+  /* =============================================
+     Item
+     ============================================= */
+
+  .masonry-item {
+    @apply relative block overflow-hidden;
+    break-inside: avoid;
+    margin-bottom: var(--masonry-gap);
+    border-radius: var(--radius-box, 0.75rem);
+    background: var(--color-base-100);
+
+    &:last-child {
+      @apply mb-0;
+    }
+
+    & img {
+      @apply block w-full h-auto;
+      border-radius: inherit;
+      object-fit: cover;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  /* Hover zoom on image */
+  .masonry-item-hover:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Clickable item */
+  .masonry-item-clickable {
+    @apply cursor-pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &:focus-visible {
+      @apply outline-2 outline-primary outline-offset-2;
+    }
+  }
+
+  /* =============================================
+     Item overlay
+     ============================================= */
+
+  .masonry-item-overlay {
+    @apply absolute inset-0 flex flex-col items-center justify-center text-center text-white;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0);
+    transition: background 0.15s ease;
+  }
+
+  .masonry-item:hover .masonry-item-overlay {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .masonry-item-title {
+    @apply text-lg font-semibold;
+    margin-bottom: 0.25rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .masonry-item-subtitle {
+    @apply text-sm;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition-delay: 50ms;
+  }
+
+  .masonry-item:hover .masonry-item-title,
+  .masonry-item:hover .masonry-item-subtitle {
+    @apply opacity-100;
+    transform: translateY(0);
+  }
+
+  /* =============================================
+     Item content (card-style)
+     ============================================= */
+
+  .masonry-item-content {
+    @apply p-4;
+
+    & .masonry-item-title {
+      color: var(--color-base-content);
+      @apply opacity-100;
+      transform: none;
+      margin-bottom: 0.5rem;
+    }
+
+    & .masonry-item-subtitle {
+      color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+      @apply opacity-100;
+      transform: none;
+    }
+  }
+
+  /* =============================================
+     Animated load
+     ============================================= */
+
+  .masonry-animated .masonry-item {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: masonry-fade-in 0.3s ease forwards;
+  }
+
+  .masonry-animated .masonry-item:nth-child(1) { animation-delay: 0ms; }
+  .masonry-animated .masonry-item:nth-child(2) { animation-delay: 50ms; }
+  .masonry-animated .masonry-item:nth-child(3) { animation-delay: 100ms; }
+  .masonry-animated .masonry-item:nth-child(4) { animation-delay: 150ms; }
+  .masonry-animated .masonry-item:nth-child(5) { animation-delay: 200ms; }
+  .masonry-animated .masonry-item:nth-child(6) { animation-delay: 250ms; }
+  .masonry-animated .masonry-item:nth-child(7) { animation-delay: 300ms; }
+  .masonry-animated .masonry-item:nth-child(8) { animation-delay: 350ms; }
+  .masonry-animated .masonry-item:nth-child(9) { animation-delay: 400ms; }
+  .masonry-animated .masonry-item:nth-child(10) { animation-delay: 450ms; }
+  .masonry-animated .masonry-item:nth-child(11) { animation-delay: 500ms; }
+  .masonry-animated .masonry-item:nth-child(12) { animation-delay: 550ms; }
+  .masonry-animated .masonry-item:nth-child(n+13) { animation-delay: 600ms; }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .masonry-item.glass {
+    @apply glass;
+  }
+}
+
+@keyframes masonry-fade-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 1200px) {
+  .masonry-cols-6 { --masonry-cols: 4; }
+  .masonry-cols-5 { --masonry-cols: 4; }
+}
+
+@media (max-width: 992px) {
+  .masonry-cols-6 { --masonry-cols: 3; }
+  .masonry-cols-5 { --masonry-cols: 3; }
+  .masonry-cols-4 { --masonry-cols: 3; }
+}
+
+@media (max-width: 767px) {
+  .masonry-cols-6,
+  .masonry-cols-5,
+  .masonry-cols-4,
+  .masonry-cols-3 {
+    --masonry-cols: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .masonry-cols-6,
+  .masonry-cols-5,
+  .masonry-cols-4,
+  .masonry-cols-3 {
+    --masonry-cols: 1;
+  }
+
+  .masonry-cols-2 {
+    --masonry-cols: 1;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .masonry-animated .masonry-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .masonry-item img,
+  .masonry-item-overlay,
+  .masonry-item-title,
+  .masonry-item-subtitle,
+  .masonry-item-clickable {
+    transition: none;
+  }
+
+  .masonry-item-hover:hover img {
+    transform: none;
+  }
+}
