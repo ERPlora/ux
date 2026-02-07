@@ -1,0 +1,308 @@
+/* UX v3 - Progress Steps Component */
+/* Multi-step progress indicator with horizontal/vertical layouts */
+
+@layer components {
+
+  /* =============================================
+     Base container
+     ============================================= */
+
+  .progress-steps {
+    --ps-indicator-size: 32px;
+    --ps-line-h: 2px;
+
+    @apply flex;
+  }
+
+  /* =============================================
+     Step indicator (circle)
+     ============================================= */
+
+  .progress-steps-indicator {
+    @apply flex items-center justify-center shrink-0 relative font-semibold text-sm;
+    width: var(--ps-indicator-size);
+    height: var(--ps-indicator-size);
+    border-radius: 50%;
+    border: 2px solid var(--color-base-300);
+    background-color: var(--color-base-100);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    z-index: 1;
+    transition: all 0.15s ease;
+
+    & svg {
+      @apply size-4;
+    }
+  }
+
+  /* =============================================
+     Step states
+     ============================================= */
+
+  .progress-steps-step-active .progress-steps-indicator {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+  }
+
+  .progress-steps-step-completed .progress-steps-indicator {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+  }
+
+  .progress-steps-step-error .progress-steps-indicator {
+    border-color: var(--color-error);
+    background-color: var(--color-error);
+    color: var(--color-error-content);
+  }
+
+  /* =============================================
+     Step content
+     ============================================= */
+
+  .progress-steps-content {
+    @apply mt-2 text-center;
+  }
+
+  .progress-steps-title {
+    @apply text-sm font-medium m-0;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    transition: color 0.15s ease;
+  }
+
+  .progress-steps-step-active .progress-steps-title,
+  .progress-steps-step-completed .progress-steps-title {
+    color: var(--color-base-content);
+  }
+
+  .progress-steps-description {
+    @apply text-xs m-0 mt-0.5;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Horizontal layout (default)
+     ============================================= */
+
+  .progress-steps-horizontal {
+    @apply flex-row items-start;
+
+    & .progress-steps-step {
+      @apply flex-1 flex flex-col items-center relative;
+
+      &:not(:last-child)::after {
+        content: '';
+        @apply absolute;
+        top: calc(var(--ps-indicator-size) / 2);
+        left: calc(50% + var(--ps-indicator-size) / 2 + 4px);
+        right: calc(-50% + var(--ps-indicator-size) / 2 + 4px);
+        height: var(--ps-line-h);
+        background-color: var(--color-base-300);
+        transform: translateY(-50%);
+      }
+
+      &.progress-steps-step-completed:not(:last-child)::after {
+        background-color: var(--color-primary);
+      }
+    }
+  }
+
+  /* =============================================
+     Vertical layout
+     ============================================= */
+
+  .progress-steps-vertical {
+    @apply flex-col;
+
+    & .progress-steps-step {
+      @apply flex flex-row items-start relative pb-6;
+
+      &:last-child {
+        @apply pb-0;
+      }
+
+      &:not(:last-child)::after {
+        content: '';
+        @apply absolute;
+        top: calc(var(--ps-indicator-size) + 4px);
+        left: calc(var(--ps-indicator-size) / 2);
+        bottom: 4px;
+        width: var(--ps-line-h);
+        background-color: var(--color-base-300);
+        transform: translateX(-50%);
+      }
+
+      &.progress-steps-step-completed:not(:last-child)::after {
+        background-color: var(--color-primary);
+      }
+    }
+
+    & .progress-steps-content {
+      @apply ml-4 mt-0 text-left pt-1;
+    }
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .progress-steps-sm {
+    --ps-indicator-size: 24px;
+    --ps-line-h: 2px;
+
+    & .progress-steps-indicator {
+      @apply text-xs;
+
+      & svg {
+        @apply size-3;
+      }
+    }
+  }
+
+  .progress-steps-lg {
+    --ps-indicator-size: 40px;
+    --ps-line-h: 3px;
+
+    & .progress-steps-indicator {
+      @apply text-base;
+
+      & svg {
+        @apply size-5;
+      }
+    }
+
+    & .progress-steps-title {
+      @apply text-base;
+    }
+  }
+
+  /* =============================================
+     Dots variant
+     ============================================= */
+
+  .progress-steps-dots .progress-steps-indicator {
+    @apply size-3 border-0;
+
+    & span {
+      @apply hidden;
+    }
+  }
+
+  .progress-steps-dots.progress-steps-horizontal .progress-steps-step:not(:last-child)::after {
+    top: 6px;
+    left: calc(50% + 10px);
+    right: calc(-50% + 10px);
+  }
+
+  /* =============================================
+     Outline variant
+     ============================================= */
+
+  .progress-steps-outline .progress-steps-step-active .progress-steps-indicator,
+  .progress-steps-outline .progress-steps-step-completed .progress-steps-indicator {
+    @apply bg-transparent;
+    color: var(--color-primary);
+  }
+
+  /* =============================================
+     Bar variant
+     ============================================= */
+
+  .progress-steps-bar {
+    @apply relative p-0;
+
+    &::before {
+      content: '';
+      @apply absolute;
+      top: calc(var(--ps-indicator-size) / 2);
+      left: calc(var(--ps-indicator-size) / 2);
+      right: calc(var(--ps-indicator-size) / 2);
+      height: var(--ps-line-h);
+      background-color: var(--color-base-300);
+      transform: translateY(-50%);
+      z-index: 0;
+    }
+
+    & .progress-steps-progress {
+      @apply absolute;
+      top: calc(var(--ps-indicator-size) / 2);
+      left: calc(var(--ps-indicator-size) / 2);
+      height: var(--ps-line-h);
+      background-color: var(--color-primary);
+      transform: translateY(-50%);
+      z-index: 0;
+      transition: width 0.3s ease;
+    }
+
+    & .progress-steps-step:not(:last-child)::after {
+      @apply hidden;
+    }
+  }
+
+  /* =============================================
+     Clickable steps
+     ============================================= */
+
+  .progress-steps-clickable .progress-steps-step {
+    @apply cursor-pointer;
+  }
+
+  .progress-steps-clickable .progress-steps-indicator:hover {
+    transform: scale(1.1);
+  }
+
+  .progress-steps-clickable .progress-steps-step-disabled {
+    @apply cursor-not-allowed opacity-50;
+
+    & .progress-steps-indicator:hover {
+      transform: none;
+    }
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .progress-steps-responsive.progress-steps-horizontal .progress-steps-step {
+    flex-direction: row;
+    align-items: flex-start;
+    padding-bottom: 1rem;
+  }
+
+  .progress-steps-responsive.progress-steps-horizontal .progress-steps-step:not(:last-child)::after {
+    top: calc(var(--ps-indicator-size) + 4px);
+    left: calc(var(--ps-indicator-size) / 2);
+    right: auto;
+    bottom: 0;
+    width: var(--ps-line-h);
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  .progress-steps-responsive .progress-steps-content {
+    margin-top: 0;
+    margin-left: 1rem;
+    text-align: left;
+    padding-top: 4px;
+  }
+
+  .progress-steps-responsive {
+    flex-direction: column;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-steps-indicator {
+    transition: none;
+  }
+
+  .progress-steps-bar .progress-steps-progress {
+    transition: none;
+  }
+}
