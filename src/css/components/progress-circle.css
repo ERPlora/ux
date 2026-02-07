@@ -1,0 +1,257 @@
+/* UX v3 - Progress Circle Component */
+/* Circular SVG progress indicator */
+/* Consumes color variables from colors.css: --c */
+
+@layer components {
+
+  /* =============================================
+     Base container
+     ============================================= */
+
+  .progress-circle {
+    --pc-size: 120px;
+    --pc-stroke: 8px;
+    --pc-color: var(--c, var(--color-primary));
+
+    @apply relative inline-flex items-center justify-center;
+    width: var(--pc-size);
+    height: var(--pc-size);
+  }
+
+  .progress-circle-svg {
+    @apply w-full h-full;
+    transform: rotate(-90deg);
+  }
+
+  .progress-circle-bg {
+    fill: none;
+    stroke: var(--color-base-200);
+    stroke-width: var(--pc-stroke);
+  }
+
+  .progress-circle-fill {
+    fill: none;
+    stroke: var(--pc-color);
+    stroke-width: var(--pc-stroke);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  /* =============================================
+     Center content
+     ============================================= */
+
+  .progress-circle-content {
+    @apply absolute flex flex-col items-center justify-center text-center;
+  }
+
+  .progress-circle-value {
+    @apply font-bold leading-none;
+    font-size: 1.75rem;
+    color: var(--color-base-content);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress-circle-label {
+    @apply text-xs mt-0.5;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .progress-circle-icon {
+    @apply size-8;
+    color: var(--pc-color);
+  }
+
+  /* =============================================
+     Animated fill
+     ============================================= */
+
+  .progress-circle-animated .progress-circle-fill {
+    animation: progress-circle-fill 1s cubic-bezier(0, 0, 0.2, 1) forwards;
+  }
+
+  /* =============================================
+     Size variants
+     ============================================= */
+
+  .progress-circle-xs {
+    --pc-size: 48px;
+    --pc-stroke: 4px;
+
+    & .progress-circle-value {
+      @apply text-sm;
+    }
+
+    & .progress-circle-label {
+      @apply hidden;
+    }
+  }
+
+  .progress-circle-sm {
+    --pc-size: 80px;
+    --pc-stroke: 6px;
+
+    & .progress-circle-value {
+      @apply text-xl;
+    }
+
+    & .progress-circle-label {
+      font-size: 0.6875rem;
+    }
+  }
+
+  .progress-circle-lg {
+    --pc-size: 160px;
+    --pc-stroke: 10px;
+
+    & .progress-circle-value {
+      font-size: 2.5rem;
+    }
+
+    & .progress-circle-label {
+      @apply text-sm;
+    }
+  }
+
+  .progress-circle-xl {
+    --pc-size: 200px;
+    --pc-stroke: 12px;
+
+    & .progress-circle-value {
+      font-size: 3rem;
+    }
+
+    & .progress-circle-label {
+      @apply text-base;
+    }
+  }
+
+  /* =============================================
+     Stroke variants
+     ============================================= */
+
+  .progress-circle-thin {
+    --pc-stroke: 4px;
+  }
+
+  .progress-circle-thick {
+    --pc-stroke: 12px;
+  }
+
+  /* =============================================
+     Color composition
+     ============================================= */
+
+  .progress-circle.color-primary,
+  .progress-circle.color-secondary,
+  .progress-circle.color-accent,
+  .progress-circle.color-info,
+  .progress-circle.color-success,
+  .progress-circle.color-warning,
+  .progress-circle.color-error {
+    --pc-color: var(--c);
+  }
+
+  /* =============================================
+     Gradient stroke
+     ============================================= */
+
+  .progress-circle-gradient .progress-circle-fill {
+    stroke: url(#progress-gradient);
+  }
+
+  /* =============================================
+     Indeterminate (spinner)
+     ============================================= */
+
+  .progress-circle-indeterminate .progress-circle-svg {
+    animation: progress-circle-rotate 1.5s linear infinite;
+  }
+
+  .progress-circle-indeterminate .progress-circle-fill {
+    stroke-dasharray: 80, 200;
+    stroke-dashoffset: 0;
+    animation: progress-circle-dash 1.5s ease-in-out infinite;
+  }
+
+  /* =============================================
+     Semi-circle
+     ============================================= */
+
+  .progress-circle-semi {
+    height: calc(var(--pc-size) / 2 + var(--pc-stroke));
+    @apply overflow-hidden;
+
+    & .progress-circle-svg {
+      transform: rotate(-90deg);
+    }
+
+    & .progress-circle-content {
+      top: auto;
+      bottom: var(--pc-stroke);
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .progress-circle.glass .progress-circle-bg {
+    stroke: rgba(255, 255, 255, 0.2);
+  }
+
+  .progress-circle.glass .progress-circle-value,
+  .progress-circle.glass .progress-circle-label {
+    @apply text-white;
+  }
+}
+
+/* =============================================
+   Keyframes (outside @layer)
+   ============================================= */
+
+@keyframes progress-circle-fill {
+  from {
+    stroke-dashoffset: var(--circumference);
+  }
+}
+
+@keyframes progress-circle-rotate {
+  100% {
+    transform: rotate(270deg);
+  }
+}
+
+@keyframes progress-circle-dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -124;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-circle-fill {
+    transition: none;
+  }
+
+  .progress-circle-animated .progress-circle-fill {
+    animation: none;
+  }
+
+  .progress-circle-indeterminate .progress-circle-svg,
+  .progress-circle-indeterminate .progress-circle-fill {
+    animation: none;
+  }
+}
