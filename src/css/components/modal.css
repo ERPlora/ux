@@ -1,0 +1,204 @@
+/* UX v3 - Modal Component */
+/* Dialog overlays — supports native <dialog> + data-state */
+
+@layer components {
+
+  /* =============================================
+     Modal backdrop
+     ============================================= */
+
+  .modal-backdrop {
+    @apply fixed inset-0 flex items-center justify-center z-400;
+    padding: 1.5rem;
+    background-color: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+  }
+
+  .modal-backdrop[data-state="open"],
+  .modal-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+
+    & .modal {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Mobile: bottom-sheet style */
+  @media (max-width: 767px) {
+    .modal-backdrop {
+      @apply items-end p-0;
+    }
+  }
+
+  /* =============================================
+     Modal container
+     ============================================= */
+
+  .modal {
+    @apply relative flex flex-col w-full overflow-hidden;
+    max-width: 500px;
+    max-height: 85dvh;
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.15s;
+  }
+
+  /* Mobile: sheet from bottom */
+  @media (max-width: 767px) {
+    .modal {
+      max-width: none;
+      max-height: 90dvh;
+      border-radius: var(--radius-box) var(--radius-box) 0 0;
+      transform: translateY(100%);
+    }
+
+    .modal-backdrop[data-state="open"] .modal,
+    .modal-backdrop.is-open .modal {
+      transform: translateY(0);
+    }
+  }
+
+  /* =============================================
+     Native <dialog> support
+     ============================================= */
+
+  dialog.modal {
+    @apply p-0 border-none;
+    max-width: 500px;
+    max-height: 85dvh;
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+
+    &::backdrop {
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  /* =============================================
+     Modal children
+     ============================================= */
+
+  .modal-header {
+    @apply flex items-center justify-between shrink-0;
+    padding: 1.25rem;
+    border-bottom: var(--border) solid var(--color-base-200);
+  }
+
+  .modal-title {
+    @apply m-0 text-lg font-semibold text-base-content;
+  }
+
+  .modal-close {
+    @apply inline-flex items-center justify-center size-8 p-0 border-none rounded-full cursor-pointer;
+    background-color: var(--color-base-200);
+    color: var(--color-base-content);
+    opacity: 0.6;
+    transition: opacity 0.15s;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    & > svg {
+      @apply size-4;
+    }
+  }
+
+  .modal-body {
+    @apply flex-1 overflow-y-auto;
+    padding: 1.25rem;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-footer {
+    @apply flex items-center justify-end gap-2 shrink-0;
+    padding: 1.25rem;
+    border-top: var(--border) solid var(--color-base-200);
+  }
+
+  /* =============================================
+     Handle (mobile drag indicator)
+     ============================================= */
+
+  .modal-handle {
+    @apply hidden mx-auto my-2 shrink-0;
+    width: 2.25rem;
+    height: 0.25rem;
+    background-color: var(--color-base-300);
+    border-radius: 9999px;
+  }
+
+  @media (max-width: 767px) {
+    .modal-handle {
+      @apply block;
+    }
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .modal-sm {
+    max-width: 400px;
+  }
+
+  .modal-lg {
+    max-width: 800px;
+  }
+
+  .modal-xl {
+    max-width: 1140px;
+  }
+
+  .modal-fullscreen {
+    max-width: none;
+    max-height: none;
+    @apply w-full h-full rounded-none;
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .modal.glass {
+    @apply glass;
+  }
+}
+
+/* =============================================
+   Checkbox hack (zero-JS modal)
+   ============================================= */
+
+.modal-toggle {
+  @apply hidden;
+
+  &:checked ~ .modal-backdrop {
+    opacity: 1;
+    visibility: visible;
+
+    & .modal {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop,
+  .modal {
+    transition: none;
+  }
+}

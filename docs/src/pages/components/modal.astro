@@ -1,0 +1,196 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Modal">
+  <p class="text-base-content/70 mb-6">Dialog overlays for confirmations, forms, and content. Automatically converts to a bottom sheet on mobile. Supports native <code class="text-xs bg-base-200 px-1.5 py-0.5 rounded">&lt;dialog&gt;</code> and <code class="text-xs bg-base-200 px-1.5 py-0.5 rounded">data-state</code> patterns.</p>
+
+  <CodePreview
+    title="Basic Modal (data-state)"
+    semantic={`<!-- Trigger -->
+<button class="btn color-primary" onclick="document.getElementById('modal-1').dataset.state='open'">Open Modal</button>
+
+<!-- Modal -->
+<div id="modal-1" class="modal-backdrop" data-state="closed">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Modal Title</h3>
+      <button class="modal-close" onclick="this.closest('.modal-backdrop').dataset.state='closed'">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>This is the modal content. Click outside or press the close button to dismiss.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="this.closest('.modal-backdrop').dataset.state='closed'">Cancel</button>
+      <button class="btn color-primary" onclick="this.closest('.modal-backdrop').dataset.state='closed'">Confirm</button>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Trigger -->
+<button class="btn color-primary" onclick="document.getElementById('modal-tw').dataset.state='open'">Open Modal</button>
+
+<!-- Modal backdrop (hidden by default) -->
+<div id="modal-tw" class="fixed inset-0 flex items-center justify-center z-400 p-6 bg-black/40 opacity-0 invisible [&[data-state=open]]:opacity-100 [&[data-state=open]]:visible transition-all" data-state="closed">
+  <div class="relative flex flex-col w-full max-w-md max-h-[85dvh] bg-base-100 rounded-2xl shadow-xl overflow-hidden">
+    <div class="flex items-center justify-between p-5 border-b border-base-200">
+      <h3 class="text-lg font-semibold">Modal Title</h3>
+      <button class="size-8 rounded-full bg-base-200 inline-flex items-center justify-center opacity-60 hover:opacity-100" onclick="this.closest('[data-state]').dataset.state='closed'">
+        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-5">
+      <p>This is the modal content.</p>
+    </div>
+    <div class="flex items-center justify-end gap-2 p-5 border-t border-base-200">
+      <button class="btn btn-ghost" onclick="this.closest('[data-state]').dataset.state='closed'">Cancel</button>
+      <button class="btn color-primary" onclick="this.closest('[data-state]').dataset.state='closed'">Confirm</button>
+    </div>
+  </div>
+</div>`}
+    js={`// Open modal
+document.getElementById('modal-1').dataset.state = 'open';
+
+// Close modal
+document.getElementById('modal-1').dataset.state = 'closed';
+
+// Close on backdrop click
+document.querySelector('.modal-backdrop').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) {
+    e.target.dataset.state = 'closed';
+  }
+});
+
+// Close on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelector('.modal-backdrop[data-state="open"]')?.setAttribute('data-state', 'closed');
+  }
+});`}
+    height="100px"
+  />
+
+  <CodePreview
+    title="Native &lt;dialog&gt;"
+    semantic={`<button class="btn color-primary" onclick="document.getElementById('dialog-1').showModal()">Open Dialog</button>
+
+<dialog id="dialog-1" class="modal">
+  <div class="modal-header">
+    <h3 class="modal-title">Native Dialog</h3>
+    <button class="modal-close" onclick="this.closest('dialog').close()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>Using the native HTML &lt;dialog&gt; element. Press Escape to close.</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="this.closest('dialog').close()">Close</button>
+  </div>
+</dialog>`}
+    tailwind={`<button class="btn color-primary" onclick="document.getElementById('dialog-tw').showModal()">Open Dialog</button>
+
+<dialog id="dialog-tw" class="p-0 border-none max-w-md max-h-[85dvh] bg-base-100 rounded-2xl shadow-xl backdrop:bg-black/40">
+  <div class="flex items-center justify-between p-5 border-b border-base-200">
+    <h3 class="text-lg font-semibold">Native Dialog</h3>
+    <button class="size-8 rounded-full bg-base-200 inline-flex items-center justify-center opacity-60 hover:opacity-100" onclick="this.closest('dialog').close()">
+      <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+    </button>
+  </div>
+  <div class="p-5">
+    <p>Using native &lt;dialog&gt;. Press Escape to close.</p>
+  </div>
+  <div class="flex items-center justify-end gap-2 p-5 border-t border-base-200">
+    <button class="btn btn-ghost" onclick="this.closest('dialog').close()">Close</button>
+  </div>
+</dialog>`}
+    js={`// Native <dialog> API
+const dialog = document.getElementById('dialog-1');
+dialog.showModal(); // opens with backdrop
+dialog.close();     // closes
+
+// Escape key automatically closes native dialogs`}
+    height="100px"
+  />
+
+  <CodePreview
+    title="Zero-JS (Checkbox Hack)"
+    semantic={`<!-- Hidden checkbox controls the modal -->
+<input type="checkbox" id="modal-toggle-1" class="modal-toggle" />
+<label for="modal-toggle-1" class="btn">Open (No JS)</label>
+<div class="modal-backdrop">
+  <div class="modal modal-sm">
+    <div class="modal-body">
+      <h3 class="text-lg font-semibold mb-2">Zero JavaScript!</h3>
+      <p class="text-sm text-base-content/70">This modal works with a hidden checkbox — no JS needed.</p>
+    </div>
+    <div class="modal-footer">
+      <label for="modal-toggle-1" class="btn color-primary">Got it</label>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Checkbox hack requires semantic classes for the toggle behavior -->`}
+    js={`// No JavaScript required!
+// Uses a hidden checkbox + CSS :checked ~ selector`}
+    height="100px"
+  />
+
+  <CodePreview
+    title="Sizes"
+    noFrame
+    semantic={`<!-- Small: max-width 400px -->
+<div class="modal modal-sm">...</div>
+
+<!-- Default: max-width 500px -->
+<div class="modal">...</div>
+
+<!-- Large: max-width 800px -->
+<div class="modal modal-lg">...</div>
+
+<!-- Extra large: max-width 1140px -->
+<div class="modal modal-xl">...</div>
+
+<!-- Fullscreen -->
+<div class="modal modal-fullscreen">...</div>`}
+    tailwind={`<!-- Adjust max-width with Tailwind utilities -->
+<div class="... max-w-sm">Small</div>
+<div class="... max-w-md">Default</div>
+<div class="... max-w-3xl">Large</div>
+<div class="... max-w-6xl">XL</div>
+<div class="... max-w-none w-full h-full rounded-none">Fullscreen</div>`}
+    js={`// No JavaScript required for sizing`}
+  />
+
+  <!-- Reference Table -->
+  <div class="mt-10 space-y-6">
+    <h2 class="text-xl font-bold">Classes Reference</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm border border-base-300 rounded-lg overflow-hidden">
+        <thead class="bg-base-200">
+          <tr>
+            <th class="text-left px-4 py-2 font-medium">Class</th>
+            <th class="text-left px-4 py-2 font-medium">Description</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-base-300">
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-backdrop</td><td class="px-4 py-2">Fixed overlay container (use data-state="open/closed")</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal</td><td class="px-4 py-2">Modal dialog box</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-header</td><td class="px-4 py-2">Header with title and close</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-title</td><td class="px-4 py-2">Modal heading</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-close</td><td class="px-4 py-2">Close button (circle)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-body</td><td class="px-4 py-2">Scrollable content area</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-footer</td><td class="px-4 py-2">Action buttons area</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-handle</td><td class="px-4 py-2">Mobile drag handle (auto-shown)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-sm</td><td class="px-4 py-2">Small (400px)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-lg</td><td class="px-4 py-2">Large (800px)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-xl</td><td class="px-4 py-2">Extra large (1140px)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-fullscreen</td><td class="px-4 py-2">Full screen modal</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.modal-toggle</td><td class="px-4 py-2">Hidden checkbox for zero-JS modal</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">dialog.modal</td><td class="px-4 py-2">Native &lt;dialog&gt; styling</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</DocsLayout>
