@@ -1,0 +1,625 @@
+/* Machine Status Component */
+/* Industrial equipment monitoring card with status indicator, metrics, uptime, alerts, operator */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .machine-status {
+    @apply flex flex-col;
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* Clickable card */
+  a.machine-status,
+  button.machine-status {
+    @apply cursor-pointer text-left;
+    text-decoration: none;
+
+    &:active { transform: scale(0.98); }
+  }
+
+  /* =============================================
+     Header
+     ============================================= */
+
+  .machine-status-header {
+    @apply flex items-start justify-between gap-4;
+  }
+
+  .machine-status-info {
+    @apply flex-1 min-w-0;
+  }
+
+  .machine-status-name {
+    @apply text-lg font-semibold m-0 flex items-center gap-2;
+    color: var(--color-base-content);
+    line-height: 1.3;
+  }
+
+  .machine-status-id {
+    @apply text-sm font-normal;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .machine-status-location {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  .machine-status-icon {
+    @apply flex items-center justify-center shrink-0;
+    width: 48px;
+    height: 48px;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.25rem);
+    color: var(--color-primary);
+
+    svg { @apply w-6 h-6; }
+    img { @apply w-6 h-6 object-contain; }
+  }
+
+  /* =============================================
+     Status Indicator
+     ============================================= */
+
+  .machine-status-indicator {
+    @apply inline-flex items-center gap-1 text-sm font-medium;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--color-base-200);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .machine-status-indicator-dot {
+    @apply relative shrink-0 rounded-full;
+    width: 12px;
+    height: 12px;
+    background-color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* Running */
+  .machine-status-indicator-running {
+    background-color: color-mix(in oklch, var(--color-success) 10%, transparent);
+    color: var(--color-success);
+
+    .machine-status-indicator-dot {
+      background-color: var(--color-success);
+
+      &::before {
+        content: '';
+        @apply absolute inset-0 rounded-full;
+        background: inherit;
+        animation: machine-pulse 2s ease-in-out infinite;
+      }
+    }
+  }
+
+  /* Idle */
+  .machine-status-indicator-idle {
+    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+    color: var(--color-primary);
+
+    .machine-status-indicator-dot {
+      background-color: var(--color-primary);
+    }
+  }
+
+  /* Maintenance */
+  .machine-status-indicator-maintenance {
+    background-color: color-mix(in oklch, var(--color-warning) 10%, transparent);
+    color: var(--color-warning);
+
+    .machine-status-indicator-dot {
+      background-color: var(--color-warning);
+
+      &::before {
+        content: '';
+        @apply absolute inset-0 rounded-full;
+        background: inherit;
+        animation: machine-blink 1s ease-in-out infinite;
+      }
+    }
+  }
+
+  /* Offline */
+  .machine-status-indicator-offline {
+    background-color: var(--color-base-200);
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+
+    .machine-status-indicator-dot {
+      background-color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    }
+  }
+
+  /* Error */
+  .machine-status-indicator-error {
+    background-color: color-mix(in oklch, var(--color-error) 10%, transparent);
+    color: var(--color-error);
+
+    .machine-status-indicator-dot {
+      background-color: var(--color-error);
+
+      &::before {
+        content: '';
+        @apply absolute inset-0 rounded-full;
+        background: inherit;
+        animation: machine-pulse-fast 1s ease-in-out infinite;
+      }
+    }
+  }
+
+  /* =============================================
+     Current Job / Work Order
+     ============================================= */
+
+  .machine-status-job {
+    @apply flex flex-col;
+    gap: 0.25rem;
+    padding: 1rem;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  .machine-status-job-label {
+    @apply text-xs uppercase;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    letter-spacing: 0.05em;
+  }
+
+  .machine-status-job-name {
+    @apply text-base font-semibold m-0;
+    color: var(--color-base-content);
+  }
+
+  .machine-status-job-details {
+    @apply flex items-center flex-wrap text-sm;
+    gap: 1rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .machine-status-job-progress {
+    margin-top: 0.5rem;
+  }
+
+  .machine-status-job-progress-bar {
+    @apply overflow-hidden;
+    height: 6px;
+    background-color: var(--color-base-100);
+    border-radius: 9999px;
+  }
+
+  .machine-status-job-progress-fill {
+    @apply h-full;
+    background-color: var(--color-primary);
+    border-radius: 9999px;
+    transition: width 0.3s ease;
+  }
+
+  .machine-status-job-progress-label {
+    @apply flex justify-between text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  /* =============================================
+     Metrics Grid
+     ============================================= */
+
+  .machine-status-metrics {
+    @apply grid gap-2;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  }
+
+  .machine-status-metric {
+    @apply flex flex-col items-center text-center;
+    padding: 0.5rem;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  .machine-status-metric-success .machine-status-metric-value {
+    color: var(--color-success);
+  }
+
+  .machine-status-metric-warning .machine-status-metric-value {
+    color: var(--color-warning);
+  }
+
+  .machine-status-metric-danger .machine-status-metric-value {
+    color: var(--color-error);
+  }
+
+  .machine-status-metric-value {
+    @apply text-lg font-bold;
+    color: var(--color-base-content);
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .machine-status-metric-value-sm { @apply text-base; }
+  .machine-status-metric-value-lg { @apply text-xl; }
+
+  .machine-status-metric-unit {
+    @apply text-xs font-normal;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .machine-status-metric-label {
+    @apply text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  /* =============================================
+     Uptime Display
+     ============================================= */
+
+  .machine-status-uptime {
+    @apply flex items-center gap-4;
+  }
+
+  .machine-status-uptime-warning .machine-status-uptime-fill {
+    stroke: var(--color-warning);
+  }
+
+  .machine-status-uptime-danger .machine-status-uptime-fill {
+    stroke: var(--color-error);
+  }
+
+  .machine-status-uptime-circle {
+    @apply relative shrink-0;
+    width: 60px;
+    height: 60px;
+  }
+
+  .machine-status-uptime-svg {
+    @apply w-full h-full;
+    transform: rotate(-90deg);
+  }
+
+  .machine-status-uptime-bg {
+    fill: none;
+    stroke: var(--color-base-200);
+    stroke-width: 6;
+  }
+
+  .machine-status-uptime-fill {
+    fill: none;
+    stroke: var(--color-success);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 157;
+    stroke-dashoffset: 157;
+    transition: stroke-dashoffset 0.3s ease;
+  }
+
+  .machine-status-uptime-text {
+    @apply absolute text-sm font-bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--color-base-content);
+  }
+
+  .machine-status-uptime-info { @apply flex-1; }
+
+  .machine-status-uptime-label {
+    @apply text-xs uppercase;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    letter-spacing: 0.05em;
+  }
+
+  .machine-status-uptime-value {
+    @apply text-xl font-bold;
+    color: var(--color-base-content);
+  }
+
+  .machine-status-uptime-time {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Alert Section
+     ============================================= */
+
+  .machine-status-alert {
+    @apply flex items-center gap-2 text-sm;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  .machine-status-alert-warning {
+    background-color: color-mix(in oklch, var(--color-warning) 10%, transparent);
+    color: var(--color-warning);
+  }
+
+  .machine-status-alert-error {
+    background-color: color-mix(in oklch, var(--color-error) 10%, transparent);
+    color: var(--color-error);
+  }
+
+  .machine-status-alert-info {
+    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+    color: var(--color-primary);
+  }
+
+  .machine-status-alert-icon {
+    @apply w-5 h-5 shrink-0;
+    svg { @apply w-full h-full; }
+  }
+
+  .machine-status-alert-text { @apply flex-1; }
+
+  .machine-status-alert-time {
+    @apply text-xs opacity-80;
+    color: inherit;
+  }
+
+  .machine-status-alerts {
+    @apply flex flex-col;
+    gap: 0.25rem;
+  }
+
+  /* =============================================
+     Operator Section
+     ============================================= */
+
+  .machine-status-operator {
+    @apply flex items-center gap-2;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--color-base-300);
+  }
+
+  .machine-status-operator-empty {
+    @apply text-sm italic;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .machine-status-operator-avatar {
+    @apply flex items-center justify-center shrink-0 text-sm font-semibold rounded-full;
+    width: 32px;
+    height: 32px;
+    background-color: var(--color-primary);
+    color: white;
+
+    img { @apply w-full h-full object-cover rounded-full; }
+  }
+
+  .machine-status-operator-info {
+    @apply flex-1 min-w-0;
+  }
+
+  .machine-status-operator-name {
+    @apply text-sm font-medium truncate;
+    color: var(--color-base-content);
+  }
+
+  .machine-status-operator-role {
+    @apply text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .machine-status-operator-shift {
+    @apply text-xs;
+    padding: 2px 0.25rem;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.25rem);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Footer
+     ============================================= */
+
+  .machine-status-footer {
+    @apply flex items-center justify-between gap-2 text-xs;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--color-base-300);
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .machine-status-last-update {
+    @apply flex items-center gap-1;
+  }
+
+  .machine-status-actions {
+    @apply flex items-center gap-1;
+  }
+
+  /* =============================================
+     Mini Variant
+     ============================================= */
+
+  .machine-status-mini {
+    gap: 0.5rem;
+    padding: 1rem;
+
+    .machine-status-name { @apply text-base; }
+
+    .machine-status-indicator {
+      padding: 2px 0.25rem;
+      @apply text-xs;
+    }
+
+    .machine-status-indicator-dot { width: 8px; height: 8px; }
+    .machine-status-icon { width: 36px; height: 36px; }
+    .machine-status-metrics { grid-template-columns: repeat(2, 1fr); }
+    .machine-status-metric-value { @apply text-base; }
+  }
+
+  /* =============================================
+     Compact Variant (Single Line)
+     ============================================= */
+
+  .machine-status-compact {
+    @apply flex-row items-center;
+    gap: 1rem;
+    padding: 1rem;
+
+    .machine-status-header { @apply flex-1 min-w-0; }
+
+    .machine-status-metrics {
+      @apply flex shrink-0;
+      gap: 1.5rem;
+    }
+
+    .machine-status-metric {
+      @apply p-0 bg-transparent;
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .machine-status.glass {
+    border-color: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+
+    .machine-status-job,
+    .machine-status-metric {
+      background-color: color-mix(in oklch, var(--color-base-100) 15%, transparent);
+    }
+  }
+
+  /* =============================================
+     Machine Grid
+     ============================================= */
+
+  .machine-grid {
+    @apply grid gap-4;
+  }
+
+  .machine-grid-auto {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .machine-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .machine-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .machine-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .machine-grid-list { grid-template-columns: 1fr; }
+
+  /* =============================================
+     Status Bar (mini horizontal overview)
+     ============================================= */
+
+  .machine-status-bar {
+    @apply flex items-center;
+    gap: 1.5rem;
+    padding: 1rem 1.5rem;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.25rem);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .machine-status-bar-item {
+    @apply flex items-center gap-2 shrink-0;
+  }
+
+  .machine-status-bar-count {
+    @apply text-xl font-bold;
+    color: var(--color-base-content);
+  }
+
+  .machine-status-bar-label {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .machine-status-bar-dot {
+    @apply rounded-full;
+    width: 10px;
+    height: 10px;
+  }
+
+  .machine-status-bar-dot-running { background-color: var(--color-success); }
+  .machine-status-bar-dot-idle { background-color: var(--color-primary); }
+  .machine-status-bar-dot-maintenance { background-color: var(--color-warning); }
+  .machine-status-bar-dot-offline { background-color: color-mix(in oklch, var(--color-base-content) 40%, transparent); }
+  .machine-status-bar-dot-error { background-color: var(--color-error); }
+}
+
+/* =============================================
+   Animations
+   ============================================= */
+
+@keyframes machine-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes machine-pulse-fast {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes machine-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 991px) {
+  .machine-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .machine-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 767px) {
+  .machine-grid-4,
+  .machine-grid-3,
+  .machine-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .machine-status-compact {
+    @apply flex-col items-stretch;
+
+    .machine-status-metrics {
+      @apply flex-wrap justify-around;
+    }
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .machine-status {
+    transition: none;
+
+    &:hover { transform: none; }
+  }
+
+  .machine-status-indicator-running .machine-status-indicator-dot::before,
+  .machine-status-indicator-maintenance .machine-status-indicator-dot::before,
+  .machine-status-indicator-error .machine-status-indicator-dot::before {
+    animation: none;
+  }
+
+  .machine-status-uptime-fill,
+  .machine-status-job-progress-fill {
+    transition: none;
+  }
+}

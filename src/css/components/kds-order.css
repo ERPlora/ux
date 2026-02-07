@@ -1,0 +1,286 @@
+/* UX v3 - KDS Order Component */
+/* Kitchen Display System order cards for restaurant kitchens */
+
+@layer components {
+
+  /* =============================================
+     Base
+     ============================================= */
+
+  .kds-order {
+    @apply overflow-hidden cursor-pointer;
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box, 0.75rem);
+    border: 3px solid var(--kds-status-color, var(--color-warning));
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px color-mix(in oklch, var(--color-base-content) 15%, transparent);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  /* =============================================
+     Status Variants
+     ============================================= */
+
+  .kds-order-pending {
+    --kds-status-color: var(--color-warning);
+  }
+
+  .kds-order-preparing {
+    --kds-status-color: var(--color-info, oklch(0.62 0.19 250));
+  }
+
+  .kds-order-ready {
+    --kds-status-color: var(--color-success);
+  }
+
+  .kds-order-alert {
+    --kds-status-color: var(--color-error);
+    background-color: color-mix(in oklch, var(--color-error) 5%, transparent);
+    animation: kds-pulse 2s ease-in-out infinite;
+  }
+
+  .kds-order-completed {
+    --kds-status-color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    @apply opacity-70;
+  }
+
+  /* =============================================
+     Header
+     ============================================= */
+
+  .kds-order-header {
+    @apply flex justify-between items-start;
+    padding: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--kds-status-color, var(--color-warning));
+    margin-bottom: 0.75rem;
+  }
+
+  .kds-order-id {
+    @apply text-xl font-bold;
+    color: var(--color-base-content);
+  }
+
+  .kds-order-table {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  .kds-order-time {
+    @apply text-right;
+  }
+
+  .kds-order-elapsed {
+    @apply font-bold;
+    font-size: 1.5rem;
+    color: var(--kds-status-color, var(--color-base-content));
+  }
+
+  .kds-order-started {
+    @apply text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Body / Items
+     ============================================= */
+
+  .kds-order-body {
+    padding: 0 1rem;
+  }
+
+  .kds-order-items {
+    @apply list-none m-0 p-0;
+  }
+
+  .kds-order-item {
+    @apply flex items-start gap-2;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-base-300);
+
+    &:last-child { border-bottom: none; }
+  }
+
+  .kds-order-item-qty {
+    @apply flex items-center justify-center font-bold text-sm shrink-0;
+    width: 28px;
+    height: 28px;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.25rem);
+    color: var(--color-base-content);
+  }
+
+  .kds-order-item-details {
+    @apply flex-1 min-w-0;
+  }
+
+  .kds-order-item-name {
+    @apply font-semibold;
+    color: var(--color-base-content);
+    margin-bottom: 0.125rem;
+  }
+
+  .kds-order-item-notes {
+    @apply text-xs italic;
+    color: var(--color-warning);
+  }
+
+  .kds-order-item-station {
+    @apply text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* Item status dot */
+  .kds-order-item-status {
+    @apply shrink-0 rounded-full;
+    width: 10px;
+    height: 10px;
+    margin-top: 0.5rem;
+  }
+
+  .kds-order-item-status-pending {
+    background-color: var(--color-warning);
+  }
+
+  .kds-order-item-status-preparing {
+    background-color: var(--color-info, oklch(0.62 0.19 250));
+    animation: kds-item-pulse 1.5s ease-in-out infinite;
+  }
+
+  .kds-order-item-status-ready {
+    background-color: var(--color-success);
+  }
+
+  /* =============================================
+     Footer
+     ============================================= */
+
+  .kds-order-footer {
+    @apply flex gap-2;
+    padding: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-base-300);
+    margin-top: 0.75rem;
+  }
+
+  .kds-order-action {
+    @apply flex-1 flex items-center justify-center gap-2 font-semibold text-sm border-none cursor-pointer;
+    padding: 0.75rem;
+    border-radius: var(--radius-field, 0.25rem);
+    transition: all 0.15s ease;
+  }
+
+  .kds-order-action-primary {
+    background-color: var(--kds-status-color, var(--color-primary));
+    color: var(--color-primary-content, white);
+
+    &:hover { filter: brightness(1.1); }
+  }
+
+  .kds-order-action-secondary {
+    background-color: var(--color-base-200);
+    color: var(--color-base-content);
+
+    &:hover { background-color: var(--color-base-300); }
+  }
+
+  /* =============================================
+     Priority
+     ============================================= */
+
+  .kds-order-priority-high {
+    @apply relative;
+  }
+
+  .kds-order-priority {
+    @apply absolute font-bold uppercase;
+    top: -8px;
+    right: 12px;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--color-error);
+    color: var(--color-primary-content, white);
+    font-size: 0.625rem;
+    letter-spacing: 0.05em;
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  /* =============================================
+     Bumped
+     ============================================= */
+
+  .kds-order-bumped {
+    animation: kds-bump 0.3s ease-out;
+  }
+
+  /* =============================================
+     Compact
+     ============================================= */
+
+  .kds-order-compact {
+    .kds-order-header,
+    .kds-order-body,
+    .kds-order-footer { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .kds-order-id { @apply text-base; }
+    .kds-order-elapsed { @apply text-xl; }
+    .kds-order-item { padding: 0.25rem 0; }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .kds-order.glass {
+    @apply glass;
+  }
+}
+
+/* =============================================
+   Keyframes (outside @layer)
+   ============================================= */
+
+@keyframes kds-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-error) 40%, transparent); }
+  50% { box-shadow: 0 0 0 8px color-mix(in oklch, var(--color-error) 0%, transparent); }
+}
+
+@keyframes kds-item-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes kds-bump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .kds-order-id { font-size: 1rem; }
+  .kds-order-elapsed { font-size: 1.25rem; }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .kds-order,
+  .kds-order-alert,
+  .kds-order-item-status-preparing,
+  .kds-order-bumped {
+    animation: none;
+    transition: none;
+  }
+}

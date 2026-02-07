@@ -1,0 +1,654 @@
+/* Gantt Chart Component */
+/* Project/manufacturing Gantt chart with task panel, timeline, bars, milestones, dependencies */
+
+@layer components {
+
+  /* =============================================
+     Variables
+     ============================================= */
+
+  .gantt {
+    --gantt-row-height: 40px;
+    --gantt-header-height: 48px;
+    --gantt-task-panel-width: 280px;
+    --gantt-bar-height: 24px;
+    --gantt-bar-radius: 4px;
+    --gantt-milestone-size: 16px;
+    --gantt-today-color: var(--color-error);
+    --gantt-weekend-bg: color-mix(in oklch, var(--color-base-content) 2%, transparent);
+    --gantt-grid-color: var(--color-base-300);
+    --gantt-dependency-color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .gantt {
+    @apply flex flex-col w-full overflow-hidden;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+  }
+
+  /* Compact */
+  .gantt-compact {
+    --gantt-row-height: 32px;
+    --gantt-header-height: 40px;
+    --gantt-bar-height: 18px;
+    --gantt-milestone-size: 12px;
+
+    .gantt-task-name { @apply text-xs; }
+    .gantt-bar-label { font-size: 10px; }
+  }
+
+  /* Read Only */
+  .gantt-readonly {
+    .gantt-bar { @apply cursor-default; }
+    .gantt-bar-handle { @apply hidden; }
+
+    .gantt-milestone {
+      @apply cursor-default;
+      &:hover { transform: rotate(45deg) translateX(-50%); }
+    }
+  }
+
+  /* Glass */
+  .gantt.glass {
+    border-color: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+
+    .gantt-toolbar,
+    .gantt-tasks,
+    .gantt-header {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+    }
+  }
+
+  /* =============================================
+     Toolbar
+     ============================================= */
+
+  .gantt-toolbar {
+    @apply flex items-center justify-between gap-4 shrink-0;
+    padding: 0.5rem 1rem;
+    background-color: var(--color-base-200);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .gantt-toolbar-start,
+  .gantt-toolbar-end {
+    @apply flex items-center gap-2;
+  }
+
+  .gantt-title {
+    @apply text-lg font-semibold m-0;
+    color: var(--color-base-content);
+  }
+
+  .gantt-zoom-controls {
+    @apply flex items-center overflow-hidden;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  .gantt-zoom-btn {
+    @apply flex items-center justify-center border-none text-sm cursor-pointer;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 0.5rem;
+    background-color: transparent;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    transition: all 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-200);
+      color: var(--color-base-content);
+    }
+
+    &:not(:last-child) {
+      border-right: 1px solid var(--color-base-300);
+    }
+  }
+
+  .gantt-zoom-btn-active {
+    background-color: var(--color-primary);
+    color: white;
+
+    &:hover { filter: brightness(0.9); }
+  }
+
+  .gantt-nav-btn {
+    @apply flex items-center justify-center cursor-pointer;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.25rem);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    transition: all 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-200);
+      color: var(--color-base-content);
+      border-color: var(--color-primary);
+    }
+
+    svg { @apply w-4 h-4; }
+  }
+
+  .gantt-today-btn {
+    @apply flex items-center gap-1 text-sm cursor-pointer;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.25rem);
+    color: var(--color-base-content);
+    transition: all 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-200);
+      border-color: var(--color-primary);
+    }
+  }
+
+  /* =============================================
+     Body (Main Area)
+     ============================================= */
+
+  .gantt-body {
+    @apply flex flex-1 overflow-hidden relative;
+  }
+
+  /* =============================================
+     Task Panel (Left Side)
+     ============================================= */
+
+  .gantt-tasks {
+    @apply flex flex-col shrink-0;
+    width: var(--gantt-task-panel-width);
+    border-right: 1px solid var(--color-base-300);
+    background-color: var(--color-base-100);
+    z-index: 10;
+  }
+
+  .gantt-tasks-header {
+    @apply flex items-center text-sm font-semibold uppercase;
+    height: var(--gantt-header-height);
+    padding: 0 1rem;
+    background-color: var(--color-base-200);
+    border-bottom: 1px solid var(--color-base-300);
+    letter-spacing: 0.5px;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .gantt-tasks-body {
+    @apply flex-1 overflow-y-auto overflow-x-hidden;
+  }
+
+  .gantt-task-row {
+    @apply flex items-center;
+    height: var(--gantt-row-height);
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--gantt-grid-color);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-primary) 5%, transparent);
+    }
+  }
+
+  .gantt-task-row-selected {
+    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+  }
+
+  .gantt-task-row-group {
+    @apply font-semibold;
+    background-color: var(--color-base-200);
+  }
+
+  .gantt-task-indent { @apply shrink-0; }
+
+  .gantt-task-expand {
+    @apply flex items-center justify-center border-none cursor-pointer;
+    width: 20px;
+    height: 20px;
+    margin-right: 0.25rem;
+    background-color: transparent;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    border-radius: var(--radius-field, 0.25rem);
+    transition: all 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-200);
+      color: var(--color-base-content);
+    }
+
+    svg {
+      @apply w-3.5 h-3.5;
+      transition: transform 0.15s ease;
+    }
+  }
+
+  .gantt-task-expand-expanded svg {
+    transform: rotate(90deg);
+  }
+
+  .gantt-task-name {
+    @apply flex-1 text-sm truncate;
+    color: var(--color-base-content);
+  }
+
+  .gantt-task-status {
+    @apply shrink-0;
+    margin-left: 0.5rem;
+  }
+
+  /* =============================================
+     Resizer
+     ============================================= */
+
+  .gantt-resizer {
+    @apply absolute top-0 bottom-0;
+    left: var(--gantt-task-panel-width);
+    width: 4px;
+    background-color: transparent;
+    cursor: col-resize;
+    z-index: 20;
+    transition: background-color 0.15s ease;
+
+    &:hover { background-color: var(--color-primary); }
+  }
+
+  .gantt-resizer-active {
+    background-color: var(--color-primary);
+  }
+
+  /* =============================================
+     Chart Area (Right Side)
+     ============================================= */
+
+  .gantt-chart {
+    @apply flex-1 flex flex-col overflow-hidden relative;
+  }
+
+  .gantt-chart-scroll {
+    @apply flex-1 overflow-auto relative;
+  }
+
+  .gantt-chart-inner {
+    @apply relative;
+    min-width: 100%;
+  }
+
+  /* =============================================
+     Timeline Header
+     ============================================= */
+
+  .gantt-header {
+    @apply sticky top-0;
+    z-index: 5;
+    background-color: var(--color-base-200);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .gantt-header-row {
+    @apply flex;
+    height: calc(var(--gantt-header-height) / 2);
+  }
+
+  .gantt-header-row-primary {
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .gantt-header-cell {
+    @apply flex items-center justify-center text-xs font-medium whitespace-nowrap shrink-0;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    border-right: 1px solid var(--gantt-grid-color);
+  }
+
+  .gantt-header-cell-primary {
+    @apply font-semibold;
+    color: var(--color-base-content);
+  }
+
+  .gantt-header-cell-today {
+    background-color: color-mix(in oklch, var(--color-error) 10%, transparent);
+    color: var(--color-error);
+  }
+
+  .gantt-header-cell-weekend {
+    background-color: var(--gantt-weekend-bg);
+  }
+
+  /* =============================================
+     Chart Grid
+     ============================================= */
+
+  .gantt-grid {
+    @apply absolute inset-0 pointer-events-none;
+  }
+
+  .gantt-grid-row {
+    @apply flex;
+    height: var(--gantt-row-height);
+    border-bottom: 1px solid var(--gantt-grid-color);
+  }
+
+  .gantt-grid-cell {
+    @apply shrink-0;
+    border-right: 1px solid var(--gantt-grid-color);
+  }
+
+  .gantt-grid-cell-weekend {
+    background-color: var(--gantt-weekend-bg);
+  }
+
+  /* =============================================
+     Today Line
+     ============================================= */
+
+  .gantt-today-line {
+    @apply absolute top-0 bottom-0 pointer-events-none;
+    width: 2px;
+    background-color: var(--gantt-today-color);
+    z-index: 4;
+
+    &::before {
+      content: '';
+      @apply absolute rounded-full;
+      top: -6px;
+      left: -4px;
+      width: 10px;
+      height: 10px;
+      background-color: var(--gantt-today-color);
+    }
+  }
+
+  /* =============================================
+     Bars Container
+     ============================================= */
+
+  .gantt-bars {
+    @apply relative;
+    z-index: 3;
+  }
+
+  .gantt-bar-row {
+    @apply relative flex items-center;
+    height: var(--gantt-row-height);
+  }
+
+  /* =============================================
+     Task Bar
+     ============================================= */
+
+  .gantt-bar {
+    @apply absolute flex items-center overflow-hidden cursor-pointer;
+    height: var(--gantt-bar-height);
+    background-color: var(--color-primary);
+    border-radius: var(--gantt-bar-radius);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 2;
+
+      .gantt-bar-handle { opacity: 1; }
+    }
+  }
+
+  .gantt-bar-selected {
+    box-shadow: 0 0 0 2px var(--color-base-100), 0 0 0 4px var(--color-primary);
+  }
+
+  .gantt-bar-dragging {
+    @apply opacity-80;
+    z-index: 10;
+  }
+
+  /* Bar states */
+  .gantt-bar-not-started { background-color: color-mix(in oklch, var(--color-base-content) 30%, transparent); }
+  .gantt-bar-in-progress { background-color: var(--color-primary); }
+  .gantt-bar-completed { background-color: var(--color-success); }
+  .gantt-bar-delayed { background-color: var(--color-error); }
+  .gantt-bar-on-hold { background-color: var(--color-warning); }
+
+  /* Category colors */
+  .gantt-bar-category-design { background-color: var(--color-accent, #8b5cf6); }
+  .gantt-bar-category-development { background-color: #3b82f6; }
+  .gantt-bar-category-testing { background-color: #06b6d4; }
+  .gantt-bar-category-marketing { background-color: #f97316; }
+  .gantt-bar-category-management { background-color: #6366f1; }
+
+  /* Group bar */
+  .gantt-bar-group {
+    height: 8px;
+    background-color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    border-radius: 0;
+
+    &::before,
+    &::after {
+      content: '';
+      @apply absolute bottom-0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
+
+    &::before {
+      left: 0;
+      border-width: 0 0 8px 8px;
+      border-color: transparent transparent color-mix(in oklch, var(--color-base-content) 60%, transparent) transparent;
+    }
+
+    &::after {
+      right: 0;
+      border-width: 8px 0 0 8px;
+      border-color: transparent transparent transparent color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    }
+  }
+
+  /* Progress indicator within bar */
+  .gantt-bar-progress {
+    @apply absolute top-0 left-0 bottom-0;
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: var(--gantt-bar-radius) 0 0 var(--gantt-bar-radius);
+    transition: width 0.2s ease;
+  }
+
+  .gantt-bar-label {
+    @apply relative text-xs font-medium text-white whitespace-nowrap truncate;
+    padding: 0 0.5rem;
+    z-index: 1;
+  }
+
+  /* Bar resize handles */
+  .gantt-bar-handle {
+    @apply absolute top-0 bottom-0;
+    width: 8px;
+    cursor: ew-resize;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .gantt-bar-handle-start {
+    left: 0;
+    border-radius: var(--gantt-bar-radius) 0 0 var(--gantt-bar-radius);
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.2), transparent);
+  }
+
+  .gantt-bar-handle-end {
+    right: 0;
+    border-radius: 0 var(--gantt-bar-radius) var(--gantt-bar-radius) 0;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.2), transparent);
+  }
+
+  /* =============================================
+     Milestone
+     ============================================= */
+
+  .gantt-milestone {
+    @apply absolute cursor-pointer;
+    width: var(--gantt-milestone-size);
+    height: var(--gantt-milestone-size);
+    background-color: var(--color-warning);
+    transform: rotate(45deg) translateX(-50%);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: rotate(45deg) translateX(-50%) scale(1.2);
+    }
+  }
+
+  .gantt-milestone-completed { background-color: var(--color-success); }
+  .gantt-milestone-delayed { background-color: var(--color-error); }
+
+  /* =============================================
+     Dependencies (Arrows)
+     ============================================= */
+
+  .gantt-dependencies {
+    @apply absolute inset-0 pointer-events-none;
+    z-index: 1;
+  }
+
+  .gantt-dependency {
+    fill: none;
+    stroke: var(--gantt-dependency-color);
+    stroke-width: 1.5;
+  }
+
+  .gantt-dependency-arrow {
+    fill: var(--gantt-dependency-color);
+  }
+
+  /* =============================================
+     Empty State
+     ============================================= */
+
+  .gantt-empty {
+    @apply flex flex-col items-center justify-center text-center;
+    padding: 2.5rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .gantt-empty-icon {
+    @apply w-16 h-16;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    margin-bottom: 1rem;
+  }
+
+  .gantt-empty-title {
+    @apply text-lg font-semibold m-0;
+    color: var(--color-base-content);
+    margin-bottom: 0.25rem;
+  }
+
+  .gantt-empty-text {
+    @apply text-sm m-0;
+  }
+
+  /* =============================================
+     Tooltip
+     ============================================= */
+
+  .gantt-tooltip {
+    @apply fixed text-sm pointer-events-none;
+    z-index: 1000;
+    padding: 0.5rem 1rem;
+    background-color: var(--color-base-content);
+    color: var(--color-base-100);
+    border-radius: var(--radius-field, 0.25rem);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+
+  .gantt-tooltip-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .gantt-tooltip-title {
+    @apply font-semibold;
+    margin-bottom: 4px;
+  }
+
+  .gantt-tooltip-dates {
+    @apply text-xs opacity-80;
+  }
+
+  .gantt-tooltip-progress {
+    @apply flex items-center gap-1 text-xs;
+    margin-top: 4px;
+  }
+
+  .gantt-tooltip-progress-bar {
+    @apply flex-1 overflow-hidden;
+    height: 4px;
+    background-color: color-mix(in oklch, var(--color-base-100) 20%, transparent);
+    border-radius: 2px;
+  }
+
+  .gantt-tooltip-progress-fill {
+    @apply h-full;
+    background-color: var(--color-base-100);
+    border-radius: 2px;
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .gantt {
+    --gantt-task-panel-width: 180px;
+  }
+
+  .gantt-toolbar { @apply flex-wrap; }
+
+  .gantt-title {
+    @apply w-full;
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* =============================================
+   Print
+   ============================================= */
+
+@media print {
+  .gantt {
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+
+  .gantt-toolbar { @apply hidden; }
+
+  .gantt-bar {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .gantt-bar,
+  .gantt-milestone,
+  .gantt-bar-progress,
+  .gantt-tooltip {
+    transition: none;
+  }
+
+  .gantt-task-expand svg {
+    transition: none;
+  }
+}

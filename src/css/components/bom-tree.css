@@ -1,0 +1,514 @@
+/* BOM Tree Component */
+/* Bill of Materials tree with hierarchy, type badges, stock indicators, cost, search, drag-drop */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .bom-tree {
+    @apply overflow-hidden;
+    color: var(--color-base-content);
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box, 0.75rem);
+
+    --bom-indent: 28px;
+    --bom-item-height: 48px;
+    --bom-icon-size: 20px;
+    --bom-toggle-size: 20px;
+    --bom-level-width: 3px;
+    --bom-type-raw: #f59e0b;
+    --bom-type-raw-bg: color-mix(in oklch, #f59e0b 10%, transparent);
+    --bom-type-subassembly: #3b82f6;
+    --bom-type-subassembly-bg: color-mix(in oklch, #3b82f6 10%, transparent);
+    --bom-type-finished: #22c55e;
+    --bom-type-finished-bg: color-mix(in oklch, #22c55e 10%, transparent);
+    --bom-type-consumable: #8b5cf6;
+    --bom-type-consumable-bg: color-mix(in oklch, #8b5cf6 10%, transparent);
+    --bom-type-packaging: #6b7280;
+    --bom-type-packaging-bg: color-mix(in oklch, #6b7280 10%, transparent);
+  }
+
+  .bom-tree-bordered {
+    border: 1px solid var(--color-base-300);
+  }
+
+  /* =============================================
+     Header
+     ============================================= */
+
+  .bom-tree-header {
+    @apply flex items-center gap-4;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-base-300);
+    background-color: var(--color-base-200);
+  }
+
+  .bom-tree-title {
+    @apply flex-1 font-semibold text-lg;
+  }
+
+  .bom-tree-actions {
+    @apply flex items-center gap-1;
+  }
+
+  .bom-tree-action {
+    @apply inline-flex items-center justify-center border-none cursor-pointer;
+    width: 36px;
+    height: 36px;
+    background-color: transparent;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    border-radius: var(--radius-field, 0.25rem);
+    transition: all 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-300);
+      color: var(--color-base-content);
+    }
+
+    &:active { transform: scale(0.95); }
+
+    svg { @apply w-4.5 h-4.5; }
+  }
+
+  /* =============================================
+     Search
+     ============================================= */
+
+  .bom-tree-search {
+    @apply flex items-center gap-2;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-base-300);
+    background-color: var(--color-base-100);
+  }
+
+  .bom-tree-search-input {
+    @apply flex-1 text-sm;
+    height: 36px;
+    padding: 0 0.5rem;
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-field, 0.25rem);
+    background-color: var(--color-base-100);
+    color: var(--color-base-content);
+    outline: none;
+    transition: border-color 0.15s ease;
+
+    &:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 15%, transparent);
+    }
+
+    &::placeholder {
+      color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    }
+  }
+
+  /* =============================================
+     List / Tree Structure
+     ============================================= */
+
+  .bom-tree-list {
+    @apply list-none m-0 p-0;
+  }
+
+  .bom-tree-list-nested {
+    padding-left: var(--bom-indent);
+  }
+
+  .bom-tree-node { @apply m-0 p-0; }
+
+  /* =============================================
+     Tree Item
+     ============================================= */
+
+  .bom-tree-item {
+    @apply relative flex items-center gap-2 cursor-pointer;
+    min-height: var(--bom-item-height);
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-base-300);
+    transition: background-color 0.15s ease;
+
+    &:hover { background-color: var(--color-base-200); }
+    &:active { background-color: var(--color-base-300); }
+  }
+
+  .bom-tree-item-selected {
+    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+
+    &:hover { background-color: color-mix(in oklch, var(--color-primary) 10%, transparent); }
+  }
+
+  .bom-tree-item-highlight {
+    background-color: color-mix(in oklch, var(--color-warning) 10%, transparent);
+  }
+
+  .bom-tree-item-dragging { @apply opacity-50; }
+
+  .bom-tree-item-drag-over {
+    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+    outline: 2px dashed var(--color-primary);
+    outline-offset: -2px;
+  }
+
+  /* =============================================
+     Toggle
+     ============================================= */
+
+  .bom-tree-toggle {
+    @apply flex items-center justify-center shrink-0;
+    width: var(--bom-toggle-size);
+    height: var(--bom-toggle-size);
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    transition: transform 0.15s ease;
+
+    svg { @apply w-3.5 h-3.5; }
+  }
+
+  .bom-tree-toggle-expanded { transform: rotate(90deg); }
+  .bom-tree-toggle-empty { @apply invisible; }
+
+  /* =============================================
+     Level Indicator
+     ============================================= */
+
+  .bom-tree-level {
+    @apply flex items-center shrink-0;
+    gap: 0.25rem;
+  }
+
+  .bom-tree-level-bar {
+    width: var(--bom-level-width);
+    height: 24px;
+    border-radius: 2px;
+    background-color: var(--color-base-300);
+  }
+
+  .bom-tree-level-bar-l1 { background-color: var(--color-primary); }
+  .bom-tree-level-bar-l2 { background-color: var(--color-success); }
+  .bom-tree-level-bar-l3 { background-color: var(--color-warning); }
+  .bom-tree-level-bar-l4 { background-color: var(--color-error); }
+  .bom-tree-level-bar-l5 { background-color: var(--color-accent, #8b5cf6); }
+
+  /* =============================================
+     Item Icon
+     ============================================= */
+
+  .bom-tree-icon {
+    @apply flex items-center justify-center shrink-0;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-field, 0.25rem);
+    background-color: var(--color-base-300);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+
+    svg { width: var(--bom-icon-size); height: var(--bom-icon-size); }
+  }
+
+  .bom-tree-icon-raw { background-color: var(--bom-type-raw-bg); color: var(--bom-type-raw); }
+  .bom-tree-icon-subassembly { background-color: var(--bom-type-subassembly-bg); color: var(--bom-type-subassembly); }
+  .bom-tree-icon-finished { background-color: var(--bom-type-finished-bg); color: var(--bom-type-finished); }
+  .bom-tree-icon-consumable { background-color: var(--bom-type-consumable-bg); color: var(--bom-type-consumable); }
+  .bom-tree-icon-packaging { background-color: var(--bom-type-packaging-bg); color: var(--bom-type-packaging); }
+
+  /* =============================================
+     Item Details
+     ============================================= */
+
+  .bom-tree-details {
+    @apply flex-1 min-w-0 flex flex-col;
+    gap: 2px;
+  }
+
+  .bom-tree-name {
+    @apply font-medium truncate;
+    color: var(--color-base-content);
+  }
+
+  .bom-tree-sku {
+    @apply text-xs font-mono;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Quantity
+     ============================================= */
+
+  .bom-tree-quantity {
+    @apply flex items-baseline shrink-0 justify-end;
+    gap: 0.25rem;
+    min-width: 70px;
+  }
+
+  .bom-tree-qty-value {
+    @apply font-semibold text-base;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-base-content);
+  }
+
+  .bom-tree-qty-unit {
+    @apply text-xs uppercase;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Stock Indicator
+     ============================================= */
+
+  .bom-tree-stock {
+    @apply flex items-center shrink-0;
+    gap: 0.25rem;
+    min-width: 90px;
+  }
+
+  .bom-tree-stock-dot {
+    @apply shrink-0 rounded-full;
+    width: 8px;
+    height: 8px;
+  }
+
+  .bom-tree-stock-text {
+    @apply text-xs font-medium;
+  }
+
+  .bom-tree-stock-in-stock {
+    .bom-tree-stock-dot { background-color: var(--color-success); }
+    .bom-tree-stock-text { color: var(--color-success); }
+  }
+
+  .bom-tree-stock-low-stock {
+    .bom-tree-stock-dot {
+      background-color: var(--color-warning);
+      animation: bom-pulse 2s ease-in-out infinite;
+    }
+    .bom-tree-stock-text { color: var(--color-warning); }
+  }
+
+  .bom-tree-stock-out-of-stock {
+    .bom-tree-stock-dot { background-color: var(--color-error); }
+    .bom-tree-stock-text { color: var(--color-error); }
+  }
+
+  /* =============================================
+     Cost
+     ============================================= */
+
+  .bom-tree-cost {
+    @apply flex flex-col items-end shrink-0;
+    min-width: 80px;
+  }
+
+  .bom-tree-cost-value {
+    @apply font-semibold text-base;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-base-content);
+  }
+
+  .bom-tree-cost-label {
+    @apply text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .bom-tree-cost-total {
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-field, 0.25rem);
+    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+
+    .bom-tree-cost-value { color: var(--color-primary); }
+  }
+
+  /* =============================================
+     Footer
+     ============================================= */
+
+  .bom-tree-footer {
+    @apply flex items-center justify-between gap-4;
+    padding: 1rem;
+    border-top: 1px solid var(--color-base-300);
+    background-color: var(--color-base-200);
+  }
+
+  .bom-tree-summary {
+    @apply flex;
+    gap: 1.5rem;
+  }
+
+  .bom-tree-summary-item {
+    @apply flex flex-col;
+    gap: 2px;
+  }
+
+  .bom-tree-summary-label {
+    @apply text-xs uppercase;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    letter-spacing: 0.5px;
+  }
+
+  .bom-tree-summary-value {
+    @apply font-semibold text-lg;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* =============================================
+     Empty State
+     ============================================= */
+
+  .bom-tree-empty {
+    @apply flex flex-col items-center justify-center text-center;
+    padding: 2.5rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .bom-tree-empty-icon {
+    @apply w-16 h-16 opacity-50;
+    margin-bottom: 1rem;
+  }
+
+  .bom-tree-empty-title {
+    @apply font-semibold text-lg;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-bottom: 0.25rem;
+  }
+
+  /* =============================================
+     Type Badge
+     ============================================= */
+
+  .bom-tree-type {
+    @apply inline-flex items-center shrink-0 text-xs font-semibold uppercase;
+    height: 20px;
+    padding: 0 0.25rem;
+    letter-spacing: 0.5px;
+    border-radius: var(--radius-field, 0.25rem);
+    font-size: 0.6875rem;
+  }
+
+  .bom-tree-type-raw { background-color: var(--bom-type-raw-bg); color: var(--bom-type-raw); }
+  .bom-tree-type-subassembly { background-color: var(--bom-type-subassembly-bg); color: var(--bom-type-subassembly); }
+  .bom-tree-type-finished { background-color: var(--bom-type-finished-bg); color: var(--bom-type-finished); }
+  .bom-tree-type-consumable { background-color: var(--bom-type-consumable-bg); color: var(--bom-type-consumable); }
+  .bom-tree-type-packaging { background-color: var(--bom-type-packaging-bg); color: var(--bom-type-packaging); }
+
+  /* =============================================
+     Size Variants
+     ============================================= */
+
+  .bom-tree-sm {
+    --bom-item-height: 40px;
+    --bom-indent: 24px;
+    --bom-icon-size: 16px;
+
+    .bom-tree-item { padding: 0.25rem 0.5rem; }
+    .bom-tree-icon { width: 28px; height: 28px; }
+  }
+
+  .bom-tree-lg {
+    --bom-item-height: 56px;
+    --bom-indent: 36px;
+    --bom-icon-size: 24px;
+
+    .bom-tree-item { padding: 1rem 1.5rem; }
+    .bom-tree-icon { width: 40px; height: 40px; }
+  }
+
+  .bom-tree-compact {
+    .bom-tree-item {
+      min-height: 36px;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .bom-tree-icon {
+      width: 24px;
+      height: 24px;
+      svg { @apply w-3.5 h-3.5; }
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .bom-tree.glass {
+    .bom-tree-header,
+    .bom-tree-footer {
+      background-color: color-mix(in oklch, var(--color-base-100) 5%, transparent);
+    }
+
+    .bom-tree-item:hover {
+      background-color: color-mix(in oklch, var(--color-base-100) 8%, transparent);
+    }
+
+    .bom-tree-item-selected {
+      background-color: color-mix(in oklch, var(--color-primary) 20%, transparent);
+    }
+  }
+}
+
+/* =============================================
+   Animations
+   ============================================= */
+
+@keyframes bom-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .bom-tree-header { @apply flex-wrap; }
+  .bom-tree-cost, .bom-tree-stock { min-width: auto; }
+
+  .bom-tree-item {
+    @apply flex-wrap;
+    gap: 0.25rem;
+  }
+
+  .bom-tree-details { flex-basis: calc(100% - 60px); }
+
+  .bom-tree-quantity,
+  .bom-tree-stock,
+  .bom-tree-cost { @apply ml-auto; }
+
+  .bom-tree-footer {
+    @apply flex-col items-stretch;
+  }
+
+  .bom-tree-summary {
+    @apply flex-wrap justify-between;
+  }
+}
+
+/* =============================================
+   Print
+   ============================================= */
+
+@media print {
+  .bom-tree {
+    background-color: white;
+    border: 1px solid #ccc;
+  }
+
+  .bom-tree-actions,
+  .bom-tree-search { @apply hidden; }
+
+  .bom-tree-item { break-inside: avoid; }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .bom-tree-toggle,
+  .bom-tree-item,
+  .bom-tree-action {
+    transition: none;
+  }
+
+  .bom-tree-stock-low-stock .bom-tree-stock-dot {
+    animation: none;
+  }
+}

@@ -1,0 +1,320 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Payment">
+  <p class="text-base-content/70 mb-6">POS payment component with method selection, quick amounts, change calculation, split payments, summary totals, and action buttons.</p>
+
+  <CodePreview
+    title="Payment Methods"
+    semantic={`<div class="payment" style="max-width: 480px;">
+  <div class="payment-section">
+    <span class="payment-label">Payment Method</span>
+    <div class="payment-methods">
+      <div class="payment-method payment-method-selected">
+        <span class="payment-method-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:2rem;height:2rem;"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg>
+        </span>
+        <span class="payment-method-name">Cash</span>
+      </div>
+      <div class="payment-method">
+        <span class="payment-method-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:2rem;height:2rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+        </span>
+        <span class="payment-method-name">Card</span>
+      </div>
+      <div class="payment-method">
+        <span class="payment-method-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:2rem;height:2rem;"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/><path d="M12 7v5l3 3"/></svg>
+        </span>
+        <span class="payment-method-name">ERPlora Wallet</span>
+      </div>
+      <div class="payment-method">
+        <span class="payment-method-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:2rem;height:2rem;"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </span>
+        <span class="payment-method-name">Transfer</span>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="flex flex-col gap-6" style="max-width: 480px;">
+  <div class="flex flex-col gap-2">
+    <span class="text-xs font-semibold uppercase tracking-wider text-base-content/50">Payment Method</span>
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2">
+      <div class="flex flex-col items-center gap-2 p-4 border-2 border-primary bg-primary/5 rounded-box cursor-pointer">
+        <svg class="size-8 text-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg>
+        <span class="text-sm font-medium">Cash</span>
+      </div>
+      <div class="flex flex-col items-center gap-2 p-4 border border-base-300 rounded-box cursor-pointer hover:border-primary hover:bg-base-200">
+        <svg class="size-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+        <span class="text-sm font-medium">Card</span>
+      </div>
+      <div class="flex flex-col items-center gap-2 p-4 border border-base-300 rounded-box cursor-pointer hover:border-primary hover:bg-base-200">
+        <svg class="size-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/><path d="M12 7v5l3 3"/></svg>
+        <span class="text-sm font-medium">ERPlora Wallet</span>
+      </div>
+      <div class="flex flex-col items-center gap-2 p-4 border border-base-300 rounded-box cursor-pointer hover:border-primary hover:bg-base-200">
+        <svg class="size-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <span class="text-sm font-medium">Transfer</span>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Select payment method
+document.querySelectorAll('.payment-method').forEach(method => {
+  method.addEventListener('click', () => {
+    if (method.classList.contains('payment-method-disabled')) return;
+    document.querySelectorAll('.payment-method').forEach(m =>
+      m.classList.remove('payment-method-selected')
+    );
+    method.classList.add('payment-method-selected');
+  });
+});`}
+  />
+
+  <CodePreview
+    title="Quick Amounts"
+    semantic={`<div class="payment" style="max-width: 480px;">
+  <div class="payment-section">
+    <span class="payment-label">Quick Amount</span>
+    <div class="payment-quick">
+      <button class="payment-quick-btn">5 &euro;</button>
+      <button class="payment-quick-btn">10 &euro;</button>
+      <button class="payment-quick-btn">20 &euro;</button>
+      <button class="payment-quick-btn">50 &euro;</button>
+      <button class="payment-quick-btn">Exact</button>
+    </div>
+  </div>
+  <div class="payment-section">
+    <div class="payment-change">
+      <span class="payment-change-label">Change</span>
+      <span class="payment-change-amount">&euro;5.50</span>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="flex flex-col gap-6" style="max-width: 480px;">
+  <div class="flex flex-col gap-2">
+    <span class="text-xs font-semibold uppercase tracking-wider text-base-content/50">Quick Amount</span>
+    <div class="flex flex-wrap gap-2">
+      <button class="px-4 py-2 text-sm font-medium bg-base-200 border border-base-300 rounded-field hover:bg-base-300 active:scale-97">5 &euro;</button>
+      <button class="px-4 py-2 text-sm font-medium bg-base-200 border border-base-300 rounded-field hover:bg-base-300 active:scale-97">10 &euro;</button>
+      <button class="px-4 py-2 text-sm font-medium bg-base-200 border border-base-300 rounded-field hover:bg-base-300 active:scale-97">20 &euro;</button>
+      <button class="px-4 py-2 text-sm font-medium bg-base-200 border border-base-300 rounded-field hover:bg-base-300 active:scale-97">50 &euro;</button>
+      <button class="px-4 py-2 text-sm font-medium bg-base-200 border border-base-300 rounded-field hover:bg-base-300 active:scale-97">Exact</button>
+    </div>
+  </div>
+  <div class="flex flex-col gap-1">
+    <span class="text-sm text-base-content/60">Change</span>
+    <span class="text-3xl font-bold text-success">&euro;5.50</span>
+  </div>
+</div>`}
+    js={`// Quick amount selection
+const totalDue = 14.50;
+document.querySelectorAll('.payment-quick-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const text = btn.textContent.trim();
+    let tendered;
+    if (text === 'Exact') tendered = totalDue;
+    else tendered = parseFloat(text);
+    const change = tendered - totalDue;
+    document.querySelector('.payment-change-amount').textContent =
+      '€' + Math.max(0, change).toFixed(2);
+  });
+});`}
+  />
+
+  <CodePreview
+    title="Payment Summary"
+    semantic={`<div class="payment" style="max-width: 480px;">
+  <div class="payment-summary">
+    <div class="payment-summary-row">
+      <span>Subtotal</span>
+      <span>&euro;42.00</span>
+    </div>
+    <div class="payment-summary-row">
+      <span>Tax (21%)</span>
+      <span>&euro;8.82</span>
+    </div>
+    <div class="payment-summary-row">
+      <span>Discount</span>
+      <span style="color: var(--color-success, #16a34a);">-&euro;5.00</span>
+    </div>
+    <div class="payment-summary-row payment-summary-total">
+      <span>Total</span>
+      <span>&euro;45.82</span>
+    </div>
+  </div>
+  <div class="payment-actions">
+    <button class="btn btn-outline" style="flex:1;">Cancel</button>
+    <button class="btn color-primary" style="flex:1;">Pay &euro;45.82</button>
+  </div>
+</div>`}
+    tailwind={`<div class="flex flex-col gap-6" style="max-width: 480px;">
+  <div class="flex flex-col gap-2 p-4 bg-base-200 rounded-box">
+    <div class="flex justify-between text-sm text-base-content/60">
+      <span>Subtotal</span>
+      <span>&euro;42.00</span>
+    </div>
+    <div class="flex justify-between text-sm text-base-content/60">
+      <span>Tax (21%)</span>
+      <span>&euro;8.82</span>
+    </div>
+    <div class="flex justify-between text-sm text-success">
+      <span>Discount</span>
+      <span>-&euro;5.00</span>
+    </div>
+    <div class="flex justify-between pt-3 mt-2 border-t-2 border-base-300 text-lg font-bold">
+      <span>Total</span>
+      <span>&euro;45.82</span>
+    </div>
+  </div>
+  <div class="flex gap-2">
+    <button class="btn btn-outline flex-1">Cancel</button>
+    <button class="btn color-primary flex-1">Pay &euro;45.82</button>
+  </div>
+</div>`}
+    js={`// Process payment
+document.querySelector('.payment-actions .color-primary')?.addEventListener('click', () => {
+  // Submit payment to your backend
+  console.log('Processing payment...');
+});`}
+  />
+
+  <CodePreview
+    title="Compact & Glass"
+    semantic={`<div class="flex gap-6 flex-wrap">
+  <!-- Compact -->
+  <div class="payment payment-compact" style="max-width: 360px;">
+    <div class="payment-section">
+      <span class="payment-label">Method</span>
+      <div class="payment-methods-list">
+        <div class="payment-method payment-method-selected">
+          <span class="payment-method-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1.5rem;height:1.5rem;"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg>
+          </span>
+          <span class="payment-method-name">Cash</span>
+        </div>
+        <div class="payment-method">
+          <span class="payment-method-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1.5rem;height:1.5rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+          </span>
+          <span class="payment-method-name">Card</span>
+        </div>
+      </div>
+    </div>
+    <div class="payment-summary">
+      <div class="payment-summary-row payment-summary-total">
+        <span>Total</span>
+        <span>&euro;12.50</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Glass -->
+  <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 0.75rem;">
+    <div class="payment glass" style="max-width: 360px;">
+      <div class="payment-section">
+        <span class="payment-label">Method</span>
+        <div class="payment-methods-2col">
+          <div class="payment-method payment-method-selected">
+            <span class="payment-method-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:2rem;height:2rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+            </span>
+            <span class="payment-method-name">Card</span>
+          </div>
+          <div class="payment-method">
+            <span class="payment-method-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:2rem;height:2rem;"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/><path d="M12 7v5l3 3"/></svg>
+            </span>
+            <span class="payment-method-name">ERPlora Wallet</span>
+          </div>
+        </div>
+      </div>
+      <div class="payment-summary">
+        <div class="payment-summary-row payment-summary-total">
+          <span>Total</span>
+          <span>&euro;28.90</span>
+        </div>
+      </div>
+      <div class="payment-actions">
+        <button class="btn color-primary" style="width:100%;">Pay &euro;28.90</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="flex gap-6 flex-wrap">
+  <!-- Compact: uses smaller padding and gap -->
+  <div class="flex flex-col gap-3 p-3 bg-base-100 rounded-box border border-base-300" style="max-width: 360px;">
+    <span class="text-xs font-semibold uppercase tracking-wider text-base-content/50">Method</span>
+    <div class="grid grid-cols-1 gap-1">
+      <div class="flex items-center gap-2 p-2 border-2 border-primary bg-primary/5 rounded-box cursor-pointer">
+        <svg class="size-6 text-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg>
+        <span class="text-sm font-medium">Cash</span>
+      </div>
+      <div class="flex items-center gap-2 p-2 border border-base-300 rounded-box cursor-pointer hover:border-primary">
+        <svg class="size-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+        <span class="text-sm font-medium">Card</span>
+      </div>
+    </div>
+    <div class="flex justify-between pt-3 border-t-2 border-base-300 text-lg font-bold">
+      <span>Total</span><span>&euro;12.50</span>
+    </div>
+  </div>
+
+  <!-- Glass -->
+  <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 0.75rem;">
+    <div class="flex flex-col gap-4 p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-box" style="max-width: 360px;">
+      <!-- Glass payment content -->
+    </div>
+  </div>
+</div>`}
+    js={`// Same selection logic applies to compact and glass variants
+// .payment-compact reduces padding/gap
+// .glass applies glass morphism via CSS`}
+  />
+
+  <!-- Reference Table -->
+  <div class="mt-10 space-y-6">
+    <h2 class="text-xl font-bold">Classes Reference</h2>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm border border-base-300 rounded-lg overflow-hidden">
+        <thead class="bg-base-200">
+          <tr>
+            <th class="text-left px-4 py-2 font-medium">Class</th>
+            <th class="text-left px-4 py-2 font-medium">Description</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-base-300">
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment</td><td class="px-4 py-2">Base container (flex column, gap-6)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-section</td><td class="px-4 py-2">Section group</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-label</td><td class="px-4 py-2">Uppercase section label</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-methods</td><td class="px-4 py-2">Grid of payment method cards (auto-fit)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-methods-list</td><td class="px-4 py-2">Single column methods grid</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-methods-2col</td><td class="px-4 py-2">Two column methods grid</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-methods-3col</td><td class="px-4 py-2">Three column methods grid</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-method</td><td class="px-4 py-2">Individual method card (flex col, centered, border, rounded)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-method-selected</td><td class="px-4 py-2">Active/selected state (primary border + bg)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-method-disabled</td><td class="px-4 py-2">Disabled state</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-method-icon</td><td class="px-4 py-2">Icon in method card (size-8)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-method-name</td><td class="px-4 py-2">Method label text</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-quick</td><td class="px-4 py-2">Quick amount buttons row (flex wrap gap-2)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-quick-btn</td><td class="px-4 py-2">Individual quick amount button</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-change</td><td class="px-4 py-2">Change display container</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-change-label</td><td class="px-4 py-2">Label for change display</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-change-amount</td><td class="px-4 py-2">Change amount (green/success color, text-3xl bold)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-split</td><td class="px-4 py-2">Split payment section</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-split-row</td><td class="px-4 py-2">Row in split section (flex between)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-summary</td><td class="px-4 py-2">Summary section</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-summary-row</td><td class="px-4 py-2">Row in summary</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-summary-total</td><td class="px-4 py-2">Total row (bold, larger text)</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-actions</td><td class="px-4 py-2">Action buttons row</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.payment-compact</td><td class="px-4 py-2">Compact sizing variant</td></tr>
+          <tr><td class="px-4 py-2 font-mono text-xs">.glass</td><td class="px-4 py-2">Glass morphism variant</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</DocsLayout>

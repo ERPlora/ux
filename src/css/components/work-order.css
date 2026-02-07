@@ -1,0 +1,552 @@
+/* Work Order Component */
+/* Manufacturing work order card with status, priority, progress, materials, quantities */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .work-order {
+    @apply relative flex flex-col overflow-hidden;
+    width: 360px;
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box, 0.75rem);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Priority indicator strip */
+    &::before {
+      content: '';
+      @apply absolute top-0 left-0 bottom-0;
+      width: 4px;
+      background-color: var(--wo-priority-color, var(--color-primary));
+    }
+  }
+
+  /* =============================================
+     Priority Variants
+     ============================================= */
+
+  .work-order-priority-low {
+    --wo-priority-color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .work-order-priority-normal {
+    --wo-priority-color: var(--color-primary);
+  }
+
+  .work-order-priority-high {
+    --wo-priority-color: var(--color-warning);
+  }
+
+  .work-order-priority-urgent {
+    --wo-priority-color: var(--color-error);
+    box-shadow: 0 0 0 2px var(--color-error), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+    &::before {
+      animation: work-order-urgent-strip 1.5s ease-in-out infinite;
+    }
+  }
+
+  /* =============================================
+     Header
+     ============================================= */
+
+  .work-order-header {
+    @apply flex flex-col;
+    gap: 4px;
+    padding: 1rem;
+    padding-left: calc(1rem + 8px);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .work-order-header-top {
+    @apply flex items-center justify-between gap-2;
+  }
+
+  .work-order-number {
+    @apply text-lg font-bold m-0;
+    color: var(--color-base-content);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .work-order-status {
+    @apply inline-flex items-center gap-1 text-xs font-semibold uppercase rounded-full;
+    padding: 4px 10px;
+    letter-spacing: 0.5px;
+    background-color: var(--wo-status-bg, color-mix(in oklch, var(--color-base-content) 10%, transparent));
+    color: var(--wo-status-color, color-mix(in oklch, var(--color-base-content) 60%, transparent));
+  }
+
+  .work-order-status-pulse .work-order-status-dot {
+    animation: work-order-pulse 1.5s ease-in-out infinite;
+  }
+
+  .work-order-status-pending {
+    --wo-status-bg: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+    --wo-status-color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .work-order-status-in-progress {
+    --wo-status-bg: color-mix(in oklch, var(--color-primary) 10%, transparent);
+    --wo-status-color: var(--color-primary);
+  }
+
+  .work-order-status-completed {
+    --wo-status-bg: color-mix(in oklch, var(--color-success) 10%, transparent);
+    --wo-status-color: var(--color-success);
+  }
+
+  .work-order-status-on-hold {
+    --wo-status-bg: color-mix(in oklch, var(--color-warning) 10%, transparent);
+    --wo-status-color: var(--color-warning);
+  }
+
+  .work-order-status-dot {
+    @apply rounded-full;
+    width: 6px;
+    height: 6px;
+    background-color: currentColor;
+  }
+
+  /* Product info */
+  .work-order-product {
+    @apply flex flex-col;
+    gap: 2px;
+    margin-top: 4px;
+  }
+
+  .work-order-product-name {
+    @apply text-base font-semibold m-0;
+    color: var(--color-base-content);
+    line-height: 1.3;
+  }
+
+  .work-order-product-sku {
+    @apply text-xs font-mono;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Priority Badge
+     ============================================= */
+
+  .work-order-priority {
+    @apply inline-flex items-center gap-1 text-xs font-semibold uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .work-order-priority-badge-low {
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .work-order-priority-badge-normal {
+    color: var(--color-primary);
+  }
+
+  .work-order-priority-badge-high {
+    color: var(--color-warning);
+  }
+
+  .work-order-priority-badge-urgent {
+    color: var(--color-error);
+  }
+
+  .work-order-priority-icon {
+    @apply w-3 h-3;
+    svg { @apply w-full h-full; }
+  }
+
+  /* =============================================
+     Content
+     ============================================= */
+
+  .work-order-content {
+    @apply flex flex-col gap-4;
+    padding: 1rem;
+    padding-left: calc(1rem + 8px);
+  }
+
+  /* =============================================
+     Quantities
+     ============================================= */
+
+  .work-order-quantities {
+    @apply flex items-center gap-6;
+  }
+
+  .work-order-quantity {
+    @apply flex flex-col;
+    gap: 2px;
+  }
+
+  .work-order-quantity-label {
+    @apply text-xs uppercase;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    letter-spacing: 0.5px;
+  }
+
+  .work-order-quantity-value {
+    @apply text-xl font-bold;
+    color: var(--color-base-content);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .work-order-quantity-value-completed {
+    color: var(--color-success);
+  }
+
+  .work-order-quantity-value-remaining {
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Progress
+     ============================================= */
+
+  .work-order-progress {
+    @apply flex flex-col;
+    gap: 4px;
+  }
+
+  .work-order-progress-header {
+    @apply flex items-center justify-between;
+  }
+
+  .work-order-progress-label {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .work-order-progress-value {
+    @apply text-sm font-semibold;
+    color: var(--color-base-content);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .work-order-progress-bar {
+    @apply w-full overflow-hidden;
+    height: 8px;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  .work-order-progress-fill {
+    @apply h-full;
+    background-color: var(--color-primary);
+    border-radius: var(--radius-field, 0.25rem);
+    transition: width 0.2s ease;
+  }
+
+  .work-order-progress-fill-success {
+    background-color: var(--color-success);
+  }
+
+  .work-order-progress-fill-warning {
+    background-color: var(--color-warning);
+  }
+
+  /* =============================================
+     Due Date
+     ============================================= */
+
+  .work-order-due-date {
+    @apply flex items-center gap-1 text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .work-order-due-date-overdue {
+    @apply font-semibold;
+    color: var(--color-error);
+
+    .work-order-due-date-icon { @apply opacity-100; }
+  }
+
+  .work-order-due-date-warning {
+    @apply font-medium;
+    color: var(--color-warning);
+
+    .work-order-due-date-icon { @apply opacity-100; }
+  }
+
+  .work-order-due-date-icon {
+    @apply w-3.5 h-3.5 opacity-70;
+    svg { @apply w-full h-full; }
+  }
+
+  /* =============================================
+     Machine / Workstation
+     ============================================= */
+
+  .work-order-machine {
+    @apply flex items-center gap-1 text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .work-order-machine-icon {
+    @apply w-3.5 h-3.5 opacity-70;
+    svg { @apply w-full h-full; }
+  }
+
+  .work-order-machine-name {
+    @apply font-medium;
+    color: var(--color-base-content);
+  }
+
+  /* =============================================
+     Materials / BOM
+     ============================================= */
+
+  .work-order-materials {
+    @apply flex flex-col;
+    gap: 4px;
+  }
+
+  .work-order-materials-header {
+    @apply flex items-center justify-between text-sm font-semibold;
+    color: var(--color-base-content);
+  }
+
+  .work-order-materials-count {
+    @apply text-xs font-normal;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .work-order-materials-list {
+    @apply flex flex-col m-0 p-0 list-none;
+    gap: 4px;
+  }
+
+  .work-order-material {
+    @apply flex items-center justify-between text-sm;
+    padding: 4px 8px;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  .work-order-material-shortage {
+    background-color: color-mix(in oklch, var(--color-error) 10%, transparent);
+
+    .work-order-material-qty {
+      @apply font-semibold;
+      color: var(--color-error);
+    }
+  }
+
+  .work-order-material-name {
+    color: var(--color-base-content);
+  }
+
+  .work-order-material-qty {
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* =============================================
+     Meta
+     ============================================= */
+
+  .work-order-meta {
+    @apply flex flex-wrap gap-4;
+  }
+
+  .work-order-meta-item {
+    @apply flex items-center gap-1 text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .work-order-meta-icon {
+    @apply w-3.5 h-3.5 opacity-70;
+    svg { @apply w-full h-full; }
+  }
+
+  /* =============================================
+     Actions
+     ============================================= */
+
+  .work-order-actions {
+    @apply flex items-center gap-2;
+    padding: 1rem;
+    padding-left: calc(1rem + 8px);
+    border-top: 1px solid var(--color-base-300);
+  }
+
+  .work-order-action {
+    @apply flex-1 flex items-center justify-center gap-1 border-none text-sm font-semibold cursor-pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s ease;
+
+    &:active { transform: scale(0.98); }
+
+    &:disabled {
+      @apply opacity-50 cursor-not-allowed;
+      transform: none;
+    }
+  }
+
+  .work-order-action-start {
+    background-color: var(--color-primary);
+    color: white;
+    &:hover { filter: brightness(0.9); }
+  }
+
+  .work-order-action-pause {
+    background-color: var(--color-warning);
+    color: white;
+    &:hover { filter: brightness(0.9); }
+  }
+
+  .work-order-action-complete {
+    background-color: var(--color-success);
+    color: white;
+    &:hover { filter: brightness(0.9); }
+  }
+
+  .work-order-action-secondary {
+    background-color: var(--color-base-300);
+    color: var(--color-base-content);
+    &:hover { filter: brightness(0.95); }
+  }
+
+  .work-order-action-icon {
+    @apply w-4 h-4;
+    svg { @apply w-full h-full; }
+  }
+
+  /* =============================================
+     Compact Variant
+     ============================================= */
+
+  .work-order-compact {
+    .work-order-header,
+    .work-order-content,
+    .work-order-actions {
+      padding: 0.5rem;
+      padding-left: calc(0.5rem + 8px);
+    }
+
+    .work-order-number { @apply text-base; }
+    .work-order-product-name { @apply text-sm; }
+    .work-order-quantities { @apply gap-4; }
+    .work-order-quantity-value { @apply text-lg; }
+    .work-order-materials { @apply hidden; }
+    .work-order-content { @apply gap-2; }
+  }
+
+  /* =============================================
+     Detailed Variant
+     ============================================= */
+
+  .work-order-detailed {
+    width: 420px;
+
+    .work-order-header {
+      background-color: var(--color-base-200);
+    }
+  }
+
+  /* =============================================
+     Full Width
+     ============================================= */
+
+  .work-order-full { @apply w-full; }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .work-order.glass {
+    .work-order-header {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+      border-color: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+    }
+
+    .work-order-actions {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+      border-color: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+    }
+
+    .work-order-material {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+    }
+
+    .work-order-progress-bar {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+    }
+  }
+
+  /* =============================================
+     Grid
+     ============================================= */
+
+  .work-order-grid {
+    @apply grid gap-6 p-4;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+
+    .work-order { @apply w-full; }
+  }
+
+  /* Kanban-style columns */
+  .work-order-column {
+    @apply flex flex-col gap-4;
+    min-width: 360px;
+    padding: 1rem;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-box, 0.75rem);
+  }
+
+  .work-order-column-header {
+    @apply flex items-center justify-between text-sm font-semibold uppercase;
+    padding: 0.5rem;
+    letter-spacing: 0.5px;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .work-order-column-count {
+    @apply flex items-center justify-center text-xs font-bold;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 12px;
+    background-color: var(--color-base-300);
+    color: var(--color-base-content);
+  }
+}
+
+/* =============================================
+   Animations
+   ============================================= */
+
+@keyframes work-order-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+@keyframes work-order-urgent-strip {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .work-order,
+  .work-order-action,
+  .work-order-progress-fill {
+    transition: none;
+  }
+
+  .work-order-status-pulse .work-order-status-dot,
+  .work-order-priority-urgent::before {
+    animation: none;
+  }
+}
