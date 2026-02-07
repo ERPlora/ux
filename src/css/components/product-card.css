@@ -1,0 +1,300 @@
+/* UX v3 - Product Card Component */
+/* POS product cards with image, badges, price, stock, quick-add, grid layout */
+
+@layer components {
+
+  /* =============================================
+     Card
+     ============================================= */
+
+  .product-card {
+    @apply flex flex-col overflow-hidden cursor-pointer select-none;
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box, 0.75rem);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+      .product-card-image { transform: scale(1.05); }
+      .product-card-quick-add { opacity: 1; transform: scale(1); }
+    }
+
+    &:active { transform: scale(0.97); }
+  }
+
+  .product-card-unavailable { @apply opacity-50 pointer-events-none; }
+
+  .product-card-out-of-stock {
+    @apply relative;
+
+    &::after {
+      content: '';
+      @apply absolute inset-0;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: var(--radius-box, 0.75rem);
+    }
+  }
+
+  .product-card-selected {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-primary) 30%, transparent);
+  }
+
+  /* =============================================
+     Image
+     ============================================= */
+
+  .product-card-image-wrapper {
+    @apply relative overflow-hidden;
+    aspect-ratio: 1;
+    background-color: var(--color-base-200);
+  }
+
+  .product-card-image {
+    @apply w-full h-full object-cover;
+    transition: transform 0.3s ease;
+  }
+
+  .product-card-placeholder {
+    @apply flex items-center justify-center w-full h-full;
+    background: linear-gradient(135deg, var(--color-base-200), var(--color-base-300));
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+
+    svg { @apply w-12 h-12 opacity-50; }
+  }
+
+  /* =============================================
+     Badges
+     ============================================= */
+
+  .product-card-badges {
+    @apply absolute flex flex-wrap gap-1;
+    top: 0.25rem;
+    left: 0.25rem;
+    right: 0.25rem;
+    z-index: 2;
+  }
+
+  .product-card-badge {
+    @apply inline-flex items-center text-xs font-semibold uppercase;
+    padding: 2px 0.25rem;
+    background-color: var(--color-primary);
+    border-radius: var(--radius-field, 0.25rem);
+    color: var(--color-primary-content, white);
+    letter-spacing: 0.5px;
+  }
+
+  .product-card-badge-sale { background-color: var(--color-error); color: white; }
+  .product-card-badge-new { background-color: var(--color-success); color: white; }
+  .product-card-badge-low-stock { background-color: var(--color-warning); color: #111; }
+  .product-card-badge-out { background-color: #6b7280; color: white; }
+
+  /* =============================================
+     Content
+     ============================================= */
+
+  .product-card-content {
+    @apply flex flex-col flex-1 gap-1;
+    padding: 0.5rem;
+  }
+
+  .product-card-name {
+    @apply text-sm font-medium m-0 overflow-hidden;
+    color: var(--color-base-content);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .product-card-category {
+    @apply text-xs uppercase;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    letter-spacing: 0.5px;
+  }
+
+  .product-card-sku {
+    @apply text-xs font-mono;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Price
+     ============================================= */
+
+  .product-card-price-wrapper {
+    @apply flex items-baseline gap-1 flex-wrap;
+  }
+
+  .product-card-price {
+    @apply text-lg font-bold;
+    color: var(--color-base-content);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .product-card-price-sale { color: var(--color-error); }
+
+  .product-card-price-original {
+    @apply text-sm line-through;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .product-card-discount {
+    @apply text-xs font-semibold;
+    color: var(--color-error);
+    background-color: color-mix(in oklch, var(--color-error) 10%, transparent);
+    padding: 1px 0.25rem;
+    border-radius: var(--radius-field, 0.25rem);
+  }
+
+  /* =============================================
+     Stock
+     ============================================= */
+
+  .product-card-stock { @apply text-xs; color: color-mix(in oklch, var(--color-base-content) 60%, transparent); }
+  .product-card-stock-low { color: var(--color-warning); }
+  .product-card-stock-out { color: var(--color-error); }
+  .product-card-stock-available { color: var(--color-success); }
+
+  /* =============================================
+     Quick Add
+     ============================================= */
+
+  .product-card-quick-add {
+    @apply absolute flex items-center justify-center border-none rounded-full cursor-pointer;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    width: 36px;
+    height: 36px;
+    background-color: var(--color-primary);
+    color: var(--color-primary-content, white);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.15s ease, transform 0.15s ease, background-color 0.15s ease;
+    z-index: 3;
+
+    &:hover { filter: brightness(0.9); }
+    &:active { transform: scale(0.9); }
+
+    svg { @apply w-5 h-5; }
+  }
+
+  @media (hover: none) {
+    .product-card-quick-add { opacity: 1; transform: scale(1); }
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .product-card-sm {
+    .product-card-content { padding: 0.25rem; }
+    .product-card-name { @apply text-xs; -webkit-line-clamp: 1; }
+    .product-card-price { @apply text-base; }
+  }
+
+  .product-card-lg {
+    .product-card-content { padding: 1rem; }
+    .product-card-name { @apply text-base; }
+    .product-card-price { @apply text-xl; }
+  }
+
+  /* =============================================
+     Horizontal
+     ============================================= */
+
+  .product-card-horizontal {
+    @apply flex-row;
+
+    .product-card-image-wrapper {
+      width: 100px;
+      min-height: 100px;
+      aspect-ratio: 1;
+      @apply shrink-0;
+    }
+
+    .product-card-content { @apply justify-center; }
+  }
+
+  /* =============================================
+     Adding Animation
+     ============================================= */
+
+  .product-card-adding {
+    animation: product-add-pulse 0.5s ease-out;
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .product-card.glass {
+    @apply glass;
+    border-color: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+
+    .product-card-placeholder {
+      background: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+    }
+  }
+
+  /* =============================================
+     Product Grid
+     ============================================= */
+
+  .product-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .product-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .product-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .product-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .product-grid-5 { grid-template-columns: repeat(5, 1fr); }
+  .product-grid-6 { grid-template-columns: repeat(6, 1fr); }
+  .product-grid-compact { @apply gap-2; }
+}
+
+@keyframes product-add-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-primary) 40%, transparent); }
+  70% { box-shadow: 0 0 0 15px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 991px) {
+  .product-grid-4,
+  .product-grid-5,
+  .product-grid-6 { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 767px) {
+  .product-grid-3,
+  .product-grid-4,
+  .product-grid-5,
+  .product-grid-6 { grid-template-columns: repeat(2, 1fr); }
+
+  .product-grid { @apply gap-2; }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card,
+  .product-card-image,
+  .product-card-quick-add {
+    transition: none;
+  }
+
+  .product-card-adding {
+    animation: none;
+  }
+}

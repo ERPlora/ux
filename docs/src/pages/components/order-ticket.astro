@@ -1,0 +1,360 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Order Ticket">
+  <p class="text-base-content/70 mb-6">POS kitchen/order tickets with status variants, item list with modifiers, totals, timer, actions, and grid/column layout for KDS.</p>
+
+  <CodePreview
+    title="Pending Order"
+    semantic={`<div class="order-ticket order-ticket-pending">
+  <div class="order-ticket-header">
+    <div class="order-ticket-header-top">
+      <h3 class="order-ticket-order-number">#042</h3>
+      <span class="order-ticket-status order-ticket-status-pulse">
+        <span class="order-ticket-status-dot"></span>
+        Pendiente
+      </span>
+    </div>
+    <div class="order-ticket-header-meta">
+      <span class="order-ticket-meta-item">
+        <span class="order-ticket-time">14:32</span>
+      </span>
+      <span class="order-ticket-meta-item">
+        <span class="order-ticket-table">Mesa 5</span>
+      </span>
+      <span class="order-ticket-type order-ticket-type-dine-in">Sala</span>
+    </div>
+  </div>
+  <ul class="order-ticket-items">
+    <li class="order-ticket-item">
+      <span class="order-ticket-item-qty">2</span>
+      <div class="order-ticket-item-content">
+        <span class="order-ticket-item-name">Café Espresso</span>
+      </div>
+      <span class="order-ticket-item-price">€5.00</span>
+    </li>
+    <li class="order-ticket-item">
+      <span class="order-ticket-item-qty">1</span>
+      <div class="order-ticket-item-content">
+        <span class="order-ticket-item-name">Tostada Integral</span>
+        <div class="order-ticket-item-modifiers">
+          <span class="order-ticket-item-modifier">Aguacate</span>
+          <span class="order-ticket-item-modifier order-ticket-item-modifier-remove">Mantequilla</span>
+        </div>
+        <div class="order-ticket-item-notes">Sin sal por favor</div>
+      </div>
+      <span class="order-ticket-item-price">€4.50</span>
+    </li>
+  </ul>
+  <div class="order-ticket-footer">
+    <div class="order-ticket-totals">
+      <div class="order-ticket-total-row">
+        <span class="order-ticket-total-label">Subtotal</span>
+        <span class="order-ticket-total-value">€9.50</span>
+      </div>
+      <div class="order-ticket-total-row order-ticket-total-row-grand">
+        <span class="order-ticket-total-label">Total</span>
+        <span class="order-ticket-total-value">€9.50</span>
+      </div>
+    </div>
+    <div class="order-ticket-actions">
+      <button class="order-ticket-action order-ticket-action-secondary">Cancelar</button>
+      <button class="order-ticket-action order-ticket-action-primary">Preparar</button>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="relative flex flex-col overflow-hidden w-80 bg-base-100 rounded-box shadow-md before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-warning">
+  <div class="flex flex-col gap-1 shrink-0 p-4 pt-[calc(1rem+4px)] border-b border-base-300 bg-base-200">
+    <div class="flex items-center justify-between gap-2">
+      <h3 class="text-xl font-bold m-0">#042</h3>
+      <span class="inline-flex items-center gap-1 text-xs font-semibold uppercase rounded-full px-2.5 py-1 bg-warning/10 text-warning tracking-wide">
+        <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
+        Pendiente
+      </span>
+    </div>
+    <div class="flex items-center gap-4 text-sm text-base-content/60">
+      <span class="font-medium">14:32</span>
+      <span class="font-semibold text-base-content">Mesa 5</span>
+      <span class="text-xs font-medium px-1.5 py-0.5 rounded bg-primary/10 text-primary">Sala</span>
+    </div>
+  </div>
+  <ul class="flex flex-col list-none m-0 p-0 max-h-80 overflow-y-auto">
+    <li class="flex items-start gap-2 p-4 border-b border-base-300 hover:bg-base-200">
+      <span class="flex items-center justify-center shrink-0 font-bold text-sm min-w-7 h-7 rounded-md bg-base-300">2</span>
+      <div class="flex-1 min-w-0">
+        <span class="font-semibold">Café Espresso</span>
+      </div>
+      <span class="text-sm font-medium text-right shrink-0 text-base-content/60">€5.00</span>
+    </li>
+    <!-- more items... -->
+  </ul>
+  <div class="flex flex-col gap-2 shrink-0 p-4 border-t border-base-300 bg-base-200">
+    <div class="flex justify-between text-sm text-base-content/60">
+      <span>Subtotal</span><span class="font-semibold">€9.50</span>
+    </div>
+    <div class="flex justify-between text-lg font-bold pt-2 mt-1 border-t border-dashed border-base-300">
+      <span>Total</span><span>€9.50</span>
+    </div>
+    <div class="flex items-center gap-2 mt-2">
+      <button class="flex-1 flex items-center justify-center gap-1 text-sm font-semibold px-4 py-2 rounded-lg bg-base-300 hover:brightness-95">Cancelar</button>
+      <button class="flex-1 flex items-center justify-center gap-1 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-white hover:brightness-90">Preparar</button>
+    </div>
+  </div>
+</div>`}
+    js={`// Update ticket status
+function setTicketStatus(ticket, status) {
+  ticket.className = ticket.className.replace(/order-ticket-(pending|preparing|ready|completed|cancelled|urgent)/g, '');
+  ticket.classList.add('order-ticket-' + status);
+}
+
+// Action buttons
+document.querySelectorAll('.order-ticket-action-primary').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const ticket = btn.closest('.order-ticket');
+    setTicketStatus(ticket, 'preparing');
+    btn.textContent = 'Listo';
+  });
+});`}
+  />
+
+  <CodePreview
+    title="Status Variants"
+    semantic={`<div class="flex gap-4 flex-wrap">
+  <!-- Preparing -->
+  <div class="order-ticket order-ticket-preparing order-ticket-sm">
+    <div class="order-ticket-header">
+      <div class="order-ticket-header-top">
+        <h3 class="order-ticket-order-number">#043</h3>
+        <span class="order-ticket-status">
+          <span class="order-ticket-status-dot"></span>
+          Preparando
+        </span>
+      </div>
+      <div class="order-ticket-header-meta">
+        <span class="order-ticket-time">14:35</span>
+        <span class="order-ticket-type order-ticket-type-takeout">Para llevar</span>
+      </div>
+    </div>
+    <ul class="order-ticket-items">
+      <li class="order-ticket-item">
+        <span class="order-ticket-item-qty">1</span>
+        <div class="order-ticket-item-content">
+          <span class="order-ticket-item-name">Zumo Natural</span>
+        </div>
+      </li>
+    </ul>
+    <div class="order-ticket-footer">
+      <div class="order-ticket-actions">
+        <button class="order-ticket-action order-ticket-action-success">Listo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ready -->
+  <div class="order-ticket order-ticket-ready order-ticket-sm">
+    <div class="order-ticket-header">
+      <div class="order-ticket-header-top">
+        <h3 class="order-ticket-order-number">#041</h3>
+        <span class="order-ticket-status">
+          <span class="order-ticket-status-dot"></span>
+          Listo
+        </span>
+      </div>
+      <div class="order-ticket-header-meta">
+        <span class="order-ticket-time">14:28</span>
+        <span class="order-ticket-type order-ticket-type-delivery">Delivery</span>
+      </div>
+    </div>
+    <ul class="order-ticket-items">
+      <li class="order-ticket-item">
+        <span class="order-ticket-item-qty">3</span>
+        <div class="order-ticket-item-content">
+          <span class="order-ticket-item-name">Ensalada César</span>
+        </div>
+      </li>
+    </ul>
+    <div class="order-ticket-footer">
+      <div class="order-ticket-actions">
+        <button class="order-ticket-action order-ticket-action-primary">Entregar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completed -->
+  <div class="order-ticket order-ticket-completed order-ticket-sm">
+    <div class="order-ticket-header">
+      <div class="order-ticket-header-top">
+        <h3 class="order-ticket-order-number">#039</h3>
+        <span class="order-ticket-status">Completado</span>
+      </div>
+    </div>
+    <ul class="order-ticket-items">
+      <li class="order-ticket-item order-ticket-item-completed">
+        <span class="order-ticket-item-qty">2</span>
+        <div class="order-ticket-item-content">
+          <span class="order-ticket-item-name">Café Latte</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>`}
+    tailwind={`<!-- Status is controlled by custom properties:
+  --ticket-status-color and --ticket-status-bg
+  set via .order-ticket-pending/preparing/ready/completed/cancelled/urgent
+  The top bar color changes via ::before pseudo element -->`}
+    js={`// Status transitions: pending → preparing → ready → completed
+// Each status variant sets CSS custom properties for colors`}
+  />
+
+  <CodePreview
+    title="Urgent & Timer"
+    semantic={`<div class="order-ticket order-ticket-urgent order-ticket-pending">
+  <div class="order-ticket-header">
+    <div class="order-ticket-header-top">
+      <h3 class="order-ticket-order-number">#044</h3>
+      <span class="order-ticket-status order-ticket-status-pulse">
+        <span class="order-ticket-status-dot"></span>
+        Urgente
+      </span>
+    </div>
+    <div class="order-ticket-header-meta">
+      <span class="order-ticket-meta-item">
+        <span class="order-ticket-timer order-ticket-timer-danger">
+          12:45
+        </span>
+      </span>
+      <span class="order-ticket-table">Mesa 1</span>
+    </div>
+  </div>
+  <div class="order-ticket-notes">
+    <span class="order-ticket-notes-label">Nota:</span>
+    Cliente con prisa, vuelo en 30 min
+  </div>
+  <ul class="order-ticket-items">
+    <li class="order-ticket-item order-ticket-item-urgent">
+      <span class="order-ticket-item-qty">1</span>
+      <div class="order-ticket-item-content">
+        <span class="order-ticket-item-name">Menú Express</span>
+        <div class="order-ticket-item-modifiers">
+          <span class="order-ticket-item-modifier">Pollo a la plancha</span>
+          <span class="order-ticket-item-modifier">Ensalada</span>
+        </div>
+      </div>
+      <span class="order-ticket-item-price">€12.90</span>
+    </li>
+    <li class="order-ticket-item">
+      <span class="order-ticket-item-qty">1</span>
+      <div class="order-ticket-item-content">
+        <span class="order-ticket-item-name">Agua mineral</span>
+      </div>
+      <span class="order-ticket-item-price">€1.50</span>
+    </li>
+  </ul>
+  <div class="order-ticket-footer">
+    <div class="order-ticket-totals">
+      <div class="order-ticket-total-row order-ticket-total-row-grand">
+        <span class="order-ticket-total-label">Total</span>
+        <span class="order-ticket-total-value">€14.40</span>
+      </div>
+    </div>
+    <div class="order-ticket-actions">
+      <button class="order-ticket-action order-ticket-action-success">Listo</button>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- .order-ticket-urgent adds red ring + pulse animation -->
+<!-- .order-ticket-timer-danger makes timer blink red -->
+<!-- .order-ticket-item-urgent highlights item row with red background -->`}
+    js={`// Timer countdown
+function startTimer(ticketEl) {
+  const timerEl = ticketEl.querySelector('.order-ticket-timer');
+  let seconds = 0;
+  setInterval(() => {
+    seconds++;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    timerEl.textContent = m + ':' + String(s).padStart(2, '0');
+    if (seconds > 600) timerEl.classList.add('order-ticket-timer-danger');
+    else if (seconds > 300) timerEl.classList.add('order-ticket-timer-warning');
+  }, 1000);
+}`}
+  />
+
+  <CodePreview
+    title="KDS Column Layout"
+    semantic={`<div class="flex gap-4 overflow-x-auto p-4" style="min-height: 300px;">
+  <!-- Pending Column -->
+  <div class="order-ticket-column">
+    <div class="order-ticket-column-header">
+      Pendientes
+      <span class="order-ticket-column-count">2</span>
+    </div>
+    <div class="order-ticket order-ticket-pending order-ticket-full">
+      <div class="order-ticket-header">
+        <div class="order-ticket-header-top">
+          <h3 class="order-ticket-order-number">#042</h3>
+          <span class="order-ticket-status"><span class="order-ticket-status-dot"></span> Pend.</span>
+        </div>
+      </div>
+      <ul class="order-ticket-items">
+        <li class="order-ticket-item">
+          <span class="order-ticket-item-qty">2</span>
+          <div class="order-ticket-item-content"><span class="order-ticket-item-name">Café</span></div>
+        </li>
+      </ul>
+    </div>
+    <div class="order-ticket order-ticket-pending order-ticket-full">
+      <div class="order-ticket-header">
+        <div class="order-ticket-header-top">
+          <h3 class="order-ticket-order-number">#044</h3>
+          <span class="order-ticket-status"><span class="order-ticket-status-dot"></span> Pend.</span>
+        </div>
+      </div>
+      <ul class="order-ticket-items">
+        <li class="order-ticket-item">
+          <span class="order-ticket-item-qty">1</span>
+          <div class="order-ticket-item-content"><span class="order-ticket-item-name">Ensalada</span></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Preparing Column -->
+  <div class="order-ticket-column">
+    <div class="order-ticket-column-header">
+      Preparando
+      <span class="order-ticket-column-count">1</span>
+    </div>
+    <div class="order-ticket order-ticket-preparing order-ticket-full">
+      <div class="order-ticket-header">
+        <div class="order-ticket-header-top">
+          <h3 class="order-ticket-order-number">#041</h3>
+          <span class="order-ticket-status"><span class="order-ticket-status-dot"></span> Prep.</span>
+        </div>
+      </div>
+      <ul class="order-ticket-items">
+        <li class="order-ticket-item">
+          <span class="order-ticket-item-qty">3</span>
+          <div class="order-ticket-item-content"><span class="order-ticket-item-name">Tostada</span></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Ready Column -->
+  <div class="order-ticket-column">
+    <div class="order-ticket-column-header">
+      Listos
+      <span class="order-ticket-column-count">0</span>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- KDS layout uses flex columns with overflow-x-auto for horizontal scrolling -->
+<!-- Each .order-ticket-column is a flex-col with min-width, bg-base-200, and rounded-box -->
+<!-- .order-ticket-full makes tickets take full column width -->`}
+    js={`// Drag-and-drop between columns (optional)
+// Or click-to-advance: click ticket to move to next status column`}
+  />
+</DocsLayout>
