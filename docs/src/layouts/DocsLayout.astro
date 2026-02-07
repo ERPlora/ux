@@ -227,7 +227,16 @@ const currentPath = Astro.url.pathname;
         <!-- Sidebar Drawer -->
         <aside class="drawer drawer-start" style="--drawer-width: 250px;">
           <div class="content">
-            <nav class="p-3 space-y-5">
+            <!-- Search -->
+            <div class="p-3 pb-0">
+              <input
+                type="text"
+                id="nav-search"
+                placeholder="Buscar componente..."
+                class="w-full px-3 py-1.5 text-sm rounded-lg border border-base-300 bg-base-100 text-base-content placeholder:text-base-content/40 outline-none focus:border-primary transition-colors"
+              />
+            </div>
+            <nav class="p-3 space-y-5" id="nav-list">
               {navigation.map((section) => (
                 <div>
                   <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3">
@@ -311,5 +320,30 @@ const currentPath = Astro.url.pathname;
     if (details && !details.contains(e.target as Node)) {
       details.open = false;
     }
+  });
+
+  // Nav search filter
+  const navSearch = document.getElementById('nav-search') as HTMLInputElement;
+  const navList = document.getElementById('nav-list') as HTMLElement;
+
+  navSearch?.addEventListener('input', () => {
+    const q = navSearch.value.toLowerCase().trim();
+    const sections = navList.querySelectorAll(':scope > div');
+
+    sections.forEach((section) => {
+      const items = section.querySelectorAll('li');
+      let visibleCount = 0;
+
+      items.forEach((li) => {
+        const link = li.querySelector('a');
+        const text = link?.textContent?.toLowerCase() || '';
+        const match = !q || text.includes(q);
+        (li as HTMLElement).style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+      });
+
+      // Hide entire section if no matches
+      (section as HTMLElement).style.display = visibleCount > 0 ? '' : 'none';
+    });
   });
 </script>
