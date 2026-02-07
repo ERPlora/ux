@@ -1,0 +1,142 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Resizable">
+  <p class="text-base-content/70 mb-6">Resizable panels with drag handles, visual grips, collapse buttons, and nested layouts.</p>
+
+  <CodePreview
+    title="Basic Horizontal Resizable"
+    semantic={`<div class="resizable" style="height: 250px; border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); overflow: hidden;">
+  <div class="resizable-panel" style="flex-basis: 60%; padding: 1rem;">
+    <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Left Panel</h4>
+    <p style="color: var(--color-base-content); opacity: 0.7;">Drag the handle to resize. This panel is 60% by default.</p>
+  </div>
+  <div class="resizable-handle" role="separator" aria-orientation="vertical" tabindex="0"></div>
+  <div class="resizable-panel" style="padding: 1rem;">
+    <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Right Panel</h4>
+    <p style="color: var(--color-base-content); opacity: 0.7;">This panel fills the remaining space.</p>
+  </div>
+</div>`}
+    tailwind={`<div class="flex w-full h-[250px] border border-base-300 rounded-box overflow-hidden">
+  <div class="flex-1 overflow-hidden p-4" style="flex-basis: 60%;">
+    <h4 class="font-semibold mb-2">Left Panel</h4>
+  </div>
+  <div class="flex-none w-1 bg-base-300 cursor-col-resize hover:bg-primary transition-colors"></div>
+  <div class="flex-1 overflow-hidden p-4">
+    <h4 class="font-semibold mb-2">Right Panel</h4>
+  </div>
+</div>`}
+    js={`// Basic resize handler:
+const handle = document.querySelector('.resizable-handle');
+const leftPanel = handle.previousElementSibling;
+const container = handle.parentElement;
+
+handle.addEventListener('mousedown', (e) => {
+  document.body.dataset.resizing = 'horizontal';
+  const startX = e.clientX;
+  const startWidth = leftPanel.getBoundingClientRect().width;
+
+  const onMove = (e) => {
+    const newWidth = startWidth + (e.clientX - startX);
+    const pct = (newWidth / container.getBoundingClientRect().width) * 100;
+    leftPanel.style.flexBasis = Math.min(Math.max(pct, 10), 90) + '%';
+  };
+
+  const onUp = () => {
+    delete document.body.dataset.resizing;
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  };
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+});`}
+  />
+
+  <CodePreview
+    title="Vertical Resizable"
+    semantic={`<div class="resizable resizable-vertical" style="height: 400px; border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); overflow: hidden;">
+  <div class="resizable-panel" style="flex-basis: 50%; padding: 1rem;">
+    <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Top Panel</h4>
+    <p style="color: var(--color-base-content); opacity: 0.7;">Vertical layout — drag the handle up or down.</p>
+  </div>
+  <div class="resizable-handle" role="separator" aria-orientation="horizontal" tabindex="0"></div>
+  <div class="resizable-panel" style="padding: 1rem;">
+    <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Bottom Panel</h4>
+    <p style="color: var(--color-base-content); opacity: 0.7;">Panels stack vertically.</p>
+  </div>
+</div>`}
+    tailwind={`<!-- resizable-vertical: flex-direction column, handle uses cursor: row-resize -->`}
+    js={`// Same pattern as horizontal but track clientY instead of clientX`}
+  />
+
+  <CodePreview
+    title="With Grip Handle"
+    semantic={`<div class="resizable" style="height: 250px; border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); overflow: hidden;">
+  <div class="resizable-panel" style="flex-basis: 50%; padding: 1rem;">
+    <p style="font-weight: 600;">Panel A</p>
+  </div>
+  <div class="resizable-handle" role="separator" tabindex="0">
+    <div class="resizable-grip">
+      <svg viewBox="0 0 6 16" fill="currentColor"><circle cx="1" cy="2" r="1"/><circle cx="5" cy="2" r="1"/><circle cx="1" cy="6" r="1"/><circle cx="5" cy="6" r="1"/><circle cx="1" cy="10" r="1"/><circle cx="5" cy="10" r="1"/><circle cx="1" cy="14" r="1"/><circle cx="5" cy="14" r="1"/></svg>
+    </div>
+  </div>
+  <div class="resizable-panel" style="padding: 1rem;">
+    <p style="font-weight: 600;">Panel B</p>
+  </div>
+</div>`}
+    tailwind={`<!-- resizable-grip: visual dots indicator inside the handle -->`}
+    js={`// No JavaScript required for styling — add resize logic as needed`}
+  />
+
+  <CodePreview
+    title="Handle Variants"
+    semantic={`<div class="flex flex-col gap-4">
+  <!-- Hidden handle -->
+  <div class="resizable" style="height: 150px; border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); overflow: hidden;">
+    <div class="resizable-panel" style="flex-basis: 50%; padding: 1rem;">
+      <p class="text-sm font-medium">Hidden handle (appears on hover)</p>
+    </div>
+    <div class="resizable-handle resizable-handle-hidden" role="separator" tabindex="0"></div>
+    <div class="resizable-panel" style="padding: 1rem;">
+      <p class="text-sm">Right panel</p>
+    </div>
+  </div>
+
+  <!-- Bordered handle -->
+  <div class="resizable" style="height: 150px; border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); overflow: hidden;">
+    <div class="resizable-panel" style="flex-basis: 50%; padding: 1rem;">
+      <p class="text-sm font-medium">Bordered handle</p>
+    </div>
+    <div class="resizable-handle resizable-handle-bordered" role="separator" tabindex="0"></div>
+    <div class="resizable-panel" style="padding: 1rem;">
+      <p class="text-sm">Right panel</p>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- resizable-handle-hidden: transparent, shows color on hover -->
+<!-- resizable-handle-bordered: thin border line instead of solid bar -->`}
+    js={`// No JavaScript required for styling`}
+  />
+
+  <CodePreview
+    title="Three Panels"
+    semantic={`<div class="resizable" style="height: 250px; border: 1px solid var(--color-base-300); border-radius: var(--radius-box, 0.75rem); overflow: hidden;">
+  <div class="resizable-panel" style="flex-basis: 25%; padding: 1rem; background: color-mix(in oklch, var(--color-primary) 5%, transparent);">
+    <p class="text-sm font-medium">Sidebar</p>
+  </div>
+  <div class="resizable-handle" role="separator" tabindex="0"></div>
+  <div class="resizable-panel" style="flex-basis: 50%; padding: 1rem;">
+    <p class="text-sm font-medium">Main</p>
+  </div>
+  <div class="resizable-handle" role="separator" tabindex="0"></div>
+  <div class="resizable-panel" style="flex-basis: 25%; padding: 1rem; background: color-mix(in oklch, var(--color-success) 5%, transparent);">
+    <p class="text-sm font-medium">Details</p>
+  </div>
+</div>`}
+    tailwind={`<!-- Multiple panels: just add more resizable-panel + resizable-handle pairs -->`}
+    js={`// Each handle resizes its adjacent panels independently`}
+  />
+</DocsLayout>

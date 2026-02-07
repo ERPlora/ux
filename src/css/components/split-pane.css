@@ -1,0 +1,150 @@
+/* UX v3 - Split Pane Component */
+/* Two-panel layout with main content and collapsible side panel */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .split-pane {
+    @apply flex flex-row h-full w-full relative overflow-hidden;
+  }
+
+  /* =============================================
+     Main content area
+     ============================================= */
+
+  .split-pane-main {
+    @apply flex-1 min-w-0 flex flex-col h-full overflow-hidden;
+  }
+
+  /* =============================================
+     Side panel
+     ============================================= */
+
+  .split-pane-side {
+    width: var(--split-pane-width, 320px);
+    max-width: 85vw;
+    @apply shrink-0 h-full flex flex-col overflow-hidden;
+    background-color: var(--color-base-100);
+    border-left: 1px solid var(--color-base-300);
+    transition: transform 0.2s ease, width 0.2s ease, opacity 0.2s ease;
+  }
+
+  .split-pane-side-left {
+    @apply order-first;
+    border-left: none;
+    border-right: 1px solid var(--color-base-300);
+  }
+
+  /* =============================================
+     Collapsed state
+     ============================================= */
+
+  .split-pane-collapsed .split-pane-side {
+    width: 0;
+    border-left: none;
+    border-right: none;
+    @apply opacity-0 overflow-hidden;
+  }
+
+  /* =============================================
+     Backdrop (mobile)
+     ============================================= */
+
+  .split-pane-backdrop {
+    @apply hidden fixed inset-0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 40;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* =============================================
+     Toggle button
+     ============================================= */
+
+  .split-pane-toggle {
+    @apply flex items-center justify-center border-none bg-transparent cursor-pointer;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+
+    & svg {
+      @apply w-5 h-5;
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .split-pane-side.glass {
+    @apply glass;
+    border-left-color: rgba(255, 255, 255, 0.18);
+  }
+}
+
+/* =============================================
+   Desktop (>= 992px)
+   ============================================= */
+
+@media (min-width: 992px) {
+  .split-pane-side {
+    @apply relative;
+    transform: translateX(0);
+  }
+
+  .split-pane-backdrop {
+    display: none !important;
+  }
+}
+
+/* =============================================
+   Mobile (< 992px)
+   ============================================= */
+
+@media (max-width: 991px) {
+  .split-pane-side {
+    @apply fixed top-0 bottom-0;
+    right: 0;
+    z-index: 50;
+    transform: translateX(100%);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .split-pane-side-left {
+    right: auto;
+    left: 0;
+    transform: translateX(-100%);
+  }
+
+  .split-pane-open .split-pane-side {
+    transform: translateX(0);
+  }
+
+  .split-pane-backdrop {
+    @apply block;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .split-pane-open .split-pane-backdrop {
+    pointer-events: auto;
+    opacity: 1;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .split-pane-side,
+  .split-pane-backdrop {
+    transition: none;
+  }
+}
