@@ -1,0 +1,267 @@
+/* UX v3 - Picker Component */
+/* iOS-style scroll wheel picker with columns, backdrop, and inline variant */
+
+@layer components {
+
+  /* =============================================
+     Backdrop
+     ============================================= */
+
+  .picker-backdrop {
+    @apply fixed inset-0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 400;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+                visibility 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .picker-backdrop[data-state="open"] {
+    @apply opacity-100 visible;
+
+    & .picker {
+      transform: translateY(0);
+    }
+  }
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .picker {
+    @apply fixed left-0 right-0 bottom-0;
+    background-color: var(--color-base-100);
+    border-radius: 1rem 1rem 0 0;
+    z-index: 500;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: env(safe-area-inset-bottom);
+    will-change: transform;
+  }
+
+  /* =============================================
+     Header
+     ============================================= */
+
+  .picker-header {
+    @apply flex items-center justify-between shrink-0;
+    min-height: 44px;
+    padding: 0 0.5rem;
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .picker-btn {
+    @apply flex items-center justify-center bg-transparent border-none cursor-pointer;
+    min-width: 60px;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    color: var(--color-primary);
+    font-size: 0.9375rem;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s ease;
+
+    &:active {
+      opacity: 0.5;
+    }
+  }
+
+  .picker-btn-cancel {
+    @apply font-normal;
+  }
+
+  .picker-btn-confirm {
+    @apply font-semibold;
+  }
+
+  .picker-title {
+    @apply flex-1 text-center font-semibold m-0;
+    font-size: 0.9375rem;
+    color: var(--color-base-content);
+  }
+
+  /* =============================================
+     Columns container
+     ============================================= */
+
+  .picker-columns {
+    @apply flex overflow-hidden relative;
+    height: 216px;
+
+    /* Selection highlight band */
+    &::before {
+      content: '';
+      @apply absolute left-0 right-0 pointer-events-none;
+      top: 50%;
+      height: 36px;
+      transform: translateY(-50%);
+      background-color: var(--color-base-200);
+      border-top: 1px solid var(--color-base-300);
+      border-bottom: 1px solid var(--color-base-300);
+      z-index: 0;
+    }
+
+    /* Gradient fade mask */
+    &::after {
+      content: '';
+      @apply absolute inset-0 pointer-events-none;
+      background: linear-gradient(
+        to bottom,
+        var(--color-base-100) 0%,
+        transparent 20%,
+        transparent 80%,
+        var(--color-base-100) 100%
+      );
+      z-index: 1;
+    }
+  }
+
+  /* =============================================
+     Column
+     ============================================= */
+
+  .picker-column {
+    @apply flex-1 h-full overflow-hidden relative;
+  }
+
+  .picker-column-wrapper {
+    @apply absolute left-0 right-0;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+
+  .picker-column-dragging .picker-column-wrapper {
+    transition: none;
+  }
+
+  /* =============================================
+     Item
+     ============================================= */
+
+  .picker-item {
+    @apply flex items-center justify-center cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis;
+    height: 36px;
+    padding: 0 1rem;
+    font-size: 1.125rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .picker-item-selected {
+    @apply font-medium;
+    color: var(--color-base-content);
+  }
+
+  .picker-item-disabled {
+    @apply pointer-events-none;
+    color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+  }
+
+  /* =============================================
+     Divider (between columns)
+     ============================================= */
+
+  .picker-divider {
+    @apply flex items-center justify-center font-medium;
+    padding: 0 4px;
+    font-size: 1.125rem;
+    color: var(--color-base-content);
+  }
+
+  /* =============================================
+     Column label
+     ============================================= */
+
+  .picker-column-label {
+    @apply absolute left-0 right-0 text-center text-xs font-semibold uppercase tracking-wide;
+    top: 4px;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    z-index: 2;
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .picker-sm .picker-columns {
+    height: 180px;
+  }
+
+  .picker-sm .picker-item {
+    height: 30px;
+    font-size: 0.9375rem;
+  }
+
+  .picker-sm .picker-columns::before {
+    height: 30px;
+  }
+
+  .picker-lg .picker-columns {
+    height: 252px;
+  }
+
+  .picker-lg .picker-item {
+    height: 42px;
+    font-size: 1.25rem;
+  }
+
+  .picker-lg .picker-columns::before {
+    height: 42px;
+  }
+
+  /* =============================================
+     Inline variant
+     ============================================= */
+
+  .picker-inline {
+    @apply static;
+    transform: none;
+    border-radius: var(--radius-box, 0.75rem);
+    border: 1px solid var(--color-base-300);
+
+    & .picker-header {
+      border-bottom: none;
+      background-color: var(--color-base-200);
+      border-radius: var(--radius-box, 0.75rem) var(--radius-box, 0.75rem) 0 0;
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .picker.glass {
+    @apply glass;
+    border: 0.5px solid rgba(255, 255, 255, 0.18);
+
+    & .picker-header {
+      border-bottom-color: rgba(255, 255, 255, 0.18);
+    }
+
+    & .picker-columns::before {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .picker {
+    transition: none;
+  }
+
+  .picker-backdrop {
+    transition: none;
+  }
+
+  .picker-column-wrapper {
+    transition: none;
+  }
+}
