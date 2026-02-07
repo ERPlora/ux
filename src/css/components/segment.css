@@ -1,0 +1,295 @@
+/* UX v3 - Segment Component */
+/* iOS-style segmented control with sliding indicator */
+
+@layer components {
+
+  /* =============================================
+     Segment container
+     ============================================= */
+
+  .segment {
+    @apply inline-flex items-stretch relative;
+    background-color: color-mix(in oklch, var(--color-base-content) 8%, transparent);
+    border-radius: var(--radius-field);
+    padding: 3px;
+  }
+
+  .segment-block {
+    @apply flex w-full;
+  }
+
+  /* =============================================
+     Sliding indicator
+     ============================================= */
+
+  .segment-indicator {
+    @apply absolute;
+    top: 3px;
+    bottom: 3px;
+    background-color: var(--color-base-100);
+    border-radius: calc(var(--radius-field) - 3px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: left 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                width 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+    will-change: left, width, transform;
+  }
+
+  .segment-indicator-animating {
+    animation: segment-squish 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* =============================================
+     Segment Button
+     ============================================= */
+
+  .segment-btn {
+    @apply relative flex items-center justify-center flex-1 border-none cursor-pointer font-medium whitespace-nowrap;
+    min-height: 36px;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    font-size: 0.875rem;
+    border-radius: calc(var(--radius-field) - 3px);
+    -webkit-tap-highlight-color: transparent;
+    z-index: 1;
+    transition: color 0.15s, transform 0.15s;
+
+    &:hover:not(.segment-btn-selected) {
+      @apply text-base-content;
+    }
+
+    &:active:not(.segment-btn-selected) {
+      transform: scale(0.96);
+    }
+  }
+
+  .segment-btn-selected,
+  .segment-btn[aria-selected="true"] {
+    @apply text-base-content;
+  }
+
+  .segment-btn-disabled {
+    @apply opacity-40 pointer-events-none;
+  }
+
+  /* Button content */
+  .segment-btn-icon {
+    @apply shrink-0;
+    width: 18px;
+    height: 18px;
+
+    & > svg {
+      @apply size-full;
+    }
+
+    & + .segment-btn-label {
+      margin-left: 0.25rem;
+    }
+  }
+
+  .segment-btn-label {
+    @apply overflow-hidden text-ellipsis;
+  }
+
+  .segment-btn-icon-only {
+    padding: 0.5rem;
+
+    & .segment-btn-icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  /* =============================================
+     Variants
+     ============================================= */
+
+  /* Primary (colored indicator) */
+  .segment-primary {
+    background-color: color-mix(in oklch, var(--color-primary) 15%, transparent);
+
+    & .segment-indicator {
+      background-color: var(--color-primary);
+    }
+
+    & .segment-btn-selected,
+    & .segment-btn[aria-selected="true"] {
+      color: var(--color-primary-content);
+    }
+  }
+
+  /* Outline */
+  .segment-outline {
+    @apply bg-transparent;
+    border: var(--border) solid var(--color-base-300);
+    padding: 0;
+
+    & .segment-btn {
+      @apply rounded-none;
+      border-right: var(--border) solid var(--color-base-300);
+
+      &:first-child {
+        border-radius: calc(var(--radius-field) - 1px) 0 0 calc(var(--radius-field) - 1px);
+      }
+
+      &:last-child {
+        border-radius: 0 calc(var(--radius-field) - 1px) calc(var(--radius-field) - 1px) 0;
+        border-right: none;
+      }
+    }
+
+    & .segment-indicator {
+      top: 0;
+      bottom: 0;
+      border-radius: calc(var(--radius-field) - 1px);
+      box-shadow: none;
+      background-color: var(--color-primary);
+    }
+
+    & .segment-btn-selected,
+    & .segment-btn[aria-selected="true"] {
+      color: var(--color-primary-content);
+    }
+  }
+
+  /* Rounded Pill */
+  .segment-rounded {
+    @apply rounded-full;
+    padding: 3px;
+
+    & .segment-btn {
+      @apply rounded-full;
+    }
+
+    & .segment-indicator {
+      @apply rounded-full;
+    }
+  }
+
+  /* =============================================
+     Color Variants
+     ============================================= */
+
+  .segment-success {
+    & .segment-indicator { background-color: var(--color-success); }
+    & .segment-btn-selected,
+    & .segment-btn[aria-selected="true"] { color: var(--color-success-content); }
+  }
+
+  .segment-error {
+    & .segment-indicator { background-color: var(--color-error); }
+    & .segment-btn-selected,
+    & .segment-btn[aria-selected="true"] { color: var(--color-error-content); }
+  }
+
+  .segment-warning {
+    & .segment-indicator { background-color: var(--color-warning); }
+    & .segment-btn-selected,
+    & .segment-btn[aria-selected="true"] { color: var(--color-warning-content); }
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .segment-sm {
+    padding: 2px;
+
+    & .segment-btn {
+      min-height: 28px;
+      padding: 0.25rem 0.5rem;
+      @apply text-xs;
+    }
+
+    & .segment-btn-icon {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .segment-lg {
+    padding: 3px;
+
+    & .segment-btn {
+      min-height: 44px;
+      padding: 0.75rem 1.5rem;
+      @apply text-base;
+    }
+
+    & .segment-btn-icon {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  /* =============================================
+     States
+     ============================================= */
+
+  .segment-disabled {
+    @apply opacity-50 pointer-events-none;
+  }
+
+  /* =============================================
+     Scrollable
+     ============================================= */
+
+  .segment-scrollable {
+    @apply flex overflow-x-auto scrollbar-hide;
+    -webkit-overflow-scrolling: touch;
+
+    & .segment-btn {
+      flex: 0 0 auto;
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .segment.glass {
+    @apply glass;
+    border: 0.5px solid var(--glass-border);
+
+    & .segment-indicator {
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    & .segment-btn-selected,
+    & .segment-btn[aria-selected="true"] {
+      @apply text-base-content;
+    }
+  }
+}
+
+/* =============================================
+   Squish animation
+   ============================================= */
+
+@keyframes segment-squish {
+  0% { transform: scaleX(1) scaleY(1); }
+  30% { transform: scaleX(1.08) scaleY(0.92); }
+  60% { transform: scaleX(0.96) scaleY(1.02); }
+  100% { transform: scaleX(1) scaleY(1); }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .segment-indicator {
+    transition: none;
+  }
+
+  .segment-indicator-animating {
+    animation: none;
+  }
+
+  .segment-btn {
+    transition: none;
+  }
+}
