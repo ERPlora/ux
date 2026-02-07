@@ -1,0 +1,264 @@
+/* Datetime — date/time picker with calendar, time selection, and native fallback */
+
+@layer components {
+
+  /* ---- Base ---- */
+  .datetime {
+    @apply relative flex flex-col w-full;
+  }
+
+  .datetime-label {
+    @apply block mb-1 text-sm font-medium text-base-content/60;
+  }
+
+  .datetime-trigger {
+    @apply flex items-center w-full px-4 bg-base-100 border border-base-300 rounded-field cursor-pointer;
+    min-height: var(--touch-target, 44px);
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .datetime-trigger:hover {
+    @apply border-base-content/30;
+  }
+
+  .datetime-open .datetime-trigger {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 15%, transparent);
+  }
+
+  .datetime-value {
+    @apply flex-1 text-base text-base-content;
+  }
+  .datetime-placeholder {
+    @apply text-base-content/40;
+  }
+
+  .datetime-icon {
+    @apply size-5 ml-2 text-base-content/60;
+  }
+  .datetime-icon svg {
+    @apply size-full;
+  }
+
+  /* ---- Native Input ---- */
+  .datetime-native {
+    @apply w-full px-4 text-base text-base-content bg-base-100 border border-base-300 rounded-field outline-none;
+    min-height: var(--touch-target, 44px);
+    font-size: 16px;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .datetime-native:hover {
+    @apply border-base-content/30;
+  }
+  .datetime-native:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 15%, transparent);
+  }
+  .datetime-native::-webkit-calendar-picker-indicator {
+    @apply cursor-pointer opacity-60;
+  }
+  .datetime-native::-webkit-calendar-picker-indicator:hover {
+    @apply opacity-100;
+  }
+
+  /* ---- Sizes ---- */
+  .datetime-sm .datetime-trigger,
+  .datetime-sm .datetime-native {
+    @apply px-3 text-sm;
+    min-height: var(--touch-target-sm, 36px);
+  }
+  .datetime-lg .datetime-trigger,
+  .datetime-lg .datetime-native {
+    @apply px-5 text-lg;
+    min-height: 52px;
+  }
+
+  /* ---- Glass ---- */
+  .datetime.glass .datetime-trigger {
+    @apply glass;
+    border: 0.5px solid var(--glass-border, rgba(255,255,255,0.18));
+  }
+  .datetime.glass .datetime-trigger:hover {
+    background: var(--glass-bg, rgba(255,255,255,0.72));
+  }
+
+  /* ---- Picker Dropdown ---- */
+  .datetime-picker {
+    @apply absolute left-0 bg-base-100 border border-base-300 rounded-box shadow-xl z-100 overflow-hidden;
+    top: calc(100% + 4px);
+    min-width: 280px;
+  }
+  .datetime-picker-footer {
+    @apply flex justify-end gap-2 p-3 border-t border-base-300;
+  }
+
+  /* ---- Calendar Header ---- */
+  .calendar-header {
+    @apply flex items-center justify-between p-3 border-b border-base-300;
+  }
+  .calendar-nav {
+    @apply flex items-center justify-center size-9 p-0 bg-transparent border-none rounded-full cursor-pointer;
+    color: var(--color-primary);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease;
+  }
+  .calendar-nav:hover {
+    background: color-mix(in oklch, var(--color-primary) 10%, transparent);
+  }
+  .calendar-nav:active {
+    background: color-mix(in oklch, var(--color-primary) 20%, transparent);
+  }
+  .calendar-nav:disabled {
+    @apply opacity-30 pointer-events-none;
+  }
+  .calendar-nav-icon {
+    @apply size-5;
+  }
+  .calendar-nav-icon svg {
+    @apply size-full;
+  }
+  .calendar-title {
+    @apply text-base font-semibold text-base-content cursor-pointer px-2 py-1 rounded-field;
+    transition: background-color 0.15s ease;
+  }
+  .calendar-title:hover {
+    @apply bg-base-200;
+  }
+
+  /* ---- Calendar Grid ---- */
+  .calendar-weekdays {
+    @apply grid grid-cols-7 px-2 py-1 border-b border-base-300;
+  }
+  .calendar-weekday {
+    @apply flex items-center justify-center h-8 text-xs font-semibold text-base-content/40 uppercase;
+  }
+  .calendar-days {
+    @apply grid grid-cols-7 p-2 gap-0.5;
+  }
+  .calendar-day {
+    @apply flex items-center justify-center size-9 mx-auto text-sm text-base-content bg-transparent border-none rounded-full cursor-pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .calendar-day:hover {
+    @apply bg-base-200;
+  }
+  .calendar-day-other {
+    @apply text-base-content/30;
+  }
+  .calendar-day-today {
+    @apply font-semibold;
+    color: var(--color-primary);
+  }
+  .calendar-day-selected {
+    background: var(--color-primary);
+    color: var(--color-primary-content, #fff);
+  }
+  .calendar-day-selected:hover {
+    background: color-mix(in oklch, var(--color-primary) 85%, black);
+  }
+  .calendar-day-disabled {
+    @apply opacity-30 pointer-events-none;
+  }
+  .calendar-day-range-start {
+    border-radius: 50% 0 0 50%;
+  }
+  .calendar-day-range-end {
+    border-radius: 0 50% 50% 0;
+  }
+  .calendar-day-in-range {
+    @apply rounded-none;
+    background: color-mix(in oklch, var(--color-primary) 15%, transparent);
+  }
+
+  /* ---- Month/Year Selectors ---- */
+  .calendar-months,
+  .calendar-years {
+    @apply grid grid-cols-3 gap-2 p-3;
+  }
+  .calendar-month,
+  .calendar-year {
+    @apply flex items-center justify-center h-10 text-sm text-base-content bg-transparent border-none rounded-field cursor-pointer;
+    transition: background-color 0.15s ease;
+  }
+  .calendar-month:hover,
+  .calendar-year:hover {
+    @apply bg-base-200;
+  }
+  .calendar-month-selected,
+  .calendar-year-selected {
+    background: var(--color-primary);
+    color: var(--color-primary-content, #fff);
+  }
+
+  /* ---- Inline Calendar ---- */
+  .calendar-inline {
+    @apply static shadow-none border border-base-300;
+  }
+
+  /* ---- Glass Calendar ---- */
+  .calendar.glass {
+    @apply glass;
+  }
+  .calendar.glass .calendar-header {
+    border-bottom-color: var(--glass-border, rgba(255,255,255,0.18));
+  }
+
+  /* ---- Time Picker ---- */
+  .time-picker {
+    @apply flex items-center justify-center p-4 gap-2 border-t border-base-300;
+  }
+  .time-picker-column {
+    @apply flex flex-col items-center;
+  }
+  .time-picker-label {
+    @apply text-xs text-base-content/40 mb-1;
+  }
+  .time-picker-input {
+    @apply w-15 h-11 p-0 text-xl font-semibold text-center text-base-content bg-base-200 border-none rounded-field outline-none;
+    -moz-appearance: textfield;
+  }
+  .time-picker-input::-webkit-outer-spin-button,
+  .time-picker-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .time-picker-input:focus {
+    background: color-mix(in oklch, var(--color-primary) 15%, transparent);
+  }
+  .time-picker-separator {
+    @apply text-xl font-semibold text-base-content pt-4;
+  }
+  .time-picker-period {
+    @apply flex flex-col gap-0.5 ml-2;
+  }
+  .time-picker-period-btn {
+    @apply px-2 py-1 text-xs font-semibold text-base-content/60 bg-transparent border-none rounded cursor-pointer;
+    transition: all 0.15s ease;
+  }
+  .time-picker-period-btn:hover {
+    @apply bg-base-200;
+  }
+  .time-picker-period-btn-active {
+    background: var(--color-primary);
+    color: var(--color-primary-content, #fff);
+  }
+
+  /* ---- Disabled ---- */
+  .datetime-disabled {
+    @apply opacity-50 pointer-events-none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .datetime-trigger,
+  .datetime-native,
+  .calendar-nav,
+  .calendar-day,
+  .time-picker-period-btn {
+    transition: none;
+  }
+}
