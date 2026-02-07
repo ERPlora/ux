@@ -1,0 +1,370 @@
+/* UX v3 - Sheet Component */
+/* Bottom sheet, side sheet, action sheet with glass, detents */
+
+@layer components {
+
+  /* =============================================
+     Sheet Backdrop
+     ============================================= */
+
+  .sheet-backdrop {
+    @apply fixed inset-0 invisible;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.35s, visibility 0.35s;
+
+    &[data-state="open"],
+    &.is-open {
+      @apply visible;
+      opacity: 1;
+      transition: opacity 0.3s, visibility 0.3s;
+
+      & .sheet {
+        transform: translateY(0);
+        transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+
+      & .side-sheet-left {
+        transform: translateX(0);
+        transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+
+      & .side-sheet-right {
+        transform: translateX(0);
+        transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+
+      & .action-sheet {
+        transform: translateY(0);
+        transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+    }
+  }
+
+  /* =============================================
+     Bottom Sheet
+     ============================================= */
+
+  .sheet {
+    @apply fixed left-0 right-0 bottom-0 flex flex-col;
+    max-height: 90dvh;
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box) var(--radius-box) 0 0;
+    border-top: 0.5px solid var(--color-base-200);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+    z-index: 50;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: env(safe-area-inset-bottom);
+    will-change: transform;
+  }
+
+  /* =============================================
+     Sheet Handle
+     ============================================= */
+
+  .sheet-handle {
+    @apply flex items-center justify-center shrink-0 cursor-grab;
+    padding: 0.5rem 0;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .sheet-handle-bar {
+    width: 36px;
+    height: 4px;
+    background-color: var(--color-base-300);
+    border-radius: 2px;
+  }
+
+  /* =============================================
+     Sheet Header
+     ============================================= */
+
+  .sheet-header {
+    @apply flex items-center justify-between shrink-0;
+    padding: 0.5rem 1.5rem;
+    border-bottom: 0.5px solid var(--color-base-200);
+  }
+
+  .sheet-header-no-border {
+    border-bottom: none;
+  }
+
+  .sheet-title {
+    @apply text-lg font-semibold text-base-content m-0;
+  }
+
+  .sheet-close {
+    @apply flex items-center justify-center border-none rounded-full cursor-pointer shrink-0;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: var(--color-base-200);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s;
+
+    &:hover {
+      background-color: var(--color-base-300);
+    }
+
+    & > svg {
+      @apply size-4.5;
+    }
+  }
+
+  /* =============================================
+     Sheet Content
+     ============================================= */
+
+  .sheet-content {
+    @apply flex-1 overflow-y-auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1.5rem;
+  }
+
+  .sheet-content-no-padding {
+    padding: 0;
+  }
+
+  /* =============================================
+     Sheet Footer
+     ============================================= */
+
+  .sheet-footer {
+    @apply flex flex-col shrink-0;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-top: 0.5px solid var(--color-base-200);
+
+    & .btn {
+      @apply w-full;
+    }
+  }
+
+  .sheet-footer-row {
+    @apply flex-row justify-end;
+
+    & .btn {
+      width: auto;
+      @apply flex-1;
+    }
+  }
+
+  /* =============================================
+     Sheet Sizes
+     ============================================= */
+
+  .sheet-sm  { height: 40dvh; max-height: 40dvh; }
+  .sheet-md  { height: 60dvh; max-height: 60dvh; }
+  .sheet-lg  { height: 80dvh; max-height: 80dvh; }
+  .sheet-full { height: 100dvh; max-height: 100dvh; @apply rounded-none; }
+  .sheet-auto { height: auto; max-height: 90dvh; }
+
+  /* =============================================
+     Sheet Detents (snap points)
+     ============================================= */
+
+  .sheet-detent-sm   { max-height: 25dvh; }
+  .sheet-detent-md   { max-height: 50dvh; }
+  .sheet-detent-lg   { max-height: 90dvh; }
+
+  /* =============================================
+     Sheet Dragging
+     ============================================= */
+
+  .sheet-dragging {
+    transition: none !important;
+  }
+
+  .sheet-scroll-lock .sheet-content {
+    overscroll-behavior-y: contain;
+  }
+
+  /* =============================================
+     Side Sheet
+     ============================================= */
+
+  .side-sheet {
+    @apply fixed top-0 bottom-0 flex flex-col;
+    width: 320px;
+    max-width: 85dvw;
+    background-color: var(--color-base-100);
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.15);
+    z-index: 50;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+
+  .side-sheet-left {
+    @apply left-0;
+    border-radius: 0 var(--radius-box) var(--radius-box) 0;
+    transform: translateX(-100%);
+  }
+
+  .side-sheet-right {
+    @apply right-0;
+    border-radius: var(--radius-box) 0 0 var(--radius-box);
+    transform: translateX(100%);
+  }
+
+  .side-sheet-header {
+    @apply flex items-center justify-between shrink-0;
+    min-height: 56px;
+    padding: 1rem 1.5rem;
+    padding-top: calc(1rem + env(safe-area-inset-top));
+    border-bottom: 0.5px solid var(--color-base-200);
+  }
+
+  .side-sheet-content {
+    @apply flex-1 overflow-y-auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .side-sheet-footer {
+    @apply shrink-0;
+    padding: 1rem 1.5rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    border-top: 0.5px solid var(--color-base-200);
+  }
+
+  /* =============================================
+     Action Sheet
+     ============================================= */
+
+  .action-sheet {
+    @apply fixed flex flex-col;
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    gap: 0.5rem;
+    z-index: 50;
+    transform: translateY(calc(100% + 1.5rem));
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: env(safe-area-inset-bottom);
+    will-change: transform;
+  }
+
+  .action-sheet-group {
+    background-color: var(--color-base-100);
+    border: 0.5px solid var(--color-base-200);
+    border-radius: var(--radius-box);
+    @apply overflow-hidden;
+  }
+
+  .action-sheet-header {
+    @apply text-center;
+    padding: 1rem 1.5rem;
+    border-bottom: 0.5px solid var(--color-base-200);
+  }
+
+  .action-sheet-title {
+    @apply text-sm font-semibold m-0;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .action-sheet-message {
+    @apply text-sm m-0;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  .action-sheet-btn {
+    @apply flex items-center justify-center w-full border-none cursor-pointer;
+    min-height: 56px;
+    padding: 1rem 1.5rem;
+    background: none;
+    color: var(--color-primary);
+    font-size: 1.125rem;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s;
+
+    &:not(:last-child) {
+      border-bottom: 0.5px solid var(--color-base-200);
+    }
+
+    &:hover {
+      background-color: var(--color-base-200);
+    }
+
+    &:active {
+      background-color: var(--color-base-300);
+    }
+  }
+
+  .action-sheet-btn-destructive {
+    color: var(--color-error);
+  }
+
+  .action-sheet-btn-cancel {
+    @apply font-semibold;
+  }
+
+  .action-sheet-btn-icon {
+    @apply shrink-0;
+    width: 24px;
+    height: 24px;
+    margin-right: 1rem;
+
+    & > svg {
+      @apply size-full;
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .sheet.glass {
+    @apply glass;
+    border-top: 0.5px solid var(--glass-border);
+
+    & .sheet-header {
+      border-bottom-color: var(--glass-border);
+    }
+
+    & .sheet-footer {
+      border-top-color: var(--glass-border);
+    }
+  }
+
+  .action-sheet.glass .action-sheet-group {
+    @apply glass;
+    border: 0.5px solid var(--glass-border);
+  }
+
+  .side-sheet.glass {
+    @apply glass;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-backdrop {
+    transition: opacity 0.1s ease, visibility 0.1s ease;
+  }
+
+  .sheet,
+  .side-sheet,
+  .action-sheet {
+    transition: transform 0.1s ease;
+  }
+
+  .sheet-backdrop[data-state="open"] .sheet,
+  .sheet-backdrop.is-open .sheet,
+  .sheet-backdrop[data-state="open"] .side-sheet-left,
+  .sheet-backdrop.is-open .side-sheet-left,
+  .sheet-backdrop[data-state="open"] .side-sheet-right,
+  .sheet-backdrop.is-open .side-sheet-right,
+  .sheet-backdrop[data-state="open"] .action-sheet,
+  .sheet-backdrop.is-open .action-sheet {
+    transition: transform 0.1s ease;
+  }
+}

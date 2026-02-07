@@ -1,0 +1,327 @@
+/* UX v3 - Carousel Component */
+/* Image/content carousel with navigation, dots, multiple transition effects */
+
+@layer components {
+
+  /* =============================================
+     Carousel Container
+     ============================================= */
+
+  .carousel {
+    @apply relative w-full overflow-hidden;
+  }
+
+  /* =============================================
+     Viewport & Track
+     ============================================= */
+
+  .carousel-viewport {
+    @apply overflow-hidden w-full;
+  }
+
+  .carousel-track {
+    @apply flex;
+    transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+    will-change: transform;
+  }
+
+  /* =============================================
+     Slide
+     ============================================= */
+
+  .carousel-slide {
+    @apply shrink-0;
+    box-sizing: border-box;
+  }
+
+  /* =============================================
+     Navigation Arrows
+     ============================================= */
+
+  .carousel-nav {
+    @apply absolute flex items-center justify-center rounded-full cursor-pointer;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-base-100);
+    border: var(--border) solid var(--color-base-300);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s, transform 0.15s, opacity 0.15s;
+
+    &:hover {
+      background-color: var(--color-base-200);
+    }
+
+    &:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    &:disabled {
+      @apply opacity-40 cursor-not-allowed pointer-events-none;
+    }
+
+    & > svg {
+      @apply size-5 text-base-content;
+    }
+  }
+
+  .carousel-nav-prev {
+    left: 0.5rem;
+  }
+
+  .carousel-nav-next {
+    right: 0.5rem;
+  }
+
+  /* Nav outside variant */
+  .carousel-nav-outside {
+    & .carousel-nav-prev {
+      left: calc(-1 * (40px + 1rem));
+    }
+    & .carousel-nav-next {
+      right: calc(-1 * (40px + 1rem));
+    }
+  }
+
+  /* Small nav */
+  .carousel-nav-sm .carousel-nav {
+    width: 32px;
+    height: 32px;
+
+    & > svg {
+      @apply size-4;
+    }
+  }
+
+  /* =============================================
+     Pagination Dots
+     ============================================= */
+
+  .carousel-pagination {
+    @apply flex justify-center;
+    gap: 0.25rem;
+    margin-top: 1rem;
+  }
+
+  .carousel-dot {
+    @apply border-none p-0 cursor-pointer rounded-full;
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-base-300);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s, transform 0.15s;
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    }
+  }
+
+  .carousel-dot-active {
+    background-color: var(--color-primary);
+    transform: scale(1.2);
+  }
+
+  /* Line dots variant */
+  .carousel-pagination-lines .carousel-dot {
+    width: 24px;
+    height: 4px;
+    border-radius: 2px;
+
+    &.carousel-dot-active {
+      transform: scaleX(1.2);
+    }
+  }
+
+  /* =============================================
+     Transition Variants
+     ============================================= */
+
+  .carousel-smooth .carousel-track {
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .carousel-fast .carousel-track {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .carousel-spring .carousel-track {
+    transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .carousel-dragging .carousel-track {
+    transition: none;
+    cursor: grabbing;
+  }
+
+  /* =============================================
+     Gap Variants
+     ============================================= */
+
+  .carousel-gap-xs .carousel-slide { padding: 0 0.25rem; }
+  .carousel-gap-xs .carousel-track { margin: 0 -0.25rem; }
+
+  .carousel-gap-sm .carousel-slide { padding: 0 0.5rem; }
+  .carousel-gap-sm .carousel-track { margin: 0 -0.5rem; }
+
+  .carousel-gap-md .carousel-slide { padding: 0 1rem; }
+  .carousel-gap-md .carousel-track { margin: 0 -1rem; }
+
+  .carousel-gap-lg .carousel-slide { padding: 0 1.5rem; }
+  .carousel-gap-lg .carousel-track { margin: 0 -1.5rem; }
+
+  /* =============================================
+     Slide Width Variants
+     ============================================= */
+
+  .carousel-show-1 .carousel-slide { width: 100%; }
+  .carousel-show-2 .carousel-slide { width: 50%; }
+  .carousel-show-3 .carousel-slide { width: 33.333333%; }
+  .carousel-show-4 .carousel-slide { width: 25%; }
+  .carousel-show-5 .carousel-slide { width: 20%; }
+  .carousel-show-6 .carousel-slide { width: 16.666666%; }
+
+  /* Auto width */
+  .carousel-auto .carousel-slide { width: auto; }
+
+  /* =============================================
+     Center Mode
+     ============================================= */
+
+  .carousel-center .carousel-slide {
+    transition: transform 0.15s;
+  }
+
+  .carousel-center .carousel-slide-active {
+    transform: scale(1.05);
+    z-index: 1;
+  }
+
+  /* =============================================
+     Fade Effect
+     ============================================= */
+
+  .carousel-fade {
+    & .carousel-track {
+      @apply block relative;
+    }
+
+    & .carousel-slide {
+      @apply absolute top-0 left-0 w-full;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    & .carousel-slide-active {
+      @apply relative;
+      opacity: 1;
+    }
+  }
+
+  /* =============================================
+     Peek Mode
+     ============================================= */
+
+  .carousel-peek .carousel-viewport {
+    @apply overflow-visible;
+  }
+
+  /* =============================================
+     Loading State
+     ============================================= */
+
+  .carousel-loading {
+    & .carousel-track {
+      @apply opacity-0;
+    }
+
+    &::after {
+      content: '';
+      @apply absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--color-base-300);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: carousel-spin 0.8s linear infinite;
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .carousel.glass .carousel-nav,
+  .carousel-nav.glass {
+    @apply glass;
+    border: 0.5px solid var(--glass-border);
+  }
+
+  .carousel.glass .carousel-pagination {
+    @apply glass rounded-full;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* =============================================
+   Keyframes
+   ============================================= */
+
+@keyframes carousel-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* =============================================
+   Responsive Breakpoints
+   ============================================= */
+
+@media (max-width: 1024px) {
+  .carousel-show-lg-1 .carousel-slide { width: 100%; }
+  .carousel-show-lg-2 .carousel-slide { width: 50%; }
+  .carousel-show-lg-3 .carousel-slide { width: 33.333333%; }
+  .carousel-show-lg-4 .carousel-slide { width: 25%; }
+}
+
+@media (max-width: 768px) {
+  .carousel-show-md-1 .carousel-slide { width: 100%; }
+  .carousel-show-md-2 .carousel-slide { width: 50%; }
+  .carousel-show-md-3 .carousel-slide { width: 33.333333%; }
+
+  .carousel-nav-hide-mobile .carousel-nav {
+    @apply hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-show-sm-1 .carousel-slide { width: 100%; }
+  .carousel-show-sm-2 .carousel-slide { width: 50%; }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel-track,
+  .carousel-smooth .carousel-track,
+  .carousel-fast .carousel-track,
+  .carousel-spring .carousel-track,
+  .carousel-center .carousel-slide {
+    transition: none;
+  }
+
+  .carousel-fade .carousel-slide {
+    transition: opacity 0.1s ease;
+  }
+
+  .carousel-loading::after {
+    animation: none;
+  }
+}
