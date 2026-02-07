@@ -1,0 +1,191 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Diff Viewer">
+  <p class="text-base-content/70 mb-6">Code diff viewer with unified and split views, line types, gutter numbers, word-level diffs, and expandable sections.</p>
+
+  <CodePreview
+    title="Unified Diff"
+    semantic={`<div class="diff diff-unified">
+  <div class="diff-header">
+    <span class="diff-title">app.js</span>
+    <div class="diff-stats">
+      <span class="diff-stat-added">+3</span>
+      <span class="diff-stat-removed">-1</span>
+    </div>
+  </div>
+  <div class="diff-content">
+    <div class="diff-line diff-line-context">
+      <span class="diff-gutter">1</span>
+      <span class="diff-gutter">1</span>
+      <span class="diff-marker"> </span>
+      <span class="diff-code">import express from 'express';</span>
+    </div>
+    <div class="diff-line diff-line-removed">
+      <span class="diff-gutter">2</span>
+      <span class="diff-gutter"> </span>
+      <span class="diff-marker">-</span>
+      <span class="diff-code">const port = 3000;</span>
+    </div>
+    <div class="diff-line diff-line-added">
+      <span class="diff-gutter"> </span>
+      <span class="diff-gutter">2</span>
+      <span class="diff-marker">+</span>
+      <span class="diff-code">const port = process.env.PORT || 3000;</span>
+    </div>
+    <div class="diff-line diff-line-added">
+      <span class="diff-gutter"> </span>
+      <span class="diff-gutter">3</span>
+      <span class="diff-marker">+</span>
+      <span class="diff-code">const host = process.env.HOST || 'localhost';</span>
+    </div>
+    <div class="diff-line diff-line-context">
+      <span class="diff-gutter">3</span>
+      <span class="diff-gutter">4</span>
+      <span class="diff-marker"> </span>
+      <span class="diff-code">const app = express();</span>
+    </div>
+    <div class="diff-line diff-line-added">
+      <span class="diff-gutter"> </span>
+      <span class="diff-gutter">5</span>
+      <span class="diff-marker">+</span>
+      <span class="diff-code">app.listen(port, host);</span>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="overflow-hidden font-mono text-[0.8125rem] leading-relaxed bg-base-100 border border-base-300 rounded-box">
+  <div class="flex items-center justify-between px-4 py-3 bg-base-200 border-b border-base-300">
+    <span class="font-semibold text-sm">app.js</span>
+    <div class="flex gap-3 text-xs">
+      <span class="text-success">+3</span>
+      <span class="text-error">-1</span>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <!-- Lines with flex layout: gutter | marker | code -->
+  </div>
+</div>`}
+    js={`// No JavaScript required for styling
+// Use a diff library like 'diff' or 'jsdiff' to compute changes`}
+  />
+
+  <CodePreview
+    title="Split View"
+    semantic={`<div class="diff diff-split">
+  <div class="diff-header">
+    <span class="diff-title">config.json</span>
+    <div class="diff-actions">
+      <button class="diff-action">Unified</button>
+      <button class="diff-action diff-action-active">Split</button>
+    </div>
+  </div>
+  <div class="diff-content">
+    <div class="diff-pane diff-pane-old">
+      <div class="diff-pane-header diff-pane-header-old">Original</div>
+      <div class="diff-line diff-line-context">
+        <span class="diff-gutter">1</span>
+        <span class="diff-code">{</span>
+      </div>
+      <div class="diff-line diff-line-removed">
+        <span class="diff-gutter">2</span>
+        <span class="diff-code">  "debug": false,</span>
+      </div>
+      <div class="diff-line diff-line-context">
+        <span class="diff-gutter">3</span>
+        <span class="diff-code">  "port": 8080</span>
+      </div>
+      <div class="diff-line diff-line-context">
+        <span class="diff-gutter">4</span>
+        <span class="diff-code">}</span>
+      </div>
+    </div>
+    <div class="diff-pane">
+      <div class="diff-pane-header diff-pane-header-new">Modified</div>
+      <div class="diff-line diff-line-context">
+        <span class="diff-gutter">1</span>
+        <span class="diff-code">{</span>
+      </div>
+      <div class="diff-line diff-line-added">
+        <span class="diff-gutter">2</span>
+        <span class="diff-code">  "debug": true,</span>
+      </div>
+      <div class="diff-line diff-line-context">
+        <span class="diff-gutter">3</span>
+        <span class="diff-code">  "port": 8080</span>
+      </div>
+      <div class="diff-line diff-line-context">
+        <span class="diff-gutter">4</span>
+        <span class="diff-code">}</span>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- diff-split: side-by-side panes for old/new -->
+<!-- diff-pane-old: left side with border-right -->
+<!-- diff-pane-header-old/new: colored headers (red/green) -->
+<!-- diff-action-active: highlighted toggle button -->`}
+    js={`// Toggle between unified and split views:
+// viewer.classList.toggle('diff-unified');
+// viewer.classList.toggle('diff-split');`}
+  />
+
+  <CodePreview
+    title="File Status Badges"
+    semantic={`<div class="diff">
+  <div class="diff-file">
+    <svg class="diff-file-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span class="diff-file-name">src/utils/helpers.ts</span>
+    <span class="diff-file-status diff-file-status-modified">Modified</span>
+  </div>
+  <div class="diff-content" style="padding: 1rem;">
+    <p class="text-sm" style="color: var(--color-base-content); opacity: 0.6;">Diff content goes here...</p>
+  </div>
+</div>
+
+<div class="diff mt-3">
+  <div class="diff-file">
+    <svg class="diff-file-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span class="diff-file-name">src/new-feature.ts</span>
+    <span class="diff-file-status diff-file-status-added">Added</span>
+  </div>
+</div>
+
+<div class="diff mt-3">
+  <div class="diff-file">
+    <svg class="diff-file-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span class="diff-file-name">src/old-module.ts</span>
+    <span class="diff-file-status diff-file-status-deleted">Deleted</span>
+  </div>
+</div>`}
+    tailwind={`<!-- File status badges: diff-file-status-modified (yellow), diff-file-status-added (green), diff-file-status-deleted (red), diff-file-status-renamed (blue) -->`}
+    js={`// No JavaScript required`}
+  />
+
+  <CodePreview
+    title="Word Diff & Highlights"
+    semantic={`<div class="diff diff-unified diff-word">
+  <div class="diff-header">
+    <span class="diff-title">Inline word changes</span>
+  </div>
+  <div class="diff-content">
+    <div class="diff-line diff-line-removed">
+      <span class="diff-gutter">5</span>
+      <span class="diff-gutter"> </span>
+      <span class="diff-marker">-</span>
+      <span class="diff-code">const message = <span class="diff-highlight-removed">"Hello World"</span>;</span>
+    </div>
+    <div class="diff-line diff-line-added">
+      <span class="diff-gutter"> </span>
+      <span class="diff-gutter">5</span>
+      <span class="diff-marker">+</span>
+      <span class="diff-code">const message = <span class="diff-highlight-added">"Hello, World!"</span>;</span>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- diff-highlight-added/removed: inline word-level background highlights -->
+<!-- diff-word: enables word-level diff mode -->`}
+    js={`// Use a word-diff algorithm to compute inline changes`}
+  />
+</DocsLayout>
