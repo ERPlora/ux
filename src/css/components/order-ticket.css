@@ -1,0 +1,488 @@
+/* UX v3 - Order Ticket Component */
+/* POS order ticket with status, items, modifiers, totals, timer, grid/column layouts */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .order-ticket {
+    @apply relative flex flex-col overflow-hidden;
+    width: 320px;
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box, 0.75rem);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Status top bar */
+    &::before {
+      content: '';
+      @apply absolute top-0 left-0 right-0;
+      height: 4px;
+      background-color: var(--ticket-status-color, var(--color-warning));
+    }
+  }
+
+  /* =============================================
+     Status Variants
+     ============================================= */
+
+  .order-ticket-pending {
+    --ticket-status-color: var(--color-warning);
+    --ticket-status-bg: color-mix(in oklch, var(--color-warning) 10%, transparent);
+  }
+
+  .order-ticket-preparing {
+    --ticket-status-color: var(--color-primary);
+    --ticket-status-bg: color-mix(in oklch, var(--color-primary) 10%, transparent);
+  }
+
+  .order-ticket-ready {
+    --ticket-status-color: var(--color-success);
+    --ticket-status-bg: color-mix(in oklch, var(--color-success) 10%, transparent);
+  }
+
+  .order-ticket-completed {
+    --ticket-status-color: #6b7280;
+    --ticket-status-bg: color-mix(in oklch, #6b7280 10%, transparent);
+    @apply opacity-70;
+  }
+
+  .order-ticket-cancelled {
+    --ticket-status-color: var(--color-error);
+    --ticket-status-bg: color-mix(in oklch, var(--color-error) 10%, transparent);
+    @apply opacity-50;
+  }
+
+  .order-ticket-urgent {
+    box-shadow: 0 0 0 2px var(--color-error), 0 8px 24px rgba(0, 0, 0, 0.12);
+    animation: order-ticket-urgent-pulse 2s ease-in-out infinite;
+  }
+
+  /* =============================================
+     Header
+     ============================================= */
+
+  .order-ticket-header {
+    @apply flex flex-col gap-1 shrink-0;
+    padding: 1rem;
+    padding-top: calc(1rem + 4px);
+    border-bottom: 1px solid var(--color-base-300);
+    background-color: var(--color-base-200);
+  }
+
+  .order-ticket-header-top {
+    @apply flex items-center justify-between gap-2;
+  }
+
+  .order-ticket-order-number {
+    @apply text-xl font-bold m-0;
+    color: var(--color-base-content);
+  }
+
+  .order-ticket-status {
+    @apply inline-flex items-center gap-1 text-xs font-semibold uppercase rounded-full;
+    padding: 4px 10px;
+    letter-spacing: 0.5px;
+    background-color: var(--ticket-status-bg, color-mix(in oklch, var(--color-warning) 10%, transparent));
+    color: var(--ticket-status-color, var(--color-warning));
+  }
+
+  .order-ticket-status-dot {
+    @apply rounded-full;
+    width: 6px;
+    height: 6px;
+    background-color: currentColor;
+  }
+
+  .order-ticket-status-pulse .order-ticket-status-dot {
+    animation: order-ticket-pulse 1.5s ease-in-out infinite;
+  }
+
+  .order-ticket-header-meta {
+    @apply flex items-center gap-4 text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .order-ticket-meta-item {
+    @apply flex items-center gap-1;
+  }
+
+  .order-ticket-meta-icon {
+    @apply w-3.5 h-3.5 opacity-70;
+
+    svg { @apply w-full h-full; }
+  }
+
+  .order-ticket-time { @apply font-medium; }
+
+  .order-ticket-table {
+    @apply font-semibold;
+    color: var(--color-base-content);
+  }
+
+  .order-ticket-type {
+    @apply text-xs font-medium;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: var(--color-base-300);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .order-ticket-type-dine-in {
+    background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+    color: var(--color-primary);
+  }
+
+  .order-ticket-type-takeout {
+    background-color: color-mix(in oklch, var(--color-warning) 10%, transparent);
+    color: var(--color-warning);
+  }
+
+  .order-ticket-type-delivery {
+    background-color: color-mix(in oklch, var(--color-accent, #8b5cf6) 10%, transparent);
+    color: var(--color-accent, #8b5cf6);
+  }
+
+  /* =============================================
+     Items
+     ============================================= */
+
+  .order-ticket-items {
+    @apply flex flex-col list-none m-0 p-0;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .order-ticket-item {
+    @apply flex items-start gap-2;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-base-300);
+    transition: background-color 0.15s ease;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background-color: var(--color-base-200); }
+  }
+
+  .order-ticket-item-completed {
+    @apply opacity-60 line-through;
+    text-decoration-color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .order-ticket-item-urgent {
+    background-color: color-mix(in oklch, var(--color-error) 10%, transparent);
+
+    .order-ticket-item-qty {
+      background-color: var(--color-error);
+      color: white;
+    }
+  }
+
+  .order-ticket-item-qty {
+    @apply flex items-center justify-center shrink-0 font-bold text-sm;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background-color: var(--color-base-300);
+    color: var(--color-base-content);
+  }
+
+  .order-ticket-item-content {
+    @apply flex-1 min-w-0 flex flex-col;
+    gap: 2px;
+  }
+
+  .order-ticket-item-name {
+    @apply font-semibold;
+    color: var(--color-base-content);
+    line-height: 1.3;
+  }
+
+  .order-ticket-item-modifiers {
+    @apply flex flex-col;
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .order-ticket-item-modifier {
+    @apply text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    padding-left: 0.5rem;
+
+    &::before { content: '+ '; color: color-mix(in oklch, var(--color-base-content) 40%, transparent); }
+  }
+
+  .order-ticket-item-modifier-remove {
+    color: var(--color-error);
+
+    &::before { content: '- '; color: var(--color-error); }
+  }
+
+  .order-ticket-item-notes {
+    @apply text-sm italic;
+    color: var(--color-warning);
+    margin-top: 4px;
+    padding: 4px 8px;
+    background-color: color-mix(in oklch, var(--color-warning) 8%, transparent);
+    border-radius: 4px;
+    border-left: 2px solid var(--color-warning);
+  }
+
+  .order-ticket-item-price {
+    @apply text-sm font-medium text-right shrink-0;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Footer / Totals
+     ============================================= */
+
+  .order-ticket-footer {
+    @apply flex flex-col gap-2 shrink-0;
+    padding: 1rem;
+    border-top: 1px solid var(--color-base-300);
+    background-color: var(--color-base-200);
+  }
+
+  .order-ticket-totals {
+    @apply flex flex-col gap-1;
+  }
+
+  .order-ticket-total-row {
+    @apply flex items-center justify-between text-sm;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .order-ticket-total-row-grand {
+    @apply text-lg font-bold;
+    padding-top: 0.5rem;
+    margin-top: 0.25rem;
+    border-top: 1px dashed var(--color-base-300);
+    color: var(--color-base-content);
+  }
+
+  .order-ticket-total-label { @apply flex-1; }
+  .order-ticket-total-value { @apply font-semibold text-right; }
+
+  /* =============================================
+     Actions
+     ============================================= */
+
+  .order-ticket-actions {
+    @apply flex items-center gap-2;
+    padding: 1rem;
+    padding-top: 0;
+  }
+
+  .order-ticket-actions-full {
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-base-300);
+  }
+
+  .order-ticket-action {
+    @apply flex-1 flex items-center justify-center gap-1 border-none text-sm font-semibold cursor-pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s ease;
+
+    &:active { transform: scale(0.98); }
+  }
+
+  .order-ticket-action-primary {
+    background-color: var(--color-primary);
+    color: white;
+    &:hover { filter: brightness(0.9); }
+  }
+
+  .order-ticket-action-success {
+    background-color: var(--color-success);
+    color: white;
+    &:hover { filter: brightness(0.9); }
+  }
+
+  .order-ticket-action-secondary {
+    background-color: var(--color-base-300);
+    color: var(--color-base-content);
+    &:hover { background-color: var(--color-base-300); filter: brightness(0.95); }
+  }
+
+  .order-ticket-action-icon {
+    @apply w-4 h-4;
+    svg { @apply w-full h-full; }
+  }
+
+  /* =============================================
+     Timer
+     ============================================= */
+
+  .order-ticket-timer {
+    @apply flex items-center gap-1 text-sm font-semibold;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .order-ticket-timer-warning { color: var(--color-warning); }
+
+  .order-ticket-timer-danger {
+    color: var(--color-error);
+    animation: order-ticket-blink 1s ease-in-out infinite;
+  }
+
+  .order-ticket-timer-icon {
+    @apply w-3.5 h-3.5;
+    svg { @apply w-full h-full; }
+  }
+
+  /* =============================================
+     Notes
+     ============================================= */
+
+  .order-ticket-notes {
+    @apply text-sm italic;
+    padding: 0.5rem 1rem;
+    color: var(--color-warning);
+    background-color: color-mix(in oklch, var(--color-warning) 8%, transparent);
+    border-top: 1px dashed var(--color-warning);
+  }
+
+  .order-ticket-notes-label {
+    @apply font-semibold not-italic mr-1;
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .order-ticket-sm {
+    width: 260px;
+    padding: 0.5rem;
+
+    .order-ticket-order-number { @apply text-lg; }
+    .order-ticket-item-name { @apply text-sm; }
+  }
+
+  .order-ticket-lg {
+    width: 380px;
+
+    .order-ticket-order-number { @apply text-2xl; }
+  }
+
+  .order-ticket-full { width: 100%; }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .order-ticket.glass {
+    @apply glass;
+
+    .order-ticket-header,
+    .order-ticket-footer {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+      border-color: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+    }
+
+    .order-ticket-item {
+      border-color: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+    }
+  }
+
+  /* =============================================
+     Grid / Column Layouts
+     ============================================= */
+
+  .order-ticket-grid {
+    @apply grid gap-6 p-4;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+
+    .order-ticket { @apply w-full; }
+  }
+
+  .order-ticket-column {
+    @apply flex flex-col gap-4;
+    min-width: 320px;
+    padding: 1rem;
+    background-color: var(--color-base-200);
+    border-radius: var(--radius-box, 0.75rem);
+  }
+
+  .order-ticket-column-header {
+    @apply flex items-center justify-between text-sm font-semibold uppercase;
+    padding: 0.5rem;
+    letter-spacing: 0.5px;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .order-ticket-column-count {
+    @apply flex items-center justify-center text-xs font-bold;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 12px;
+    background-color: var(--color-base-300);
+    color: var(--color-base-content);
+  }
+}
+
+/* =============================================
+   Animations
+   ============================================= */
+
+@keyframes order-ticket-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+@keyframes order-ticket-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes order-ticket-urgent-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px var(--color-error), 0 8px 24px rgba(0, 0, 0, 0.12); }
+  50% { box-shadow: 0 0 0 4px color-mix(in oklch, var(--color-error) 40%, transparent), 0 8px 24px rgba(0, 0, 0, 0.12); }
+}
+
+/* =============================================
+   Print
+   ============================================= */
+
+@media print {
+  .order-ticket {
+    width: 80mm;
+    box-shadow: none;
+    border: 1px solid #000;
+    border-radius: 0;
+    page-break-inside: avoid;
+
+    &::before { display: none; }
+  }
+
+  .order-ticket-header,
+  .order-ticket-footer { background-color: transparent; }
+  .order-ticket-actions { display: none; }
+  .order-ticket-items { max-height: none; overflow: visible; }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .order-ticket,
+  .order-ticket-item,
+  .order-ticket-action {
+    transition: none;
+  }
+
+  .order-ticket-urgent,
+  .order-ticket-status-pulse .order-ticket-status-dot,
+  .order-ticket-timer-danger {
+    animation: none;
+  }
+}
