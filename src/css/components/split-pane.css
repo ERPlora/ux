@@ -24,7 +24,8 @@
      ============================================= */
 
   .split-pane-toggle {
-    @apply fixed w-0 h-0 opacity-0 pointer-events-none;
+    @apply absolute w-px h-px opacity-0 pointer-events-none overflow-hidden;
+    clip: rect(0 0 0 0);
   }
 
   /* =============================================
@@ -53,7 +54,7 @@
     @apply shrink-0 h-full flex flex-col overflow-hidden;
     background-color: var(--color-base-100);
     border-left: 1px solid var(--color-base-300);
-    transition: width 0.2s ease, opacity 0.2s ease;
+    transition: width 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   }
 
   .split-pane-side-left {
@@ -96,6 +97,19 @@
   }
 
   /* =============================================
+     Backdrop (for mobile overlay)
+     ============================================= */
+
+  .split-pane-backdrop {
+    @apply hidden fixed inset-0 pointer-events-none;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 40;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* =============================================
      Collapsed state (class-based, for JS usage)
      ============================================= */
 
@@ -106,7 +120,6 @@
     @apply opacity-0 overflow-hidden;
   }
 
-  /* Flip chevron when collapsed (class-based) */
   .split-pane-collapsed .split-pane-divider-btn svg {
     transform: rotate(180deg);
   }
@@ -120,10 +133,22 @@
   }
 
   /* =============================================
-     Collapsed state (checkbox, NO JS)
+     Glass
      ============================================= */
 
-  /* Unchecked = collapsed (right side panel) */
+  .split-pane-side.glass {
+    @apply glass;
+    border-left-color: rgba(255, 255, 255, 0.18);
+  }
+}
+
+/* =============================================
+   Desktop (>= 992px) — side-by-side layout
+   ============================================= */
+
+@media (min-width: 992px) {
+
+  /* Checkbox: unchecked = collapsed (right side panel) */
   .split-pane-toggle:not(:checked) ~ .split-pane .split-pane-side:not(.split-pane-side-left) {
     width: 0;
     border-left: none;
@@ -134,7 +159,7 @@
     transform: rotate(180deg);
   }
 
-  /* Unchecked = collapsed (left side panel) */
+  /* Checkbox: unchecked = collapsed (left side panel) */
   .split-pane-toggle:not(:checked) ~ .split-pane .split-pane-side-left {
     width: 0;
     border-right: none;
@@ -150,52 +175,23 @@
     transform: rotate(0deg);
   }
 
-  /* =============================================
-     Backdrop (mobile)
-     ============================================= */
-
-  .split-pane-backdrop {
-    @apply hidden fixed inset-0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 40;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* =============================================
-     Glass
-     ============================================= */
-
-  .split-pane-side.glass {
-    @apply glass;
-    border-left-color: rgba(255, 255, 255, 0.18);
-  }
-}
-
-/* =============================================
-   Desktop (>= 992px)
-   ============================================= */
-
-@media (min-width: 992px) {
-  .split-pane-side {
-    @apply relative;
-    transform: translateX(0);
-  }
-
+  /* Desktop: backdrop always hidden */
   .split-pane-backdrop {
     display: none !important;
   }
 }
 
 /* =============================================
-   Mobile (< 992px)
+   Mobile (< 992px) — overlay from edge
    ============================================= */
 
 @media (max-width: 991px) {
+
+  /* Side panel becomes a fixed overlay */
   .split-pane-side {
     @apply fixed top-0 bottom-0;
     right: 0;
+    width: var(--split-pane-width, 320px);
     z-index: 50;
     transform: translateX(100%);
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
@@ -207,18 +203,54 @@
     transform: translateX(-100%);
   }
 
-  .split-pane-open .split-pane-side {
+  /* Checkbox: checked = slide in the panel */
+  .split-pane-toggle:checked ~ .split-pane .split-pane-side {
     transform: translateX(0);
   }
 
-  .split-pane-backdrop {
+  /* Backdrop visible when checked */
+  .split-pane-toggle:checked ~ .split-pane .split-pane-backdrop {
+    @apply block pointer-events-auto;
+    opacity: 1;
+  }
+
+  /* Unchecked = panel hidden, backdrop hidden */
+  .split-pane-toggle:not(:checked) ~ .split-pane .split-pane-backdrop {
     @apply block pointer-events-none;
     opacity: 0;
   }
 
+  /* Class-based JS fallback */
+  .split-pane-open .split-pane-side {
+    transform: translateX(0);
+  }
+
   .split-pane-open .split-pane-backdrop {
-    @apply pointer-events-auto;
+    @apply block pointer-events-auto;
     opacity: 1;
+  }
+
+  /* Hide divider on mobile — the toggle button floats instead */
+  .split-pane-divider {
+    @apply hidden;
+  }
+
+  /* Floating toggle button for mobile */
+  .split-pane-mobile-toggle {
+    @apply fixed flex items-center justify-center cursor-pointer rounded-full shadow-lg;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 3rem;
+    height: 3rem;
+    z-index: 60;
+    background-color: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+    color: var(--color-base-content);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .split-pane-mobile-toggle svg {
+    @apply w-5 h-5;
   }
 }
 

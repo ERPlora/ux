@@ -25036,10 +25036,12 @@
 @layer components {
   .split-pane-toggle {
     pointer-events: none;
-    position: fixed;
-    height: calc(var(--spacing) * 0);
-    width: calc(var(--spacing) * 0);
+    position: absolute;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
     opacity: 0%;
+    clip: rect(0 0 0 0);
   }
   .split-pane {
     position: relative;
@@ -25067,7 +25069,7 @@
     overflow: hidden;
     background-color: var(--color-base-100);
     border-left: 1px solid var(--color-base-300);
-    transition: width 0.2s ease, opacity 0.2s ease;
+    transition: width 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   }
   .split-pane-side-left {
     order: -9999;
@@ -25109,6 +25111,17 @@
       transition: transform 0.2s ease;
     }
   }
+  .split-pane-backdrop {
+    pointer-events: none;
+    position: fixed;
+    inset: calc(var(--spacing) * 0);
+    display: none;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 40;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
   .split-pane-collapsed .split-pane-side {
     width: 0;
     border-left: none;
@@ -25125,6 +25138,16 @@
   .split-pane-collapsed:has(.split-pane-side-left) .split-pane-divider-btn svg {
     transform: rotate(0deg);
   }
+  .split-pane-side.glass {
+    background: var(--color-glass-bg);
+    backdrop-filter: blur(var(--blur-glass)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(180%);
+    border: 0.5px solid var(--color-glass-border);
+    box-shadow: var(--shadow-glass);
+    border-left-color: rgba(255, 255, 255, 0.18);
+  }
+}
+@media (min-width: 992px) {
   .split-pane-toggle:not(:checked) ~ .split-pane .split-pane-side:not(.split-pane-side-left) {
     width: 0;
     border-left: none;
@@ -25147,30 +25170,6 @@
     transform: rotate(0deg);
   }
   .split-pane-backdrop {
-    position: fixed;
-    inset: calc(var(--spacing) * 0);
-    display: none;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 40;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .split-pane-side.glass {
-    background: var(--color-glass-bg);
-    backdrop-filter: blur(var(--blur-glass)) saturate(180%);
-    -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(180%);
-    border: 0.5px solid var(--color-glass-border);
-    box-shadow: var(--shadow-glass);
-    border-left-color: rgba(255, 255, 255, 0.18);
-  }
-}
-@media (min-width: 992px) {
-  .split-pane-side {
-    position: relative;
-    transform: translateX(0);
-  }
-  .split-pane-backdrop {
     display: none !important;
   }
 }
@@ -25180,6 +25179,7 @@
     top: calc(var(--spacing) * 0);
     bottom: calc(var(--spacing) * 0);
     right: 0;
+    width: var(--split-pane-width, 320px);
     z-index: 50;
     transform: translateX(100%);
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
@@ -25189,17 +25189,52 @@
     left: 0;
     transform: translateX(-100%);
   }
-  .split-pane-open .split-pane-side {
+  .split-pane-toggle:checked ~ .split-pane .split-pane-side {
     transform: translateX(0);
   }
-  .split-pane-backdrop {
+  .split-pane-toggle:checked ~ .split-pane .split-pane-backdrop {
+    pointer-events: auto;
+    display: block;
+    opacity: 1;
+  }
+  .split-pane-toggle:not(:checked) ~ .split-pane .split-pane-backdrop {
     pointer-events: none;
     display: block;
     opacity: 0;
   }
+  .split-pane-open .split-pane-side {
+    transform: translateX(0);
+  }
   .split-pane-open .split-pane-backdrop {
     pointer-events: auto;
+    display: block;
     opacity: 1;
+  }
+  .split-pane-divider {
+    display: none;
+  }
+  .split-pane-mobile-toggle {
+    position: fixed;
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(infinity * 1px);
+    --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 3rem;
+    height: 3rem;
+    z-index: 60;
+    background-color: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+    color: var(--color-base-content);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .split-pane-mobile-toggle svg {
+    height: calc(var(--spacing) * 5);
+    width: calc(var(--spacing) * 5);
   }
 }
 @media (prefers-reduced-motion: reduce) {
