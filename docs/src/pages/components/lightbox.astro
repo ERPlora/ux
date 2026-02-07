@@ -1,0 +1,237 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Lightbox">
+  <p class="text-base-content/70 mb-6">Fullscreen image viewer with navigation, thumbnails, zoom controls, captions, and keyboard support.</p>
+
+  <CodePreview
+    title="Basic Lightbox"
+    semantic={`<!-- Trigger -->
+<button class="lightbox-trigger" onclick="document.getElementById('lb-demo').classList.add('lightbox-open')">
+  <img src="https://picsum.photos/300/200?random=1" alt="Sample" class="rounded-lg cursor-pointer" style="max-width: 300px;" />
+</button>
+
+<!-- Lightbox -->
+<div id="lb-demo" class="lightbox">
+  <div class="lightbox-backdrop"></div>
+  <div class="lightbox-container">
+    <div class="lightbox-header">
+      <span class="lightbox-title">Mountain Landscape</span>
+      <div class="lightbox-actions">
+        <button class="lightbox-btn" onclick="this.closest('.lightbox').classList.remove('lightbox-open')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="lightbox-image-container">
+      <div class="lightbox-image-wrapper">
+        <img src="https://picsum.photos/1200/800?random=1" alt="Mountain Landscape" class="lightbox-image" />
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Lightbox uses fixed fullscreen overlay with z-500.
+     Core structure: backdrop (bg-black/95) + container (flex-col) + header + image area.
+     Toggle visibility with opacity/visibility classes. -->`}
+    js={`// Open lightbox:
+document.getElementById('lb-demo').classList.add('lightbox-open');
+
+// Close lightbox:
+document.getElementById('lb-demo').classList.remove('lightbox-open');
+
+// Close on Escape:
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelector('.lightbox-open')?.classList.remove('lightbox-open');
+  }
+});`}
+  />
+
+  <CodePreview
+    title="Navigation & Counter"
+    semantic={`<div style="position: relative; height: 350px; background: #000; border-radius: var(--radius-box, 1rem); overflow: hidden;">
+  <div class="lightbox-container" style="position: absolute; inset: 0;">
+    <div class="lightbox-header">
+      <span class="lightbox-counter">2 / 5</span>
+      <div class="lightbox-actions">
+        <button class="lightbox-btn" title="Download">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+        </button>
+        <button class="lightbox-btn" title="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="lightbox-image-container">
+      <button class="lightbox-nav lightbox-nav-prev">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+      </button>
+      <div class="lightbox-image-wrapper">
+        <img src="https://picsum.photos/800/500?random=2" alt="Photo 2 of 5" class="lightbox-image" />
+      </div>
+      <button class="lightbox-nav lightbox-nav-next">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+      </button>
+    </div>
+    <div class="lightbox-footer">
+      <div class="lightbox-caption">
+        <div class="lightbox-caption-title">Coastal Sunset</div>
+        <div class="lightbox-caption-description">Beautiful sunset view from the cliffs.</div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Navigation buttons: absolute positioned, top-50% -translate-y-50%,
+     size-12 bg-black/50 rounded-full. Left button: left-3, Right: right-3.
+     Counter: text-sm text-white/70. -->`}
+    js={`// Navigate with arrow keys:
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') prevImage();
+  if (e.key === 'ArrowRight') nextImage();
+});
+
+// Navigate buttons:
+document.querySelector('.lightbox-nav-prev').onclick = prevImage;
+document.querySelector('.lightbox-nav-next').onclick = nextImage;`}
+  />
+
+  <CodePreview
+    title="Thumbnails"
+    semantic={`<div style="position: relative; height: 380px; background: #000; border-radius: var(--radius-box, 1rem); overflow: hidden;">
+  <div class="lightbox-container" style="position: absolute; inset: 0;">
+    <div class="lightbox-header">
+      <span class="lightbox-counter">1 / 4</span>
+      <div class="lightbox-actions">
+        <button class="lightbox-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="lightbox-image-container">
+      <div class="lightbox-image-wrapper">
+        <img src="https://picsum.photos/800/500?random=10" alt="Photo 1" class="lightbox-image" />
+      </div>
+    </div>
+    <div class="lightbox-footer">
+      <div class="lightbox-thumbnails">
+        <button class="lightbox-thumbnail lightbox-thumbnail-active">
+          <img src="https://picsum.photos/80/80?random=10" alt="Thumb 1" />
+        </button>
+        <button class="lightbox-thumbnail">
+          <img src="https://picsum.photos/80/80?random=11" alt="Thumb 2" />
+        </button>
+        <button class="lightbox-thumbnail">
+          <img src="https://picsum.photos/80/80?random=12" alt="Thumb 3" />
+        </button>
+        <button class="lightbox-thumbnail">
+          <img src="https://picsum.photos/80/80?random=13" alt="Thumb 4" />
+        </button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Thumbnails: flex row, gap-1, centered, overflow-x-auto.
+     Each thumbnail: size-12 rounded-sm overflow-hidden, opacity-0.5.
+     Active thumbnail: opacity-1, border-2 border-white. -->`}
+    js={`// Switch active thumbnail:
+thumbnails.forEach((thumb, i) => {
+  thumb.onclick = () => {
+    document.querySelector('.lightbox-thumbnail-active')?.classList.remove('lightbox-thumbnail-active');
+    thumb.classList.add('lightbox-thumbnail-active');
+    showImage(i);
+  };
+});`}
+  />
+
+  <CodePreview
+    title="Zoom Controls"
+    semantic={`<div style="position: relative; height: 350px; background: #000; border-radius: var(--radius-box, 1rem); overflow: hidden;">
+  <div class="lightbox-container" style="position: absolute; inset: 0;">
+    <div class="lightbox-header">
+      <span class="lightbox-title">Zoomable Image</span>
+      <div class="lightbox-actions">
+        <button class="lightbox-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="lightbox-image-container">
+      <div class="lightbox-image-wrapper">
+        <img src="https://picsum.photos/800/500?random=20" alt="Zoomable" class="lightbox-image" />
+      </div>
+    </div>
+    <div class="lightbox-zoom-controls">
+      <button class="lightbox-btn" title="Zoom in">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+      </button>
+      <span class="lightbox-zoom-level">100%</span>
+      <button class="lightbox-btn" title="Zoom out">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/></svg>
+      </button>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Zoom controls: absolute bottom-[80px] right-3, flex-col gap-1.
+     Zoom level: text-xs text-white bg-black/50 rounded-full px-2. -->`}
+    js={`// Zoom in/out with transform scale:
+let zoom = 1;
+function zoomIn() { zoom = Math.min(zoom + 0.25, 5); applyZoom(); }
+function zoomOut() { zoom = Math.max(zoom - 0.25, 0.5); applyZoom(); }
+function applyZoom() {
+  wrapper.style.transform = \`scale(\${zoom})\`;
+  zoomLabel.textContent = Math.round(zoom * 100) + '%';
+}`}
+  />
+
+  <CodePreview
+    title="Loading State"
+    semantic={`<div style="position: relative; height: 250px; background: #000; border-radius: var(--radius-box, 1rem); overflow: hidden;">
+  <div class="lightbox-container" style="position: absolute; inset: 0;">
+    <div class="lightbox-image-container">
+      <div class="lightbox-loading">
+        <div class="lightbox-spinner"></div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="flex items-center justify-center h-[250px] bg-black rounded-box">
+  <div class="size-10 rounded-full animate-spin" style="border: 3px solid rgba(255,255,255,0.2); border-top-color: white;"></div>
+</div>`}
+    js={`// Show spinner while image loads:
+const img = new Image();
+img.onload = () => {
+  spinner.style.display = 'none';
+  container.appendChild(img);
+};
+img.src = imageUrl;`}
+  />
+
+  <CodePreview
+    title="Trigger Element"
+    semantic={`<div class="flex gap-3">
+  <div class="lightbox-trigger">
+    <img src="https://picsum.photos/150/150?random=30" alt="Click to view" class="rounded-lg" style="width: 150px; height: 150px; object-fit: cover;" />
+  </div>
+  <div class="lightbox-trigger">
+    <img src="https://picsum.photos/150/150?random=31" alt="Click to view" class="rounded-lg" style="width: 150px; height: 150px; object-fit: cover;" />
+  </div>
+  <div class="lightbox-trigger">
+    <img src="https://picsum.photos/150/150?random=32" alt="Click to view" class="rounded-lg" style="width: 150px; height: 150px; object-fit: cover;" />
+  </div>
+</div>`}
+    tailwind={`<div class="flex gap-3">
+  <div class="cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+    <img src="https://picsum.photos/150/150?random=30" alt="Click to view" class="rounded-lg size-[150px] object-cover" />
+  </div>
+  <div class="cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+    <img src="https://picsum.photos/150/150?random=31" alt="Click to view" class="rounded-lg size-[150px] object-cover" />
+  </div>
+</div>`}
+    js={`// Wire triggers to lightbox:
+document.querySelectorAll('.lightbox-trigger').forEach((trigger, i) => {
+  trigger.onclick = () => { showImage(i); openLightbox(); };
+});`}
+  />
+</DocsLayout>

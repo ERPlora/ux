@@ -1,0 +1,255 @@
+/* Image Gallery — grid of images with masonry, featured layout, hover effects, lightbox */
+
+@layer components {
+
+  /* ---- Base ---- */
+  .gallery {
+    --gallery-gap: 0.5rem;
+    --gallery-radius: var(--radius-field, 0.5rem);
+  }
+
+  /* ---- Grid ---- */
+  .gallery-grid {
+    @apply grid;
+    gap: var(--gallery-gap);
+  }
+
+  /* Column Variants */
+  .gallery-cols-2 .gallery-grid { @apply grid-cols-2; }
+  .gallery-cols-3 .gallery-grid { @apply grid-cols-3; }
+  .gallery-cols-4 .gallery-grid { @apply grid-cols-4; }
+  .gallery-cols-5 .gallery-grid { @apply grid-cols-5; }
+  .gallery-cols-auto .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  /* Aspect Ratios */
+  .gallery-square .gallery-item { aspect-ratio: 1; }
+  .gallery-landscape .gallery-item { aspect-ratio: 4/3; }
+  .gallery-portrait .gallery-item { aspect-ratio: 3/4; }
+  .gallery-wide .gallery-item { aspect-ratio: 16/9; }
+
+  /* Masonry */
+  .gallery-masonry .gallery-grid {
+    @apply block;
+    column-count: 3;
+    column-gap: var(--gallery-gap);
+  }
+  .gallery-masonry .gallery-item {
+    aspect-ratio: auto;
+    break-inside: avoid;
+    margin-bottom: var(--gallery-gap);
+  }
+  .gallery-masonry.gallery-cols-2 .gallery-grid { column-count: 2; }
+  .gallery-masonry.gallery-cols-4 .gallery-grid { column-count: 4; }
+
+  /* Featured (first image large) */
+  .gallery-featured .gallery-grid {
+    @apply grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: repeat(2, 1fr);
+  }
+  .gallery-featured .gallery-item:first-child {
+    grid-row: span 2;
+  }
+
+  /* ---- Gallery Item ---- */
+  .gallery-item {
+    @apply relative overflow-hidden cursor-pointer;
+    aspect-ratio: 1;
+    border-radius: var(--gallery-radius);
+    background: color-mix(in oklch, var(--color-base-content) 8%, transparent);
+  }
+  .gallery-item:focus {
+    @apply outline-none;
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 30%, transparent);
+  }
+  .gallery-item img {
+    @apply size-full object-cover;
+    transition: transform 0.2s ease;
+  }
+  .gallery-item:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Overlay */
+  .gallery-item-overlay {
+    @apply absolute inset-0 flex items-center justify-center;
+    background: rgba(0, 0, 0, 0);
+    transition: background 0.15s ease;
+  }
+  .gallery-item:hover .gallery-item-overlay {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  .gallery-item-icon {
+    @apply size-8 text-white opacity-0;
+    transform: scale(0.8);
+    transition: all 0.15s ease;
+  }
+  .gallery-item:hover .gallery-item-icon {
+    @apply opacity-100;
+    transform: scale(1);
+  }
+
+  /* More indicator */
+  .gallery-more {
+    @apply absolute inset-0 flex items-center justify-center text-white text-2xl font-semibold;
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  /* Loading skeleton */
+  .gallery-item-loading {
+    background: linear-gradient(90deg,
+      color-mix(in oklch, var(--color-base-content) 8%, transparent) 0%,
+      color-mix(in oklch, var(--color-base-content) 15%, transparent) 50%,
+      color-mix(in oklch, var(--color-base-content) 8%, transparent) 100%
+    );
+    background-size: 200% 100%;
+    animation: gallery-shimmer 1.5s infinite;
+  }
+
+  /* ---- Gallery Lightbox ---- */
+  .gallery-lightbox {
+    @apply fixed inset-0 z-500 flex flex-col;
+    background: rgba(0, 0, 0, 0.95);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+  }
+  .gallery-lightbox-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .gallery-lightbox-header {
+    @apply flex items-center justify-between px-6 py-4 text-white;
+  }
+  .gallery-lightbox-counter {
+    @apply text-sm opacity-80;
+  }
+  .gallery-lightbox-actions {
+    @apply flex gap-2;
+  }
+  .gallery-lightbox-action {
+    @apply flex items-center justify-center size-10 bg-transparent border-none rounded-full text-white cursor-pointer;
+    transition: background 0.15s ease;
+  }
+  .gallery-lightbox-action:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .gallery-lightbox-action svg {
+    @apply size-6;
+  }
+
+  .gallery-lightbox-content {
+    @apply flex-1 flex items-center justify-center relative px-16 overflow-hidden;
+  }
+  .gallery-lightbox-image {
+    @apply max-w-full max-h-full object-contain select-none;
+    transform: scale(1);
+    transition: transform 0.15s ease;
+  }
+  .gallery-lightbox-image-zoomed {
+    @apply cursor-zoom-out;
+  }
+
+  .gallery-lightbox-nav {
+    @apply absolute top-1/2 -translate-y-1/2 flex items-center justify-center size-12 border-none rounded-full text-white cursor-pointer;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.15s ease;
+  }
+  .gallery-lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .gallery-lightbox-nav:disabled {
+    @apply opacity-30 cursor-not-allowed;
+  }
+  .gallery-lightbox-nav-prev {
+    @apply left-4;
+  }
+  .gallery-lightbox-nav-next {
+    @apply right-4;
+  }
+  .gallery-lightbox-nav svg {
+    @apply size-6;
+  }
+
+  .gallery-lightbox-caption {
+    @apply px-6 py-4 text-center text-white;
+  }
+  .gallery-lightbox-title {
+    @apply text-base font-semibold mb-1;
+  }
+  .gallery-lightbox-description {
+    @apply text-sm opacity-70;
+  }
+
+  /* Thumbnails */
+  .gallery-lightbox-thumbs {
+    @apply flex justify-center gap-2 p-4 overflow-x-auto scrollbar-hide;
+  }
+  .gallery-lightbox-thumb {
+    @apply shrink-0 rounded-sm overflow-hidden cursor-pointer;
+    width: 80px;
+    height: 80px;
+    opacity: 0.5;
+    border: 2px solid transparent;
+    transition: all 0.15s ease;
+  }
+  .gallery-lightbox-thumb:hover {
+    opacity: 0.8;
+  }
+  .gallery-lightbox-thumb-active {
+    opacity: 1;
+    border-color: white;
+  }
+  .gallery-lightbox-thumb img {
+    @apply size-full object-cover;
+  }
+}
+
+/* Keyframes */
+@keyframes gallery-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .gallery-cols-4 .gallery-grid,
+  .gallery-cols-5 .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .gallery-masonry.gallery-cols-4 .gallery-grid,
+  .gallery-masonry .gallery-grid {
+    column-count: 2;
+  }
+  .gallery-lightbox-content {
+    padding: 0 1rem;
+  }
+  .gallery-lightbox-nav {
+    @apply size-10;
+  }
+  .gallery-lightbox-nav-prev { left: 0.5rem; }
+  .gallery-lightbox-nav-next { right: 0.5rem; }
+  .gallery-lightbox-thumbs {
+    display: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .gallery-item img,
+  .gallery-item-overlay,
+  .gallery-item-icon,
+  .gallery-lightbox,
+  .gallery-lightbox-action,
+  .gallery-lightbox-nav,
+  .gallery-lightbox-thumb,
+  .gallery-lightbox-image {
+    transition: none;
+  }
+  .gallery-item-loading {
+    animation: none;
+  }
+}
