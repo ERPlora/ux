@@ -1,0 +1,270 @@
+/* UX v3 - Img Component */
+/* Responsive image container with shapes, loading states, and aspect ratios */
+
+@layer components {
+
+  /* =============================================
+     Base image container
+     ============================================= */
+
+  .img {
+    @apply relative block overflow-hidden;
+    background-color: var(--color-base-200);
+  }
+
+  /* =============================================
+     Image element
+     ============================================= */
+
+  .img-element {
+    @apply block w-full h-full opacity-0;
+    object-fit: var(--img-fit, cover);
+    object-position: var(--img-position, center);
+    transition: opacity 0.3s ease;
+  }
+
+  /* =============================================
+     Shape variants
+     ============================================= */
+
+  .img-rounded {
+    border-radius: var(--radius-box);
+  }
+
+  .img-circle {
+    @apply rounded-full;
+  }
+
+  /* =============================================
+     Object-fit variants
+     ============================================= */
+
+  .img-contain .img-element {
+    @apply object-contain;
+  }
+
+  .img-cover .img-element {
+    @apply object-cover;
+  }
+
+  .img-fill .img-element {
+    object-fit: fill;
+  }
+
+  .img-none .img-element {
+    @apply object-none;
+  }
+
+  .img-scale-down .img-element {
+    @apply object-scale-down;
+  }
+
+  /* =============================================
+     Aspect ratios
+     ============================================= */
+
+  .img-square {
+    @apply aspect-square;
+  }
+
+  .img-video {
+    @apply aspect-video;
+  }
+
+  .img-portrait {
+    aspect-ratio: 3 / 4;
+  }
+
+  .img-landscape {
+    aspect-ratio: 4 / 3;
+  }
+
+  .img-wide {
+    aspect-ratio: 21 / 9;
+  }
+
+  /* =============================================
+     Sizes
+     ============================================= */
+
+  .img-xs {
+    @apply w-8 h-8;
+  }
+
+  .img-sm {
+    @apply w-12 h-12;
+
+    & .img-placeholder svg {
+      @apply w-6 h-6;
+    }
+
+    & .img-error-icon {
+      @apply w-5 h-5;
+    }
+
+    & .img-error-text {
+      @apply hidden;
+    }
+  }
+
+  .img-md {
+    @apply w-20 h-20;
+  }
+
+  .img-lg {
+    @apply w-30 h-30;
+
+    & .img-placeholder svg {
+      @apply w-16 h-16;
+    }
+
+    & .img-error-icon {
+      @apply w-12 h-12;
+    }
+  }
+
+  .img-xl {
+    @apply w-50 h-50;
+  }
+
+  /* =============================================
+     Loaded state
+     ============================================= */
+
+  .img-loaded .img-element {
+    @apply opacity-100;
+  }
+
+  .img-loaded .img-skeleton,
+  .img-loaded .img-lqip {
+    @apply opacity-0 pointer-events-none;
+  }
+
+  .img-loaded .img-placeholder {
+    @apply hidden;
+  }
+
+  /* =============================================
+     Error state
+     ============================================= */
+
+  .img-error .img-skeleton {
+    @apply opacity-0 pointer-events-none;
+  }
+
+  .img-error .img-error-display {
+    @apply flex;
+  }
+
+  /* =============================================
+     Skeleton / placeholder
+     ============================================= */
+
+  .img-skeleton {
+    @apply absolute inset-0 overflow-hidden;
+    background-color: var(--color-base-200);
+    transition: opacity 0.3s ease;
+
+    &::after {
+      content: '';
+      @apply absolute inset-0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+      transform: translateX(-100%);
+      animation: img-shimmer 1.5s infinite;
+    }
+  }
+
+  .img-placeholder {
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-50;
+    color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+
+    & svg {
+      @apply w-12 h-12;
+    }
+  }
+
+  /* =============================================
+     Error display
+     ============================================= */
+
+  .img-error-display {
+    @apply absolute inset-0 hidden flex-col items-center justify-center gap-2;
+    background-color: var(--color-base-200);
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .img-error-icon {
+    @apply w-8 h-8 opacity-50;
+  }
+
+  .img-error-text {
+    @apply text-xs text-center;
+    max-width: 80%;
+  }
+
+  /* =============================================
+     LQIP (low quality image placeholder)
+     ============================================= */
+
+  .img-lqip {
+    @apply absolute inset-0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(20px);
+    transform: scale(1.1);
+    transition: opacity 0.3s ease;
+  }
+
+  /* =============================================
+     Animation variants
+     ============================================= */
+
+  .img-fade .img-element {
+    transition: opacity 0.5s ease;
+  }
+
+  .img-zoom .img-element {
+    transform: scale(1.05);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .img-zoom.img-loaded .img-element {
+    transform: scale(1);
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .img.glass {
+    @apply glass;
+  }
+}
+
+/* =============================================
+   Keyframes
+   ============================================= */
+
+@keyframes img-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .img-skeleton::after {
+    animation: none;
+  }
+
+  .img-fade .img-element,
+  .img-zoom .img-element {
+    transition: none;
+  }
+
+  .img-zoom .img-element {
+    transform: none;
+  }
+}

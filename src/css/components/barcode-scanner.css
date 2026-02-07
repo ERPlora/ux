@@ -1,0 +1,398 @@
+/* UX v3 - Barcode Scanner Component */
+/* Camera-based barcode/QR scanner with viewfinder frame, scan line animation, controls, manual input, loading/error states */
+
+@layer components {
+
+  /* =============================================
+     Base Container
+     ============================================= */
+
+  .barcode-scanner {
+    @apply relative overflow-hidden;
+    background-color: var(--color-neutral, #111);
+    border-radius: var(--radius-box, 0.75rem);
+    aspect-ratio: 4/3;
+    max-width: 100%;
+  }
+
+  /* =============================================
+     Fullscreen
+     ============================================= */
+
+  .barcode-scanner-fullscreen {
+    @apply fixed inset-0 z-500;
+    border-radius: 0;
+    aspect-ratio: auto;
+  }
+
+  /* =============================================
+     Video Feed
+     ============================================= */
+
+  .barcode-scanner-video {
+    @apply w-full h-full object-cover;
+  }
+
+  /* =============================================
+     Overlay (contains frame + instructions)
+     ============================================= */
+
+  .barcode-scanner-overlay {
+    @apply absolute inset-0 flex flex-col items-center justify-center pointer-events-none;
+  }
+
+  /* =============================================
+     Viewfinder Frame
+     ============================================= */
+
+  .barcode-scanner-frame {
+    @apply relative;
+    width: 70%;
+    max-width: 300px;
+    aspect-ratio: 1.5;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius-field, 0.5rem);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+
+    /* Top-left corner */
+    &::before {
+      content: '';
+      @apply absolute;
+      top: -2px;
+      left: -2px;
+      width: 20px;
+      height: 20px;
+      border-top: 3px solid var(--color-primary);
+      border-left: 3px solid var(--color-primary);
+      border-top-left-radius: var(--radius-field, 0.5rem);
+    }
+
+    /* Top-right corner */
+    &::after {
+      content: '';
+      @apply absolute;
+      top: -2px;
+      right: -2px;
+      width: 20px;
+      height: 20px;
+      border-top: 3px solid var(--color-primary);
+      border-right: 3px solid var(--color-primary);
+      border-top-right-radius: var(--radius-field, 0.5rem);
+    }
+  }
+
+  /* Bottom corners (extra element) */
+  .barcode-scanner-corners {
+    @apply absolute inset-0;
+
+    &::before {
+      content: '';
+      @apply absolute;
+      bottom: -2px;
+      left: -2px;
+      width: 20px;
+      height: 20px;
+      border-bottom: 3px solid var(--color-primary);
+      border-left: 3px solid var(--color-primary);
+      border-bottom-left-radius: var(--radius-field, 0.5rem);
+    }
+
+    &::after {
+      content: '';
+      @apply absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 20px;
+      height: 20px;
+      border-bottom: 3px solid var(--color-primary);
+      border-right: 3px solid var(--color-primary);
+      border-bottom-right-radius: var(--radius-field, 0.5rem);
+    }
+  }
+
+  /* =============================================
+     Scan Line Animation
+     ============================================= */
+
+  .barcode-scanner-scan-line {
+    @apply absolute left-0 right-0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+    animation: barcode-scan-line 2s ease-in-out infinite;
+  }
+
+  /* =============================================
+     Instructions Text
+     ============================================= */
+
+  .barcode-scanner-instructions {
+    @apply absolute text-sm text-center whitespace-nowrap;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* =============================================
+     Result Badge
+     ============================================= */
+
+  .barcode-scanner-result {
+    @apply absolute flex items-center gap-1 text-sm font-medium pointer-events-auto;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 1rem;
+    background-color: var(--color-success);
+    color: white;
+    border-radius: 9999px;
+    animation: barcode-scan-result 0.3s ease-out;
+
+    svg {
+      @apply w-4 h-4;
+    }
+  }
+
+  /* =============================================
+     Controls (top-right buttons)
+     ============================================= */
+
+  .barcode-scanner-controls {
+    @apply absolute flex gap-2 pointer-events-auto;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .barcode-scanner-btn {
+    @apply flex items-center justify-center border-none rounded-full cursor-pointer;
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    svg {
+      @apply w-5 h-5;
+    }
+  }
+
+  /* =============================================
+     Close Button (top-left)
+     ============================================= */
+
+  .barcode-scanner-close {
+    @apply absolute pointer-events-auto;
+    top: 1rem;
+    left: 1rem;
+  }
+
+  /* =============================================
+     Loading State
+     ============================================= */
+
+  .barcode-scanner-loading {
+    @apply absolute inset-0 flex flex-col items-center justify-center gap-4;
+    background-color: var(--color-neutral, #111);
+  }
+
+  .barcode-scanner-loading-spinner {
+    @apply rounded-full;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--color-primary);
+    animation: barcode-scan-spin 0.8s linear infinite;
+  }
+
+  .barcode-scanner-loading-text {
+    @apply text-sm;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  /* =============================================
+     Error State
+     ============================================= */
+
+  .barcode-scanner-error {
+    @apply absolute inset-0 flex flex-col items-center justify-center gap-4 text-center;
+    background-color: var(--color-neutral, #111);
+    padding: 2rem;
+  }
+
+  .barcode-scanner-error-icon {
+    @apply w-12 h-12;
+    color: var(--color-error);
+  }
+
+  .barcode-scanner-error-text {
+    @apply text-base;
+    color: white;
+  }
+
+  .barcode-scanner-error-hint {
+    @apply text-sm;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* =============================================
+     Manual Input
+     ============================================= */
+
+  .barcode-scanner-manual {
+    @apply absolute flex gap-2 pointer-events-auto;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .barcode-scanner-manual-input {
+    @apply border-none;
+    width: 200px;
+    height: 40px;
+    padding: 0 1rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    color: var(--color-neutral, #111);
+
+    &::placeholder {
+      color: var(--color-base-content, #999);
+      opacity: 0.5;
+    }
+  }
+
+  .barcode-scanner-manual-submit {
+    @apply border-none font-medium cursor-pointer;
+    height: 40px;
+    padding: 0 1rem;
+    border-radius: 9999px;
+    background-color: var(--color-primary);
+    color: white;
+    transition: opacity 0.15s ease;
+
+    &:hover {
+      @apply opacity-90;
+    }
+  }
+
+  /* =============================================
+     Scan History
+     ============================================= */
+
+  .barcode-scanner-history {
+    @apply absolute pointer-events-auto;
+    bottom: 1rem;
+    left: 1rem;
+    max-width: 200px;
+  }
+
+  .barcode-scanner-history-item {
+    @apply text-xs truncate;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: var(--radius-field, 0.5rem);
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.25rem;
+  }
+
+  /* =============================================
+     Format Badge
+     ============================================= */
+
+  .barcode-scanner-format {
+    @apply inline-block text-xs font-medium;
+    padding: 2px 6px;
+    background-color: color-mix(in oklch, var(--color-primary) 15%, transparent);
+    color: var(--color-primary);
+    border-radius: var(--radius-field, 0.5rem);
+    margin-right: 0.25rem;
+  }
+
+  /* =============================================
+     Glass Variant
+     ============================================= */
+
+  .barcode-scanner.glass .barcode-scanner-controls,
+  .barcode-scanner.glass .barcode-scanner-history-item {
+    @apply glass;
+  }
+}
+
+/* =============================================
+   Keyframes (outside @layer)
+   ============================================= */
+
+@keyframes barcode-scan-line {
+  0%, 100% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  50% { top: 100%; opacity: 1; }
+  60% { opacity: 0; }
+}
+
+@keyframes barcode-scan-result {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes barcode-scan-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   Dark Mode
+   ============================================= */
+
+[data-theme="dark"] .barcode-scanner-manual-input,
+.dark .barcode-scanner-manual-input {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .barcode-scanner-scan-line,
+  .barcode-scanner-loading-spinner,
+  .barcode-scanner-result {
+    animation: none;
+  }
+
+  .barcode-scanner-scan-line {
+    opacity: 1;
+    top: 50%;
+  }
+
+  .barcode-scanner-btn,
+  .barcode-scanner-manual-submit {
+    transition: none;
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .barcode-scanner-frame {
+    width: 85%;
+  }
+
+  .barcode-scanner-manual {
+    @apply flex-col;
+    width: calc(100% - 4rem);
+  }
+
+  .barcode-scanner-manual-input {
+    @apply w-full;
+  }
+}

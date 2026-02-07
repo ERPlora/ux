@@ -1,0 +1,320 @@
+/* UX v3 - Loyalty Card Component */
+/* Cards for loyalty programs, membership tiers, and rewards */
+
+@layer components {
+
+  /* =============================================
+     Base loyalty card
+     ============================================= */
+
+  .loyalty-card {
+    --loyalty-gradient: linear-gradient(135deg, #cd7f32, #b87333);
+    --loyalty-padding: 1.5rem;
+    --loyalty-radius: var(--radius-box);
+
+    @apply relative flex flex-col overflow-hidden text-white;
+    padding: var(--loyalty-padding);
+    border-radius: var(--loyalty-radius);
+    background: var(--loyalty-gradient);
+    min-height: 180px;
+  }
+
+  /* Shine effect overlay */
+  .loyalty-card::before {
+    content: '';
+    @apply absolute top-0 w-full h-full;
+    left: -100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .loyalty-card:hover::before {
+    left: 100%;
+  }
+
+  /* Decorative radial pattern */
+  .loyalty-card::after {
+    content: '';
+    @apply absolute pointer-events-none;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  }
+
+  /* =============================================
+     Tier variants
+     ============================================= */
+
+  .loyalty-card-bronze {
+    --loyalty-gradient: linear-gradient(135deg, #cd7f32, #b87333);
+  }
+
+  .loyalty-card-silver {
+    --loyalty-gradient: linear-gradient(135deg, #c0c0c0, #a8a8a8);
+    color: #333;
+  }
+
+  .loyalty-card-gold {
+    --loyalty-gradient: linear-gradient(135deg, #ffd700, #daa520);
+    color: #333;
+  }
+
+  .loyalty-card-platinum {
+    --loyalty-gradient: linear-gradient(135deg, #e5e4e2, #c4c3c0);
+    color: #333;
+  }
+
+  .loyalty-card-diamond {
+    --loyalty-gradient: linear-gradient(135deg, #b9f2ff, #89cff0);
+    color: #1e3a5f;
+  }
+
+  .loyalty-card-primary {
+    --loyalty-gradient: linear-gradient(135deg, var(--color-primary), color-mix(in oklch, var(--color-primary) 80%, black));
+  }
+
+  .loyalty-card-vip {
+    --loyalty-gradient: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #ffd700;
+  }
+
+  /* =============================================
+     Header
+     ============================================= */
+
+  .loyalty-card-header {
+    @apply flex justify-between items-start mb-auto relative z-1;
+  }
+
+  .loyalty-card-logo {
+    max-width: 80px;
+    max-height: 32px;
+  }
+
+  .loyalty-card-tier {
+    @apply text-xs font-bold uppercase tracking-wider rounded-full;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 255, 255, 0.2);
+    letter-spacing: 0.1em;
+  }
+
+  /* =============================================
+     Body
+     ============================================= */
+
+  .loyalty-card-body {
+    @apply relative z-1 mt-auto;
+  }
+
+  .loyalty-card-points-label {
+    @apply text-xs uppercase opacity-80;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  .loyalty-card-points {
+    @apply font-bold;
+    font-size: 2rem;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  .loyalty-card-points-suffix {
+    @apply font-normal opacity-80;
+    font-size: 1rem;
+    margin-left: 0.25rem;
+  }
+
+  /* =============================================
+     Footer
+     ============================================= */
+
+  .loyalty-card-footer {
+    @apply flex justify-between items-end relative z-1;
+    margin-top: 1rem;
+  }
+
+  .loyalty-card-member {
+    font-size: 0.875rem;
+  }
+
+  .loyalty-card-member-name {
+    @apply font-semibold;
+    margin-bottom: 0.125rem;
+  }
+
+  .loyalty-card-member-id {
+    @apply text-xs font-mono opacity-80;
+  }
+
+  .loyalty-card-expiry {
+    @apply text-xs text-right;
+  }
+
+  .loyalty-card-expiry-label {
+    @apply opacity-80;
+    margin-bottom: 0.125rem;
+  }
+
+  .loyalty-card-expiry-date {
+    @apply font-semibold;
+  }
+
+  /* =============================================
+     Progress bar (next tier)
+     ============================================= */
+
+  .loyalty-card-progress {
+    @apply relative z-1;
+    margin-top: 1rem;
+  }
+
+  .loyalty-card-progress-bar {
+    @apply w-full overflow-hidden;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    margin-bottom: 0.5rem;
+  }
+
+  .loyalty-card-progress-fill {
+    @apply h-full;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  .loyalty-card-progress-text {
+    @apply flex justify-between text-xs opacity-80;
+  }
+
+  /* =============================================
+     QR code area
+     ============================================= */
+
+  .loyalty-card-qr {
+    @apply absolute z-1;
+    bottom: var(--loyalty-padding);
+    right: var(--loyalty-padding);
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: var(--radius-field);
+    padding: 4px;
+  }
+
+  .loyalty-card-qr img,
+  .loyalty-card-qr canvas {
+    @apply w-full h-full object-contain;
+  }
+
+  /* =============================================
+     Compact variant
+     ============================================= */
+
+  .loyalty-card-compact {
+    --loyalty-padding: 1rem;
+    @apply flex-row items-center gap-4;
+    min-height: auto;
+
+    & .loyalty-card-header {
+      @apply mb-0;
+    }
+
+    & .loyalty-card-points {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* =============================================
+     Horizontal variant
+     ============================================= */
+
+  .loyalty-card-horizontal {
+    @apply flex-row items-center;
+    min-height: auto;
+    padding: 1rem 1.5rem;
+
+    & .loyalty-card-header {
+      @apply mb-0 mr-6;
+    }
+
+    & .loyalty-card-body {
+      @apply mt-0 flex-1;
+    }
+
+    & .loyalty-card-footer {
+      @apply mt-0 ml-auto flex-col items-end;
+    }
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .loyalty-card.glass {
+    @apply glass;
+    border: 1px solid var(--glass-border, rgba(255,255,255,0.18));
+    color: var(--color-base-content);
+
+    &::before,
+    &::after {
+      @apply hidden;
+    }
+
+    & .loyalty-card-tier {
+      background: var(--glass-bg-thick, rgba(255,255,255,0.85));
+    }
+
+    & .loyalty-card-progress-bar {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    & .loyalty-card-progress-fill {
+      background: var(--color-primary);
+    }
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .loyalty-card {
+    min-height: 160px;
+  }
+
+  .loyalty-card-points {
+    font-size: 1.75rem;
+  }
+
+  .loyalty-card-qr {
+    width: 50px;
+    height: 50px;
+  }
+
+  .loyalty-card-horizontal {
+    @apply flex-col items-stretch;
+
+    & .loyalty-card-footer {
+      @apply flex-row mt-4;
+    }
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .loyalty-card::before {
+    @apply hidden;
+  }
+
+  .loyalty-card-progress-fill {
+    transition: none;
+  }
+}

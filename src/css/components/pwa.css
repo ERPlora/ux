@@ -1,0 +1,249 @@
+/* UX v3 - PWA Component */
+/* Online/offline status bar, install banner, update prompt, offline overlay, cached badge */
+
+@layer components {
+
+  /* =============================================
+     Online / Offline Status Bar
+     ============================================= */
+
+  .pwa-status {
+    @apply fixed top-0 left-0 right-0 text-center font-medium;
+    z-index: 50;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .pwa-status-visible {
+    transform: translateY(0);
+  }
+
+  .pwa-status-offline {
+    background-color: var(--color-error);
+    color: var(--color-error-content);
+  }
+
+  .pwa-status-online {
+    background-color: var(--color-success);
+    color: var(--color-success-content);
+  }
+
+  /* =============================================
+     Install Banner
+     ============================================= */
+
+  .pwa-install {
+    @apply fixed bottom-0 left-0 right-0;
+    z-index: 40;
+    background-color: var(--color-base-100);
+    border-top: var(--border) solid var(--color-base-200);
+    padding: 1.5rem;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .pwa-install-visible {
+    transform: translateY(0);
+  }
+
+  .pwa-install-content {
+    @apply flex items-center;
+    gap: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .pwa-install-icon {
+    @apply shrink-0;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-field);
+    object-fit: contain;
+  }
+
+  .pwa-install-text {
+    @apply flex-1 min-w-0;
+  }
+
+  .pwa-install-title {
+    @apply font-semibold text-base-content;
+    font-size: 1rem;
+    margin-bottom: 2px;
+  }
+
+  .pwa-install-subtitle {
+    font-size: 0.875rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .pwa-install-actions {
+    @apply flex shrink-0;
+    gap: 0.5rem;
+  }
+
+  /* =============================================
+     Update Available Banner
+     ============================================= */
+
+  .pwa-update {
+    @apply fixed flex items-center justify-between;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    z-index: 40;
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+    border-radius: var(--radius-box);
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    transform: translateY(calc(100% + 2rem));
+    transition: transform 0.3s ease;
+  }
+
+  .pwa-update-visible {
+    transform: translateY(0);
+  }
+
+  .pwa-update-text {
+    @apply font-medium;
+    font-size: 0.875rem;
+  }
+
+  .pwa-update-btn {
+    @apply border-none font-medium cursor-pointer;
+    background: rgba(255, 255, 255, 0.2);
+    color: inherit;
+    padding: 0.25rem 1rem;
+    border-radius: var(--radius-field);
+    font-size: 0.875rem;
+    transition: background-color 0.15s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  /* =============================================
+     Offline Overlay
+     ============================================= */
+
+  .pwa-offline-overlay {
+    @apply fixed inset-0 flex flex-col items-center justify-center text-center;
+    z-index: 40;
+    background-color: var(--color-base-100);
+    padding: 2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+
+  .pwa-offline-overlay-visible {
+    @apply opacity-100 visible;
+  }
+
+  .pwa-offline-overlay-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.5rem;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .pwa-offline-overlay-title {
+    @apply font-semibold text-base-content;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .pwa-offline-overlay-subtitle {
+    font-size: 1rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    max-width: 300px;
+  }
+
+  /* =============================================
+     Cached Indicator Badge
+     ============================================= */
+
+  .pwa-cached {
+    @apply inline-flex items-center font-medium;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: var(--radius-field);
+    background-color: color-mix(in oklch, var(--color-success) 12%, transparent);
+    color: var(--color-success);
+  }
+
+  .pwa-cached-icon {
+    @apply size-3.5;
+  }
+
+  /* =============================================
+     Glass Variant
+     ============================================= */
+
+  .pwa-install.glass {
+    @apply glass;
+  }
+
+  .pwa-update.glass {
+    @apply glass;
+    color: var(--color-base-content);
+  }
+}
+
+/* =============================================
+   Safe Area Support
+   ============================================= */
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .pwa-status {
+    padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+  }
+}
+
+/* =============================================
+   iOS Safari Hint
+   ============================================= */
+
+@supports (-webkit-touch-callout: none) {
+  .pwa-install-subtitle-ios::after {
+    content: ' Tap Share then "Add to Home Screen"';
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .pwa-update {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .pwa-install {
+    padding: 1rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .pwa-status,
+  .pwa-install,
+  .pwa-update,
+  .pwa-offline-overlay {
+    transition: none;
+  }
+}

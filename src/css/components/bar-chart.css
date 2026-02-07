@@ -1,0 +1,261 @@
+/* UX v3 - Bar Chart Component */
+/* CSS-only bar chart with vertical/horizontal, stacked, compact, grid lines, color variants */
+
+@layer components {
+
+  /* =============================================
+     Variables
+     ============================================= */
+
+  .bar-chart {
+    --bar-chart-height: 240px;
+    --bar-chart-gap: 1rem;
+    --bar-chart-bar-radius: 6px;
+    --bar-chart-bar-color: var(--color-primary);
+  }
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .bar-chart {
+    @apply flex items-end;
+    gap: var(--bar-chart-gap);
+    height: var(--bar-chart-height);
+    padding: 1rem;
+  }
+
+  /* =============================================
+     Bar Item
+     ============================================= */
+
+  .bar-chart-item {
+    @apply flex-1 flex flex-col items-center justify-end h-full;
+    gap: 0.75rem;
+  }
+
+  /* =============================================
+     Value Label (top of bar)
+     ============================================= */
+
+  .bar-chart-value {
+    @apply text-center;
+  }
+
+  .bar-chart-value-main {
+    @apply text-sm font-bold;
+    color: var(--bar-color, var(--color-primary));
+  }
+
+  .bar-chart-value-sub {
+    @apply text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Bar
+     ============================================= */
+
+  .bar-chart-bar {
+    @apply relative w-full;
+    background: linear-gradient(to top, var(--bar-color, var(--bar-chart-bar-color)), color-mix(in oklch, var(--bar-color, var(--bar-chart-bar-color)) 70%, white));
+    border-radius: var(--bar-chart-bar-radius) var(--bar-chart-bar-radius) 0 0;
+    min-height: 4px;
+    transition: height 0.3s ease;
+
+    /* Dot indicator at top */
+    &::before {
+      content: '';
+      @apply absolute rounded-full;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 8px;
+      background-color: var(--bar-color, var(--color-primary));
+      border: 2px solid var(--color-base-100);
+    }
+  }
+
+  .bar-chart-bar-no-dot::before {
+    @apply hidden;
+  }
+
+  /* =============================================
+     Label (bottom of bar)
+     ============================================= */
+
+  .bar-chart-label {
+    @apply text-sm font-semibold text-center;
+    color: var(--color-base-content);
+  }
+
+  /* =============================================
+     Horizontal Variant
+     ============================================= */
+
+  .bar-chart-horizontal {
+    @apply flex-col items-stretch;
+    height: auto;
+  }
+
+  .bar-chart-horizontal .bar-chart-item {
+    @apply flex-row h-auto;
+    gap: 1rem;
+  }
+
+  .bar-chart-horizontal .bar-chart-label {
+    @apply text-left shrink-0;
+    width: 80px;
+  }
+
+  .bar-chart-horizontal .bar-chart-bar {
+    @apply flex-1;
+    height: 24px;
+    border-radius: 0 var(--bar-chart-bar-radius) var(--bar-chart-bar-radius) 0;
+    background: linear-gradient(to right, var(--bar-color, var(--bar-chart-bar-color)), color-mix(in oklch, var(--bar-color, var(--bar-chart-bar-color)) 70%, white));
+
+    &::before { @apply hidden; }
+  }
+
+  .bar-chart-horizontal .bar-chart-value {
+    @apply text-right shrink-0;
+    width: 80px;
+  }
+
+  /* =============================================
+     Stacked Variant
+     ============================================= */
+
+  .bar-chart-bar-stacked {
+    @apply flex flex-col-reverse bg-transparent;
+  }
+
+  .bar-chart-bar-segment {
+    @apply w-full;
+    transition: height 0.3s ease;
+  }
+
+  .bar-chart-bar-segment:first-child {
+    border-radius: 0 0 var(--bar-chart-bar-radius) var(--bar-chart-bar-radius);
+  }
+
+  .bar-chart-bar-segment:last-child {
+    border-radius: var(--bar-chart-bar-radius) var(--bar-chart-bar-radius) 0 0;
+  }
+
+  /* =============================================
+     Color Variants
+     ============================================= */
+
+  .bar-chart-primary { --bar-color: var(--color-primary); }
+  .bar-chart-success { --bar-color: var(--color-success); }
+  .bar-chart-warning { --bar-color: var(--color-warning); }
+  .bar-chart-error   { --bar-color: var(--color-error); }
+
+  /* Per-bar color via style attribute --bar-color */
+  .bar-chart-bar[style*="--bar-color"] {
+    background: linear-gradient(to top, var(--bar-color), color-mix(in oklch, var(--bar-color) 70%, white));
+  }
+
+  /* =============================================
+     Size Variants
+     ============================================= */
+
+  .bar-chart-sm {
+    --bar-chart-height: 160px;
+    --bar-chart-gap: 0.5rem;
+  }
+
+  .bar-chart-lg {
+    --bar-chart-height: 320px;
+    --bar-chart-gap: 1.5rem;
+  }
+
+  /* =============================================
+     Compact (mini sparkline style)
+     ============================================= */
+
+  .bar-chart-compact {
+    --bar-chart-height: 60px;
+    --bar-chart-gap: 0.25rem;
+    --bar-chart-bar-radius: 2px;
+    @apply p-0;
+
+    .bar-chart-value,
+    .bar-chart-label {
+      @apply hidden;
+    }
+
+    .bar-chart-bar::before {
+      @apply hidden;
+    }
+  }
+
+  /* =============================================
+     Grid Lines
+     ============================================= */
+
+  .bar-chart-grid {
+    @apply relative;
+    background-image: linear-gradient(
+      to top,
+      transparent 0%,
+      transparent 24%,
+      var(--color-base-300) 24%,
+      var(--color-base-300) 25%,
+      transparent 25%,
+      transparent 49%,
+      var(--color-base-300) 49%,
+      var(--color-base-300) 50%,
+      transparent 50%,
+      transparent 74%,
+      var(--color-base-300) 74%,
+      var(--color-base-300) 75%,
+      transparent 75%
+    );
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .bar-chart.glass {
+    @apply glass;
+    border-radius: var(--radius-box, 1rem);
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .bar-chart {
+    --bar-chart-gap: 0.5rem;
+    @apply overflow-x-auto;
+  }
+
+  .bar-chart-item {
+    min-width: 50px;
+  }
+
+  .bar-chart-value-main {
+    @apply text-xs;
+  }
+
+  .bar-chart-label {
+    @apply text-xs;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-chart-bar,
+  .bar-chart-bar-segment {
+    transition: none;
+  }
+}

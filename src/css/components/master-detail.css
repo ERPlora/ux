@@ -1,0 +1,192 @@
+/* UX v3 - Master Detail Component */
+/* Two-panel layout: left master list + right detail view. Ideal for admin interfaces. */
+
+@layer components {
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .master-detail {
+    --md-master-width: 280px;
+    --md-master-min: 240px;
+    --md-master-max: 400px;
+    --md-mobile-master-height: 40vh;
+
+    @apply flex flex-row h-full w-full overflow-hidden;
+    background-color: var(--color-base-200);
+  }
+
+  /* =============================================
+     Full height variants
+     ============================================= */
+
+  .master-detail-full {
+    height: 100dvh;
+  }
+
+  .master-detail-has-navbar {
+    height: calc(100dvh - var(--navbar-height, 56px));
+  }
+
+  /* =============================================
+     Master panel (left)
+     ============================================= */
+
+  .master-detail-master {
+    width: var(--md-master-width);
+    min-width: var(--md-master-min);
+    max-width: var(--md-master-max);
+    @apply shrink-0 flex flex-col overflow-hidden;
+    background-color: var(--color-base-100);
+    border-right: 1px solid var(--color-base-300);
+  }
+
+  .master-detail-master-header {
+    @apply shrink-0 p-4;
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .master-detail-master-content {
+    @apply flex-1 overflow-y-auto overflow-x-hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  .master-detail-master-footer {
+    @apply shrink-0 p-4;
+    border-top: 1px solid var(--color-base-300);
+  }
+
+  /* =============================================
+     Detail panel (right)
+     ============================================= */
+
+  .master-detail-detail {
+    @apply flex-1 min-w-0 flex flex-col overflow-hidden;
+    background-color: var(--color-base-200);
+  }
+
+  .master-detail-detail-header {
+    @apply shrink-0 p-4;
+    background-color: var(--color-base-100);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .master-detail-detail-content {
+    @apply flex-1 overflow-y-auto overflow-x-hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  .master-detail-detail-footer {
+    @apply shrink-0 p-4;
+    background-color: var(--color-base-100);
+    border-top: 1px solid var(--color-base-300);
+  }
+
+  /* =============================================
+     Empty state
+     ============================================= */
+
+  .master-detail-empty {
+    @apply flex items-center justify-center h-full text-center;
+    padding: 2.5rem;
+  }
+
+  .master-detail-empty-icon {
+    @apply mb-4;
+    color: var(--color-base-content);
+    opacity: 0.3;
+  }
+
+  .master-detail-empty-title {
+    @apply text-xl font-medium m-0 mb-2;
+  }
+
+  .master-detail-empty-text {
+    @apply text-base m-0;
+    color: var(--color-base-content);
+    opacity: 0.6;
+  }
+
+  /* =============================================
+     Width variants
+     ============================================= */
+
+  .master-detail-narrow {
+    --md-master-width: 240px;
+    --md-master-min: 200px;
+  }
+
+  .master-detail-wide {
+    --md-master-width: 350px;
+    --md-master-min: 300px;
+    --md-master-max: 500px;
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .master-detail.glass .master-detail-master {
+    @apply glass;
+    border-right-color: var(--color-glass-border);
+  }
+
+  .master-detail.glass .master-detail-detail {
+    background: var(--color-glass-bg);
+    backdrop-filter: blur(var(--blur-glass)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(180%);
+  }
+}
+
+/* =============================================
+   Responsive (mobile stacks vertically)
+   ============================================= */
+
+@media (max-width: 767px) {
+  .master-detail {
+    @apply flex-col;
+  }
+
+  .master-detail-master {
+    @apply w-full;
+    min-width: 100%;
+    max-width: 100%;
+    max-height: var(--md-mobile-master-height);
+    border-right: none;
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  .master-detail-detail {
+    @apply flex-1;
+    min-height: 0;
+  }
+
+  /* Collapsible master on mobile */
+  .master-detail-collapsible .master-detail-master {
+    @apply max-h-0 border-b-0;
+    transition: max-height 0.3s var(--ease-ios);
+  }
+
+  .master-detail-collapsible.master-detail-master-open .master-detail-master {
+    max-height: var(--md-mobile-master-height);
+    border-bottom: 1px solid var(--color-base-300);
+  }
+
+  /* Hide detail when master-only mode */
+  .master-detail-mobile-master-only .master-detail-detail {
+    @apply hidden;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .master-detail-collapsible .master-detail-master {
+    transition: none;
+  }
+}

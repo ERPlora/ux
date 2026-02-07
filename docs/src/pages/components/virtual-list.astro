@@ -1,0 +1,178 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Virtual List">
+  <p class="text-base-content/70 mb-6">Scroll container with windowing support for rendering large datasets efficiently. Only visible items are rendered in the DOM.</p>
+
+  <CodePreview
+    title="Basic Virtual List"
+    semantic={`<div class="virtual-list" style="height: 300px;">
+  <div class="virtual-list-container" style="height: 2000px;">
+    <div class="virtual-list-content" style="top: 0;">
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-base-300);">
+        <div style="font-weight: 500;">Item 1</div>
+        <div style="font-size: 0.75rem; opacity: 0.6;">Description for item 1</div>
+      </div>
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-base-300);">
+        <div style="font-weight: 500;">Item 2</div>
+        <div style="font-size: 0.75rem; opacity: 0.6;">Description for item 2</div>
+      </div>
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-base-300);">
+        <div style="font-weight: 500;">Item 3</div>
+        <div style="font-size: 0.75rem; opacity: 0.6;">Description for item 3</div>
+      </div>
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-base-300);">
+        <div style="font-weight: 500;">Item 4</div>
+        <div style="font-size: 0.75rem; opacity: 0.6;">Description for item 4</div>
+      </div>
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-base-300);">
+        <div style="font-weight: 500;">Item 5</div>
+        <div style="font-size: 0.75rem; opacity: 0.6;">Description for item 5</div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="relative overflow-y-auto overflow-x-hidden" style="height: 300px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;">
+  <div class="relative w-full" style="height: 2000px;">
+    <div class="absolute left-0 right-0 w-full" style="top: 0;">
+      <div class="box-border px-4 py-3 border-b border-base-300">
+        <div class="font-medium">Item 1</div>
+        <div class="text-xs opacity-60">Description for item 1</div>
+      </div>
+      <div class="box-border px-4 py-3 border-b border-base-300">
+        <div class="font-medium">Item 2</div>
+        <div class="text-xs opacity-60">Description for item 2</div>
+      </div>
+      <div class="box-border px-4 py-3 border-b border-base-300">
+        <div class="font-medium">Item 3</div>
+        <div class="text-xs opacity-60">Description for item 3</div>
+      </div>
+      <div class="box-border px-4 py-3 border-b border-base-300">
+        <div class="font-medium">Item 4</div>
+        <div class="text-xs opacity-60">Description for item 4</div>
+      </div>
+      <div class="box-border px-4 py-3 border-b border-base-300">
+        <div class="font-medium">Item 5</div>
+        <div class="text-xs opacity-60">Description for item 5</div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Virtual list windowing logic (simplified)
+const list = document.querySelector('.virtual-list');
+const container = list.querySelector('.virtual-list-container');
+const content = list.querySelector('.virtual-list-content');
+const itemHeight = 56; // fixed row height
+const totalItems = 1000;
+
+container.style.height = totalItems * itemHeight + 'px';
+
+list.addEventListener('scroll', () => &#123;
+  const scrollTop = list.scrollTop;
+  const startIndex = Math.floor(scrollTop / itemHeight);
+  const visibleCount = Math.ceil(list.clientHeight / itemHeight) + 1;
+  content.style.top = startIndex * itemHeight + 'px';
+  // Render items[startIndex..startIndex+visibleCount]
+&#125;);`}
+    height="360px"
+  />
+
+  <CodePreview
+    title="Striped Rows"
+    semantic={`<div class="virtual-list virtual-list-striped" style="height: 220px;">
+  <div class="virtual-list-container">
+    <div class="virtual-list-content">
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem;">Row 1 - Regular background</div>
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem;">Row 2 - Striped background</div>
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem;">Row 3 - Regular background</div>
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem;">Row 4 - Striped background</div>
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem;">Row 5 - Regular background</div>
+      <div class="virtual-list-item" style="padding: 0.75rem 1rem;">Row 6 - Striped background</div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="relative overflow-y-auto overflow-x-hidden" style="height: 220px;">
+  <div class="relative w-full">
+    <div class="absolute left-0 right-0 w-full">
+      <div class="px-4 py-3">Row 1 - Regular background</div>
+      <div class="px-4 py-3 bg-base-200">Row 2 - Striped background</div>
+      <div class="px-4 py-3">Row 3 - Regular background</div>
+      <div class="px-4 py-3 bg-base-200">Row 4 - Striped background</div>
+      <div class="px-4 py-3">Row 5 - Regular background</div>
+      <div class="px-4 py-3 bg-base-200">Row 6 - Striped background</div>
+    </div>
+  </div>
+</div>`}
+    js={`// No JavaScript required for striping - CSS handles :nth-child`}
+    height="280px"
+  />
+
+  <CodePreview
+    title="Loading State"
+    noFrame
+    semantic={`<div class="virtual-list" style="height: 200px;">
+  <div class="virtual-list-loader">
+    <div class="virtual-list-spinner"></div>
+    <span class="virtual-list-loader-text">Loading items...</span>
+  </div>
+</div>`}
+    tailwind={`<div class="relative overflow-y-auto overflow-x-hidden bg-base-100 rounded-xl border border-base-300" style="height: 200px;">
+  <div class="flex items-center justify-center p-6 text-base-content/60">
+    <div class="w-6 h-6 rounded-full border-2 border-base-300 border-t-primary animate-spin"></div>
+    <span class="ml-2 text-sm">Loading items...</span>
+  </div>
+</div>`}
+    js={`// Show loader while fetching data, then replace with items`}
+  />
+
+  <CodePreview
+    title="Empty State"
+    noFrame
+    semantic={`<div class="virtual-list" style="height: 250px;">
+  <div class="virtual-list-empty">
+    <svg class="virtual-list-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 13V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7m16 0v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5m16 0h-2.586a1 1 0 0 0-.707.293l-2.414 2.414a1 1 0 0 1-.707.293h-3.172a1 1 0 0 1-.707-.293l-2.414-2.414A1 1 0 0 0 6.586 13H4"></path></svg>
+    <h3 class="virtual-list-empty-title">No items found</h3>
+    <p class="virtual-list-empty-text">Try adjusting your filters or search query.</p>
+  </div>
+</div>`}
+    tailwind={`<div class="relative overflow-hidden bg-base-100 rounded-xl border border-base-300" style="height: 250px;">
+  <div class="flex flex-col items-center justify-center text-center p-10">
+    <svg class="w-12 h-12 mb-4 text-base-content/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 13V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7m16 0v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5m16 0h-2.586a1 1 0 0 0-.707.293l-2.414 2.414a1 1 0 0 1-.707.293h-3.172a1 1 0 0 1-.707-.293l-2.414-2.414A1 1 0 0 0 6.586 13H4"></path></svg>
+    <h3 class="text-lg font-semibold">No items found</h3>
+    <p class="text-sm text-base-content/60 mt-1">Try adjusting your filters or search query.</p>
+  </div>
+</div>`}
+    js={`// No JavaScript required - show empty state when list has no data`}
+  />
+
+  <!-- Reference Table -->
+  <div class="mt-8">
+    <h2 class="text-xl font-bold mb-4">Reference</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead>
+          <tr class="border-b border-base-300">
+            <th class="py-2 pr-4 font-semibold">Class</th>
+            <th class="py-2 font-semibold">Description</th>
+          </tr>
+        </thead>
+        <tbody class="font-mono text-xs">
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list</td><td>Scroll container with overscroll-behavior</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list-container</td><td>Spacer element (set total height)</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list-content</td><td>Positioned content (set top offset)</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list-item</td><td>Individual row item</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list-striped</td><td>Alternating row backgrounds</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list-bordered</td><td>Bottom borders on rows</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list-loader</td><td>Loading indicator container</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list-spinner</td><td>Spinning loader circle</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list-empty</td><td>Empty state container</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list-scroll-top</td><td>Scroll-to-top button</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list-scroll-top-visible</td><td>Shows scroll-to-top button</td></tr>
+          <tr class="border-b border-base-200"><td class="py-2 pr-4">.virtual-list.glass</td><td>Glassmorphism variant</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</DocsLayout>

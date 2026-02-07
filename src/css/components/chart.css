@@ -1,0 +1,206 @@
+/* UX v3 - Chart Component */
+/* CSS-only container for chart libraries (Chart.js, D3, etc.) with theming, legend, tooltip */
+
+@layer components {
+
+  /* =============================================
+     Variables
+     ============================================= */
+
+  .chart {
+    --chart-1: var(--color-primary);
+    --chart-2: var(--color-info);
+    --chart-3: var(--color-success);
+    --chart-4: var(--color-warning);
+    --chart-5: var(--color-error);
+    --chart-6: var(--color-secondary);
+    --chart-7: var(--color-accent);
+    --chart-8: oklch(0.70 0.15 200);
+    --chart-9: oklch(0.60 0.20 300);
+    --chart-10: oklch(0.65 0.18 340);
+    --chart-grid: var(--color-base-300);
+    --chart-axis: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    --chart-text: var(--color-base-content);
+    --chart-text-secondary: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Container
+     ============================================= */
+
+  .chart {
+    @apply relative block w-full overflow-hidden;
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box, 1rem);
+
+    /* Canvas for Chart.js */
+    canvas {
+      @apply block w-full max-w-full;
+    }
+  }
+
+  /* Bordered */
+  .chart-bordered {
+    border: 1px solid var(--color-base-300);
+  }
+
+  /* Padded */
+  .chart-padded {
+    @apply p-4;
+  }
+
+  /* Fixed Heights */
+  .chart-sm { height: 200px; }
+  .chart-md { height: 300px; }
+  .chart-lg { height: 400px; }
+  .chart-xl { height: 500px; }
+
+  /* =============================================
+     SVG Support (D3, matplotlib, etc.)
+     ============================================= */
+
+  .chart-svg {
+    svg {
+      @apply block w-full max-w-full;
+      height: auto;
+      background-color: var(--color-base-100);
+
+      /* Override white backgrounds */
+      rect[fill="#ffffff"],
+      rect[fill="white"],
+      rect.background {
+        fill: var(--color-base-100);
+      }
+
+      /* Override text colors */
+      text {
+        fill: var(--chart-text);
+      }
+
+      .tick text {
+        fill: var(--chart-text-secondary);
+      }
+
+      /* Map matplotlib default palette to chart tokens */
+      [fill="#1f77b4"] { fill: var(--chart-1); }
+      [stroke="#1f77b4"] { stroke: var(--chart-1); }
+      [fill="#ff7f0e"] { fill: var(--chart-2); }
+      [stroke="#ff7f0e"] { stroke: var(--chart-2); }
+      [fill="#2ca02c"] { fill: var(--chart-3); }
+      [stroke="#2ca02c"] { stroke: var(--chart-3); }
+      [fill="#d62728"] { fill: var(--chart-4); }
+      [stroke="#d62728"] { stroke: var(--chart-4); }
+      [fill="#9467bd"] { fill: var(--chart-5); }
+      [stroke="#9467bd"] { stroke: var(--chart-5); }
+    }
+  }
+
+  /* =============================================
+     Legend
+     ============================================= */
+
+  .chart-legend {
+    @apply flex flex-wrap items-center gap-4;
+    padding: 0.75rem 1rem;
+  }
+
+  .chart-legend-item {
+    @apply flex items-center gap-1.5 text-sm;
+    color: var(--chart-text-secondary);
+  }
+
+  .chart-legend-dot {
+    @apply shrink-0 rounded-full;
+    width: 10px;
+    height: 10px;
+    background-color: var(--chart-1);
+  }
+
+  /* =============================================
+     Tooltip (for custom chart tooltips)
+     ============================================= */
+
+  .chart-tooltip {
+    @apply fixed text-sm pointer-events-none;
+    z-index: 100;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--color-base-content);
+    color: var(--color-base-100);
+    border-radius: var(--radius-field, 0.5rem);
+    box-shadow: 0 8px 24px oklch(0 0 0 / 0.15);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+
+  .chart-tooltip-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .chart-tooltip-title {
+    @apply font-semibold;
+    margin-bottom: 2px;
+  }
+
+  .chart-tooltip-value {
+    @apply text-xs opacity-80;
+  }
+
+  /* =============================================
+     Header (title + actions above chart)
+     ============================================= */
+
+  .chart-header {
+    @apply flex items-center justify-between;
+    padding: 1rem 1rem 0;
+  }
+
+  .chart-title {
+    @apply text-base font-semibold m-0;
+    color: var(--color-base-content);
+  }
+
+  .chart-subtitle {
+    @apply text-xs;
+    color: var(--chart-text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  .chart-actions {
+    @apply flex items-center gap-2;
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .chart.glass {
+    @apply glass;
+    border-color: var(--color-glass-border);
+  }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .chart-padded {
+    @apply p-2;
+  }
+
+  .chart-legend {
+    @apply gap-3 text-xs;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-tooltip {
+    transition: none;
+  }
+}

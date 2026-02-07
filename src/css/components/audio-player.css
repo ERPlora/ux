@@ -1,0 +1,532 @@
+/* UX v3 - Audio Player Component */
+/* Audio player with controls, waveform, progress, playlist, mini/compact variants */
+
+@layer components {
+
+  /* =============================================
+     Base Container
+     ============================================= */
+
+  .audio-player {
+    @apply relative flex flex-col w-full;
+    padding: 1rem;
+    background-color: var(--color-base-100);
+    border-radius: var(--radius-box, 0.75rem);
+    border: 1px solid var(--color-base-300);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  /* =============================================
+     Track Info
+     ============================================= */
+
+  .audio-player-info {
+    @apply flex items-center gap-4 mb-4;
+  }
+
+  .audio-player-artwork {
+    @apply shrink-0 flex items-center justify-center overflow-hidden;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-field, 0.5rem);
+    background-color: var(--color-base-200);
+
+    & img {
+      @apply size-full object-cover;
+    }
+
+    & svg {
+      @apply size-8;
+      color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
+    }
+  }
+
+  .audio-player-meta {
+    @apply flex-1 min-w-0;
+  }
+
+  .audio-player-title {
+    @apply text-base font-semibold m-0 truncate;
+    color: var(--color-base-content);
+    margin-bottom: 0.25rem;
+  }
+
+  .audio-player-artist {
+    @apply text-sm m-0 truncate;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  /* =============================================
+     Waveform
+     ============================================= */
+
+  .audio-player-waveform {
+    @apply relative w-full cursor-pointer overflow-hidden mb-4;
+    height: 48px;
+    border-radius: 4px;
+
+    & canvas {
+      @apply block w-full h-full;
+    }
+  }
+
+  .audio-player-waveform-overlay {
+    @apply absolute top-0 left-0 h-full pointer-events-none;
+    background-color: var(--color-primary);
+    opacity: 0.3;
+    transition: width 0.05s linear;
+  }
+
+  /* =============================================
+     Progress Bar
+     ============================================= */
+
+  .audio-player-progress {
+    @apply relative w-full cursor-pointer;
+    height: 4px;
+    margin-bottom: 0.5rem;
+
+    &:hover .audio-player-progress-thumb,
+    &:active .audio-player-progress-thumb {
+      opacity: 1;
+    }
+
+    &:active .audio-player-progress-thumb {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+  }
+
+  .audio-player-progress-track {
+    @apply absolute w-full h-full overflow-hidden;
+    background-color: var(--color-base-300);
+    border-radius: 2px;
+  }
+
+  .audio-player-progress-fill {
+    @apply absolute h-full;
+    background-color: var(--color-primary);
+    border-radius: 2px;
+    transition: width 0.05s linear;
+  }
+
+  .audio-player-progress-buffer {
+    @apply absolute h-full;
+    background-color: var(--color-base-300);
+    opacity: 0.5;
+    border-radius: 2px;
+  }
+
+  .audio-player-progress-thumb {
+    @apply absolute rounded-full;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+
+  /* =============================================
+     Time Display
+     ============================================= */
+
+  .audio-player-time {
+    @apply flex justify-between text-xs mb-4;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .audio-player-time-current,
+  .audio-player-time-duration {
+    min-width: 40px;
+  }
+
+  .audio-player-time-current {
+    @apply text-left;
+  }
+
+  .audio-player-time-duration {
+    @apply text-right;
+  }
+
+  /* =============================================
+     Controls
+     ============================================= */
+
+  .audio-player-controls {
+    @apply flex items-center justify-center gap-2;
+  }
+
+  .audio-player-btn {
+    @apply flex items-center justify-center p-0 border-none bg-transparent rounded-full cursor-pointer;
+    width: 44px;
+    height: 44px;
+    color: var(--color-base-content);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease, transform 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-200);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      @apply opacity-40 cursor-not-allowed pointer-events-none;
+    }
+
+    & svg {
+      @apply size-6;
+    }
+  }
+
+  .audio-player-btn-sm {
+    width: 36px;
+    height: 36px;
+
+    & svg {
+      @apply size-5;
+    }
+  }
+
+  .audio-player-btn-play {
+    width: 56px;
+    height: 56px;
+    background-color: var(--color-primary);
+    color: var(--color-primary-content, white);
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-primary) 85%, black);
+    }
+
+    & svg {
+      @apply size-7;
+    }
+  }
+
+  /* =============================================
+     Secondary Controls (Volume / Speed)
+     ============================================= */
+
+  .audio-player-secondary {
+    @apply flex items-center justify-between mt-4 pt-4;
+    border-top: 1px solid var(--color-base-300);
+  }
+
+  .audio-player-volume {
+    @apply flex items-center gap-1 flex-1;
+    max-width: 150px;
+  }
+
+  .audio-player-volume-slider {
+    @apply flex-1 relative overflow-hidden cursor-pointer;
+    height: 4px;
+    background-color: var(--color-base-300);
+    border-radius: 2px;
+  }
+
+  .audio-player-volume-fill {
+    @apply absolute h-full;
+    background-color: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+    border-radius: 2px;
+    transition: width 0.05s linear;
+  }
+
+  .audio-player-volume-input {
+    @apply absolute w-full h-full m-0 cursor-pointer;
+    opacity: 0;
+    -webkit-appearance: none;
+  }
+
+  .audio-player-speed {
+    @apply flex items-center gap-1;
+  }
+
+  .audio-player-speed-btn {
+    @apply flex items-center justify-center text-xs font-medium cursor-pointer;
+    min-width: 48px;
+    height: 32px;
+    padding: 0 0.5rem;
+    border: 1px solid var(--color-base-300);
+    background-color: var(--color-base-100);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    border-radius: 4px;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-200);
+    }
+  }
+
+  .audio-player-speed-btn-active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-content, white);
+  }
+
+  /* =============================================
+     Playlist
+     ============================================= */
+
+  .audio-player-playlist {
+    @apply mt-4 pt-4 overflow-y-auto;
+    border-top: 1px solid var(--color-base-300);
+    max-height: 200px;
+  }
+
+  .audio-player-playlist-header {
+    @apply flex items-center justify-between mb-2;
+  }
+
+  .audio-player-playlist-title {
+    @apply text-sm font-semibold m-0;
+    color: var(--color-base-content);
+  }
+
+  .audio-player-playlist-count {
+    @apply text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .audio-player-playlist-item {
+    @apply flex items-center gap-2 cursor-pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-base-200);
+    }
+  }
+
+  .audio-player-playlist-item-active {
+    background-color: var(--color-primary);
+    color: var(--color-primary-content, white);
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-primary) 85%, black);
+    }
+
+    & .audio-player-playlist-item-index {
+      color: inherit;
+    }
+
+    & .audio-player-playlist-item-duration {
+      color: inherit;
+      opacity: 0.8;
+    }
+  }
+
+  .audio-player-playlist-item-index {
+    @apply text-xs text-center;
+    width: 24px;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  .audio-player-playlist-item-info {
+    @apply flex-1 min-w-0;
+  }
+
+  .audio-player-playlist-item-title {
+    @apply text-sm font-medium truncate;
+  }
+
+  .audio-player-playlist-item-duration {
+    @apply text-xs;
+    color: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  }
+
+  /* =============================================
+     Mini Variant
+     ============================================= */
+
+  .audio-player-mini {
+    @apply flex-row items-center gap-4;
+    padding: 0.5rem 1rem;
+
+    & .audio-player-artwork {
+      width: 48px;
+      height: 48px;
+    }
+
+    & .audio-player-info {
+      @apply mb-0 flex-1 min-w-0;
+    }
+
+    & .audio-player-meta {
+      @apply flex flex-col;
+    }
+
+    & .audio-player-title {
+      @apply text-sm;
+    }
+
+    & .audio-player-artist {
+      @apply text-xs;
+    }
+
+    & .audio-player-progress,
+    & .audio-player-time,
+    & .audio-player-secondary,
+    & .audio-player-waveform,
+    & .audio-player-playlist {
+      @apply hidden;
+    }
+
+    & .audio-player-controls {
+      @apply m-0 gap-1;
+    }
+
+    & .audio-player-btn-play {
+      width: 44px;
+      height: 44px;
+
+      & svg {
+        @apply size-5;
+      }
+    }
+
+    & .audio-player-mini-progress {
+      @apply absolute bottom-0 left-0 right-0;
+      height: 3px;
+      background-color: var(--color-base-300);
+    }
+
+    & .audio-player-mini-progress-fill {
+      @apply h-full;
+      background-color: var(--color-primary);
+      transition: width 0.1s linear;
+    }
+  }
+
+  /* =============================================
+     Compact Variant
+     ============================================= */
+
+  .audio-player-compact {
+    padding: 0.5rem 1rem;
+
+    & .audio-player-info {
+      margin-bottom: 0.5rem;
+    }
+
+    & .audio-player-artwork {
+      width: 48px;
+      height: 48px;
+    }
+
+    & .audio-player-secondary {
+      @apply hidden;
+    }
+  }
+
+  /* =============================================
+     Loading State
+     ============================================= */
+
+  .audio-player-loading .audio-player-btn-play {
+    @apply relative;
+    color: transparent;
+
+    &::after {
+      content: '';
+      @apply absolute rounded-full;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--color-primary-content, white);
+      border-top-color: transparent;
+      animation: audio-player-spin 0.8s linear infinite;
+    }
+  }
+
+  /* =============================================
+     Error State
+     ============================================= */
+
+  .audio-player-error {
+    border-color: var(--color-error);
+  }
+
+  .audio-player-error-msg {
+    @apply flex items-center gap-2 text-sm mb-4;
+    padding: 0.5rem;
+    background-color: color-mix(in oklch, var(--color-error) 10%, transparent);
+    border-radius: 4px;
+    color: var(--color-error);
+
+    & svg {
+      @apply size-5 shrink-0;
+    }
+  }
+
+  /* =============================================
+     Glass
+     ============================================= */
+
+  .audio-player.glass {
+    @apply glass;
+    border: 0.5px solid var(--glass-border);
+
+    & .audio-player-secondary,
+    & .audio-player-playlist {
+      border-top-color: var(--glass-border);
+    }
+
+    & .audio-player-speed-btn {
+      background-color: color-mix(in oklch, var(--color-base-100) 50%, transparent);
+      border-color: var(--glass-border);
+
+      &:hover {
+        background-color: color-mix(in oklch, var(--color-base-100) 70%, transparent);
+      }
+    }
+  }
+}
+
+/* =============================================
+   Keyframes
+   ============================================= */
+
+@keyframes audio-player-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   Responsive
+   ============================================= */
+
+@media (max-width: 767px) {
+  .audio-player-secondary {
+    @apply flex-col gap-4;
+  }
+
+  .audio-player-volume {
+    max-width: 100%;
+    @apply w-full;
+  }
+}
+
+/* =============================================
+   Reduced Motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .audio-player-progress-fill,
+  .audio-player-progress-thumb,
+  .audio-player-volume-fill,
+  .audio-player-btn,
+  .audio-player-waveform-overlay {
+    transition: none;
+  }
+
+  .audio-player-loading .audio-player-btn-play::after {
+    animation: none;
+  }
+}
