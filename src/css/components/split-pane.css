@@ -1,7 +1,31 @@
 /* UX v3 - Split Pane Component */
 /* Two-panel layout with main content and collapsible side panel */
+/*
+   Usage (checkbox, no JS):
+   <input type="checkbox" id="sp" class="split-pane-toggle" checked>
+   <div class="split-pane">
+     <div class="split-pane-main">...</div>
+     <div class="split-pane-divider">
+       <label for="sp" class="split-pane-divider-btn">
+         <svg>chevron</svg>
+       </label>
+     </div>
+     <div class="split-pane-side">...</div>
+   </div>
+
+   checked   = side panel visible
+   unchecked = side panel collapsed
+*/
 
 @layer components {
+
+  /* =============================================
+     Hidden checkbox toggle (no JS needed)
+     ============================================= */
+
+  .split-pane-toggle {
+    @apply fixed w-0 h-0 opacity-0 pointer-events-none;
+  }
 
   /* =============================================
      Container
@@ -29,7 +53,7 @@
     @apply shrink-0 h-full flex flex-col overflow-hidden;
     background-color: var(--color-base-100);
     border-left: 1px solid var(--color-base-300);
-    transition: transform 0.2s ease, width 0.2s ease, opacity 0.2s ease;
+    transition: width 0.2s ease, opacity 0.2s ease;
   }
 
   .split-pane-side-left {
@@ -39,7 +63,40 @@
   }
 
   /* =============================================
-     Collapsed state
+     Divider (always visible, sits between main & side)
+     ============================================= */
+
+  .split-pane-divider {
+    @apply shrink-0 flex flex-col items-center justify-center relative;
+    width: 1px;
+    background-color: var(--color-base-300);
+    z-index: 1;
+  }
+
+  .split-pane-divider-btn {
+    @apply flex items-center justify-center cursor-pointer rounded-full;
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+    color: var(--color-base-content);
+    opacity: 0.6;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      @apply opacity-100;
+      background-color: var(--color-base-300);
+    }
+
+    & svg {
+      @apply w-3.5 h-3.5;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  /* =============================================
+     Collapsed state (class-based, for JS usage)
      ============================================= */
 
   .split-pane-collapsed .split-pane-side {
@@ -47,6 +104,50 @@
     border-left: none;
     border-right: none;
     @apply opacity-0 overflow-hidden;
+  }
+
+  /* Flip chevron when collapsed (class-based) */
+  .split-pane-collapsed .split-pane-divider-btn svg {
+    transform: rotate(180deg);
+  }
+
+  .split-pane:has(.split-pane-side-left) .split-pane-divider-btn svg {
+    transform: rotate(180deg);
+  }
+
+  .split-pane-collapsed:has(.split-pane-side-left) .split-pane-divider-btn svg {
+    transform: rotate(0deg);
+  }
+
+  /* =============================================
+     Collapsed state (checkbox, NO JS)
+     ============================================= */
+
+  /* Unchecked = collapsed (right side panel) */
+  .split-pane-toggle:not(:checked) ~ .split-pane .split-pane-side:not(.split-pane-side-left) {
+    width: 0;
+    border-left: none;
+    @apply opacity-0 overflow-hidden;
+  }
+
+  .split-pane-toggle:not(:checked) ~ .split-pane .split-pane-divider-btn svg {
+    transform: rotate(180deg);
+  }
+
+  /* Unchecked = collapsed (left side panel) */
+  .split-pane-toggle:not(:checked) ~ .split-pane .split-pane-side-left {
+    width: 0;
+    border-right: none;
+    @apply opacity-0 overflow-hidden;
+  }
+
+  /* Checked + left panel: chevron faces left by default */
+  .split-pane-toggle:checked ~ .split-pane:has(.split-pane-side-left) .split-pane-divider-btn svg {
+    transform: rotate(180deg);
+  }
+
+  .split-pane-toggle:not(:checked) ~ .split-pane:has(.split-pane-side-left) .split-pane-divider-btn svg {
+    transform: rotate(0deg);
   }
 
   /* =============================================
@@ -60,22 +161,6 @@
     opacity: 0;
     transition: opacity 0.2s ease;
     -webkit-tap-highlight-color: transparent;
-  }
-
-  /* =============================================
-     Toggle button
-     ============================================= */
-
-  .split-pane-toggle {
-    @apply flex items-center justify-center border-none bg-transparent cursor-pointer;
-    width: 2.75rem;
-    height: 2.75rem;
-    color: inherit;
-    -webkit-tap-highlight-color: transparent;
-
-    & svg {
-      @apply w-5 h-5;
-    }
   }
 
   /* =============================================
@@ -144,6 +229,10 @@
 @media (prefers-reduced-motion: reduce) {
   .split-pane-side,
   .split-pane-backdrop {
+    transition: none;
+  }
+
+  .split-pane-divider-btn svg {
     transition: none;
   }
 }
