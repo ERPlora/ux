@@ -1,0 +1,124 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Gauge">
+  <p class="text-base-content/70 mb-6">SVG arc gauge with needle, segments, ticks, value display, sizes, and animation.</p>
+
+  <CodePreview
+    title="Basic Gauge"
+    semantic={`<div class="gauge">
+  <svg class="gauge-svg" width="180" height="110" viewBox="0 0 180 110">
+    <!-- Track (background arc) -->
+    <path class="gauge-track" d="M 20 100 A 70 70 0 0 1 160 100" stroke-width="10" />
+    <!-- Fill (value arc) -->
+    <path class="gauge-fill" d="M 20 100 A 70 70 0 0 1 160 100" stroke-width="10"
+          stroke-dasharray="220" stroke-dashoffset="66" />
+    <!-- Ticks -->
+    <line class="gauge-tick gauge-tick-major" x1="20" y1="100" x2="20" y2="90" />
+    <line class="gauge-tick" x1="55" y1="35" x2="55" y2="45" />
+    <line class="gauge-tick gauge-tick-major" x1="90" y1="30" x2="90" y2="20" />
+    <line class="gauge-tick" x1="125" y1="35" x2="125" y2="45" />
+    <line class="gauge-tick gauge-tick-major" x1="160" y1="100" x2="160" y2="90" />
+  </svg>
+  <div class="gauge-value-container" style="bottom: 10px; left: 50%; transform: translateX(-50%);">
+    <span class="gauge-value">70</span>
+    <span class="gauge-unit">%</span>
+  </div>
+  <div class="gauge-labels">
+    <span class="gauge-min">0</span>
+    <span class="gauge-max">100</span>
+  </div>
+</div>`}
+    tailwind={`<div class="relative inline-flex flex-col items-center">
+  <svg width="180" height="110" viewBox="0 0 180 110">
+    <path d="M 20 100 A 70 70 0 0 1 160 100" fill="none" stroke-width="10" class="stroke-base-200" stroke-linecap="round" />
+    <path d="M 20 100 A 70 70 0 0 1 160 100" fill="none" stroke-width="10" class="stroke-primary" stroke-linecap="round"
+          stroke-dasharray="220" stroke-dashoffset="66" />
+  </svg>
+  <div class="absolute bottom-2.5 left-1/2 -translate-x-1/2 text-center">
+    <span class="text-3xl font-bold tabular-nums">70</span>
+    <span class="text-sm text-base-content/60 block">%</span>
+  </div>
+</div>`}
+    js={`// Update gauge value:
+// const pct = value / max;
+// const offset = circumference * (1 - pct);
+// fill.setAttribute('stroke-dashoffset', offset);`}
+  />
+
+  <CodePreview
+    title="With Needle"
+    semantic={`<div class="gauge">
+  <svg class="gauge-svg" width="180" height="110" viewBox="0 0 180 110">
+    <path class="gauge-track" d="M 20 100 A 70 70 0 0 1 160 100" stroke-width="10" />
+    <!-- Needle (rotated to point at value) -->
+    <polygon class="gauge-needle" points="90,35 85,100 95,100" style="transform: rotate(-25deg)" />
+    <circle class="gauge-needle-center" cx="90" cy="100" r="8" />
+  </svg>
+  <div class="gauge-value-container" style="bottom: 25px; left: 50%; transform: translateX(-50%);">
+    <span class="gauge-label">Speed</span>
+  </div>
+</div>`}
+    tailwind={`<!-- Needle: polygon rotated via transform-origin center
+     Center dot: circle with bg-base-100 and border -->`}
+    js={`// Rotate needle: needle.style.transform = 'rotate(' + angle + 'deg)';
+// Angle maps from min (-90) to max (90) based on value`}
+  />
+
+  <CodePreview
+    title="Color Segments"
+    semantic={`<div class="gauge">
+  <svg class="gauge-svg" width="180" height="110" viewBox="0 0 180 110">
+    <!-- Danger segment (0-30%) -->
+    <path class="gauge-segment gauge-segment-danger gauge-segment-active"
+          d="M 20 100 A 70 70 0 0 1 60 45" stroke-width="10" />
+    <!-- Warning segment (30-60%) -->
+    <path class="gauge-segment gauge-segment-warning"
+          d="M 60 45 A 70 70 0 0 1 120 45" stroke-width="10" />
+    <!-- Success segment (60-100%) -->
+    <path class="gauge-segment gauge-segment-success"
+          d="M 120 45 A 70 70 0 0 1 160 100" stroke-width="10" />
+  </svg>
+  <div class="gauge-value-container" style="bottom: 10px; left: 50%; transform: translateX(-50%);">
+    <span class="gauge-value" style="color: var(--color-error)">25</span>
+    <span class="gauge-unit">rpm</span>
+  </div>
+</div>`}
+    tailwind={`<!-- Each segment is a separate SVG path with color classes
+     Active segment has full opacity, others are 25% -->`}
+    js={`// Highlight active segment based on value range
+// segments.forEach(s => s.classList.toggle('gauge-segment-active', inRange));`}
+  />
+
+  <div class="overflow-x-auto mt-8">
+    <table class="table">
+      <thead><tr><th>Class</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>.gauge</code></td><td>Base container</td></tr>
+        <tr><td><code>.gauge-svg</code></td><td>SVG element</td></tr>
+        <tr><td><code>.gauge-track</code></td><td>Background arc</td></tr>
+        <tr><td><code>.gauge-fill</code></td><td>Value arc (uses --c color)</td></tr>
+        <tr><td><code>.gauge-segment</code></td><td>Color segment</td></tr>
+        <tr><td><code>.gauge-segment-active</code></td><td>Active segment (full opacity)</td></tr>
+        <tr><td><code>.gauge-segment-danger/warning/success</code></td><td>Segment colors</td></tr>
+        <tr><td><code>.gauge-needle</code></td><td>Needle polygon</td></tr>
+        <tr><td><code>.gauge-needle-center</code></td><td>Center circle</td></tr>
+        <tr><td><code>.gauge-value-container</code></td><td>Absolute positioned value</td></tr>
+        <tr><td><code>.gauge-value</code></td><td>Main number</td></tr>
+        <tr><td><code>.gauge-unit</code></td><td>Unit label</td></tr>
+        <tr><td><code>.gauge-label</code></td><td>Description label</td></tr>
+        <tr><td><code>.gauge-labels</code></td><td>Min/max container</td></tr>
+        <tr><td><code>.gauge-min / .gauge-max</code></td><td>Min/max values</td></tr>
+        <tr><td><code>.gauge-tick</code></td><td>Tick mark</td></tr>
+        <tr><td><code>.gauge-tick-major</code></td><td>Major tick (thicker)</td></tr>
+        <tr><td><code>.gauge-sm</code></td><td>Small (120px)</td></tr>
+        <tr><td><code>.gauge-lg</code></td><td>Large (240px)</td></tr>
+        <tr><td><code>.gauge-xl</code></td><td>Extra large (320px)</td></tr>
+        <tr><td><code>.gauge-animated</code></td><td>Animated fill on load</td></tr>
+        <tr><td><code>.gauge.glass</code></td><td>Glass morphism variant</td></tr>
+      </tbody>
+    </table>
+  </div>
+</DocsLayout>

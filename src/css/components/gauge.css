@@ -1,0 +1,194 @@
+/* Gauge — SVG arc/needle gauge for displaying values */
+
+@layer components {
+  /* ===== Base ===== */
+  .gauge {
+    @apply relative inline-flex flex-col items-center;
+  }
+
+  .gauge-svg {
+    @apply block overflow-visible;
+  }
+
+  /* ===== Track & Fill ===== */
+  .gauge-track {
+    fill: none;
+    stroke: var(--color-base-200);
+    stroke-linecap: round;
+  }
+
+  .gauge-fill {
+    fill: none;
+    stroke: var(--c, var(--color-primary));
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s ease;
+  }
+
+  /* Color composition: .gauge.color-success etc. sets --c */
+
+  /* ===== Segments ===== */
+  .gauge-segment {
+    fill: none;
+    stroke-linecap: round;
+    opacity: 0.25;
+  }
+
+  .gauge-segment-active {
+    opacity: 1;
+  }
+
+  .gauge-segment-danger {
+    stroke: var(--color-error);
+  }
+
+  .gauge-segment-warning {
+    stroke: var(--color-warning);
+  }
+
+  .gauge-segment-success {
+    stroke: var(--color-success);
+  }
+
+  /* ===== Needle ===== */
+  .gauge-needle {
+    fill: var(--color-base-content);
+    transform-origin: center center;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .gauge-needle-center {
+    fill: var(--color-base-100);
+    stroke: var(--color-base-300);
+    stroke-width: 2;
+  }
+
+  /* ===== Value display ===== */
+  .gauge-value-container {
+    @apply absolute flex flex-col items-center justify-center text-center;
+  }
+
+  .gauge-value {
+    @apply font-bold leading-none;
+    font-size: 2rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-base-content);
+  }
+
+  .gauge-unit {
+    @apply font-medium;
+    font-size: 0.875rem;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  .gauge-label {
+    @apply font-medium uppercase;
+    font-size: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+    margin-top: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== Min/Max labels ===== */
+  .gauge-labels {
+    @apply flex justify-between w-full;
+    margin-top: 0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .gauge-min,
+  .gauge-max {
+    font-size: 0.75rem;
+    color: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+  }
+
+  /* ===== Ticks ===== */
+  .gauge-tick {
+    stroke: var(--color-base-300);
+    stroke-width: 2;
+  }
+
+  .gauge-tick-major {
+    stroke-width: 3;
+    stroke: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .gauge-tick-label {
+    fill: color-mix(in oklch, var(--color-base-content) 50%, transparent);
+    font-size: 10px;
+    text-anchor: middle;
+  }
+
+  /* ===== Sizes ===== */
+  .gauge-sm {
+    --gauge-size: 120px;
+
+    .gauge-value {
+      font-size: 1.25rem;
+    }
+
+    .gauge-unit {
+      font-size: 0.75rem;
+    }
+  }
+
+  .gauge-lg {
+    --gauge-size: 240px;
+
+    .gauge-value {
+      font-size: 2.5rem;
+    }
+
+    .gauge-unit {
+      font-size: 1rem;
+    }
+  }
+
+  .gauge-xl {
+    --gauge-size: 320px;
+
+    .gauge-value {
+      font-size: 3rem;
+    }
+
+    .gauge-unit {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* ===== Animated ===== */
+  .gauge-animated .gauge-fill {
+    animation: gauge-fill 1s ease-out forwards;
+  }
+
+  /* ===== Glass ===== */
+  .gauge.glass {
+    .gauge-track {
+      stroke: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+    }
+
+    .gauge-needle-center {
+      fill: color-mix(in oklch, var(--color-base-100) 70%, transparent);
+      stroke: color-mix(in oklch, var(--color-base-content) 15%, transparent);
+    }
+  }
+}
+
+/* Keyframes (outside @layer) */
+@keyframes gauge-fill {
+  from {
+    stroke-dashoffset: var(--gauge-circumference);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .gauge-fill,
+  .gauge-needle {
+    transition: none;
+  }
+
+  .gauge-animated .gauge-fill {
+    animation: none;
+  }
+}
