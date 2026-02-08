@@ -1,0 +1,688 @@
+---
+import DocsLayout from '../layouts/DocsLayout.astro';
+import CodePreview from '../components/CodePreview.astro';
+---
+
+<DocsLayout title="Templates">
+  <p class="text-base-content/70 mb-6">Real-world Django + HTMX template patterns using UX components. These examples come from <strong>ERPlora</strong>, an ERP system with 302 templates across 17 modules — all built with UX CSS.</p>
+
+  <div class="space-y-3 mb-8 p-4 bg-base-200 rounded-box">
+    <h3 class="font-semibold text-sm">Modules using UX</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-base-300 text-left">
+            <th class="py-1.5 px-2 font-medium">Module</th>
+            <th class="py-1.5 px-2 font-medium text-right">Templates</th>
+            <th class="py-1.5 px-2 font-medium">Module</th>
+            <th class="py-1.5 px-2 font-medium text-right">Templates</th>
+          </tr>
+        </thead>
+        <tbody class="text-base-content/70">
+          <tr><td class="py-1 px-2">Loyalty</td><td class="py-1 px-2 text-right font-mono">26</td><td class="py-1 px-2">Appointments</td><td class="py-1 px-2 text-right font-mono">24</td></tr>
+          <tr><td class="py-1 px-2">Staff</td><td class="py-1 px-2 text-right font-mono">22</td><td class="py-1 px-2">Orders</td><td class="py-1 px-2 text-right font-mono">21</td></tr>
+          <tr><td class="py-1 px-2">Inventory</td><td class="py-1 px-2 text-right font-mono">21</td><td class="py-1 px-2">Services</td><td class="py-1 px-2 text-right font-mono">21</td></tr>
+          <tr><td class="py-1 px-2">Commissions</td><td class="py-1 px-2 text-right font-mono">20</td><td class="py-1 px-2">Returns</td><td class="py-1 px-2 text-right font-mono">20</td></tr>
+          <tr><td class="py-1 px-2">Invoicing</td><td class="py-1 px-2 text-right font-mono">17</td><td class="py-1 px-2">Reservations</td><td class="py-1 px-2 text-right font-mono">17</td></tr>
+          <tr><td class="py-1 px-2">Discounts</td><td class="py-1 px-2 text-right font-mono">16</td><td class="py-1 px-2">Sales</td><td class="py-1 px-2 text-right font-mono">16</td></tr>
+          <tr><td class="py-1 px-2">VeriFACTU</td><td class="py-1 px-2 text-right font-mono">16</td><td class="py-1 px-2">Kitchen</td><td class="py-1 px-2 text-right font-mono">14</td></tr>
+          <tr><td class="py-1 px-2">Cash Register</td><td class="py-1 px-2 text-right font-mono">11</td><td class="py-1 px-2">Customers</td><td class="py-1 px-2 text-right font-mono">11</td></tr>
+          <tr class="border-t border-base-300 font-semibold text-base-content"><td class="py-1.5 px-2" colspan="3">Total</td><td class="py-1.5 px-2 text-right font-mono">302</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="text-xl font-bold mt-10 mb-4">Template Architecture</h2>
+
+  <div class="callout mb-6">
+    <div class="callout-title">Page + Partial Pattern</div>
+    <div class="callout-body">
+      <p>Every view has two templates: a <strong>page</strong> (extends layout, includes partial) and a <strong>partial</strong> (the actual content). Full requests get the page; HTMX requests get just the partial — zero duplication.</p>
+    </div>
+  </div>
+
+  <CodePreview
+    title="Page Template (extends layout)"
+    noFrame
+    semantic={`{% raw %}{% extends "dashboard/layout.html" %}
+{% load i18n djicons %}
+
+{% block page_title %}{% trans "Sales" %}{% endblock %}
+
+{% block content %}
+{% with current_section="sales" section_title=_("Sales") %}
+{{ block.super }}
+{% endwith %}
+{% endblock %}
+
+{% block dashboard_content %}
+{% include "sales/partials/content.html" %}
+{% endblock %}{% endraw %}`}
+    tailwind={`<!-- Page templates are thin wrappers. The real content
+     lives in the partial. This pattern means:
+     - Full page load → renders layout + partial
+     - HTMX request → server returns only the partial
+     - Zero HTML duplication between the two modes -->
+
+<!-- The view uses @htmx_view decorator:
+     @htmx_view("sales/pages/index.html",
+                 "sales/partials/content.html")
+     def index(request):
+         return {"sales": Sale.objects.all()} -->`}
+    js={`// No JS needed — Django @htmx_view decorator
+// handles returning page vs partial automatically`}
+  />
+
+  <!-- ============================================= -->
+  <!-- Dashboard Pattern -->
+  <!-- ============================================= -->
+
+  <h2 class="text-xl font-bold mt-12 mb-4">Dashboard Pattern</h2>
+  <p class="text-base-content/70 mb-4">Stats grid + recent activity + quick actions. Used in every module's index page.</p>
+
+  <CodePreview
+    title="Sales Dashboard (real template)"
+    height="700px"
+    semantic={`<!-- Stats Grid -->
+<div class="p-4">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold">Sales</h1>
+    <p class="text-sm mt-2 text-base-content/60">Sales management and point of sale</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="card">
+      <div class="card-body p-6">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+          </div>
+          <div>
+            <div class="text-sm text-base-content/60">Sales Today</div>
+            <div class="text-2xl font-semibold">24</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body p-6">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-success/10 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z"/></svg>
+          </div>
+          <div>
+            <div class="text-sm text-base-content/60">Revenue Today</div>
+            <div class="text-2xl font-semibold">$1,847.50</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body p-6">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-warning" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+          </div>
+          <div>
+            <div class="text-sm text-base-content/60">This Week</div>
+            <div class="text-2xl font-semibold">142</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body p-6">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-success/10 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"/></svg>
+          </div>
+          <div>
+            <div class="text-sm text-base-content/60">Week Revenue</div>
+            <div class="text-2xl font-semibold">$12,340.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Sales Card -->
+  <div class="card mb-6">
+    <div class="card-header">
+      <div class="flex justify-between items-center">
+        <h2 class="card-title">Recent Sales</h2>
+        <button class="btn btn-ghost btn-sm">View all <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg></button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 rounded-lg bg-base-200/50">
+          <div>
+            <div class="font-medium">VTA-0024</div>
+            <div class="text-xs text-base-content/60">07/02/2026 14:32 - Ana Garcia</div>
+          </div>
+          <div class="text-right">
+            <div class="font-semibold text-success">$245.00</div>
+            <div class="text-xs text-base-content/60">Card</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-lg bg-base-200/50">
+          <div>
+            <div class="font-medium">VTA-0023</div>
+            <div class="text-xs text-base-content/60">07/02/2026 13:15</div>
+          </div>
+          <div class="text-right">
+            <div class="font-semibold text-success">$89.90</div>
+            <div class="text-xs text-base-content/60">Cash</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Methods Table -->
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Payment Methods (Today)</h2></div>
+    <div class="card-body">
+      <table class="table w-full">
+        <thead>
+          <tr><th>Method</th><th class="text-center">Count</th><th class="text-right">Total</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><div class="flex items-center gap-2"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg> Cash</div></td><td class="text-center">12</td><td class="text-right font-semibold text-success">$623.50</td></tr>
+          <tr><td><div class="flex items-center gap-2"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/></svg> Card</div></td><td class="text-center">10</td><td class="text-right font-semibold text-success">$1,024.00</td></tr>
+          <tr><td><div class="flex items-center gap-2"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg> Transfer</div></td><td class="text-center">2</td><td class="text-right font-semibold text-success">$200.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Same layout using Tailwind utility classes -->
+<div class="p-4">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold">Sales</h1>
+    <p class="text-sm mt-2 text-base-content/60">Sales management and point of sale</p>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-base-100 border border-base-300 rounded-box p-6">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+        </div>
+        <div>
+          <div class="text-sm text-base-content/60">Sales Today</div>
+          <div class="text-2xl font-semibold">24</div>
+        </div>
+      </div>
+    </div>
+    <!-- ...repeat for other stats -->
+  </div>
+
+  <!-- Recent Sales -->
+  <div class="bg-base-100 border border-base-300 rounded-box mb-6 overflow-hidden">
+    <div class="flex justify-between items-center p-4 border-b border-base-300">
+      <h2 class="font-semibold">Recent Sales</h2>
+      <button class="text-sm text-primary">View all</button>
+    </div>
+    <div class="p-4 space-y-3">
+      <div class="flex items-center justify-between p-3 rounded-lg bg-base-200/50">
+        <div>
+          <div class="font-medium">VTA-0024</div>
+          <div class="text-xs text-base-content/60">07/02/2026 14:32</div>
+        </div>
+        <div class="font-semibold text-success">$245.00</div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Django template uses:
+// {% verbatim %}
+// {% load i18n djicons %}
+// {{ sales_count_today }}, {{ sales_total_today|floatformat:2 }}
+// {% for sale in recent_sales %}...{% endfor %}
+// {% icon "receipt-outline" class="text-2xl text-primary" %}
+// {% endverbatim %}
+//
+// HTMX navigation:
+// hx-get="{% url 'sales:history' %}"
+// hx-target="#main-content-area"
+// hx-push-url="true"`}
+  />
+
+  <!-- ============================================= -->
+  <!-- List Pattern -->
+  <!-- ============================================= -->
+
+  <h2 class="text-xl font-bold mt-12 mb-4">List Pattern</h2>
+  <p class="text-base-content/70 mb-4">Searchable, filterable list with HTMX navigation. Every module has at least one list view.</p>
+
+  <CodePreview
+    title="Loyalty Members List"
+    height="540px"
+    semantic={`<div class="p-4">
+  <!-- Header with actions -->
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold">Members</h2>
+    <button class="btn color-primary btn-sm">
+      <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
+      Add Member
+    </button>
+  </div>
+
+  <!-- Search + Filter -->
+  <div class="flex gap-2 mb-4">
+    <div class="flex-1">
+      <input type="search" class="input w-full" placeholder="Search members..."
+             hx-get="/loyalty/members/"
+             hx-trigger="input changed delay:300ms"
+             hx-target="#members-list"
+             name="q">
+    </div>
+    <select class="select" name="tier"
+            hx-get="/loyalty/members/"
+            hx-trigger="change"
+            hx-target="#members-list"
+            hx-include="[name=q]">
+      <option value="">All Tiers</option>
+      <option value="gold">Gold</option>
+      <option value="silver">Silver</option>
+      <option value="bronze">Bronze</option>
+    </select>
+  </div>
+
+  <!-- Members List -->
+  <div id="members-list">
+    <div class="card">
+      <div class="list">
+        <a class="list-item list-item-clickable" href="/loyalty/members/1/">
+          <div class="flex items-center gap-3 flex-1">
+            <div class="avatar avatar-sm">
+              <span>AG</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="list-item-title">Ana Garcia</div>
+              <div class="list-item-description">2,450 points &middot; Gold</div>
+            </div>
+          </div>
+          <span class="badge color-warning badge-sm" style="background-color: #f59e0b; color: #fff;">Gold</span>
+        </a>
+        <a class="list-item list-item-clickable" href="/loyalty/members/2/">
+          <div class="flex items-center gap-3 flex-1">
+            <div class="avatar avatar-sm">
+              <span>CL</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="list-item-title">Carlos Lopez</div>
+              <div class="list-item-description">890 points &middot; Silver</div>
+            </div>
+          </div>
+          <span class="badge badge-sm" style="background-color: #9ca3af; color: #fff;">Silver</span>
+        </a>
+        <a class="list-item list-item-clickable" href="/loyalty/members/3/">
+          <div class="flex items-center gap-3 flex-1">
+            <div class="avatar avatar-sm">
+              <span>MR</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="list-item-title">Maria Ruiz</div>
+              <div class="list-item-description">340 points &middot; Bronze</div>
+            </div>
+          </div>
+          <span class="badge badge-sm" style="background-color: #cd7f32; color: #fff;">Bronze</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold">Members</h2>
+    <button class="inline-flex items-center h-9 px-3 bg-primary text-primary-content rounded-lg text-sm font-medium">+ Add Member</button>
+  </div>
+
+  <!-- Search + Filter -->
+  <div class="flex gap-2 mb-4">
+    <input type="search" class="flex-1 h-11 px-3 rounded-field border border-base-300 bg-base-100 outline-none focus:border-primary transition-colors" placeholder="Search members..."
+           hx-get="/loyalty/members/"
+           hx-trigger="input changed delay:300ms"
+           hx-target="#members-list"
+           name="q">
+    <select class="h-11 px-3 rounded-field border border-base-300 bg-base-100" name="tier"
+            hx-get="/loyalty/members/"
+            hx-trigger="change"
+            hx-target="#members-list"
+            hx-include="[name=q]">
+      <option value="">All Tiers</option>
+      <option value="gold">Gold</option>
+    </select>
+  </div>
+
+  <!-- List -->
+  <div class="border border-base-300 rounded-box overflow-hidden divide-y divide-base-300">
+    <a class="flex items-center gap-3 px-4 py-3 hover:bg-base-200/50 transition-colors" href="/loyalty/members/1/">
+      <div class="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">AG</div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-medium">Ana Garcia</div>
+        <div class="text-xs text-base-content/60">2,450 pts</div>
+      </div>
+      <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: #f59e0b; color: #fff;">Gold</span>
+    </a>
+  </div>
+</div>`}
+    js={`// HTMX handles search + filter:
+// - input triggers debounced GET with ?q=...
+// - select triggers GET with ?tier=...
+// - hx-include="[name=q]" passes search along with filter
+// - Server returns updated list HTML
+
+// Django template (simplified):
+// {% verbatim %}
+// {% for member in members %}
+// <a class="list-item list-item-clickable"
+//    hx-get="{% url 'loyalty:member_detail' pk=member.pk %}"
+//    hx-target="#main-content-area"
+//    hx-push-url="true">
+//   ...{{ member.name }}...
+// </a>
+// {% empty %}
+// <div class="text-center py-8 text-base-content/60">
+//   <p>No members found</p>
+// </div>
+// {% endfor %}
+// {% endverbatim %}`}
+  />
+
+  <!-- ============================================= -->
+  <!-- Settings Pattern -->
+  <!-- ============================================= -->
+
+  <h2 class="text-xl font-bold mt-12 mb-4">Settings Pattern</h2>
+  <p class="text-base-content/70 mb-4">Toggle and input settings that save immediately via HTMX POST, no form submission needed.</p>
+
+  <CodePreview
+    title="Orders Settings (instant save)"
+    height="560px"
+    semantic={`<div class="p-4">
+  <!-- Settings Section: Kitchen Display -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h3 class="card-title">
+        <svg class="w-5 h-5 text-primary inline mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.871c1.355 0 2.697.056 4.024.166C17.155 8.51 18 9.473 18 10.608v2.513M15 8.25v-1.5m-6 1.5v-1.5m12 9.75-1.5.75a3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0L3 16.5m15-3.379a48.474 48.474 0 0 0-6-.371c-2.032 0-4.034.126-6 .371m12 0c.39.049.777.102 1.163.16 1.07.16 1.837 1.094 1.837 2.175v5.169c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 0 1 3 20.625v-5.17c0-1.08.768-2.014 1.837-2.174A47.78 47.78 0 0 1 6 13.12"/></svg>
+        Kitchen Display
+      </h3>
+    </div>
+    <div class="list">
+      <div class="list-item">
+        <div class="list-item-content">
+          <span class="list-item-title">Auto Print Tickets</span>
+          <span class="list-item-description">Print kitchen tickets automatically when orders fire</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" checked
+                 hx-post="/orders/settings/toggle/"
+                 hx-vals='js:{name: "auto_print_tickets", value: event.target.checked ? "true" : "false"}'
+                 hx-swap="none">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="list-item">
+        <div class="list-item-content">
+          <span class="list-item-title">Show Prep Time</span>
+          <span class="list-item-description">Display elapsed preparation time on orders</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox"
+                 hx-post="/orders/settings/toggle/"
+                 hx-vals='js:{name: "show_prep_time", value: event.target.checked ? "true" : "false"}'
+                 hx-swap="none">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="list-item">
+        <div class="list-item-content">
+          <span class="list-item-title">Alert Threshold</span>
+          <span class="list-item-description">Minutes before flagging as delayed</span>
+        </div>
+        <input type="number" class="input input-sm" style="width: 80px;" value="15"
+               hx-post="/orders/settings/input/"
+               hx-vals='js:{name: "alert_threshold_minutes", value: event.target.value}'
+               hx-trigger="change"
+               hx-swap="none"
+               min="1" max="120">
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions Section -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Quick Actions</h3>
+    </div>
+    <div class="list">
+      <a class="list-item list-item-clickable"
+         hx-get="/orders/stations/"
+         hx-target="#main-content-area"
+         hx-push-url="true">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z"/></svg>
+          <div>
+            <div class="list-item-title">Kitchen Stations</div>
+            <div class="list-item-description">5 stations configured</div>
+          </div>
+        </div>
+        <svg class="w-4 h-4 text-base-content/40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+      </a>
+      <a class="list-item list-item-clickable"
+         hx-get="/orders/kds/"
+         hx-target="#main-content-area"
+         hx-push-url="true">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25Z"/></svg>
+          <div>
+            <div class="list-item-title">Kitchen Display</div>
+            <div class="list-item-description">Open kitchen display system</div>
+          </div>
+        </div>
+        <svg class="w-4 h-4 text-base-content/40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+      </a>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="p-4">
+  <div class="bg-base-100 border border-base-300 rounded-box mb-4 overflow-hidden">
+    <div class="px-4 py-3 border-b border-base-300 font-semibold">Kitchen Display</div>
+    <div class="divide-y divide-base-300">
+      <div class="flex items-center justify-between px-4 py-3">
+        <div>
+          <div class="text-sm font-medium">Auto Print Tickets</div>
+          <div class="text-xs text-base-content/60">Print tickets when orders fire</div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" class="sr-only peer" checked
+                 hx-post="/orders/settings/toggle/"
+                 hx-vals='js:{name: "auto_print_tickets", value: event.target.checked}'
+                 hx-swap="none">
+          <div class="w-11 h-6 bg-base-300 peer-checked:bg-primary rounded-full transition-colors after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+        </label>
+      </div>
+      <div class="flex items-center justify-between px-4 py-3">
+        <div>
+          <div class="text-sm font-medium">Alert Threshold</div>
+          <div class="text-xs text-base-content/60">Minutes before flagging</div>
+        </div>
+        <input type="number" value="15" min="1" max="120" style="width: 80px;"
+               class="h-9 px-2 text-sm rounded-field border border-base-300 bg-base-100 text-center"
+               hx-post="/orders/settings/input/"
+               hx-trigger="change"
+               hx-swap="none">
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Settings save instantly via HTMX:
+// - Toggles: hx-post with hx-vals passing name + boolean value
+// - Inputs: hx-post on change event
+// - hx-swap="none" — no DOM update needed (server returns 200 OK)
+//
+// Django view:
+// @require_POST
+// def settings_toggle(request):
+//     name = request.POST.get('name')
+//     value = request.POST.get('value') == 'true'
+//     config = get_module_config(request)
+//     setattr(config, name, value)
+//     config.save()
+//     return HttpResponse(status=200)`}
+  />
+
+  <!-- ============================================= -->
+  <!-- Empty State Pattern -->
+  <!-- ============================================= -->
+
+  <h2 class="text-xl font-bold mt-12 mb-4">Empty State Pattern</h2>
+  <p class="text-base-content/70 mb-4">Friendly empty states with icon, message, and call-to-action button.</p>
+
+  <CodePreview
+    title="Empty States (3 variants)"
+    height="420px"
+    semantic={`<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+  <!-- Basic empty state -->
+  <div class="card">
+    <div class="card-body text-center py-8">
+      <svg class="w-12 h-12 mx-auto text-base-content/30 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+      <p class="text-base-content/60 mb-3">No sales yet</p>
+      <button class="btn color-primary btn-sm">Make first sale</button>
+    </div>
+  </div>
+
+  <!-- Search no results -->
+  <div class="card">
+    <div class="card-body text-center py-8">
+      <svg class="w-12 h-12 mx-auto text-base-content/30 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+      <p class="text-base-content/60 mb-3">No results for "pizza"</p>
+      <button class="btn btn-outline btn-sm">Clear filters</button>
+    </div>
+  </div>
+
+  <!-- With description -->
+  <div class="card">
+    <div class="card-body text-center py-8">
+      <svg class="w-12 h-12 mx-auto text-base-content/30 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+      <p class="font-medium mb-1">No members yet</p>
+      <p class="text-sm text-base-content/60 mb-3">Enroll customers in the loyalty program to start earning points</p>
+      <button class="btn color-primary btn-sm">Add Member</button>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+  <div class="bg-base-100 border border-base-300 rounded-box text-center py-8 px-4">
+    <svg class="w-12 h-12 mx-auto text-base-content/30 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+    <p class="text-base-content/60 mb-3">No sales yet</p>
+    <button class="h-9 px-3 bg-primary text-primary-content rounded-lg text-sm font-medium">Make first sale</button>
+  </div>
+
+  <div class="bg-base-100 border border-base-300 rounded-box text-center py-8 px-4">
+    <svg class="w-12 h-12 mx-auto text-base-content/30 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+    <p class="text-base-content/60 mb-3">No results for "pizza"</p>
+    <button class="h-9 px-3 border border-base-300 rounded-lg text-sm font-medium hover:bg-base-200">Clear filters</button>
+  </div>
+</div>`}
+    js={`// Django empty states use {% verbatim %}{% empty %}{% endverbatim %} or {% verbatim %}{% if not items %}{% endverbatim %}:
+//
+// {% verbatim %}
+// {% for product in products %}
+//   <div class="list-item">{{ product.name }}</div>
+// {% empty %}
+//   <div class="text-center py-8 text-base-content/60">
+//     {% icon "cube-outline" class="text-5xl block mx-auto mb-2" %}
+//     <p>No products found</p>
+//     <a href="{% url 'inventory:product_create' %}"
+//        class="btn color-primary btn-sm mt-3">
+//       Add First Product
+//     </a>
+//   </div>
+// {% endfor %}
+// {% endverbatim %}`}
+  />
+
+  <!-- ============================================= -->
+  <!-- Django Template Syntax -->
+  <!-- ============================================= -->
+
+  <h2 class="text-xl font-bold mt-12 mb-4">Django Template Reference</h2>
+
+  <div class="space-y-4">
+    <div class="callout">
+      <div class="callout-title">HTMX SPA Navigation</div>
+      <div class="callout-body">
+        <p>All internal links use HTMX to swap content without full page reload:</p>
+        <pre class="text-sm mt-2 bg-neutral text-neutral-content rounded-lg p-3 overflow-x-auto"><code>&lt;a hx-get="&#123;% url 'sales:detail' sale.id %&#125;"
+   hx-target="#main-content-area"
+   hx-push-url="true"
+   class="list-item list-item-clickable"&gt;
+  ...
+&lt;/a&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Icons (djicons)</div>
+      <div class="callout-body">
+        <p>Ionicons via Django template tag:</p>
+        <pre class="text-sm mt-2 bg-neutral text-neutral-content rounded-lg p-3 overflow-x-auto"><code>&#123;% load djicons %&#125;
+&#123;% icon "receipt-outline" class="text-2xl text-primary" %&#125;
+&#123;% icon "cash-outline" class="text-xl text-success" %&#125;
+&#123;% icon "alert-circle-outline" class="text-warning" %&#125;</code></pre>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Internationalization</div>
+      <div class="callout-body">
+        <p>All user-visible text uses Django i18n:</p>
+        <pre class="text-sm mt-2 bg-neutral text-neutral-content rounded-lg p-3 overflow-x-auto"><code>&#123;% load i18n %&#125;
+&#123;% trans "Recent Sales" %&#125;
+&#123;% trans "No results found" %&#125;</code></pre>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Delete with Confirmation</div>
+      <div class="callout-body">
+        <p>JavaScript confirm + fetch + HTMX redirect:</p>
+        <pre class="text-sm mt-2 bg-neutral text-neutral-content rounded-lg p-3 overflow-x-auto"><code>&lt;button onclick="deleteItem()" class="btn color-danger btn-sm"&gt;Delete&lt;/button&gt;
+
+&lt;script&gt;
+function deleteItem() &#123;
+  if (confirm('Delete this item?')) &#123;
+    fetch('&#123;% url "orders:delete" order.id %&#125;', &#123;
+      method: 'POST',
+      headers: &#123;'X-CSRFToken': '&#123;&#123; csrf_token &#125;&#125;'&#125;,
+    &#125;).then(r =&gt; &#123;
+      if (r.ok) htmx.ajax('GET', '&#123;% url "orders:active_orders" %&#125;', '#main-content-area');
+    &#125;);
+  &#125;
+&#125;
+&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Color-Coded Status Badges</div>
+      <div class="callout-body">
+        <p>Map model status to badge colors in templates:</p>
+        <pre class="text-sm mt-2 bg-neutral text-neutral-content rounded-lg p-3 overflow-x-auto"><code>&#123;% if order.status == 'pending' %&#125;
+  &lt;span class="badge color-warning badge-soft"&gt;Pending&lt;/span&gt;
+&#123;% elif order.status == 'preparing' %&#125;
+  &lt;span class="badge color-primary badge-soft"&gt;Preparing&lt;/span&gt;
+&#123;% elif order.status == 'ready' %&#125;
+  &lt;span class="badge color-success"&gt;Ready&lt;/span&gt;
+&#123;% elif order.status == 'cancelled' %&#125;
+  &lt;span class="badge color-danger badge-soft"&gt;Cancelled&lt;/span&gt;
+&#123;% endif %&#125;</code></pre>
+      </div>
+    </div>
+  </div>
+</DocsLayout>
