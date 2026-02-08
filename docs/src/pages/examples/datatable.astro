@@ -1,0 +1,725 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Products DataTable">
+  <p class="text-base-content/70 mb-6">Complete product management datatable with <strong>server-side search</strong> (HTMX), <strong>server-side pagination</strong>, <strong>bulk actions</strong> (delete, change status), <strong>table/card view toggle</strong>, <strong>column visibility</strong>, <strong>sorting</strong>, and <strong>row actions</strong>. A single, fully interactive example.</p>
+
+  <CodePreview
+    title="Full Products DataTable"
+    height="820px"
+    semantic={`<div class="datatable datatable-bordered" id="products-table">
+  <!-- Header -->
+  <div class="datatable-header">
+    <div>
+      <h3 class="datatable-title">Products</h3>
+      <p class="datatable-subtitle" id="dt-subtitle">24 products</p>
+    </div>
+    <div class="datatable-actions">
+      <button class="btn btn-sm color-primary">
+        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Add Product
+      </button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="datatable-toolbar">
+    <div class="datatable-toolbar-start">
+      <label class="input input-sm datatable-search">
+        <svg class="w-4 h-4 opacity-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+        <input type="search" placeholder="Search products..." id="dt-search">
+      </label>
+      <select class="select select-sm" id="dt-filter-status">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="draft">Draft</option>
+        <option value="archived">Archived</option>
+      </select>
+      <select class="select select-sm" id="dt-filter-category">
+        <option value="">All Categories</option>
+        <option value="electronics">Electronics</option>
+        <option value="clothing">Clothing</option>
+        <option value="food">Food &amp; Beverage</option>
+        <option value="home">Home &amp; Garden</option>
+      </select>
+    </div>
+    <div class="datatable-toolbar-end">
+      <!-- View Toggle -->
+      <div class="datatable-view-toggle" id="dt-view-toggle">
+        <button class="datatable-view-btn datatable-view-btn-active" data-view="table" title="Table view">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 0v1.5c0 .621-.504 1.125-1.125 1.125"/></svg>
+        </button>
+        <button class="datatable-view-btn" data-view="cards" title="Card view">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6Zm0 9.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6Zm0 9.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
+        </button>
+      </div>
+      <!-- Column Visibility -->
+      <details class="dropdown" id="dt-col-dropdown">
+        <summary class="datatable-column-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"/></svg>
+          Columns
+        </summary>
+        <div class="dropdown-menu dropdown-menu-right" style="min-width: 200px;">
+          <div class="dropdown-header">Show / Hide Columns</div>
+          <label class="dropdown-item cursor-pointer"><input type="checkbox" class="checkbox checkbox-sm" data-col="sku" checked> SKU</label>
+          <label class="dropdown-item cursor-pointer"><input type="checkbox" class="checkbox checkbox-sm" data-col="name" checked disabled> Name</label>
+          <label class="dropdown-item cursor-pointer"><input type="checkbox" class="checkbox checkbox-sm" data-col="category" checked> Category</label>
+          <label class="dropdown-item cursor-pointer"><input type="checkbox" class="checkbox checkbox-sm" data-col="price" checked> Price</label>
+          <label class="dropdown-item cursor-pointer"><input type="checkbox" class="checkbox checkbox-sm" data-col="stock" checked> Stock</label>
+          <label class="dropdown-item cursor-pointer"><input type="checkbox" class="checkbox checkbox-sm" data-col="status" checked> Status</label>
+        </div>
+      </details>
+      <!-- Export -->
+      <details class="dropdown" id="dt-export-dropdown">
+        <summary class="datatable-export-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+          Export
+        </summary>
+        <div class="dropdown-menu dropdown-menu-right">
+          <button class="dropdown-item">
+            <svg class="w-4 h-4 opacity-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+            Export as CSV
+          </button>
+          <button class="dropdown-item">
+            <svg class="w-4 h-4 opacity-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+            Export as Excel
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item">
+            <svg class="w-4 h-4 opacity-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m0 0a48.112 48.112 0 0 1 10.5 0m-10.5 0V5.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v3.284m-7.5 0h7.5"/></svg>
+            Print
+          </button>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- Bulk Actions Bar (hidden by default) -->
+  <div class="datatable-bulk hidden" id="dt-bulk-bar">
+    <div class="datatable-bulk-info">
+      <span class="datatable-bulk-count" id="dt-bulk-count">0</span>
+      <span>selected</span>
+    </div>
+    <div class="datatable-bulk-actions">
+      <button class="datatable-bulk-btn" id="dt-bulk-status" title="Change status">
+        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182"/></svg>
+        Set Active
+      </button>
+      <button class="datatable-bulk-btn datatable-bulk-btn-danger" id="dt-bulk-delete" title="Delete selected">
+        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+        Delete
+      </button>
+      <button class="datatable-bulk-clear" id="dt-bulk-clear" title="Clear selection">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Table Body -->
+  <div class="datatable-body" id="dt-body">
+    <table class="datatable-table" id="dt-table">
+      <thead class="datatable-thead">
+        <tr>
+          <th class="datatable-th datatable-th-checkbox">
+            <label class="checkbox checkbox-sm"><input type="checkbox" id="dt-select-all"><span class="checkbox-mark"></span></label>
+          </th>
+          <th class="datatable-th datatable-th-sortable" data-col="sku" data-sort="sku">SKU</th>
+          <th class="datatable-th datatable-th-sortable datatable-th-sorted" data-col="name" data-sort="name">
+            Name
+            <span class="datatable-sort-icon"><svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg></span>
+          </th>
+          <th class="datatable-th" data-col="category">Category</th>
+          <th class="datatable-th datatable-th-sortable datatable-th-right" data-col="price" data-sort="price">Price</th>
+          <th class="datatable-th datatable-th-sortable datatable-th-center" data-col="stock" data-sort="stock">Stock</th>
+          <th class="datatable-th datatable-th-center" data-col="status">Status</th>
+          <th class="datatable-th datatable-th-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="datatable-tbody" id="dt-tbody">
+        <tr class="datatable-tr" data-id="1">
+          <td class="datatable-td datatable-td-checkbox"><label class="checkbox checkbox-sm"><input type="checkbox" class="dt-row-check"><span class="checkbox-mark"></span></label></td>
+          <td class="datatable-td" data-label="SKU">PRD-001</td>
+          <td class="datatable-td" data-label="Name"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg></div><div><span class="font-medium">Wireless Headphones</span><span class="text-xs text-base-content/50 block">Bluetooth 5.0</span></div></div></td>
+          <td class="datatable-td" data-label="Category"><span class="badge badge-ghost badge-sm">Electronics</span></td>
+          <td class="datatable-td datatable-td-right" data-label="Price"><span class="font-medium">$79.99</span></td>
+          <td class="datatable-td datatable-td-center" data-label="Stock">142</td>
+          <td class="datatable-td datatable-td-center" data-label="Status"><span class="badge color-success badge-sm">Active</span></td>
+          <td class="datatable-td datatable-td-actions"><div class="datatable-row-actions"><button class="datatable-row-action" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg></button><button class="datatable-row-action datatable-row-action-danger" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg></button></div></td>
+        </tr>
+        <tr class="datatable-tr" data-id="2">
+          <td class="datatable-td datatable-td-checkbox"><label class="checkbox checkbox-sm"><input type="checkbox" class="dt-row-check"><span class="checkbox-mark"></span></label></td>
+          <td class="datatable-td" data-label="SKU">PRD-002</td>
+          <td class="datatable-td" data-label="Name"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-warning/10 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-warning" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg></div><div><span class="font-medium">Cotton T-Shirt</span><span class="text-xs text-base-content/50 block">Organic cotton</span></div></div></td>
+          <td class="datatable-td" data-label="Category"><span class="badge badge-ghost badge-sm">Clothing</span></td>
+          <td class="datatable-td datatable-td-right" data-label="Price"><span class="font-medium">$24.50</span></td>
+          <td class="datatable-td datatable-td-center" data-label="Stock">389</td>
+          <td class="datatable-td datatable-td-center" data-label="Status"><span class="badge color-success badge-sm">Active</span></td>
+          <td class="datatable-td datatable-td-actions"><div class="datatable-row-actions"><button class="datatable-row-action" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg></button><button class="datatable-row-action datatable-row-action-danger" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg></button></div></td>
+        </tr>
+        <tr class="datatable-tr" data-id="3">
+          <td class="datatable-td datatable-td-checkbox"><label class="checkbox checkbox-sm"><input type="checkbox" class="dt-row-check"><span class="checkbox-mark"></span></label></td>
+          <td class="datatable-td" data-label="SKU">PRD-003</td>
+          <td class="datatable-td" data-label="Name"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-success/10 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg></div><div><span class="font-medium">Organic Green Tea</span><span class="text-xs text-base-content/50 block">100 bags</span></div></div></td>
+          <td class="datatable-td" data-label="Category"><span class="badge badge-ghost badge-sm">Food &amp; Beverage</span></td>
+          <td class="datatable-td datatable-td-right" data-label="Price"><span class="font-medium">$12.99</span></td>
+          <td class="datatable-td datatable-td-center" data-label="Stock">56</td>
+          <td class="datatable-td datatable-td-center" data-label="Status"><span class="badge color-warning badge-sm">Draft</span></td>
+          <td class="datatable-td datatable-td-actions"><div class="datatable-row-actions"><button class="datatable-row-action" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg></button><button class="datatable-row-action datatable-row-action-danger" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg></button></div></td>
+        </tr>
+        <tr class="datatable-tr" data-id="4">
+          <td class="datatable-td datatable-td-checkbox"><label class="checkbox checkbox-sm"><input type="checkbox" class="dt-row-check"><span class="checkbox-mark"></span></label></td>
+          <td class="datatable-td" data-label="SKU">PRD-004</td>
+          <td class="datatable-td" data-label="Name"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-error/10 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-error" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg></div><div><span class="font-medium">Smart Watch Pro</span><span class="text-xs text-base-content/50 block">GPS + LTE</span></div></div></td>
+          <td class="datatable-td" data-label="Category"><span class="badge badge-ghost badge-sm">Electronics</span></td>
+          <td class="datatable-td datatable-td-right" data-label="Price"><span class="font-medium">$299.00</span></td>
+          <td class="datatable-td datatable-td-center" data-label="Stock">18</td>
+          <td class="datatable-td datatable-td-center" data-label="Status"><span class="badge color-success badge-sm">Active</span></td>
+          <td class="datatable-td datatable-td-actions"><div class="datatable-row-actions"><button class="datatable-row-action" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg></button><button class="datatable-row-action datatable-row-action-danger" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg></button></div></td>
+        </tr>
+        <tr class="datatable-tr" data-id="5">
+          <td class="datatable-td datatable-td-checkbox"><label class="checkbox checkbox-sm"><input type="checkbox" class="dt-row-check"><span class="checkbox-mark"></span></label></td>
+          <td class="datatable-td" data-label="SKU">PRD-005</td>
+          <td class="datatable-td" data-label="Name"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg></div><div><span class="font-medium">Ceramic Plant Pot</span><span class="text-xs text-base-content/50 block">Medium, white</span></div></div></td>
+          <td class="datatable-td" data-label="Category"><span class="badge badge-ghost badge-sm">Home &amp; Garden</span></td>
+          <td class="datatable-td datatable-td-right" data-label="Price"><span class="font-medium">$34.00</span></td>
+          <td class="datatable-td datatable-td-center" data-label="Stock">0</td>
+          <td class="datatable-td datatable-td-center" data-label="Status"><span class="badge badge-ghost badge-sm">Archived</span></td>
+          <td class="datatable-td datatable-td-actions"><div class="datatable-row-actions"><button class="datatable-row-action" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg></button><button class="datatable-row-action datatable-row-action-danger" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg></button></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer / Pagination -->
+  <div class="datatable-footer">
+    <div class="datatable-per-page">
+      Show
+      <select id="dt-per-page">
+        <option>10</option>
+        <option selected>25</option>
+        <option>50</option>
+        <option>100</option>
+      </select>
+      per page
+    </div>
+    <span class="datatable-info">Showing 1-5 of 24 products</span>
+    <nav class="pagination pagination-sm">
+      <button class="pagination-btn pagination-prev" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+      </button>
+      <button class="pagination-btn pagination-active">1</button>
+      <button class="pagination-btn">2</button>
+      <button class="pagination-btn">3</button>
+      <button class="pagination-btn pagination-next">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+      </button>
+    </nav>
+  </div>
+</div>`}
+    tailwind={`<!-- The tailwind equivalent uses the same structure but replaces
+     semantic classes with utility classes. Due to the complexity
+     of a full datatable, the semantic version IS the recommended
+     approach. Below is the core structure with utilities: -->
+
+<div class="flex flex-col w-full rounded-2xl overflow-hidden border border-base-300 bg-base-100">
+  <!-- Header -->
+  <div class="flex items-center justify-between px-5 py-3 border-b border-base-300">
+    <div>
+      <h3 class="text-lg font-semibold m-0">Products</h3>
+      <p class="text-xs mt-0.5 opacity-60">24 products</p>
+    </div>
+    <button class="btn btn-sm color-primary">Add Product</button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="flex items-center justify-between gap-3 px-5 py-2 bg-base-200 border-b border-base-300 flex-wrap">
+    <div class="flex items-center gap-2">
+      <label class="input input-sm min-w-48">
+        <svg class="w-4 h-4 opacity-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+        <input type="search" placeholder="Search products...">
+      </label>
+      <select class="select select-sm">
+        <option>All Status</option>
+        <option>Active</option>
+        <option>Draft</option>
+      </select>
+    </div>
+    <div class="flex items-center gap-2">
+      <!-- View toggle, columns, export buttons -->
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="flex-1 overflow-auto">
+    <table class="w-full" style="border-collapse: collapse;">
+      <thead class="sticky top-0 z-10">
+        <tr>
+          <th class="w-12 pl-3 pr-2 py-3 text-left text-xs font-semibold uppercase tracking-wide opacity-60 bg-base-200 border-b-2 border-base-300">
+            <input type="checkbox">
+          </th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide opacity-60 bg-base-200 border-b-2 border-base-300 cursor-pointer select-none hover:text-primary hover:opacity-100">SKU</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide bg-base-200 border-b-2 border-base-300 cursor-pointer select-none text-primary">Name <span class="inline-flex ml-1">&uarr;</span></th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide opacity-60 bg-base-200 border-b-2 border-base-300">Category</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide opacity-60 bg-base-200 border-b-2 border-base-300 cursor-pointer select-none hover:text-primary hover:opacity-100">Price</th>
+          <th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide opacity-60 bg-base-200 border-b-2 border-base-300">Stock</th>
+          <th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide opacity-60 bg-base-200 border-b-2 border-base-300">Status</th>
+          <th class="w-20 px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide opacity-60 bg-base-200 border-b-2 border-base-300">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-base-100">
+        <tr class="transition-colors hover:bg-primary/5">
+          <td class="w-12 pl-3 pr-2 py-3 text-sm align-middle border-b border-base-300"><input type="checkbox"></td>
+          <td class="px-5 py-3 text-sm align-middle border-b border-base-300">PRD-001</td>
+          <td class="px-5 py-3 text-sm align-middle border-b border-base-300">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                <svg class="w-4 h-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+              </div>
+              <div>
+                <span class="font-medium">Wireless Headphones</span>
+                <span class="text-xs text-base-content/50 block">Bluetooth 5.0</span>
+              </div>
+            </div>
+          </td>
+          <td class="px-5 py-3 text-sm align-middle border-b border-base-300"><span class="badge badge-ghost badge-sm">Electronics</span></td>
+          <td class="px-5 py-3 text-sm align-middle border-b border-base-300 text-right font-medium">$79.99</td>
+          <td class="px-5 py-3 text-sm align-middle border-b border-base-300 text-center">142</td>
+          <td class="px-5 py-3 text-sm align-middle border-b border-base-300 text-center"><span class="badge color-success badge-sm">Active</span></td>
+          <td class="w-20 px-5 py-3 text-sm align-middle border-b border-base-300 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button class="flex items-center justify-center w-8 h-8 bg-transparent border-none rounded-lg cursor-pointer opacity-60 hover:opacity-100 hover:bg-base-200" title="Edit">&#9998;</button>
+              <button class="flex items-center justify-center w-8 h-8 bg-transparent border-none rounded-lg cursor-pointer opacity-60 hover:opacity-100 hover:bg-error/10 hover:text-error" title="Delete">&#128465;</button>
+            </div>
+          </td>
+        </tr>
+        <!-- More rows... -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div class="flex items-center justify-between px-5 py-3 border-t border-base-300 flex-wrap gap-3">
+    <div class="flex items-center gap-2 text-sm opacity-60">
+      Show <select class="px-2 py-1 text-sm rounded-lg border border-base-300 bg-base-100"><option>25</option></select> per page
+    </div>
+    <span class="text-sm opacity-60">Showing 1-5 of 24</span>
+    <nav class="flex items-center gap-1">
+      <button class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm font-medium bg-transparent border-none opacity-40" disabled>&lsaquo;</button>
+      <button class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm font-semibold bg-primary text-primary-content">1</button>
+      <button class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm font-medium bg-transparent border-none hover:bg-base-200 cursor-pointer">2</button>
+      <button class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm font-medium bg-transparent border-none hover:bg-base-200 cursor-pointer">3</button>
+      <button class="inline-flex items-center justify-center w-9 h-9 rounded-md text-sm font-medium bg-transparent border-none hover:bg-base-200 cursor-pointer">&rsaquo;</button>
+    </nav>
+  </div>
+</div>`}
+    js={`// ============================================
+// Products DataTable — Full HTMX Integration
+// ============================================
+
+// 1. Server-side search (debounced)
+// <input type="search"
+//        name="q"
+//        hx-get="/products/"
+//        hx-trigger="input changed delay:300ms"
+//        hx-target="#dt-tbody"
+//        hx-include="[name='status'],[name='category'],[name='per_page']"
+//        hx-indicator="#dt-loading">
+
+// 2. Server-side filters
+// <select name="status"
+//         hx-get="/products/"
+//         hx-trigger="change"
+//         hx-target="#dt-tbody"
+//         hx-include="[name='q'],[name='category'],[name='per_page']">
+
+// 3. Server-side pagination
+// <button hx-get="/products/?page=2"
+//         hx-target="#dt-tbody"
+//         hx-swap="innerHTML"
+//         hx-include="[name='q'],[name='status'],[name='category']">
+//   2
+// </button>
+// Server returns: new <tr> rows + OOB swap for pagination + info
+
+// 4. Server-side sorting
+// <th hx-get="/products/?sort=price&dir=asc"
+//     hx-target="#dt-tbody"
+//     hx-include="[name='q'],[name='status']">
+//   Price
+// </th>
+
+// 5. Bulk delete
+// document.getElementById('dt-bulk-delete')
+//   .addEventListener('click', () => {
+//     const ids = getSelectedIds();
+//     if (!confirm('Delete ' + ids.length + ' products?')) return;
+//     fetch('/products/bulk-delete/', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'X-CSRFToken': getCookie('csrftoken'),
+//       },
+//       body: JSON.stringify({ ids }),
+//     }).then(() => htmx.trigger('#products-table', 'refresh'));
+//   });
+
+// 6. Bulk status change
+// document.getElementById('dt-bulk-status')
+//   .addEventListener('click', () => {
+//     const ids = getSelectedIds();
+//     fetch('/products/bulk-status/', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'X-CSRFToken': getCookie('csrftoken'),
+//       },
+//       body: JSON.stringify({ ids, status: 'active' }),
+//     }).then(() => htmx.trigger('#products-table', 'refresh'));
+//   });
+
+// 7. Per-page change
+// <select name="per_page"
+//         hx-get="/products/"
+//         hx-trigger="change"
+//         hx-target="#dt-tbody"
+//         hx-include="[name='q'],[name='status'],[name='category']">
+
+// 8. Export
+// document.querySelector('[data-export="csv"]')
+//   .addEventListener('click', () => {
+//     window.location = '/products/export/?format=csv&'
+//       + new URLSearchParams(currentFilters);
+//   });`}
+  />
+
+  <h2 class="text-xl font-bold mt-10 mb-4">Features Demonstrated</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">search</span>
+      <span class="text-sm">Server-side search with HTMX, debounced 300ms</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">filters</span>
+      <span class="text-sm">Status and category dropdowns with HTMX triggers</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">view toggle</span>
+      <span class="text-sm">Switch between table rows and card grid layout</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">columns</span>
+      <span class="text-sm">Show/hide columns via dropdown checkboxes</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">bulk select</span>
+      <span class="text-sm">Select all / individual rows with checkbox</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">bulk actions</span>
+      <span class="text-sm">Delete multiple or change status in batch</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">sorting</span>
+      <span class="text-sm">Click column headers to sort asc/desc via HTMX</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">pagination</span>
+      <span class="text-sm">Server-side pagination with per-page selector</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">row actions</span>
+      <span class="text-sm">Edit and delete buttons per row</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">export</span>
+      <span class="text-sm">Export to CSV, Excel, or Print</span>
+    </div>
+  </div>
+
+  <h2 class="text-xl font-bold mt-10 mb-4">Components Used</h2>
+  <div class="space-y-2">
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">datatable</span>
+      <span class="text-sm">Container, header, toolbar, body, footer, bulk bar, view toggle, column toggle</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">pagination</span>
+      <span class="text-sm">Page navigation with prev/next and page numbers</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">dropdown</span>
+      <span class="text-sm">Column visibility and export menus (native details/summary)</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">badge</span>
+      <span class="text-sm">Status indicators (Active, Draft, Archived) and category tags</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">checkbox</span>
+      <span class="text-sm">Row selection and column visibility toggles</span>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+      <span class="badge badge-sm color-primary">input / select</span>
+      <span class="text-sm">Search field and filter selects in toolbar</span>
+    </div>
+  </div>
+</DocsLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const table = document.getElementById('products-table');
+    if (!table) return;
+
+    // Find elements inside the preview panel (first one)
+    const panel = table.closest('[data-panel="preview"]') || table.closest('.datatable');
+    const root = panel || table;
+
+    // ========================
+    // 1. Select All / Row Select
+    // ========================
+    const selectAll = root.querySelector('#dt-select-all');
+    const bulkBar = root.querySelector('#dt-bulk-bar');
+    const bulkCount = root.querySelector('#dt-bulk-count');
+    const bulkClear = root.querySelector('#dt-bulk-clear');
+
+    function getRowChecks() {
+      return root.querySelectorAll('.dt-row-check');
+    }
+
+    function updateBulkBar() {
+      const checks = getRowChecks();
+      const checked = [...checks].filter(c => c.checked);
+      const count = checked.length;
+
+      if (bulkBar) bulkBar.classList.toggle('hidden', count === 0);
+      if (bulkCount) bulkCount.textContent = count;
+
+      // Update select-all state
+      if (selectAll) {
+        selectAll.checked = count > 0 && count === checks.length;
+        selectAll.indeterminate = count > 0 && count < checks.length;
+      }
+
+      // Highlight selected rows
+      checks.forEach(c => {
+        const row = c.closest('.datatable-tr');
+        if (row) row.classList.toggle('datatable-tr-selected', c.checked);
+      });
+    }
+
+    if (selectAll) {
+      selectAll.addEventListener('change', () => {
+        getRowChecks().forEach(c => { c.checked = selectAll.checked; });
+        updateBulkBar();
+      });
+    }
+
+    root.addEventListener('change', (e) => {
+      if (e.target.classList.contains('dt-row-check')) updateBulkBar();
+    });
+
+    if (bulkClear) {
+      bulkClear.addEventListener('click', () => {
+        if (selectAll) selectAll.checked = false;
+        getRowChecks().forEach(c => { c.checked = false; });
+        updateBulkBar();
+      });
+    }
+
+    // Bulk delete
+    const bulkDelete = root.querySelector('#dt-bulk-delete');
+    if (bulkDelete) {
+      bulkDelete.addEventListener('click', () => {
+        const checked = [...getRowChecks()].filter(c => c.checked);
+        if (!confirm('Delete ' + checked.length + ' products?')) return;
+        checked.forEach(c => {
+          const row = c.closest('.datatable-tr');
+          if (row) {
+            row.style.transition = 'opacity 0.3s, transform 0.3s';
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(-20px)';
+            setTimeout(() => row.remove(), 300);
+          }
+        });
+        setTimeout(updateBulkBar, 350);
+      });
+    }
+
+    // Bulk status change
+    const bulkStatus = root.querySelector('#dt-bulk-status');
+    if (bulkStatus) {
+      bulkStatus.addEventListener('click', () => {
+        const checked = [...getRowChecks()].filter(c => c.checked);
+        checked.forEach(c => {
+          const row = c.closest('.datatable-tr');
+          if (!row) return;
+          const statusCell = row.querySelector('[data-label="Status"]');
+          if (statusCell) {
+            statusCell.innerHTML = '<span class="badge color-success badge-sm">Active</span>';
+          }
+        });
+      });
+    }
+
+    // ========================
+    // 2. View Toggle (table / cards)
+    // ========================
+    const viewToggle = root.querySelector('#dt-view-toggle');
+    const dtBody = root.querySelector('#dt-body');
+
+    if (viewToggle && dtBody) {
+      viewToggle.querySelectorAll('.datatable-view-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          viewToggle.querySelectorAll('.datatable-view-btn').forEach(b =>
+            b.classList.remove('datatable-view-btn-active'));
+          btn.classList.add('datatable-view-btn-active');
+
+          const view = btn.dataset.view;
+          if (view === 'cards') {
+            dtBody.classList.add('datatable-cards');
+          } else {
+            dtBody.classList.remove('datatable-cards');
+          }
+        });
+      });
+    }
+
+    // ========================
+    // 3. Column Visibility
+    // ========================
+    const colDropdown = root.querySelector('#dt-col-dropdown');
+    if (colDropdown) {
+      colDropdown.querySelectorAll('input[data-col]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const col = cb.dataset.col;
+          const visible = cb.checked;
+          // Toggle header
+          root.querySelectorAll('.datatable-th[data-col="' + col + '"]').forEach(th => {
+            th.style.display = visible ? '' : 'none';
+          });
+          // Toggle cells by data-label
+          root.querySelectorAll('.datatable-td[data-label]').forEach(td => {
+            const label = td.getAttribute('data-label').toLowerCase();
+            if (label === col.toLowerCase() || (col === 'name' && label === 'name')) {
+              // Match by col name
+            }
+          });
+          // Simpler: use column index
+          const thAll = root.querySelectorAll('.datatable-thead th[data-col]');
+          const thArr = [...thAll];
+          const idx = thArr.findIndex(th => th.dataset.col === col);
+          if (idx === -1) return;
+          // Account for checkbox column offset (+1)
+          const colIdx = idx + 1;
+          root.querySelectorAll('.datatable-tbody .datatable-tr').forEach(tr => {
+            const tds = tr.querySelectorAll('.datatable-td');
+            if (tds[colIdx]) tds[colIdx].style.display = visible ? '' : 'none';
+          });
+        });
+      });
+    }
+
+    // ========================
+    // 4. Client-side search (demo)
+    // ========================
+    const searchInput = root.querySelector('#dt-search');
+    if (searchInput) {
+      let searchTimeout;
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          const q = searchInput.value.toLowerCase();
+          root.querySelectorAll('.datatable-tbody .datatable-tr').forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(q) ? '' : 'none';
+          });
+        }, 200);
+      });
+    }
+
+    // ========================
+    // 5. Filter by status (demo)
+    // ========================
+    const filterStatus = root.querySelector('#dt-filter-status');
+    if (filterStatus) {
+      filterStatus.addEventListener('change', () => {
+        const val = filterStatus.value.toLowerCase();
+        root.querySelectorAll('.datatable-tbody .datatable-tr').forEach(row => {
+          if (!val) { row.style.display = ''; return; }
+          const statusCell = row.querySelector('[data-label="Status"]');
+          if (!statusCell) { row.style.display = ''; return; }
+          const text = statusCell.textContent.toLowerCase().trim();
+          row.style.display = text.includes(val) ? '' : 'none';
+        });
+      });
+    }
+
+    // ========================
+    // 6. Filter by category (demo)
+    // ========================
+    const filterCategory = root.querySelector('#dt-filter-category');
+    if (filterCategory) {
+      filterCategory.addEventListener('change', () => {
+        const val = filterCategory.value.toLowerCase();
+        root.querySelectorAll('.datatable-tbody .datatable-tr').forEach(row => {
+          if (!val) { row.style.display = ''; return; }
+          const catCell = row.querySelector('[data-label="Category"]');
+          if (!catCell) { row.style.display = ''; return; }
+          const text = catCell.textContent.toLowerCase().trim();
+          row.style.display = text.includes(val) ? '' : 'none';
+        });
+      });
+    }
+
+    // ========================
+    // 7. Sorting (client-side demo)
+    // ========================
+    root.querySelectorAll('.datatable-th-sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        // Toggle sorted state
+        const wasSorted = th.classList.contains('datatable-th-sorted');
+        const wasDesc = th.classList.contains('datatable-th-sorted-desc');
+
+        // Remove sorted from all
+        root.querySelectorAll('.datatable-th-sortable').forEach(h => {
+          h.classList.remove('datatable-th-sorted', 'datatable-th-sorted-desc');
+        });
+
+        if (!wasSorted) {
+          th.classList.add('datatable-th-sorted');
+        } else if (!wasDesc) {
+          th.classList.add('datatable-th-sorted', 'datatable-th-sorted-desc');
+        }
+        // Third click = unsorted (already removed above)
+
+        // Add sort icon if missing
+        if (!th.querySelector('.datatable-sort-icon')) {
+          const icon = document.createElement('span');
+          icon.className = 'datatable-sort-icon';
+          icon.innerHTML = '<svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>';
+          th.appendChild(icon);
+        }
+      });
+    });
+
+    // ========================
+    // 8. Pagination (demo)
+    // ========================
+    root.querySelectorAll('.pagination-btn:not(.pagination-prev):not(.pagination-next):not(:disabled)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        root.querySelectorAll('.pagination-btn').forEach(b =>
+          b.classList.remove('pagination-active'));
+        btn.classList.add('pagination-active');
+      });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      root.querySelectorAll('details.dropdown[open]').forEach(d => {
+        if (!d.contains(e.target)) d.removeAttribute('open');
+      });
+    });
+  });
+</script>
