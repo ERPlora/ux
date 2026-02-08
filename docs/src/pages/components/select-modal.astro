@@ -1,0 +1,671 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Select Modal">
+  <p class="text-base-content/70 mb-6">Ionic-style select that opens a modal with radio or checkbox options. Combines the trigger (styled like a select) with a modal overlay containing option items. Reuses existing <code>.modal</code>, <code>.radio</code>, <code>.checkbox</code>, and <code>.btn</code> components.</p>
+
+  <!-- ============================================= -->
+  <!-- SINGLE SELECT (radios)                        -->
+  <!-- ============================================= -->
+
+  <CodePreview
+    title="Single Select (Radios)"
+    height="500px"
+    semantic={`<div x-data="{ open: false, selected: '' }">
+  <!-- Trigger -->
+  <button class="select-modal" @click="open = true">
+    <span class="select-modal-placeholder" x-show="!selected">Select framework...</span>
+    <span class="select-modal-value" x-show="selected" x-text="selected"></span>
+  </button>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" :data-state="open ? 'open' : 'closed'" @click.self="open = false">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Select Framework</h3>
+        <button class="modal-close" @click="open = false">&times;</button>
+      </div>
+      <div class="modal-body p-0">
+        <label class="select-modal-option" :class="selected === 'React' && 'select-modal-option-selected'" @click="selected = 'React'">
+          <input type="radio" name="fw" class="radio-input" value="React">
+          <span class="radio-circle"><span class="radio-dot"></span></span>
+          <span class="select-modal-option-label">React</span>
+        </label>
+        <label class="select-modal-option" :class="selected === 'Vue' && 'select-modal-option-selected'" @click="selected = 'Vue'">
+          <input type="radio" name="fw" class="radio-input" value="Vue">
+          <span class="radio-circle"><span class="radio-dot"></span></span>
+          <span class="select-modal-option-label">Vue</span>
+        </label>
+        <label class="select-modal-option" :class="selected === 'Svelte' && 'select-modal-option-selected'" @click="selected = 'Svelte'">
+          <input type="radio" name="fw" class="radio-input" value="Svelte">
+          <span class="radio-circle"><span class="radio-dot"></span></span>
+          <span class="select-modal-option-label">Svelte</span>
+        </label>
+        <label class="select-modal-option" :class="selected === 'Astro' && 'select-modal-option-selected'" @click="selected = 'Astro'">
+          <input type="radio" name="fw" class="radio-input" value="Astro">
+          <span class="radio-circle"><span class="radio-dot"></span></span>
+          <span class="select-modal-option-label">Astro</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" @click="selected = ''; open = false">Cancel</button>
+        <button class="btn btn-sm color-primary" @click="open = false">OK</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div x-data="{ open: false, selected: '' }">
+  <button class="relative w-full flex items-center gap-2 cursor-pointer outline-none text-left h-[2.75rem] pl-3 pr-10 text-base bg-base-100 border border-base-300 rounded-field bg-no-repeat bg-[right_0.75rem_center] bg-[length:1rem] hover:border-base-content/30 focus:border-primary focus:ring-3 focus:ring-primary/15" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;)" @click="open = true">
+    <span class="truncate flex-1 text-base-content/40" x-show="!selected">Select framework...</span>
+    <span class="truncate flex-1 text-base-content" x-show="selected" x-text="selected"></span>
+  </button>
+
+  <div class="fixed inset-0 flex items-center justify-center z-400 p-6 bg-black/40 transition-all" :class="open ? 'opacity-100 visible' : 'opacity-0 invisible'" @click.self="open = false">
+    <div class="relative flex flex-col w-full max-w-[400px] max-h-[85dvh] bg-base-100 rounded-box shadow-xl" :class="open ? 'scale-100 opacity-100' : 'scale-95 opacity-0'" style="transition: transform 0.2s cubic-bezier(0.32,0.72,0,1), opacity 0.15s">
+      <div class="flex items-center justify-between shrink-0 p-5 border-b border-base-200">
+        <h3 class="m-0 text-lg font-semibold">Select Framework</h3>
+        <button class="inline-flex items-center justify-center size-8 rounded-full bg-base-200 text-base-content opacity-60 hover:opacity-100" @click="open = false">&times;</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-0">
+        <label class="flex items-center gap-3 cursor-pointer px-5 py-3 hover:bg-base-200 border-b border-base-200" @click="selected = 'React'">
+          <input type="radio" name="fw" class="absolute opacity-0 w-0 h-0" value="React">
+          <span class="relative flex items-center justify-center shrink-0 size-6 rounded-full border-2 border-base-300">
+            <span class="size-3 rounded-full bg-primary" :class="selected === 'React' ? 'scale-100' : 'scale-0'" style="transition: transform 0.15s"></span>
+          </span>
+          <span class="text-base">React</span>
+        </label>
+        <!-- ...more options... -->
+      </div>
+      <div class="flex items-center justify-end gap-2 shrink-0 p-5 border-t border-base-200">
+        <button class="btn btn-ghost btn-sm" @click="selected = ''; open = false">Cancel</button>
+        <button class="btn btn-sm color-primary" @click="open = false">OK</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// With Alpine.js (shown above):
+// x-data manages open state and selected value
+// @click on labels updates the selection
+// Cancel resets, OK confirms
+
+// Vanilla JS equivalent:
+const trigger = document.querySelector('.select-modal');
+const backdrop = document.querySelector('.modal-backdrop');
+trigger.addEventListener('click', () => backdrop.dataset.state = 'open');
+document.querySelector('.modal-close').addEventListener('click', () => backdrop.dataset.state = 'closed');
+
+// Update trigger text on selection
+document.querySelectorAll('.select-modal-option input').forEach(input => {
+  input.addEventListener('change', () => {
+    document.querySelector('.select-modal-value').textContent = input.value;
+  });
+});`}
+  />
+
+  <!-- ============================================= -->
+  <!-- MULTIPLE SELECT (checkboxes)                  -->
+  <!-- ============================================= -->
+
+  <CodePreview
+    title="Multiple Select (Checkboxes)"
+    height="500px"
+    semantic={`<div x-data="{ open: false, selected: [] }">
+  <!-- Trigger -->
+  <button class="select-modal" @click="open = true">
+    <span class="select-modal-placeholder" x-show="selected.length === 0">Select fruits...</span>
+    <span class="select-modal-value" x-show="selected.length > 0" x-text="selected.join(', ')"></span>
+  </button>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" :data-state="open ? 'open' : 'closed'" @click.self="open = false">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Select Fruits</h3>
+        <button class="modal-close" @click="open = false">&times;</button>
+      </div>
+      <div class="modal-body p-0">
+        <template x-for="fruit in ['Apple', 'Banana', 'Cherry', 'Mango', 'Orange']" :key="fruit">
+          <label class="select-modal-option" :class="selected.includes(fruit) && 'select-modal-option-selected'" @click="selected.includes(fruit) ? selected = selected.filter(f => f !== fruit) : selected.push(fruit)">
+            <input type="checkbox" class="checkbox-input" :checked="selected.includes(fruit)">
+            <span class="checkbox-box"><svg class="checkbox-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+            <span class="select-modal-option-label" x-text="fruit"></span>
+          </label>
+        </template>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" @click="selected = []; open = false">Cancel</button>
+        <button class="btn btn-sm color-primary" @click="open = false">OK</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div x-data="{ open: false, selected: [] }">
+  <button class="relative w-full flex items-center gap-2 cursor-pointer outline-none text-left h-[2.75rem] pl-3 pr-10 text-base bg-base-100 border border-base-300 rounded-field bg-no-repeat bg-[right_0.75rem_center] bg-[length:1rem] hover:border-base-content/30 focus:border-primary focus:ring-3 focus:ring-primary/15" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;)" @click="open = true">
+    <span class="truncate flex-1 text-base-content/40" x-show="selected.length === 0">Select fruits...</span>
+    <span class="truncate flex-1 text-base-content" x-show="selected.length > 0" x-text="selected.join(', ')"></span>
+  </button>
+
+  <!-- Modal with pure Tailwind classes -->
+  <div class="fixed inset-0 flex items-center justify-center z-400 p-6 bg-black/40 transition-all" :class="open ? 'opacity-100 visible' : 'opacity-0 invisible'" @click.self="open = false">
+    <div class="relative flex flex-col w-full max-w-[400px] max-h-[85dvh] bg-base-100 rounded-box shadow-xl">
+      <div class="flex items-center justify-between shrink-0 p-5 border-b border-base-200">
+        <h3 class="m-0 text-lg font-semibold">Select Fruits</h3>
+        <button class="inline-flex items-center justify-center size-8 rounded-full bg-base-200 opacity-60 hover:opacity-100" @click="open = false">&times;</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-0">
+        <template x-for="fruit in ['Apple', 'Banana', 'Cherry', 'Mango', 'Orange']" :key="fruit">
+          <label class="flex items-center gap-3 cursor-pointer px-5 py-3 hover:bg-base-200 border-b border-base-200" @click="selected.includes(fruit) ? selected = selected.filter(f => f !== fruit) : selected.push(fruit)">
+            <input type="checkbox" class="absolute opacity-0 w-0 h-0" :checked="selected.includes(fruit)">
+            <span class="relative flex items-center justify-center shrink-0 size-6 rounded-md border-2 border-base-300" :class="selected.includes(fruit) && 'bg-primary border-primary'">
+              <svg class="size-3.5 text-primary-content" :class="selected.includes(fruit) ? 'block' : 'hidden'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </span>
+            <span class="text-base" x-text="fruit"></span>
+          </label>
+        </template>
+      </div>
+      <div class="flex items-center justify-end gap-2 shrink-0 p-5 border-t border-base-200">
+        <button class="btn btn-ghost btn-sm" @click="selected = []; open = false">Cancel</button>
+        <button class="btn btn-sm color-primary" @click="open = false">OK</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// With Alpine.js: x-data manages open state and selected array
+// @click on labels toggles items in/out of the array
+// Cancel clears, OK confirms
+
+// Vanilla JS:
+const selected = new Set();
+document.querySelectorAll('.select-modal-option input[type="checkbox"]').forEach(cb => {
+  cb.addEventListener('change', () => {
+    cb.checked ? selected.add(cb.value) : selected.delete(cb.value);
+    // Update trigger text
+    const trigger = document.querySelector('.select-modal-value');
+    trigger.textContent = [...selected].join(', ');
+  });
+});`}
+  />
+
+  <!-- ============================================= -->
+  <!-- WITH DESCRIPTIONS                             -->
+  <!-- ============================================= -->
+
+  <CodePreview
+    title="Options with Descriptions"
+    height="500px"
+    semantic={`<div x-data="{ open: false, selected: 'standard' }">
+  <button class="select-modal" @click="open = true">
+    <span class="select-modal-value" x-text="selected === 'standard' ? 'Standard Shipping' : selected === 'express' ? 'Express Shipping' : 'Overnight'"></span>
+  </button>
+
+  <div class="modal-backdrop" :data-state="open ? 'open' : 'closed'" @click.self="open = false">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Shipping Method</h3>
+        <button class="modal-close" @click="open = false">&times;</button>
+      </div>
+      <div class="modal-body p-0">
+        <label class="select-modal-option" :class="selected === 'standard' && 'select-modal-option-selected'" @click="selected = 'standard'">
+          <input type="radio" name="ship" class="radio-input" value="standard" :checked="selected === 'standard'">
+          <span class="radio-circle"><span class="radio-dot"></span></span>
+          <span class="select-modal-option-text">
+            <span class="select-modal-option-label">Standard Shipping</span>
+            <span class="select-modal-option-description">5-7 business days &bull; Free</span>
+          </span>
+        </label>
+        <label class="select-modal-option" :class="selected === 'express' && 'select-modal-option-selected'" @click="selected = 'express'">
+          <input type="radio" name="ship" class="radio-input" value="express" :checked="selected === 'express'">
+          <span class="radio-circle"><span class="radio-dot"></span></span>
+          <span class="select-modal-option-text">
+            <span class="select-modal-option-label">Express Shipping</span>
+            <span class="select-modal-option-description">2-3 business days &bull; $9.99</span>
+          </span>
+        </label>
+        <label class="select-modal-option" :class="selected === 'overnight' && 'select-modal-option-selected'" @click="selected = 'overnight'">
+          <input type="radio" name="ship" class="radio-input" value="overnight" :checked="selected === 'overnight'">
+          <span class="radio-circle"><span class="radio-dot"></span></span>
+          <span class="select-modal-option-text">
+            <span class="select-modal-option-label">Overnight</span>
+            <span class="select-modal-option-description">Next business day &bull; $24.99</span>
+          </span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" @click="open = false">Cancel</button>
+        <button class="btn btn-sm color-primary" @click="open = false">OK</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Same structure as above with inline Tailwind utilities -->
+<!-- .select-modal-option-text = flex-1 min-w-0 -->
+<!-- .select-modal-option-label = text-base leading-snug text-base-content -->
+<!-- .select-modal-option-description = text-sm text-base-content/55 mt-0.5 -->
+<div x-data="{ open: false, selected: 'standard' }">
+  <button class="relative w-full flex items-center gap-2 cursor-pointer text-left h-[2.75rem] pl-3 pr-10 text-base bg-base-100 border border-base-300 rounded-field" @click="open = true">
+    <span class="truncate flex-1" x-text="selected === 'standard' ? 'Standard Shipping' : selected === 'express' ? 'Express Shipping' : 'Overnight'"></span>
+  </button>
+  <!-- modal with option-text/option-label/option-description structure -->
+</div>`}
+    js={`// Alpine.js manages the single selection
+// Each option updates selected on click
+// Description text provides additional context per option`}
+  />
+
+  <!-- ============================================= -->
+  <!-- CHECKMARK STYLE                               -->
+  <!-- ============================================= -->
+
+  <CodePreview
+    title="Checkmark Style (no radio/checkbox widget)"
+    height="460px"
+    semantic={`<div x-data="{ open: false, selected: 'dark' }">
+  <button class="select-modal" @click="open = true">
+    <span class="select-modal-value" x-text="selected.charAt(0).toUpperCase() + selected.slice(1)"></span>
+  </button>
+
+  <div class="modal-backdrop" :data-state="open ? 'open' : 'closed'" @click.self="open = false">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Theme</h3>
+        <button class="modal-close" @click="open = false">&times;</button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="select-modal-option" :class="selected === 'light' && 'select-modal-option-selected'" @click="selected = 'light'">
+          <span class="select-modal-option-label">Light</span>
+          <svg class="select-modal-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div class="select-modal-option" :class="selected === 'dark' && 'select-modal-option-selected'" @click="selected = 'dark'">
+          <span class="select-modal-option-label">Dark</span>
+          <svg class="select-modal-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div class="select-modal-option" :class="selected === 'system' && 'select-modal-option-selected'" @click="selected = 'system'">
+          <span class="select-modal-option-label">System</span>
+          <svg class="select-modal-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm color-primary" @click="open = false">Done</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div x-data="{ open: false, selected: 'dark' }">
+  <button class="relative w-full flex items-center gap-2 cursor-pointer text-left h-[2.75rem] pl-3 pr-10 text-base bg-base-100 border border-base-300 rounded-field" @click="open = true">
+    <span class="truncate flex-1" x-text="selected.charAt(0).toUpperCase() + selected.slice(1)"></span>
+  </button>
+  <!-- Modal with checkmark-only options -->
+  <!-- No radio/checkbox — just a check SVG that shows/hides -->
+  <!-- .select-modal-option-check = shrink-0 size-5 text-primary opacity-0 -->
+  <!-- .select-modal-option-selected .select-modal-option-check = opacity-100 -->
+</div>`}
+    js={`// Checkmark style uses no radio/checkbox inputs
+// Just div.select-modal-option with a check SVG
+// The check is hidden (opacity-0) and revealed when selected (opacity-100)
+// Useful for simple single-choice lists like theme or language pickers`}
+  />
+
+  <!-- ============================================= -->
+  <!-- WITH SEARCH                                   -->
+  <!-- ============================================= -->
+
+  <CodePreview
+    title="With Search"
+    height="520px"
+    semantic={`<div x-data="{ open: false, selected: '', search: '' }">
+  <button class="select-modal" @click="open = true">
+    <span class="select-modal-placeholder" x-show="!selected">Select country...</span>
+    <span class="select-modal-value" x-show="selected" x-text="selected"></span>
+  </button>
+
+  <div class="modal-backdrop" :data-state="open ? 'open' : 'closed'" @click.self="open = false">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Select Country</h3>
+        <button class="modal-close" @click="open = false">&times;</button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="select-modal-search">
+          <input type="text" class="input input-sm w-full" placeholder="Search..." x-model="search">
+        </div>
+        <template x-for="c in ['Argentina', 'Australia', 'Brazil', 'Canada', 'France', 'Germany', 'Italy', 'Japan', 'Mexico', 'Spain', 'UK', 'USA'].filter(c => c.toLowerCase().includes(search.toLowerCase()))" :key="c">
+          <label class="select-modal-option" :class="selected === c && 'select-modal-option-selected'" @click="selected = c">
+            <input type="radio" name="country" class="radio-input" :value="c">
+            <span class="radio-circle"><span class="radio-dot"></span></span>
+            <span class="select-modal-option-label" x-text="c"></span>
+          </label>
+        </template>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" @click="selected = ''; open = false">Cancel</button>
+        <button class="btn btn-sm color-primary" @click="open = false">OK</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Search input is sticky at the top of the scrollable area -->
+<!-- .select-modal-search = sticky top-0 z-10 px-5 py-3 bg-base-100 border-b border-base-200 -->
+<!-- Contains a standard .input .input-sm or pure Tailwind equivalent -->
+<div x-data="{ open: false, selected: '', search: '' }">
+  <button class="relative w-full flex items-center gap-2 cursor-pointer text-left h-[2.75rem] pl-3 pr-10 text-base bg-base-100 border border-base-300 rounded-field" @click="open = true">
+    <span class="truncate flex-1 text-base-content/40" x-show="!selected">Select country...</span>
+    <span class="truncate flex-1" x-show="selected" x-text="selected"></span>
+  </button>
+  <!-- modal with sticky search + filtered options -->
+</div>`}
+    js={`// Alpine.js x-model on search input filters the options list
+// x-for with .filter() renders only matching items
+// The search input is inside .select-modal-search which sticks to top
+
+// For vanilla JS, add an input event listener:
+const searchInput = document.querySelector('.select-modal-search input');
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.toLowerCase();
+  document.querySelectorAll('.select-modal-option').forEach(opt => {
+    const text = opt.querySelector('.select-modal-option-label').textContent;
+    opt.style.display = text.toLowerCase().includes(query) ? '' : 'none';
+  });
+});`}
+  />
+
+  <!-- ============================================= -->
+  <!-- TAGS IN TRIGGER                               -->
+  <!-- ============================================= -->
+
+  <CodePreview
+    title="Tags in Trigger (Multi-select)"
+    height="500px"
+    semantic={`<div x-data="{ open: false, selected: ['React', 'Vue'] }">
+  <button class="select-modal" @click="open = true">
+    <span class="select-modal-placeholder" x-show="selected.length === 0">Select technologies...</span>
+    <span class="select-modal-tags" x-show="selected.length > 0">
+      <template x-for="tag in selected" :key="tag">
+        <span class="select-modal-tag">
+          <span x-text="tag"></span>
+          <span class="select-modal-tag-remove" @click.stop="selected = selected.filter(t => t !== tag)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </span>
+        </span>
+      </template>
+    </span>
+  </button>
+
+  <div class="modal-backdrop" :data-state="open ? 'open' : 'closed'" @click.self="open = false">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Technologies</h3>
+        <button class="modal-close" @click="open = false">&times;</button>
+      </div>
+      <div class="modal-body p-0">
+        <template x-for="tech in ['React', 'Vue', 'Svelte', 'Angular', 'Astro', 'Next.js']" :key="tech">
+          <label class="select-modal-option" :class="selected.includes(tech) && 'select-modal-option-selected'" @click="selected.includes(tech) ? selected = selected.filter(t => t !== tech) : selected.push(tech)">
+            <input type="checkbox" class="checkbox-input" :checked="selected.includes(tech)">
+            <span class="checkbox-box"><svg class="checkbox-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+            <span class="select-modal-option-label" x-text="tech"></span>
+          </label>
+        </template>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" @click="selected = []; open = false">Clear All</button>
+        <button class="btn btn-sm color-primary" @click="open = false">Done</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div x-data="{ open: false, selected: ['React', 'Vue'] }">
+  <button class="relative w-full flex items-center gap-2 cursor-pointer text-left h-[2.75rem] pl-3 pr-10 text-base bg-base-100 border border-base-300 rounded-field" @click="open = true">
+    <span class="flex flex-wrap gap-1 flex-1 overflow-hidden" x-show="selected.length > 0">
+      <template x-for="tag in selected" :key="tag">
+        <span class="inline-flex items-center gap-1 text-xs font-medium rounded-full px-2 py-0.5 bg-primary/12 text-primary max-w-[120px]">
+          <span class="truncate" x-text="tag"></span>
+          <span class="inline-flex items-center justify-center size-3.5 rounded-full opacity-60 hover:opacity-100 cursor-pointer" @click.stop="selected = selected.filter(t => t !== tag)">
+            <svg class="size-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </span>
+        </span>
+      </template>
+    </span>
+  </button>
+  <!-- modal with checkbox options -->
+</div>`}
+    js={`// Tags are removable directly from the trigger via @click.stop
+// The .stop modifier prevents the modal from opening when removing a tag
+// Inside the modal, checkboxes toggle items in/out of the selected array`}
+  />
+
+  <!-- ============================================= -->
+  <!-- GLASS VARIANT                                 -->
+  <!-- ============================================= -->
+
+  <CodePreview
+    title="Glass Variant"
+    height="500px"
+    semantic={`<div class="p-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
+  <div x-data="{ open: false, selected: '' }">
+    <!-- Glass trigger -->
+    <button class="select-modal glass" @click="open = true">
+      <span class="select-modal-placeholder" x-show="!selected">Select option...</span>
+      <span class="select-modal-value" x-show="selected" x-text="selected"></span>
+    </button>
+
+    <!-- Glass modal -->
+    <div class="modal-backdrop" :data-state="open ? 'open' : 'closed'" @click.self="open = false">
+      <div class="modal modal-sm glass">
+        <div class="modal-header">
+          <h3 class="modal-title">Select Option</h3>
+          <button class="modal-close" @click="open = false">&times;</button>
+        </div>
+        <div class="modal-body p-0">
+          <label class="select-modal-option" :class="selected === 'Option A' && 'select-modal-option-selected'" @click="selected = 'Option A'">
+            <input type="radio" name="opt" class="radio-input" value="Option A">
+            <span class="radio-circle"><span class="radio-dot"></span></span>
+            <span class="select-modal-option-label">Option A</span>
+          </label>
+          <label class="select-modal-option" :class="selected === 'Option B' && 'select-modal-option-selected'" @click="selected = 'Option B'">
+            <input type="radio" name="opt" class="radio-input" value="Option B">
+            <span class="radio-circle"><span class="radio-dot"></span></span>
+            <span class="select-modal-option-label">Option B</span>
+          </label>
+          <label class="select-modal-option" :class="selected === 'Option C' && 'select-modal-option-selected'" @click="selected = 'Option C'">
+            <input type="radio" name="opt" class="radio-input" value="Option C">
+            <span class="radio-circle"><span class="radio-dot"></span></span>
+            <span class="select-modal-option-label">Option C</span>
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost btn-sm" @click="open = false">Cancel</button>
+          <button class="btn btn-sm color-primary" @click="open = false">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div class="p-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
+  <div x-data="{ open: false, selected: '' }">
+    <!-- Glass trigger: glass utility adds backdrop-filter + translucent bg -->
+    <button class="relative w-full flex items-center gap-2 cursor-pointer text-left h-[2.75rem] pl-3 pr-10 text-base glass rounded-field border-[0.5px] border-white/20" @click="open = true">
+      <span class="truncate flex-1 text-white/60" x-show="!selected">Select option...</span>
+      <span class="truncate flex-1 text-white" x-show="selected" x-text="selected"></span>
+    </button>
+    <!-- Glass modal: .modal.glass -->
+  </div>
+</div>`}
+    js={`// Glass variant uses the .glass utility class on both trigger and modal
+// No additional JS needed — works the same as non-glass version
+// Trigger: .select-modal.glass
+// Modal: .modal.glass`}
+  />
+
+  <!-- ============================================= -->
+  <!-- SIZES                                         -->
+  <!-- ============================================= -->
+
+  <CodePreview
+    title="Sizes"
+    noFrame={true}
+    semantic={`<div class="flex flex-col gap-3 w-full max-w-sm">
+  <button class="select-modal select-modal-sm">
+    <span class="select-modal-placeholder">Small select...</span>
+  </button>
+  <button class="select-modal">
+    <span class="select-modal-placeholder">Default select...</span>
+  </button>
+  <button class="select-modal select-modal-lg">
+    <span class="select-modal-placeholder">Large select...</span>
+  </button>
+</div>`}
+    tailwind={`<div class="flex flex-col gap-3 w-full max-w-sm">
+  <button class="relative w-full flex items-center gap-2 cursor-pointer text-left h-9 pl-2.5 pr-8 text-sm bg-base-100 border border-base-300 rounded-field bg-no-repeat bg-[right_0.75rem_center] bg-[length:1rem]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;)">
+    <span class="truncate flex-1 text-base-content/40">Small select...</span>
+  </button>
+  <button class="relative w-full flex items-center gap-2 cursor-pointer text-left h-[2.75rem] pl-3 pr-10 text-base bg-base-100 border border-base-300 rounded-field bg-no-repeat bg-[right_0.75rem_center] bg-[length:1rem]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;)">
+    <span class="truncate flex-1 text-base-content/40">Default select...</span>
+  </button>
+  <button class="relative w-full flex items-center gap-2 cursor-pointer text-left h-[3.25rem] pl-4 pr-11 text-lg bg-base-100 border border-base-300 rounded-field bg-no-repeat bg-[right_0.75rem_center] bg-[length:1rem]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;)">
+    <span class="truncate flex-1 text-base-content/40">Large select...</span>
+  </button>
+</div>`}
+    js={`// Size classes: .select-modal-sm (h-9), .select-modal (h-11), .select-modal-lg (h-13)
+// No JavaScript needed for sizing — pure CSS classes`}
+  />
+
+  <!-- ============================================= -->
+  <!-- DISABLED OPTION                               -->
+  <!-- ============================================= -->
+
+  <CodePreview
+    title="Disabled Options"
+    height="420px"
+    semantic={`<div x-data="{ open: true, selected: '' }">
+  <div class="modal-backdrop" data-state="open" style="position: relative; min-height: 350px; padding: 1rem; background: transparent;">
+    <div class="modal modal-sm" style="position: relative; transform: none; opacity: 1;">
+      <div class="modal-header">
+        <h3 class="modal-title">Select Plan</h3>
+      </div>
+      <div class="modal-body p-0">
+        <label class="select-modal-option">
+          <input type="radio" name="plan" class="radio-input" value="free">
+          <span class="radio-circle"><span class="radio-dot"></span></span>
+          <span class="select-modal-option-text">
+            <span class="select-modal-option-label">Free</span>
+            <span class="select-modal-option-description">Basic features</span>
+          </span>
+        </label>
+        <label class="select-modal-option select-modal-option-disabled">
+          <input type="radio" name="plan" class="radio-input" value="pro" disabled>
+          <span class="radio-circle"><span class="radio-dot"></span></span>
+          <span class="select-modal-option-text">
+            <span class="select-modal-option-label">Pro (coming soon)</span>
+            <span class="select-modal-option-description">Advanced features</span>
+          </span>
+        </label>
+        <label class="select-modal-option">
+          <input type="radio" name="plan" class="radio-input" value="enterprise">
+          <span class="radio-circle"><span class="radio-dot"></span></span>
+          <span class="select-modal-option-text">
+            <span class="select-modal-option-label">Enterprise</span>
+            <span class="select-modal-option-description">Custom solution</span>
+          </span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm color-primary">OK</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Disabled option: add opacity-40 cursor-not-allowed pointer-events-none -->
+<label class="flex items-center gap-3 px-5 py-3 opacity-40 cursor-not-allowed pointer-events-none border-b border-base-200">
+  <input type="radio" class="absolute opacity-0 w-0 h-0" disabled>
+  <span class="relative flex items-center justify-center shrink-0 size-6 rounded-full border-2 border-base-300">
+    <span class="size-3 rounded-full bg-primary scale-0"></span>
+  </span>
+  <span class="flex-1 min-w-0">
+    <span class="text-base">Pro (coming soon)</span>
+    <span class="text-sm text-base-content/55 mt-0.5 block">Advanced features</span>
+  </span>
+</label>`}
+    js={`// Disabled options use .select-modal-option-disabled class
+// This adds pointer-events: none and reduced opacity
+// The radio/checkbox input should also have the disabled attribute`}
+  />
+
+
+  <!-- ============================================= -->
+  <!-- REFERENCE                                     -->
+  <!-- ============================================= -->
+
+  <h2 class="text-xl font-bold mt-14 mb-4">Reference</h2>
+
+  <h3 class="font-semibold mb-3">Trigger Classes</h3>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="border-b border-base-200">
+          <th class="text-left py-2 pr-4 font-medium">Class</th>
+          <th class="text-left py-2 font-medium">Description</th>
+        </tr>
+      </thead>
+      <tbody class="text-base-content/70">
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal</td><td class="py-2">Trigger button styled like a select</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-value</td><td class="py-2">Displayed selected value text</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-placeholder</td><td class="py-2">Placeholder when nothing selected</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-tags</td><td class="py-2">Container for multi-select chips</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-tag</td><td class="py-2">Individual chip tag</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-tag-remove</td><td class="py-2">Remove button on tag</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-sm</td><td class="py-2">Small trigger size</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-lg</td><td class="py-2">Large trigger size</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-filled</td><td class="py-2">Filled background variant</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-ghost</td><td class="py-2">Transparent variant</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-error</td><td class="py-2">Error state border</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-success</td><td class="py-2">Success state border</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal.glass</td><td class="py-2">Glass morphism variant</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="font-semibold mt-6 mb-3">Option Classes (inside modal-body)</h3>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="border-b border-base-200">
+          <th class="text-left py-2 pr-4 font-medium">Class</th>
+          <th class="text-left py-2 font-medium">Description</th>
+        </tr>
+      </thead>
+      <tbody class="text-base-content/70">
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-option</td><td class="py-2">Option item row</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-option-selected</td><td class="py-2">Selected state (tinted background)</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-option-disabled</td><td class="py-2">Disabled option</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-option-text</td><td class="py-2">Wrapper for label + description</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-option-label</td><td class="py-2">Primary option text</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-option-description</td><td class="py-2">Secondary description text</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-option-check</td><td class="py-2">Checkmark icon (for check-only style)</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.select-modal-search</td><td class="py-2">Sticky search input container</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="font-semibold mt-6 mb-3">Reused Components</h3>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="border-b border-base-200">
+          <th class="text-left py-2 pr-4 font-medium">Component</th>
+          <th class="text-left py-2 font-medium">Usage</th>
+        </tr>
+      </thead>
+      <tbody class="text-base-content/70">
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.modal-backdrop + .modal</td><td class="py-2">Overlay container</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.modal-header / .modal-footer</td><td class="py-2">Header with title, footer with buttons</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.modal-body.p-0</td><td class="py-2">Edge-to-edge option list</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.radio-input + .radio-circle</td><td class="py-2">Single select radio buttons</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.checkbox-input + .checkbox-box</td><td class="py-2">Multiple select checkboxes</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.btn / .btn-ghost / .color-primary</td><td class="py-2">Cancel/OK buttons</td></tr>
+        <tr class="border-b border-base-200"><td class="py-2 pr-4 font-mono text-xs">.modal.glass</td><td class="py-2">Glass modal variant</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</DocsLayout>
