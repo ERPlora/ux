@@ -1,0 +1,242 @@
+/* UX v3 - Navbar Component */
+/* Responsive website navigation bar: logo left, links right, hamburger on mobile */
+/* CSS-only mobile menu via hidden checkbox — no JS required */
+
+@layer components {
+
+  /* =============================================
+     Base navbar
+     ============================================= */
+
+  .navbar {
+    @apply flex items-center w-full px-4 bg-base-100;
+    min-height: 4rem;
+    gap: 0.5rem;
+    border-bottom: var(--border) solid var(--color-base-300);
+  }
+
+  /* =============================================
+     Zones
+     ============================================= */
+
+  .navbar-start {
+    @apply flex items-center gap-2 shrink-0;
+  }
+
+  .navbar-center {
+    @apply flex-1 flex items-center justify-center gap-1;
+  }
+
+  .navbar-end {
+    @apply flex items-center gap-2 shrink-0 ml-auto;
+  }
+
+  /* =============================================
+     Brand (logo + text)
+     ============================================= */
+
+  .navbar-brand {
+    @apply flex items-center gap-2 no-underline shrink-0;
+    color: var(--color-base-content);
+
+    & img {
+      @apply h-8 w-auto;
+    }
+  }
+
+  .navbar-brand-text {
+    @apply font-bold text-lg whitespace-nowrap;
+  }
+
+  /* =============================================
+     Inline nav links (desktop)
+     ============================================= */
+
+  .navbar-nav {
+    @apply hidden items-center gap-1;
+  }
+
+  .navbar-link {
+    @apply inline-flex items-center px-3 py-2 text-sm font-medium no-underline rounded-field whitespace-nowrap;
+    color: color-mix(in oklch, var(--color-base-content) 70%, transparent);
+    transition: color 0.15s ease, background-color 0.15s ease;
+
+    &:hover {
+      color: var(--color-base-content);
+      background-color: var(--color-base-200);
+    }
+  }
+
+  .navbar-link-active {
+    color: var(--color-primary);
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+
+  /* Menu button: hidden by default (desktop), shown on mobile */
+  .navbar .menu-button {
+    @apply hidden;
+  }
+
+  /* =============================================
+     Mobile menu panel
+     ============================================= */
+
+  .navbar-mobile {
+    @apply hidden flex-col w-full bg-base-100;
+    border-bottom: var(--border) solid var(--color-base-300);
+    padding: 0.75rem 1rem 1rem;
+    gap: 0.25rem;
+  }
+
+  /* Open states: data-state or class (JS-based) */
+  .navbar-mobile[data-state="open"],
+  .navbar-mobile.is-open {
+    @apply flex;
+  }
+
+  .navbar-mobile .navbar-link {
+    @apply flex w-full py-3 px-3 text-base rounded-field;
+  }
+
+  /* =============================================
+     Responsive: show/hide at md breakpoint
+     ============================================= */
+
+  @media (min-width: 768px) {
+    .navbar-nav {
+      @apply flex;
+    }
+
+    .navbar .menu-button {
+      display: none !important;
+    }
+
+    .navbar-mobile {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .navbar .menu-button {
+      @apply flex;
+    }
+  }
+
+  /* =============================================
+     Variants
+     ============================================= */
+
+  /* No border, just shadow */
+  .navbar-shadow {
+    @apply border-b-0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Floating: detached with rounded corners */
+  .navbar-floating {
+    @apply mx-4 mt-4 rounded-box border border-base-300;
+    border-bottom: var(--border) solid var(--color-base-300);
+  }
+
+  .navbar-floating + .navbar-mobile {
+    @apply mx-4 rounded-b-box border border-t-0 border-base-300;
+  }
+
+  /* Transparent (for hero overlays) */
+  .navbar-transparent {
+    @apply bg-transparent border-b-0;
+  }
+
+  .navbar-transparent .navbar-link {
+    color: color-mix(in oklch, var(--color-base-content) 80%, transparent);
+
+    &:hover {
+      @apply bg-white/10;
+      color: var(--color-base-content);
+    }
+  }
+
+  /* Compact */
+  .navbar-compact {
+    min-height: 3rem;
+  }
+
+  /* =============================================
+     Glass variant
+     ============================================= */
+
+  .navbar.glass {
+    @apply glass;
+    border-bottom-color: var(--color-glass-border);
+  }
+
+  .navbar.glass + .navbar-mobile {
+    @apply glass;
+    border-bottom-color: var(--color-glass-border);
+  }
+
+  /* =============================================
+     Dark mode
+     ============================================= */
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .navbar-shadow {
+      box-shadow: none;
+      border-bottom: var(--border) solid var(--color-base-300);
+    }
+  }
+
+  [data-theme="dark"] .navbar-shadow {
+    box-shadow: none;
+    border-bottom: var(--border) solid var(--color-base-300);
+  }
+}
+
+/* =============================================
+   CSS-only mobile menu toggle (checkbox hack)
+   OUTSIDE @layer so Tailwind v4 never tree-shakes it
+   ============================================= */
+
+/* The checkbox uses the HTML hidden attribute — no CSS class needed */
+/* :has() targets the parent wrapper when the checkbox is checked */
+
+/* Show mobile menu when checkbox is checked */
+:has(> input:checked) > .navbar-mobile {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Animate hamburger to X when checked */
+:has(> input:checked) > .navbar .menu-button .menu-button-line:nth-child(1) {
+  transform: translateY(calc(5px + 2px)) rotate(45deg);
+}
+
+:has(> input:checked) > .navbar .menu-button .menu-button-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+:has(> input:checked) > .navbar .menu-button .menu-button-line:nth-child(3) {
+  transform: translateY(calc(-1 * (5px + 2px))) rotate(-45deg);
+}
+
+/* Override: still hide on desktop even when checked */
+@media (min-width: 768px) {
+  :has(> input:checked) > .navbar-mobile {
+    display: none !important;
+  }
+}
+
+/* =============================================
+   Reduced motion
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-link,
+  .menu-button-line {
+    transition: none;
+  }
+}
