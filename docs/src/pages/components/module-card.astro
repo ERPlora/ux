@@ -1,0 +1,582 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+
+const starSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+const starEmpty = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="opacity: 0.25"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+const cubeIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6"><path d="M21 16.5v-9l-9-5.25L3 7.5v9l9 5.25 9-5.25z"/><path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/></svg>`;
+const cartIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6"><path d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0z"/></svg>`;
+const peopleIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6"><path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0z"/></svg>`;
+const chartIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125z"/></svg>`;
+const shieldIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6"><path d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>`;
+const calendarIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>`;
+
+const stars4 = `<span class="module-card-star module-card-star-filled">${starSvg}</span>`.repeat(4) + `<span class="module-card-star">${starSvg}</span>`;
+const stars5 = `<span class="module-card-star module-card-star-filled">${starSvg}</span>`.repeat(5);
+const stars3 = `<span class="module-card-star module-card-star-filled">${starSvg}</span>`.repeat(3) + `<span class="module-card-star">${starSvg}</span>`.repeat(2);
+---
+
+<DocsLayout title="Module Card">
+  <p class="text-base-content/70 mb-6">Software module/extension cards for app marketplaces. Displays icon, name, author, version, description, star rating, price, and action buttons. Supports installed/owned states, grid and list layouts.</p>
+
+  <CodePreview
+    title="Basic Module Card"
+    height="300px"
+    semantic={`<div style="max-width: 340px;">
+  <div class="module-card">
+    <div class="module-card-body">
+      <div class="module-card-header">
+        <div class="module-card-icon">${cubeIcon}</div>
+        <div class="module-card-info">
+          <h4 class="module-card-name"><a href="#">Inventory Manager</a></h4>
+          <span class="module-card-author">ERPlora · v2.1.0</span>
+          <div class="module-card-meta">
+            <span class="chip chip-sm">Inventory</span>
+          </div>
+        </div>
+      </div>
+      <p class="module-card-description">Track stock levels, manage warehouses, transfers, and stocktake. Real-time inventory across all locations.</p>
+      <div class="module-card-rating">
+        <div class="module-card-stars">${stars4}</div>
+        <span class="module-card-rating-value">4.2</span>
+        <span class="module-card-rating-count">(128)</span>
+      </div>
+      <div class="module-card-footer">
+        <span class="module-card-price module-card-price-free">Free</span>
+        <div class="module-card-actions">
+          <button class="btn btn-sm color-primary">Get Free</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<div style="max-width: 340px;">
+  <div class="flex flex-col overflow-hidden bg-base-100 border border-base-300 rounded-box hover:border-primary transition-all">
+    <div class="flex flex-col flex-1 p-4">
+      <div class="flex items-start gap-3">
+        <div class="flex items-center justify-center shrink-0 w-12 h-12 rounded-lg bg-primary text-primary-content">
+          ${cubeIcon}
+        </div>
+        <div class="flex-1 min-w-0">
+          <h4 class="text-sm font-semibold m-0 truncate"><a href="#" class="no-underline text-base-content hover:text-primary">Inventory Manager</a></h4>
+          <span class="text-xs text-base-content/50">ERPlora · v2.1.0</span>
+          <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+            <span class="chip chip-sm">Inventory</span>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-base-content/60 mt-3 mb-0 line-clamp-2">Track stock levels, manage warehouses, transfers, and stocktake. Real-time inventory across all locations.</p>
+      <div class="flex items-center gap-1.5 mt-3">
+        <div class="inline-flex gap-0.5 text-warning">${starSvg.repeat(4)}</div>
+        <span class="text-xs font-medium text-base-content/60">4.2</span>
+        <span class="text-xs text-base-content/40">(128)</span>
+      </div>
+      <div class="flex items-center justify-between mt-auto pt-3 border-t border-base-200">
+        <span class="font-semibold text-sm text-success">Free</span>
+        <button class="btn btn-sm color-primary">Get Free</button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// No JavaScript required for static display.
+// For interactive rating, see the Rating component.`}
+  />
+
+  <CodePreview
+    title="Paid Module with States"
+    height="340px"
+    semantic={`<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <!-- One-time purchase -->
+  <div class="module-card">
+    <div class="module-card-body">
+      <div class="module-card-header">
+        <div class="module-card-icon" style="background: #8b5cf6;">${chartIcon}</div>
+        <div class="module-card-info">
+          <h4 class="module-card-name">Sales Analytics</h4>
+          <span class="module-card-author">ERPlora · v1.5.0</span>
+        </div>
+        <div class="module-card-badges">
+          <span class="badge badge-sm color-warning">Featured</span>
+        </div>
+      </div>
+      <p class="module-card-description">Advanced sales dashboards, revenue tracking, and customer trend reports with export capabilities.</p>
+      <div class="module-card-rating">
+        <div class="module-card-stars">${stars5}</div>
+        <span class="module-card-rating-value">4.8</span>
+        <span class="module-card-rating-count">(312)</span>
+      </div>
+      <div class="module-card-footer">
+        <span class="module-card-price">&euro;29.00</span>
+        <div class="module-card-actions">
+          <button class="btn btn-sm color-primary">Purchase</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subscription -->
+  <div class="module-card">
+    <div class="module-card-body">
+      <div class="module-card-header">
+        <div class="module-card-icon" style="background: #10b981;">${shieldIcon}</div>
+        <div class="module-card-info">
+          <h4 class="module-card-name">Compliance Suite</h4>
+          <span class="module-card-author">ERPlora · v3.0.1</span>
+        </div>
+      </div>
+      <p class="module-card-description">Automated fiscal compliance: Verifactu, SII, tax reporting, and audit trails for Spain and EU.</p>
+      <div class="module-card-rating">
+        <div class="module-card-stars">${stars4}</div>
+        <span class="module-card-rating-value">4.5</span>
+        <span class="module-card-rating-count">(87)</span>
+      </div>
+      <div class="module-card-footer">
+        <span class="module-card-price">&euro;9.90<span class="module-card-price-period">/mo</span></span>
+        <div class="module-card-actions">
+          <button class="btn btn-sm color-primary">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Installed state -->
+  <div class="module-card module-card-installed">
+    <div class="module-card-body">
+      <div class="module-card-header">
+        <div class="module-card-icon-soft module-card-icon">${peopleIcon}</div>
+        <div class="module-card-info">
+          <h4 class="module-card-name">HR Module</h4>
+          <span class="module-card-author">ERPlora · v2.3.0</span>
+        </div>
+        <div class="module-card-badges">
+          <span class="chip chip-sm color-success">Installed</span>
+        </div>
+      </div>
+      <p class="module-card-description">Employee management, attendance tracking, leave requests, and payroll integration.</p>
+      <div class="module-card-rating">
+        <div class="module-card-stars">${stars4}</div>
+        <span class="module-card-rating-value">4.3</span>
+        <span class="module-card-rating-count">(205)</span>
+      </div>
+      <div class="module-card-footer">
+        <span class="module-card-price module-card-price-free">Free</span>
+        <div class="module-card-actions">
+          <button class="btn btn-sm" disabled>Installed</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Same structure using Tailwind utilities -->`}
+    js={`// No JavaScript required for static cards.`}
+  />
+
+  <CodePreview
+    title="My Modules (Manage View)"
+    height="300px"
+    semantic={`<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <!-- Active module -->
+  <div class="module-card module-card-installed">
+    <div class="module-card-body">
+      <div class="module-card-header">
+        <div class="module-card-icon">${cubeIcon}</div>
+        <div class="module-card-info">
+          <h4 class="module-card-name">Inventory Manager</h4>
+          <span class="module-card-author">v2.1.0 · Active</span>
+        </div>
+        <div class="module-card-badges">
+          <span class="chip chip-sm color-success">Active</span>
+        </div>
+      </div>
+      <p class="module-card-description">Track stock levels, manage warehouses, transfers, and stocktake.</p>
+      <div class="module-card-footer">
+        <div class="module-card-actions" style="width: 100%;">
+          <label class="toggle toggle-sm color-success"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          <a href="#" class="btn btn-sm btn-ghost">Settings</a>
+          <button class="btn btn-sm btn-ghost color-error ml-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-4 h-4"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disabled module -->
+  <div class="module-card">
+    <div class="module-card-body">
+      <div class="module-card-header">
+        <div class="module-card-icon" style="background: #6b7280;">${calendarIcon}</div>
+        <div class="module-card-info">
+          <h4 class="module-card-name">Shift Calendar</h4>
+          <span class="module-card-author">v1.2.0 · Inactive</span>
+        </div>
+        <div class="module-card-badges">
+          <span class="chip chip-sm">Inactive</span>
+        </div>
+      </div>
+      <p class="module-card-description">Employee shift scheduling with drag-and-drop calendar and availability management.</p>
+      <div class="module-card-footer">
+        <div class="module-card-actions" style="width: 100%;">
+          <label class="toggle toggle-sm color-success"><input type="checkbox"><span class="toggle-slider"></span></label>
+          <a href="#" class="btn btn-sm btn-ghost">Settings</a>
+          <button class="btn btn-sm btn-ghost color-error ml-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-4 h-4"><path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Same structure using Tailwind utilities -->`}
+    js={`// Toggle active/inactive:
+// toggle.addEventListener('change', (e) => {
+//   const card = e.target.closest('.module-card');
+//   card.classList.toggle('module-card-installed', e.target.checked);
+// });`}
+  />
+
+  <CodePreview
+    title="Glass Variant"
+    height="300px"
+    semantic={`<div class="p-8 rounded-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <div style="max-width: 340px;">
+    <div class="module-card glass">
+      <div class="module-card-body">
+        <div class="module-card-header">
+          <div class="module-card-icon-soft module-card-icon" style="background: rgba(255,255,255,0.15); color: white;">${cartIcon}</div>
+          <div class="module-card-info">
+            <h4 class="module-card-name" style="color: white;">POS Terminal</h4>
+            <span class="module-card-author" style="color: rgba(255,255,255,0.6);">ERPlora · v4.0.0</span>
+          </div>
+        </div>
+        <p class="module-card-description" style="color: rgba(255,255,255,0.7);">Complete point-of-sale system with receipt printing, barcode scanning, and multi-payment support.</p>
+        <div class="module-card-rating">
+          <div class="module-card-stars">${stars5}</div>
+          <span class="module-card-rating-value" style="color: rgba(255,255,255,0.7);">5.0</span>
+          <span class="module-card-rating-count" style="color: rgba(255,255,255,0.5);">(524)</span>
+        </div>
+        <div class="module-card-footer" style="border-color: rgba(255,255,255,0.15);">
+          <span class="module-card-price" style="color: white;">Free</span>
+          <button class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">Get Free</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Same structure using glass utility class -->`}
+    js={`// No JavaScript required`}
+  />
+
+  <CodePreview
+    title="Compact / List View"
+    height="300px"
+    semantic={`<div class="flex flex-col gap-3" style="max-width: 500px;">
+  <div class="module-card module-card-compact">
+    <div class="module-card-body">
+      <div class="module-card-header">
+        <div class="module-card-icon module-card-icon-soft" style="width: 36px; height: 36px;">${cubeIcon}</div>
+        <div class="module-card-info">
+          <h4 class="module-card-name">Inventory Manager</h4>
+          <span class="module-card-author">ERPlora · v2.1.0</span>
+        </div>
+        <div class="module-card-actions">
+          <span class="module-card-price module-card-price-free">Free</span>
+          <button class="btn btn-sm color-primary">Get</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="module-card module-card-compact module-card-installed">
+    <div class="module-card-body">
+      <div class="module-card-header">
+        <div class="module-card-icon module-card-icon-soft" style="width: 36px; height: 36px;">${chartIcon}</div>
+        <div class="module-card-info">
+          <h4 class="module-card-name">Sales Analytics</h4>
+          <span class="module-card-author">ERPlora · v1.5.0</span>
+        </div>
+        <div class="module-card-actions">
+          <span class="chip chip-sm color-success">Installed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="module-card module-card-compact">
+    <div class="module-card-body">
+      <div class="module-card-header">
+        <div class="module-card-icon module-card-icon-soft" style="width: 36px; height: 36px;">${shieldIcon}</div>
+        <div class="module-card-info">
+          <h4 class="module-card-name">Compliance Suite</h4>
+          <span class="module-card-author">ERPlora · v3.0.1</span>
+        </div>
+        <div class="module-card-actions">
+          <span class="module-card-price">&euro;9.90<span class="module-card-price-period">/mo</span></span>
+          <button class="btn btn-sm btn-outline color-primary">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Same using Tailwind utilities -->`}
+    js={`// No JavaScript required`}
+  />
+
+  <CodePreview
+    title="Full Marketplace Page"
+    height="800px"
+    semantic={`<div class="bg-base-200 p-6 rounded-box min-h-160">
+  <!-- Header -->
+  <div class="text-center mb-8 max-w-lg mx-auto">
+    <h1 class="text-2xl font-bold mb-2">Extend Your Hub</h1>
+    <p class="text-base-content/60 text-sm">Discover modules to add new features to your ERP system</p>
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="max-w-2xl mx-auto mb-6">
+    <input type="search" class="input w-full" placeholder="Search modules..." id="module-search">
+  </div>
+
+  <div class="flex flex-wrap gap-2 mb-6 justify-center" id="type-filters">
+    <span class="chip color-primary cursor-pointer" data-filter="">All Modules</span>
+    <span class="chip chip-outline cursor-pointer" data-filter="free">Free</span>
+    <span class="chip chip-outline cursor-pointer" data-filter="one_time">One-time</span>
+    <span class="chip chip-outline cursor-pointer" data-filter="subscription">Subscription</span>
+  </div>
+
+  <p class="text-sm text-base-content/50 mb-4" id="result-count">6 modules found</p>
+
+  <!-- Module Grid -->
+  <div class="module-grid module-grid-3" id="module-grid">
+    <div class="module-card" data-type="free" data-name="Inventory Manager">
+      <div class="module-card-body">
+        <div class="module-card-header">
+          <div class="module-card-icon">${cubeIcon}</div>
+          <div class="module-card-info">
+            <h4 class="module-card-name"><a href="#">Inventory Manager</a></h4>
+            <span class="module-card-author">ERPlora · v2.1.0</span>
+            <div class="module-card-meta"><span class="chip chip-sm">Inventory</span></div>
+          </div>
+        </div>
+        <p class="module-card-description">Track stock levels, manage warehouses, transfers, and stocktake. Real-time inventory across all locations.</p>
+        <div class="module-card-rating">
+          <div class="module-card-stars">${stars4}</div>
+          <span class="module-card-rating-value">4.2</span>
+          <span class="module-card-rating-count">(128)</span>
+        </div>
+        <div class="module-card-footer">
+          <span class="module-card-price module-card-price-free">Free</span>
+          <div class="module-card-actions"><button class="btn btn-sm color-primary">Get Free</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module-card" data-type="one_time" data-name="Sales Analytics">
+      <div class="module-card-body">
+        <div class="module-card-header">
+          <div class="module-card-icon" style="background: #8b5cf6;">${chartIcon}</div>
+          <div class="module-card-info">
+            <h4 class="module-card-name"><a href="#">Sales Analytics</a></h4>
+            <span class="module-card-author">ERPlora · v1.5.0</span>
+            <div class="module-card-meta"><span class="chip chip-sm">Analytics</span></div>
+          </div>
+          <div class="module-card-badges"><span class="badge badge-sm color-warning">Featured</span></div>
+        </div>
+        <p class="module-card-description">Advanced sales dashboards, revenue tracking, and customer trend reports.</p>
+        <div class="module-card-rating">
+          <div class="module-card-stars">${stars5}</div>
+          <span class="module-card-rating-value">4.8</span>
+          <span class="module-card-rating-count">(312)</span>
+        </div>
+        <div class="module-card-footer">
+          <span class="module-card-price">&euro;29.00</span>
+          <div class="module-card-actions"><button class="btn btn-sm color-primary">Purchase</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module-card" data-type="subscription" data-name="Compliance Suite">
+      <div class="module-card-body">
+        <div class="module-card-header">
+          <div class="module-card-icon" style="background: #10b981;">${shieldIcon}</div>
+          <div class="module-card-info">
+            <h4 class="module-card-name"><a href="#">Compliance Suite</a></h4>
+            <span class="module-card-author">ERPlora · v3.0.1</span>
+            <div class="module-card-meta"><span class="chip chip-sm">Fiscal</span></div>
+          </div>
+        </div>
+        <p class="module-card-description">Automated fiscal compliance: Verifactu, SII, tax reporting, audit trails.</p>
+        <div class="module-card-rating">
+          <div class="module-card-stars">${stars4}</div>
+          <span class="module-card-rating-value">4.5</span>
+          <span class="module-card-rating-count">(87)</span>
+        </div>
+        <div class="module-card-footer">
+          <span class="module-card-price">&euro;9.90<span class="module-card-price-period">/mo</span></span>
+          <div class="module-card-actions"><button class="btn btn-sm color-primary">Subscribe</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module-card" data-type="free" data-name="HR Module">
+      <div class="module-card-body">
+        <div class="module-card-header">
+          <div class="module-card-icon" style="background: #f59e0b;">${peopleIcon}</div>
+          <div class="module-card-info">
+            <h4 class="module-card-name"><a href="#">HR Module</a></h4>
+            <span class="module-card-author">ERPlora · v2.3.0</span>
+            <div class="module-card-meta"><span class="chip chip-sm">HR</span></div>
+          </div>
+        </div>
+        <p class="module-card-description">Employee management, attendance, leave requests, and payroll integration.</p>
+        <div class="module-card-rating">
+          <div class="module-card-stars">${stars4}</div>
+          <span class="module-card-rating-value">4.3</span>
+          <span class="module-card-rating-count">(205)</span>
+        </div>
+        <div class="module-card-footer">
+          <span class="module-card-price module-card-price-free">Free</span>
+          <div class="module-card-actions"><button class="btn btn-sm color-primary">Get Free</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module-card" data-type="free" data-name="POS Terminal">
+      <div class="module-card-body">
+        <div class="module-card-header">
+          <div class="module-card-icon" style="background: #ef4444;">${cartIcon}</div>
+          <div class="module-card-info">
+            <h4 class="module-card-name"><a href="#">POS Terminal</a></h4>
+            <span class="module-card-author">ERPlora · v4.0.0</span>
+            <div class="module-card-meta"><span class="chip chip-sm">POS</span></div>
+          </div>
+          <div class="module-card-badges"><span class="badge badge-sm color-warning">Featured</span></div>
+        </div>
+        <p class="module-card-description">Complete point-of-sale with receipt printing, barcode scanning, multi-payment.</p>
+        <div class="module-card-rating">
+          <div class="module-card-stars">${stars5}</div>
+          <span class="module-card-rating-value">5.0</span>
+          <span class="module-card-rating-count">(524)</span>
+        </div>
+        <div class="module-card-footer">
+          <span class="module-card-price module-card-price-free">Free</span>
+          <div class="module-card-actions"><button class="btn btn-sm color-primary">Get Free</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module-card" data-type="one_time" data-name="Shift Calendar">
+      <div class="module-card-body">
+        <div class="module-card-header">
+          <div class="module-card-icon" style="background: #6366f1;">${calendarIcon}</div>
+          <div class="module-card-info">
+            <h4 class="module-card-name"><a href="#">Shift Calendar</a></h4>
+            <span class="module-card-author">ERPlora · v1.2.0</span>
+            <div class="module-card-meta"><span class="chip chip-sm">HR</span></div>
+          </div>
+        </div>
+        <p class="module-card-description">Employee shift scheduling with drag-and-drop calendar and availability.</p>
+        <div class="module-card-rating">
+          <div class="module-card-stars">${stars3}</div>
+          <span class="module-card-rating-value">3.6</span>
+          <span class="module-card-rating-count">(42)</span>
+        </div>
+        <div class="module-card-footer">
+          <span class="module-card-price">&euro;15.00</span>
+          <div class="module-card-actions"><button class="btn btn-sm color-primary">Purchase</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Same structure with Tailwind grid + card utilities -->`}
+    js={`// Filter by type
+const filters = document.querySelectorAll('[data-filter]');
+const cards = document.querySelectorAll('.module-card[data-type]');
+const countEl = document.getElementById('result-count');
+
+filters.forEach(chip => {
+  chip.addEventListener('click', () => {
+    // Update active chip
+    filters.forEach(c => {
+      c.classList.remove('color-primary');
+      c.classList.add('chip-outline');
+    });
+    chip.classList.add('color-primary');
+    chip.classList.remove('chip-outline');
+
+    const type = chip.dataset.filter;
+    let visible = 0;
+    cards.forEach(card => {
+      const show = !type || card.dataset.type === type;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    countEl.textContent = visible + ' modules found';
+  });
+});
+
+// Search by name
+const search = document.getElementById('module-search');
+search.addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  let visible = 0;
+  cards.forEach(card => {
+    const name = card.dataset.name.toLowerCase();
+    const show = name.includes(q);
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  countEl.textContent = visible + ' modules found';
+});`}
+  />
+
+  <!-- Reference Table -->
+  <h2 class="text-xl font-semibold mt-12 mb-4">CSS Reference</h2>
+  <div class="overflow-x-auto">
+    <table class="table w-full">
+      <thead>
+        <tr>
+          <th>Class</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>.module-card</code></td><td>Card container</td></tr>
+        <tr><td><code>.module-card-body</code></td><td>Inner content wrapper with padding</td></tr>
+        <tr><td><code>.module-card-header</code></td><td>Top row: icon + info + badges</td></tr>
+        <tr><td><code>.module-card-icon</code></td><td>48px icon container (solid bg)</td></tr>
+        <tr><td><code>.module-card-icon-soft</code></td><td>Tinted/transparent icon variant</td></tr>
+        <tr><td><code>.module-card-info</code></td><td>Name + author + meta wrapper</td></tr>
+        <tr><td><code>.module-card-name</code></td><td>Module title (truncated)</td></tr>
+        <tr><td><code>.module-card-author</code></td><td>Author / version text</td></tr>
+        <tr><td><code>.module-card-badges</code></td><td>Featured / status badges (top-right)</td></tr>
+        <tr><td><code>.module-card-meta</code></td><td>Category chips, version badges</td></tr>
+        <tr><td><code>.module-card-description</code></td><td>2-line clamped description</td></tr>
+        <tr><td><code>.module-card-rating</code></td><td>Star rating row</td></tr>
+        <tr><td><code>.module-card-stars</code></td><td>Stars container</td></tr>
+        <tr><td><code>.module-card-star</code></td><td>Individual star (empty)</td></tr>
+        <tr><td><code>.module-card-star-filled</code></td><td>Filled star (warning color)</td></tr>
+        <tr><td><code>.module-card-rating-value</code></td><td>Numeric rating (e.g. "4.5")</td></tr>
+        <tr><td><code>.module-card-rating-count</code></td><td>Review count (e.g. "(128)")</td></tr>
+        <tr><td><code>.module-card-footer</code></td><td>Price + action buttons row</td></tr>
+        <tr><td><code>.module-card-price</code></td><td>Price text</td></tr>
+        <tr><td><code>.module-card-price-free</code></td><td>Green "Free" price</td></tr>
+        <tr><td><code>.module-card-price-period</code></td><td>Subscription period (e.g. "/mo")</td></tr>
+        <tr><td><code>.module-card-actions</code></td><td>Action buttons container</td></tr>
+        <tr><td><code>.module-card-installed</code></td><td>Green top bar + border for installed</td></tr>
+        <tr><td><code>.module-card-owned</code></td><td>Blue border for owned</td></tr>
+        <tr><td><code>.module-card-disabled</code></td><td>Dimmed + no interaction</td></tr>
+        <tr><td><code>.module-card-sm</code></td><td>Small size variant</td></tr>
+        <tr><td><code>.module-card-lg</code></td><td>Large size variant</td></tr>
+        <tr><td><code>.module-card-compact</code></td><td>List-item style (no description)</td></tr>
+        <tr><td><code>.module-card-horizontal</code></td><td>Horizontal layout</td></tr>
+        <tr><td><code>.module-card.glass</code></td><td>Glass morphism</td></tr>
+        <tr><td><code>.module-grid</code></td><td>Auto-fill responsive grid (280px min)</td></tr>
+        <tr><td><code>.module-grid-2/3/4</code></td><td>Fixed column count grid</td></tr>
+        <tr><td><code>.module-grid-compact</code></td><td>Reduced gap</td></tr>
+        <tr><td><code>.module-list</code></td><td>Single column list layout</td></tr>
+      </tbody>
+    </table>
+  </div>
+</DocsLayout>
