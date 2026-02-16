@@ -1125,7 +1125,7 @@ Glass: `modal glass`
 </div>
 ```
 
-**Confirm dialog pattern** (use `modal-sm` + `callout`):
+**Confirm dialog pattern** (use `modal-sm` with centered icon):
 ```html
 <!-- Alpine.js — place modal OUTSIDE any overflow:hidden parent (e.g. card) -->
 <div x-data="{ confirm: false }">
@@ -1133,22 +1133,16 @@ Glass: `modal glass`
 
   <div class="modal-backdrop" :data-state="confirm ? 'open' : 'closed'">
     <div class="modal modal-sm">
-      <div class="modal-header">
-        <h3 class="modal-title">Delete Item</h3>
-        <button class="modal-close" @click="confirm = false">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="callout color-error">
-          <span class="callout-icon">⚠</span>
-          <div class="callout-content">
-            <p class="callout-title">This action cannot be undone</p>
-            <p class="callout-text">The item will be permanently deleted.</p>
-          </div>
+      <div class="modal-body text-center py-8">
+        <div class="inline-flex items-center justify-center size-14 rounded-full bg-error/10 text-error mb-4">
+          <!-- icon -->
         </div>
+        <h3 class="text-lg font-semibold mb-2">Delete Item?</h3>
+        <p class="text-sm text-base-content/60">This action cannot be undone.</p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" @click="confirm = false">Cancel</button>
-        <button class="btn color-error" @click="confirm = false; performDelete()">Delete</button>
+        <button class="btn btn-ghost flex-1" @click="confirm = false">Cancel</button>
+        <button class="btn color-error flex-1" @click="confirm = false; performDelete()">Delete</button>
       </div>
     </div>
   </div>
