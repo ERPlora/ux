@@ -1125,6 +1125,37 @@ Glass: `modal glass`
 </div>
 ```
 
+**Confirm dialog pattern** (use `modal-sm` + `callout`):
+```html
+<!-- Alpine.js — place modal OUTSIDE any overflow:hidden parent (e.g. card) -->
+<div x-data="{ confirm: false }">
+  <button class="btn color-error" @click="confirm = true">Delete</button>
+
+  <div class="modal-backdrop" :data-state="confirm ? 'open' : 'closed'">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Delete Item</h3>
+        <button class="modal-close" @click="confirm = false">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="callout color-error">
+          <span class="callout-icon">⚠</span>
+          <div class="callout-content">
+            <p class="callout-title">This action cannot be undone</p>
+            <p class="callout-text">The item will be permanently deleted.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" @click="confirm = false">Cancel</button>
+        <button class="btn color-error" @click="confirm = false; performDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+```
+> **Important:** The `modal-backdrop` must NOT be inside a container with `overflow: hidden` (like `.card`). Place it as a sibling, not a child.
+
 #### sheet (bottom sheet)
 ```html
 <div class="sheet-backdrop" data-state="open">
