@@ -1,0 +1,534 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Image Zoom">
+  <p class="text-base-content/70 mb-6">Image zoom component with lens (magnifying glass), side preview, inner zoom, and fullscreen zoom modes. Requires JavaScript to toggle active states on hover or click.</p>
+
+  <CodePreview
+    title="Basic Structure"
+    height="280px"
+    semantic={`<!-- Base image zoom container -->
+<div class="image-zoom" onmouseenter="this.classList.add('image-zoom-active')" onmouseleave="this.classList.remove('image-zoom-active')">
+  <div style="width: 300px; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
+    Hover to zoom
+  </div>
+  <!-- Zoom icon overlay -->
+  <div class="image-zoom-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+  </div>
+</div>`}
+    tailwind={`<!-- Base image zoom container with Tailwind -->
+<div class="relative inline-block overflow-visible cursor-zoom-in leading-none group"
+     onmouseenter="this.classList.add('zoom-active')"
+     onmouseleave="this.classList.remove('zoom-active')">
+  <div class="w-[300px] h-[200px] rounded-lg flex items-center justify-center text-white text-sm select-none" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    Hover to zoom
+  </div>
+  <!-- Zoom icon -->
+  <div class="absolute bottom-2 right-2 flex items-center justify-center size-8 rounded-full pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity" style="background: rgba(0,0,0,0.5); color: white;">
+    <svg class="size-[18px]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+  </div>
+</div>`}
+    js={`// Toggle zoom on hover:
+const container = document.querySelector('.image-zoom');
+container.addEventListener('mouseenter', () => {
+  container.classList.add('image-zoom-active');
+});
+container.addEventListener('mouseleave', () => {
+  container.classList.remove('image-zoom-active');
+});
+
+// The image-zoom-active class:
+// - Hides the cursor (cursor: none)
+// - Shows the lens, result window, or inner zoom
+// - Hides the zoom icon overlay`}
+  />
+
+  <CodePreview
+    title="Lens Mode (Round)"
+    height="320px"
+    semantic={`<!-- Lens mode: circular magnifying glass -->
+<div class="image-zoom" onmouseenter="this.classList.add('image-zoom-active')" onmouseleave="this.classList.remove('image-zoom-active')">
+  <div style="width: 300px; height: 200px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
+    Hover for lens
+  </div>
+  <!-- Lens element: circular magnifier that follows cursor -->
+  <div class="image-zoom-lens" style="opacity: 1; visibility: visible; transform: translate(30%, 30%) scale(1); background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); background-size: 600px 400px; background-position: -150px -100px;"></div>
+  <div class="image-zoom-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+  </div>
+</div>`}
+    tailwind={`<!-- Lens with Tailwind -->
+<div class="relative inline-block overflow-visible cursor-zoom-in leading-none"
+     onmouseenter="this.classList.add('zoom-active')"
+     onmouseleave="this.classList.remove('zoom-active')">
+  <div class="w-[300px] h-[200px] rounded-lg flex items-center justify-center text-white text-sm select-none" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+    Hover for lens
+  </div>
+  <!-- Lens: absolute positioned circle -->
+  <div class="absolute rounded-full overflow-hidden pointer-events-none z-50"
+       style="width: 150px; height: 150px; border: 2px solid rgba(255,255,255,0.8); box-shadow: 0 4px 20px rgba(0,0,0,0.3); background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); background-size: 600px 400px; background-position: -150px -100px; transform: translate(30%, 30%) scale(1);">
+  </div>
+</div>`}
+    js={`// Lens follows cursor position:
+const container = document.querySelector('.image-zoom');
+const lens = container.querySelector('.image-zoom-lens');
+const img = container.querySelector('.image-zoom-img');
+
+// Set background to high-res image, scaled up
+lens.style.backgroundImage = \`url(\${img.src})\`;
+lens.style.backgroundSize = \`\${img.width * zoomLevel}px \${img.height * zoomLevel}px\`;
+
+container.addEventListener('mousemove', (e) => {
+  const rect = container.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  // Position lens at cursor
+  lens.style.left = x + 'px';
+  lens.style.top = y + 'px';
+
+  // Move background to show zoomed region
+  lens.style.backgroundPosition =
+    \`-\${x * zoomLevel - lens.offsetWidth / 2}px -\${y * zoomLevel - lens.offsetHeight / 2}px\`;
+});`}
+  />
+
+  <CodePreview
+    title="Lens Mode (Square)"
+    height="320px"
+    semantic={`<!-- Square lens variant: add image-zoom-lens-square to container -->
+<div class="image-zoom image-zoom-lens-square" onmouseenter="this.classList.add('image-zoom-active')" onmouseleave="this.classList.remove('image-zoom-active')">
+  <div style="width: 300px; height: 200px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
+    Square lens
+  </div>
+  <!-- Lens with rounded-rectangle shape (uses --radius-field) -->
+  <div class="image-zoom-lens" style="opacity: 1; visibility: visible; transform: translate(30%, 30%) scale(1); background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); background-size: 600px 400px; background-position: -150px -100px;"></div>
+  <div class="image-zoom-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+  </div>
+</div>`}
+    tailwind={`<!-- Square lens with Tailwind -->
+<div class="relative inline-block overflow-visible cursor-zoom-in leading-none"
+     onmouseenter="this.classList.add('zoom-active')"
+     onmouseleave="this.classList.remove('zoom-active')">
+  <div class="w-[300px] h-[200px] rounded-lg flex items-center justify-center text-white text-sm select-none" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+    Square lens
+  </div>
+  <!-- Lens: rounded-rectangle -->
+  <div class="absolute overflow-hidden pointer-events-none z-50 rounded-field"
+       style="width: 150px; height: 150px; border: 2px solid rgba(255,255,255,0.8); box-shadow: 0 4px 20px rgba(0,0,0,0.3); background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); background-size: 600px 400px; background-position: -150px -100px; transform: translate(30%, 30%) scale(1);">
+  </div>
+</div>`}
+    js={`// Square lens: same JS as round lens.
+// The shape is controlled purely by CSS:
+// - Default: .image-zoom-lens uses border-radius: 50% (round)
+// - Square: .image-zoom-lens-square .image-zoom-lens uses --radius-field`}
+  />
+
+  <CodePreview
+    title="Side Preview (Result Window)"
+    height="320px"
+    semantic={`<!-- Side preview: zoomed result appears to the right -->
+<div style="display: flex; gap: 2rem; align-items: flex-start; padding: 1rem;">
+  <div class="image-zoom image-zoom-active" style="cursor: default;">
+    <div style="width: 250px; height: 200px; background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
+      Source image
+    </div>
+    <!-- Result window: shows zoomed portion on the side -->
+    <div class="image-zoom-result" style="position: relative; left: auto; opacity: 1; visibility: visible; transform: none; width: 200px; height: 200px; background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); background-size: 500px 400px; background-position: -100px -60px;">
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Side preview with Tailwind -->
+<div class="flex gap-8 items-start p-4">
+  <div class="relative inline-block">
+    <div class="w-[250px] h-[200px] rounded-lg flex items-center justify-center text-white text-sm" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
+      Source image
+    </div>
+  </div>
+  <!-- Result window (to the right) -->
+  <div class="w-[200px] h-[200px] overflow-hidden rounded-field border border-base-300"
+       style="box-shadow: 0 10px 25px rgba(0,0,0,0.15); background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); background-size: 500px 400px; background-position: -100px -60px;">
+  </div>
+</div>`}
+    js={`// Side preview: update background-position in the result window
+const result = container.querySelector('.image-zoom-result');
+result.style.backgroundImage = \`url(\${img.src})\`;
+result.style.backgroundSize = \`\${img.width * zoomLevel}px \${img.height * zoomLevel}px\`;
+
+container.addEventListener('mousemove', (e) => {
+  const rect = img.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width;
+  const y = (e.clientY - rect.top) / rect.height;
+
+  result.style.backgroundPosition =
+    \`\${-x * (img.width * zoomLevel - result.offsetWidth)}px \${-y * (img.height * zoomLevel - result.offsetHeight)}px\`;
+});`}
+  />
+
+  <CodePreview
+    title="Result Position Variants"
+    height="200px"
+    semantic={`<div style="display: flex; gap: 2rem; flex-wrap: wrap; padding: 1rem;">
+  <!-- Default: right side -->
+  <div style="text-align: center;">
+    <span class="badge mb-2">Default (right)</span>
+    <div class="image-zoom">
+      <div style="width: 100px; height: 80px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 0.375rem;"></div>
+      <div class="image-zoom-result"></div>
+    </div>
+  </div>
+
+  <!-- Left side -->
+  <div style="text-align: center;">
+    <span class="badge mb-2">image-zoom-result-left</span>
+    <div class="image-zoom image-zoom-result-left">
+      <div style="width: 100px; height: 80px; background: linear-gradient(135deg, #f093fb, #f5576c); border-radius: 0.375rem;"></div>
+      <div class="image-zoom-result"></div>
+    </div>
+  </div>
+
+  <!-- Top -->
+  <div style="text-align: center;">
+    <span class="badge mb-2">image-zoom-result-top</span>
+    <div class="image-zoom image-zoom-result-top">
+      <div style="width: 100px; height: 80px; background: linear-gradient(135deg, #4facfe, #00f2fe); border-radius: 0.375rem;"></div>
+      <div class="image-zoom-result"></div>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+  <div style="text-align: center;">
+    <span class="badge mb-2">image-zoom-result-bottom</span>
+    <div class="image-zoom image-zoom-result-bottom">
+      <div style="width: 100px; height: 80px; background: linear-gradient(135deg, #a18cd1, #fbc2eb); border-radius: 0.375rem;"></div>
+      <div class="image-zoom-result"></div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Position variants are controlled by modifier classes on the container:
+     - Default: result appears to the right (left: calc(100% + 1rem))
+     - image-zoom-result-left: result appears to the left
+     - image-zoom-result-top: result appears above, centered
+     - image-zoom-result-bottom: result appears below, centered
+-->
+<div class="flex gap-8 flex-wrap p-4">
+  <div class="text-center text-sm text-base-content/60">Right (default)</div>
+  <div class="text-center text-sm text-base-content/60">Left</div>
+  <div class="text-center text-sm text-base-content/60">Top</div>
+  <div class="text-center text-sm text-base-content/60">Bottom</div>
+</div>`}
+    js={`// Position is pure CSS — no JS needed for placement.
+// Just add the variant class to the container:
+// <div class="image-zoom image-zoom-result-left">
+// <div class="image-zoom image-zoom-result-top">
+// <div class="image-zoom image-zoom-result-bottom">`}
+  />
+
+  <CodePreview
+    title="Inner Zoom Mode"
+    height="280px"
+    semantic={`<!-- Inner zoom: zoomed image overlays the original in-place -->
+<div class="image-zoom image-zoom-inner-mode" onmouseenter="this.classList.add('image-zoom-active')" onmouseleave="this.classList.remove('image-zoom-active')">
+  <div style="width: 300px; height: 200px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
+    Hover to inner-zoom
+  </div>
+  <!-- Inner zoom overlay: fills the container, shows zoomed background -->
+  <div class="image-zoom-inner" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); background-size: 600px 400px; background-position: -100px -60px;"></div>
+  <div class="image-zoom-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+  </div>
+</div>`}
+    tailwind={`<!-- Inner zoom with Tailwind -->
+<div class="relative inline-block overflow-visible cursor-zoom-in leading-none group"
+     onmouseenter="this.querySelector('.inner').style.opacity='1'; this.querySelector('.inner').style.visibility='visible'"
+     onmouseleave="this.querySelector('.inner').style.opacity='0'; this.querySelector('.inner').style.visibility='hidden'">
+  <div class="w-[300px] h-[200px] rounded-lg flex items-center justify-center text-white text-sm select-none" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+    Hover to inner-zoom
+  </div>
+  <!-- Overlay that fills container -->
+  <div class="inner absolute inset-0 pointer-events-none opacity-0 invisible z-1 transition-all duration-200"
+       style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); background-size: 600px 400px; background-position: -100px -60px;">
+  </div>
+</div>`}
+    js={`// Inner zoom: zoomed image fills the original container
+const inner = container.querySelector('.image-zoom-inner');
+inner.style.backgroundImage = \`url(\${img.src})\`;
+inner.style.backgroundSize = \`\${img.width * zoomLevel}px \${img.height * zoomLevel}px\`;
+
+container.addEventListener('mousemove', (e) => {
+  const rect = container.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width;
+  const y = (e.clientY - rect.top) / rect.height;
+
+  inner.style.backgroundPosition =
+    \`\${-x * (img.width * zoomLevel - rect.width)}px \${-y * (img.height * zoomLevel - rect.height)}px\`;
+});`}
+  />
+
+  <CodePreview
+    title="Fullscreen Mode"
+    height="400px"
+    semantic={`<!-- Fullscreen zoom overlay (shown inline for demo) -->
+<div style="position: relative; height: 360px; background: #000; border-radius: var(--radius-box, 1rem); overflow: hidden;">
+  <div class="image-zoom-fullscreen image-zoom-fullscreen-open" style="position: absolute;">
+    <div class="image-zoom-fullscreen-backdrop"></div>
+    <div class="image-zoom-fullscreen-container">
+      <!-- Header -->
+      <div class="image-zoom-fullscreen-header">
+        <div>
+          <span class="image-zoom-fullscreen-title">Product Photo</span>
+          <span class="image-zoom-fullscreen-zoom-level">100%</span>
+        </div>
+        <button class="image-zoom-fullscreen-close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <!-- Image area -->
+      <div class="image-zoom-fullscreen-image-container">
+        <div class="image-zoom-fullscreen-image-wrapper">
+          <div style="width: 400px; height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.25rem; display: flex; align-items: center; justify-content: center; color: white;">
+            Fullscreen Image
+          </div>
+        </div>
+      </div>
+      <!-- Controls -->
+      <div class="image-zoom-fullscreen-controls">
+        <button class="image-zoom-fullscreen-btn" title="Zoom out">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/></svg>
+        </button>
+        <span class="image-zoom-fullscreen-zoom-display">100%</span>
+        <button class="image-zoom-fullscreen-btn" title="Zoom in">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        </button>
+        <button class="image-zoom-fullscreen-btn" title="Reset zoom">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25"/></svg>
+          </button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Fullscreen zoom with Tailwind -->
+<div style="position: relative; height: 360px; background: #000; border-radius: 1rem; overflow: hidden;">
+  <div class="absolute inset-0 flex items-center justify-center z-50">
+    <div class="absolute inset-0" style="background: rgba(0,0,0,0.95);"></div>
+    <div class="relative w-full h-full flex flex-col overflow-hidden">
+      <!-- Header -->
+      <div class="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10" style="background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);">
+        <div>
+          <span class="text-base font-medium text-white">Product Photo</span>
+          <span class="text-sm text-white/70 ml-2">100%</span>
+        </div>
+        <button class="flex items-center justify-center size-11 bg-white/10 text-white border-none rounded-full cursor-pointer hover:bg-white/20">
+          <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <!-- Image -->
+      <div class="flex-1 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing" style="touch-action: none;">
+        <div class="relative flex items-center justify-center" style="will-change: transform;">
+          <div class="w-[400px] h-[250px] rounded-sm flex items-center justify-center text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            Fullscreen Image
+          </div>
+        </div>
+      </div>
+      <!-- Controls -->
+      <div class="absolute flex items-center gap-2 bottom-8 left-1/2 -translate-x-1/2 p-2 rounded-full z-10" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);">
+        <button class="flex items-center justify-center size-11 bg-white/10 text-white border-none rounded-full cursor-pointer hover:bg-white/20">
+          <svg class="size-[22px]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/></svg>
+        </button>
+        <span class="text-sm font-medium text-white text-center min-w-12">100%</span>
+        <button class="flex items-center justify-center size-11 bg-white/10 text-white border-none rounded-full cursor-pointer hover:bg-white/20">
+          <svg class="size-[22px]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>`}
+    js={`// Open fullscreen:
+const fullscreen = document.querySelector('.image-zoom-fullscreen');
+fullscreen.classList.add('image-zoom-fullscreen-open');
+
+// Close fullscreen:
+fullscreen.classList.remove('image-zoom-fullscreen-open');
+
+// Zoom controls:
+let zoom = 1;
+function zoomIn() { zoom = Math.min(zoom + 0.25, 5); applyZoom(); }
+function zoomOut() { zoom = Math.max(zoom - 0.25, 0.5); applyZoom(); }
+function resetZoom() { zoom = 1; applyZoom(); }
+
+function applyZoom() {
+  wrapper.style.transform = \`scale(\${zoom})\`;
+  display.textContent = Math.round(zoom * 100) + '%';
+
+  // Toggle zoomed state for max-width/max-height removal
+  fullscreen.classList.toggle('image-zoom-fullscreen-zoomed', zoom > 1);
+}
+
+// Pan with mouse drag when zoomed:
+let panning = false, startX, startY, scrollLeft, scrollTop;
+imageContainer.addEventListener('mousedown', (e) => {
+  if (zoom <= 1) return;
+  panning = true;
+  fullscreen.classList.add('image-zoom-fullscreen-panning');
+  startX = e.clientX; startY = e.clientY;
+});
+
+// Hide UI on interaction:
+fullscreen.classList.add('image-zoom-fullscreen-hide-ui');
+
+// Close on Escape:
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') fullscreen.classList.remove('image-zoom-fullscreen-open');
+});`}
+  />
+
+  <CodePreview
+    title="Zoom Icon Overlay"
+    height="280px"
+    semantic={`<!-- Zoom icon: subtle indicator in bottom-right corner -->
+<div style="display: flex; gap: 1.5rem; flex-wrap: wrap; padding: 1rem;">
+  <div class="image-zoom">
+    <div style="width: 200px; height: 150px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem;">
+      With search icon
+    </div>
+    <div class="image-zoom-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+    </div>
+  </div>
+
+  <div class="image-zoom">
+    <div style="width: 200px; height: 150px; background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.75rem;">
+      With expand icon
+    </div>
+    <div class="image-zoom-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- Zoom icon overlay with Tailwind -->
+<div class="flex gap-6 flex-wrap p-4">
+  <div class="relative inline-block leading-none group">
+    <div class="w-[200px] h-[150px] rounded-lg flex items-center justify-center text-white text-xs" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+      With search icon
+    </div>
+    <div class="absolute bottom-2 right-2 flex items-center justify-center size-8 rounded-full pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity" style="background: rgba(0,0,0,0.5); color: white;">
+      <svg class="size-[18px]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+    </div>
+  </div>
+
+  <div class="relative inline-block leading-none group">
+    <div class="w-[200px] h-[150px] rounded-lg flex items-center justify-center text-gray-700 text-xs" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);">
+      With expand icon
+    </div>
+    <div class="absolute bottom-2 right-2 flex items-center justify-center size-8 rounded-full pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity" style="background: rgba(0,0,0,0.5); color: white;">
+      <svg class="size-[18px]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>
+    </div>
+  </div>
+</div>`}
+    js={`// The zoom icon is purely CSS:
+// - Visible at 80% opacity by default
+// - Full opacity on container hover
+// - Hidden when image-zoom-active (zooming in progress)
+// No JavaScript required for the icon itself.`}
+  />
+
+  <CodePreview
+    title="Loading State"
+    height="280px"
+    semantic={`<!-- Loading state with spinner -->
+<div class="image-zoom image-zoom-loading">
+  <div style="width: 300px; height: 200px; background: linear-gradient(135deg, #e0e0e0, #f5f5f5); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.875rem;">
+    Loading high-res...
+  </div>
+  <div class="image-zoom-spinner"></div>
+  <div class="image-zoom-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+  </div>
+</div>`}
+    tailwind={`<!-- Loading with Tailwind -->
+<div class="relative inline-block leading-none">
+  <div class="w-[300px] h-[200px] rounded-lg flex items-center justify-center text-gray-400 text-sm opacity-50" style="background: linear-gradient(135deg, #e0e0e0, #f5f5f5);">
+    Loading high-res...
+  </div>
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-8 rounded-full animate-spin" style="border: 3px solid rgba(255,255,255,0.3); border-top-color: white;"></div>
+</div>`}
+    js={`// Show loading while high-res image loads:
+container.classList.add('image-zoom-loading');
+
+const hiRes = new Image();
+hiRes.onload = () => {
+  container.classList.remove('image-zoom-loading');
+  // Now use hiRes.src for the lens/result/inner backgrounds
+  lens.style.backgroundImage = \`url(\${hiRes.src})\`;
+};
+hiRes.src = 'product-highres.jpg';`}
+  />
+
+  <!-- Classes Reference -->
+  <h2 class="text-xl font-semibold mt-12 mb-4">Classes Reference</h2>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="border-b border-base-300">
+          <th class="text-left py-2 pr-4 font-medium">Class</th>
+          <th class="text-left py-2 pr-4 font-medium">Description</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-base-200">
+        <tr><td class="py-2 pr-4"><code>image-zoom</code></td><td class="py-2">Base container. Sets relative positioning, inline-block, overflow visible, zoom-in cursor.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-active</code></td><td class="py-2">Active state (add on hover). Hides cursor, shows lens/result/inner, hides zoom icon.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-img</code></td><td class="py-2">The source image element. Block display, max-width 100%, non-draggable.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-lens</code></td><td class="py-2">Circular magnifying glass element. 150px round, follows cursor, shows zoomed background.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-lens-square</code></td><td class="py-2">Modifier on container. Changes lens from circle to rounded rectangle (uses <code>--radius-field</code>).</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-result</code></td><td class="py-2">Side preview window. 400x400px, positioned to the right of the container by default.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-result-left</code></td><td class="py-2">Modifier on container. Positions result window to the left.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-result-top</code></td><td class="py-2">Modifier on container. Positions result window above, centered.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-result-bottom</code></td><td class="py-2">Modifier on container. Positions result window below, centered.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-inner-mode</code></td><td class="py-2">Modifier on container. Enables inner zoom mode (overlay fills the container).</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-inner</code></td><td class="py-2">Inner zoom overlay element. Absolute inset-0, shows zoomed background in-place.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-icon</code></td><td class="py-2">Zoom icon overlay in bottom-right corner. 32px circle, semi-transparent black background.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-loading</code></td><td class="py-2">Loading state on container. Reduces image opacity to 0.5.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-spinner</code></td><td class="py-2">Loading spinner. Centered, 32px, animated rotating border.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen</code></td><td class="py-2">Fullscreen overlay container. Fixed inset-0, centered, z-50, hidden by default.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-open</code></td><td class="py-2">Shows the fullscreen overlay (opacity 1, visible).</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-backdrop</code></td><td class="py-2">Dark backdrop (95% black opacity).</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-container</code></td><td class="py-2">Inner container. Full width/height, flex column layout.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-header</code></td><td class="py-2">Top bar with gradient background. Contains title and close button.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-title</code></td><td class="py-2">Image title text in header. White, medium weight.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-zoom-level</code></td><td class="py-2">Zoom percentage text in header. White at 70% opacity.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-image-container</code></td><td class="py-2">Scrollable/pannable area for the image. Grab cursor, touch-action none.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-image-wrapper</code></td><td class="py-2">Transform wrapper for zoom/pan. Will-change transform, smooth transitions.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-image</code></td><td class="py-2">The fullscreen image element. Max-height <code>calc(100dvh - 120px)</code>.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-controls</code></td><td class="py-2">Bottom control bar. Centered pill with blur backdrop, zoom in/out/reset buttons.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-btn</code></td><td class="py-2">Control button. 44px circle, translucent white background, hover/active states.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-zoom-display</code></td><td class="py-2">Zoom percentage in controls bar. White text, min-width 48px.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-close</code></td><td class="py-2">Close button. Absolute top-right, 44px circle, respects safe-area-inset-top.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-zoomed</code></td><td class="py-2">State class. Removes max-width/max-height constraints on image when zoomed in.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-panning</code></td><td class="py-2">State class. Disables transitions on image wrapper during drag/pan.</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-hide-ui</code></td><td class="py-2">Hides header and controls (opacity 0, pointer-events none).</td></tr>
+        <tr><td class="py-2 pr-4"><code>image-zoom-fullscreen-active</code></td><td class="py-2">Sets cursor to pointer on the fullscreen container.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-xl font-semibold mt-12 mb-4">Responsive Behavior</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="border-b border-base-300">
+          <th class="text-left py-2 pr-4 font-medium">Breakpoint</th>
+          <th class="text-left py-2 pr-4 font-medium">Behavior</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-base-200">
+        <tr><td class="py-2 pr-4"><code>&lt; 768px</code></td><td class="py-2">Result window is hidden. Lens shrinks to 120px. Fullscreen buttons shrink to 40px.</td></tr>
+        <tr><td class="py-2 pr-4"><code>prefers-reduced-motion</code></td><td class="py-2">All transitions and the spinner animation are disabled.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</DocsLayout>

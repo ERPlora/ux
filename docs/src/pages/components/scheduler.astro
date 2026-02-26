@@ -1,0 +1,654 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+---
+
+<DocsLayout title="Scheduler">
+  <p class="text-base-content/70 mb-6">Resource scheduler with week/day/month views, bookings with status colors, time grid, resource columns, current time indicator, and drag-to-create support.</p>
+
+  <CodePreview
+    title="Week View"
+    semantic={`<div class="scheduler">
+  <div class="scheduler-header">
+    <div class="scheduler-nav">
+      <button class="scheduler-nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="scheduler-nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <span class="scheduler-title">Feb 23 - Mar 1, 2026</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <button class="scheduler-today-btn">Today</button>
+      <div class="scheduler-view-toggle">
+        <button class="scheduler-view-btn">Day</button>
+        <button class="scheduler-view-btn scheduler-view-btn-active">Week</button>
+        <button class="scheduler-view-btn">Month</button>
+      </div>
+    </div>
+  </div>
+  <div class="scheduler-day-headers">
+    <div class="scheduler-corner"></div>
+    <div class="scheduler-day-header">
+      <span class="scheduler-day-name">Mon</span>
+      <span class="scheduler-day-number">23</span>
+    </div>
+    <div class="scheduler-day-header scheduler-day-header-today">
+      <span class="scheduler-day-name">Tue</span>
+      <span class="scheduler-day-number">24</span>
+    </div>
+    <div class="scheduler-day-header">
+      <span class="scheduler-day-name">Wed</span>
+      <span class="scheduler-day-number">25</span>
+    </div>
+    <div class="scheduler-day-header">
+      <span class="scheduler-day-name">Thu</span>
+      <span class="scheduler-day-number">26</span>
+    </div>
+    <div class="scheduler-day-header scheduler-day-header-weekend">
+      <span class="scheduler-day-name">Sat</span>
+      <span class="scheduler-day-number">28</span>
+    </div>
+  </div>
+  <div class="scheduler-body">
+    <div class="scheduler-grid">
+      <div class="scheduler-times">
+        <div class="scheduler-time">8:00</div>
+        <div class="scheduler-time">9:00</div>
+        <div class="scheduler-time">10:00</div>
+        <div class="scheduler-time">11:00</div>
+        <div class="scheduler-time">12:00</div>
+      </div>
+      <div class="scheduler-columns">
+        <div class="scheduler-day-column">
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-confirmed" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Team Standup</div>
+              <div class="scheduler-booking-time">9:00 - 10:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+        </div>
+        <div class="scheduler-day-column">
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-pending" style="top: 15px; height: 90px;">
+              <div class="scheduler-booking-title">Client Review</div>
+              <div class="scheduler-booking-time">10:15 - 11:45</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+        </div>
+        <div class="scheduler-day-column">
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-primary" style="top: 0; height: 120px;">
+              <div class="scheduler-booking-title">Workshop</div>
+              <div class="scheduler-booking-time">8:00 - 10:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+        </div>
+        <div class="scheduler-day-column">
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-confirmed" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Lunch Meeting</div>
+              <div class="scheduler-booking-time">11:00 - 12:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+        </div>
+        <div class="scheduler-day-column scheduler-day-column-weekend">
+          <div class="scheduler-hour-slot scheduler-hour-slot-non-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-non-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-non-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-non-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-non-business"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- The scheduler component is semantic-only due to its grid complexity.
+     Use the scheduler CSS classes as shown in the semantic tab. -->`}
+    js={`// Navigate weeks
+document.querySelectorAll('.scheduler-nav-btn').forEach(btn => &#123;
+  btn.addEventListener('click', () => &#123;
+    // Update scheduler-title and re-render grid
+  &#125;);
+&#125;);
+
+// View toggle
+document.querySelectorAll('.scheduler-view-btn').forEach(btn => &#123;
+  btn.addEventListener('click', () => &#123;
+    document.querySelectorAll('.scheduler-view-btn-active')
+      .forEach(b => b.classList.remove('scheduler-view-btn-active'));
+    btn.classList.add('scheduler-view-btn-active');
+    // Switch between day/week/month layouts
+  &#125;);
+&#125;);
+
+// Click slot to create booking
+document.querySelectorAll('.scheduler-hour-slot').forEach(slot => &#123;
+  slot.addEventListener('click', () => &#123;
+    // Open booking creation form
+  &#125;);
+&#125;);`}
+    height="500px"
+  />
+
+  <CodePreview
+    title="Resource View"
+    semantic={`<div class="scheduler">
+  <div class="scheduler-header">
+    <div class="scheduler-nav">
+      <button class="scheduler-nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="scheduler-nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <span class="scheduler-title">Tuesday, Feb 24</span>
+    </div>
+    <button class="scheduler-today-btn">Today</button>
+  </div>
+  <div class="scheduler-resources-header">
+    <div class="scheduler-resources-corner"></div>
+    <div class="scheduler-resource-header">
+      <div class="scheduler-resource-avatar">AL</div>
+      <div class="scheduler-resource-name">Dr. Ana Lopez</div>
+      <div class="scheduler-resource-info">Cardiology</div>
+    </div>
+    <div class="scheduler-resource-header">
+      <div class="scheduler-resource-avatar">MR</div>
+      <div class="scheduler-resource-name">Dr. Marc Ruiz</div>
+      <div class="scheduler-resource-info">Dermatology</div>
+    </div>
+    <div class="scheduler-resource-header">
+      <div class="scheduler-resource-avatar">SP</div>
+      <div class="scheduler-resource-name">Sara Perez</div>
+      <div class="scheduler-resource-info">Physiotherapy</div>
+    </div>
+  </div>
+  <div class="scheduler-body">
+    <div class="scheduler-grid">
+      <div class="scheduler-times">
+        <div class="scheduler-time">9:00</div>
+        <div class="scheduler-time">10:00</div>
+        <div class="scheduler-time">11:00</div>
+        <div class="scheduler-time">12:00</div>
+      </div>
+      <div class="scheduler-columns">
+        <div class="scheduler-day-column">
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-confirmed" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Check-up: Maria G.</div>
+              <div class="scheduler-booking-time">9:00 - 10:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-pending" style="top: 15px; height: 45px;">
+              <div class="scheduler-booking-title">Consultation</div>
+              <div class="scheduler-booking-time">10:15 - 11:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+        </div>
+        <div class="scheduler-day-column">
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-confirmed" style="top: 0; height: 90px;">
+              <div class="scheduler-booking-title">Skin Treatment</div>
+              <div class="scheduler-booking-time">10:00 - 11:30</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+        </div>
+        <div class="scheduler-day-column">
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-confirmed" style="top: 30px; height: 60px;">
+              <div class="scheduler-booking-title">Rehab Session</div>
+              <div class="scheduler-booking-time">9:30 - 10:30</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-blocked" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Blocked</div>
+              <div class="scheduler-booking-time">11:00 - 12:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- The scheduler component is semantic-only due to its grid complexity.
+     Use the scheduler CSS classes as shown in the semantic tab. -->`}
+    js={`// Resource view renders one day with columns per resource
+// instead of columns per day. Same grid structure applies.`}
+    height="500px"
+  />
+
+  <CodePreview
+    title="Booking Statuses"
+    semantic={`<div class="scheduler" style="max-width: 600px;">
+  <div class="scheduler-header">
+    <span class="scheduler-title">Booking Status Examples</span>
+  </div>
+  <div class="scheduler-body">
+    <div class="scheduler-grid" style="min-height: auto;">
+      <div class="scheduler-times">
+        <div class="scheduler-time">9:00</div>
+        <div class="scheduler-time">10:00</div>
+        <div class="scheduler-time">11:00</div>
+        <div class="scheduler-time">12:00</div>
+        <div class="scheduler-time">13:00</div>
+        <div class="scheduler-time">14:00</div>
+      </div>
+      <div class="scheduler-columns">
+        <div class="scheduler-day-column">
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-confirmed" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Confirmed Booking</div>
+              <div class="scheduler-booking-time">9:00 - 10:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-pending" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Pending Approval</div>
+              <div class="scheduler-booking-time">10:00 - 11:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-cancelled" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Cancelled Session</div>
+              <div class="scheduler-booking-time">11:00 - 12:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-blocked" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Blocked Slot</div>
+              <div class="scheduler-booking-time">12:00 - 13:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-primary" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Primary Event</div>
+              <div class="scheduler-booking-time">13:00 - 14:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-error" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Urgent / Error</div>
+              <div class="scheduler-booking-time">14:00 - 15:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- The scheduler component is semantic-only due to its grid complexity.
+     Use the scheduler CSS classes as shown in the semantic tab. -->`}
+    js={`// Booking statuses are applied via CSS modifier classes:
+// .scheduler-booking-confirmed  - Green (success)
+// .scheduler-booking-pending    - Yellow (warning)
+// .scheduler-booking-cancelled  - Muted with strikethrough
+// .scheduler-booking-blocked    - Grey, cursor not-allowed
+// .scheduler-booking-primary    - Primary color
+// .scheduler-booking-error      - Red (error)
+//
+// Conflict indicator:
+// Add .scheduler-booking-conflict to show a red
+// ring and "!" badge on overlapping bookings.`}
+    height="500px"
+  />
+
+  <CodePreview
+    title="Month View"
+    semantic={`<div class="scheduler">
+  <div class="scheduler-header">
+    <div class="scheduler-nav">
+      <button class="scheduler-nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="scheduler-nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <span class="scheduler-title">February 2026</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <button class="scheduler-today-btn">Today</button>
+      <div class="scheduler-view-toggle">
+        <button class="scheduler-view-btn">Day</button>
+        <button class="scheduler-view-btn">Week</button>
+        <button class="scheduler-view-btn scheduler-view-btn-active">Month</button>
+      </div>
+    </div>
+  </div>
+  <div class="scheduler-month-grid">
+    <div class="scheduler-month-header">Mon</div>
+    <div class="scheduler-month-header">Tue</div>
+    <div class="scheduler-month-header">Wed</div>
+    <div class="scheduler-month-header">Thu</div>
+    <div class="scheduler-month-header">Fri</div>
+    <div class="scheduler-month-header">Sat</div>
+    <div class="scheduler-month-header">Sun</div>
+
+    <div class="scheduler-month-day scheduler-month-day-other">
+      <span class="scheduler-month-day-number">26</span>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-other">
+      <span class="scheduler-month-day-number">27</span>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-other">
+      <span class="scheduler-month-day-number">28</span>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-other">
+      <span class="scheduler-month-day-number">29</span>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-other">
+      <span class="scheduler-month-day-number">30</span>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-other scheduler-month-day-weekend">
+      <span class="scheduler-month-day-number">31</span>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-other scheduler-month-day-weekend">
+      <span class="scheduler-month-day-number">1</span>
+    </div>
+
+    <div class="scheduler-month-day">
+      <span class="scheduler-month-day-number">2</span>
+      <div class="scheduler-month-booking scheduler-month-booking-confirmed">Team Standup</div>
+    </div>
+    <div class="scheduler-month-day">
+      <span class="scheduler-month-day-number">3</span>
+    </div>
+    <div class="scheduler-month-day">
+      <span class="scheduler-month-day-number">4</span>
+      <div class="scheduler-month-booking scheduler-month-booking-pending">Client Call</div>
+    </div>
+    <div class="scheduler-month-day">
+      <span class="scheduler-month-day-number">5</span>
+    </div>
+    <div class="scheduler-month-day">
+      <span class="scheduler-month-day-number">6</span>
+      <div class="scheduler-month-booking scheduler-month-booking-confirmed">Workshop</div>
+      <div class="scheduler-month-booking scheduler-month-booking-confirmed">Review</div>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-weekend">
+      <span class="scheduler-month-day-number">7</span>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-weekend">
+      <span class="scheduler-month-day-number">8</span>
+    </div>
+
+    <div class="scheduler-month-day">
+      <span class="scheduler-month-day-number">9</span>
+    </div>
+    <div class="scheduler-month-day">
+      <span class="scheduler-month-day-number">10</span>
+      <div class="scheduler-month-booking scheduler-month-booking-confirmed">Sprint Demo</div>
+    </div>
+    <div class="scheduler-month-day">
+      <span class="scheduler-month-day-number">11</span>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-today">
+      <span class="scheduler-month-day-number">12</span>
+      <div class="scheduler-month-booking scheduler-month-booking-confirmed">Standup</div>
+      <div class="scheduler-month-booking scheduler-month-booking-pending">1:1 Meeting</div>
+      <span class="scheduler-month-more">+2 more</span>
+    </div>
+    <div class="scheduler-month-day">
+      <span class="scheduler-month-day-number">13</span>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-weekend">
+      <span class="scheduler-month-day-number">14</span>
+    </div>
+    <div class="scheduler-month-day scheduler-month-day-weekend">
+      <span class="scheduler-month-day-number">15</span>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- The scheduler component is semantic-only due to its grid complexity.
+     Use the scheduler CSS classes as shown in the semantic tab. -->`}
+    js={`// Month view click handler
+document.querySelectorAll('.scheduler-month-day').forEach(day => &#123;
+  day.addEventListener('click', () => &#123;
+    // Switch to day view for the clicked date
+  &#125;);
+&#125;);
+
+// "+N more" click handler
+document.querySelectorAll('.scheduler-month-more').forEach(link => &#123;
+  link.addEventListener('click', (e) => &#123;
+    e.stopPropagation();
+    // Show popover with all bookings for this day
+  &#125;);
+&#125;);`}
+    height="500px"
+  />
+
+  <CodePreview
+    title="Current Time Indicator"
+    semantic={`<div class="scheduler" style="max-width: 500px;">
+  <div class="scheduler-header">
+    <span class="scheduler-title">Today - Live Indicator</span>
+  </div>
+  <div class="scheduler-body">
+    <div class="scheduler-grid" style="min-height: auto;">
+      <div class="scheduler-times">
+        <div class="scheduler-time">9:00</div>
+        <div class="scheduler-time">10:00</div>
+        <div class="scheduler-time">11:00</div>
+      </div>
+      <div class="scheduler-columns">
+        <div class="scheduler-day-column">
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-confirmed" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Morning Standup</div>
+              <div class="scheduler-booking-time">9:00 - 10:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <!-- Current time indicator at 10:25 (25/60 = ~42% into the hour) -->
+            <div class="scheduler-now-line" style="top: 25px;"></div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-pending" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Design Review</div>
+              <div class="scheduler-booking-time">11:00 - 12:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- The scheduler component is semantic-only due to its grid complexity.
+     Use the scheduler CSS classes as shown in the semantic tab. -->`}
+    js={`// Update current time indicator position
+function updateNowLine() &#123;
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const hourHeight = 60; // --scheduler-hour-height
+  const startHour = 8; // first visible hour
+
+  const top = (hours - startHour) * hourHeight
+            + (minutes / 60) * hourHeight;
+
+  const line = document.querySelector('.scheduler-now-line');
+  if (line) line.style.top = top + 'px';
+&#125;
+
+updateNowLine();
+setInterval(updateNowLine, 60000); // Update every minute`}
+    height="300px"
+  />
+
+  <CodePreview
+    title="Glass Variant"
+    semantic={`<div class="scheduler glass">
+  <div class="scheduler-header">
+    <div class="scheduler-nav">
+      <button class="scheduler-nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="scheduler-nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <span class="scheduler-title">Feb 24, 2026</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <button class="scheduler-today-btn">Today</button>
+      <div class="scheduler-view-toggle">
+        <button class="scheduler-view-btn scheduler-view-btn-active">Day</button>
+        <button class="scheduler-view-btn">Week</button>
+        <button class="scheduler-view-btn">Month</button>
+      </div>
+    </div>
+  </div>
+  <div class="scheduler-day-headers">
+    <div class="scheduler-corner"></div>
+    <div class="scheduler-day-header scheduler-day-header-today">
+      <span class="scheduler-day-name">Tue</span>
+      <span class="scheduler-day-number">24</span>
+    </div>
+  </div>
+  <div class="scheduler-body">
+    <div class="scheduler-grid" style="min-height: auto;">
+      <div class="scheduler-times">
+        <div class="scheduler-time">9:00</div>
+        <div class="scheduler-time">10:00</div>
+        <div class="scheduler-time">11:00</div>
+        <div class="scheduler-time">12:00</div>
+      </div>
+      <div class="scheduler-columns">
+        <div class="scheduler-day-column">
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-confirmed" style="top: 0; height: 60px;">
+              <div class="scheduler-booking-title">Morning Standup</div>
+              <div class="scheduler-booking-time">9:00 - 10:00</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-now-line" style="top: 25px;"></div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business">
+            <div class="scheduler-booking scheduler-booking-primary" style="top: 0; height: 90px;">
+              <div class="scheduler-booking-title">Design Workshop</div>
+              <div class="scheduler-booking-time">11:00 - 12:30</div>
+            </div>
+          </div>
+          <div class="scheduler-hour-slot scheduler-hour-slot-business"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`}
+    tailwind={`<!-- The scheduler component is semantic-only due to its grid complexity.
+     Use the scheduler CSS classes as shown in the semantic tab. -->`}
+    js={`// Glass variant uses the same structure - just add
+// the "glass" class to the root .scheduler element.`}
+    height="500px"
+  />
+
+  <!-- Classes Reference -->
+  <div class="overflow-x-auto mt-10">
+    <h2 class="text-xl font-semibold mb-4">Classes Reference</h2>
+    <table class="table w-full text-sm">
+      <thead>
+        <tr><th>Class</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>.scheduler</code></td><td>Root container with CSS variables (--scheduler-hour-height, --scheduler-time-width, --scheduler-resource-width)</td></tr>
+        <tr><td><code>.scheduler.glass</code></td><td>Glass morphism variant with translucent backgrounds</td></tr>
+        <tr><td colspan="2" class="font-semibold pt-4">Header</td></tr>
+        <tr><td><code>.scheduler-header</code></td><td>Top bar with navigation, title, and view toggle</td></tr>
+        <tr><td><code>.scheduler-nav</code></td><td>Navigation button group container</td></tr>
+        <tr><td><code>.scheduler-nav-btn</code></td><td>Previous/next navigation button (36x36)</td></tr>
+        <tr><td><code>.scheduler-title</code></td><td>Date range or current date title</td></tr>
+        <tr><td><code>.scheduler-today-btn</code></td><td>"Today" button with primary outline style</td></tr>
+        <tr><td><code>.scheduler-view-toggle</code></td><td>Container for Day/Week/Month toggle buttons</td></tr>
+        <tr><td><code>.scheduler-view-btn</code></td><td>Individual view toggle button</td></tr>
+        <tr><td><code>.scheduler-view-btn-active</code></td><td>Currently active view toggle button</td></tr>
+        <tr><td colspan="2" class="font-semibold pt-4">Day Headers</td></tr>
+        <tr><td><code>.scheduler-day-headers</code></td><td>Sticky row of day column headers</td></tr>
+        <tr><td><code>.scheduler-corner</code></td><td>Empty corner cell above time column</td></tr>
+        <tr><td><code>.scheduler-day-header</code></td><td>Individual day header (name + number)</td></tr>
+        <tr><td><code>.scheduler-day-header-today</code></td><td>Highlights today's column header (primary circle on number)</td></tr>
+        <tr><td><code>.scheduler-day-header-selected</code></td><td>Selected day header (light primary background)</td></tr>
+        <tr><td><code>.scheduler-day-header-weekend</code></td><td>Weekend day header (muted background)</td></tr>
+        <tr><td><code>.scheduler-day-name</code></td><td>Abbreviated day name (Mon, Tue, etc.)</td></tr>
+        <tr><td><code>.scheduler-day-number</code></td><td>Day of month number in circle</td></tr>
+        <tr><td colspan="2" class="font-semibold pt-4">Resource Headers</td></tr>
+        <tr><td><code>.scheduler-resources-header</code></td><td>Sticky row of resource column headers</td></tr>
+        <tr><td><code>.scheduler-resources-corner</code></td><td>Empty corner cell above time column (resource view)</td></tr>
+        <tr><td><code>.scheduler-resource-header</code></td><td>Individual resource header with avatar, name, info</td></tr>
+        <tr><td><code>.scheduler-resource-avatar</code></td><td>Circular avatar (32px) with initials or image</td></tr>
+        <tr><td><code>.scheduler-resource-name</code></td><td>Resource name text</td></tr>
+        <tr><td><code>.scheduler-resource-info</code></td><td>Secondary info text below name</td></tr>
+        <tr><td colspan="2" class="font-semibold pt-4">Grid &amp; Time</td></tr>
+        <tr><td><code>.scheduler-body</code></td><td>Scrollable grid container</td></tr>
+        <tr><td><code>.scheduler-grid</code></td><td>Flex container for time column + day columns</td></tr>
+        <tr><td><code>.scheduler-times</code></td><td>Sticky left time column</td></tr>
+        <tr><td><code>.scheduler-time</code></td><td>Individual hour label (e.g., "9:00")</td></tr>
+        <tr><td><code>.scheduler-columns</code></td><td>Flex container for day/resource columns</td></tr>
+        <tr><td><code>.scheduler-day-column</code></td><td>Individual day or resource column</td></tr>
+        <tr><td><code>.scheduler-day-column-weekend</code></td><td>Weekend column (muted background)</td></tr>
+        <tr><td colspan="2" class="font-semibold pt-4">Hour Slots</td></tr>
+        <tr><td><code>.scheduler-hour-slot</code></td><td>Clickable hour cell with half-hour dashed line</td></tr>
+        <tr><td><code>.scheduler-hour-slot-business</code></td><td>Business hours slot (light background)</td></tr>
+        <tr><td><code>.scheduler-hour-slot-non-business</code></td><td>Non-business hours slot (muted background)</td></tr>
+        <tr><td><code>.scheduler-interval-15</code></td><td>Add to .scheduler-grid for 15-minute dotted interval lines</td></tr>
+        <tr><td colspan="2" class="font-semibold pt-4">Bookings</td></tr>
+        <tr><td><code>.scheduler-booking</code></td><td>Absolutely positioned booking block with left border accent</td></tr>
+        <tr><td><code>.scheduler-booking-title</code></td><td>Booking title text (truncated)</td></tr>
+        <tr><td><code>.scheduler-booking-time</code></td><td>Booking time range text</td></tr>
+        <tr><td><code>.scheduler-booking-resource</code></td><td>Resource name text inside booking</td></tr>
+        <tr><td><code>.scheduler-booking-confirmed</code></td><td>Green (success) booking status</td></tr>
+        <tr><td><code>.scheduler-booking-pending</code></td><td>Yellow (warning) booking status</td></tr>
+        <tr><td><code>.scheduler-booking-cancelled</code></td><td>Muted with line-through text</td></tr>
+        <tr><td><code>.scheduler-booking-blocked</code></td><td>Grey blocked slot (cursor: not-allowed)</td></tr>
+        <tr><td><code>.scheduler-booking-primary</code></td><td>Primary color booking</td></tr>
+        <tr><td><code>.scheduler-booking-error</code></td><td>Red (error) booking</td></tr>
+        <tr><td><code>.scheduler-booking-conflict</code></td><td>Red ring + "!" badge for overlapping bookings</td></tr>
+        <tr><td colspan="2" class="font-semibold pt-4">Drag to Create</td></tr>
+        <tr><td><code>.scheduler-drag-preview</code></td><td>Dashed preview block shown while dragging to create</td></tr>
+        <tr><td colspan="2" class="font-semibold pt-4">Current Time</td></tr>
+        <tr><td><code>.scheduler-now-line</code></td><td>Red horizontal line with dot indicating current time</td></tr>
+        <tr><td colspan="2" class="font-semibold pt-4">Month View</td></tr>
+        <tr><td><code>.scheduler-month-grid</code></td><td>7-column CSS grid for month layout</td></tr>
+        <tr><td><code>.scheduler-month-header</code></td><td>Weekday header cell in month grid</td></tr>
+        <tr><td><code>.scheduler-month-day</code></td><td>Individual day cell in month grid (min-height: 100px)</td></tr>
+        <tr><td><code>.scheduler-month-day-other</code></td><td>Day from adjacent month (dimmed)</td></tr>
+        <tr><td><code>.scheduler-month-day-today</code></td><td>Today highlight with primary circle on number</td></tr>
+        <tr><td><code>.scheduler-month-day-weekend</code></td><td>Weekend day cell (muted background)</td></tr>
+        <tr><td><code>.scheduler-month-day-number</code></td><td>Day number in month cell</td></tr>
+        <tr><td><code>.scheduler-month-booking</code></td><td>Compact booking pill in month cell</td></tr>
+        <tr><td><code>.scheduler-month-booking-confirmed</code></td><td>Green confirmed booking pill</td></tr>
+        <tr><td><code>.scheduler-month-booking-pending</code></td><td>Yellow pending booking pill</td></tr>
+        <tr><td><code>.scheduler-month-more</code></td><td>"+N more" overflow link in month cell</td></tr>
+        <tr><td colspan="2" class="font-semibold pt-4">Empty State</td></tr>
+        <tr><td><code>.scheduler-empty</code></td><td>Centered empty state container</td></tr>
+        <tr><td><code>.scheduler-empty-icon</code></td><td>Icon in empty state (48x48)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</DocsLayout>
