@@ -28,26 +28,26 @@ import CodePreview from '../../components/CodePreview.astro';
         <button class="modal-close" @click="open = false">&times;</button>
       </div>
       <div class="modal-body p-0">
-        <label class="select-modal-option" :class="selected === 'React' && 'select-modal-option-selected'" @click="selected = 'React'">
-          <input type="radio" name="fw" class="radio-input" value="React">
+        <div class="select-modal-option" :class="selected === 'React' && 'select-modal-option-selected'" @click="selected = 'React'">
+          <input type="radio" name="fw" class="radio-input" value="React" :checked="selected === 'React'">
           <span class="radio-circle"><span class="radio-dot"></span></span>
           <span class="select-modal-option-label">React</span>
-        </label>
-        <label class="select-modal-option" :class="selected === 'Vue' && 'select-modal-option-selected'" @click="selected = 'Vue'">
-          <input type="radio" name="fw" class="radio-input" value="Vue">
+        </div>
+        <div class="select-modal-option" :class="selected === 'Vue' && 'select-modal-option-selected'" @click="selected = 'Vue'">
+          <input type="radio" name="fw" class="radio-input" value="Vue" :checked="selected === 'Vue'">
           <span class="radio-circle"><span class="radio-dot"></span></span>
           <span class="select-modal-option-label">Vue</span>
-        </label>
-        <label class="select-modal-option" :class="selected === 'Svelte' && 'select-modal-option-selected'" @click="selected = 'Svelte'">
-          <input type="radio" name="fw" class="radio-input" value="Svelte">
+        </div>
+        <div class="select-modal-option" :class="selected === 'Svelte' && 'select-modal-option-selected'" @click="selected = 'Svelte'">
+          <input type="radio" name="fw" class="radio-input" value="Svelte" :checked="selected === 'Svelte'">
           <span class="radio-circle"><span class="radio-dot"></span></span>
           <span class="select-modal-option-label">Svelte</span>
-        </label>
-        <label class="select-modal-option" :class="selected === 'Astro' && 'select-modal-option-selected'" @click="selected = 'Astro'">
-          <input type="radio" name="fw" class="radio-input" value="Astro">
+        </div>
+        <div class="select-modal-option" :class="selected === 'Astro' && 'select-modal-option-selected'" @click="selected = 'Astro'">
+          <input type="radio" name="fw" class="radio-input" value="Astro" :checked="selected === 'Astro'">
           <span class="radio-circle"><span class="radio-dot"></span></span>
           <span class="select-modal-option-label">Astro</span>
-        </label>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost btn-sm" @click="selected = ''; open = false">Cancel</button>
@@ -69,13 +69,13 @@ import CodePreview from '../../components/CodePreview.astro';
         <button class="inline-flex items-center justify-center size-8 rounded-full bg-base-200 text-base-content opacity-60 hover:opacity-100" @click="open = false">&times;</button>
       </div>
       <div class="flex-1 overflow-y-auto p-0">
-        <label class="flex items-center gap-3 cursor-pointer px-5 py-3 hover:bg-base-200 border-b border-base-200" @click="selected = 'React'">
-          <input type="radio" name="fw" class="absolute opacity-0 w-0 h-0" value="React">
-          <span class="relative flex items-center justify-center shrink-0 size-6 rounded-full border-2 border-base-300">
+        <div class="flex items-center gap-3 cursor-pointer px-5 py-3 hover:bg-base-200 border-b border-base-200" :class="selected === 'React' && 'bg-primary/6'" @click="selected = 'React'">
+          <input type="radio" name="fw" class="absolute opacity-0 w-0 h-0" value="React" :checked="selected === 'React'">
+          <span class="relative flex items-center justify-center shrink-0 size-6 rounded-full border-2" :class="selected === 'React' ? 'border-primary' : 'border-base-300'">
             <span class="size-3 rounded-full bg-primary" :class="selected === 'React' ? 'scale-100' : 'scale-0'" style="transition: transform 0.15s"></span>
           </span>
           <span class="text-base">React</span>
-        </label>
+        </div>
         <!-- ...more options... -->
       </div>
       <div class="flex items-center justify-end gap-2 shrink-0 p-5 border-t border-base-200">
@@ -87,7 +87,8 @@ import CodePreview from '../../components/CodePreview.astro';
 </div>`}
     js={`// With Alpine.js (shown above):
 // x-data manages open state and selected value
-// @click on labels updates the selection
+// @click on option divs updates the selection
+// :checked binding keeps the radio input in sync with Alpine state
 // Cancel resets, OK confirms
 
 // Vanilla JS equivalent:
@@ -127,11 +128,11 @@ document.querySelectorAll('.select-modal-option input').forEach(input => {
       </div>
       <div class="modal-body p-0">
         <template x-for="fruit in ['Apple', 'Banana', 'Cherry', 'Mango', 'Orange']" :key="fruit">
-          <label class="select-modal-option" :class="selected.includes(fruit) && 'select-modal-option-selected'" @click="selected.includes(fruit) ? selected = selected.filter(f => f !== fruit) : selected.push(fruit)">
+          <div class="select-modal-option" :class="selected.includes(fruit) && 'select-modal-option-selected'" @click="selected.includes(fruit) ? selected = selected.filter(f => f !== fruit) : selected.push(fruit)">
             <input type="checkbox" class="checkbox-input" :checked="selected.includes(fruit)">
             <span class="checkbox-box"><svg class="checkbox-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
             <span class="select-modal-option-label" x-text="fruit"></span>
-          </label>
+          </div>
         </template>
       </div>
       <div class="modal-footer">
@@ -147,7 +148,6 @@ document.querySelectorAll('.select-modal-option input').forEach(input => {
     <span class="truncate flex-1 text-base-content" x-show="selected.length > 0" x-text="selected.join(', ')"></span>
   </button>
 
-  <!-- Modal with pure Tailwind classes -->
   <div class="fixed inset-0 flex items-center justify-center z-400 p-6 bg-black/40 transition-all" :class="open ? 'opacity-100 visible' : 'opacity-0 invisible'" @click.self="open = false">
     <div class="relative flex flex-col w-full max-w-[400px] max-h-[85dvh] bg-base-100 rounded-box shadow-xl">
       <div class="flex items-center justify-between shrink-0 p-5 border-b border-base-200">
@@ -156,13 +156,13 @@ document.querySelectorAll('.select-modal-option input').forEach(input => {
       </div>
       <div class="flex-1 overflow-y-auto p-0">
         <template x-for="fruit in ['Apple', 'Banana', 'Cherry', 'Mango', 'Orange']" :key="fruit">
-          <label class="flex items-center gap-3 cursor-pointer px-5 py-3 hover:bg-base-200 border-b border-base-200" @click="selected.includes(fruit) ? selected = selected.filter(f => f !== fruit) : selected.push(fruit)">
+          <div class="flex items-center gap-3 cursor-pointer px-5 py-3 hover:bg-base-200 border-b border-base-200" :class="selected.includes(fruit) && 'bg-primary/6'" @click="selected.includes(fruit) ? selected = selected.filter(f => f !== fruit) : selected.push(fruit)">
             <input type="checkbox" class="absolute opacity-0 w-0 h-0" :checked="selected.includes(fruit)">
-            <span class="relative flex items-center justify-center shrink-0 size-6 rounded-md border-2 border-base-300" :class="selected.includes(fruit) && 'bg-primary border-primary'">
+            <span class="relative flex items-center justify-center shrink-0 size-6 rounded-md border-2" :class="selected.includes(fruit) ? 'bg-primary border-primary' : 'border-base-300'">
               <svg class="size-3.5 text-primary-content" :class="selected.includes(fruit) ? 'block' : 'hidden'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </span>
             <span class="text-base" x-text="fruit"></span>
-          </label>
+          </div>
         </template>
       </div>
       <div class="flex items-center justify-end gap-2 shrink-0 p-5 border-t border-base-200">
@@ -173,7 +173,8 @@ document.querySelectorAll('.select-modal-option input').forEach(input => {
   </div>
 </div>`}
     js={`// With Alpine.js: x-data manages open state and selected array
-// @click on labels toggles items in/out of the array
+// @click on divs (not labels) toggles items — avoids double-toggle
+// :checked binding keeps the hidden input in sync
 // Cancel clears, OK confirms
 
 // Vanilla JS:
@@ -181,7 +182,6 @@ const selected = new Set();
 document.querySelectorAll('.select-modal-option input[type="checkbox"]').forEach(cb => {
   cb.addEventListener('change', () => {
     cb.checked ? selected.add(cb.value) : selected.delete(cb.value);
-    // Update trigger text
     const trigger = document.querySelector('.select-modal-value');
     trigger.textContent = [...selected].join(', ');
   });
@@ -207,30 +207,30 @@ document.querySelectorAll('.select-modal-option input[type="checkbox"]').forEach
         <button class="modal-close" @click="open = false">&times;</button>
       </div>
       <div class="modal-body p-0">
-        <label class="select-modal-option" :class="selected === 'standard' && 'select-modal-option-selected'" @click="selected = 'standard'">
+        <div class="select-modal-option" :class="selected === 'standard' && 'select-modal-option-selected'" @click="selected = 'standard'">
           <input type="radio" name="ship" class="radio-input" value="standard" :checked="selected === 'standard'">
           <span class="radio-circle"><span class="radio-dot"></span></span>
           <span class="select-modal-option-text">
             <span class="select-modal-option-label">Standard Shipping</span>
             <span class="select-modal-option-description">5-7 business days &bull; Free</span>
           </span>
-        </label>
-        <label class="select-modal-option" :class="selected === 'express' && 'select-modal-option-selected'" @click="selected = 'express'">
+        </div>
+        <div class="select-modal-option" :class="selected === 'express' && 'select-modal-option-selected'" @click="selected = 'express'">
           <input type="radio" name="ship" class="radio-input" value="express" :checked="selected === 'express'">
           <span class="radio-circle"><span class="radio-dot"></span></span>
           <span class="select-modal-option-text">
             <span class="select-modal-option-label">Express Shipping</span>
             <span class="select-modal-option-description">2-3 business days &bull; $9.99</span>
           </span>
-        </label>
-        <label class="select-modal-option" :class="selected === 'overnight' && 'select-modal-option-selected'" @click="selected = 'overnight'">
+        </div>
+        <div class="select-modal-option" :class="selected === 'overnight' && 'select-modal-option-selected'" @click="selected = 'overnight'">
           <input type="radio" name="ship" class="radio-input" value="overnight" :checked="selected === 'overnight'">
           <span class="radio-circle"><span class="radio-dot"></span></span>
           <span class="select-modal-option-text">
             <span class="select-modal-option-label">Overnight</span>
             <span class="select-modal-option-description">Next business day &bull; $24.99</span>
           </span>
-        </label>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost btn-sm" @click="open = false">Cancel</button>
@@ -331,11 +331,11 @@ document.querySelectorAll('.select-modal-option input[type="checkbox"]').forEach
           <input type="text" class="input input-sm w-full" placeholder="Search..." x-model="search">
         </div>
         <template x-for="c in ['Argentina', 'Australia', 'Brazil', 'Canada', 'France', 'Germany', 'Italy', 'Japan', 'Mexico', 'Spain', 'UK', 'USA'].filter(c => c.toLowerCase().includes(search.toLowerCase()))" :key="c">
-          <label class="select-modal-option" :class="selected === c && 'select-modal-option-selected'" @click="selected = c">
-            <input type="radio" name="country" class="radio-input" :value="c">
+          <div class="select-modal-option" :class="selected === c && 'select-modal-option-selected'" @click="selected = c">
+            <input type="radio" name="country" class="radio-input" :value="c" :checked="selected === c">
             <span class="radio-circle"><span class="radio-dot"></span></span>
             <span class="select-modal-option-label" x-text="c"></span>
-          </label>
+          </div>
         </template>
       </div>
       <div class="modal-footer">
@@ -400,11 +400,11 @@ searchInput.addEventListener('input', () => {
       </div>
       <div class="modal-body p-0">
         <template x-for="tech in ['React', 'Vue', 'Svelte', 'Angular', 'Astro', 'Next.js']" :key="tech">
-          <label class="select-modal-option" :class="selected.includes(tech) && 'select-modal-option-selected'" @click="selected.includes(tech) ? selected = selected.filter(t => t !== tech) : selected.push(tech)">
+          <div class="select-modal-option" :class="selected.includes(tech) && 'select-modal-option-selected'" @click="selected.includes(tech) ? selected = selected.filter(t => t !== tech) : selected.push(tech)">
             <input type="checkbox" class="checkbox-input" :checked="selected.includes(tech)">
             <span class="checkbox-box"><svg class="checkbox-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
             <span class="select-modal-option-label" x-text="tech"></span>
-          </label>
+          </div>
         </template>
       </div>
       <div class="modal-footer">
@@ -457,21 +457,21 @@ searchInput.addEventListener('input', () => {
           <button class="modal-close" @click="open = false">&times;</button>
         </div>
         <div class="modal-body p-0">
-          <label class="select-modal-option" :class="selected === 'Option A' && 'select-modal-option-selected'" @click="selected = 'Option A'">
-            <input type="radio" name="opt" class="radio-input" value="Option A">
+          <div class="select-modal-option" :class="selected === 'Option A' && 'select-modal-option-selected'" @click="selected = 'Option A'">
+            <input type="radio" name="opt" class="radio-input" value="Option A" :checked="selected === 'Option A'">
             <span class="radio-circle"><span class="radio-dot"></span></span>
             <span class="select-modal-option-label">Option A</span>
-          </label>
-          <label class="select-modal-option" :class="selected === 'Option B' && 'select-modal-option-selected'" @click="selected = 'Option B'">
-            <input type="radio" name="opt" class="radio-input" value="Option B">
+          </div>
+          <div class="select-modal-option" :class="selected === 'Option B' && 'select-modal-option-selected'" @click="selected = 'Option B'">
+            <input type="radio" name="opt" class="radio-input" value="Option B" :checked="selected === 'Option B'">
             <span class="radio-circle"><span class="radio-dot"></span></span>
             <span class="select-modal-option-label">Option B</span>
-          </label>
-          <label class="select-modal-option" :class="selected === 'Option C' && 'select-modal-option-selected'" @click="selected = 'Option C'">
-            <input type="radio" name="opt" class="radio-input" value="Option C">
+          </div>
+          <div class="select-modal-option" :class="selected === 'Option C' && 'select-modal-option-selected'" @click="selected = 'Option C'">
+            <input type="radio" name="opt" class="radio-input" value="Option C" :checked="selected === 'Option C'">
             <span class="radio-circle"><span class="radio-dot"></span></span>
             <span class="select-modal-option-label">Option C</span>
-          </label>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-ghost btn-sm" @click="open = false">Cancel</button>
@@ -544,30 +544,30 @@ searchInput.addEventListener('input', () => {
         <h3 class="modal-title">Select Plan</h3>
       </div>
       <div class="modal-body p-0">
-        <label class="select-modal-option">
-          <input type="radio" name="plan" class="radio-input" value="free">
+        <div class="select-modal-option" :class="selected === 'free' && 'select-modal-option-selected'" @click="selected = 'free'">
+          <input type="radio" name="plan" class="radio-input" value="free" :checked="selected === 'free'">
           <span class="radio-circle"><span class="radio-dot"></span></span>
           <span class="select-modal-option-text">
             <span class="select-modal-option-label">Free</span>
             <span class="select-modal-option-description">Basic features</span>
           </span>
-        </label>
-        <label class="select-modal-option select-modal-option-disabled">
+        </div>
+        <div class="select-modal-option select-modal-option-disabled">
           <input type="radio" name="plan" class="radio-input" value="pro" disabled>
           <span class="radio-circle"><span class="radio-dot"></span></span>
           <span class="select-modal-option-text">
             <span class="select-modal-option-label">Pro (coming soon)</span>
             <span class="select-modal-option-description">Advanced features</span>
           </span>
-        </label>
-        <label class="select-modal-option">
-          <input type="radio" name="plan" class="radio-input" value="enterprise">
+        </div>
+        <div class="select-modal-option" :class="selected === 'enterprise' && 'select-modal-option-selected'" @click="selected = 'enterprise'">
+          <input type="radio" name="plan" class="radio-input" value="enterprise" :checked="selected === 'enterprise'">
           <span class="radio-circle"><span class="radio-dot"></span></span>
           <span class="select-modal-option-text">
             <span class="select-modal-option-label">Enterprise</span>
             <span class="select-modal-option-description">Custom solution</span>
           </span>
-        </label>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-sm color-primary">OK</button>
@@ -576,7 +576,7 @@ searchInput.addEventListener('input', () => {
   </div>
 </div>`}
     tailwind={`<!-- Disabled option: add opacity-40 cursor-not-allowed pointer-events-none -->
-<label class="flex items-center gap-3 px-5 py-3 opacity-40 cursor-not-allowed pointer-events-none border-b border-base-200">
+<div class="flex items-center gap-3 px-5 py-3 opacity-40 cursor-not-allowed pointer-events-none border-b border-base-200">
   <input type="radio" class="absolute opacity-0 w-0 h-0" disabled>
   <span class="relative flex items-center justify-center shrink-0 size-6 rounded-full border-2 border-base-300">
     <span class="size-3 rounded-full bg-primary scale-0"></span>
@@ -585,7 +585,7 @@ searchInput.addEventListener('input', () => {
     <span class="text-base">Pro (coming soon)</span>
     <span class="text-sm text-base-content/55 mt-0.5 block">Advanced features</span>
   </span>
-</label>`}
+</div>`}
     js={`// Disabled options use .select-modal-option-disabled class
 // This adds pointer-events: none and reduced opacity
 // The radio/checkbox input should also have the disabled attribute`}
