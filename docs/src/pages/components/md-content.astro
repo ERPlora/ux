@@ -1,0 +1,169 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import CodePreview from '../../components/CodePreview.astro';
+
+// Read the README.md from the UX project root
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
+const readmePath = resolve(import.meta.dirname, '../../../../README.md');
+const readmeContent = readFileSync(readmePath, 'utf-8');
+
+// Simple markdown to HTML converter for demo purposes
+// (We render the actual README.md content inside .md-content)
+function mdToHtml(md: string): string {
+  let html = md;
+
+  // Fenced code blocks (```lang ... ```)
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_m, _lang, code) => {
+    const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').trimEnd();
+    return `<pre><code>${escaped}</code></pre>`;
+  });
+
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Tables
+  html = html.replace(/^(\|.+\|)\n(\|[\s\-:|]+\|)\n((?:\|.+\|\n?)*)/gm, (_m, header, _sep, body) => {
+    const ths = header.split('|').filter((c: string) => c.trim()).map((c: string) => `<th>${c.trim()}</th>`).join('');
+    const rows = body.trim().split('\n').map((row: string) => {
+      const tds = row.split('|').filter((c: string) => c.trim()).map((c: string) => `<td>${c.trim()}</td>`).join('');
+      return `<tr>${tds}</tr>`;
+    }).join('');
+    return `<table><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table>`;
+  });
+
+  // Headings
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+  // Bold
+  html = html.replace(/\*\*\[([^\]]+)\]\(([^)]+)\)\*\*/g, '<strong><a href="$2">$1</a></strong>');
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  // Links
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+  // Unordered lists
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
+
+  // Horizontal rules
+  html = html.replace(/^---$/gm, '<hr>');
+
+  // Paragraphs (lines that aren't already HTML)
+  html = html.replace(/^(?!<[a-z/])((?!$).+)$/gm, '<p>$1</p>');
+
+  // Clean up empty paragraphs
+  html = html.replace(/<p>\s*<\/p>/g, '');
+
+  return html;
+}
+
+const readmeHtml = mdToHtml(readmeContent);
+---
+
+<DocsLayout title="Markdown Content">
+  <p class="text-base-content/70 mb-6">
+    Read-only display of rendered Markdown/HTML content. Wrap any server-rendered markdown in
+    <code>.md-content</code> for properly styled typography.
+  </p>
+
+  <CodePreview
+    title="Basic Usage"
+    noFrame
+    semantic={`<div class="md-content">
+  <h1>Document Title</h1>
+  <p>This is a paragraph with <strong>bold text</strong> and <em>italic text</em>. You can also use <code>inline code</code> for technical terms.</p>
+
+  <h2>Section Heading</h2>
+  <p>Lists, tables, code blocks, and blockquotes are all styled automatically.</p>
+
+  <ul>
+    <li>First item with important details</li>
+    <li>Second item with <a href="#">a link</a></li>
+    <li>Third item with <code>code</code></li>
+  </ul>
+
+  <h3>Code Example</h3>
+  <pre><code>&lt;div class="md-content"&gt;
+  {{ content|markdown }}
+&lt;/div&gt;</code></pre>
+
+  <blockquote>
+    <p>Tip: The <code>.md-content</code> class styles all standard HTML elements produced by markdown renderers.</p>
+  </blockquote>
+
+  <h3>Data Table</h3>
+  <table>
+    <thead>
+      <tr><th>Module</th><th>Purpose</th><th>Price</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>cash_register</td><td>POS with payment splitting</td><td>Free</td></tr>
+      <tr><td>inventory</td><td>Stock management</td><td>Free</td></tr>
+      <tr><td>invoicing</td><td>Issue invoices and receipts</td><td>Free</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+  <p>Horizontal rules separate sections visually.</p>
+</div>`}
+  />
+
+  <CodePreview
+    title="Inside a Card"
+    noFrame
+    semantic={`<div class="card card-bordered" style="max-width: 640px;">
+  <div class="card-body">
+    <div class="md-content">
+      <h2>Setup Guide</h2>
+      <p>Send this as your first message to the AI Assistant:</p>
+      <pre><code>Hi! I have a restaurant in London called "The Crown".
+We serve traditional British food. I need to set up the full system.</code></pre>
+      <p>The assistant will detect your business type and install the right modules.</p>
+      <h3>Modules installed</h3>
+      <table>
+        <thead><tr><th>Module</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>sales</td><td>Table, bar, and takeaway sales</td></tr>
+          <tr><td>kitchen</td><td>Kitchen Display System (KDS)</td></tr>
+          <tr><td>tables</td><td>Table map with zones</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>`}
+  />
+
+  <CodePreview
+    title="Glass Card with Markdown"
+    noFrame
+    semantic={`<div class="card glass" style="max-width: 640px;">
+  <div class="card-body">
+    <div class="md-content">
+      <h2>Notes</h2>
+      <p>Hospitality sector — applicable VAT rate for restaurants. The set menu at a fixed price can be configured as a composite product.</p>
+      <ul>
+        <li>Open table orders with dishes by course (starter, main, dessert)</li>
+        <li>Automatically send orders to the kitchen display screen</li>
+        <li>Close the table bill with split payment if requested</li>
+      </ul>
+      <blockquote><p>The <code>kitchen</code> module shows orders in real time to the chef with priority by arrival time.</p></blockquote>
+    </div>
+  </div>
+</div>`}
+  />
+
+  <h2 class="text-xl font-bold mt-12 mb-4">Full README.md Example</h2>
+  <p class="text-base-content/70 mb-6">
+    The project's <code>README.md</code> rendered inside <code>.md-content</code>:
+  </p>
+
+  <div class="card card-bordered">
+    <div class="card-body p-6 md:p-8">
+      <div class="md-content" set:html={readmeHtml} />
+    </div>
+  </div>
+</DocsLayout>
