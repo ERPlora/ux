@@ -355,6 +355,39 @@ Como ambas versiones usan prefijo `ux-*`, los consumidores existentes ven solo m
 
 ---
 
+## Soporte para IAs (Copilot · Claude · Codex · Cursor)
+
+La librería incluye documentación machine-readable que las IAs de código consumen automáticamente:
+
+| Archivo            | Propósito                                                                 | URL pública                                       |
+| ------------------ | ------------------------------------------------------------------------- | ------------------------------------------------- |
+| `AGENTS.md`        | Estándar [agents.md](https://agents.md) — instrucciones, patrones, anti-patrones, ejemplos. Lo detectan Claude Code, Cursor, OpenAI Codex. | `https://erplora.github.io/ux/AGENTS.md`          |
+| `llms.txt`         | Estándar [llmstxt.org](https://llmstxt.org) — índice corto, links a recursos. Lo usan crawlers de IA y context-fetch. | `https://erplora.github.io/ux/llms.txt`           |
+| `llms-full.txt`    | Inventario exhaustivo de las **1321 clases** agrupadas por componente, con tokens y utilities. Para inyectar en context window. | `https://erplora.github.io/ux/llms-full.txt`      |
+
+### Cómo lo usa cada herramienta
+
+- **Claude Code / Cursor**: detectan `AGENTS.md` en la raíz del proyecto consumidor. Copia o symlink el archivo.
+- **GitHub Copilot**: usa `.github/copilot-instructions.md` — copia `AGENTS.md` ahí.
+- **ChatGPT / Claude (web)**: pega `llms-full.txt` al principio del chat para autocompletado completo.
+- **Cursor `@docs`**: añade `https://erplora.github.io/ux/llms.txt` como custom doc.
+
+### Para mantenerlos sincronizados
+
+`llms-full.txt` se regenera tras cambios en `lib/css/components/`:
+
+```bash
+for f in lib/css/components/*.css; do
+  echo "## $(basename "$f" .css)"
+  grep -hE '^\.ux-[a-z][a-z0-9_-]*' "$f" -o | sort -u
+  echo ""
+done
+```
+
+(combina con la cabecera explicativa actual de `llms-full.txt`).
+
+---
+
 ## Compatibilidad
 
 | Feature                    | Mínimo                              |
