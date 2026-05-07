@@ -14,17 +14,18 @@
  * Sin lightningcss el script hace un minify naive (suficiente para CDN).
  */
 
-import { readFile, writeFile, mkdir, watch, readdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, watch } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve('.');
 const SRC = path.join(ROOT, 'lib', 'css');
 const TEMPLATES_SRC = path.join(ROOT, 'lib', 'templates');
+const TEMPLATES_MANIFEST = path.join(TEMPLATES_SRC, 'manifest.json');
+const JS_SRC = path.join(ROOT, 'lib', 'js');
 const DIST = path.join(ROOT, 'dist');
 const DIST_TEMPLATES = path.join(DIST, 'templates');
-
-const TEMPLATES = ['corporate', 'minimal', 'forest', 'ocean', 'violet'];
+const DIST_JS = path.join(DIST, 'js');
 
 const ORDER = [
   'tokens.css',
@@ -121,27 +122,57 @@ async function build() {
   await writeFile(path.join(DIST, 'erplora-ux.min.css'), BANNER.trim() + naiveMinify(out));
   console.log(`✔ bundle · ${count} files · ${(out.length / 1024).toFixed(1)} KB → ${(naiveMinify(out).length / 1024).toFixed(1)} KB min`);
 
-  // ----- Templates (one min.css per template + an all.min.css) -----
-  if (existsSync(TEMPLATES_SRC)) {
+  // ----- Templates: discovered from manifest.json (single source of truth) -----
+  if (existsSync(TEMPLATES_MANIFEST)) {
+    const manifest = JSON.parse(await readFile(TEMPLATES_MANIFEST, 'utf8'));
+    const ids = (manifest.templates ?? [])
+      .map(t => t.id)
+      .filter(id => id && id.length > 0); // skip the "default" entry which has no CSS file
+
     let allOut = '';
     let tCount = 0;
-    for (const name of TEMPLATES) {
-      const full = path.join(TEMPLATES_SRC, `${name}.css`);
+    for (const id of ids) {
+      const full = path.join(TEMPLATES_SRC, `${id}.css`);
       if (!existsSync(full)) {
-        console.warn('skip missing template:', name);
+        console.warn(`skip missing template: ${id} (declared in manifest, file not found)`);
         continue;
       }
       const css = await readFile(full, 'utf8');
       const min = naiveMinify(css);
-      await writeFile(path.join(DIST_TEMPLATES, `${name}.css`), css);
-      await writeFile(path.join(DIST_TEMPLATES, `${name}.min.css`), min);
-      allOut += `/* ===== ${name} ===== */\n` + css + '\n';
+      await writeFile(path.join(DIST_TEMPLATES, `${id}.css`), css);
+      await writeFile(path.join(DIST_TEMPLATES, `${id}.min.css`), min);
+      allOut += `/* ===== ${id} ===== */\n` + css + '\n';
       tCount++;
     }
     if (tCount > 0) {
       await writeFile(path.join(DIST_TEMPLATES, 'all.css'), allOut);
       await writeFile(path.join(DIST_TEMPLATES, 'all.min.css'), naiveMinify(allOut));
+      // Copy the manifest itself so consumers/CDNs can fetch it.
+      await writeFile(
+        path.join(DIST_TEMPLATES, 'manifest.json'),
+        JSON.stringify(manifest, null, 2)
+      );
       console.log(`✔ templates · ${tCount} themes · ${(allOut.length / 1024).toFixed(1)} KB → ${(naiveMinify(allOut).length / 1024).toFixed(1)} KB min (all)`);
+    }
+  } else {
+    console.warn('lib/templates/manifest.json not found — skipping template build');
+  }
+
+  // ----- JS runtime (theme manager) -----
+  if (existsSync(JS_SRC)) {
+    if (!existsSync(DIST_JS)) await mkdir(DIST_JS, { recursive: true });
+    const themeRuntime = path.join(JS_SRC, 'theme-runtime.js');
+    if (existsSync(themeRuntime)) {
+      const js = await readFile(themeRuntime, 'utf8');
+      await writeFile(path.join(DIST_JS, 'theme-runtime.js'), js);
+      // Naive JS "minify": collapse whitespace, drop block comments. Good enough for a small ESM.
+      const min = js
+        .replace(/\/\*(?!!)[\s\S]*?\*\//g, '')   // block comments (preserve /*! banner */)
+        .replace(/^\s*\/\/.*$/gm, '')            // line comments
+        .replace(/\n\s*\n/g, '\n')               // blank lines
+        .trim();
+      await writeFile(path.join(DIST_JS, 'theme-runtime.min.js'), min);
+      console.log(`✔ js · theme-runtime · ${(js.length / 1024).toFixed(1)} KB → ${(min.length / 1024).toFixed(1)} KB min`);
     }
   }
 }
