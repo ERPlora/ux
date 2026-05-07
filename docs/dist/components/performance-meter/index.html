@@ -1,0 +1,830 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Performance Meter - UX Components</title><link rel="icon" type="image/svg+xml" href="/ux/favicon.svg"><script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script><script>
+      (function () {
+        var t = localStorage.getItem("theme");
+        if (t) document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script><link rel="stylesheet" href="/ux/_astro/accordion.n9OkH8JU.css">
+<style>.preview-frame[data-astro-cid-mva44yhc]{display:flex;flex-direction:column;border-radius:.5rem;border:1px solid var(--color-base-300);overflow:hidden;background:var(--color-base-100);box-shadow:0 1px 3px #0000000f,0 1px 2px #0000000a}.preview-frame-header[data-astro-cid-mva44yhc]{display:flex;align-items:center;gap:.375rem;padding:.5rem .75rem;background:var(--color-base-200);border-bottom:1px solid var(--color-base-300);flex-shrink:0}.preview-frame-dot[data-astro-cid-mva44yhc]{width:.5rem;height:.5rem;border-radius:50%}.preview-frame-title[data-astro-cid-mva44yhc]{font-size:.6875rem;color:var(--color-base-content);opacity:.4;margin-left:.375rem}.preview-frame-body[data-astro-cid-mva44yhc]{flex:1;min-height:0;overflow:auto;position:relative}.preview-frame-body[data-astro-cid-mva44yhc] .app{height:100%;min-height:0}.preview-frame-body[data-astro-cid-mva44yhc] .page{height:100%}
+</style></head> <body> <!-- Drawer toggle (hidden checkbox, no JS needed) --> <input type="checkbox" id="drawer-toggle" class="drawer-toggle" checked> <script>
+      if (window.innerWidth < 992)
+        document.getElementById("drawer-toggle").checked = false;
+    </script> <div class="app"> <div class="page"> <!-- Page Header --> <header class="header"> <!-- Left: drawer toggles + logo --> <div class="flex items-center gap-3"> <!-- Drawer toggle (label for checkbox) --> <label for="drawer-toggle" class="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-base-200 transition-colors cursor-pointer"> <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path> </svg> </label> <a href="/ux/" class="text-lg font-bold">UX <span class="text-sm font-normal text-base-content/60">v3</span></a> </div> <!-- Right: theme selector + GitHub --> <div class="flex items-center gap-3"> <!-- Theme selector (native <details>, no JS framework) --> <details class="relative" id="theme-details"> <summary class="flex items-center gap-1.5 text-sm text-base-content/60 hover:text-base-content transition-colors px-2 py-1.5 rounded-lg hover:bg-base-200 cursor-pointer list-none"> <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z"></path> </svg> <span class="hidden sm:inline" id="theme-label">Auto</span> </summary> <div class="absolute right-0 top-full mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg py-1 min-w-35 z-600"> <button data-set-theme="" class="w-full text-left px-3 py-1.5 text-sm hover:bg-base-200 transition-colors">Auto</button> <button data-set-theme="light" class="w-full text-left px-3 py-1.5 text-sm hover:bg-base-200 transition-colors">Light</button> <button data-set-theme="dark" class="w-full text-left px-3 py-1.5 text-sm hover:bg-base-200 transition-colors">Dark</button> <button data-set-theme="erplora" class="w-full text-left px-3 py-1.5 text-sm hover:bg-base-200 transition-colors">ERPlora</button> <button data-set-theme="ocean" class="w-full text-left px-3 py-1.5 text-sm hover:bg-base-200 transition-colors">Ocean</button> </div> </details> <a href="https://github.com/ERPlora/ux" target="_blank" class="text-sm text-base-content/60 hover:text-base-content transition-colors">
+GitHub
+</a> </div> </header> <!-- Backdrop (mobile) — label closes the drawer checkbox --> <label for="drawer-toggle" class="drawer-backdrop"></label> <!-- Sidebar Drawer --> <aside class="drawer drawer-start" style="--drawer-width: 250px;"> <div class="content"> <!-- Search --> <div class="p-3 pb-0"> <input type="text" id="nav-search" placeholder="Buscar componente..." class="w-full px-3 py-1.5 text-sm rounded-lg border border-base-300 bg-base-100 text-base-content placeholder:text-base-content/40 outline-none focus:border-primary transition-colors"> </div> <nav class="p-3 space-y-5" id="nav-list"> <div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Getting Started </h3> <ul class="space-y-0.5"> <li> <a href="/ux/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Installation </a> </li><li> <a href="/ux/htmx/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> HTMX Integration </a> </li><li> <a href="/ux/templates/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Templates </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Examples </h3> <ul class="space-y-0.5"> <li> <a href="/ux/examples/login/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Login Page </a> </li><li> <a href="/ux/examples/datatable/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Products DataTable </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Layout </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/layout/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> App / Page / Drawer </a> </li><li> <a href="/ux/components/grid/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Grid System </a> </li><li> <a href="/ux/components/toolbar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Header &amp; Footer </a> </li><li> <a href="/ux/components/sidebar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Sidebar </a> </li><li> <a href="/ux/components/shell/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Shell </a> </li><li> <a href="/ux/components/split-pane/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Split Pane </a> </li><li> <a href="/ux/components/resizable/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Resizable </a> </li><li> <a href="/ux/components/masonry/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Masonry </a> </li><li> <a href="/ux/components/dashboard-grid/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Dashboard Grid </a> </li><li> <a href="/ux/components/panel/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Panel </a> </li><li> <a href="/ux/components/section/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Section </a> </li><li> <a href="/ux/components/master-detail/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Master Detail </a> </li><li> <a href="/ux/components/scroll-area/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Scroll Area </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Actions </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/button/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Button </a> </li><li> <a href="/ux/components/icon-button/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Icon Button </a> </li><li> <a href="/ux/components/back-button/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Back Button </a> </li><li> <a href="/ux/components/menu-button/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Menu Button </a> </li><li> <a href="/ux/components/split-button/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Split Button </a> </li><li> <a href="/ux/components/fab/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> FAB </a> </li><li> <a href="/ux/components/numpad/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Numpad </a> </li><li> <a href="/ux/components/pinpad/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Pin Pad </a> </li><li> <a href="/ux/components/calculator/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Calculator </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Data Display </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/badge/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Badge </a> </li><li> <a href="/ux/components/quantity-badge/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Quantity Badge </a> </li><li> <a href="/ux/components/card/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Card </a> </li><li> <a href="/ux/components/avatar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Avatar </a> </li><li> <a href="/ux/components/chip/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Chip </a> </li><li> <a href="/ux/components/loading/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Loading </a> </li><li> <a href="/ux/components/skeleton/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Skeleton </a> </li><li> <a href="/ux/components/divider/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Divider </a> </li><li> <a href="/ux/components/stats/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Stats </a> </li><li> <a href="/ux/components/stock-indicator/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Stock Indicator </a> </li><li> <a href="/ux/components/carousel/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Carousel </a> </li><li> <a href="/ux/components/image-gallery/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Image Gallery </a> </li><li> <a href="/ux/components/image-zoom/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Image Zoom </a> </li><li> <a href="/ux/components/img/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Img </a> </li><li> <a href="/ux/components/chat/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Chat </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Visualization </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/timeline/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Timeline </a> </li><li> <a href="/ux/components/gauge/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Gauge </a> </li><li> <a href="/ux/components/sparkline/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Sparkline </a> </li><li> <a href="/ux/components/kpi-card/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> KPI Card </a> </li><li> <a href="/ux/components/code-block/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Code Block </a> </li><li> <a href="/ux/components/json-viewer/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> JSON Viewer </a> </li><li> <a href="/ux/components/diff-viewer/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Diff Viewer </a> </li><li> <a href="/ux/components/qr-code/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> QR Code </a> </li><li> <a href="/ux/components/barcode-scanner/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Barcode Scanner </a> </li><li> <a href="/ux/components/pdf-viewer/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> PDF Viewer </a> </li><li> <a href="/ux/components/audio-player/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Audio Player </a> </li><li> <a href="/ux/components/video-player/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Video Player </a> </li><li> <a href="/ux/components/image-crop/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Image Crop </a> </li><li> <a href="/ux/components/calendar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Calendar </a> </li><li> <a href="/ux/components/calendar-views/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Calendar Views </a> </li><li> <a href="/ux/components/kanban/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Kanban </a> </li><li> <a href="/ux/components/virtual-list/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Virtual List </a> </li><li> <a href="/ux/components/chart/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Chart </a> </li><li> <a href="/ux/components/bar-chart/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Bar Chart </a> </li><li> <a href="/ux/components/scheduler/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Scheduler </a> </li><li> <a href="/ux/components/event-card/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Event Card </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Navigation </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/navbar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Navbar </a> </li><li> <a href="/ux/components/menu/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Menu / Dropdown </a> </li><li> <a href="/ux/components/menubar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Menubar </a> </li><li> <a href="/ux/components/mega-menu/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Mega Menu </a> </li><li> <a href="/ux/components/breadcrumbs/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Breadcrumbs </a> </li><li> <a href="/ux/components/pagination/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Pagination </a> </li><li> <a href="/ux/components/tabs/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Tabs </a> </li><li> <a href="/ux/components/tabbar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Tab Bar </a> </li><li> <a href="/ux/components/category-tabs/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Category Tabs </a> </li><li> <a href="/ux/components/segment/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Segment </a> </li><li> <a href="/ux/components/stepper/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Stepper </a> </li><li> <a href="/ux/components/context-menu/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Context Menu </a> </li><li> <a href="/ux/components/command/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Command Palette </a> </li><li> <a href="/ux/components/infinite-scroll/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Infinite Scroll </a> </li><li> <a href="/ux/components/load-more/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Load More </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Data Input </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/form-control/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Checkbox / Radio / Toggle </a> </li><li> <a href="/ux/components/input/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Input &amp; Textarea </a> </li><li> <a href="/ux/components/select/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Select </a> </li><li> <a href="/ux/components/select-modal/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Select Modal </a> </li><li> <a href="/ux/components/range/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Range </a> </li><li> <a href="/ux/components/rating/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Rating </a> </li><li> <a href="/ux/components/quantity-stepper/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Quantity Stepper </a> </li><li> <a href="/ux/components/upload/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Upload </a> </li><li> <a href="/ux/components/tag-input/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Tag Input </a> </li><li> <a href="/ux/components/autocomplete/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Autocomplete </a> </li><li> <a href="/ux/components/otp-input/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> OTP Input </a> </li><li> <a href="/ux/components/currency-input/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Currency Input </a> </li><li> <a href="/ux/components/phone-input/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Phone Input </a> </li><li> <a href="/ux/components/signature-pad/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Signature Pad </a> </li><li> <a href="/ux/components/rich-text/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Rich Text Editor </a> </li><li> <a href="/ux/components/color-picker/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Color Picker </a> </li><li> <a href="/ux/components/searchbar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Searchbar </a> </li><li> <a href="/ux/components/datetime/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Datetime </a> </li><li> <a href="/ux/components/date-range-picker/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Date Range Picker </a> </li><li> <a href="/ux/components/keyboard/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Keyboard </a> </li><li> <a href="/ux/components/onscreen-keyboard/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Onscreen Keyboard </a> </li><li> <a href="/ux/components/virtual-keyboard/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Virtual Keyboard </a> </li><li> <a href="/ux/components/form/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Form </a> </li><li> <a href="/ux/components/form-wizard/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Form Wizard </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Feedback </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/alert/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Alert </a> </li><li> <a href="/ux/components/toast/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Toast </a> </li><li> <a href="/ux/components/progress-bar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Progress Bar </a> </li><li> <a href="/ux/components/progress-circle/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Progress Circle </a> </li><li> <a href="/ux/components/progress-steps/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Progress Steps </a> </li><li> <a href="/ux/components/snackbar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Snackbar </a> </li><li> <a href="/ux/components/banner/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Banner </a> </li><li> <a href="/ux/components/callout/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Callout </a> </li><li> <a href="/ux/components/spinner/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Spinner </a> </li><li> <a href="/ux/components/pwa/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> PWA </a> </li><li> <a href="/ux/components/refresher/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Refresher </a> </li><li> <a href="/ux/components/swipe/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Swipe </a> </li><li> <a href="/ux/components/status-badge/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Status Badge </a> </li><li> <a href="/ux/components/status-indicator/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Status Indicator </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Overlays </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/modal/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Modal </a> </li><li> <a href="/ux/components/sheet/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Sheet </a> </li><li> <a href="/ux/components/tooltip/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Tooltip </a> </li><li> <a href="/ux/components/popover/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Popover </a> </li><li> <a href="/ux/components/picker/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Picker </a> </li><li> <a href="/ux/components/hover-card/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Hover Card </a> </li><li> <a href="/ux/components/lightbox/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Lightbox </a> </li><li> <a href="/ux/components/notifications/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Notifications </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Lists &amp; Tables </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/list/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> List </a> </li><li> <a href="/ux/components/table/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Table </a> </li><li> <a href="/ux/components/accordion/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Accordion </a> </li><li> <a href="/ux/components/datatable/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> DataTable </a> </li><li> <a href="/ux/components/tree/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Tree </a> </li><li> <a href="/ux/components/reorder/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Reorder </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Selection </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/toggle-group/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Toggle Group </a> </li><li> <a href="/ux/components/filter-chip/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Filter Chip </a> </li><li> <a href="/ux/components/variant-selector/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Variant Selector </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> E-Commerce </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/product-card/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Product Card </a> </li><li> <a href="/ux/components/module-card/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Module Card </a> </li><li> <a href="/ux/components/cart/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Cart </a> </li><li> <a href="/ux/components/order-ticket/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Order Ticket </a> </li><li> <a href="/ux/components/kds-order/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> KDS Order </a> </li><li> <a href="/ux/components/payment/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Payment </a> </li><li> <a href="/ux/components/receipt/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Receipt </a> </li><li> <a href="/ux/components/loyalty-card/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Loyalty Card </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> HR / Employees </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/employee-card/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Employee Card </a> </li><li> <a href="/ux/components/time-clock/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Time Clock </a> </li><li> <a href="/ux/components/shift-calendar/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Shift Calendar </a> </li><li> <a href="/ux/components/attendance-list/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Attendance List </a> </li><li> <a href="/ux/components/leave-request/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Leave Request </a> </li><li> <a href="/ux/components/org-chart/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Org Chart </a> </li><li> <a href="/ux/components/performance-meter/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors bg-primary text-primary-content font-medium"> Performance Meter </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> Manufacturing </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/work-order/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Work Order </a> </li><li> <a href="/ux/components/machine-status/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Machine Status </a> </li><li> <a href="/ux/components/production-line/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Production Line </a> </li><li> <a href="/ux/components/quality-check/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Quality Check </a> </li><li> <a href="/ux/components/batch-tracker/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Batch Tracker </a> </li><li> <a href="/ux/components/bom-tree/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> BOM Tree </a> </li><li> <a href="/ux/components/gantt/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> Gantt </a> </li> </ul> </div><div> <h3 class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 px-3"> System &amp; Files </h3> <ul class="space-y-0.5"> <li> <a href="/ux/components/file-manager/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> File Manager </a> </li><li> <a href="/ux/components/system-monitor/" class="block px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-base-200 text-base-content/70"> System Monitor </a> </li> </ul> </div> </nav> </div> <div class="footer"> <span class="text-xs text-base-content/40">UX v3.0</span> </div> </aside> <!-- Main Content --> <main class="content"> <div class="p-6 max-w-full"> <h1 class="text-2xl font-bold mb-6">Performance Meter</h1>  <p class="text-base-content/70 mb-6">HR performance visualization with circular gauge, category breakdown bars, trend indicators, goal tracking, and period selector.</p> <div class="border border-base-300 rounded-xl overflow-hidden my-4" data-astro-cid-mva44yhc> <h3 class="px-4 py-2 text-sm font-medium bg-base-200 border-b border-base-300" data-astro-cid-mva44yhc>Full Performance Meter</h3> <div data-astro-cid-mva44yhc> <!-- Tabs --> <div class="flex bg-base-200 border-b border-base-300 text-sm" data-tabs="preview-p8im1bt" data-astro-cid-mva44yhc> <button class="px-4 py-2 font-medium border-b-2 border-primary text-primary" data-tab="preview" data-active data-astro-cid-mva44yhc>Preview</button> <button class="px-4 py-2 text-base-content/60 hover:text-base-content border-b-2 border-transparent" data-tab="semantic" data-astro-cid-mva44yhc>Semantic</button> <button class="px-4 py-2 text-base-content/60 hover:text-base-content border-b-2 border-transparent" data-tab="tailwind" data-astro-cid-mva44yhc>Tailwind</button> <button class="px-4 py-2 text-base-content/60 hover:text-base-content border-b-2 border-transparent" data-tab="js" data-astro-cid-mva44yhc>JS</button> </div> <!-- Panels --> <div data-panels="preview-p8im1bt" data-astro-cid-mva44yhc> <div class="p-4 bg-base-200/50" data-panel="preview" data-astro-cid-mva44yhc> <div class="preview-frame" style="height: 620px;" data-astro-cid-mva44yhc> <div class="preview-frame-header" data-astro-cid-mva44yhc> <span class="preview-frame-dot" style="background:#ff5f57;" data-astro-cid-mva44yhc></span> <span class="preview-frame-dot" style="background:#febc2e;" data-astro-cid-mva44yhc></span> <span class="preview-frame-dot" style="background:#28c840;" data-astro-cid-mva44yhc></span> <span class="preview-frame-title" data-astro-cid-mva44yhc>Preview</span> </div> <div class="preview-frame-body" data-astro-cid-mva44yhc> <div class="performance-meter performance-meter-animated">
+  <!-- Header -->
+  <div class="performance-meter-header">
+    <div class="performance-meter-avatar">SG</div>
+    <div class="performance-meter-employee-info">
+      <p class="performance-meter-employee-name">Sofia Garcia</p>
+      <p class="performance-meter-employee-role">Senior Product Designer</p>
+      <p class="performance-meter-employee-department">ERPlora &mdash; Design Team</p>
+    </div>
+    <span class="performance-meter-period-badge">
+      <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Q4 2025
+    </span>
+  </div>
+
+  <!-- Score gauge -->
+  <div class="performance-meter-score-section">
+    <div class="performance-meter-score-gauge">
+      <svg class="performance-meter-score-svg" viewBox="0 0 120 120">
+        <circle class="performance-meter-score-track" cx="60" cy="60" r="52" />
+        <circle class="performance-meter-score-fill performance-meter-score-fill-excellent"
+                cx="60" cy="60" r="52"
+                stroke-dasharray="326.73"
+                stroke-dashoffset="49"
+                style="--perf-circumference: 326.73;" />
+      </svg>
+      <div class="performance-meter-score-value">
+        <span class="performance-meter-score-number">4.3</span>
+        <span class="performance-meter-score-max">/5.0</span>
+        <div class="performance-meter-score-label">Overall</div>
+      </div>
+    </div>
+    <div class="performance-meter-score-summary">
+      <span class="performance-meter-score-status performance-meter-score-status-excellent">
+        <svg style="width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Excellent
+      </span>
+      <span class="performance-meter-trend performance-meter-trend-up">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+        +0.4 from last quarter
+      </span>
+    </div>
+  </div>
+
+  <!-- Goal section -->
+  <div class="performance-meter-goal-section">
+    <div class="performance-meter-goal-item">
+      <span class="performance-meter-goal-label">Target</span>
+      <span class="performance-meter-goal-value">4.0</span>
+    </div>
+    <div class="performance-meter-goal-divider"></div>
+    <div class="performance-meter-goal-item">
+      <span class="performance-meter-goal-label">Actual</span>
+      <span class="performance-meter-goal-value">4.3</span>
+    </div>
+    <div class="performance-meter-goal-divider"></div>
+    <div class="performance-meter-goal-item">
+      <span class="performance-meter-goal-label">Diff</span>
+      <span class="performance-meter-goal-diff performance-meter-goal-diff-positive">+0.3</span>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="performance-meter-categories">
+    <h4 class="performance-meter-categories-title">Category Breakdown</h4>
+
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name">
+          <span class="performance-meter-category-icon">
+            <svg style="width:100%;height:100%;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </span>
+          Productivity
+        </span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value">4.5</span>
+          <span class="performance-meter-category-trend performance-meter-category-trend-up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+            +0.3
+          </span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-excellent" style="width:90%;"></div>
+      </div>
+    </div>
+
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name">
+          <span class="performance-meter-category-icon">
+            <svg style="width:100%;height:100%;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </span>
+          Teamwork
+        </span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value">4.2</span>
+          <span class="performance-meter-category-trend performance-meter-category-trend-up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+            +0.5
+          </span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-good" style="width:84%;"></div>
+      </div>
+    </div>
+
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name">
+          <span class="performance-meter-category-icon">
+            <svg style="width:100%;height:100%;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          </span>
+          Communication
+        </span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value">4.0</span>
+          <span class="performance-meter-category-trend performance-meter-category-trend-neutral">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+            0.0
+          </span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-good" style="width:80%;"></div>
+      </div>
+    </div>
+
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name">
+          <span class="performance-meter-category-icon">
+            <svg style="width:100%;height:100%;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </span>
+          Innovation
+        </span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value">4.7</span>
+          <span class="performance-meter-category-trend performance-meter-category-trend-up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+            +0.8
+          </span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-excellent" style="width:94%;"></div>
+      </div>
+    </div>
+
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name">
+          <span class="performance-meter-category-icon">
+            <svg style="width:100%;height:100%;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          </span>
+          Reliability
+        </span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value">3.5</span>
+          <span class="performance-meter-category-trend performance-meter-category-trend-down">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            -0.2
+          </span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-average" style="width:70%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Period selector -->
+  <div class="performance-meter-period-selector">
+    <button class="performance-meter-period-btn">Q1</button>
+    <button class="performance-meter-period-btn">Q2</button>
+    <button class="performance-meter-period-btn">Q3</button>
+    <button class="performance-meter-period-btn performance-meter-period-btn-active">Q4</button>
+  </div>
+</div> </div> </div> </div> <div class="p-4 bg-neutral text-neutral-content hidden" data-panel="semantic" data-astro-cid-mva44yhc> <pre class="text-sm overflow-x-auto" data-astro-cid-mva44yhc><code data-astro-cid-mva44yhc>&lt;div class=&quot;performance-meter performance-meter-animated&quot;&gt;
+  &lt;!-- Header --&gt;
+  &lt;div class=&quot;performance-meter-header&quot;&gt;
+    &lt;div class=&quot;performance-meter-avatar&quot;&gt;SG&lt;/div&gt;
+    &lt;div class=&quot;performance-meter-employee-info&quot;&gt;
+      &lt;p class=&quot;performance-meter-employee-name&quot;&gt;Sofia Garcia&lt;/p&gt;
+      &lt;p class=&quot;performance-meter-employee-role&quot;&gt;Senior Product Designer&lt;/p&gt;
+      &lt;p class=&quot;performance-meter-employee-department&quot;&gt;ERPlora &amp;mdash; Design Team&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;span class=&quot;performance-meter-period-badge&quot;&gt;
+      &lt;svg style=&quot;width:14px;height:14px;&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;rect x=&quot;3&quot; y=&quot;4&quot; width=&quot;18&quot; height=&quot;18&quot; rx=&quot;2&quot;/&gt;&lt;path d=&quot;M16 2v4M8 2v4M3 10h18&quot;/&gt;&lt;/svg&gt;
+      Q4 2025
+    &lt;/span&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Score gauge --&gt;
+  &lt;div class=&quot;performance-meter-score-section&quot;&gt;
+    &lt;div class=&quot;performance-meter-score-gauge&quot;&gt;
+      &lt;svg class=&quot;performance-meter-score-svg&quot; viewBox=&quot;0 0 120 120&quot;&gt;
+        &lt;circle class=&quot;performance-meter-score-track&quot; cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot; /&gt;
+        &lt;circle class=&quot;performance-meter-score-fill performance-meter-score-fill-excellent&quot;
+                cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot;
+                stroke-dasharray=&quot;326.73&quot;
+                stroke-dashoffset=&quot;49&quot;
+                style=&quot;--perf-circumference: 326.73;&quot; /&gt;
+      &lt;/svg&gt;
+      &lt;div class=&quot;performance-meter-score-value&quot;&gt;
+        &lt;span class=&quot;performance-meter-score-number&quot;&gt;4.3&lt;/span&gt;
+        &lt;span class=&quot;performance-meter-score-max&quot;&gt;/5.0&lt;/span&gt;
+        &lt;div class=&quot;performance-meter-score-label&quot;&gt;Overall&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;performance-meter-score-summary&quot;&gt;
+      &lt;span class=&quot;performance-meter-score-status performance-meter-score-status-excellent&quot;&gt;
+        &lt;svg style=&quot;width:16px;height:16px;&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z&quot;/&gt;&lt;/svg&gt;
+        Excellent
+      &lt;/span&gt;
+      &lt;span class=&quot;performance-meter-trend performance-meter-trend-up&quot;&gt;
+        &lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M23 6l-9.5 9.5-5-5L1 18&quot;/&gt;&lt;path d=&quot;M17 6h6v6&quot;/&gt;&lt;/svg&gt;
+        +0.4 from last quarter
+      &lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Goal section --&gt;
+  &lt;div class=&quot;performance-meter-goal-section&quot;&gt;
+    &lt;div class=&quot;performance-meter-goal-item&quot;&gt;
+      &lt;span class=&quot;performance-meter-goal-label&quot;&gt;Target&lt;/span&gt;
+      &lt;span class=&quot;performance-meter-goal-value&quot;&gt;4.0&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;performance-meter-goal-divider&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;performance-meter-goal-item&quot;&gt;
+      &lt;span class=&quot;performance-meter-goal-label&quot;&gt;Actual&lt;/span&gt;
+      &lt;span class=&quot;performance-meter-goal-value&quot;&gt;4.3&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;performance-meter-goal-divider&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;performance-meter-goal-item&quot;&gt;
+      &lt;span class=&quot;performance-meter-goal-label&quot;&gt;Diff&lt;/span&gt;
+      &lt;span class=&quot;performance-meter-goal-diff performance-meter-goal-diff-positive&quot;&gt;+0.3&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Categories --&gt;
+  &lt;div class=&quot;performance-meter-categories&quot;&gt;
+    &lt;h4 class=&quot;performance-meter-categories-title&quot;&gt;Category Breakdown&lt;/h4&gt;
+
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-icon&quot;&gt;
+            &lt;svg style=&quot;width:100%;height:100%;&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;10&quot;/&gt;&lt;path d=&quot;M12 6v6l4 2&quot;/&gt;&lt;/svg&gt;
+          &lt;/span&gt;
+          Productivity
+        &lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot;&gt;4.5&lt;/span&gt;
+          &lt;span class=&quot;performance-meter-category-trend performance-meter-category-trend-up&quot;&gt;
+            &lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M18 15l-6-6-6 6&quot;/&gt;&lt;/svg&gt;
+            +0.3
+          &lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-excellent&quot; style=&quot;width:90%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-icon&quot;&gt;
+            &lt;svg style=&quot;width:100%;height:100%;&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2&quot;/&gt;&lt;circle cx=&quot;9&quot; cy=&quot;7&quot; r=&quot;4&quot;/&gt;&lt;path d=&quot;M23 21v-2a4 4 0 00-3-3.87&quot;/&gt;&lt;path d=&quot;M16 3.13a4 4 0 010 7.75&quot;/&gt;&lt;/svg&gt;
+          &lt;/span&gt;
+          Teamwork
+        &lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot;&gt;4.2&lt;/span&gt;
+          &lt;span class=&quot;performance-meter-category-trend performance-meter-category-trend-up&quot;&gt;
+            &lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M18 15l-6-6-6 6&quot;/&gt;&lt;/svg&gt;
+            +0.5
+          &lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-good&quot; style=&quot;width:84%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-icon&quot;&gt;
+            &lt;svg style=&quot;width:100%;height:100%;&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z&quot;/&gt;&lt;path d=&quot;M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z&quot;/&gt;&lt;/svg&gt;
+          &lt;/span&gt;
+          Communication
+        &lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot;&gt;4.0&lt;/span&gt;
+          &lt;span class=&quot;performance-meter-category-trend performance-meter-category-trend-neutral&quot;&gt;
+            &lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M5 12h14&quot;/&gt;&lt;/svg&gt;
+            0.0
+          &lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-good&quot; style=&quot;width:80%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-icon&quot;&gt;
+            &lt;svg style=&quot;width:100%;height:100%;&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M12 20h9&quot;/&gt;&lt;path d=&quot;M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z&quot;/&gt;&lt;/svg&gt;
+          &lt;/span&gt;
+          Innovation
+        &lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot;&gt;4.7&lt;/span&gt;
+          &lt;span class=&quot;performance-meter-category-trend performance-meter-category-trend-up&quot;&gt;
+            &lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M18 15l-6-6-6 6&quot;/&gt;&lt;/svg&gt;
+            +0.8
+          &lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-excellent&quot; style=&quot;width:94%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-icon&quot;&gt;
+            &lt;svg style=&quot;width:100%;height:100%;&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M22 11.08V12a10 10 0 11-5.93-9.14&quot;/&gt;&lt;path d=&quot;M22 4L12 14.01l-3-3&quot;/&gt;&lt;/svg&gt;
+          &lt;/span&gt;
+          Reliability
+        &lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot;&gt;3.5&lt;/span&gt;
+          &lt;span class=&quot;performance-meter-category-trend performance-meter-category-trend-down&quot;&gt;
+            &lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M6 9l6 6 6-6&quot;/&gt;&lt;/svg&gt;
+            -0.2
+          &lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-average&quot; style=&quot;width:70%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Period selector --&gt;
+  &lt;div class=&quot;performance-meter-period-selector&quot;&gt;
+    &lt;button class=&quot;performance-meter-period-btn&quot;&gt;Q1&lt;/button&gt;
+    &lt;button class=&quot;performance-meter-period-btn&quot;&gt;Q2&lt;/button&gt;
+    &lt;button class=&quot;performance-meter-period-btn&quot;&gt;Q3&lt;/button&gt;
+    &lt;button class=&quot;performance-meter-period-btn performance-meter-period-btn-active&quot;&gt;Q4&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre> <p class="text-xs opacity-60 mt-3" data-astro-cid-mva44yhc>Requires: ux.min.css</p> </div> <div class="p-4 bg-neutral text-neutral-content hidden" data-panel="tailwind" data-astro-cid-mva44yhc> <pre class="text-sm overflow-x-auto" data-astro-cid-mva44yhc><code data-astro-cid-mva44yhc>&lt;div class=&quot;flex flex-col gap-4 p-6 bg-base-100 border border-base-300 rounded-box&quot;&gt;
+  &lt;!-- Header --&gt;
+  &lt;div class=&quot;flex items-center gap-4 pb-4 border-b border-base-300&quot;&gt;
+    &lt;div class=&quot;w-14 h-14 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-xl shrink-0&quot;&gt;SG&lt;/div&gt;
+    &lt;div class=&quot;flex-1 min-w-0&quot;&gt;
+      &lt;p class=&quot;font-semibold text-lg m-0 leading-tight&quot;&gt;Sofia Garcia&lt;/p&gt;
+      &lt;p class=&quot;text-sm text-base-content/60 m-0&quot;&gt;Senior Product Designer&lt;/p&gt;
+      &lt;p class=&quot;text-xs text-base-content/40 m-0&quot;&gt;ERPlora &amp;mdash; Design Team&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;span class=&quot;inline-flex items-center gap-1 px-3 py-1.5 bg-base-200 rounded-full text-xs font-medium text-base-content/60&quot;&gt;Q4 2025&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;!-- Gauge area --&gt;
+  &lt;div class=&quot;flex items-center justify-center gap-8 py-4&quot;&gt;
+    &lt;div class=&quot;relative w-30 h-30&quot;&gt;
+      &lt;svg class=&quot;w-full h-full -rotate-90&quot; viewBox=&quot;0 0 120 120&quot;&gt;
+        &lt;circle fill=&quot;none&quot; stroke=&quot;var(--color-base-200)&quot; stroke-width=&quot;10&quot; cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot;/&gt;
+        &lt;circle fill=&quot;none&quot; stroke=&quot;var(--color-success)&quot; stroke-width=&quot;10&quot; stroke-linecap=&quot;round&quot; cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot; stroke-dasharray=&quot;326.73&quot; stroke-dashoffset=&quot;49&quot;/&gt;
+      &lt;/svg&gt;
+      &lt;div class=&quot;absolute inset-0 flex flex-col items-center justify-center&quot;&gt;
+        &lt;span class=&quot;text-3xl font-bold tabular-nums&quot;&gt;4.3&lt;/span&gt;
+        &lt;span class=&quot;text-sm font-medium text-base-content/40&quot;&gt;/5.0&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-2&quot;&gt;
+      &lt;span class=&quot;inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-success/10 text-success&quot;&gt;Excellent&lt;/span&gt;
+      &lt;span class=&quot;inline-flex items-center gap-1 text-sm font-medium text-success&quot;&gt;+0.4 from last quarter&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- Category bars --&gt;
+  &lt;div class=&quot;flex flex-col gap-4&quot;&gt;
+    &lt;h4 class=&quot;font-semibold text-sm pb-1 border-b border-base-300 m-0&quot;&gt;Category Breakdown&lt;/h4&gt;
+    &lt;div class=&quot;flex flex-col gap-1.5&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium&quot;&gt;Productivity&lt;/span&gt;&lt;span class=&quot;font-semibold tabular-nums&quot;&gt;4.5&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-base-200 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-success rounded-full&quot; style=&quot;width:90%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-1.5&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium&quot;&gt;Teamwork&lt;/span&gt;&lt;span class=&quot;font-semibold tabular-nums&quot;&gt;4.2&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-base-200 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-primary rounded-full&quot; style=&quot;width:84%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-1.5&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium&quot;&gt;Communication&lt;/span&gt;&lt;span class=&quot;font-semibold tabular-nums&quot;&gt;4.0&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-base-200 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-primary rounded-full&quot; style=&quot;width:80%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-1.5&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium&quot;&gt;Innovation&lt;/span&gt;&lt;span class=&quot;font-semibold tabular-nums&quot;&gt;4.7&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-base-200 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-success rounded-full&quot; style=&quot;width:94%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-1.5&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium&quot;&gt;Reliability&lt;/span&gt;&lt;span class=&quot;font-semibold tabular-nums&quot;&gt;3.5&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-base-200 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-warning rounded-full&quot; style=&quot;width:70%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- Period selector --&gt;
+  &lt;div class=&quot;flex gap-1 p-1 bg-base-200 rounded-lg&quot;&gt;
+    &lt;button class=&quot;flex-1 py-2 px-3 text-sm font-medium text-base-content/60 rounded&quot;&gt;Q1&lt;/button&gt;
+    &lt;button class=&quot;flex-1 py-2 px-3 text-sm font-medium text-base-content/60 rounded&quot;&gt;Q2&lt;/button&gt;
+    &lt;button class=&quot;flex-1 py-2 px-3 text-sm font-medium text-base-content/60 rounded&quot;&gt;Q3&lt;/button&gt;
+    &lt;button class=&quot;flex-1 py-2 px-3 text-sm font-medium bg-base-100 shadow-sm rounded&quot;&gt;Q4&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre> <p class="text-xs opacity-60 mt-3" data-astro-cid-mva44yhc>Requires: tw.min.css</p> </div> <div class="p-4 bg-neutral text-neutral-content hidden" data-panel="js" data-astro-cid-mva44yhc> <pre class="text-sm overflow-x-auto" data-astro-cid-mva44yhc><code data-astro-cid-mva44yhc>// Animate gauge on load
+function setGaugeScore(el, score, max = 5) {
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius; // ~326.73
+  const pct = score / max;
+  const offset = circumference * (1 - pct);
+  const fill = el.querySelector(&#39;.performance-meter-score-fill&#39;);
+  fill.style.strokeDasharray = circumference;
+  fill.style.strokeDashoffset = offset;
+
+  const number = el.querySelector(&#39;.performance-meter-score-number&#39;);
+  number.textContent = score.toFixed(1);
+}
+
+// Period selector
+document.querySelectorAll(&#39;.performance-meter-period-btn&#39;).forEach(btn =&gt; {
+  btn.addEventListener(&#39;click&#39;, () =&gt; {
+    const selector = btn.closest(&#39;.performance-meter-period-selector&#39;);
+    selector.querySelectorAll(&#39;.performance-meter-period-btn&#39;).forEach(b =&gt;
+      b.classList.remove(&#39;performance-meter-period-btn-active&#39;)
+    );
+    btn.classList.add(&#39;performance-meter-period-btn-active&#39;);
+    // Fetch data for the selected period and update gauge + bars
+  });
+});</code></pre> </div> </div> </div> </div>  <script type="module">document.querySelectorAll("[data-tabs]").forEach(a=>{const s=a.getAttribute("data-tabs"),r=document.querySelector(`[data-panels="${s}"]`);r&&a.querySelectorAll("[data-tab]").forEach(e=>{e.addEventListener("click",()=>{a.querySelectorAll("[data-tab]").forEach(t=>{t.classList.remove("border-primary","text-primary","font-medium"),t.classList.add("border-transparent","text-base-content/60")}),e.classList.add("border-primary","text-primary","font-medium"),e.classList.remove("border-transparent","text-base-content/60");const d=e.getAttribute("data-tab");r.querySelectorAll("[data-panel]").forEach(t=>{t.classList.toggle("hidden",t.getAttribute("data-panel")!==d)})})})});</script> <div class="border border-base-300 rounded-xl overflow-hidden my-4" data-astro-cid-mva44yhc> <h3 class="px-4 py-2 text-sm font-medium bg-base-200 border-b border-base-300" data-astro-cid-mva44yhc>Compact Variant</h3> <div data-astro-cid-mva44yhc> <!-- Tabs --> <div class="flex bg-base-200 border-b border-base-300 text-sm" data-tabs="preview-ttnc1vw" data-astro-cid-mva44yhc> <button class="px-4 py-2 font-medium border-b-2 border-primary text-primary" data-tab="preview" data-active data-astro-cid-mva44yhc>Preview</button> <button class="px-4 py-2 text-base-content/60 hover:text-base-content border-b-2 border-transparent" data-tab="semantic" data-astro-cid-mva44yhc>Semantic</button> <button class="px-4 py-2 text-base-content/60 hover:text-base-content border-b-2 border-transparent" data-tab="tailwind" data-astro-cid-mva44yhc>Tailwind</button> <button class="px-4 py-2 text-base-content/60 hover:text-base-content border-b-2 border-transparent" data-tab="js" data-astro-cid-mva44yhc>JS</button> </div> <!-- Panels --> <div data-panels="preview-ttnc1vw" data-astro-cid-mva44yhc> <div class="p-4 bg-base-200/50" data-panel="preview" data-astro-cid-mva44yhc> <div class="preview-frame" style="height: 320px;" data-astro-cid-mva44yhc> <div class="preview-frame-header" data-astro-cid-mva44yhc> <span class="preview-frame-dot" style="background:#ff5f57;" data-astro-cid-mva44yhc></span> <span class="preview-frame-dot" style="background:#febc2e;" data-astro-cid-mva44yhc></span> <span class="preview-frame-dot" style="background:#28c840;" data-astro-cid-mva44yhc></span> <span class="preview-frame-title" data-astro-cid-mva44yhc>Preview</span> </div> <div class="preview-frame-body" data-astro-cid-mva44yhc> <div class="performance-meter performance-meter-compact">
+  <div class="performance-meter-header">
+    <div class="performance-meter-avatar">RH</div>
+    <div class="performance-meter-employee-info">
+      <p class="performance-meter-employee-name">Roberto Herrera</p>
+      <p class="performance-meter-employee-role">Backend Developer</p>
+    </div>
+    <span class="performance-meter-period-badge">Q4 2025</span>
+  </div>
+
+  <div class="performance-meter-score-section">
+    <div class="performance-meter-score-gauge">
+      <svg class="performance-meter-score-svg" viewBox="0 0 120 120">
+        <circle class="performance-meter-score-track" cx="60" cy="60" r="52" />
+        <circle class="performance-meter-score-fill performance-meter-score-fill-good"
+                cx="60" cy="60" r="52"
+                stroke-dasharray="326.73"
+                stroke-dashoffset="80" />
+      </svg>
+      <div class="performance-meter-score-value">
+        <span class="performance-meter-score-number">3.8</span>
+        <span class="performance-meter-score-max">/5</span>
+      </div>
+    </div>
+    <div class="performance-meter-score-summary">
+      <span class="performance-meter-score-status performance-meter-score-status-good">Good</span>
+      <span class="performance-meter-trend performance-meter-trend-up">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+        +0.2
+      </span>
+    </div>
+  </div>
+
+  <div class="performance-meter-categories">
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name">Productivity</span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value">4.0</span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-good" style="width:80%;"></div>
+      </div>
+    </div>
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name">Teamwork</span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value">3.6</span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-average" style="width:72%;"></div>
+      </div>
+    </div>
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name">Code Quality</span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value">3.8</span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-good" style="width:76%;"></div>
+      </div>
+    </div>
+  </div>
+</div> </div> </div> </div> <div class="p-4 bg-neutral text-neutral-content hidden" data-panel="semantic" data-astro-cid-mva44yhc> <pre class="text-sm overflow-x-auto" data-astro-cid-mva44yhc><code data-astro-cid-mva44yhc>&lt;div class=&quot;performance-meter performance-meter-compact&quot;&gt;
+  &lt;div class=&quot;performance-meter-header&quot;&gt;
+    &lt;div class=&quot;performance-meter-avatar&quot;&gt;RH&lt;/div&gt;
+    &lt;div class=&quot;performance-meter-employee-info&quot;&gt;
+      &lt;p class=&quot;performance-meter-employee-name&quot;&gt;Roberto Herrera&lt;/p&gt;
+      &lt;p class=&quot;performance-meter-employee-role&quot;&gt;Backend Developer&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;span class=&quot;performance-meter-period-badge&quot;&gt;Q4 2025&lt;/span&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;performance-meter-score-section&quot;&gt;
+    &lt;div class=&quot;performance-meter-score-gauge&quot;&gt;
+      &lt;svg class=&quot;performance-meter-score-svg&quot; viewBox=&quot;0 0 120 120&quot;&gt;
+        &lt;circle class=&quot;performance-meter-score-track&quot; cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot; /&gt;
+        &lt;circle class=&quot;performance-meter-score-fill performance-meter-score-fill-good&quot;
+                cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot;
+                stroke-dasharray=&quot;326.73&quot;
+                stroke-dashoffset=&quot;80&quot; /&gt;
+      &lt;/svg&gt;
+      &lt;div class=&quot;performance-meter-score-value&quot;&gt;
+        &lt;span class=&quot;performance-meter-score-number&quot;&gt;3.8&lt;/span&gt;
+        &lt;span class=&quot;performance-meter-score-max&quot;&gt;/5&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;performance-meter-score-summary&quot;&gt;
+      &lt;span class=&quot;performance-meter-score-status performance-meter-score-status-good&quot;&gt;Good&lt;/span&gt;
+      &lt;span class=&quot;performance-meter-trend performance-meter-trend-up&quot;&gt;
+        &lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M23 6l-9.5 9.5-5-5L1 18&quot;/&gt;&lt;path d=&quot;M17 6h6v6&quot;/&gt;&lt;/svg&gt;
+        +0.2
+      &lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;performance-meter-categories&quot;&gt;
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot;&gt;Productivity&lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot;&gt;4.0&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-good&quot; style=&quot;width:80%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot;&gt;Teamwork&lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot;&gt;3.6&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-average&quot; style=&quot;width:72%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot;&gt;Code Quality&lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot;&gt;3.8&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-good&quot; style=&quot;width:76%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre> <p class="text-xs opacity-60 mt-3" data-astro-cid-mva44yhc>Requires: ux.min.css</p> </div> <div class="p-4 bg-neutral text-neutral-content hidden" data-panel="tailwind" data-astro-cid-mva44yhc> <pre class="text-sm overflow-x-auto" data-astro-cid-mva44yhc><code data-astro-cid-mva44yhc>&lt;div class=&quot;flex flex-col gap-2 p-4 bg-base-100 border border-base-300 rounded-box&quot;&gt;
+  &lt;div class=&quot;flex items-center gap-4 pb-2 border-b border-base-300&quot;&gt;
+    &lt;div class=&quot;w-10 h-10 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold shrink-0&quot;&gt;RH&lt;/div&gt;
+    &lt;div class=&quot;flex-1 min-w-0&quot;&gt;
+      &lt;p class=&quot;font-semibold m-0&quot;&gt;Roberto Herrera&lt;/p&gt;
+      &lt;p class=&quot;text-sm text-base-content/60 m-0&quot;&gt;Backend Developer&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;span class=&quot;px-3 py-1 bg-base-200 rounded-full text-xs font-medium text-base-content/60&quot;&gt;Q4 2025&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;flex items-center justify-center gap-6 py-2&quot;&gt;
+    &lt;div class=&quot;relative w-20 h-20&quot;&gt;
+      &lt;svg class=&quot;w-full h-full -rotate-90&quot; viewBox=&quot;0 0 120 120&quot;&gt;
+        &lt;circle fill=&quot;none&quot; stroke=&quot;var(--color-base-200)&quot; stroke-width=&quot;8&quot; cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot;/&gt;
+        &lt;circle fill=&quot;none&quot; stroke=&quot;var(--color-primary)&quot; stroke-width=&quot;8&quot; stroke-linecap=&quot;round&quot; cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot; stroke-dasharray=&quot;326.73&quot; stroke-dashoffset=&quot;80&quot;/&gt;
+      &lt;/svg&gt;
+      &lt;div class=&quot;absolute inset-0 flex flex-col items-center justify-center&quot;&gt;
+        &lt;span class=&quot;text-2xl font-bold tabular-nums&quot;&gt;3.8&lt;/span&gt;
+        &lt;span class=&quot;text-xs text-base-content/40&quot;&gt;/5&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-1&quot;&gt;
+      &lt;span class=&quot;inline-flex px-2 py-1 rounded-full text-sm font-semibold bg-primary/10 text-primary&quot;&gt;Good&lt;/span&gt;
+      &lt;span class=&quot;text-sm font-medium text-success&quot;&gt;+0.2&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;flex flex-col gap-3&quot;&gt;
+    &lt;div class=&quot;flex flex-col gap-1&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium&quot;&gt;Productivity&lt;/span&gt;&lt;span class=&quot;font-semibold&quot;&gt;4.0&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-base-200 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-primary rounded-full&quot; style=&quot;width:80%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-1&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium&quot;&gt;Teamwork&lt;/span&gt;&lt;span class=&quot;font-semibold&quot;&gt;3.6&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-base-200 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-warning rounded-full&quot; style=&quot;width:72%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-1&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium&quot;&gt;Code Quality&lt;/span&gt;&lt;span class=&quot;font-semibold&quot;&gt;3.8&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-base-200 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-primary rounded-full&quot; style=&quot;width:76%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre> <p class="text-xs opacity-60 mt-3" data-astro-cid-mva44yhc>Requires: tw.min.css</p> </div> <div class="p-4 bg-neutral text-neutral-content hidden" data-panel="js" data-astro-cid-mva44yhc> <pre class="text-sm overflow-x-auto" data-astro-cid-mva44yhc><code data-astro-cid-mva44yhc>// Compact variant uses the same JS logic, just add the class
+const meter = document.querySelector(&#39;.performance-meter&#39;);
+meter.classList.add(&#39;performance-meter-compact&#39;);</code></pre> </div> </div> </div> </div>   <div class="border border-base-300 rounded-xl overflow-hidden my-4" data-astro-cid-mva44yhc> <h3 class="px-4 py-2 text-sm font-medium bg-base-200 border-b border-base-300" data-astro-cid-mva44yhc>Glass Variant</h3> <div data-astro-cid-mva44yhc> <!-- Tabs --> <div class="flex bg-base-200 border-b border-base-300 text-sm" data-tabs="preview-knf5vdw" data-astro-cid-mva44yhc> <button class="px-4 py-2 font-medium border-b-2 border-primary text-primary" data-tab="preview" data-active data-astro-cid-mva44yhc>Preview</button> <button class="px-4 py-2 text-base-content/60 hover:text-base-content border-b-2 border-transparent" data-tab="semantic" data-astro-cid-mva44yhc>Semantic</button> <button class="px-4 py-2 text-base-content/60 hover:text-base-content border-b-2 border-transparent" data-tab="tailwind" data-astro-cid-mva44yhc>Tailwind</button> <button class="px-4 py-2 text-base-content/60 hover:text-base-content border-b-2 border-transparent" data-tab="js" data-astro-cid-mva44yhc>JS</button> </div> <!-- Panels --> <div data-panels="preview-knf5vdw" data-astro-cid-mva44yhc> <div class="p-4 bg-base-200/50" data-panel="preview" data-astro-cid-mva44yhc> <div class="preview-frame" style="height: 520px;" data-astro-cid-mva44yhc> <div class="preview-frame-header" data-astro-cid-mva44yhc> <span class="preview-frame-dot" style="background:#ff5f57;" data-astro-cid-mva44yhc></span> <span class="preview-frame-dot" style="background:#febc2e;" data-astro-cid-mva44yhc></span> <span class="preview-frame-dot" style="background:#28c840;" data-astro-cid-mva44yhc></span> <span class="preview-frame-title" data-astro-cid-mva44yhc>Preview</span> </div> <div class="preview-frame-body" data-astro-cid-mva44yhc> <div class="performance-meter performance-meter-animated glass" style="background-image:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-color:transparent;">
+  <div class="performance-meter-header" style="border-bottom-color:rgba(255,255,255,0.15);">
+    <div class="performance-meter-avatar">EL</div>
+    <div class="performance-meter-employee-info">
+      <p class="performance-meter-employee-name" style="color:#fff;">Elena Ruiz</p>
+      <p class="performance-meter-employee-role" style="color:rgba(255,255,255,0.7);">UX Researcher</p>
+      <p class="performance-meter-employee-department" style="color:rgba(255,255,255,0.5);">ERPlora &mdash; Design Team</p>
+    </div>
+    <span class="performance-meter-period-badge" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);">Q4 2025</span>
+  </div>
+
+  <div class="performance-meter-score-section">
+    <div class="performance-meter-score-gauge">
+      <svg class="performance-meter-score-svg" viewBox="0 0 120 120">
+        <circle class="performance-meter-score-track" cx="60" cy="60" r="52" />
+        <circle class="performance-meter-score-fill performance-meter-score-fill-excellent"
+                cx="60" cy="60" r="52"
+                stroke-dasharray="326.73"
+                stroke-dashoffset="33"
+                style="--perf-circumference: 326.73;" />
+      </svg>
+      <div class="performance-meter-score-value">
+        <span class="performance-meter-score-number" style="color:#fff;">4.5</span>
+        <span class="performance-meter-score-max" style="color:rgba(255,255,255,0.5);">/5.0</span>
+        <div class="performance-meter-score-label" style="color:rgba(255,255,255,0.6);">Overall</div>
+      </div>
+    </div>
+    <div class="performance-meter-score-summary">
+      <span class="performance-meter-score-status performance-meter-score-status-excellent">
+        Excellent
+      </span>
+      <span class="performance-meter-trend performance-meter-trend-up">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+        +0.6
+      </span>
+    </div>
+  </div>
+
+  <div class="performance-meter-categories">
+    <h4 class="performance-meter-categories-title" style="color:#fff;border-bottom-color:rgba(255,255,255,0.15);">Category Breakdown</h4>
+
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name" style="color:rgba(255,255,255,0.9);">Research Quality</span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value" style="color:#fff;">4.8</span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-excellent" style="width:96%;"></div>
+      </div>
+    </div>
+
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name" style="color:rgba(255,255,255,0.9);">User Empathy</span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value" style="color:#fff;">4.5</span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-excellent" style="width:90%;"></div>
+      </div>
+    </div>
+
+    <div class="performance-meter-category">
+      <div class="performance-meter-category-header">
+        <span class="performance-meter-category-name" style="color:rgba(255,255,255,0.9);">Documentation</span>
+        <div class="performance-meter-category-score">
+          <span class="performance-meter-category-value" style="color:#fff;">4.2</span>
+        </div>
+      </div>
+      <div class="performance-meter-category-bar">
+        <div class="performance-meter-category-fill performance-meter-category-fill-good" style="width:84%;"></div>
+      </div>
+    </div>
+  </div>
+</div> </div> </div> </div> <div class="p-4 bg-neutral text-neutral-content hidden" data-panel="semantic" data-astro-cid-mva44yhc> <pre class="text-sm overflow-x-auto" data-astro-cid-mva44yhc><code data-astro-cid-mva44yhc>&lt;div class=&quot;performance-meter performance-meter-animated glass&quot; style=&quot;background-image:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-color:transparent;&quot;&gt;
+  &lt;div class=&quot;performance-meter-header&quot; style=&quot;border-bottom-color:rgba(255,255,255,0.15);&quot;&gt;
+    &lt;div class=&quot;performance-meter-avatar&quot;&gt;EL&lt;/div&gt;
+    &lt;div class=&quot;performance-meter-employee-info&quot;&gt;
+      &lt;p class=&quot;performance-meter-employee-name&quot; style=&quot;color:#fff;&quot;&gt;Elena Ruiz&lt;/p&gt;
+      &lt;p class=&quot;performance-meter-employee-role&quot; style=&quot;color:rgba(255,255,255,0.7);&quot;&gt;UX Researcher&lt;/p&gt;
+      &lt;p class=&quot;performance-meter-employee-department&quot; style=&quot;color:rgba(255,255,255,0.5);&quot;&gt;ERPlora &amp;mdash; Design Team&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;span class=&quot;performance-meter-period-badge&quot; style=&quot;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);&quot;&gt;Q4 2025&lt;/span&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;performance-meter-score-section&quot;&gt;
+    &lt;div class=&quot;performance-meter-score-gauge&quot;&gt;
+      &lt;svg class=&quot;performance-meter-score-svg&quot; viewBox=&quot;0 0 120 120&quot;&gt;
+        &lt;circle class=&quot;performance-meter-score-track&quot; cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot; /&gt;
+        &lt;circle class=&quot;performance-meter-score-fill performance-meter-score-fill-excellent&quot;
+                cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot;
+                stroke-dasharray=&quot;326.73&quot;
+                stroke-dashoffset=&quot;33&quot;
+                style=&quot;--perf-circumference: 326.73;&quot; /&gt;
+      &lt;/svg&gt;
+      &lt;div class=&quot;performance-meter-score-value&quot;&gt;
+        &lt;span class=&quot;performance-meter-score-number&quot; style=&quot;color:#fff;&quot;&gt;4.5&lt;/span&gt;
+        &lt;span class=&quot;performance-meter-score-max&quot; style=&quot;color:rgba(255,255,255,0.5);&quot;&gt;/5.0&lt;/span&gt;
+        &lt;div class=&quot;performance-meter-score-label&quot; style=&quot;color:rgba(255,255,255,0.6);&quot;&gt;Overall&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;performance-meter-score-summary&quot;&gt;
+      &lt;span class=&quot;performance-meter-score-status performance-meter-score-status-excellent&quot;&gt;
+        Excellent
+      &lt;/span&gt;
+      &lt;span class=&quot;performance-meter-trend performance-meter-trend-up&quot;&gt;
+        &lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;&gt;&lt;path d=&quot;M23 6l-9.5 9.5-5-5L1 18&quot;/&gt;&lt;path d=&quot;M17 6h6v6&quot;/&gt;&lt;/svg&gt;
+        +0.6
+      &lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;performance-meter-categories&quot;&gt;
+    &lt;h4 class=&quot;performance-meter-categories-title&quot; style=&quot;color:#fff;border-bottom-color:rgba(255,255,255,0.15);&quot;&gt;Category Breakdown&lt;/h4&gt;
+
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot; style=&quot;color:rgba(255,255,255,0.9);&quot;&gt;Research Quality&lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot; style=&quot;color:#fff;&quot;&gt;4.8&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-excellent&quot; style=&quot;width:96%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot; style=&quot;color:rgba(255,255,255,0.9);&quot;&gt;User Empathy&lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot; style=&quot;color:#fff;&quot;&gt;4.5&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-excellent&quot; style=&quot;width:90%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;performance-meter-category&quot;&gt;
+      &lt;div class=&quot;performance-meter-category-header&quot;&gt;
+        &lt;span class=&quot;performance-meter-category-name&quot; style=&quot;color:rgba(255,255,255,0.9);&quot;&gt;Documentation&lt;/span&gt;
+        &lt;div class=&quot;performance-meter-category-score&quot;&gt;
+          &lt;span class=&quot;performance-meter-category-value&quot; style=&quot;color:#fff;&quot;&gt;4.2&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;performance-meter-category-bar&quot;&gt;
+        &lt;div class=&quot;performance-meter-category-fill performance-meter-category-fill-good&quot; style=&quot;width:84%;&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre> <p class="text-xs opacity-60 mt-3" data-astro-cid-mva44yhc>Requires: ux.min.css</p> </div> <div class="p-4 bg-neutral text-neutral-content hidden" data-panel="tailwind" data-astro-cid-mva44yhc> <pre class="text-sm overflow-x-auto" data-astro-cid-mva44yhc><code data-astro-cid-mva44yhc>&lt;!-- Glass variant: use backdrop-blur and translucent backgrounds over a gradient --&gt;
+&lt;div class=&quot;flex flex-col gap-4 p-6 rounded-box backdrop-blur-xl border border-white/12&quot; style=&quot;background:rgba(255,255,255,0.1);background-image:linear-gradient(135deg, #667eea 0%, #764ba2 100%);&quot;&gt;
+  &lt;div class=&quot;flex items-center gap-4 pb-4 border-b border-white/15&quot;&gt;
+    &lt;div class=&quot;w-14 h-14 rounded-full bg-neutral text-neutral-content flex items-center justify-center font-semibold text-xl shrink-0&quot;&gt;EL&lt;/div&gt;
+    &lt;div class=&quot;flex-1 min-w-0&quot;&gt;
+      &lt;p class=&quot;font-semibold text-lg m-0 text-white&quot;&gt;Elena Ruiz&lt;/p&gt;
+      &lt;p class=&quot;text-sm text-white/70 m-0&quot;&gt;UX Researcher&lt;/p&gt;
+      &lt;p class=&quot;text-xs text-white/50 m-0&quot;&gt;ERPlora &amp;mdash; Design Team&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;span class=&quot;px-3 py-1.5 bg-white/15 rounded-full text-xs font-medium text-white/80&quot;&gt;Q4 2025&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;flex items-center justify-center gap-8 py-4&quot;&gt;
+    &lt;div class=&quot;relative w-30 h-30&quot;&gt;
+      &lt;svg class=&quot;w-full h-full -rotate-90&quot; viewBox=&quot;0 0 120 120&quot;&gt;
+        &lt;circle fill=&quot;none&quot; stroke=&quot;rgba(255,255,255,0.15)&quot; stroke-width=&quot;10&quot; cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot;/&gt;
+        &lt;circle fill=&quot;none&quot; stroke=&quot;var(--color-success)&quot; stroke-width=&quot;10&quot; stroke-linecap=&quot;round&quot; cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;52&quot; stroke-dasharray=&quot;326.73&quot; stroke-dashoffset=&quot;33&quot;/&gt;
+      &lt;/svg&gt;
+      &lt;div class=&quot;absolute inset-0 flex flex-col items-center justify-center&quot;&gt;
+        &lt;span class=&quot;text-3xl font-bold tabular-nums text-white&quot;&gt;4.5&lt;/span&gt;
+        &lt;span class=&quot;text-sm text-white/50&quot;&gt;/5.0&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-2&quot;&gt;
+      &lt;span class=&quot;inline-flex px-3 py-1.5 rounded-full text-sm font-semibold bg-success/10 text-success&quot;&gt;Excellent&lt;/span&gt;
+      &lt;span class=&quot;text-sm font-medium text-success&quot;&gt;+0.6&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;flex flex-col gap-3&quot;&gt;
+    &lt;h4 class=&quot;font-semibold text-sm text-white pb-1 border-b border-white/15 m-0&quot;&gt;Category Breakdown&lt;/h4&gt;
+    &lt;div class=&quot;flex flex-col gap-1.5&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium text-white/90&quot;&gt;Research Quality&lt;/span&gt;&lt;span class=&quot;font-semibold text-white&quot;&gt;4.8&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-white/15 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-success rounded-full&quot; style=&quot;width:96%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-1.5&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium text-white/90&quot;&gt;User Empathy&lt;/span&gt;&lt;span class=&quot;font-semibold text-white&quot;&gt;4.5&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-white/15 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-success rounded-full&quot; style=&quot;width:90%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;flex flex-col gap-1.5&quot;&gt;
+      &lt;div class=&quot;flex justify-between text-sm&quot;&gt;&lt;span class=&quot;font-medium text-white/90&quot;&gt;Documentation&lt;/span&gt;&lt;span class=&quot;font-semibold text-white&quot;&gt;4.2&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;h-2 bg-white/15 rounded-full overflow-hidden&quot;&gt;&lt;div class=&quot;h-full bg-primary rounded-full&quot; style=&quot;width:84%&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre> <p class="text-xs opacity-60 mt-3" data-astro-cid-mva44yhc>Requires: tw.min.css</p> </div> <div class="p-4 bg-neutral text-neutral-content hidden" data-panel="js" data-astro-cid-mva44yhc> <pre class="text-sm overflow-x-auto" data-astro-cid-mva44yhc><code data-astro-cid-mva44yhc>// Glass variant is purely CSS
+const meter = document.querySelector(&#39;.performance-meter&#39;);
+meter.classList.add(&#39;glass&#39;);
+// Animated fill works the same way with the .performance-meter-animated class</code></pre> </div> </div> </div> </div>    <div class="overflow-x-auto mt-12"> <h2 class="text-xl font-semibold mb-4">Classes Reference</h2> <table class="table w-full"> <thead> <tr> <th>Class</th> <th>Description</th> </tr> </thead> <tbody> <tr><td><code>.performance-meter</code></td><td>Base container with padding, border, and flex column layout</td></tr> <tr><td><code>.performance-meter-compact</code></td><td>Compact variant (smaller gauge: 80px, less padding)</td></tr> <tr><td><code>.performance-meter-lg</code></td><td>Large variant (bigger gauge: 160px, more padding)</td></tr> <tr><td><code>.performance-meter-inline</code></td><td>Horizontal layout with header beside gauge</td></tr> <tr><td><code>.performance-meter-score-only</code></td><td>Minimal variant showing only the score gauge</td></tr> <tr><td><code>.performance-meter-animated</code></td><td>Enables fill animations on gauge and bars</td></tr> <tr><td><code>.performance-meter.glass</code></td><td>Glass morphism variant with translucent backgrounds</td></tr> <tr><td><code>.performance-meter-header</code></td><td>Employee info row with avatar and period badge</td></tr> <tr><td><code>.performance-meter-avatar</code></td><td>Circular avatar (3.5rem default)</td></tr> <tr><td><code>.performance-meter-employee-name</code></td><td>Employee name text</td></tr> <tr><td><code>.performance-meter-employee-role</code></td><td>Employee role/title</td></tr> <tr><td><code>.performance-meter-employee-department</code></td><td>Department text</td></tr> <tr><td><code>.performance-meter-period-badge</code></td><td>Period pill badge (e.g., "Q4 2025")</td></tr> <tr><td><code>.performance-meter-score-section</code></td><td>Flex row holding gauge and summary</td></tr> <tr><td><code>.performance-meter-score-gauge</code></td><td>SVG gauge container (120px default)</td></tr> <tr><td><code>.performance-meter-score-svg</code></td><td>SVG element rotated -90deg for top start</td></tr> <tr><td><code>.performance-meter-score-track</code></td><td>Background circle (gray track)</td></tr> <tr><td><code>.performance-meter-score-fill</code></td><td>Foreground circle (colored arc)</td></tr> <tr><td><code>.performance-meter-score-fill-excellent</code></td><td>Green (success) fill color</td></tr> <tr><td><code>.performance-meter-score-fill-good</code></td><td>Blue (primary) fill color</td></tr> <tr><td><code>.performance-meter-score-fill-average</code></td><td>Yellow (warning) fill color</td></tr> <tr><td><code>.performance-meter-score-fill-poor</code></td><td>Red (error) fill color</td></tr> <tr><td><code>.performance-meter-score-number</code></td><td>Large score number in center of gauge</td></tr> <tr><td><code>.performance-meter-score-max</code></td><td>Max score text (e.g., "/5.0")</td></tr> <tr><td><code>.performance-meter-score-status</code></td><td>Status pill (excellent, good, average, poor)</td></tr> <tr><td><code>.performance-meter-trend</code></td><td>Trend indicator with arrow icon</td></tr> <tr><td><code>.performance-meter-trend-up</code></td><td>Green upward trend</td></tr> <tr><td><code>.performance-meter-trend-down</code></td><td>Red downward trend</td></tr> <tr><td><code>.performance-meter-trend-neutral</code></td><td>Gray neutral trend</td></tr> <tr><td><code>.performance-meter-goal-section</code></td><td>Target vs actual comparison row</td></tr> <tr><td><code>.performance-meter-goal-item</code></td><td>Individual goal metric column</td></tr> <tr><td><code>.performance-meter-goal-diff-positive</code></td><td>Green positive difference</td></tr> <tr><td><code>.performance-meter-goal-diff-negative</code></td><td>Red negative difference</td></tr> <tr><td><code>.performance-meter-categories</code></td><td>Category breakdown container</td></tr> <tr><td><code>.performance-meter-category</code></td><td>Single category row (header + bar)</td></tr> <tr><td><code>.performance-meter-category-bar</code></td><td>Bar track background</td></tr> <tr><td><code>.performance-meter-category-fill</code></td><td>Bar fill (use -excellent, -good, -average, -poor)</td></tr> <tr><td><code>.performance-meter-period-selector</code></td><td>Period tab selector container</td></tr> <tr><td><code>.performance-meter-period-btn</code></td><td>Period tab button</td></tr> <tr><td><code>.performance-meter-period-btn-active</code></td><td>Active period tab with shadow</td></tr> </tbody> </table> </div>  </div> </main> </div> </div>  <script type="module">const r={"":"Auto",light:"Light",dark:"Dark",erplora:"ERPlora",ocean:"Ocean"},n=document.getElementById("theme-details"),o=document.getElementById("theme-label"),u=document.documentElement.getAttribute("data-theme")||"";o&&(o.textContent=r[u]||"Auto");n?.addEventListener("click",t=>{const a=t.target.closest("[data-set-theme]");if(!a)return;const e=a.getAttribute("data-set-theme")||"";e?(document.documentElement.setAttribute("data-theme",e),localStorage.setItem("theme",e)):(document.documentElement.removeAttribute("data-theme"),localStorage.removeItem("theme")),o&&(o.textContent=r[e]||"Auto"),n.open=!1});document.addEventListener("click",t=>{n&&!n.contains(t.target)&&(n.open=!1)});const m=document.getElementById("nav-search"),h=document.getElementById("nav-list");m?.addEventListener("input",()=>{const t=m.value.toLowerCase().trim();h.querySelectorAll(":scope > div").forEach(e=>{const i=e.querySelectorAll("li");let c=0;i.forEach(s=>{const d=s.querySelector("a")?.textContent?.toLowerCase()||"",l=!t||d.includes(t);s.style.display=l?"":"none",l&&c++}),e.style.display=c>0?"":"none"})});</script></body></html>
