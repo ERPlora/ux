@@ -70,6 +70,13 @@ const ORDER = [
   'components/system-overlays.css',
   'components/states.css',
   'components/pos.css',
+  // v2.1 modules
+  'components/actions-extra.css',
+  'components/selection.css',
+  'components/forms-inputs.css',
+  'components/data-extra.css',
+  'components/layout-extra.css',
+  'components/editors.css',
 ];
 
 const BANNER = `/*!

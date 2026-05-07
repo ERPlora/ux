@@ -1,0 +1,277 @@
+<!doctype html><html lang="es" data-theme="erplora"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Forms inputs</title>
+<link rel="stylesheet" href="../lib/css/ux.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+<style>
+  body { padding: 24px; background: var(--ux-bg); display:grid; gap: 22px; max-width: 720px; margin:auto; }
+  .demo { background: var(--ux-bg-2); border: 1px solid var(--ux-line); border-radius: 14px; padding: 22px; }
+  .demo__hd { font-size: 11px; color: var(--ux-ink-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+  .stack { display: grid; gap: 14px; }
+  .row { display:flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+  .lbl { font-size: 12px; color: var(--ux-ink-3); }
+  .live {
+    margin-top: 8px;
+    font-size: var(--ux-text-sm);
+    color: var(--ux-ink-2);
+    font-family: var(--ux-font-mono);
+    background: var(--ux-bg-3);
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  .err {
+    font-size: var(--ux-text-xs);
+    color: var(--ux-danger);
+    margin-top: 4px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .col { display:grid; gap: 6px; flex: 1; min-width: 200px; }
+</style>
+</head><body>
+
+  <!-- ============================================================
+       1) Currency input
+       ============================================================ -->
+  <div class="demo" data-signals="{amount: 250.00}">
+    <div class="demo__hd">Currency · symbol + numeric input + currency picker</div>
+
+    <div class="stack">
+
+      <div class="row">
+        <div class="col">
+          <span class="lbl">Small</span>
+          <div class="ux-currency ux-currency--sm">
+            <span class="ux-currency__symbol">€</span>
+            <input class="ux-currency__input" type="number" step="0.01" placeholder="0.00" value="9.95"/>
+          </div>
+        </div>
+
+        <div class="col">
+          <span class="lbl">Default</span>
+          <div class="ux-currency">
+            <span class="ux-currency__symbol">€</span>
+            <input class="ux-currency__input" type="number" step="0.01" placeholder="0.00" data-bind-amount/>
+            <select class="ux-currency__currency-select" aria-label="Currency">
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+          <div class="live">Total: €<span data-text="$amount"></span></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="lbl">Large · with currency picker</span>
+        <div class="ux-currency ux-currency--lg">
+          <span class="ux-currency__symbol">$</span>
+          <input class="ux-currency__input" type="number" step="0.01" placeholder="0.00" value="1250.00"/>
+          <select class="ux-currency__currency-select" aria-label="Currency">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="lbl">Invalid</span>
+        <div class="ux-currency ux-currency--invalid">
+          <span class="ux-currency__symbol">€</span>
+          <input class="ux-currency__input" type="number" step="0.01" placeholder="0.00" value="-12.00"/>
+        </div>
+        <div class="err">Amount must be positive</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       2) Phone input · international (Datastar dropdown)
+       ============================================================ -->
+  <div class="demo" data-signals="{country: 'ES', dial: '+34', flag: '🇪🇸', open: false}">
+    <div class="demo__hd">Phone · country selector with Datastar dropdown</div>
+
+    <div class="stack">
+
+      <div class="row">
+        <div class="col">
+          <span class="lbl">Small</span>
+          <div class="ux-phone ux-phone--sm">
+            <button type="button" class="ux-phone__country">
+              <span class="ux-phone__flag">🇪🇸</span>
+              <span class="ux-phone__dial">+34</span>
+            </button>
+            <input class="ux-phone__input" type="tel" placeholder="612 345 678"/>
+          </div>
+        </div>
+
+        <div class="col">
+          <span class="lbl">Default · interactive</span>
+          <div class="ux-phone">
+            <button type="button" class="ux-phone__country" data-on-click="$open = !$open">
+              <span class="ux-phone__flag" data-text="$flag"></span>
+              <span class="ux-phone__dial" data-text="$dial"></span>
+            </button>
+            <input class="ux-phone__input" type="tel" placeholder="600 000 000"/>
+
+            <div class="ux-phone__country-menu" data-attr-data-open="$open">
+              <div class="ux-phone__country-list">
+                <button type="button"
+                        class="ux-phone__country-item"
+                        data-class-is-selected="$country === 'ES'"
+                        data-on-click="$country='ES'; $dial='+34'; $flag='🇪🇸'; $open=false">
+                  <span class="ux-phone__flag">🇪🇸</span>
+                  <span>Spain</span>
+                  <span class="ux-phone__dial">+34</span>
+                </button>
+                <button type="button"
+                        class="ux-phone__country-item"
+                        data-class-is-selected="$country === 'US'"
+                        data-on-click="$country='US'; $dial='+1'; $flag='🇺🇸'; $open=false">
+                  <span class="ux-phone__flag">🇺🇸</span>
+                  <span>United States</span>
+                  <span class="ux-phone__dial">+1</span>
+                </button>
+                <button type="button"
+                        class="ux-phone__country-item"
+                        data-class-is-selected="$country === 'GB'"
+                        data-on-click="$country='GB'; $dial='+44'; $flag='🇬🇧'; $open=false">
+                  <span class="ux-phone__flag">🇬🇧</span>
+                  <span>United Kingdom</span>
+                  <span class="ux-phone__dial">+44</span>
+                </button>
+                <button type="button"
+                        class="ux-phone__country-item"
+                        data-class-is-selected="$country === 'FR'"
+                        data-on-click="$country='FR'; $dial='+33'; $flag='🇫🇷'; $open=false">
+                  <span class="ux-phone__flag">🇫🇷</span>
+                  <span>France</span>
+                  <span class="ux-phone__dial">+33</span>
+                </button>
+                <button type="button"
+                        class="ux-phone__country-item"
+                        data-class-is-selected="$country === 'DE'"
+                        data-on-click="$country='DE'; $dial='+49'; $flag='🇩🇪'; $open=false">
+                  <span class="ux-phone__flag">🇩🇪</span>
+                  <span>Germany</span>
+                  <span class="ux-phone__dial">+49</span>
+                </button>
+                <button type="button"
+                        class="ux-phone__country-item"
+                        data-class-is-selected="$country === 'MX'"
+                        data-on-click="$country='MX'; $dial='+52'; $flag='🇲🇽'; $open=false">
+                  <span class="ux-phone__flag">🇲🇽</span>
+                  <span>Mexico</span>
+                  <span class="ux-phone__dial">+52</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="live">Selected: <span data-text="$country"></span> · <span data-text="$dial"></span></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="lbl">Large</span>
+        <div class="ux-phone ux-phone--lg">
+          <button type="button" class="ux-phone__country">
+            <span class="ux-phone__flag">🇫🇷</span>
+            <span class="ux-phone__dial">+33</span>
+          </button>
+          <input class="ux-phone__input" type="tel" placeholder="6 12 34 56 78"/>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="lbl">Invalid</span>
+        <div class="ux-phone ux-phone--invalid">
+          <button type="button" class="ux-phone__country">
+            <span class="ux-phone__flag">🇪🇸</span>
+            <span class="ux-phone__dial">+34</span>
+          </button>
+          <input class="ux-phone__input" type="tel" value="123"/>
+        </div>
+        <div class="err">Phone number is too short</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       3) Quantity stepper
+       ============================================================ -->
+  <div class="demo" data-signals="{qty: 1}">
+    <div class="demo__hd">Quantity stepper · [-] [12] [+]</div>
+
+    <div class="stack">
+
+      <div class="row">
+        <div class="col">
+          <span class="lbl">Small</span>
+          <div class="ux-qty-stepper ux-qty-stepper--sm">
+            <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--minus" aria-label="Decrease"></button>
+            <span class="ux-qty-stepper__value">3</span>
+            <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--plus" aria-label="Increase"></button>
+          </div>
+        </div>
+
+        <div class="col">
+          <span class="lbl">Default · interactive</span>
+          <div class="ux-qty-stepper">
+            <button type="button"
+                    class="ux-qty-stepper__btn ux-qty-stepper__btn--minus"
+                    aria-label="Decrease"
+                    data-on-click="$qty = Math.max(1, $qty - 1)"
+                    data-attr-disabled="$qty <= 1"></button>
+            <input class="ux-qty-stepper__input" type="number" min="1" data-bind-qty/>
+            <button type="button"
+                    class="ux-qty-stepper__btn ux-qty-stepper__btn--plus"
+                    aria-label="Increase"
+                    data-on-click="$qty = $qty + 1"></button>
+          </div>
+          <div class="live">Subtotal: <span data-text="($qty * 12.50).toFixed(2)"></span> €</div>
+        </div>
+
+        <div class="col">
+          <span class="lbl">Large</span>
+          <div class="ux-qty-stepper ux-qty-stepper--lg">
+            <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--minus" aria-label="Decrease"></button>
+            <span class="ux-qty-stepper__value">12</span>
+            <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--plus" aria-label="Increase"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="lbl">Ghost</span>
+        <div class="ux-qty-stepper ux-qty-stepper--ghost">
+          <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--minus" aria-label="Decrease"></button>
+          <span class="ux-qty-stepper__value">5</span>
+          <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--plus" aria-label="Increase"></button>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="lbl">Block (full width)</span>
+        <div class="ux-qty-stepper ux-qty-stepper--block">
+          <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--minus" aria-label="Decrease"></button>
+          <input class="ux-qty-stepper__input" type="number" value="8"/>
+          <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--plus" aria-label="Increase"></button>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="lbl">Disabled</span>
+        <div class="ux-qty-stepper is-disabled">
+          <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--minus" aria-label="Decrease" disabled></button>
+          <span class="ux-qty-stepper__value">0</span>
+          <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--plus" aria-label="Increase" disabled></button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body></html>

@@ -745,3 +745,417 @@
   color: var(--ux-danger-fg);
 }
 .ux-stepper-card[data-state="error"] .ux-stepper-card__status { background: var(--ux-danger-soft); color: var(--ux-danger); }
+
+
+/* ============================================================
+   7. MENUBAR  ·  .ux-menubar
+   Desktop app menu bar (File / Edit / View / Help…)
+   ============================================================ */
+.ux-menubar {
+  --_mbar-h: 32px;
+  --_mbar-trigger-pad-x: 10px;
+  --_mbar-panel-min-w: 220px;
+
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  height: var(--_mbar-h);
+  padding: 0 6px;
+  background: var(--ux-bg-1);
+  border-bottom: 1px solid var(--ux-line);
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink-2);
+  user-select: none;
+  z-index: var(--ux-z-sticky);
+}
+
+.ux-menubar__app-name {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px 0 8px;
+  font-family: var(--ux-font-display);
+  font-weight: 600;
+  font-size: var(--ux-text-md);
+  letter-spacing: var(--ux-tracking-tight);
+  color: var(--ux-ink);
+  flex-shrink: 0;
+}
+
+.ux-menubar__menu {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 var(--_mbar-trigger-pad-x);
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: var(--ux-radius-sm);
+  transition: background var(--ux-dur-fast), color var(--ux-dur-fast);
+}
+.ux-menubar__menu:hover {
+  background: var(--ux-bg-3);
+  color: var(--ux-ink);
+}
+.ux-menubar__menu--active,
+.ux-menubar__menu.is-open,
+.ux-menubar__menu[aria-expanded="true"] {
+  background: var(--ux-bg-3);
+  color: var(--ux-ink);
+}
+
+.ux-menubar__menu-shortcut {
+  font-size: var(--ux-text-2xs);
+  color: var(--ux-ink-3);
+  margin-left: 6px;
+  font-family: var(--ux-font-mono);
+  letter-spacing: var(--ux-tracking-mono);
+}
+
+.ux-menubar__divider {
+  width: 1px;
+  margin: 6px 4px;
+  background: var(--ux-line);
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+/* Dropdown panel anchored to its trigger */
+.ux-menubar__panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: var(--ux-z-tooltip);
+  margin-top: 2px;
+  min-width: var(--_mbar-panel-min-w);
+  padding: 4px;
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line-2);
+  border-radius: var(--ux-radius-md);
+  box-shadow: var(--ux-shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink);
+}
+
+.ux-menubar__item {
+  display: grid;
+  grid-template-columns: 16px 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: var(--ux-radius-sm);
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-size: var(--ux-text-sm);
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  color: var(--ux-ink);
+  text-decoration: none;
+  transition: background var(--ux-dur-fast);
+}
+.ux-menubar__item:hover {
+  background: var(--ux-bg-3);
+}
+.ux-menubar__item[aria-disabled="true"],
+.ux-menubar__item[disabled] {
+  color: var(--ux-ink-4);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.ux-menubar__item-icon {
+  width: 16px; height: 16px;
+  display: grid; place-items: center;
+  color: var(--ux-ink-3);
+  flex-shrink: 0;
+}
+.ux-menubar__item-icon svg { width: 13px; height: 13px; }
+
+.ux-menubar__item-shortcut {
+  font-family: var(--ux-font-mono);
+  font-size: var(--ux-text-2xs);
+  color: var(--ux-ink-3);
+  letter-spacing: var(--ux-tracking-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.ux-menubar__separator {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--ux-line);
+}
+
+.ux-menubar__submenu {
+  width: 12px; height: 12px;
+  color: var(--ux-ink-3);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.ux-menubar__submenu svg { width: 10px; height: 10px; }
+
+/* Variant: compact (smaller height, reduced padding) */
+.ux-menubar--compact {
+  --_mbar-h: 26px;
+  --_mbar-trigger-pad-x: 8px;
+  font-size: var(--ux-text-xs);
+}
+.ux-menubar--compact .ux-menubar__app-name { font-size: var(--ux-text-sm); padding: 0 10px 0 6px; }
+.ux-menubar--compact .ux-menubar__menu { font-size: var(--ux-text-xs); }
+.ux-menubar--compact .ux-menubar__item { padding: 5px 8px; }
+
+/* Variant: floating (macOS-like, detached look) */
+.ux-menubar--floating {
+  margin: 8px;
+  border: 1px solid var(--ux-line-2);
+  border-bottom: 1px solid var(--ux-line-2);
+  border-radius: var(--ux-radius-lg);
+  box-shadow: var(--ux-shadow-md);
+  background: color-mix(in oklch, var(--ux-bg-1) 90%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+
+/* ============================================================
+   8. SCHEDULER  ·  .ux-scheduler
+   Appointment scheduler — week × hours grid with appointment blocks
+   ============================================================ */
+.ux-scheduler {
+  --_sch-row-h: 40px;          /* default hour row */
+  --_sch-time-col-w: 60px;
+  --_sch-days: 7;
+  --_sch-hours: 24;
+  --_sch-cell-line: var(--ux-line);
+  --_sch-cell-line-soft: color-mix(in oklch, var(--ux-line) 55%, transparent);
+
+  display: grid;
+  grid-template-columns: var(--_sch-time-col-w) 1fr;
+  grid-template-rows: auto 1fr;
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-lg);
+  overflow: hidden;
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink);
+  position: relative;
+  min-height: 0;
+}
+
+/* Header row spans both columns */
+.ux-scheduler__head {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: var(--_sch-time-col-w) repeat(var(--_sch-days), 1fr);
+  background: var(--ux-bg-1);
+  border-bottom: 1px solid var(--ux-line);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.ux-scheduler__head::before {
+  content: "";
+  border-right: 1px solid var(--ux-line);
+}
+
+.ux-scheduler__day {
+  padding: 8px 10px 10px;
+  border-right: 1px solid var(--ux-line);
+  font-size: var(--ux-text-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ux-tracking-wide);
+  font-weight: 500;
+  color: var(--ux-ink-3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+.ux-scheduler__day:last-child { border-right: none; }
+.ux-scheduler__day-name { font-size: var(--ux-text-2xs); color: var(--ux-ink-3); }
+.ux-scheduler__day-date {
+  font-family: var(--ux-font-display);
+  font-size: var(--ux-text-lg);
+  font-weight: 600;
+  color: var(--ux-ink);
+  text-transform: none;
+  letter-spacing: var(--ux-tracking-tight);
+}
+.ux-scheduler__day--today .ux-scheduler__day-date { color: var(--ux-brand); }
+.ux-scheduler__day--today {
+  background: color-mix(in oklch, var(--ux-brand) 6%, var(--ux-bg-1));
+}
+
+/* Time column (left) */
+.ux-scheduler__time-col {
+  display: grid;
+  grid-auto-rows: var(--_sch-row-h);
+  background: var(--ux-bg-1);
+  border-right: 1px solid var(--ux-line);
+}
+.ux-scheduler__hour-label {
+  font-size: var(--ux-text-2xs);
+  color: var(--ux-ink-3);
+  text-align: right;
+  padding: 2px 8px 0 0;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid var(--ux-line);
+  line-height: 1;
+}
+
+/* Grid (7 days × N hours, with quarter-hour soft lines) */
+.ux-scheduler__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--_sch-days), 1fr);
+  position: relative;
+  min-height: 0;
+}
+.ux-scheduler__cell {
+  border-right: 1px solid var(--ux-line);
+  position: relative;
+  min-height: var(--_sch-row-h);
+  cursor: pointer;
+  /* hour line bottom + 3 soft dashed quarter-hour guides */
+  background-image:
+    linear-gradient(to bottom,
+      transparent 0,
+      transparent calc(var(--_sch-row-h) - 1px),
+      var(--_sch-cell-line) calc(var(--_sch-row-h) - 1px),
+      var(--_sch-cell-line) var(--_sch-row-h)),
+    repeating-linear-gradient(to bottom,
+      transparent 0,
+      transparent calc(var(--_sch-row-h) / 4 - 1px),
+      var(--_sch-cell-line-soft) calc(var(--_sch-row-h) / 4 - 1px),
+      var(--_sch-cell-line-soft) calc(var(--_sch-row-h) / 4));
+  background-size: 100% var(--_sch-row-h), 100% var(--_sch-row-h);
+  transition: background-color var(--ux-dur-fast);
+}
+.ux-scheduler__cell:last-child { border-right: none; }
+.ux-scheduler__cell:hover { background-color: color-mix(in oklch, var(--ux-brand) 4%, transparent); }
+
+.ux-scheduler__cell.is-selecting {
+  background-color: color-mix(in oklch, var(--ux-brand) 18%, transparent);
+}
+.ux-scheduler__cell.is-busy {
+  background-color: color-mix(in oklch, var(--ux-ink-3) 8%, transparent);
+}
+.ux-scheduler__cell.is-blocked {
+  background-image:
+    repeating-linear-gradient(135deg,
+      var(--ux-bg-3) 0,
+      var(--ux-bg-3) 6px,
+      var(--ux-bg-2) 6px,
+      var(--ux-bg-2) 12px);
+  cursor: not-allowed;
+}
+
+/* Appointment block — placed via inline style top/height */
+.ux-scheduler__appointment {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  background: color-mix(in oklch, var(--ux-brand) 22%, var(--ux-bg-2));
+  border-left: 2px solid var(--ux-brand);
+  border-radius: var(--ux-radius-sm);
+  padding: 4px 8px;
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink);
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  transition: background var(--ux-dur-fast), transform var(--ux-dur-fast);
+  z-index: 1;
+}
+.ux-scheduler__appointment:hover {
+  background: color-mix(in oklch, var(--ux-brand) 30%, var(--ux-bg-2));
+  transform: translateY(-1px);
+}
+
+.ux-scheduler__appointment-title {
+  font-weight: 500;
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+.ux-scheduler__appointment-time {
+  font-size: var(--ux-text-2xs);
+  color: var(--ux-ink-2);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.ux-scheduler__appointment-attendee {
+  font-size: var(--ux-text-2xs);
+  color: var(--ux-ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+/* Color variants per category */
+.ux-scheduler__appointment--brand {
+  background: color-mix(in oklch, var(--ux-brand) 22%, var(--ux-bg-2));
+  border-left-color: var(--ux-brand);
+}
+.ux-scheduler__appointment--leaf {
+  background: color-mix(in oklch, var(--ux-leaf) 22%, var(--ux-bg-2));
+  border-left-color: var(--ux-leaf);
+}
+.ux-scheduler__appointment--warn {
+  background: color-mix(in oklch, var(--ux-warn) 22%, var(--ux-bg-2));
+  border-left-color: var(--ux-warn);
+}
+.ux-scheduler__appointment--danger {
+  background: color-mix(in oklch, var(--ux-danger) 22%, var(--ux-bg-2));
+  border-left-color: var(--ux-danger);
+}
+.ux-scheduler__appointment--info {
+  background: color-mix(in oklch, var(--ux-info) 22%, var(--ux-bg-2));
+  border-left-color: var(--ux-info);
+}
+
+/* Now line — red horizontal across all days */
+.ux-scheduler__now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid var(--ux-danger);
+  z-index: 3;
+  pointer-events: none;
+}
+.ux-scheduler__now::before {
+  content: "";
+  position: absolute;
+  left: -4px; top: -4px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--ux-danger);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ux-danger) 28%, transparent);
+}
+
+/* Sizes */
+.ux-scheduler--sm { --_sch-row-h: 30px; }
+.ux-scheduler--lg { --_sch-row-h: 60px; }
+
+/* Variant: single-day, taller */
+.ux-scheduler--day {
+  --_sch-days: 1;
+  --_sch-row-h: 64px;
+}
+.ux-scheduler--day .ux-scheduler__head { grid-template-columns: var(--_sch-time-col-w) 1fr; }
+.ux-scheduler--day .ux-scheduler__grid { grid-template-columns: 1fr; }
