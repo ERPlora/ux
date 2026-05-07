@@ -149,10 +149,40 @@ Todos los tokens son custom properties en `lib/css/tokens.css`. Personalizar es 
 Selectores de tema disponibles:
 
 ```html
-<html data-theme="erplora">  <!-- por defecto, oscuro terracota -->
-<html data-theme="dark">
-<html data-theme="light">
+<html data-theme="erplora">         <!-- por defecto, oscuro terracota -->
+<html data-theme="erplora-light">   <!-- claro terracota -->
 ```
+
+### Templates de paleta profesional
+
+Además del tema base "erplora", la librería incluye **5 paletas profesionales adicionales** en `lib/templates/`. Cada una tiene variante dark y light en el mismo archivo. Se aplican vía atributo `data-template` (compatible con `data-theme`):
+
+| Template     | Vibe                                  | Brand color                |
+|--------------|---------------------------------------|----------------------------|
+| `corporate`  | Banking, finance, enterprise SaaS     | Deep navy `#1E3A8A`        |
+| `minimal`    | Editorial, luxury, design studios     | Pure black + gold accent   |
+| `forest`     | Sustainable, agriculture, organic     | Forest green `#2F5233`     |
+| `ocean`      | Modern tech, fintech, startups        | Teal/cyan `#0EA5E9`        |
+| `violet`     | Creative agencies, design tools       | Deep violet `#7C3AED`      |
+
+Carga uno o todos:
+
+```html
+<!-- Solo uno -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@latest/dist/templates/corporate.min.css">
+
+<!-- Todos en uno (≈9 KB minificado) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@latest/dist/templates/all.min.css">
+```
+
+Aplica al `<html>` (o cualquier subárbol):
+
+```html
+<html data-theme="erplora" data-template="corporate">           <!-- dark + corporate -->
+<html data-theme="erplora-light" data-template="corporate-light"> <!-- light + corporate -->
+```
+
+Sin `data-template` se usa la paleta base "erplora". Cada template **solo redefine los `--ux-*` de color** — toda la geometría, tipografía y motion permanecen.
 
 ---
 
