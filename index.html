@@ -143,26 +143,50 @@
     font-family: var(--ux-font-mono); font-size: 10.5px; color: var(--ux-ink-3);
   }
 </style>
+<script>
+  // Apply theme + template to <html> and to every loaded preview iframe.
+  // Called from a Datastar data-effect on .ux-app — passing $theme/$template
+  // explicitly so Datastar's dep-tracking is unambiguous.
+  window.applyUxTheme = function(theme, tpl) {
+    const root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    const t = tpl ? (theme === 'erplora-light' ? tpl + '-light' : tpl) : '';
+    if (t) root.setAttribute('data-template', t); else root.removeAttribute('data-template');
+    try {
+      localStorage.setItem('ux-theme', theme);
+      localStorage.setItem('ux-template', tpl);
+    } catch (_) {}
+    document.querySelectorAll('.stage iframe').forEach(function (f) {
+      try {
+        const fr = f.contentDocument && f.contentDocument.documentElement;
+        if (!fr) return;
+        fr.setAttribute('data-theme', theme);
+        if (t) fr.setAttribute('data-template', t); else fr.removeAttribute('data-template');
+      } catch (_) {}
+    });
+  };
+  // When an iframe loads, sync it to the currently-stored theme/template.
+  // Hooks new previews when the user navigates routes.
+  window.syncIframeOnLoad = function(iframe) {
+    iframe.addEventListener('load', function () {
+      const theme = localStorage.getItem('ux-theme') || 'erplora';
+      const tpl = localStorage.getItem('ux-template') || '';
+      try {
+        const fr = iframe.contentDocument && iframe.contentDocument.documentElement;
+        if (!fr) return;
+        fr.setAttribute('data-theme', theme);
+        const t = tpl ? (theme === 'erplora-light' ? tpl + '-light' : tpl) : '';
+        if (t) fr.setAttribute('data-template', t); else fr.removeAttribute('data-template');
+      } catch (_) {}
+    });
+  };
+</script>
 </head>
 <body>
 
 <div class="ux-app" data-docs
      data-signals="{q: '', route: 'overview', theme: localStorage.getItem('ux-theme') || 'erplora', vp: 'desktop', template: localStorage.getItem('ux-template') || ''}"
-     data-effect="
-       const root = document.documentElement;
-       root.setAttribute('data-theme', $theme);
-       const t = $template ? ($theme === 'erplora-light' ? $template + '-light' : $template) : '';
-       if (t) root.setAttribute('data-template', t); else root.removeAttribute('data-template');
-       try { localStorage.setItem('ux-theme', $theme); localStorage.setItem('ux-template', $template); } catch(e){}
-       document.querySelectorAll('.stage iframe').forEach(f => {
-         try {
-           const fr = f.contentDocument && f.contentDocument.documentElement;
-           if (!fr) return;
-           fr.setAttribute('data-theme', $theme);
-           if (t) fr.setAttribute('data-template', t); else fr.removeAttribute('data-template');
-         } catch(e) {}
-       });
-     ">
+     data-effect="window.applyUxTheme($theme, $template)">
 
   <!-- =================== SIDEBAR (componente real .ux-sidebar) =================== -->
   <aside class="ux-sidebar">
@@ -445,13 +469,16 @@ function renderStage(r) {
   body.innerHTML = `
     <div class="stage-wrap">
       <div class="stage" data-vp="desktop">
-        <iframe src="${r.stage}" title="${r.title}" onload="try{this.contentDocument.documentElement.setAttribute('data-theme', currentTheme)}catch(e){}"></iframe>
+        <iframe src="${r.stage}" title="${r.title}"></iframe>
       </div>
     </div>
     <div style="margin-top:14px;font-size:11.5px;color:var(--ux-ink-3);font-family:var(--ux-font-mono);text-align:center;">
       Vista responsive — usa el selector arriba para cambiar entre Desktop · Tablet · Mobile.
     </div>
   `;
+  // Sync the freshly-mounted iframe to the current theme + template once it loads.
+  const ifr = body.querySelector('.stage iframe');
+  if (ifr) window.syncIframeOnLoad(ifr);
 }
 
 function renderOverview() {
