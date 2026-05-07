@@ -1,11 +1,11 @@
-# ERPlora UX · v2.0.0
+# ERPlora UX · v2.1.0
 
 > Librería de componentes CSS-only para el ecosistema ERPlora.
 > Sin Tailwind, sin build, sin dependencias para los consumidores.
 > Interactividad opcional vía [Datastar](https://data-star.dev) con atributos `data-*`.
 
 **Demo:** <https://erplora.github.io/ux/>
-**CDN:** `https://cdn.jsdelivr.net/gh/ERPlora/ux@v2.0.0/dist/erplora-ux.min.css`
+**CDN:** `https://cdn.jsdelivr.net/gh/ERPlora/ux@latest/dist/erplora-ux.min.css`
 
 ---
 
@@ -41,9 +41,22 @@
 
 ### Vía CDN (recomendado)
 
+**Always-current** — recibe automáticamente la última versión publicada:
+
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@v2.0.0/dist/erplora-ux.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@latest/dist/erplora-ux.min.css">
 ```
+
+**Pinneado** (recomendado para producción para evitar cambios sorpresa):
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@v2.1.0/dist/erplora-ux.min.css">
+```
+
+Otras opciones:
+- `@v2` — siempre la última 2.x.y
+- `@v2.1` — siempre la última 2.1.x
+- Nunca uses `@main` — rompe el caché y los consumidores cuando se hace push.
 
 Para interactividad opcional:
 
@@ -68,7 +81,7 @@ import '@erplora/ux/min';
 <html lang="es" data-theme="erplora">
 <head>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@v2.0.0/dist/erplora-ux.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@latest/dist/erplora-ux.min.css">
 </head>
 <body>
   <button class="ux-btn ux-btn--primary">Aceptar</button>
@@ -334,7 +347,7 @@ git push origin v2.0.0
 A los pocos minutos:
 
 ```
-https://cdn.jsdelivr.net/gh/ERPlora/ux@v2.0.0/dist/erplora-ux.min.css
+https://cdn.jsdelivr.net/gh/ERPlora/ux@latest/dist/erplora-ux.min.css
 ```
 
 ### Migración desde la librería antigua (v3 con Tailwind)
@@ -355,21 +368,21 @@ Como ambas versiones usan prefijo `ux-*`, los consumidores existentes ven solo m
 
 ---
 
-## Soporte para IAs (Copilot · Claude · Codex · Cursor)
+## Soporte para IAs (Copilot · Codex · Cursor · etc.)
 
 La librería incluye documentación machine-readable que las IAs de código consumen automáticamente:
 
 | Archivo            | Propósito                                                                 | URL pública                                       |
 | ------------------ | ------------------------------------------------------------------------- | ------------------------------------------------- |
-| `AGENTS.md`        | Estándar [agents.md](https://agents.md) — instrucciones, patrones, anti-patrones, ejemplos. Lo detectan Claude Code, Cursor, OpenAI Codex. | `https://erplora.github.io/ux/AGENTS.md`          |
+| `AGENTS.md`        | Estándar [agents.md](https://agents.md) — instrucciones, patrones, anti-patrones, ejemplos. Lo detectan Cursor, OpenAI Codex, GitHub Copilot Workspace y otros. | `https://erplora.github.io/ux/AGENTS.md`          |
 | `llms.txt`         | Estándar [llmstxt.org](https://llmstxt.org) — índice corto, links a recursos. Lo usan crawlers de IA y context-fetch. | `https://erplora.github.io/ux/llms.txt`           |
-| `llms-full.txt`    | Inventario exhaustivo de las **1321 clases** agrupadas por componente, con tokens y utilities. Para inyectar en context window. | `https://erplora.github.io/ux/llms-full.txt`      |
+| `llms-full.txt`    | Inventario exhaustivo de las **1932 clases** (260+ bloques) agrupadas por componente, con tokens y utilities. Para inyectar en context window. | `https://erplora.github.io/ux/llms-full.txt`      |
 
 ### Cómo lo usa cada herramienta
 
-- **Claude Code / Cursor**: detectan `AGENTS.md` en la raíz del proyecto consumidor. Copia o symlink el archivo.
+- **Cursor / Codex CLI**: detectan `AGENTS.md` en la raíz del proyecto consumidor. Copia o symlink el archivo.
 - **GitHub Copilot**: usa `.github/copilot-instructions.md` — copia `AGENTS.md` ahí.
-- **ChatGPT / Claude (web)**: pega `llms-full.txt` al principio del chat para autocompletado completo.
+- **Asistentes web (ChatGPT, etc.)**: pega `llms-full.txt` al principio del chat para autocompletado completo.
 - **Cursor `@docs`**: añade `https://erplora.github.io/ux/llms.txt` como custom doc.
 
 ### Para mantenerlos sincronizados

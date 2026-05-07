@@ -2,6 +2,7 @@
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>DataTable</title>
 <link rel="stylesheet" href="../lib/css/ux.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
 <style>
   body { padding: 22px; background: var(--ux-bg); }
   h4 { font-family: var(--ux-font-display); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ux-ink-3); margin: 24px 0 10px; }
@@ -9,7 +10,7 @@
 </style></head><body>
 
 <h4>DataTable · vista Tabla (toolbar consolidada en una línea)</h4>
-<div class="ux-table-wrap" id="dt-table">
+<div class="ux-table-wrap" id="dt-table" data-signals="{view: 'table'}">
 
   <!-- Toolbar única: búsqueda · filtros · rango fechas · spacer · page-size · view-toggle · io · acción primaria -->
   <div class="ux-dt-toolbar">
@@ -49,10 +50,10 @@
 
     <!-- View toggle: tabla / grid -->
     <div class="ux-view-toggle" role="tablist" aria-label="Vista">
-      <button class="ux-view-toggle__btn" aria-pressed="true" title="Vista tabla" onclick="setView('table')">
+      <button class="ux-view-toggle__btn" data-on-click="$view = 'table'" data-attr-aria-pressed="$view === 'table'" title="Vista tabla">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
-      <button class="ux-view-toggle__btn" aria-pressed="false" title="Vista cuadrícula" onclick="setView('grid')">
+      <button class="ux-view-toggle__btn" data-on-click="$view = 'grid'" data-attr-aria-pressed="$view === 'grid'" title="Vista cuadrícula">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       </button>
     </div>
@@ -76,7 +77,7 @@
   </div>
 
   <!-- Vista tabla -->
-  <div id="view-table" class="ux-table-scroll">
+  <div id="view-table" class="ux-table-scroll" data-show="$view === 'table'">
     <table class="ux-table">
       <thead>
         <tr>
@@ -232,7 +233,7 @@
   </div>
 
   <!-- Vista grid (oculta por defecto) -->
-  <div id="view-grid" class="ux-dt-grid" hidden>
+  <div id="view-grid" class="ux-dt-grid" data-show="$view === 'grid'">
     <article class="ux-dt-card" aria-selected="true">
       <header class="ux-dt-card__head">
         <div style="display:flex;gap:10px;align-items:center">
@@ -409,15 +410,5 @@
     </nav>
   </div>
 </div>
-
-<script>
-function setView(v) {
-  document.getElementById('view-table').hidden = v !== 'table';
-  document.getElementById('view-grid').hidden  = v !== 'grid';
-  document.querySelectorAll('.ux-view-toggle__btn').forEach((b, i) => {
-    b.setAttribute('aria-pressed', (i === 0 && v === 'table') || (i === 1 && v === 'grid') ? 'true' : 'false');
-  });
-}
-</script>
 
 </body></html>
