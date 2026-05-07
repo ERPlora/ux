@@ -1,0 +1,263 @@
+/* ============================================================
+   Progress + Spinner — barras lineales, segmentadas, circulares
+   ============================================================ */
+
+.ux-progress {
+  width: 100%;
+  height: 6px;
+  background: var(--ux-bg-3);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.ux-progress__bar {
+  height: 100%;
+  background: var(--ux-brand);
+  border-radius: inherit;
+  transition: width var(--ux-dur-base) var(--ux-ease-out);
+}
+.ux-progress--sm { height: 4px; }
+.ux-progress--lg { height: 10px; }
+.ux-progress--leaf .ux-progress__bar { background: var(--ux-leaf); }
+.ux-progress--warn .ux-progress__bar { background: var(--ux-warn); }
+.ux-progress--danger .ux-progress__bar { background: var(--ux-danger); }
+.ux-progress--info .ux-progress__bar { background: var(--ux-info); }
+
+/* Indeterminate */
+.ux-progress--indeterminate .ux-progress__bar {
+  width: 35% !important;
+  animation: ux-progress-indet 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes ux-progress-indet {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(290%); }
+}
+
+/* Striped */
+.ux-progress--striped .ux-progress__bar {
+  background-image: linear-gradient(45deg,
+    rgba(255,255,255,0.18) 25%, transparent 25%,
+    transparent 50%, rgba(255,255,255,0.18) 50%,
+    rgba(255,255,255,0.18) 75%, transparent 75%);
+  background-size: 14px 14px;
+  animation: ux-progress-stripes 1.2s linear infinite;
+}
+@keyframes ux-progress-stripes {
+  from { background-position: 0 0; }
+  to   { background-position: 14px 0; }
+}
+
+/* Segmented */
+.ux-progress-segments {
+  display: flex;
+  gap: 3px;
+  width: 100%;
+}
+.ux-progress-segments__seg {
+  flex: 1;
+  height: 6px;
+  background: var(--ux-bg-3);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.ux-progress-segments__seg[data-state="done"] { background: var(--ux-brand); }
+.ux-progress-segments__seg[data-state="active"] {
+  background: var(--ux-bg-3);
+}
+.ux-progress-segments__seg[data-state="active"]::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: var(--ux-brand);
+  animation: ux-seg-pulse 1.3s ease-in-out infinite;
+}
+@keyframes ux-seg-pulse {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(0); }
+}
+
+/* Progress with label */
+.ux-progress-block {
+  display: grid;
+  gap: 6px;
+}
+.ux-progress-block__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--ux-text-sm);
+}
+.ux-progress-block__label { color: var(--ux-ink-2); font-weight: 500; }
+.ux-progress-block__value {
+  color: var(--ux-ink-3);
+  font-family: var(--ux-font-mono);
+  font-size: var(--ux-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   Spinner — circular, varios tamaños
+   ============================================================ */
+.ux-spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid color-mix(in oklch, var(--ux-ink) 12%, transparent);
+  border-top-color: var(--ux-brand);
+  border-radius: 50%;
+  animation: ux-spin 0.7s linear infinite;
+}
+.ux-spinner--xs { width: 12px; height: 12px; border-width: 1.5px; }
+.ux-spinner--sm { width: 14px; height: 14px; }
+.ux-spinner--md { width: 20px; height: 20px; border-width: 2.5px; }
+.ux-spinner--lg { width: 28px; height: 28px; border-width: 3px; }
+.ux-spinner--xl { width: 40px; height: 40px; border-width: 3.5px; }
+.ux-spinner--ink { border-top-color: var(--ux-ink); }
+.ux-spinner--leaf { border-top-color: var(--ux-leaf); }
+.ux-spinner--warn { border-top-color: var(--ux-warn); }
+.ux-spinner--danger { border-top-color: var(--ux-danger); }
+@keyframes ux-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Dots spinner */
+.ux-dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+.ux-dots__d {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ux-brand);
+  animation: ux-dots-bounce 1.2s ease-in-out infinite;
+}
+.ux-dots__d:nth-child(2) { animation-delay: 0.15s; }
+.ux-dots__d:nth-child(3) { animation-delay: 0.3s; }
+@keyframes ux-dots-bounce {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.7); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+/* Circular progress (con SVG) */
+.ux-circ {
+  --ux-circ-size: 56px;
+  --ux-circ-stroke: 5;
+  --ux-circ-track: var(--ux-bg-3);
+  --ux-circ-fill: var(--ux-brand);
+  width: var(--ux-circ-size);
+  height: var(--ux-circ-size);
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+.ux-circ svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ux-circ__track { fill: none; stroke: var(--ux-circ-track); stroke-width: var(--ux-circ-stroke); }
+.ux-circ__bar {
+  fill: none;
+  stroke: var(--ux-circ-fill);
+  stroke-width: var(--ux-circ-stroke);
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--ux-dur-slow) var(--ux-ease-out);
+}
+.ux-circ__label {
+  position: absolute;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ux-ink);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--ux-font-mono);
+}
+
+/* ============================================================
+   Pagination
+   ============================================================ */
+.ux-paginator {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--ux-text-sm);
+}
+.ux-paginator__btn {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: var(--ux-radius-sm);
+  color: var(--ux-ink-2);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background var(--ux-dur-fast);
+}
+.ux-paginator__btn:hover {
+  background: var(--ux-bg-3);
+  color: var(--ux-ink);
+}
+.ux-paginator__btn[aria-current="page"],
+.ux-paginator__btn[data-active="true"] {
+  background: var(--ux-bg-3);
+  border-color: var(--ux-line-2);
+  color: var(--ux-ink);
+  font-weight: 500;
+}
+.ux-paginator__btn[disabled],
+.ux-paginator__btn[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.ux-paginator__btn svg {
+  width: 14px; height: 14px;
+}
+.ux-paginator__gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  color: var(--ux-ink-3);
+  user-select: none;
+}
+
+/* Variant: compact (prev / value / next) */
+.ux-paginator--compact {
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-md);
+  padding: 1px;
+  background: var(--ux-bg-2);
+  gap: 0;
+}
+.ux-paginator--compact .ux-paginator__btn {
+  border-radius: var(--ux-radius-xs);
+}
+
+/* Pager — barra completa con info y page-size */
+.ux-pager {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink-3);
+}
+.ux-pager__info { font-variant-numeric: tabular-nums; }
+.ux-pager__info b { color: var(--ux-ink-2); font-weight: 500; }
+.ux-pager__pgsize {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.ux-pager__pgsize select {
+  height: 26px;
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-sm);
+  color: var(--ux-ink);
+  padding: 0 22px 0 8px;
+  font: inherit;
+  font-size: 12px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none' stroke='%23999'><path d='m1 1 4 4 4-4'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+}

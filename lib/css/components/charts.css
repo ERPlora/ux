@@ -1,0 +1,264 @@
+/* ============================================================
+   ERPlora UX · Charts
+   Charts SVG declarativos. Usan la paleta del sistema.
+   Sin dependencias — el cliente genera el SVG inline.
+   ============================================================ */
+
+.ux-chart {
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-xl);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ux-chart--flat { background: transparent; border: none; padding: 0; }
+
+.ux-chart__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ux-chart__title {
+  font-family: var(--ux-font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ux-ink);
+  margin: 0;
+}
+.ux-chart__sub {
+  font-size: 11px;
+  color: var(--ux-ink-3);
+  margin-top: 2px;
+}
+.ux-chart__big {
+  font-family: var(--ux-font-display);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--ux-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.ux-chart__delta {
+  font-size: 12px;
+  color: var(--ux-ink-3);
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+}
+.ux-chart__delta--up { color: var(--ux-leaf); }
+.ux-chart__delta--down { color: var(--ux-danger); }
+
+.ux-chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 11.5px;
+  color: var(--ux-ink-2);
+}
+.ux-chart__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ux-chart__legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  background: var(--ux-brand);
+  flex-shrink: 0;
+}
+
+/* SVG canvas */
+.ux-chart__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  font-family: var(--ux-font-mono);
+  font-size: 10px;
+  overflow: visible;
+}
+
+/* axis & grid */
+.ux-chart__grid line { stroke: var(--ux-line); stroke-width: 1; shape-rendering: crispEdges; }
+.ux-chart__axis text { fill: var(--ux-ink-3); font-size: 10px; font-variant-numeric: tabular-nums; }
+.ux-chart__axis line { stroke: var(--ux-line-2); stroke-width: 1; }
+
+/* series colors */
+.ux-chart__bar       { fill: var(--ux-brand); }
+.ux-chart__bar--leaf { fill: var(--ux-leaf); }
+.ux-chart__bar--warn { fill: var(--ux-warn); }
+.ux-chart__bar--info { fill: var(--ux-info); }
+.ux-chart__bar--mute { fill: var(--ux-bg-4); }
+.ux-chart__bar:hover { filter: brightness(1.15); }
+
+.ux-chart__line       { stroke: var(--ux-brand); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ux-chart__line--leaf { stroke: var(--ux-leaf); }
+.ux-chart__line--info { stroke: var(--ux-info); }
+.ux-chart__line--mute { stroke: var(--ux-ink-3); stroke-dasharray: 4 4; stroke-width: 1.5; }
+
+.ux-chart__area       { fill: url(#ux-area-grad); }
+.ux-chart__area-leaf  { fill: url(#ux-area-grad-leaf); }
+
+.ux-chart__dot { fill: var(--ux-brand); stroke: var(--ux-bg-2); stroke-width: 2; }
+.ux-chart__dot--leaf { fill: var(--ux-leaf); }
+
+.ux-chart__label-value {
+  fill: var(--ux-ink);
+  font-family: var(--ux-font-display);
+  font-weight: 600;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ux-chart__hover {
+  fill: transparent;
+  cursor: pointer;
+}
+.ux-chart__hover:hover ~ .ux-chart__hover-bar { opacity: 1; }
+
+/* ---------- Donut ---------- */
+.ux-donut {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+.ux-donut__svg {
+  width: 140px; height: 140px;
+}
+.ux-donut__track { fill: none; stroke: var(--ux-bg-3); stroke-width: 16; }
+.ux-donut__slice { fill: none; stroke-width: 16; transform: rotate(-90deg); transform-origin: center; transition: stroke-dasharray var(--ux-dur-slow) var(--ux-ease-out); }
+.ux-donut__slice--brand { stroke: var(--ux-brand); }
+.ux-donut__slice--leaf  { stroke: var(--ux-leaf); }
+.ux-donut__slice--warn  { stroke: var(--ux-warn); }
+.ux-donut__slice--info  { stroke: var(--ux-info); }
+.ux-donut__slice--mute  { stroke: var(--ux-bg-4); }
+.ux-donut__center {
+  font-family: var(--ux-font-display);
+  fill: var(--ux-ink);
+  text-anchor: middle;
+}
+.ux-donut__center-value { font-size: 22px; font-weight: 600; letter-spacing: -0.04em; }
+.ux-donut__center-label { font-size: 9px; fill: var(--ux-ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.ux-donut__legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+.ux-donut__legend-row {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  color: var(--ux-ink-2);
+}
+.ux-donut__legend-row b {
+  color: var(--ux-ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.ux-donut__legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+  background: var(--ux-brand);
+}
+
+/* ---------- Bar (horizontal list-like) ---------- */
+.ux-hbars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ux-hbar {
+  display: grid;
+  grid-template-columns: 110px 1fr 60px;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+}
+.ux-hbar__label {
+  color: var(--ux-ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ux-hbar__track {
+  height: 8px;
+  background: var(--ux-bg-3);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.ux-hbar__fill {
+  height: 100%;
+  background: var(--ux-brand);
+  border-radius: 4px;
+  transition: width var(--ux-dur-slow) var(--ux-ease-out);
+}
+.ux-hbar__fill--leaf  { background: var(--ux-leaf); }
+.ux-hbar__fill--warn  { background: var(--ux-warn); }
+.ux-hbar__fill--info  { background: var(--ux-info); }
+.ux-hbar__fill--danger{ background: var(--ux-danger); }
+.ux-hbar__value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ux-ink);
+  font-weight: 500;
+}
+
+/* ---------- Heatmap (calendario/actividad) ---------- */
+.ux-heat {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, 1fr);
+  gap: 3px;
+}
+.ux-heat__cell {
+  width: 12px; height: 12px;
+  border-radius: 2px;
+  background: var(--ux-bg-3);
+}
+.ux-heat__cell[data-v="1"] { background: color-mix(in oklch, var(--ux-brand) 25%, var(--ux-bg-3)); }
+.ux-heat__cell[data-v="2"] { background: color-mix(in oklch, var(--ux-brand) 50%, var(--ux-bg-3)); }
+.ux-heat__cell[data-v="3"] { background: color-mix(in oklch, var(--ux-brand) 75%, var(--ux-bg-3)); }
+.ux-heat__cell[data-v="4"] { background: var(--ux-brand); }
+
+/* ---------- Funnel ---------- */
+.ux-funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ux-funnel__step {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+.ux-funnel__bar {
+  height: 32px;
+  background: linear-gradient(90deg, var(--ux-brand), color-mix(in oklch, var(--ux-brand) 60%, var(--ux-bg-3)));
+  border-radius: var(--ux-radius-sm);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  color: var(--ux-brand-fg);
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 0;
+}
+.ux-funnel__bar--leaf { background: linear-gradient(90deg, var(--ux-leaf), color-mix(in oklch, var(--ux-leaf) 60%, var(--ux-bg-3))); }
+.ux-funnel__bar--warn { background: linear-gradient(90deg, var(--ux-warn), color-mix(in oklch, var(--ux-warn) 60%, var(--ux-bg-3))); color: var(--ux-warn-fg); }
+.ux-funnel__bar--mute { background: var(--ux-bg-3); color: var(--ux-ink-2); }
+.ux-funnel__meta {
+  font-size: 11.5px;
+  color: var(--ux-ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ux-funnel__meta b { color: var(--ux-ink); font-weight: 500; }

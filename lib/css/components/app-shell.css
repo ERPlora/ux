@@ -1,0 +1,100 @@
+/* ============================================================
+   ERPlora UX · App Shell
+   Estructura de aplicación: sidebar fijo + topbar pegajoso + main
+   En mobile: sidebar se convierte en drawer con backdrop, tab-bar inferior aparece como nav principal
+   ============================================================ */
+
+.ux-app {
+  display: grid;
+  grid-template-columns: var(--ux-sidebar-w) 1fr;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--ux-bg);
+  position: relative;
+}
+
+.ux-app[data-sidebar="collapsed"] {
+  grid-template-columns: var(--ux-sidebar-w-collapsed) 1fr;
+}
+
+.ux-app[data-sidebar="hidden"] {
+  grid-template-columns: 1fr;
+}
+
+.ux-app__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ux-app__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--ux-space-5) var(--ux-page-pad) var(--ux-space-9);
+}
+
+/* Tab-bar inferior en el shell (oculto en desktop) */
+.ux-app__tabbar {
+  display: none;
+}
+
+/* Backdrop del sidebar drawer (oculto en desktop) */
+.ux-app__sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: calc(var(--ux-z-drawer) - 1);
+  opacity: 0;
+  transition: opacity var(--ux-dur-base) var(--ux-ease-out);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+   Mobile (<768px)
+   ============================================================ */
+@media (max-width: 767px) {
+  .ux-app,
+  .ux-app[data-sidebar="collapsed"],
+  .ux-app[data-sidebar="hidden"] {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sidebar como drawer offcanvas */
+  .ux-app .ux-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(288px, 85vw);
+    transform: translateX(-100%);
+    z-index: var(--ux-z-drawer);
+    box-shadow: var(--ux-shadow-lg);
+    transition: transform var(--ux-dur-base) var(--ux-ease-out);
+  }
+
+  .ux-app[data-sidebar="open"] .ux-sidebar {
+    transform: translateX(0);
+  }
+
+  .ux-app[data-sidebar="open"] .ux-app__sidebar-overlay {
+    display: block;
+    opacity: 1;
+  }
+
+  /* Tab-bar fijo abajo, visible solo en mobile */
+  .ux-app__tabbar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--ux-z-sticky);
+  }
+
+  /* Reservar espacio para el tab-bar */
+  .ux-app[data-tabbar] .ux-app__body {
+    padding-bottom: calc(58px + env(safe-area-inset-bottom) + var(--ux-space-5));
+  }
+}
