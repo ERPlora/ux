@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>ERPlora UX · Librería</title>
 <link rel="stylesheet" href="lib/css/ux.css"/>
+<link rel="stylesheet" href="lib/templates/all.css"/>
 <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
 <style>
   /* ===== Doc-only chrome (lo mínimo, todo lo demás usa la librería) ===== */
@@ -45,6 +46,36 @@
   .vp button[aria-pressed="true"] {
     background: var(--ux-bg-1); color: var(--ux-ink);
     box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  }
+
+  /* Template selector — matches .vp pill aesthetic */
+  .topbar-template {
+    height: 30px;
+    padding: 0 28px 0 10px;
+    background: var(--ux-bg-3) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238A8378' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>") no-repeat right 8px center;
+    border: 1px solid var(--ux-line);
+    border-radius: var(--ux-radius-md);
+    color: var(--ux-ink-2);
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 500;
+    -webkit-appearance: none; appearance: none;
+    cursor: pointer;
+    transition: border-color var(--ux-dur-fast), color var(--ux-dur-fast), background-color var(--ux-dur-fast);
+    flex-shrink: 0;
+  }
+  .topbar-template:hover {
+    border-color: var(--ux-line-2);
+    color: var(--ux-ink);
+  }
+  .topbar-template:focus-visible {
+    outline: 0;
+    border-color: var(--ux-brand);
+    box-shadow: 0 0 0 3px var(--ux-brand-soft);
+  }
+  .topbar-template option {
+    background: var(--ux-bg-1);
+    color: var(--ux-ink);
   }
 
   /* Body scroll area */
@@ -115,7 +146,23 @@
 </head>
 <body>
 
-<div class="ux-app" data-docs data-signals="{q: '', route: 'overview', theme: 'erplora', vp: 'desktop'}">
+<div class="ux-app" data-docs
+     data-signals="{q: '', route: 'overview', theme: localStorage.getItem('ux-theme') || 'erplora', vp: 'desktop', template: localStorage.getItem('ux-template') || ''}"
+     data-effect="
+       const root = document.documentElement;
+       root.setAttribute('data-theme', $theme);
+       const t = $template ? ($theme === 'erplora-light' ? $template + '-light' : $template) : '';
+       if (t) root.setAttribute('data-template', t); else root.removeAttribute('data-template');
+       try { localStorage.setItem('ux-theme', $theme); localStorage.setItem('ux-template', $template); } catch(e){}
+       document.querySelectorAll('.stage iframe').forEach(f => {
+         try {
+           const fr = f.contentDocument && f.contentDocument.documentElement;
+           if (!fr) return;
+           fr.setAttribute('data-theme', $theme);
+           if (t) fr.setAttribute('data-template', t); else fr.removeAttribute('data-template');
+         } catch(e) {}
+       });
+     ">
 
   <!-- =================== SIDEBAR (componente real .ux-sidebar) =================== -->
   <aside class="ux-sidebar">
@@ -166,9 +213,17 @@
 
       <div class="ux-topbar__actions">
         <div class="vp" role="tablist" aria-label="Tema">
-          <button data-theme-btn="erplora" aria-pressed="true">🌙 Dark</button>
-          <button data-theme-btn="erplora-light" aria-pressed="false">☀ Light</button>
+          <button data-on-click="$theme = 'erplora'"       data-attr-aria-pressed="$theme === 'erplora'">🌙 Dark</button>
+          <button data-on-click="$theme = 'erplora-light'" data-attr-aria-pressed="$theme === 'erplora-light'">☀ Light</button>
         </div>
+        <select class="topbar-template" data-bind-template aria-label="Template">
+          <option value="">⌘ Default · Terracotta</option>
+          <option value="corporate">⬢ Corporate · Blue</option>
+          <option value="minimal">○ Minimal · Mono</option>
+          <option value="forest">▲ Forest · Earth</option>
+          <option value="ocean">~ Ocean · Tech</option>
+          <option value="violet">◆ Violet · Creative</option>
+        </select>
         <div class="vp" role="tablist" aria-label="Viewport">
           <button data-vp-btn="desktop" aria-pressed="true">▢ Desktop</button>
           <button data-vp-btn="tablet"  aria-pressed="false">▭ Tablet</button>
@@ -346,9 +401,6 @@ function go(route) {
 }
 
 let currentVp = 'desktop';
-let currentTheme = localStorage.getItem('ux-theme') || 'erplora';
-document.documentElement.setAttribute('data-theme', currentTheme);
-document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', b.dataset.themeBtn === currentTheme));
 
 document.querySelectorAll('[data-vp-btn]').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -357,17 +409,7 @@ document.querySelectorAll('[data-vp-btn]').forEach(btn => {
     const stage = body.querySelector('.stage'); if (stage) stage.dataset.vp = currentVp;
   });
 });
-document.querySelectorAll('[data-theme-btn]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    currentTheme = btn.dataset.themeBtn;
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    localStorage.setItem('ux-theme', currentTheme);
-    document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', b === btn));
-    document.querySelectorAll('.stage iframe').forEach(f => {
-      try { f.contentDocument.documentElement.setAttribute('data-theme', currentTheme); } catch(e){}
-    });
-  });
-});
+// (Theme + template handled via Datastar data-effect on the .ux-app root.)
 
 document.querySelectorAll('.ux-sidebar__item[data-route]').forEach(a => {
   a.addEventListener('click', e => {

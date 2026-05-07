@@ -52,6 +52,15 @@ When the user is **building UI in a project that includes this library**, the ag
 
 Themes available out of the box: `data-theme="erplora"` (dark terracota, default), `data-theme="erplora-light"` (light variant). Apply on `<html>` or any subtree.
 
+**Optional palette templates** (loaded as additional CSS, applied via `data-template`):
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@latest/dist/templates/all.min.css">
+<html data-theme="erplora" data-template="corporate">
+```
+
+Available templates (each has a dark + `-light` variant): `corporate` (banking navy), `minimal` (mono+gold), `forest` (earth green), `ocean` (tech teal), `violet` (creative purple). Templates only redefine `--ux-*` color tokens — geometry, typography and motion are unchanged. Pass them through to consumer apps when the brand asks for a different palette and you don't want to fork the library.
+
 ## Class catalog (block → notable variants & children)
 
 This is the **block index**. For each, common variants (`--`) and children (`__`) are listed. The full machine-readable inventory lives in `llms-full.txt` and the canonical source is `lib/css/components/`.
