@@ -1,0 +1,473 @@
+/* ============================================================
+   ERPlora UX · Table & DataTable
+   Tabla densa para dashboards · soporta hover, selección,
+   sticky header, tipos de celda (num, status, avatar).
+   ============================================================ */
+
+.ux-table-wrap {
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-xl);
+  overflow: hidden;
+}
+
+.ux-table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--ux-line);
+  background: var(--ux-bg-1);
+}
+.ux-table-toolbar__title {
+  font-family: var(--ux-font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ux-ink);
+}
+.ux-table-toolbar__count {
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink-3);
+  background: var(--ux-bg-3);
+  border: 1px solid var(--ux-line);
+  padding: 2px 7px;
+  border-radius: var(--ux-radius-pill);
+}
+.ux-table-toolbar__spacer { flex: 1; }
+
+/* ============================================================
+   Consolidated toolbar — search · filters · date · pagesize · view · io
+   Una sola línea con todos los controles del DataTable.
+   ============================================================ */
+.ux-dt-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ux-line);
+  background: var(--ux-bg-1);
+  flex-wrap: wrap;
+}
+.ux-dt-toolbar > .ux-search { flex: 1 1 240px; min-width: 200px; max-width: 320px; }
+.ux-dt-toolbar > .ux-select { flex: 0 0 auto; width: auto; min-width: 150px; }
+.ux-dt-toolbar__spacer { flex: 1; }
+.ux-dt-toolbar__divider {
+  width: 1px;
+  height: 22px;
+  background: var(--ux-line);
+  margin: 0 2px;
+}
+
+/* Date range input compacto */
+.ux-date-range {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-md);
+  padding: 0 10px;
+  height: 34px;
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink-2);
+  cursor: pointer;
+  transition: border-color var(--ux-dur-fast);
+}
+.ux-date-range:hover { border-color: var(--ux-line-2); }
+.ux-date-range svg { width: 14px; height: 14px; color: var(--ux-ink-3); }
+.ux-date-range__sep { color: var(--ux-ink-3); }
+
+/* Icon-only toolbar buttons */
+.ux-icon-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-md);
+  color: var(--ux-ink-2);
+  cursor: pointer;
+  transition: all var(--ux-dur-fast);
+}
+.ux-icon-btn:hover { border-color: var(--ux-line-2); color: var(--ux-ink); background: var(--ux-bg-3); }
+.ux-icon-btn svg { width: 15px; height: 15px; }
+.ux-icon-btn--brand { background: var(--ux-brand); border-color: var(--ux-brand); color: var(--ux-brand-fg); }
+.ux-icon-btn--brand:hover { background: var(--ux-brand-2); border-color: var(--ux-brand-2); color: var(--ux-brand-fg); }
+.ux-icon-btn--danger:hover { color: var(--ux-danger); border-color: var(--ux-danger); }
+
+/* View toggle: Tabla / Grid */
+.ux-view-toggle {
+  display: inline-flex;
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-md);
+  padding: 2px;
+  height: 34px;
+}
+.ux-view-toggle__btn {
+  width: 30px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--ux-radius-md) - 2px);
+  color: var(--ux-ink-3);
+  cursor: pointer;
+  transition: all var(--ux-dur-fast);
+}
+.ux-view-toggle__btn:hover { color: var(--ux-ink-2); }
+.ux-view-toggle__btn svg { width: 14px; height: 14px; }
+.ux-view-toggle__btn[aria-pressed="true"] {
+  background: var(--ux-bg-4);
+  color: var(--ux-ink);
+  box-shadow: var(--ux-shadow-xs);
+}
+
+/* Row action icons (inline en celdas, sin texto) */
+.ux-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.ux-row-action {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--ux-radius-sm);
+  color: var(--ux-ink-3);
+  cursor: pointer;
+  transition: all var(--ux-dur-fast);
+}
+.ux-row-action:hover { background: var(--ux-bg-3); color: var(--ux-ink); }
+.ux-row-action svg { width: 14px; height: 14px; }
+.ux-row-action--ok    { color: var(--ux-leaf); }
+.ux-row-action--warn  { color: var(--ux-warn); }
+.ux-row-action--info  { color: var(--ux-info); }
+.ux-row-action--danger:hover { color: var(--ux-danger); }
+
+/* ============================================================
+   Card grid view (alternativa a tabla densa)
+   ============================================================ */
+.ux-dt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  padding: 14px;
+}
+.ux-dt-card {
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-lg);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color var(--ux-dur-fast);
+}
+.ux-dt-card:hover { border-color: var(--ux-line-2); }
+.ux-dt-card[aria-selected="true"] {
+  border-color: var(--ux-brand);
+  background: color-mix(in oklch, var(--ux-brand) 6%, var(--ux-bg-2));
+}
+.ux-dt-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ux-dt-card__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ux-radius-md);
+  background: var(--ux-bg-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ux-ink-2);
+}
+.ux-dt-card__icon svg { width: 16px; height: 16px; }
+.ux-dt-card__title {
+  font-size: var(--ux-text-sm);
+  font-weight: 500;
+  color: var(--ux-ink);
+}
+.ux-dt-card__sub {
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink-3);
+  font-family: var(--ux-font-mono);
+}
+.ux-dt-card__body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  font-size: var(--ux-text-xs);
+}
+.ux-dt-card__field {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--ux-ink-3);
+}
+.ux-dt-card__field strong {
+  color: var(--ux-ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.ux-dt-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid var(--ux-line);
+}
+
+.ux-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ux-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink);
+}
+
+.ux-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--ux-bg-1);
+  font-weight: 500;
+  font-size: var(--ux-text-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ux-tracking-wide);
+  color: var(--ux-ink-3);
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ux-line);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.ux-table thead th.ux-th--sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.ux-table thead th.ux-th--sortable:hover { color: var(--ux-ink-2); }
+.ux-table thead th.ux-th--sortable[aria-sort]:not([aria-sort="none"]) { color: var(--ux-ink); }
+.ux-table thead th.ux-th--sortable::after {
+  content: "↕";
+  margin-left: 6px;
+  opacity: 0.4;
+  font-size: 10px;
+}
+.ux-table thead th[aria-sort="ascending"]::after  { content: "↑"; opacity: 1; color: var(--ux-brand); }
+.ux-table thead th[aria-sort="descending"]::after { content: "↓"; opacity: 1; color: var(--ux-brand); }
+
+.ux-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--ux-line);
+  vertical-align: middle;
+}
+.ux-table tbody tr:last-child td { border-bottom: none; }
+.ux-table tbody tr {
+  transition: background var(--ux-dur-fast);
+}
+.ux-table tbody tr:hover {
+  background: var(--ux-bg-3);
+}
+.ux-table tbody tr[aria-selected="true"] {
+  background: color-mix(in oklch, var(--ux-brand) 8%, transparent);
+}
+.ux-table tbody tr[aria-selected="true"]:hover {
+  background: color-mix(in oklch, var(--ux-brand) 12%, transparent);
+}
+
+/* Tipos de celda */
+.ux-td--num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  font-weight: 500;
+}
+.ux-td--mono {
+  font-family: var(--ux-font-mono);
+  font-size: 12px;
+  color: var(--ux-ink-2);
+}
+.ux-td--muted { color: var(--ux-ink-3); }
+.ux-td--strong { font-weight: 500; }
+.ux-td--right { text-align: right; }
+.ux-td--center { text-align: center; }
+.ux-td--ellipsis {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cell con avatar/icono + texto */
+.ux-cell-rich {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ux-cell-rich__main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ux-cell-rich__title { font-weight: 500; color: var(--ux-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ux-cell-rich__sub { font-size: var(--ux-text-xs); color: var(--ux-ink-3); }
+
+/* Variantes */
+.ux-table--zebra tbody tr:nth-child(even) {
+  background: color-mix(in oklch, var(--ux-bg-3) 50%, transparent);
+}
+.ux-table--compact tbody td { padding: 8px 12px; }
+.ux-table--compact thead th { padding: 8px 12px; }
+
+.ux-table--bordered tbody td { border-right: 1px solid var(--ux-line); }
+.ux-table--bordered tbody td:last-child { border-right: none; }
+.ux-table--bordered thead th { border-right: 1px solid var(--ux-line); }
+.ux-table--bordered thead th:last-child { border-right: none; }
+
+/* Footer / pagination row */
+.ux-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--ux-line);
+  background: var(--ux-bg-1);
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink-3);
+}
+
+/* ============================================================
+   Pagination
+   ============================================================ */
+
+.ux-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--ux-text-sm);
+}
+
+.ux-pagination__btn {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--ux-line);
+  background: var(--ux-bg-2);
+  color: var(--ux-ink-2);
+  border-radius: var(--ux-radius-sm);
+  cursor: pointer;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--ux-dur-fast);
+}
+.ux-pagination__btn:hover:not(:disabled) {
+  border-color: var(--ux-line-2);
+  color: var(--ux-ink);
+}
+.ux-pagination__btn[aria-current="page"] {
+  background: var(--ux-brand);
+  border-color: var(--ux-brand);
+  color: var(--ux-brand-fg);
+}
+.ux-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ux-pagination__ellipsis {
+  padding: 0 4px;
+  color: var(--ux-ink-3);
+}
+
+/* Page-size select */
+.ux-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink-3);
+}
+.ux-page-size .ux-select {
+  --_h: 26px;
+  width: auto;
+  padding: 0 24px 0 8px;
+  font-size: var(--ux-text-xs);
+}
+
+/* ============================================================
+   Sparkline — usado embebido en celdas o KPIs
+   ============================================================ */
+
+.ux-spark {
+  display: inline-block;
+  width: 80px;
+  height: 22px;
+  vertical-align: middle;
+}
+.ux-spark--lg { width: 120px; height: 32px; }
+.ux-spark--sm { width: 56px; height: 18px; }
+
+.ux-spark path,
+.ux-spark polyline {
+  fill: none;
+  stroke: var(--ux-ink-2);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ux-spark--up   path, .ux-spark--up polyline   { stroke: var(--ux-leaf); }
+.ux-spark--down path, .ux-spark--down polyline { stroke: var(--ux-danger); }
+.ux-spark--brand path, .ux-spark--brand polyline { stroke: var(--ux-brand); }
+
+.ux-spark__area {
+  fill: currentColor;
+  opacity: 0.12;
+  stroke: none;
+}
+
+/* Bar sparkline */
+.ux-spark-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 22px;
+  vertical-align: middle;
+}
+.ux-spark-bars__bar {
+  width: 4px;
+  background: var(--ux-ink-3);
+  border-radius: 1px;
+  transition: background var(--ux-dur-fast);
+}
+.ux-spark-bars--brand .ux-spark-bars__bar { background: var(--ux-brand); }
+.ux-spark-bars--up    .ux-spark-bars__bar { background: var(--ux-leaf); }
+
+/* Trend pill — pequeño indicador inline */
+.ux-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--ux-text-xs);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ux-ink-3);
+}
+.ux-trend--up { color: var(--ux-leaf); }
+.ux-trend--down { color: var(--ux-danger); }
+.ux-trend__arrow { width: 10px; height: 10px; }

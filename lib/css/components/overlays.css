@@ -1,0 +1,727 @@
+/* ============================================================
+   ERPlora UX · Overlays
+   Modal · Drawer · Toast · Tooltip · Popover
+   Cada componente toma su z-index del token correspondiente.
+   ============================================================ */
+
+/* ============================================================
+   Backdrop común
+   ============================================================ */
+.ux-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 1;
+  transition: opacity var(--ux-dur-base) var(--ux-ease-out);
+}
+.ux-backdrop[hidden],
+.ux-backdrop[data-state="closed"] { opacity: 0; pointer-events: none; }
+
+/* ============================================================
+   Modal · diálogo centrado
+   ============================================================ */
+.ux-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ux-z-modal);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  pointer-events: none;
+}
+.ux-modal-root .ux-backdrop { pointer-events: auto; }
+.ux-modal-root[data-state="open"] { pointer-events: auto; }
+
+.ux-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - 48px);
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line-2);
+  border-radius: var(--ux-radius-2xl);
+  box-shadow: var(--ux-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(8px) scale(0.98);
+  opacity: 0;
+  transition: transform var(--ux-dur-base) var(--ux-ease-spring), opacity var(--ux-dur-base) var(--ux-ease-out);
+}
+.ux-modal-root[data-state="open"] .ux-modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.ux-modal--sm  { max-width: 380px; }
+.ux-modal--md  { max-width: 480px; }
+.ux-modal--lg  { max-width: 640px; }
+.ux-modal--xl  { max-width: 880px; }
+
+.ux-modal__header {
+  padding: 18px 20px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.ux-modal__icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  background: var(--ux-bg-3);
+  color: var(--ux-ink-2);
+}
+.ux-modal__icon svg { width: 18px; height: 18px; }
+.ux-modal__icon--brand { background: var(--ux-brand-soft); color: var(--ux-brand-3); }
+.ux-modal__icon--danger { background: var(--ux-danger-soft); color: var(--ux-danger); }
+.ux-modal__icon--warn { background: var(--ux-warn-soft); color: var(--ux-warn); }
+.ux-modal__icon--ok { background: var(--ux-leaf-soft); color: var(--ux-leaf); }
+
+.ux-modal__heading { flex: 1; min-width: 0; }
+.ux-modal__title {
+  font-family: var(--ux-font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ux-ink);
+  margin: 0;
+}
+.ux-modal__sub {
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink-3);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.ux-modal__close {
+  width: 28px; height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--ux-ink-3);
+  border-radius: var(--ux-radius-sm);
+  cursor: pointer;
+  display: grid; place-items: center;
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.ux-modal__close:hover { background: var(--ux-bg-3); color: var(--ux-ink); }
+
+.ux-modal__body {
+  padding: 4px 20px 18px;
+  overflow-y: auto;
+  flex: 1;
+  font-size: var(--ux-text-md);
+  color: var(--ux-ink-2);
+  line-height: 1.55;
+}
+.ux-modal__footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--ux-line);
+  background: var(--ux-bg-1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.ux-modal__footer--between { justify-content: space-between; }
+
+/* ============================================================
+   Drawer · panel lateral
+   ============================================================ */
+.ux-drawer-root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ux-z-drawer);
+  pointer-events: none;
+}
+.ux-drawer-root[data-state="open"] { pointer-events: auto; }
+.ux-drawer-root .ux-backdrop { pointer-events: auto; }
+
+.ux-drawer {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 100%;
+  max-width: 420px;
+  background: var(--ux-bg-1);
+  border-left: 1px solid var(--ux-line-2);
+  box-shadow: var(--ux-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--ux-dur-slow) var(--ux-ease-spring);
+}
+
+/* Right side (default) */
+.ux-drawer { right: 0; transform: translateX(100%); }
+.ux-drawer-root[data-state="open"] .ux-drawer { transform: translateX(0); }
+
+/* Left side */
+.ux-drawer--left {
+  right: auto; left: 0;
+  border-left: none;
+  border-right: 1px solid var(--ux-line-2);
+  transform: translateX(-100%);
+}
+.ux-drawer-root[data-state="open"] .ux-drawer--left { transform: translateX(0); }
+
+/* Bottom sheet (mobile) */
+.ux-drawer--bottom {
+  top: auto; bottom: 0;
+  width: 100%; max-width: none;
+  height: auto; max-height: 80vh;
+  border: none;
+  border-top: 1px solid var(--ux-line-2);
+  border-radius: var(--ux-radius-2xl) var(--ux-radius-2xl) 0 0;
+  transform: translateY(100%);
+}
+.ux-drawer-root[data-state="open"] .ux-drawer--bottom { transform: translateY(0); }
+.ux-drawer--bottom::before {
+  content: "";
+  display: block;
+  width: 36px; height: 4px;
+  background: var(--ux-line-3);
+  border-radius: 2px;
+  margin: 8px auto 0;
+}
+
+.ux-drawer__header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--ux-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ux-drawer__title {
+  font-family: var(--ux-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ux-ink);
+}
+.ux-drawer__sub {
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink-3);
+  margin-top: 2px;
+}
+.ux-drawer__close {
+  width: 28px; height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--ux-ink-3);
+  border-radius: var(--ux-radius-sm);
+  cursor: pointer;
+  display: grid; place-items: center;
+  font-size: 18px;
+  line-height: 1;
+}
+.ux-drawer__close:hover { background: var(--ux-bg-3); color: var(--ux-ink); }
+
+.ux-drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+.ux-drawer__footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--ux-line);
+  background: var(--ux-bg);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ============================================================
+   Toast · stack en una esquina
+   ============================================================ */
+.ux-toast-region {
+  position: fixed;
+  z-index: var(--ux-z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  pointer-events: none;
+  max-width: 380px;
+  width: calc(100vw - 32px);
+}
+.ux-toast-region[data-pos="top-right"]    { top: 0; right: 0; }
+.ux-toast-region[data-pos="top-left"]     { top: 0; left: 0; }
+.ux-toast-region[data-pos="bottom-right"] { bottom: 0; right: 0; }
+.ux-toast-region[data-pos="bottom-left"]  { bottom: 0; left: 0; }
+.ux-toast-region[data-pos="top-center"]    { top: 0; left: 50%; transform: translateX(-50%); }
+.ux-toast-region[data-pos="bottom-center"] { bottom: 0; left: 50%; transform: translateX(-50%); }
+
+.ux-toast {
+  pointer-events: auto;
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line-2);
+  border-radius: var(--ux-radius-lg);
+  box-shadow: var(--ux-shadow-md);
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--ux-text-md);
+  color: var(--ux-ink);
+  animation: ux-toast-in var(--ux-dur-base) var(--ux-ease-spring);
+}
+@keyframes ux-toast-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ux-toast__icon {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.ux-toast--ok    .ux-toast__icon { color: var(--ux-leaf); }
+.ux-toast--warn  .ux-toast__icon { color: var(--ux-warn); }
+.ux-toast--danger .ux-toast__icon { color: var(--ux-danger); }
+.ux-toast--info  .ux-toast__icon { color: var(--ux-info); }
+.ux-toast--brand .ux-toast__icon { color: var(--ux-brand); }
+
+.ux-toast--ok    { border-color: color-mix(in oklch, var(--ux-leaf) 35%, var(--ux-line-2)); }
+.ux-toast--warn  { border-color: color-mix(in oklch, var(--ux-warn) 35%, var(--ux-line-2)); }
+.ux-toast--danger { border-color: color-mix(in oklch, var(--ux-danger) 35%, var(--ux-line-2)); }
+.ux-toast--info  { border-color: color-mix(in oklch, var(--ux-info) 35%, var(--ux-line-2)); }
+
+.ux-toast__body { flex: 1; min-width: 0; }
+.ux-toast__title {
+  font-weight: 500;
+  font-size: var(--ux-text-md);
+  color: var(--ux-ink);
+  margin-bottom: 2px;
+}
+.ux-toast__desc {
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink-3);
+  line-height: 1.4;
+}
+.ux-toast__action {
+  background: transparent;
+  border: none;
+  color: var(--ux-brand-3);
+  font: inherit;
+  font-size: var(--ux-text-xs);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 4px;
+}
+.ux-toast__close {
+  width: 22px; height: 22px;
+  border: none;
+  background: transparent;
+  color: var(--ux-ink-3);
+  border-radius: var(--ux-radius-xs);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.ux-toast__close:hover { background: var(--ux-bg-3); color: var(--ux-ink); }
+
+/* ============================================================
+   Tooltip · pequeño, vía data-tip o nodo dedicado
+   ============================================================ */
+.ux-tooltip {
+  position: absolute;
+  z-index: var(--ux-z-tooltip);
+  background: var(--ux-bg-4);
+  color: var(--ux-ink);
+  font-size: var(--ux-text-xs);
+  padding: 6px 9px;
+  border-radius: var(--ux-radius-sm);
+  border: 1px solid var(--ux-line-2);
+  box-shadow: var(--ux-shadow-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.ux-tooltip::after {
+  content: "";
+  position: absolute;
+  width: 8px; height: 8px;
+  background: inherit;
+  border: inherit;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+.ux-tooltip--top    { transform: translate(-50%, calc(-100% - 8px)); }
+.ux-tooltip--top::after    { left: 50%; bottom: -5px; margin-left: -4px; border-bottom: 1px solid var(--ux-line-2); border-right: 1px solid var(--ux-line-2); border-top:none; border-left:none; }
+.ux-tooltip--bottom { transform: translate(-50%, 8px); }
+.ux-tooltip--bottom::after { left: 50%; top: -5px; margin-left: -4px; border-top: 1px solid var(--ux-line-2); border-left: 1px solid var(--ux-line-2); border-bottom:none; border-right:none; }
+
+/* Trigger helper — añade [data-tip] a un elemento para tooltip puro CSS */
+[data-tip] { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(4px);
+  background: var(--ux-bg-4);
+  color: var(--ux-ink);
+  font-size: var(--ux-text-xs);
+  font-weight: 500;
+  padding: 5px 8px;
+  border-radius: var(--ux-radius-sm);
+  border: 1px solid var(--ux-line-2);
+  box-shadow: var(--ux-shadow-sm);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--ux-dur-fast), transform var(--ux-dur-fast);
+  z-index: var(--ux-z-tooltip);
+}
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================================
+   Popover · contenedor flotante con contenido rico
+   ============================================================ */
+.ux-popover {
+  position: absolute;
+  z-index: var(--ux-z-tooltip);
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line-2);
+  border-radius: var(--ux-radius-lg);
+  box-shadow: var(--ux-shadow-md);
+  min-width: 220px;
+  max-width: 320px;
+  font-size: var(--ux-text-sm);
+}
+.ux-popover__title {
+  font-family: var(--ux-font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ux-ink);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ux-line);
+}
+.ux-popover__body {
+  padding: 10px 12px;
+  color: var(--ux-ink-2);
+  line-height: 1.5;
+}
+.ux-popover__footer {
+  padding: 8px 10px;
+  border-top: 1px solid var(--ux-line);
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  background: var(--ux-bg-1);
+  border-radius: 0 0 var(--ux-radius-lg) var(--ux-radius-lg);
+}
+
+/* Menu — popover con lista de acciones */
+.ux-menu {
+  position: absolute;
+  z-index: var(--ux-z-tooltip);
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line-2);
+  border-radius: var(--ux-radius-lg);
+  box-shadow: var(--ux-shadow-md);
+  min-width: 200px;
+  padding: 6px;
+}
+.ux-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: var(--ux-radius-sm);
+  font-size: var(--ux-text-md);
+  color: var(--ux-ink);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+}
+.ux-menu__item:hover,
+.ux-menu__item:focus-visible { background: var(--ux-bg-3); outline: none; }
+.ux-menu__item svg { width: 14px; height: 14px; color: var(--ux-ink-3); flex-shrink: 0; }
+.ux-menu__item--danger { color: var(--ux-danger); }
+.ux-menu__item--danger svg { color: var(--ux-danger); }
+.ux-menu__divider { height: 1px; background: var(--ux-line); margin: 6px 0; }
+.ux-menu__shortcut {
+  margin-left: auto;
+  font-family: var(--ux-font-mono);
+  font-size: 10.5px;
+  color: var(--ux-ink-3);
+}
+.ux-menu__label {
+  font-size: var(--ux-text-2xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--ux-tracking-wide);
+  color: var(--ux-ink-3);
+  padding: 6px 10px 4px;
+}
+
+/* Submenu chevron + cascading */
+.ux-menu__item--has-sub {
+  padding-right: 24px;
+  position: relative;
+}
+.ux-menu__item--has-sub::after {
+  content: "";
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  width: 6px; height: 6px;
+  border-right: 1.5px solid var(--ux-ink-3);
+  border-top: 1.5px solid var(--ux-ink-3);
+  transform: translateY(-50%) rotate(45deg);
+}
+.ux-menu__sub {
+  position: absolute;
+  top: -7px; left: calc(100% + 4px);
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line-2);
+  border-radius: var(--ux-radius-lg);
+  box-shadow: var(--ux-shadow-md);
+  min-width: 200px;
+  padding: 6px;
+  display: none;
+}
+.ux-menu__item--has-sub:hover > .ux-menu__sub,
+.ux-menu__item--has-sub[data-state="open"] > .ux-menu__sub { display: block; }
+
+/* Check / Radio menu items */
+.ux-menu__item[role="menuitemcheckbox"],
+.ux-menu__item[role="menuitemradio"],
+.ux-menu__item--check {
+  padding-left: 30px;
+  position: relative;
+}
+.ux-menu__item--check::before,
+.ux-menu__item[role="menuitemcheckbox"]::before,
+.ux-menu__item[role="menuitemradio"]::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px; height: 12px;
+  opacity: 0;
+}
+.ux-menu__item[aria-checked="true"]::before,
+.ux-menu__item[data-checked="true"]::before {
+  opacity: 1;
+  background: linear-gradient(45deg, transparent 32%, var(--ux-brand) 32% 38%, transparent 38% 60%, var(--ux-brand) 60% 66%, transparent 66%);
+  background-size: 100% 100%;
+  /* simple check via CSS shape */
+  background:
+    linear-gradient(45deg, transparent 28%, var(--ux-brand) 28% 38%, transparent 38%) bottom left/55% 55% no-repeat,
+    linear-gradient(-45deg, transparent 28%, var(--ux-brand) 28% 38%, transparent 38%) top right/55% 55% no-repeat;
+}
+
+/* Menu meta (key+value rows, used in user menus) */
+.ux-menu__userblock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  margin: -2px 0 4px;
+  border-bottom: 1px solid var(--ux-line);
+  font-size: var(--ux-text-sm);
+}
+.ux-menu__userblock-name { font-weight: 500; color: var(--ux-ink); }
+.ux-menu__userblock-meta { font-size: var(--ux-text-xs); color: var(--ux-ink-3); }
+
+
+/* ============================================================
+   Context Menu — visualmente clónico al menu pero anclado a click derecho
+   ============================================================ */
+.ux-ctx-menu {
+  position: absolute;
+  z-index: var(--ux-z-tooltip);
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line-2);
+  border-radius: var(--ux-radius-lg);
+  box-shadow: var(--ux-shadow-md);
+  min-width: 200px;
+  padding: 5px;
+  font-size: var(--ux-text-sm);
+  animation: ux-ctx-pop var(--ux-dur-fast) var(--ux-ease-out);
+}
+@keyframes ux-ctx-pop {
+  from { opacity: 0; transform: scale(0.96) translateY(-2px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.ux-ctx-menu__item {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--ux-radius-sm);
+  cursor: default;
+  color: var(--ux-ink);
+  user-select: none;
+}
+.ux-ctx-menu__item:hover,
+.ux-ctx-menu__item:focus-visible {
+  background: var(--ux-bg-3);
+  outline: none;
+}
+.ux-ctx-menu__item svg { width: 14px; height: 14px; color: var(--ux-ink-3); }
+.ux-ctx-menu__item--danger { color: var(--ux-danger); }
+.ux-ctx-menu__item--danger svg { color: var(--ux-danger); }
+.ux-ctx-menu__item--disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.ux-ctx-menu__shortcut {
+  font-family: var(--ux-font-mono);
+  font-size: 10.5px;
+  color: var(--ux-ink-3);
+  letter-spacing: 0;
+}
+.ux-ctx-menu__divider {
+  height: 1px;
+  background: var(--ux-line);
+  margin: 4px 0;
+}
+.ux-ctx-menu__label {
+  font-size: var(--ux-text-2xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--ux-tracking-wide);
+  color: var(--ux-ink-3);
+  padding: 6px 10px 4px;
+}
+
+
+/* ============================================================
+   Hover Card — popover rica anclada por hover (perfiles, refs cruzadas)
+   ============================================================ */
+.ux-hover-card {
+  position: absolute;
+  z-index: var(--ux-z-tooltip);
+  width: 280px;
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line-2);
+  border-radius: var(--ux-radius-lg);
+  box-shadow: var(--ux-shadow-md);
+  padding: 14px;
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink-2);
+  line-height: 1.5;
+  animation: ux-hcard-in var(--ux-dur-base) var(--ux-ease-out);
+}
+@keyframes ux-hcard-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ux-hover-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.ux-hover-card__avatar {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: var(--ux-bg-3);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  font-family: var(--ux-font-display);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ux-ink);
+  overflow: hidden;
+}
+.ux-hover-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.ux-hover-card__title {
+  font-weight: 600;
+  color: var(--ux-ink);
+  font-size: var(--ux-text-md);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ux-hover-card__handle {
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink-3);
+  font-family: var(--ux-font-mono);
+  margin-top: 1px;
+}
+.ux-hover-card__body {
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink-2);
+  line-height: 1.5;
+}
+.ux-hover-card__stats {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ux-line);
+  font-size: var(--ux-text-xs);
+  color: var(--ux-ink-3);
+}
+.ux-hover-card__stats b {
+  display: block;
+  font-size: var(--ux-text-md);
+  color: var(--ux-ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ux-hover-card__footer {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.ux-hover-card__action {
+  flex: 1;
+  height: 28px;
+  background: var(--ux-bg-3);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-sm);
+  font: inherit;
+  font-size: var(--ux-text-xs);
+  font-weight: 500;
+  color: var(--ux-ink);
+  cursor: pointer;
+}
+.ux-hover-card__action:hover { background: var(--ux-bg-4); }
+.ux-hover-card__action--brand {
+  background: var(--ux-brand);
+  border-color: var(--ux-brand);
+  color: var(--ux-brand-fg);
+}
+.ux-hover-card__action--brand:hover { background: var(--ux-brand-2); }
+
+/* Hover trigger — el elemento ancla */
+.ux-hover-trigger {
+  position: relative;
+  display: inline-flex;
+}
+.ux-hover-trigger > .ux-hover-card {
+  top: calc(100% + 8px);
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--ux-dur-fast) var(--ux-ease-out);
+}
+.ux-hover-trigger:hover > .ux-hover-card,
+.ux-hover-trigger:focus-within > .ux-hover-card {
+  opacity: 1;
+  pointer-events: auto;
+}

@@ -1,0 +1,385 @@
+/* ============================================================
+   ERPlora UX · Tab Bar + Tabs
+   Patrones alineados con la librería oficial ERPlora/ux:
+   - .ux-tabbar         → navegación principal (footer en mobile, opcional en desktop)
+   - .ux-tabs           → subnavegación dentro de un módulo
+   ============================================================ */
+
+/* ============================================================
+   1. TAB BAR — Navegación principal (mobile + apps modulares)
+   ============================================================ */
+
+.ux-tabbar {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 0;
+  height: calc(58px + env(safe-area-inset-bottom));
+  padding: 4px 8px env(safe-area-inset-bottom);
+  background: color-mix(in oklch, var(--ux-bg-1) 92%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid var(--ux-line);
+}
+
+/* Variante: fija en la parte inferior (modo mobile-app) */
+.ux-tabbar--fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--ux-z-sticky);
+}
+
+/* Variante: integrada en el shell (cuando el app shell la posiciona) */
+.ux-tabbar--inset {
+  position: relative;
+}
+
+/* Tab item */
+.ux-tabbar-item {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 6px;
+  border-radius: var(--ux-radius-md);
+  background: transparent;
+  border: none;
+  color: var(--ux-ink-3);
+  opacity: 0.7;
+  font-family: inherit;
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color var(--ux-dur-fast), opacity var(--ux-dur-fast), background var(--ux-dur-fast);
+}
+.ux-tabbar-item:hover { opacity: 0.9; color: var(--ux-ink-2); }
+.ux-tabbar-item:focus-visible {
+  outline: 2px solid var(--ux-brand);
+  outline-offset: -2px;
+}
+
+/* Active state */
+.ux-tabbar-item[aria-current="page"],
+.ux-tabbar-item[aria-selected="true"],
+.ux-tabbar-item[data-active="true"],
+.ux-tabbar-item--active {
+  opacity: 1;
+  color: var(--ux-brand);
+}
+
+/* Icon */
+.ux-tabbar-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.ux-tabbar-icon svg { width: 100%; height: 100%; }
+
+/* Label */
+.ux-tabbar-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Desktop: ligeramente más grande */
+@media (min-width: 768px) {
+  .ux-tabbar-icon { width: 24px; height: 24px; }
+  .ux-tabbar-label { font-size: 11px; }
+}
+
+/* Badge sobre el icono */
+.ux-tabbar-badge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  background: var(--ux-danger);
+  color: #fff;
+  border: 2px solid var(--ux-bg-1);
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+}
+.ux-tabbar-badge--dot {
+  min-width: 8px;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  top: -2px;
+  right: -4px;
+}
+
+/* Variant: con indicator superior estilo iOS */
+.ux-tabbar--indicator .ux-tabbar-item[aria-current="page"]::before,
+.ux-tabbar--indicator .ux-tabbar-item[data-active="true"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 3px;
+  background: var(--ux-brand);
+  border-radius: 0 0 3px 3px;
+}
+
+/* Variant: pill background activo (Material) */
+.ux-tabbar--pill .ux-tabbar-item[aria-current="page"],
+.ux-tabbar--pill .ux-tabbar-item[data-active="true"] {
+  background: var(--ux-brand-soft);
+  color: var(--ux-brand);
+}
+.ux-tabbar--pill .ux-tabbar-item[aria-current="page"]::before,
+.ux-tabbar--pill .ux-tabbar-item[data-active="true"]::before {
+  display: none;
+}
+
+/* Variant: solo iconos */
+.ux-tabbar--icons .ux-tabbar-label { display: none; }
+.ux-tabbar--icons .ux-tabbar-item { gap: 0; padding: 10px; }
+
+/* Variant: con FAB central (typical mobile pattern) */
+.ux-tabbar-fab {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  margin-top: -16px;
+  border-radius: 50%;
+  background: var(--ux-brand);
+  color: var(--ux-brand-fg);
+  display: grid;
+  place-items: center;
+  border: 4px solid var(--ux-bg-1);
+  box-shadow: var(--ux-shadow-md);
+  cursor: pointer;
+  transition: transform var(--ux-dur-fast);
+}
+.ux-tabbar-fab:hover { transform: translateY(-2px); }
+.ux-tabbar-fab svg { width: 22px; height: 22px; }
+
+/* ============================================================
+   2. TABS — Subnavegación dentro de un módulo
+   ============================================================ */
+
+.ux-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: var(--ux-space-1);
+  border-bottom: 1px solid var(--ux-line);
+  padding: 0 var(--ux-space-1);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ux-tabs::-webkit-scrollbar { display: none; }
+
+.ux-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  background: transparent;
+  border: none;
+  color: var(--ux-ink-3);
+  font-size: var(--ux-text-md);
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color var(--ux-dur-fast);
+}
+.ux-tab:hover { color: var(--ux-ink-2); }
+.ux-tab[aria-selected="true"],
+.ux-tab[data-active="true"] {
+  color: var(--ux-ink);
+}
+.ux-tab[aria-selected="true"]::after,
+.ux-tab[data-active="true"]::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ux-brand);
+  border-radius: 2px 2px 0 0;
+}
+.ux-tab:focus-visible {
+  outline: 2px solid var(--ux-brand);
+  outline-offset: -2px;
+  border-radius: var(--ux-radius-sm);
+}
+
+.ux-tab-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.ux-tab-badge {
+  margin-left: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--ux-bg-3);
+  color: var(--ux-ink-2);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 500;
+  display: inline-grid;
+  place-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.ux-tab[aria-selected="true"] .ux-tab-badge,
+.ux-tab[data-active="true"] .ux-tab-badge {
+  background: var(--ux-brand-soft);
+  color: var(--ux-brand);
+}
+
+/* Variant: pill tabs (segmented) */
+.ux-tabs--pill {
+  border-bottom: none;
+  background: var(--ux-bg-3);
+  padding: 3px;
+  border-radius: var(--ux-radius-md);
+  gap: 0;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--ux-line);
+  overflow: visible;
+}
+.ux-tabs--pill .ux-tab {
+  height: 28px;
+  padding: 0 12px;
+  font-size: var(--ux-text-sm);
+  border-radius: var(--ux-radius-sm);
+}
+.ux-tabs--pill .ux-tab[aria-selected="true"]::after,
+.ux-tabs--pill .ux-tab[data-active="true"]::after { display: none; }
+.ux-tabs--pill .ux-tab[aria-selected="true"],
+.ux-tabs--pill .ux-tab[data-active="true"] {
+  background: var(--ux-bg-1);
+  color: var(--ux-ink);
+  box-shadow: var(--ux-shadow-xs);
+}
+
+/* Variant: vertical (settings-style) */
+.ux-tabs--vertical {
+  flex-direction: column;
+  border-bottom: none;
+  border-right: 1px solid var(--ux-line);
+  padding: var(--ux-space-1) 0;
+  align-items: stretch;
+  overflow: visible;
+}
+.ux-tabs--vertical .ux-tab {
+  height: auto;
+  padding: 8px 14px;
+  justify-content: flex-start;
+  border-radius: 0;
+}
+.ux-tabs--vertical .ux-tab[aria-selected="true"]::after,
+.ux-tabs--vertical .ux-tab[data-active="true"]::after {
+  left: -1px;
+  right: auto;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  height: auto;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Variant: enclosed (folder-style) — útil en sub-tabs de detalle */
+.ux-tabs--enclosed {
+  border-bottom: 1px solid var(--ux-line);
+  gap: 2px;
+  padding: 0;
+}
+.ux-tabs--enclosed .ux-tab {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--ux-radius-md) var(--ux-radius-md) 0 0;
+  margin-bottom: -1px;
+}
+.ux-tabs--enclosed .ux-tab[aria-selected="true"]::after,
+.ux-tabs--enclosed .ux-tab[data-active="true"]::after { display: none; }
+.ux-tabs--enclosed .ux-tab[aria-selected="true"],
+.ux-tabs--enclosed .ux-tab[data-active="true"] {
+  background: var(--ux-bg-2);
+  border-color: var(--ux-line);
+  border-bottom-color: var(--ux-bg-2);
+  color: var(--ux-ink);
+}
+
+/* Variant: scrollable wrapper con flechas */
+.ux-tabs-scroll {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.ux-tabs-scroll__btn {
+  flex-shrink: 0;
+  width: 28px;
+  align-self: stretch;
+  background: var(--ux-bg);
+  border: none;
+  color: var(--ux-ink-3);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--ux-line);
+}
+.ux-tabs-scroll__btn:hover { color: var(--ux-ink); }
+.ux-tabs-scroll__btn svg { width: 14px; height: 14px; }
+.ux-tabs-scroll__btn--prev { box-shadow: 4px 0 8px var(--ux-bg); }
+.ux-tabs-scroll__btn--next { box-shadow: -4px 0 8px var(--ux-bg); }
+.ux-tabs-scroll .ux-tabs { flex: 1; min-width: 0; }
+
+/* Variant: tabs con count + close (browser-tabs style) */
+.ux-tab__close {
+  width: 16px; height: 16px;
+  border: none;
+  background: transparent;
+  color: var(--ux-ink-3);
+  border-radius: var(--ux-radius-xs);
+  font-size: 12px;
+  line-height: 1;
+  margin-left: 4px;
+  cursor: pointer;
+  display: grid; place-items: center;
+}
+.ux-tab__close:hover { background: var(--ux-bg-3); color: var(--ux-ink); }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ux-tabbar-item,
+  .ux-tab {
+    transition: none;
+  }
+}

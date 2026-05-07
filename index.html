@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="es" data-theme="erplora">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ERPlora UX · Librería</title>
+<link rel="stylesheet" href="lib/css/ux.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+<style>
+  /* ===== Doc-only chrome (lo mínimo, todo lo demás usa la librería) ===== */
+  body { background: var(--ux-bg); }
+
+  /* La sidebar de docs es algo más ancha porque tiene MUCHAS rutas */
+  .ux-app[data-docs] { grid-template-columns: 250px 1fr; }
+  .ux-app[data-docs] .ux-sidebar { width: 250px; }
+
+  /* Estado activo de los items via [data-route-active] (Datastar) */
+  .ux-sidebar__item[data-route-active="true"] {
+    background: var(--ux-bg-3); color: var(--ux-ink);
+  }
+  .ux-sidebar__item[data-route-active="true"]::before {
+    content: ""; position: absolute; left: 0;
+    width: 3px; height: 16px;
+    background: var(--ux-brand); border-radius: 0 2px 2px 0;
+  }
+  .ux-sidebar__item.is-hidden { display: none; }
+  .ux-sidebar__group.is-hidden { display: none; }
+
+  /* Pill selector (tema + viewport) — vive en el topbar */
+  .vp {
+    display: inline-flex; padding: 2px;
+    background: var(--ux-bg-3);
+    border: 1px solid var(--ux-line);
+    border-radius: var(--ux-radius-md);
+    flex-shrink: 0;
+  }
+  .vp button {
+    height: 26px; padding: 0 9px;
+    font-size: 11.5px; color: var(--ux-ink-3);
+    border-radius: 5px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 5px;
+    background: transparent; border: 0; cursor: pointer;
+  }
+  .vp button:hover { color: var(--ux-ink); }
+  .vp button[aria-pressed="true"] {
+    background: var(--ux-bg-1); color: var(--ux-ink);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  }
+
+  /* Body scroll area */
+  .doc__body { padding: 26px 22px 80px; }
+  .doc__body--canvas { padding: 18px; }
+  .doc__title {
+    font-family: var(--ux-font-display);
+    font-size: 28px; font-weight: 600;
+    letter-spacing: -0.04em; color: var(--ux-ink);
+    margin-bottom: 6px;
+  }
+  .doc__sub { font-size: 14px; color: var(--ux-ink-3); margin-bottom: 28px; max-width: 640px; }
+
+  /* Stage (iframe holder) */
+  .stage-wrap {
+    background:
+      radial-gradient(circle at 20% 0%, color-mix(in oklch, var(--ux-brand) 8%, transparent), transparent 50%),
+      var(--ux-bg);
+    border: 1px solid var(--ux-line);
+    border-radius: 14px;
+    padding: 24px;
+    overflow: hidden;
+    display: flex; justify-content: center;
+  }
+  .stage {
+    width: 100%; max-width: var(--stage-w, 1280px);
+    background: var(--ux-bg);
+    border: 1px solid var(--ux-line-2);
+    border-radius: 10px; overflow: hidden;
+    transition: max-width 0.3s var(--ux-ease-out);
+    box-shadow: var(--ux-shadow-md);
+  }
+  .stage iframe { width: 100%; height: var(--stage-h, 700px); border: 0; background: var(--ux-bg); display: block; }
+  .stage[data-vp="desktop"] { --stage-w: 1280px; --stage-h: 760px; }
+  .stage[data-vp="tablet"]  { --stage-w: 834px;  --stage-h: 720px; }
+  .stage[data-vp="mobile"]  { --stage-w: 390px;  --stage-h: 760px; }
+
+  /* Overview / design-system tarjetas */
+  .demo-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); margin-bottom: 32px; }
+  .demo {
+    background: var(--ux-bg-2); border: 1px solid var(--ux-line);
+    border-radius: 12px; padding: 18px;
+  }
+  .demo__label {
+    font-size: 10.5px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--ux-ink-3); margin-bottom: 12px;
+  }
+  .swatches { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .swatch { background: var(--ux-bg-2); border: 1px solid var(--ux-line); border-radius: 10px; padding: 12px; }
+  .swatch__chip { height: 48px; border-radius: 7px; margin-bottom: 8px; border: 1px solid var(--ux-line); }
+  .swatch__name { font-size: 12px; font-weight: 500; color: var(--ux-ink); }
+  .swatch__var { font-family: var(--ux-font-mono); font-size: 10.5px; color: var(--ux-ink-3); }
+  .type-stack > * + * { margin-top: 10px; }
+  .type-row {
+    display: grid; grid-template-columns: 80px 1fr;
+    align-items: baseline; gap: 16px; padding: 12px 14px;
+    background: var(--ux-bg-2); border: 1px solid var(--ux-line); border-radius: 10px;
+  }
+  .type-row__label { font-family: var(--ux-font-mono); font-size: 10.5px; color: var(--ux-ink-3); }
+  .radii-grid, .shadow-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .radius-cell, .shadow-cell {
+    height: 100px; background: var(--ux-bg-2); border: 1px solid var(--ux-line);
+    display: grid; place-items: center;
+    font-family: var(--ux-font-mono); font-size: 10.5px; color: var(--ux-ink-3);
+  }
+</style>
+</head>
+<body>
+
+<div class="ux-app" data-docs data-signals="{q: '', route: 'overview', theme: 'erplora', vp: 'desktop'}">
+
+  <!-- =================== SIDEBAR (componente real .ux-sidebar) =================== -->
+  <aside class="ux-sidebar">
+    <div class="ux-sidebar__brand">
+      <div class="ux-sidebar__logo">EX</div>
+      <div class="ux-sidebar__brand-text">
+        <span class="ux-sidebar__brand-name">ERPlora UX</span>
+        <span class="ux-sidebar__brand-meta">v3 · Librería</span>
+      </div>
+    </div>
+
+    <!-- Buscador con .ux-search dentro del header del sidebar -->
+    <div style="padding: 10px 12px 4px;">
+      <div class="ux-search">
+        <span class="ux-search__icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </span>
+        <input class="ux-input ux-input--sm" type="search" placeholder="Buscar componente…" data-bind-q/>
+      </div>
+    </div>
+
+    <nav class="ux-sidebar__body" id="navList">
+      <!-- Renderizado por JS para mantener una sola fuente de verdad -->
+    </nav>
+
+    <div class="ux-sidebar__footer">
+      <div class="ux-sidebar__user">
+        <span class="ux-avatar ux-avatar--sm ux-avatar--brand">EX</span>
+        <div class="ux-sidebar__user-info">
+          <div class="ux-sidebar__user-name">Sistema</div>
+          <div class="ux-sidebar__user-meta">Rama main · GH Pages</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =================== MAIN =================== -->
+  <main class="ux-app__main">
+    <header class="ux-topbar">
+      <button class="ux-topbar__menu-btn" aria-label="Menú">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <nav class="ux-topbar__crumb" aria-label="Breadcrumb">
+        <span class="ux-topbar__crumb-item">ERPlora UX</span>
+        <span class="ux-topbar__crumb-sep">/</span>
+        <span class="ux-topbar__crumb-item" id="crumb">Visión general</span>
+      </nav>
+
+      <div class="ux-topbar__actions">
+        <div class="vp" role="tablist" aria-label="Tema">
+          <button data-theme-btn="erplora" aria-pressed="true">🌙 Dark</button>
+          <button data-theme-btn="erplora-light" aria-pressed="false">☀ Light</button>
+        </div>
+        <div class="vp" role="tablist" aria-label="Viewport">
+          <button data-vp-btn="desktop" aria-pressed="true">▢ Desktop</button>
+          <button data-vp-btn="tablet"  aria-pressed="false">▭ Tablet</button>
+          <button data-vp-btn="mobile"  aria-pressed="false">▯ Mobile</button>
+        </div>
+        <a class="ux-btn ux-btn--ghost ux-btn--sm" href="https://github.com/erplora/erplora.github.io" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.4-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2.9-.3 1.9-.4 3-.4s2 .1 3 .4c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.7.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </header>
+
+    <div class="doc__body" id="body"></div>
+  </main>
+</div>
+
+<script>
+/* =====================================================================
+   Catálogo de rutas — única fuente de verdad. Datastar lee desde aquí
+   para renderizar la sidebar y filtrar.
+   ===================================================================== */
+
+const ICON = {
+  home:   'M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z',
+  layers: 'M12 2 2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
+  layout: 'M3 3h18v18H3zM3 9h18M9 21V9',
+  nav:    'M3 12h18M3 6h18M3 18h12',
+  cube:   'M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.3 7L12 12l8.7-5M12 22V12',
+  grid:   'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+  forms:  'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8',
+  table:  'M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18',
+  alert:  'M12 9v4M12 17h0M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z',
+  modal:  'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+  flow:   'M22 12h-4l-3 9L9 3l-3 9H2',
+  factory:'M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z',
+  store:  'M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4M3 9l1.5-3h15L21 9M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM10 21V13h4v8',
+};
+
+const NAV = [
+  { group: "Foundations", items: [
+    { id: "overview",      label: "Visión general",   icon: ICON.home },
+    { id: "design-system", label: "Design system",    icon: ICON.layers },
+  ]},
+  { group: "Layout", items: [
+    { id: "app-shell",     label: "App shell",        icon: ICON.layout },
+    { id: "mobile-shell",  label: "Mobile shell",     icon: ICON.layout },
+    { id: "sidebar",       label: "Sidebar",          icon: ICON.layout },
+    { id: "topbar",        label: "Topbar",           icon: ICON.layout },
+  ]},
+  { group: "Navegación", items: [
+    { id: "tabbar",        label: "Tab bar (bottom)", icon: ICON.nav },
+    { id: "tabs",          label: "Tabs (top)",       icon: ICON.nav },
+    { id: "menu-btn",      label: "Menu button",      icon: ICON.nav },
+    { id: "breadcrumbs",   label: "Breadcrumbs",      icon: ICON.nav },
+  ]},
+  { group: "Atomics", items: [
+    { id: "button",        label: "Button",           icon: ICON.cube },
+    { id: "badge",         label: "Badge & Pill",     icon: ICON.cube },
+    { id: "avatar",        label: "Avatar",           icon: ICON.cube },
+    { id: "progress",      label: "Progress · Spinner · Pagination", icon: ICON.cube, badge: "new" },
+    { id: "pickers",       label: "Datepicker · OTP · Rating · Auto", icon: ICON.cube, badge: "new" },
+  ]},
+  { group: "Surfaces", items: [
+    { id: "card",          label: "Card",             icon: ICON.grid },
+    { id: "kpi",           label: "KPI card",         icon: ICON.grid },
+    { id: "stats",         label: "Stats",            icon: ICON.grid },
+    { id: "empty",         label: "Empty state",      icon: ICON.grid },
+    { id: "accordion",     label: "Accordion",        icon: ICON.grid },
+    { id: "list",          label: "List",             icon: ICON.grid },
+    { id: "tree",          label: "Tree",             icon: ICON.grid },
+    { id: "inline-feedback", label: "Banners · Callouts", icon: ICON.alert, badge: "new" },
+  ]},
+  { group: "Forms", items: [
+    { id: "forms-text",    label: "Inputs · Search",  icon: ICON.forms },
+    { id: "forms-select",  label: "Select · Toggle · Radio", icon: ICON.forms },
+    { id: "forms-layout",  label: "Form layout",      icon: ICON.forms },
+    { id: "forms-extra",   label: "Slider · Upload · Stepper", icon: ICON.forms, badge: "new" },
+  ]},
+  { group: "Data display", items: [
+    { id: "table",         label: "Table",            icon: ICON.table },
+    { id: "datatable",     label: "DataTable + Pagination", icon: ICON.table },
+    { id: "sparkline",     label: "Sparkline",        icon: ICON.table },
+  ]},
+  { group: "Overlays", items: [
+    { id: "modal",         label: "Modal",            icon: ICON.modal },
+    { id: "drawer",        label: "Drawer",           icon: ICON.modal },
+    { id: "toast",         label: "Toast",            icon: ICON.modal },
+    { id: "tooltip",       label: "Tooltip · Popover · Menu", icon: ICON.modal },
+    { id: "overlays-extra", label: "Context menu · Hover card", icon: ICON.modal, badge: "new" },
+  ]},
+  { group: "Workflow", items: [
+    { id: "kanban",        label: "Kanban",           icon: ICON.flow },
+    { id: "calendar",      label: "Calendar",         icon: ICON.flow },
+    { id: "chat",          label: "Chat",             icon: ICON.flow },
+    { id: "timeline",      label: "Timeline & Stepper", icon: ICON.flow },
+    { id: "charts",        label: "Charts",           icon: ICON.flow },
+  ]},
+  { group: "Industria", items: [
+    { id: "manufacturing", label: "Manufactura",      icon: ICON.factory },
+    { id: "hr",            label: "Recursos humanos", icon: ICON.factory },
+    { id: "multimedia",    label: "Multimedia",       icon: ICON.factory },
+    { id: "forms-advanced",label: "Forms avanzados",  icon: ICON.factory },
+    { id: "commerce",      label: "Comercial · invoice", icon: ICON.factory },
+    { id: "mobile",        label: "Mobile patterns",  icon: ICON.factory },
+    { id: "system-overlays", label: "Cmd+K · Notif · Coach", icon: ICON.factory },
+    { id: "states",        label: "Estados · skel · loading", icon: ICON.factory },
+  ]},
+  { group: "POS · Punto de venta", items: [
+    { id: "pos-canvas",    label: "POS · canvas completo", icon: ICON.store },
+    { id: "pos-numpad",    label: "Numpad",           icon: ICON.store },
+    { id: "pos-payment",   label: "Cobro / pago",     icon: ICON.store },
+    { id: "receipt",       label: "Receipt (ticket)", icon: ICON.store },
+    { id: "kds",           label: "KDS · cocina",     icon: ICON.store },
+  ]},
+];
+
+const ROUTES = {};
+for (const grp of NAV) for (const it of grp.items) {
+  ROUTES[it.id] = { title: it.label, stage: `previews/${it.id}.html` };
+}
+ROUTES.overview = { title: "Visión general", render: renderOverview };
+ROUTES["design-system"] = { title: "Design system", render: renderDesignSystem };
+
+/* ----- Render sidebar ----- */
+const navList = document.getElementById('navList');
+navList.innerHTML = NAV.map(grp => `
+  <div class="ux-sidebar__group" data-group="${grp.group.toLowerCase()}">${grp.group}</div>
+  ${grp.items.map(it => `
+    <button class="ux-sidebar__item" data-route="${it.id}" data-label="${it.label.toLowerCase()}">
+      <svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${it.icon}"/></svg>
+      <span class="ux-sidebar__label">${it.label}</span>
+      ${it.badge ? `<span class="ux-sidebar__badge ux-sidebar__badge--brand">${it.badge}</span>` : ''}
+    </button>
+  `).join('')}
+`).join('');
+
+/* ----- Routing ----- */
+const body = document.getElementById('body');
+const crumb = document.getElementById('crumb');
+
+function go(route) {
+  const r = ROUTES[route] || ROUTES.overview;
+  crumb.textContent = r.title;
+  document.querySelectorAll('.ux-sidebar__item').forEach(a => {
+    a.toggleAttribute('aria-current', a.dataset.route === route);
+    a.dataset.routeActive = (a.dataset.route === route);
+  });
+  body.innerHTML = '';
+  if (r.render) {
+    body.classList.remove('doc__body--canvas');
+    r.render();
+  } else {
+    body.classList.add('doc__body--canvas');
+    renderStage(r);
+  }
+  const stage = body.querySelector('.stage');
+  if (stage) stage.dataset.vp = currentVp;
+}
+
+let currentVp = 'desktop';
+let currentTheme = localStorage.getItem('ux-theme') || 'erplora';
+document.documentElement.setAttribute('data-theme', currentTheme);
+document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', b.dataset.themeBtn === currentTheme));
+
+document.querySelectorAll('[data-vp-btn]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentVp = btn.dataset.vpBtn;
+    document.querySelectorAll('[data-vp-btn]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    const stage = body.querySelector('.stage'); if (stage) stage.dataset.vp = currentVp;
+  });
+});
+document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentTheme = btn.dataset.themeBtn;
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('ux-theme', currentTheme);
+    document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    document.querySelectorAll('.stage iframe').forEach(f => {
+      try { f.contentDocument.documentElement.setAttribute('data-theme', currentTheme); } catch(e){}
+    });
+  });
+});
+
+document.querySelectorAll('.ux-sidebar__item[data-route]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    location.hash = '#' + a.dataset.route;
+  });
+});
+window.addEventListener('hashchange', () => go(location.hash.slice(1) || 'overview'));
+
+/* ----- Filter (search en sidebar) ----- */
+const searchInput = document.querySelector('.ux-search input');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  const groups = document.querySelectorAll('.ux-sidebar__group');
+  groups.forEach(g => {
+    let visibleInGroup = 0;
+    let next = g.nextElementSibling;
+    while (next && !next.classList.contains('ux-sidebar__group')) {
+      const match = !q || next.dataset.label?.includes(q);
+      next.classList.toggle('is-hidden', !match);
+      if (match) visibleInGroup++;
+      next = next.nextElementSibling;
+    }
+    g.classList.toggle('is-hidden', visibleInGroup === 0);
+  });
+});
+
+/* =====================================================================
+   Renderers
+   ===================================================================== */
+
+function renderStage(r) {
+  body.innerHTML = `
+    <div class="stage-wrap">
+      <div class="stage" data-vp="desktop">
+        <iframe src="${r.stage}" title="${r.title}" onload="try{this.contentDocument.documentElement.setAttribute('data-theme', currentTheme)}catch(e){}"></iframe>
+      </div>
+    </div>
+    <div style="margin-top:14px;font-size:11.5px;color:var(--ux-ink-3);font-family:var(--ux-font-mono);text-align:center;">
+      Vista responsive — usa el selector arriba para cambiar entre Desktop · Tablet · Mobile.
+    </div>
+  `;
+}
+
+function renderOverview() {
+  body.innerHTML = `
+    <h1 class="doc__title">ERPlora UX</h1>
+    <p class="doc__sub">Librería CSS para construir aplicaciones internas (back-office, POS, dashboards, manufactura, HR). Tema oscuro y sobrio por defecto, acento terracota, tipografía Inter. Toda la interactividad va con Datastar — la librería es 100% declarativa.</p>
+
+    <div class="demo-grid">
+      <div class="demo">
+        <div class="demo__label">Sistema · tokens.css</div>
+        <p style="font-size:13px;color:var(--ux-ink-2);line-height:1.55;">Una capa única de variables CSS define color, tipografía, espaciado, radios, sombras y motion. Tema <code class="ux-code--inline">erplora</code> (oscuro) y <code class="ux-code--inline">erplora-light</code>.</p>
+      </div>
+      <div class="demo">
+        <div class="demo__label">CSS plano</div>
+        <p style="font-size:13px;color:var(--ux-ink-2);line-height:1.55;">Cada componente vive en un <code class="ux-code--inline">.css</code> independiente. Sin <code class="ux-code--inline">@apply</code>, sin build steps. Importa lo que necesitas o el bundle <code class="ux-code--inline">ux.css</code>.</p>
+      </div>
+      <div class="demo">
+        <div class="demo__label">Datastar · CDN</div>
+        <p style="font-size:13px;color:var(--ux-ink-2);line-height:1.55;">Estados con <code class="ux-code--inline">data-signals</code>, <code class="ux-code--inline">data-on-*</code>, <code class="ux-code--inline">data-bind-*</code>. Esta misma página usa Datastar para el filtrado del sidebar.</p>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--ux-font-display);font-size:18px;letter-spacing:-0.03em;margin:30px 0 14px;color:var(--ux-ink);">Composición del shell</h3>
+    <p style="font-size:13.5px;color:var(--ux-ink-2);line-height:1.7;max-width:680px;">
+      Esta misma documentación es un ejemplo en vivo de la librería: la barra lateral usa <code class="ux-code--inline">.ux-sidebar</code> con sus grupos, items, iconos y badges; el buscador es <code class="ux-code--inline">.ux-search</code> + <code class="ux-code--inline">.ux-input--sm</code>; la cabecera es <code class="ux-code--inline">.ux-topbar</code> con breadcrumb y acciones; la app entera está envuelta en <code class="ux-code--inline">.ux-app</code>.
+    </p>
+  `;
+}
+
+function renderDesignSystem() {
+  const palette = [
+    { name: 'bg', v: '--ux-bg' },{ name: 'bg-1', v: '--ux-bg-1' },{ name: 'bg-2', v: '--ux-bg-2' },
+    { name: 'bg-3', v: '--ux-bg-3' },{ name: 'bg-4', v: '--ux-bg-4' },
+    { name: 'ink', v: '--ux-ink' },{ name: 'ink-2', v: '--ux-ink-2' },{ name: 'ink-3', v: '--ux-ink-3' },{ name: 'ink-4', v: '--ux-ink-4' },
+    { name: 'brand', v: '--ux-brand' },{ name: 'brand-2', v: '--ux-brand-2' },{ name: 'brand-3', v: '--ux-brand-3' },
+    { name: 'leaf', v: '--ux-leaf' },{ name: 'warn', v: '--ux-warn' },{ name: 'danger', v: '--ux-danger' },{ name: 'info', v: '--ux-info' },
+  ];
+  body.innerHTML = `
+    <h1 class="doc__title">Design system</h1>
+    <p class="doc__sub">Tokens base. Todo el resto se deriva de aquí.</p>
+    <h3 style="font-family:var(--ux-font-display);font-size:16px;letter-spacing:-0.03em;margin:24px 0 12px;color:var(--ux-ink);">Paleta</h3>
+    <div class="swatches">
+      ${palette.map(p => `<div class="swatch"><div class="swatch__chip" style="background: var(${p.v});"></div><div class="swatch__name">${p.name}</div><div class="swatch__var">${p.v}</div></div>`).join('')}
+    </div>
+    <h3 style="font-family:var(--ux-font-display);font-size:16px;letter-spacing:-0.03em;margin:32px 0 12px;color:var(--ux-ink);">Tipografía</h3>
+    <div class="type-stack">
+      <div class="type-row"><span class="type-row__label">5xl · 60</span><span style="font-family:var(--ux-font-display);font-size:60px;font-weight:600;line-height:1.05;letter-spacing:-0.04em;">Display 5xl</span></div>
+      <div class="type-row"><span class="type-row__label">4xl · 44</span><span style="font-family:var(--ux-font-display);font-size:44px;font-weight:600;line-height:1.1;letter-spacing:-0.04em;">Display 4xl</span></div>
+      <div class="type-row"><span class="type-row__label">3xl · 32</span><span style="font-family:var(--ux-font-display);font-size:32px;font-weight:600;letter-spacing:-0.03em;">Heading 3xl</span></div>
+      <div class="type-row"><span class="type-row__label">2xl · 24</span><span style="font-size:24px;font-weight:600;letter-spacing:-0.02em;">Heading 2xl</span></div>
+      <div class="type-row"><span class="type-row__label">xl · 19</span><span style="font-size:19px;font-weight:600;">Heading xl</span></div>
+      <div class="type-row"><span class="type-row__label">lg · 16</span><span style="font-size:16px;">Body large</span></div>
+      <div class="type-row"><span class="type-row__label">base · 14</span><span style="font-size:14px;">Body base — tono auxiliar para descripciones y body de tarjetas.</span></div>
+      <div class="type-row"><span class="type-row__label">md · 13.5</span><span style="font-size:13.5px;">Body md — texto denso para tablas y dashboards.</span></div>
+      <div class="type-row"><span class="type-row__label">sm · 12.5</span><span style="font-size:12.5px;color:var(--ux-ink-2);">Body sm — auxiliar.</span></div>
+      <div class="type-row"><span class="type-row__label">mono · 13</span><span style="font-family:var(--ux-font-mono);font-size:13px;">12.342,80 €  ·  req_a8f2d1c4</span></div>
+    </div>
+    <h3 style="font-family:var(--ux-font-display);font-size:16px;letter-spacing:-0.03em;margin:32px 0 12px;color:var(--ux-ink);">Radios</h3>
+    <div class="radii-grid">
+      <div class="radius-cell" style="border-radius:var(--ux-radius-xs);">xs · 4</div>
+      <div class="radius-cell" style="border-radius:var(--ux-radius-sm);">sm · 6</div>
+      <div class="radius-cell" style="border-radius:var(--ux-radius-md);">md · 8</div>
+      <div class="radius-cell" style="border-radius:var(--ux-radius-lg);">lg · 10</div>
+      <div class="radius-cell" style="border-radius:var(--ux-radius-xl);">xl · 14</div>
+      <div class="radius-cell" style="border-radius:var(--ux-radius-2xl);">2xl · 18</div>
+    </div>
+    <h3 style="font-family:var(--ux-font-display);font-size:16px;letter-spacing:-0.03em;margin:32px 0 12px;color:var(--ux-ink);">Sombras</h3>
+    <div class="shadow-grid">
+      <div class="shadow-cell" style="box-shadow:var(--ux-shadow-xs);">xs</div>
+      <div class="shadow-cell" style="box-shadow:var(--ux-shadow-sm);">sm</div>
+      <div class="shadow-cell" style="box-shadow:var(--ux-shadow-md);">md</div>
+      <div class="shadow-cell" style="box-shadow:var(--ux-shadow-lg);">lg</div>
+    </div>
+  `;
+}
+
+go(location.hash.slice(1) || 'overview');
+</script>
+
+</body>
+</html>

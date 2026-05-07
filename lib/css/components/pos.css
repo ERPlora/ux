@@ -1,0 +1,914 @@
+/* ============================================================
+   ERPlora UX · POS
+   Componentes específicos del punto de venta:
+   numpad · cart · payment · receipt · kds-order
+   ============================================================ */
+
+/* ============================================================
+   POS Layout · split en desktop (catálogo + carrito siempre visible)
+   En mobile el carrito se oculta y aparece como drawer al pulsar el FAB.
+   ============================================================ */
+.ux-pos {
+  position: relative;
+  background: var(--ux-bg);
+  height: 100%;
+  min-height: 600px;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 12px;
+}
+.ux-pos__main {
+  background: var(--ux-bg-1);
+  border-radius: var(--ux-radius-xl);
+  border: 1px solid var(--ux-line);
+  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ux-pos__main > .ux-cat-rail { flex: 0 0 auto; }
+
+/* Aside · split en desktop, drawer en mobile */
+.ux-pos__aside {
+  background: var(--ux-bg-1);
+  border-radius: var(--ux-radius-xl);
+  border: 1px solid var(--ux-line);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+@media (max-width: 900px) {
+  .ux-pos { grid-template-columns: 1fr; }
+  .ux-pos__aside {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: min(420px, 92vw);
+    border-radius: 0;
+    border: 0;
+    border-left: 1px solid var(--ux-line);
+    z-index: 60;
+    transform: translateX(100%);
+    transition: transform var(--ux-dur-slow) var(--ux-ease);
+    box-shadow: var(--ux-shadow-xl);
+  }
+  .ux-pos__aside--left {
+    right: auto; left: 0;
+    border-left: 0;
+    border-right: 1px solid var(--ux-line);
+    transform: translateX(-100%);
+  }
+  .ux-pos[data-cart-open="true"] .ux-pos__aside { transform: translateX(0); }
+}
+.ux-pos__backdrop {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--ux-dur-slow);
+  z-index: 55;
+}
+@media (max-width: 900px) {
+  .ux-pos__backdrop { display: block; }
+  .ux-pos[data-cart-open="true"] .ux-pos__backdrop {
+    opacity: 1; pointer-events: auto;
+  }
+}
+
+/* FAB del carrito · solo en mobile */
+.ux-pos__cart-fab {
+  display: none;
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--ux-brand);
+  color: var(--ux-brand-fg);
+  border: 0;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--ux-shadow-lg);
+  z-index: 50;
+  transition: transform var(--ux-dur-fast), background var(--ux-dur-fast);
+}
+.ux-pos__cart-fab:hover { transform: scale(1.05); background: var(--ux-brand-2); }
+.ux-pos__cart-fab svg { width: 24px; height: 24px; }
+@media (max-width: 900px) {
+  .ux-pos__cart-fab { display: inline-flex; }
+}
+.ux-pos__cart-fab__badge {
+  position: absolute;
+  top: -2px; right: -2px;
+  min-width: 22px; height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--ux-ink);
+  color: var(--ux-bg);
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--ux-bg);
+  font-variant-numeric: tabular-nums;
+}
+
+.ux-pos__cart-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--ux-bg-3);
+  border: 1px solid var(--ux-line);
+  color: var(--ux-ink-2);
+  cursor: pointer;
+}
+.ux-pos__cart-close svg { width: 14px; height: 14px; }
+@media (max-width: 900px) {
+  .ux-pos__cart-close { display: inline-flex; }
+}
+
+/* ============================================================
+   Catálogo · scroll del grid de productos
+   ============================================================ */
+.ux-cat-scroll {
+  flex: 1 1 0;
+  overflow-y: auto;
+  min-height: 0;
+}
+.ux-cat-scroll::-webkit-scrollbar { width: 8px; }
+.ux-cat-scroll::-webkit-scrollbar-track { background: transparent; }
+.ux-cat-scroll::-webkit-scrollbar-thumb {
+  background: var(--ux-line-2);
+  border-radius: 4px;
+}
+.ux-cat-scroll::-webkit-scrollbar-thumb:hover { background: var(--ux-ink-3); }
+
+/* ============================================================
+   Categorías como cards · estilo miCard con imagen de fondo
+   Sustituyen a los chips planos cuando se quiere un toque más visual.
+   ============================================================ */
+.ux-cat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 0 0 14px;
+}
+.ux-cat-card {
+  position: relative;
+  height: 96px;
+  border-radius: var(--ux-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--ux-line);
+  cursor: pointer;
+  background: var(--ux-bg-3);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 12px;
+  text-align: left;
+  isolation: isolate;
+  transition: transform var(--ux-dur-fast), border-color var(--ux-dur-fast);
+  font-family: inherit;
+  color: #fff;
+}
+.ux-cat-card:hover { transform: translateY(-2px); border-color: var(--ux-line-2); }
+.ux-cat-card:active { transform: scale(0.98); }
+.ux-cat-card__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: -2;
+}
+.ux-cat-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.7) 100%);
+  z-index: -1;
+}
+.ux-cat-card__name {
+  font-family: var(--ux-font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.ux-cat-card__count {
+  font-size: 11px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+.ux-cat-card[aria-pressed="true"] {
+  border-color: var(--ux-brand);
+  box-shadow: 0 0 0 2px var(--ux-brand);
+}
+/* ============================================================
+   Categorías · carrusel horizontal con flechas
+   ============================================================ */
+.ux-cat-rail {
+  position: relative;
+  padding: 14px 0 14px;
+  border-bottom: 1px solid var(--ux-line);
+}
+.ux-cat-rail__track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 0 14px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ux-line-2) transparent;
+}
+.ux-cat-rail__track::-webkit-scrollbar { height: 6px; }
+.ux-cat-rail__track::-webkit-scrollbar-track { background: transparent; }
+.ux-cat-rail__track::-webkit-scrollbar-thumb {
+  background: var(--ux-line-2);
+  border-radius: 3px;
+}
+.ux-cat-rail__track::-webkit-scrollbar-thumb:hover { background: var(--ux-ink-3); }
+
+.ux-cat-rail .ux-cat-card {
+  flex: 0 0 160px;
+  scroll-snap-align: start;
+}
+
+.ux-cat-rail__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ux-bg-1);
+  border: 1px solid var(--ux-line);
+  color: var(--ux-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: var(--ux-shadow-md);
+  transition: background var(--ux-dur-fast), transform var(--ux-dur-fast);
+}
+.ux-cat-rail__arrow:hover { background: var(--ux-bg-2); }
+.ux-cat-rail__arrow:active { transform: translateY(-50%) scale(0.94); }
+.ux-cat-rail__arrow--prev { left: 4px; }
+.ux-cat-rail__arrow--next { right: 4px; }
+.ux-cat-rail__arrow svg { width: 16px; height: 16px; }
+
+/* Tile con imagen de producto */
+.ux-cat-tile__img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--ux-radius-md);
+  background-size: cover;
+  background-position: center;
+  background-color: var(--ux-bg-3);
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* ============================================================
+   Cat-card (carrusel) · efectos hover/active
+   ============================================================ */
+.ux-cat-card {
+  transition:
+    transform var(--ux-dur-fast) var(--ux-ease),
+    border-color var(--ux-dur-fast),
+    box-shadow var(--ux-dur-fast);
+}
+.ux-cat-card:hover {
+  transform: translateY(-3px) scale(1.02);
+  border-color: var(--ux-brand);
+  box-shadow: 0 10px 24px -10px rgba(0,0,0,0.5);
+}
+.ux-cat-card:active {
+  transform: translateY(-1px) scale(0.98);
+  transition-duration: 80ms;
+}
+.ux-cat-card[aria-pressed="true"] {
+  border-color: var(--ux-brand);
+  box-shadow: 0 0 0 2px var(--ux-brand), 0 8px 20px -10px rgba(0,0,0,0.4);
+}
+
+/* ============================================================
+   Fly-to-cart animation
+   ============================================================ */
+.ux-fly {
+  position: fixed;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: 999;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  transition: transform 700ms cubic-bezier(0.5, -0.2, 0.6, 1.4), opacity 700ms ease, width 700ms ease, height 700ms ease;
+}
+
+/* Cart badge bump */
+@keyframes ux-bump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+.ux-bump { animation: ux-bump 380ms var(--ux-ease); }
+
+/* Cart line enter */
+@keyframes ux-line-in {
+  0%   { opacity: 0; transform: translateX(20px); background: color-mix(in oklch, var(--ux-brand) 25%, transparent); }
+  60%  { background: color-mix(in oklch, var(--ux-brand) 25%, transparent); }
+  100% { opacity: 1; transform: translateX(0); background: transparent; }
+}
+.ux-cart__line--enter { animation: ux-line-in 500ms var(--ux-ease); }
+
+/* Variantes de color tintado (sin imagen) */
+.ux-cat-card--coffee  .ux-cat-card__bg { background: linear-gradient(135deg, #6b4226, #2a1810); }
+.ux-cat-card--tea     .ux-cat-card__bg { background: linear-gradient(135deg, #4a7d4a, #1f3a1f); }
+.ux-cat-card--bakery  .ux-cat-card__bg { background: linear-gradient(135deg, #c89568, #6b4423); }
+.ux-cat-card--cold    .ux-cat-card__bg { background: linear-gradient(135deg, #4a7da8, #1f3a55); }
+.ux-cat-card--menu    .ux-cat-card__bg { background: linear-gradient(135deg, #a85a3a, #5a2818); }
+.ux-cat-card--dessert .ux-cat-card__bg { background: linear-gradient(135deg, #b87a9d, #5a2c4a); }
+.ux-cat-card--snacks  .ux-cat-card__bg { background: linear-gradient(135deg, #d8a23a, #6b4f1a); }
+.ux-cat-card--all     .ux-cat-card__bg { background: linear-gradient(135deg, #555, #1a1a1a); }
+
+/* ============================================================
+   Numpad · grid 3×4 + acciones laterales
+   ============================================================ */
+.ux-numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: var(--ux-bg-2);
+  padding: 12px;
+  border-radius: var(--ux-radius-xl);
+  border: 1px solid var(--ux-line);
+}
+
+.ux-numpad__btn {
+  height: 56px;
+  background: var(--ux-bg-3);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-md);
+  color: var(--ux-ink);
+  font-family: var(--ux-font-display);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  transition: background var(--ux-dur-fast), transform var(--ux-dur-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ux-numpad__btn:hover { background: var(--ux-bg-4); }
+.ux-numpad__btn:active { transform: scale(0.97); }
+
+.ux-numpad__btn--brand {
+  background: var(--ux-brand);
+  color: var(--ux-brand-fg);
+  border-color: transparent;
+}
+.ux-numpad__btn--brand:hover { background: var(--ux-brand-2); }
+
+.ux-numpad__btn--ghost {
+  background: transparent;
+  color: var(--ux-ink-2);
+  border-color: var(--ux-line);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--ux-font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ux-numpad__btn--double { grid-column: span 2; }
+.ux-numpad__btn--tall   { grid-row: span 2; height: auto; }
+
+/* Display del numpad */
+.ux-numpad-display {
+  background: var(--ux-bg-3);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-lg);
+  padding: 16px;
+  text-align: right;
+  margin-bottom: 12px;
+  font-family: var(--ux-font-display);
+}
+.ux-numpad-display__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--ux-ink-3);
+  letter-spacing: var(--ux-tracking-wide);
+}
+.ux-numpad-display__value {
+  font-size: 38px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--ux-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   Cart · línea de pedido
+   ============================================================ */
+.ux-cart {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.ux-cart__header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ux-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ux-cart__title {
+  font-family: var(--ux-font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ux-ink);
+}
+.ux-cart__sub {
+  font-size: 11px;
+  color: var(--ux-ink-3);
+  margin-top: 2px;
+}
+
+.ux-cart__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.ux-cart__line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: var(--ux-radius-md);
+  transition: background var(--ux-dur-fast);
+  cursor: pointer;
+}
+.ux-cart__line:hover { background: var(--ux-bg-3); }
+.ux-cart__line--selected { background: color-mix(in oklch, var(--ux-brand) 10%, transparent); }
+.ux-cart__line--selected:hover { background: color-mix(in oklch, var(--ux-brand) 14%, transparent); }
+
+.ux-cart__line-name {
+  font-size: 13px;
+  color: var(--ux-ink);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ux-cart__line-qty {
+  display: inline-block;
+  min-width: 22px;
+  padding: 1px 6px;
+  background: var(--ux-bg-4);
+  color: var(--ux-ink-2);
+  border-radius: var(--ux-radius-xs);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.ux-cart__line-meta {
+  font-size: 11px;
+  color: var(--ux-ink-3);
+  margin-top: 2px;
+}
+.ux-cart__line-price {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ux-ink);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.ux-cart__line-orig {
+  text-decoration: line-through;
+  color: var(--ux-ink-3);
+  font-size: 11px;
+}
+
+/* Totals box */
+.ux-cart__totals {
+  border-top: 1px solid var(--ux-line);
+  padding: 12px 16px;
+  background: var(--ux-bg);
+}
+.ux-cart__total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  color: var(--ux-ink-3);
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.ux-cart__total-row--main {
+  font-family: var(--ux-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ux-ink);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--ux-line);
+}
+
+.ux-cart__actions {
+  padding: 12px;
+  border-top: 1px solid var(--ux-line);
+  display: grid;
+  gap: 8px;
+}
+.ux-cart__cta {
+  height: 56px;
+  border-radius: var(--ux-radius-lg);
+  font-size: 16px;
+  font-weight: 500;
+  background: var(--ux-brand);
+  color: var(--ux-brand-fg);
+  border: none;
+  cursor: pointer;
+  font-family: var(--ux-font-display);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  transition: background var(--ux-dur-fast);
+}
+.ux-cart__cta:hover { background: var(--ux-brand-2); }
+.ux-cart__cta-amount { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* ============================================================
+   Catalog tile · botón de producto en cuadrícula POS
+   ============================================================ */
+.ux-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 14px;
+}
+.ux-cat-scroll > .ux-cat-grid { padding-top: 14px; }
+
+.ux-cat-tile {
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-lg);
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  font: inherit;
+  transition:
+    transform var(--ux-dur-fast) var(--ux-ease),
+    border-color var(--ux-dur-fast),
+    box-shadow var(--ux-dur-fast),
+    background var(--ux-dur-fast);
+  position: relative;
+  min-height: 96px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.ux-cat-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in oklch, var(--ux-brand) 18%, transparent) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity var(--ux-dur-base);
+  pointer-events: none;
+  z-index: 0;
+}
+.ux-cat-tile > * { position: relative; z-index: 1; }
+.ux-cat-tile:hover {
+  border-color: var(--ux-brand);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px -8px rgba(0,0,0,0.4), 0 0 0 1px var(--ux-brand);
+}
+.ux-cat-tile:hover::before { opacity: 1; }
+.ux-cat-tile:hover .ux-cat-tile__img { transform: scale(1.06); }
+.ux-cat-tile:active {
+  transform: translateY(-1px) scale(0.97);
+  transition-duration: 80ms;
+}
+/* Pulso al añadir */
+@keyframes ux-tile-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in oklch, var(--ux-brand) 60%, transparent); }
+  100% { box-shadow: 0 0 0 14px transparent; }
+}
+.ux-cat-tile--pulse {
+  animation: ux-tile-pulse 500ms var(--ux-ease);
+  border-color: var(--ux-brand) !important;
+}
+.ux-cat-tile__img {
+  transition: transform var(--ux-dur-slow) var(--ux-ease);
+}
+
+.ux-cat-tile__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ux-ink);
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.ux-cat-tile__price {
+  font-size: 12px;
+  color: var(--ux-ink-3);
+  font-variant-numeric: tabular-nums;
+  margin-top: auto;
+}
+.ux-cat-tile__swatch {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--ux-brand);
+}
+.ux-cat-tile--out {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ux-cat-tile--out::after {
+  content: "Sin stock";
+  position: absolute;
+  bottom: 8px; right: 8px;
+  font-size: 9px;
+  color: var(--ux-danger);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+/* Categoría chips horizontales */
+.ux-cat-chips {
+  display: flex;
+  gap: 6px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--ux-line);
+  background: var(--ux-bg-1);
+  scrollbar-width: none;
+}
+.ux-cat-chips::-webkit-scrollbar { display: none; }
+.ux-cat-chip {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  background: var(--ux-bg-3);
+  border: 1px solid var(--ux-line);
+  color: var(--ux-ink-2);
+  border-radius: var(--ux-radius-pill);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  font: inherit;
+  transition: all var(--ux-dur-fast);
+}
+.ux-cat-chip:hover { border-color: var(--ux-line-2); color: var(--ux-ink); }
+.ux-cat-chip[aria-pressed="true"] {
+  background: var(--ux-ink);
+  color: var(--ux-bg);
+  border-color: var(--ux-ink);
+}
+
+/* ============================================================
+   Payment · método y desglose
+   ============================================================ */
+.ux-pay-methods {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.ux-pay-method {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-lg);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: border-color var(--ux-dur-fast), background var(--ux-dur-fast);
+}
+.ux-pay-method:hover { border-color: var(--ux-line-2); }
+.ux-pay-method[aria-pressed="true"] {
+  border-color: var(--ux-brand);
+  background: color-mix(in oklch, var(--ux-brand) 6%, var(--ux-bg-2));
+}
+.ux-pay-method__icon {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: var(--ux-bg-3);
+  display: grid;
+  place-items: center;
+  color: var(--ux-ink-2);
+}
+.ux-pay-method__icon svg { width: 18px; height: 18px; }
+.ux-pay-method[aria-pressed="true"] .ux-pay-method__icon { background: var(--ux-brand-soft); color: var(--ux-brand-3); }
+
+.ux-pay-method__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ux-ink);
+}
+.ux-pay-method__sub {
+  font-size: 11px;
+  color: var(--ux-ink-3);
+}
+
+/* ============================================================
+   Receipt · ticket impreso (estilo papel)
+   ============================================================ */
+.ux-receipt {
+  background: #fafaf6;
+  color: #1a1815;
+  font-family: var(--ux-font-mono);
+  font-size: 11.5px;
+  line-height: 1.55;
+  padding: 22px 18px;
+  border-radius: var(--ux-radius-lg);
+  width: 280px;
+  max-width: 100%;
+  border: 1px solid var(--ux-line);
+  box-shadow: var(--ux-shadow-md);
+  position: relative;
+  /* dentado superior e inferior */
+  -webkit-mask:
+    radial-gradient(circle at 6px 0, transparent 4px, #000 4.5px) top left / 12px 8px repeat-x,
+    radial-gradient(circle at 6px 8px, transparent 4px, #000 4.5px) bottom left / 12px 8px repeat-x,
+    linear-gradient(#000, #000);
+  -webkit-mask-composite: source-over;
+          mask:
+    radial-gradient(circle at 6px 0, transparent 4px, #000 4.5px) top left / 12px 8px repeat-x,
+    radial-gradient(circle at 6px 8px, transparent 4px, #000 4.5px) bottom left / 12px 8px repeat-x,
+    linear-gradient(#000, #000);
+  margin: 8px 0;
+}
+
+.ux-receipt__title {
+  font-family: var(--ux-font-display);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.ux-receipt__sub {
+  text-align: center;
+  font-size: 10.5px;
+  color: #5c564d;
+  margin-bottom: 14px;
+}
+.ux-receipt__divider {
+  border: none;
+  border-top: 1px dashed #888;
+  margin: 8px 0;
+}
+.ux-receipt__line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ux-receipt__line-name {
+  flex: 1;
+  word-break: break-word;
+}
+.ux-receipt__line-price {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ux-receipt__total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+.ux-receipt__footer {
+  text-align: center;
+  font-size: 10px;
+  color: #5c564d;
+  margin-top: 12px;
+  line-height: 1.4;
+}
+
+/* ============================================================
+   KDS · ticket de cocina
+   ============================================================ */
+.ux-kds {
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  border-radius: var(--ux-radius-xl);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 280px;
+  max-width: 100%;
+  position: relative;
+  border-top: 4px solid var(--ux-info);
+}
+.ux-kds--ready { border-top-color: var(--ux-leaf); }
+.ux-kds--late { border-top-color: var(--ux-danger); animation: ux-kds-pulse 1.5s ease-in-out infinite; }
+@keyframes ux-kds-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 0 4px color-mix(in oklch, var(--ux-danger) 25%, transparent); }
+}
+
+.ux-kds__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ux-kds__order {
+  font-family: var(--ux-font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ux-ink);
+}
+.ux-kds__time {
+  font-family: var(--ux-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ux-ink-2);
+  background: var(--ux-bg-3);
+  padding: 3px 7px;
+  border-radius: 4px;
+}
+.ux-kds--late .ux-kds__time { color: var(--ux-danger); background: var(--ux-danger-soft); }
+.ux-kds--ready .ux-kds__time { color: var(--ux-leaf); background: var(--ux-leaf-soft); }
+
+.ux-kds__source {
+  font-size: 11px;
+  color: var(--ux-ink-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ux-kds__items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+.ux-kds__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 2px 0;
+  color: var(--ux-ink);
+}
+.ux-kds__qty {
+  font-weight: 700;
+  color: var(--ux-brand);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  min-width: 22px;
+}
+.ux-kds__notes {
+  font-size: 11px;
+  color: var(--ux-warn);
+  margin-left: 30px;
+  font-style: italic;
+}
+.ux-kds__item--done {
+  color: var(--ux-ink-3);
+  text-decoration: line-through;
+}
+
+.ux-kds__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.ux-kds__actions .ux-btn { flex: 1; }
