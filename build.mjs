@@ -80,7 +80,7 @@ const ORDER = [
 ];
 
 const BANNER = `/*!
- * ERPlora UX · v2.0.0
+ * ERPlora UX · v2.1.0
  * CSS-only component library — no Tailwind, no build for consumers
  * https://github.com/ERPlora/ux
  * MIT License

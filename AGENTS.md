@@ -1,13 +1,14 @@
 # AGENTS.md — ERPlora UX
 
-Open standard for coding agents. Detected automatically by Claude Code, Cursor, OpenAI Codex, and most LLM-powered editors. Mirror or copy this file into a consumer project as `AGENTS.md` (or `.cursorrules`, or `.github/copilot-instructions.md`) so the agent picks it up.
+Open standard for coding agents. Detected automatically by Cursor, OpenAI Codex, GitHub Copilot Workspace, and most other LLM-powered editors. Mirror or copy this file into a consumer project as `AGENTS.md` (or `.cursorrules`, or `.github/copilot-instructions.md`) so the agent picks it up.
 
 ## What this library is
 
 ERPlora UX is a **CSS-only semantic component library**. One stylesheet, ~200 components, prefix `ux-*`. **No Tailwind, no SCSS, no JS dependency.** Optional runtime interactivity is wired via [Datastar](https://data-star.dev) `data-*` attributes — never required.
 
-- Latest: **v2.0.0**
-- CDN: `https://cdn.jsdelivr.net/gh/ERPlora/ux@v2.0.0/dist/erplora-ux.min.css`
+- Latest: **v2.1.0** (~260 component blocks, 1932 classes total)
+- CDN (always-current): `https://cdn.jsdelivr.net/gh/ERPlora/ux@latest/dist/erplora-ux.min.css`
+- CDN (pinned): `https://cdn.jsdelivr.net/gh/ERPlora/ux@v2.1.0/dist/erplora-ux.min.css`
 - npm: `@erplora/ux` → import `@erplora/ux/min`
 - Source: <https://github.com/ERPlora/ux>
 - Showcase: <https://erplora.github.io/ux/>
@@ -21,7 +22,7 @@ When the user is **building UI in a project that includes this library**, the ag
 3. **Theme via custom properties, not new classes.** Override `--ux-*` variables on `:root` or any subtree. Never hardcode hex colors.
 4. **Use runtime states with `is-*`**: `is-active`, `is-open`, `is-loading`, `is-disabled`, `is-selected`. Toggle these from JS/Datastar — they are not `--modifier`.
 5. **Wire interactivity with Datastar `data-*` if present**, otherwise plain JS. Examples: `data-signals`, `data-show`, `data-bind-q`, `data-on-click`, `data-class-is-active`. The library never *requires* Datastar.
-6. **Quote the CDN tag, not `@main`.** Always `@v2.0.0` (or the latest stable tag) so users get a frozen build.
+6. **CDN URL pattern**: prefer `@latest` for greenfield projects (auto-tracks newest semver tag), `@v2.1.0` (or current latest tag) for production deploys that need full reproducibility. Never recommend `@main` — it bypasses the CDN cache and breaks consumers when a commit lands.
 
 ### Anti-patterns the agent must avoid
 
@@ -39,7 +40,7 @@ When the user is **building UI in a project that includes this library**, the ag
 <html lang="en" data-theme="erplora">
 <head>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@v2.0.0/dist/erplora-ux.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@latest/dist/erplora-ux.min.css">
   <!-- Optional, for interactive previews -->
   <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
 </head>
@@ -49,7 +50,7 @@ When the user is **building UI in a project that includes this library**, the ag
 </html>
 ```
 
-Themes available out of the box: `data-theme="erplora"` (dark terracota, default), `data-theme="dark"`, `data-theme="light"`.
+Themes available out of the box: `data-theme="erplora"` (dark terracota, default), `data-theme="erplora-light"` (light variant). Apply on `<html>` or any subtree.
 
 ## Class catalog (block → notable variants & children)
 
@@ -188,6 +189,81 @@ This is the **block index**. For each, common variants (`--`) and children (`__`
 
 - `ux-empty` · `ux-error` · `ux-disabled` · `ux-loading` · `ux-page-loading`
 
+## v2.1 additions (2026-05-08) — actions, selection, inputs, layout, editors, verticals
+
+### Actions extra (`actions-extra.css`)
+- `ux-back-btn` — back navigation · `__icon`, `__label` · `--sm`, `--lg`, `--icon`
+- `ux-split-btn` — primary action + dropdown caret · `__main`, `__sep`, `__caret` · `--primary`, `--secondary`, `--danger` · `--sm`, `--lg`
+- `ux-calc` — visual calculator · `__display`, `__display-prev`, `__display-value`, `__keys`, `__key` (`--op`, `--equals`, `--fn`)
+- `ux-app-icon` — app launcher tile · sizes `--xs/sm/lg/xl` · color variants `--brand/leaf/warn/danger/info` · gallery wrapper `ux-app-icons`
+
+### Selection (`selection.css`)
+- `ux-tag` — labeled tag (rectangular, ≠ chip) · variants `--brand/leaf/warn/danger/info/neutral`, `--solid` · removable child `__remove` · container `ux-tags`
+- `ux-filter-chip` — toggleable filter chip with `is-active` · children `__icon`, `__label`, `__count`, `__check` · container `ux-filter-chips`
+- `ux-toggle-group` — segmented buttons (≠ `ux-segment`, more substantial) · `__option` · `--ghost`, `--block` · sizes
+- `ux-variant` — product color/size selector · `__swatch`, `__label` · states `is-selected/disabled/out` · `--size` for rectangular text swatches · container `ux-variants`
+- `ux-qty-badge` — count badge · sizes `--xs/sm` · `--floating` for icon overlays · `--dot` for dot-only
+
+### Inputs extra (`forms-inputs.css`)
+- `ux-currency` — amount input with currency symbol · `__symbol`, `__input`, `__currency-select` · `--invalid` · sizes
+- `ux-phone` — international phone with country selector · `__country`, `__flag`, `__dial`, `__input`, `__country-menu`, `__country-list`, `__country-item`
+- `ux-qty-stepper` — `[-] qty [+]` (≠ workflow `ux-stepper`) · `__btn--minus`, `__btn--plus`, `__input/__value` · `--ghost`, `--block`
+
+### Data extra (`data-extra.css`)
+- `ux-json` — JSON tree viewer · `__row`, `__key`, `__string`, `__number`, `__bool`, `__null`, `__bracket`, `__caret`, `__nested` · `is-collapsed`
+- `ux-qr` — QR code wrapper (always white bg) · sizes · `--bordered`
+- `ux-stock` — stock indicator · `--in-stock/low/out` · `--soft`
+- `ux-reorder` — sortable list with drag handles · `is-dragging`, `is-drop-target`
+- `ux-vlist` — virtual list (visual styles) · `__row` · `--dense`
+- `ux-carousel` — slide deck · `__track`, `__slide`, `__nav--prev/next`, `__dots`, `__dot--active` · `--cards`
+- `ux-iscroll` — infinite scroll sentinel · `is-loading`, `is-end`
+- `ux-load-more` — load-more button + count
+- `ux-img` — image wrapper · aspect ratios `--square/portrait/video/free` · `is-loading/loaded`
+- `ux-zoom` — image zoom · `is-zooming` · `--inline`, `--lightbox`
+
+### Layout extra (`layout-extra.css`)
+- `ux-panel` — surface panel · `__head`, `__body`, `__footer`, `__actions` · `--ghost`, `--bordered`, `--flush`, `--sticky-head`
+- `ux-masonry` — column-based masonry · `--2/3/4/5`, responsive
+- `ux-master-detail` — sidebar list + detail · `--compact`, `--wide`, `--mobile-detail`
+- `ux-scroll` — styled scrollable container · `--x`, `--y`, `--both`, `--invisible`, `--fade`
+- `ux-spacer` — flex spacer · sizes + `--block`, `--divider`
+- `ux-resize` — resizable container · `__handle` · `--x`, `--y`
+- `ux-split` — split-pane · `__pane`, `__divider` · `--vertical`, `--collapsed-left/right`
+- `ux-toolbar` — horizontal action bar · `__group`, `__divider`, `__spacer`, `__title` · `--floating`, `--ghost`, `--sticky`
+
+### Editors (`editors.css`)
+- `ux-richtext` — rich text editor · `__toolbar`, `__btn`, `__divider`, `__select`, `__content`, `__footer` · `--minimal` · `is-focus`
+- `ux-keyboard` — visual shortcut hints · `__row`, `__key`, `__plus` · `--inline`, `--compact`
+- `ux-osk` — touch on-screen QWERTY · `--numeric`, `--compact` · `is-shift` · companion `ux-osk-display`
+- `ux-vkb` — dense virtual keyboard · `--qwerty`, `--numeric`, `--symbol`, `--compact` · companion `ux-vkb-display`
+
+### Multimedia extra (extends `multimedia.css`)
+- `ux-audio` — audio player · `__play`, `__cover`, `__info`, `__progress`, `__bar`, `__fill`, `__time`, `__vol`, `__speed` · `--compact`, `--full` · `is-playing`
+- `ux-video` — video player · `__el`, `__poster`, `__play-overlay`, `__controls`, `__btn`, `__progress` · `--sm/lg/contain/no-controls` · `is-playing`, `is-fullscreen`
+- `ux-pdf` — PDF viewer · `__toolbar`, `__thumbs`, `__thumb`, `__viewer`, `__page`, `__page-content` · `--no-thumbs`, `--continuous`
+
+### HR extra (extends `hr.css`)
+- `ux-clock` — time clock · `__display`, `__date`, `__name`, `__status`, `__elapsed`, `__btn--in/out/break` · `--compact`, `--kiosk` · `is-clocked-in`, `is-on-break`
+- `ux-shift-cal` — shift calendar grid · shifts `--morning/afternoon/night/off`
+- `ux-attendance` — who's in/out today · status `--present/late/absent/leave` · `is-late`, `is-absent`
+- `ux-perf` — performance meter · `--radial`, `--horizontal`, `--mini` · color `--good/avg/poor`
+
+### Manufacturing extra (extends `manufacturing.css`)
+- `ux-machine` — machine status card · `--running/idle/maintenance/down/setup` · `is-alert`
+- `ux-prodline` — production line · stations + connectors · `is-running/idle/blocked` · `--vertical`
+- `ux-qc` — quality checklist · items `is-pass/fail/skip/pending` · `--inspection-mode`
+- `ux-batch` — batch tracker with traceability chain · `is-recalled`, `is-quarantined`
+
+### Commerce extra (extends `commerce.css`)
+- `ux-loyalty` — membership card · tier variants `--silver/gold/platinum/brand`
+- `ux-ticket` — order/kitchen ticket · status `--new/prepping/ready/delivered` · type `--dine/takeaway/delivery` · `is-urgent`
+- `ux-event-card` — calendar event · color variants · `is-now`
+- `ux-product` — generic e-commerce product card · `--list`, `--compact`, `--grid` · `is-out`, `is-on-sale`, `is-wishlisted`
+
+### Navigation extra (extends `navigation.css`)
+- `ux-menubar` — desktop app menu bar · `__menu`, `__panel`, `__item`, `__separator`, `__submenu` · `--compact`, `--floating` · `is-open`
+- `ux-scheduler` — weekly appointment grid · appointments `--brand/leaf/warn/danger/info` · `is-selecting/busy/blocked` · `--day` for single-day, sizes
+
 ## Color & status semantics
 
 Status colors are stable across components. When the agent picks a variant, the meaning is:
@@ -320,8 +396,13 @@ Per-component tokens use a `--_*` prefix (e.g. `--_btn-h`, `--_btn-bg`) — don'
 
 ## Versioning & deprecation
 
-- Patch releases (`v2.0.x`) — bug fixes, no class changes.
+- Patch releases (`v2.1.x`) — bug fixes, no class changes.
 - Minor releases (`v2.x.0`) — new components or new modifiers; existing classes never break.
 - Major releases bump the prefix discussion (none planned for v2.x).
 
-When suggesting a CDN URL, always include the version: `@v2.0.0`. Never recommend `@main`.
+CDN URL recommendations for agents to suggest:
+- **Always-current**: `@latest` — auto-resolves to the most recent semver tag. Best for greenfield projects and demos.
+- **Major-pinned**: `@v2` — locks to 2.x, gets minor + patch updates automatically.
+- **Minor-pinned**: `@v2.1` — locks to 2.1.x, only gets patches.
+- **Exact pin**: `@v2.1.0` — fully reproducible, recommended for production builds with locked deploys.
+- **Never** recommend `@main` — bypasses CDN cache, can break consumers on any push.
