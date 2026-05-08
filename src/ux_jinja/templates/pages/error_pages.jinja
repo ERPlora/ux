@@ -1,0 +1,57 @@
+{% from "ui/card.jinja" import card %}
+{% from "ui/empty.jinja" import empty %}
+{% from "ui/tabs.jinja" import tabs, tab_panel %}
+{% from "ui/button.jinja" import button %}
+
+{# Error pages showcase — 404, 500 and 403 rendered via the empty() macro.   #}
+{# A tabs() control switches between them using the `selected_error` signal. #}
+{# Consumers can extend via the named block ``error_pages_content``.         #}
+{% set _tabs_id = "errors" %}
+{% set _tab_items = [
+  {"label": "404 — Not found", "key": "404"},
+  {"label": "500 — Server error", "key": "500"},
+  {"label": "403 — Forbidden", "key": "403"},
+] %}
+{% block error_pages_content %}
+<section class="ux-stack" data-signals='{"selected_error": "404"}'>
+  <header>
+    <h1>Error pages</h1>
+    <p>Showcase of 404, 500 and 403 templates. Pick one with the tabs below.</p>
+  </header>
+
+  {{ tabs(_tabs_id, items=_tab_items, value="404") }}
+
+  {% call tab_panel(_tabs_id, "404") %}
+    {% call card() %}
+      {% call empty(
+        title="Page not found",
+        description="The page you are looking for does not exist or was moved."
+      ) %}
+        {{ button("Back to home", variant="primary", href="/") }}
+      {% endcall %}
+    {% endcall %}
+  {% endcall %}
+
+  {% call tab_panel(_tabs_id, "500") %}
+    {% call card() %}
+      {% call empty(
+        title="Something went wrong",
+        description="An unexpected error occurred. Our team has been notified."
+      ) %}
+        {{ button("Reload", variant="primary", on_click="window.location.reload()") }}
+      {% endcall %}
+    {% endcall %}
+  {% endcall %}
+
+  {% call tab_panel(_tabs_id, "403") %}
+    {% call card() %}
+      {% call empty(
+        title="Access denied",
+        description="You do not have permission to view this resource."
+      ) %}
+        {{ button("Sign in", variant="primary", href="/login") }}
+      {% endcall %}
+    {% endcall %}
+  {% endcall %}
+</section>
+{% endblock %}

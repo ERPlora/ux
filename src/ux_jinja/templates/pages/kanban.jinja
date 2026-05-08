@@ -1,0 +1,67 @@
+{% from "ui/card.jinja" import card %}
+{% from "ui/badge.jinja" import badge %}
+
+{# Kanban example page — three-column board (Backlog / In Progress / Done).  #}
+{# Context vars (all optional):                                              #}
+{#   columns — list of dicts:                                                #}
+{#     [{title, count, items=[{title, description, priority}]}, ...]        #}
+{#     `priority` is one of "high" | "med" | "low" (controls badge variant). #}
+{# When `columns` is omitted, a default mock board is rendered so the page  #}
+{# is self-contained for previews.                                           #}
+{# Consumers can extend via the named block ``kanban_content``.              #}
+{% set _default_columns = [
+  {"title": "Backlog", "count": 3, "items": [
+    {"title": "Distribuidora Iberica catalogue", "description": "Demo of the inventory module before May 28.", "priority": "med"},
+    {"title": "Bakery Marisol — 2 POS", "description": "Pricing review for the second site.", "priority": "low"},
+    {"title": "Restaurant Vega", "description": "Migration from spreadsheets.", "priority": "low"},
+  ]},
+  {"title": "In Progress", "count": 2, "items": [
+    {"title": "Onboarding flow rewrite", "description": "New steps for SaaS hub provisioning.", "priority": "high"},
+    {"title": "Stripe webhook hardening", "description": "Retry queue + idempotency keys.", "priority": "med"},
+  ]},
+  {"title": "Done", "count": 2, "items": [
+    {"title": "Hotframe 0.0.9 release", "description": "HTTP interceptor subsystem shipped.", "priority": "low"},
+    {"title": "ux-jinja v0.2.0", "description": "38 macros + page templates.", "priority": "low"},
+  ]},
+] %}
+{% set _columns = columns | default(_default_columns) %}
+{% set _priority_variants = {"high": "danger", "med": "warn", "low": "info"} %}
+{% block kanban_content %}
+<section class="ux-stack">
+  <header>
+    <h1>Kanban</h1>
+    <p>Three-column board composed from ux-jinja card and badge macros.</p>
+  </header>
+
+  <div class="ux-grid-auto ux-grid-auto--lg">
+    {% for col in _columns %}
+      {% set _col_title = col["title"] | default("") %}
+      {% set _col_items = col["items"] | default([]) %}
+      {% set _col_count = col["count"] | default(_col_items | length) %}
+      {% call card() %}
+        <header class="ux-flex ux-justify-between ux-items-center">
+          <h3 class="ux-card__title">{{ _col_title|e }}</h3>
+          {{ badge(_col_count|string, variant="info", size="sm") }}
+        </header>
+        <div class="ux-stack" style="margin-top:.75rem">
+          {% for item in _col_items %}
+            {% set _item_title = item["title"] | default("") %}
+            {% set _item_desc = item["description"] | default("") %}
+            {% set _item_priority = item["priority"] | default("low") %}
+            {% set _item_variant = _priority_variants.get(_item_priority, "info") %}
+            {% call card(flat=True) %}
+              <header class="ux-flex ux-justify-between ux-items-center">
+                <h4 class="ux-card__title" style="font-size:.95rem;margin:0">{{ _item_title|e }}</h4>
+                {{ badge(_item_priority, variant=_item_variant, size="sm") }}
+              </header>
+              {% if _item_desc %}
+                <p style="margin:.5rem 0 0;font-size:.85rem">{{ _item_desc|e }}</p>
+              {% endif %}
+            {% endcall %}
+          {% endfor %}
+        </div>
+      {% endcall %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

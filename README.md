@@ -518,6 +518,22 @@ See <https://erplora.github.io/ux/> for live previews of the underlying CSS.
 
 ---
 
+## Previews
+
+The static HTML files under `previews/components/*.html` are the historical
+showcase pages used by the GitHub Pages site (https://erplora.github.io/ux/).
+
+Since v0.2.0 the canonical reference for component markup lives in the
+`ux-jinja` Python package: each macro under `src/ux_jinja/templates/ui/`
+is the source of truth, with live previews and copy-pastable code at
+https://ux.erplora.com.
+
+The static `previews/` directory is kept for the GitHub Pages demo and
+will be removed once that site fully migrates to the Hotframe-rendered
+`ux.erplora.com`.
+
+---
+
 ## Licencia
 
 MIT © ERPlora · 2025

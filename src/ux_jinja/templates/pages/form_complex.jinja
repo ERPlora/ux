@@ -1,0 +1,116 @@
+{% from "ui/card.jinja" import card, card_footer %}
+{% from "ui/button.jinja" import button %}
+{% from "ui/field.jinja" import field %}
+{% from "ui/input.jinja" import input as ux_input %}
+{% from "ui/textarea.jinja" import textarea %}
+{% from "ui/select.jinja" import select as ux_select %}
+{% from "ui/toggle.jinja" import toggle %}
+{% from "ui/check.jinja" import check %}
+{% from "ui/range.jinja" import range as ux_range %}
+{% from "ui/chip.jinja" import chip %}
+
+{# Complex form example page — product creation form split into four        #}
+{# sections (General, Pricing, Status, Notifications).                      #}
+{# Context vars (all optional):                                             #}
+{#   submit_url — backend endpoint for the Datastar @post action            #}
+{#                (default "/products").                                    #}
+{# Datastar signals are seeded on the form root so toggles / checks /       #}
+{# range bind via $signal.                                                  #}
+{# Consumers can extend via the named block ``form_complex_content``.       #}
+{% set _submit_url = submit_url | default("/products") %}
+{% set _categories = [
+  {"value": "", "label": "Select a category"},
+  {"value": "bakery", "label": "Bakery"},
+  {"value": "drinks", "label": "Drinks"},
+  {"value": "groceries", "label": "Groceries"},
+  {"value": "services", "label": "Services"},
+] %}
+{% set _currencies = [
+  {"value": "EUR", "label": "EUR"},
+  {"value": "USD", "label": "USD"},
+  {"value": "GBP", "label": "GBP"},
+] %}
+{% set _form_signals = {
+  "name": "",
+  "description": "",
+  "category": "",
+  "price": 0,
+  "currency": "EUR",
+  "discount": 0,
+  "active": true,
+  "featured": false,
+  "notify_email": true,
+  "notify_push": false,
+  "notify_sms": false
+} %}
+{% block form_complex_content %}
+<section class="ux-stack">
+  <header>
+    <h1>New product</h1>
+    <p>Create a product and configure pricing, status and notifications.</p>
+  </header>
+
+  <form class="ux-stack"
+    data-signals='{{ _form_signals | tojson }}'
+    data-on:submit="@post('{{ _submit_url|e }}'); event.preventDefault()">
+
+    {% call card(title="General", subtitle="Public information") %}
+      <div class="ux-stack">
+        {% call field(label="Name", required=True) %}
+          {{ ux_input("name", placeholder="Product name", value_signal="$name") }}
+        {% endcall %}
+        {% call field(label="Description", hint="Shown on the product page.") %}
+          {{ textarea("description", placeholder="Short description", rows=4, value_signal="$description") }}
+        {% endcall %}
+        {% call field(label="Category", required=True) %}
+          {{ ux_select("category", options=_categories, value_signal="$category") }}
+        {% endcall %}
+      </div>
+    {% endcall %}
+
+    {% call card(title="Pricing", subtitle="Price, currency and discount") %}
+      <div class="ux-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        {% call field(label="Price", required=True) %}
+          {{ ux_input("price", type="number", placeholder="0.00", value_signal="$price") }}
+        {% endcall %}
+        {% call field(label="Currency") %}
+          {{ ux_select("currency", options=_currencies, value_signal="$currency") }}
+        {% endcall %}
+      </div>
+      {% call field(label="Discount (%)", hint="0 to 100") %}
+        {{ ux_range("discount", min=0, max=100, step=1, value_signal="$discount") }}
+      {% endcall %}
+    {% endcall %}
+
+    {% call card(title="Status", subtitle="Visibility and tags") %}
+      <div class="ux-stack">
+        {% call field(label="Active") %}
+          {{ toggle("active", value_signal="$active") }}
+        {% endcall %}
+        {% call field(label="Featured") %}
+          {{ toggle("featured", value_signal="$featured") }}
+        {% endcall %}
+        {% call field(label="Tags") %}
+          <div class="ux-flex" style="gap:.5rem;flex-wrap:wrap">
+            {{ chip("new", variant="brand", removable=True) }}
+            {{ chip("seasonal", variant="info", removable=True) }}
+            {{ chip("limited", removable=True) }}
+          </div>
+        {% endcall %}
+      </div>
+    {% endcall %}
+
+    {% call card(title="Notifications", subtitle="Channels for product updates") %}
+      <div class="ux-stack">
+        {{ check("notify_email", label="Email — product updates", value_signal="$notify_email") }}
+        {{ check("notify_push", label="Push — inventory alerts", value_signal="$notify_push") }}
+        {{ check("notify_sms", label="SMS — billing reminders", value_signal="$notify_sms") }}
+      </div>
+      {% call card_footer() %}
+        {{ button("Cancel", variant="ghost", type="button") }}
+        {{ button("Save product", variant="primary", type="submit") }}
+      {% endcall %}
+    {% endcall %}
+  </form>
+</section>
+{% endblock %}

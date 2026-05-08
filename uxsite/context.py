@@ -81,6 +81,11 @@ PAGE_NAMES: list[str] = [
     "login",
     "settings",
     "profile",
+    "kanban",
+    "calendar_view",
+    "form_complex",
+    "error_pages",
+    "pos",
 ]
 
 
@@ -133,6 +138,11 @@ PAGE_DESCRIPTIONS: dict[str, str] = {
     "login": "Centered sign-in form with email/password and link footer.",
     "settings": "Settings page with sidebar nav and grouped account cards.",
     "profile": "User profile with avatar, KPIs and recent activity list.",
+    "kanban": "Three-column kanban board with cards, badges and counts.",
+    "calendar_view": "Mini calendar plus a list of events for the selected day.",
+    "form_complex": "Multi-section product form with toggles, range and chips.",
+    "error_pages": "Showcase of 403/404/500 error layouts on a single page.",
+    "pos": "Point-of-sale layout with catalogue, ticket and payment panels.",
 }
 
 
