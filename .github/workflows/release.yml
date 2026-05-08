@@ -41,7 +41,11 @@ jobs:
     name: Publish ux-jinja to PyPI
     needs: test
     runs-on: ubuntu-latest
-    environment: pypi   # protected env that holds the PYPI_API_TOKEN
+    # The `pypi` GitHub environment holds PYPI_API_TOKEN. Until that
+    # token is configured, this job is skipped automatically by the
+    # `if:` guard below — Lightsail deploy still runs.
+    environment: pypi
+    if: ${{ vars.PYPI_PUBLISH_ENABLED == 'true' }}
     steps:
       - uses: actions/checkout@v4
         with:
