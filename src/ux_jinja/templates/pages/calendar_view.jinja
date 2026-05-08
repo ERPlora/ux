@@ -1,0 +1,69 @@
+{% from "ui/card.jinja" import card %}
+{% from "ui/calendar.jinja" import calendar %}
+{% from "ui/list.jinja" import list as ux_list %}
+{% from "ui/badge.jinja" import badge %}
+
+{# Calendar view example page — mini calendar on the left, day events on the #}
+{# right rendered as a list.                                                 #}
+{# Context vars (all optional):                                              #}
+{#   selected_date — ISO date string ("2026-05-12"), default below.          #}
+{#   events        — list of dicts                                           #}
+{#                   [{date, title, badge_variant}, ...]                     #}
+{#                   where `date` is an ISO string. Items whose date matches #}
+{#                   `selected_date` are listed on the right pane; every     #}
+{#                   distinct date receives the `--has-event` modifier in    #}
+{#                   the calendar grid.                                      #}
+{# Consumers can extend via the named block ``calendar_view_content``.       #}
+{% set _default_selected_date = "2026-05-12" %}
+{% set _default_events = [
+  {"date": "2026-05-04", "title": "Quarterly review", "badge_variant": "info"},
+  {"date": "2026-05-12", "title": "Stripe webhook deploy", "badge_variant": "warn"},
+  {"date": "2026-05-12", "title": "ux-jinja v0.3 planning", "badge_variant": "ok"},
+  {"date": "2026-05-12", "title": "Customer call — Bakery Marisol", "badge_variant": "info"},
+  {"date": "2026-05-19", "title": "Hotframe release", "badge_variant": "ok"},
+  {"date": "2026-05-23", "title": "Tax filing reminder", "badge_variant": "danger"},
+] %}
+{% set _selected_date = selected_date | default(_default_selected_date) %}
+{% set _events = events | default(_default_events) %}
+{% set _selected_events = _events | selectattr("date", "equalto", _selected_date) | list %}
+{% set _event_dates = _events | map(attribute="date") | list %}
+{% set _selected_year = _selected_date[0:4] | int %}
+{% set _selected_month = _selected_date[5:7] | int %}
+{% block calendar_view_content %}
+<section class="ux-stack">
+  <header>
+    <h1>Calendar</h1>
+    <p>Pick a day to see scheduled events.</p>
+  </header>
+
+  <div class="ux-grid" style="display:grid;grid-template-columns:300px 1fr;gap:1.5rem">
+    <aside>
+      {% call card() %}
+        {{ calendar(year=_selected_year, month=_selected_month, selected=_selected_date, events=_event_dates) }}
+      {% endcall %}
+    </aside>
+
+    <div>
+      {% call card(title="Events", subtitle=_selected_date) %}
+        {% if _selected_events %}
+          {% call ux_list() %}
+            {% for ev in _selected_events %}
+              {% set _ev_title = ev.title | default("") %}
+              {% set _ev_variant = ev.badge_variant | default("info") %}
+              <div class="ux-list__item">
+                <div class="ux-list__body">
+                  <div class="ux-list__title">{{ _ev_title|e }}</div>
+                  <div class="ux-list__desc">{{ ev.date|e }}</div>
+                </div>
+                <span class="ux-list__aside">{{ badge("event", variant=_ev_variant, size="sm") }}</span>
+              </div>
+            {% endfor %}
+          {% endcall %}
+        {% else %}
+          <p>No events scheduled for {{ _selected_date|e }}.</p>
+        {% endif %}
+      {% endcall %}
+    </div>
+  </div>
+</section>
+{% endblock %}

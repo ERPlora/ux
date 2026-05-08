@@ -1,0 +1,130 @@
+{% from "ui/card.jinja" import card, card_footer %}
+{% from "ui/badge.jinja" import badge %}
+{% from "ui/button.jinja" import button %}
+
+{# Point-of-sale example page — three columns:                              #}
+{#   left   : product catalogue (grid of cards with placeholder + name +    #}
+{#            price)                                                         #}
+{#   centre : current ticket (list of items with quantity, name, price)     #}
+{#   right  : payment panel (subtotal / tax / total + payment method        #}
+{#            buttons)                                                       #}
+{# Context vars (all optional):                                             #}
+{#   products — list of dicts                                               #}
+{#              [{name, price, category}, ...]                              #}
+{#   cart     — list of dicts                                               #}
+{#              [{name, qty, price}, ...]                                   #}
+{#   currency — symbol displayed next to amounts (default "EUR").           #}
+{#   tax_rate — fraction (default 0.21 — 21% VAT).                          #}
+{# Consumers can extend via the named block ``pos_content``.                #}
+{% set _default_products = [
+  {"name": "Espresso", "price": 1.6, "category": "coffee"},
+  {"name": "Cappuccino", "price": 2.4, "category": "coffee"},
+  {"name": "Latte", "price": 2.6, "category": "coffee"},
+  {"name": "Americano", "price": 1.8, "category": "coffee"},
+  {"name": "Green Tea", "price": 2.0, "category": "tea"},
+  {"name": "Chai Latte", "price": 2.8, "category": "tea"},
+  {"name": "Croissant", "price": 1.9, "category": "bakery"},
+  {"name": "Muffin", "price": 2.2, "category": "bakery"},
+  {"name": "Bagel", "price": 2.5, "category": "bakery"},
+  {"name": "Iced Coffee", "price": 2.7, "category": "cold"},
+  {"name": "Lemonade", "price": 2.3, "category": "cold"},
+  {"name": "Cheesecake", "price": 3.5, "category": "dessert"},
+] %}
+{% set _default_cart = [
+  {"name": "Cappuccino", "qty": 2, "price": 2.4},
+  {"name": "Croissant", "qty": 1, "price": 1.9},
+  {"name": "Iced Coffee", "qty": 1, "price": 2.7},
+  {"name": "Cheesecake", "qty": 1, "price": 3.5},
+] %}
+{% set _products = products | default(_default_products) %}
+{% set _cart = cart | default(_default_cart) %}
+{% set _currency = currency | default("EUR") %}
+{% set _tax_rate = tax_rate | default(0.21) %}
+{% set _subtotal = _cart | sum(attribute="price", start=0) %}
+{# Recompute subtotal accounting for quantity (sum filter cannot multiply). #}
+{% set _ns = namespace(subtotal=0) %}
+{% for line in _cart %}
+  {% set _ns.subtotal = _ns.subtotal + (line.price | default(0)) * (line.qty | default(1)) %}
+{% endfor %}
+{% set _subtotal = _ns.subtotal %}
+{% set _tax = _subtotal * _tax_rate %}
+{% set _total = _subtotal + _tax %}
+{% block pos_content %}
+<section class="ux-stack">
+  <header>
+    <h1>Point of sale</h1>
+    <p>Catalogue, ticket and payment panel side by side.</p>
+  </header>
+
+  <div class="ux-grid"
+    style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:1rem;align-items:start">
+
+    <!-- Catalogue -->
+    {% call card(title="Catalogue", subtitle=(_products | length) ~ " products") %}
+      <div class="ux-grid-auto ux-grid-auto--md">
+        {% for p in _products %}
+          {% set _name = p.name | default("") %}
+          {% set _price = p.price | default(0) %}
+          {% set _category = p.category | default("all") %}
+          {% call card(flat=True, interactive=True) %}
+            <div style="aspect-ratio:1/1;background:var(--ux-bg-3, #eee);border-radius:.5rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem">
+              <span aria-hidden="true">{{ _category[0]|upper }}</span>
+            </div>
+            <p style="margin:.5rem 0 0;font-weight:600">{{ _name|e }}</p>
+            <p style="margin:.15rem 0 0;font-size:.85rem">{{ "%.2f"|format(_price) }} {{ _currency|e }}</p>
+          {% endcall %}
+        {% endfor %}
+      </div>
+    {% endcall %}
+
+    <!-- Ticket -->
+    {% call card(title="Ticket", subtitle=(_cart | length) ~ " items") %}
+      {% if _cart %}
+        <ul class="ux-list">
+          {% for line in _cart %}
+            {% set _line_name = line.name | default("") %}
+            {% set _line_qty = line.qty | default(1) %}
+            {% set _line_price = line.price | default(0) %}
+            {% set _line_total = _line_price * _line_qty %}
+            <li class="ux-list__item">
+              <span class="ux-list__body">
+                <div class="ux-list__title">{{ _line_qty }} x {{ _line_name|e }}</div>
+                <div class="ux-list__desc">{{ "%.2f"|format(_line_price) }} {{ _currency|e }} ea.</div>
+              </span>
+              <span class="ux-list__aside">{{ "%.2f"|format(_line_total) }} {{ _currency|e }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>Cart is empty.</p>
+      {% endif %}
+    {% endcall %}
+
+    <!-- Payment -->
+    {% call card(title="Payment", subtitle="Choose a method") %}
+      <div class="ux-stack">
+        <div class="ux-flex ux-justify-between ux-items-center">
+          <span>Subtotal</span>
+          <span>{{ "%.2f"|format(_subtotal) }} {{ _currency|e }}</span>
+        </div>
+        <div class="ux-flex ux-justify-between ux-items-center">
+          <span>Tax ({{ (_tax_rate * 100)|int }}%)</span>
+          <span>{{ "%.2f"|format(_tax) }} {{ _currency|e }}</span>
+        </div>
+        <div class="ux-flex ux-justify-between ux-items-center" style="font-weight:700">
+          <span>Total</span>
+          <span>{{ "%.2f"|format(_total) }} {{ _currency|e }}</span>
+        </div>
+        {{ badge("ready to charge", variant="ok", size="sm") }}
+      </div>
+      {% call card_footer() %}
+        <div class="ux-stack" style="width:100%">
+          {{ button("Pay with card", variant="primary", attrs={"style": "width:100%"}) }}
+          {{ button("Pay cash", variant="secondary", attrs={"style": "width:100%"}) }}
+          {{ button("Mobile wallet", variant="ghost", attrs={"style": "width:100%"}) }}
+        </div>
+      {% endcall %}
+    {% endcall %}
+  </div>
+</section>
+{% endblock %}
