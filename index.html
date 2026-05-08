@@ -246,7 +246,7 @@
 <div class="ux-app" data-docs
      data-signals="{q: '', route: 'overview', theme: localStorage.getItem('ux-theme') || 'erplora', vp: 'desktop', template: localStorage.getItem('ux-template') || '', sidebarOpen: false}"
      data-attr-data-sidebar="$sidebarOpen ? 'open' : ''"
-     data-effect="window.uxTheme && window.uxTheme.set($theme, $template)">
+     data-effect="$theme; $template; window.uxTheme && window.uxTheme.set($theme, $template)">
   <div class="ux-app__sidebar-overlay" data-on-click="$sidebarOpen = false"></div>
 
   <!-- =================== SIDEBAR (componente real .ux-sidebar) =================== -->
@@ -306,11 +306,22 @@
       <h1 class="ux-topbar__page-title" id="page-title">Visión general</h1>
 
       <div class="ux-topbar__actions">
+        <!--
+          Theme + template buttons. We call window.uxTheme.set(...) DIRECTLY
+          inside data-on-click instead of relying on data-effect — the effect
+          dependency tracking through `&& ...` was unreliable across browsers.
+          The signal write keeps Datastar's data-attr-aria-pressed reactive.
+        -->
         <div class="vp" role="tablist" aria-label="Tema">
-          <button data-on-click="$theme = 'erplora'"       data-attr-aria-pressed="$theme === 'erplora'">🌙 Dark</button>
-          <button data-on-click="$theme = 'erplora-light'" data-attr-aria-pressed="$theme === 'erplora-light'">☀ Light</button>
+          <button
+            data-on-click="$theme = 'erplora'; window.uxTheme.set('erplora', $template)"
+            data-attr-aria-pressed="$theme === 'erplora'">🌙 Dark</button>
+          <button
+            data-on-click="$theme = 'erplora-light'; window.uxTheme.set('erplora-light', $template)"
+            data-attr-aria-pressed="$theme === 'erplora-light'">☀ Light</button>
         </div>
-        <select class="topbar-template" data-bind-template aria-label="Template">
+        <select class="topbar-template" data-bind-template aria-label="Template"
+          data-on-input="window.uxTheme.set($theme, evt.target.value)">
           <!-- options populated at runtime from lib/templates/manifest.json -->
         </select>
         <div class="vp" role="tablist" aria-label="Viewport">
