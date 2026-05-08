@@ -103,18 +103,25 @@ jobs:
           DEPLOY_HOST: ${{ steps.lightsail.outputs.ip }}
           DEPLOY_REF: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
+          # Connect as `ubuntu` (the default Lightsail user, owner of the
+          # key pair). `ubuntu` is already in sudoers and re-execs the
+          # deploy as the unprivileged `deploy` user that owns /srv/uxsite.
           ssh -i ~/.ssh/uxsite_deploy -o StrictHostKeyChecking=accept-new \
-              "deploy@$DEPLOY_HOST" bash -s <<EOSSH
+              "ubuntu@$DEPLOY_HOST" sudo -u deploy -H bash -s <<EOSSH
             set -euo pipefail
             cd /srv/uxsite
             git fetch --tags --prune
             git checkout "$DEPLOY_REF"
             git reset --hard "$DEPLOY_REF"
             .venv/bin/pip install --quiet -e '.[dev]' gunicorn
-            sudo /usr/bin/supervisorctl restart uxsite
-            sleep 2
-            curl -fsS -o /dev/null -w 'HTTP %{http_code} TTFB %{time_starttransfer}s\n' http://127.0.0.1:8000/
           EOSSH
+          # Restart the supervisor program. `ubuntu` has the sudo NOPASSWD
+          # rule installed by setup.sh.
+          ssh -i ~/.ssh/uxsite_deploy "ubuntu@$DEPLOY_HOST" \
+              sudo /usr/bin/supervisorctl restart uxsite
+          sleep 2
+          ssh -i ~/.ssh/uxsite_deploy "ubuntu@$DEPLOY_HOST" \
+              "curl -fsS -o /dev/null -w 'HTTP %{http_code} TTFB %{time_starttransfer}s\n' http://127.0.0.1:8000/"
 
       - name: Smoke test public URL
         run: |

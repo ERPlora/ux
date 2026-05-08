@@ -80,9 +80,14 @@ if [[ ! -d "/etc/letsencrypt/live/$DOMAIN" ]]; then
     --redirect
 fi
 
-# 7. Sudoers rule so the deploy user can restart supervisor without password.
-#    The release workflow needs this to bounce gunicorn after a git pull.
+# 7. Sudoers rules:
+#    - `ubuntu` (the default Lightsail user, used by the release workflow
+#      to SSH in) can restart supervisor and re-exec as deploy.
+#    - `deploy` (the unprivileged user that owns /srv/uxsite) can also
+#      restart supervisor for manual ops.
 install -m 0440 /dev/stdin /etc/sudoers.d/uxsite-deploy <<'SUDO'
+ubuntu ALL=(root) NOPASSWD: /usr/bin/supervisorctl restart uxsite, /usr/bin/supervisorctl start uxsite, /usr/bin/supervisorctl status uxsite
+ubuntu ALL=(deploy) NOPASSWD: ALL
 deploy ALL=(root) NOPASSWD: /usr/bin/supervisorctl restart uxsite, /usr/bin/supervisorctl start uxsite, /usr/bin/supervisorctl status uxsite
 SUDO
 
