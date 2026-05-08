@@ -82,10 +82,12 @@ const ORDER = [
   'components/data-extra.css',
   'components/layout-extra.css',
   'components/editors.css',
+  // v2.2 modules
+  'components/public.css',
 ];
 
 const BANNER = `/*!
- * ERPlora UX · v2.1.0
+ * ERPlora UX · v2.2.0
  * CSS-only component library — no Tailwind, no build for consumers
  * https://github.com/ERPlora/ux
  * MIT License
