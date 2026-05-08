@@ -273,6 +273,107 @@ This is the **block index**. For each, common variants (`--`) and children (`__`
 - `ux-menubar` — desktop app menu bar · `__menu`, `__panel`, `__item`, `__separator`, `__submenu` · `--compact`, `--floating` · `is-open`
 - `ux-scheduler` — weekly appointment grid · appointments `--brand/leaf/warn/danger/info` · `is-selecting/busy/blocked` · `--day` for single-day, sizes
 
+## Grid system
+
+Three layout primitives + modern CSS escape hatches. Use them in this order of preference: container queries → 12-col responsive grid → fixed `.ux-grid-N` → flex helpers.
+
+### Container
+
+```html
+<div class="ux-container">…page content (max 1440px)…</div>
+<div class="ux-container ux-container--reading">…article body (880px)…</div>
+<div class="ux-container ux-container--narrow">…form (720px)…</div>
+<div class="ux-container ux-container--fluid">…uses clamp() for organic padding…</div>
+```
+
+Modifiers: `--narrow` (720px) · `--reading` (880px) · default (1440px) · `--wide` (1440px) · `--full` · `--flush` · `--fluid` (clamp-based padding).
+
+### 12-col responsive grid (`.ux-row` + `.ux-col-{N}`)
+
+Mobile-first. Children default to `grid-column: span 12` (full width on phone) unless an explicit `.ux-col-sm-{n}` is set.
+
+```html
+<div class="ux-row">
+  <main  class="ux-col-md-8 ux-col-lg-9">…</main>
+  <aside class="ux-col-md-4 ux-col-lg-3 ux-col-sticky">…</aside>
+</div>
+```
+
+- `.ux-col-{1..12}` — base span
+- `.ux-col-sm-{1..12}` — explicit phone span (≤ 767px)
+- `.ux-col-md-{1..12}` — tablet+ (≥ 768px)
+- `.ux-col-lg-{1..12}` — desktop+ (≥ 1200px)
+- `.ux-col-full` — `grid-column: 1 / -1` (the entire row)
+- `.ux-col-auto` — natural width
+- `.ux-col-sticky` — sticky-top, useful for sidebars
+
+Row modifiers: `.ux-row--stack` (force one column) · `.ux-row--subgrid` (inherit parent's tracks) · `.ux-row--dense` (fill gaps with smaller items) · `.ux-row--gap-sm/lg/0`.
+
+### Auto-fit grid (cards, gallery)
+
+```html
+<div class="ux-grid-auto ux-grid-auto--md">…cards reflow themselves…</div>
+```
+
+Variants: `--xs` (140px min) · `--sm` (180px) · `--md` (240px, default) · `--lg` (320px) · `--xl` (400px). Stack `--dense` for masonry-style packing.
+
+### Fixed-N (legacy, still supported)
+
+`.ux-grid-2 / -3 / -4 / -6` — N equal columns, auto-collapse on smaller viewports. Prefer `.ux-row` + `.ux-col-md-N` for new code.
+
+### Container queries (component-relative responsiveness)
+
+When a component might live in a sidebar/drawer at narrow width even on a desktop viewport, mark its wrapper `.ux-cq` and use container-query column variants:
+
+```html
+<aside class="ux-cq" style="width: 320px;">
+  <div class="ux-row">
+    <div class="ux-col-cq-12">narrow → full</div>
+    <div class="ux-col-cq-6">at ≥480 container → half</div>
+    <div class="ux-col-cq-6">at ≥480 container → half</div>
+  </div>
+</aside>
+```
+
+- `.ux-cq` makes the element a `container-type: inline-size` query root (named `ux`)
+- `.ux-col-cq-{N}` applies when **container** ≥ 480px (not viewport)
+- `.ux-col-cq-lg-{N}` applies when container ≥ 720px
+
+This is the killer feature for components that move between dashboard / sidebar / modal contexts.
+
+### Aspect-ratio cells
+
+```html
+<div class="ux-row">
+  <figure class="ux-col-md-4 ux-cell-video">…16:9 thumbnail…</figure>
+  <figure class="ux-col-md-4 ux-cell-square">…1:1…</figure>
+</div>
+```
+
+Available: `--square` · `--video` (16:9) · `--photo` (4:3) · `--portrait` (3:4) · `--wide` (21:9).
+
+### Logical-property spacing
+
+`.ux-px-{3,4,6}` (padding-inline) · `.ux-py-{3,4,6}` (padding-block) · `.ux-mx-auto` · `.ux-my-auto`. Safe for RTL.
+
+### Visibility per breakpoint
+
+`.ux-hide-sm` (≤ 767) · `.ux-hide-md` (768-1199) · `.ux-hide-lg` (≥ 1200).
+Container-query equivalents: `.ux-show-cq-md` · `.ux-hide-cq-md`.
+
+### Decision tree
+
+| Need | Use |
+|------|-----|
+| Page max-width wrapper | `.ux-container` |
+| Header + main + sidebar layout | `.ux-row` + `.ux-col-md-N` |
+| Card gallery (any count) | `.ux-grid-auto` |
+| Component with adaptive children | `.ux-cq` + `.ux-col-cq-N` |
+| Sticky sidebar | add `.ux-col-sticky` to the col |
+| Masonry pack (varying heights) | `.ux-grid-auto--dense` |
+| Aligned nested grid | `.ux-row--subgrid` inside another `.ux-row` |
+| Responsive image cell | `.ux-cell-{video,square,photo,portrait,wide}` |
+
 ## Color & status semantics
 
 Status colors are stable across components. When the agent picks a variant, the meaning is:

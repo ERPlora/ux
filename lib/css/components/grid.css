@@ -1,0 +1,250 @@
+/* ============================================================
+   ERPlora UX · Grid system
+   ------------------------------------------------------------
+   Three responsive entornos:
+     mobile  ≤ 767px
+     tablet  768 – 1199px
+     desktop ≥ 1200px
+
+   Three layout primitives:
+
+   1. .ux-container          — content max-width by breakpoint
+   2. .ux-row + .ux-col-{N}  — 12-col responsive grid (`md` / `lg` variants)
+   3. .ux-grid-auto          — auto-fit minmax grid (for card galleries)
+
+   Plus the existing .ux-grid-2/3/4/6 fixed grids in page.css.
+   ============================================================ */
+
+/* ---------- 1. Container ---------- */
+.ux-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--ux-space-4);
+  padding-right: var(--ux-space-4);
+  max-width: var(--ux-page-max);
+}
+.ux-container--narrow { max-width: 720px; }
+.ux-container--reading { max-width: 880px; }       /* doc/article width */
+.ux-container--wide { max-width: 1440px; }
+.ux-container--full { max-width: 100%; padding-inline: var(--ux-space-3); }
+.ux-container--flush { padding-inline: 0; }
+
+@media (max-width: 767px) {
+  .ux-container { padding-left: var(--ux-space-3); padding-right: var(--ux-space-3); }
+}
+
+/* ---------- 2. 12-column responsive grid ---------- */
+
+/* .ux-row is a 12-col CSS grid, sized via gap variables. Children pick a span
+   class (.ux-col-{1..12}) — when no span is set, items fall to default
+   `auto`-fit for backwards compat. */
+.ux-row {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--ux-space-4);
+}
+.ux-row--gap-sm { gap: var(--ux-space-2); }
+.ux-row--gap-lg { gap: var(--ux-space-6); }
+.ux-row--gap-0 { gap: 0; }
+
+/* Stack utility — forces column flow regardless of viewport */
+.ux-row--stack { grid-template-columns: 1fr; }
+
+/* Span helpers — base (mobile-first: span N columns from 1 / span N) */
+.ux-col-1  { grid-column: span 1; }
+.ux-col-2  { grid-column: span 2; }
+.ux-col-3  { grid-column: span 3; }
+.ux-col-4  { grid-column: span 4; }
+.ux-col-5  { grid-column: span 5; }
+.ux-col-6  { grid-column: span 6; }
+.ux-col-7  { grid-column: span 7; }
+.ux-col-8  { grid-column: span 8; }
+.ux-col-9  { grid-column: span 9; }
+.ux-col-10 { grid-column: span 10; }
+.ux-col-11 { grid-column: span 11; }
+.ux-col-12 { grid-column: span 12; }
+.ux-col-full { grid-column: 1 / -1; }
+.ux-col-auto { grid-column: auto; }
+
+/* On mobile (≤767), default to full-width unless an explicit `sm` span is set.
+   This is the safest default for cards/forms in cramped viewports. */
+@media (max-width: 767px) {
+  .ux-row > [class*="ux-col-"]:not([class*="ux-col-sm-"]) { grid-column: 1 / -1; }
+}
+
+/* Tablet override (≥768px) */
+@media (min-width: 768px) {
+  .ux-col-md-1  { grid-column: span 1; }
+  .ux-col-md-2  { grid-column: span 2; }
+  .ux-col-md-3  { grid-column: span 3; }
+  .ux-col-md-4  { grid-column: span 4; }
+  .ux-col-md-5  { grid-column: span 5; }
+  .ux-col-md-6  { grid-column: span 6; }
+  .ux-col-md-7  { grid-column: span 7; }
+  .ux-col-md-8  { grid-column: span 8; }
+  .ux-col-md-9  { grid-column: span 9; }
+  .ux-col-md-10 { grid-column: span 10; }
+  .ux-col-md-11 { grid-column: span 11; }
+  .ux-col-md-12 { grid-column: span 12; }
+  .ux-col-md-full { grid-column: 1 / -1; }
+}
+
+/* Desktop override (≥1200px) */
+@media (min-width: 1200px) {
+  .ux-col-lg-1  { grid-column: span 1; }
+  .ux-col-lg-2  { grid-column: span 2; }
+  .ux-col-lg-3  { grid-column: span 3; }
+  .ux-col-lg-4  { grid-column: span 4; }
+  .ux-col-lg-5  { grid-column: span 5; }
+  .ux-col-lg-6  { grid-column: span 6; }
+  .ux-col-lg-7  { grid-column: span 7; }
+  .ux-col-lg-8  { grid-column: span 8; }
+  .ux-col-lg-9  { grid-column: span 9; }
+  .ux-col-lg-10 { grid-column: span 10; }
+  .ux-col-lg-11 { grid-column: span 11; }
+  .ux-col-lg-12 { grid-column: span 12; }
+  .ux-col-lg-full { grid-column: 1 / -1; }
+}
+
+/* Small (≤767px) explicit overrides — for the rare case you want a ≠12 layout
+   on mobile (e.g. a 4-icon dock that stays 2x2 on phone). */
+@media (max-width: 767px) {
+  .ux-col-sm-1  { grid-column: span 1; }
+  .ux-col-sm-2  { grid-column: span 2; }
+  .ux-col-sm-3  { grid-column: span 3; }
+  .ux-col-sm-4  { grid-column: span 4; }
+  .ux-col-sm-5  { grid-column: span 5; }
+  .ux-col-sm-6  { grid-column: span 6; }
+  .ux-col-sm-7  { grid-column: span 7; }
+  .ux-col-sm-8  { grid-column: span 8; }
+  .ux-col-sm-9  { grid-column: span 9; }
+  .ux-col-sm-10 { grid-column: span 10; }
+  .ux-col-sm-11 { grid-column: span 11; }
+  .ux-col-sm-12 { grid-column: span 12; }
+  .ux-col-sm-full { grid-column: 1 / -1; }
+}
+
+/* ---------- 3. Auto-fit grid (cards, gallery) ---------- */
+
+/* Cards reflow themselves: each cell at least 240px wide, fills available room. */
+.ux-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--_min, 240px), 1fr));
+  gap: var(--ux-space-4);
+}
+.ux-grid-auto--xs { --_min: 140px; }
+.ux-grid-auto--sm { --_min: 180px; }
+.ux-grid-auto--md { --_min: 240px; }   /* default */
+.ux-grid-auto--lg { --_min: 320px; }
+.ux-grid-auto--xl { --_min: 400px; }
+
+/* ---------- Gap responsive helpers ---------- */
+@media (min-width: 768px) {
+  .ux-gap-md-2 { gap: var(--ux-space-2); }
+  .ux-gap-md-3 { gap: var(--ux-space-3); }
+  .ux-gap-md-4 { gap: var(--ux-space-4); }
+  .ux-gap-md-5 { gap: var(--ux-space-5); }
+  .ux-gap-md-6 { gap: var(--ux-space-6); }
+}
+@media (min-width: 1200px) {
+  .ux-gap-lg-2 { gap: var(--ux-space-2); }
+  .ux-gap-lg-3 { gap: var(--ux-space-3); }
+  .ux-gap-lg-4 { gap: var(--ux-space-4); }
+  .ux-gap-lg-5 { gap: var(--ux-space-5); }
+  .ux-gap-lg-6 { gap: var(--ux-space-6); }
+}
+
+/* ============================================================
+   Modern CSS — container queries, subgrid, dense flow, fluid
+   ============================================================ */
+
+/* ---------- 4. Container queries ----------
+   `.ux-cq` makes the element a query container so descendants can adapt to
+   the PARENT'S width instead of the viewport. Best for components that may
+   live in a sidebar, drawer, modal, or main column at different widths. */
+.ux-cq         { container-type: inline-size; container-name: ux; }
+.ux-cq-block   { container-type: size; container-name: ux; }      /* width + height */
+.ux-cq-normal  { container-type: normal; }
+
+/* Container-query variants of the 12-col grid:
+   - .ux-col-cq-{N} on a child of .ux-cq applies when its container is ≥ 480px
+   - .ux-col-cq-lg-{N} when container ≥ 720px
+   Use these instead of viewport `md` / `lg` when the component might be in
+   a narrow sidebar even on desktop viewports. */
+@container ux (min-width: 480px) {
+  .ux-col-cq-1  { grid-column: span 1; }
+  .ux-col-cq-2  { grid-column: span 2; }
+  .ux-col-cq-3  { grid-column: span 3; }
+  .ux-col-cq-4  { grid-column: span 4; }
+  .ux-col-cq-6  { grid-column: span 6; }
+  .ux-col-cq-8  { grid-column: span 8; }
+  .ux-col-cq-12 { grid-column: span 12; }
+}
+@container ux (min-width: 720px) {
+  .ux-col-cq-lg-1  { grid-column: span 1; }
+  .ux-col-cq-lg-2  { grid-column: span 2; }
+  .ux-col-cq-lg-3  { grid-column: span 3; }
+  .ux-col-cq-lg-4  { grid-column: span 4; }
+  .ux-col-cq-lg-6  { grid-column: span 6; }
+  .ux-col-cq-lg-8  { grid-column: span 8; }
+  .ux-col-cq-lg-12 { grid-column: span 12; }
+}
+@container ux (min-width: 480px) {
+  .ux-show-cq-md { display: revert; }
+  .ux-hide-cq-md { display: none; }
+}
+@container ux (max-width: 479.98px) {
+  .ux-show-cq-md { display: none; }
+}
+
+/* ---------- 5. Subgrid ----------
+   Nested grids that align to the parent's track sizing. Use when an inner
+   `.ux-row` should share its parent's 12 columns instead of declaring its own. */
+.ux-row--subgrid {
+  grid-template-columns: subgrid;
+}
+.ux-row--subgrid-rows {
+  grid-template-rows: subgrid;
+}
+
+/* ---------- 6. Masonry-like dense flow ----------
+   Cards with varying heights pack tightly without leaving gaps. */
+.ux-grid-auto--dense,
+.ux-row--dense {
+  grid-auto-flow: row dense;
+}
+
+/* ---------- 7. Fluid container — uses clamp() for organic widths ---------- */
+.ux-container--fluid {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: clamp(var(--ux-space-3), 4vw, var(--ux-space-7));
+  max-width: clamp(320px, 100%, 1440px);
+}
+
+/* ---------- 8. Aspect-ratio cells ----------
+   Useful for thumbnail / hero / video cells inside the grid. */
+.ux-cell-square   { aspect-ratio: 1 / 1; }
+.ux-cell-video    { aspect-ratio: 16 / 9; }
+.ux-cell-portrait { aspect-ratio: 3 / 4; }
+.ux-cell-photo    { aspect-ratio: 4 / 3; }
+.ux-cell-wide     { aspect-ratio: 21 / 9; }
+
+/* ---------- 9. Sticky helper for col items ---------- */
+.ux-col-sticky {
+  position: sticky;
+  top: calc(var(--ux-topbar-h) + var(--ux-space-3));
+  align-self: start;
+}
+
+/* ---------- 10. Logical-property-aware spacing helpers ----------
+   Match the writing direction; safer for RTL or vertical languages. */
+.ux-px-3 { padding-inline: var(--ux-space-3); }
+.ux-px-4 { padding-inline: var(--ux-space-4); }
+.ux-px-6 { padding-inline: var(--ux-space-6); }
+.ux-py-3 { padding-block: var(--ux-space-3); }
+.ux-py-4 { padding-block: var(--ux-space-4); }
+.ux-py-6 { padding-block: var(--ux-space-6); }
+.ux-mx-auto { margin-inline: auto; }
+.ux-my-auto { margin-block: auto; }

@@ -38,6 +38,7 @@ const ORDER = [
   'components/tab-bar.css',
   'components/menu-btn.css',
   'components/page.css',
+  'components/grid.css',
   // Atomics
   'components/button.css',
   'components/badge.css',
