@@ -1,0 +1,121 @@
+name: Release
+
+# Triggered by pushing a vX.Y.Z tag from main. Three things happen in order:
+#   1. Run the test suite (fail-fast).
+#   2. Build the ux-jinja sdist + wheel and upload to PyPI.
+#   3. Pull the new tag on the Lightsail instance and bounce gunicorn.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag or branch to deploy (defaults to current)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  id-token: write   # required for OIDC ↔ AWS
+
+env:
+  AWS_REGION: eu-west-1
+  AWS_ROLE_ARN: arn:aws:iam::363427305647:role/github-actions-deploy
+  SSH_SECRET_NAME: erplora/uxsite/ssh-key
+  LIGHTSAIL_INSTANCE: uxsite
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: pip install -e ".[dev]"
+      - run: pytest tests/test_macros.py -v --tb=short
+
+  publish-pypi:
+    name: Publish ux-jinja to PyPI
+    needs: test
+    runs-on: ubuntu-latest
+    environment: pypi   # protected env that holds the PYPI_API_TOKEN
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install build tools
+        run: pip install --upgrade build twine
+
+      - name: Build sdist + wheel
+        run: python -m build
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
+
+  deploy-lightsail:
+    name: Deploy uxsite to Lightsail
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Resolve Lightsail public IP
+        id: lightsail
+        run: |
+          IP=$(aws lightsail get-static-ip \
+                --static-ip-name uxsite-ip \
+                --query 'staticIp.ipAddress' \
+                --output text)
+          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch SSH private key from Secrets Manager
+        run: |
+          mkdir -p ~/.ssh
+          aws secretsmanager get-secret-value \
+            --secret-id "$SSH_SECRET_NAME" \
+            --query 'SecretString' \
+            --output text > ~/.ssh/uxsite_deploy
+          chmod 600 ~/.ssh/uxsite_deploy
+          ssh-keyscan -t ed25519,ecdsa,rsa "${{ steps.lightsail.outputs.ip }}" \
+            >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy via SSH (git fetch + pip install + supervisorctl restart)
+        env:
+          DEPLOY_HOST: ${{ steps.lightsail.outputs.ip }}
+          DEPLOY_REF: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          ssh -i ~/.ssh/uxsite_deploy -o StrictHostKeyChecking=accept-new \
+              "deploy@$DEPLOY_HOST" bash -s <<EOSSH
+            set -euo pipefail
+            cd /srv/uxsite
+            git fetch --tags --prune
+            git checkout "$DEPLOY_REF"
+            git reset --hard "$DEPLOY_REF"
+            .venv/bin/pip install --quiet -e '.[dev]' gunicorn
+            sudo /usr/bin/supervisorctl restart uxsite
+            sleep 2
+            curl -fsS -o /dev/null -w 'HTTP %{http_code} TTFB %{time_starttransfer}s\n' http://127.0.0.1:8000/
+          EOSSH
+
+      - name: Smoke test public URL
+        run: |
+          curl -fsS -o /dev/null -w 'public HTTP %{http_code}\n' https://ux.erplora.com/

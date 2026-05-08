@@ -1,0 +1,20 @@
+{# input(name, value, type, placeholder, size, invalid, disabled, value_signal, attrs)
+
+   Emits `<input class="ux-input">` matching lib/css/components/forms.css.
+   Sizes: sm | lg (md is default with no modifier).
+   Invalid state -> ux-input--invalid.
+   `value_signal` -> Datastar `data-bind="$signal"` two-way binding.
+#}
+{% macro input(name, value="", type="text", placeholder=None, size=None, invalid=False, disabled=False, value_signal=None, attrs={}) %}
+{%- set classes = ["ux-input"] -%}
+{%- if size %}{%- do classes.append("ux-input--" ~ size) -%}{%- endif -%}
+{%- if invalid %}{%- do classes.append("ux-input--invalid") -%}{%- endif -%}
+<input class="{{ classes | join(' ') }}"
+  type="{{ type|e }}"
+  name="{{ name|e }}"
+{%- if value not in (None, "") %} value="{{ value|e }}"{% endif -%}
+{%- if placeholder %} placeholder="{{ placeholder|e }}"{% endif -%}
+{%- if disabled %} disabled{% endif -%}
+{%- if value_signal %} data-bind="{{ value_signal|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}/>
+{% endmacro %}

@@ -1,0 +1,21 @@
+{# button(label, variant, size, disabled, icon_only, on_click, href, type, attrs)
+
+   Variants  : primary | secondary | ghost | outline | danger | link
+   Sizes     : sm | md (default, no class) | lg
+   Renders   : <button> by default, <a> if `href` is set.
+   Datastar  : `on_click` becomes `data-on:click="..."`.
+#}
+{% macro button(label="", variant="primary", size=None, disabled=False, icon_only=False, on_click=None, href=None, type="button", attrs={}) %}
+{%- set tag = "a" if href else "button" -%}
+{%- set classes = ["ux-btn", "ux-btn--" ~ variant] -%}
+{%- if size %}{%- do classes.append("ux-btn--" ~ size) -%}{%- endif -%}
+{%- if icon_only %}{%- do classes.append("ux-btn--icon") -%}{%- endif -%}
+<{{ tag }} class="{{ classes | join(' ') }}"
+{%- if tag == "button" %} type="{{ type }}"{% endif -%}
+{%- if href %} href="{{ href|e }}"{% endif -%}
+{%- if disabled %} disabled aria-disabled="true"{% endif -%}
+{%- if on_click %} data-on:click="{{ on_click|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% else %}{{ label|e }}{% endif -%}
+</{{ tag }}>
+{% endmacro %}

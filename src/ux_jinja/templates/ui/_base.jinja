@@ -1,0 +1,24 @@
+{# Internal helpers shared by ui/* macros — not part of the public API. #}
+
+{# Concatenate class fragments, dropping None and empty strings. #}
+{%- macro cls() -%}
+{%- set parts = [] -%}
+{%- for c in varargs -%}
+  {%- if c -%}{%- set _ = parts.append(c) -%}{%- endif -%}
+{%- endfor -%}
+{{ parts | join(' ') }}
+{%- endmacro -%}
+
+{# Render a dict of HTML attributes, properly escaped.
+   - True       -> bare attribute (e.g. `disabled`)
+   - False/None -> attribute is skipped
+   - other      -> rendered as key="value" with HTML escaping
+#}
+{%- macro attrs(extra={}) -%}
+{%- for k, v in extra.items() -%}
+{%- if v is sameas true %} {{ k }}
+{%- elif v is sameas false or v is none -%}
+{%- else %} {{ k }}="{{ v|e }}"
+{%- endif -%}
+{%- endfor -%}
+{%- endmacro -%}

@@ -462,6 +462,62 @@ Cobertura objetivo: navegadores modernos (últimas 2 versiones) — coherente co
 
 ---
 
+## Python: `ux-jinja` package
+
+Jinja2 macros and page templates that wrap the CSS classes for use in
+FastAPI/Hotframe (Hub) and Django (Cloud). Lives in `src/ux_jinja/` of this
+same repo and is published independently as the `ux-jinja` pip package.
+
+```bash
+pip install ux-jinja
+```
+
+```python
+from ux_jinja import TEMPLATES_DIR
+templates_loader.add_searchpath(str(TEMPLATES_DIR))
+```
+
+```jinja
+{% from "ui/button.jinja" import button %}
+{% from "ui/card.jinja" import card %}
+
+{{ button("Save", on_click="@post('/api/save')") }}
+
+{% call card(title="Order #42") %}
+  <p>Body of the card.</p>
+{% endcall %}
+```
+
+The macros use the Jinja2 `do` extension (for in-template list mutation), so
+the `Environment` must enable it:
+
+```python
+from jinja2 import Environment, FileSystemLoader
+
+env = Environment(
+    loader=FileSystemLoader(str(TEMPLATES_DIR)),
+    extensions=["jinja2.ext.do"],
+    autoescape=True,
+)
+```
+
+Macros available under `ui/`:
+
+| Module          | Exports                          |
+| --------------- | -------------------------------- |
+| `button.jinja`  | `button`                         |
+| `badge.jinja`   | `badge`                          |
+| `card.jinja`    | `card`, `card_footer`            |
+| `input.jinja`   | `input`                          |
+| `textarea.jinja`| `textarea`                       |
+| `select.jinja`  | `select`                         |
+| `modal.jinja`   | `modal`, `modal_footer`          |
+| `datatable.jinja`| `datatable`                     |
+
+See <https://erplora.github.io/ux/> for live previews of the underlying CSS.
+
+---
+
 ## Licencia
 
 MIT © ERPlora · 2025

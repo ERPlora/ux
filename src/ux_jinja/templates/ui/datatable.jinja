@@ -1,0 +1,97 @@
+{# datatable(id, columns, rows, search, search_placeholder, view_toggle, attrs)
+
+   Minimal wrapper around the .ux-table-wrap pattern from
+   lib/css/components/data-extra.css and previews/components/datatable.html.
+
+   `columns` is a list describing the headers. Each entry is either:
+     - a plain string (used as-is for the header label, key inferred from index)
+     - a dict {key, label, sortable=False, align=None}
+
+   `rows` is a list of dicts keyed by column `key`, OR a list of lists with
+   values aligned to the columns order.
+
+   `search=True` adds an .ux-search input at the start of the toolbar; the
+   value is bound to the signal `$<id>_q` so callers can hook a filter.
+   `view_toggle=True` adds the table/grid view-toggle buttons (table is the
+   only view we render here; the grid view is the consumer's responsibility).
+
+   This intentionally covers the basic case. Advanced toolbars (date range,
+   bulk actions, exports) live in the dedicated previews and should be
+   composed manually.
+#}
+{% macro datatable(id, columns=[], rows=[], search=True, search_placeholder="Search...", view_toggle=False, attrs={}) %}
+{%- set q_signal = "$" ~ id ~ "_q" -%}
+{%- set view_signal = "$" ~ id ~ "_view" -%}
+{%- set norm_cols = [] -%}
+{%- for col in columns -%}
+  {%- if col is mapping -%}
+    {%- do norm_cols.append({
+      "key": col.key|default(loop.index0),
+      "label": col.label|default(""),
+      "sortable": col.sortable|default(false),
+      "align": col.align|default(None),
+    }) -%}
+  {%- else -%}
+    {%- do norm_cols.append({"key": loop.index0, "label": col, "sortable": false, "align": None}) -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- set signals_parts = [] -%}
+{%- if search %}{%- do signals_parts.append('"' ~ id ~ '_q": ""') -%}{%- endif -%}
+{%- if view_toggle %}{%- do signals_parts.append('"' ~ id ~ '_view": "table"') -%}{%- endif -%}
+<div class="ux-table-wrap" id="{{ id|e }}"
+  {%- if signals_parts %} data-signals='{ {{ signals_parts | join(", ") }} }'{% endif -%}
+  {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if search or view_toggle %}
+  <div class="ux-dt-toolbar">
+    {%- if search %}
+    <div class="ux-search" style="flex:1 1 220px;max-width:300px">
+      <svg class="ux-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input class="ux-input ux-input--sm" type="search" placeholder="{{ search_placeholder|e }}" data-bind="{{ q_signal|e }}"/>
+    </div>
+    {%- endif %}
+    <div class="ux-dt-toolbar__spacer"></div>
+    {%- if view_toggle %}
+    <div class="ux-view-toggle" role="tablist" aria-label="View">
+      <button type="button" class="ux-view-toggle__btn" data-on:click="{{ view_signal|e }} = 'table'" data-attr:aria-pressed="{{ view_signal|e }} === 'table'" title="Table view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <button type="button" class="ux-view-toggle__btn" data-on:click="{{ view_signal|e }} = 'grid'" data-attr:aria-pressed="{{ view_signal|e }} === 'grid'" title="Grid view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+    </div>
+    {%- endif %}
+  </div>
+  {%- endif %}
+  <div class="ux-table-scroll"
+    {%- if view_toggle %} data-show="{{ view_signal|e }} === 'table'"{% endif %}>
+    <table class="ux-table">
+      <thead>
+        <tr>
+          {%- for col in norm_cols %}
+          <th
+            {%- if col.sortable %} class="ux-th--sortable"{% endif -%}
+            {%- if col.align == 'right' %} class="ux-td--right"{% endif -%}
+          >{{ col.label|e }}</th>
+          {%- endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {%- for row in rows %}
+        <tr>
+          {%- for col in norm_cols -%}
+          {%- if row is mapping -%}
+            {%- set cell = row.get(col.key, "") -%}
+          {%- else -%}
+            {%- set cell = row[loop.index0] if loop.index0 < (row|length) else "" -%}
+          {%- endif %}
+          <td
+            {%- if col.align == 'right' %} class="ux-td--right"{% endif -%}
+          >{{ cell|e }}</td>
+          {%- endfor %}
+        </tr>
+        {%- endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endmacro %}

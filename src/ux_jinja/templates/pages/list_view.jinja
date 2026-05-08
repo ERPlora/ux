@@ -1,0 +1,63 @@
+{% from "ui/button.jinja" import button %}
+{% from "ui/badge.jinja" import badge %}
+
+{# List view example page — users table with row-level badges and actions. #}
+{# Expects an iterable ``users`` in the render context. Each user is a dict #}
+{# with keys: name, email, role, status.                                    #}
+{# Note: this template inlines the table so per-cell HTML (badge, action    #}
+{# buttons) renders without going through the auto-escaping datatable macro.#}
+{% block list_view_content %}
+<section class="ux-stack">
+  <header class="ux-flex ux-justify-between ux-items-center">
+    <div>
+      <h1>Users</h1>
+      <p>Workspace members with role and status.</p>
+    </div>
+    {{ button("Invite user", variant="primary") }}
+  </header>
+
+  {% set status_variants = {
+    "active": "ok",
+    "invited": "info",
+    "suspended": "danger",
+    "pending": "warn",
+  } %}
+
+  <div class="ux-table-wrap" data-signals="{ users_q: '' }">
+    <div class="ux-dt-toolbar">
+      <div class="ux-search" style="flex:1 1 220px;max-width:300px">
+        <svg class="ux-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input class="ux-input ux-input--sm" type="search" placeholder="Search users..." data-bind="$users_q"/>
+      </div>
+      <div class="ux-dt-toolbar__spacer"></div>
+    </div>
+    <div class="ux-table-scroll">
+      <table class="ux-table">
+        <thead>
+          <tr>
+            <th class="ux-th--sortable">Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th class="ux-td--right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td>{{ u.name|e }}</td>
+            <td>{{ u.email|e }}</td>
+            <td>{{ u.role|e }}</td>
+            <td>{{ badge(u.status, variant=status_variants.get(u.status, "info")) }}</td>
+            <td class="ux-td--right">
+              {{ button("Edit", variant="ghost", size="sm") }}
+              {{ button("Remove", variant="danger", size="sm") }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}
