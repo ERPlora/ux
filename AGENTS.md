@@ -397,7 +397,8 @@ Per-component tokens use a `--_*` prefix (e.g. `--_btn-h`, `--_btn-bg`) — don'
 
 ## Where to find more
 
-- **`previews/<name>.html`** in the source repo — one fully working preview per component, the most authoritative reference.
+- **`previews/components/<name>.html`** in the source repo — one fully working preview per component, the most authoritative reference.
+- **`previews/<domain>/<page>.html`** — full app-page mockups (saas + hub merged) under domains: `auth/`, `dashboard/`, `orgs/`, `hubs/`, `users/`, `billing/`, `marketplace/`, `modules/`, `employees/`, `roles/`, `settings/`, `profile/`, `errors/`, `system/`, `public/`. Where a screen exists in both products, the file is suffixed `-saas.html` or `-hub.html` (example: `auth/login-saas.html` and `auth/login-hub.html`).
 - **`lib/css/components/<name>.css`** — the component's CSS source. Read it to confirm exact class names and modifiers.
 - **`lib/css/tokens.css`** — every theme variable.
 - **`README.md`** — full catalog and Datastar patterns.
