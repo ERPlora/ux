@@ -1,0 +1,391 @@
+<!doctype html><html lang="es" data-theme="erplora"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ERPlora Cloud · Carrito</title>
+<link rel="stylesheet" href="../../lib/css/ux.css"/>
+<link rel="stylesheet" href="../../lib/templates/all.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+<style>
+  body { background: var(--ux-bg); margin: 0; }
+  .cart-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 20px; align-items: start; }
+  @media (max-width: 980px) { .cart-layout { grid-template-columns: 1fr; } }
+  .cart-summary { position: sticky; top: 12px; }
+  .cart-stepper-wrap { padding: 14px 18px; background: var(--ux-bg-2); border: 1px solid var(--ux-line); border-radius: var(--ux-radius-lg); margin-bottom: 18px; }
+
+  .cart-line {
+    display: grid; grid-template-columns: 80px 1fr auto; gap: 16px;
+    padding: 14px; align-items: center;
+    background: var(--ux-bg-2); border: 1px solid var(--ux-line);
+    border-radius: var(--ux-radius-lg);
+  }
+  .cart-line + .cart-line { margin-top: 10px; }
+  .cart-line__thumb {
+    width: 80px; height: 80px; border-radius: var(--ux-radius-md);
+    display: grid; place-items: center;
+    color: var(--ux-ink-3); font-family: var(--ux-font-mono); font-size: 10px;
+  }
+  .cart-line__thumb--a { background: linear-gradient(135deg, #2a1a14, #4a2818); }
+  .cart-line__thumb--b { background: linear-gradient(135deg, #1a2a3a, #2a3a4a); }
+  .cart-line__thumb--c { background: linear-gradient(135deg, #1a2a1a, #2a3a25); }
+  .cart-line__thumb--d { background: linear-gradient(135deg, #2a1a2a, #3a2548); }
+  .cart-line__info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .cart-line__name { font-family: var(--ux-font-display); font-size: 15px; font-weight: 600; color: var(--ux-ink); }
+  .cart-line__meta { font-size: 12px; color: var(--ux-ink-3); }
+  .cart-line__bottom { display: flex; gap: 16px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+  .cart-line__price-block { text-align: right; min-width: 90px; }
+  .cart-line__unit { font-size: 11px; color: var(--ux-ink-3); }
+  .cart-line__total { font-family: var(--ux-font-display); font-size: 18px; font-weight: 700; color: var(--ux-ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+
+  .summary-card { background: var(--ux-bg-2); border: 1px solid var(--ux-line); border-radius: var(--ux-radius-lg); padding: 18px; }
+  .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; color: var(--ux-ink-2); font-variant-numeric: tabular-nums; }
+  .summary-row b { color: var(--ux-ink); font-weight: 500; }
+  .summary-divider { border: none; border-top: 1px dashed var(--ux-line); margin: 10px 0; }
+  .summary-total { display: flex; justify-content: space-between; align-items: baseline; margin: 4px 0 14px; }
+  .summary-total__label { font-size: 13px; color: var(--ux-ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .summary-total__value { font-family: var(--ux-font-display); font-size: 28px; font-weight: 700; color: var(--ux-ink); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+
+  .pay-icons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .pay-icon { width: 36px; height: 24px; border-radius: 4px; background: var(--ux-bg-3); border: 1px solid var(--ux-line); display: grid; place-items: center; font-family: var(--ux-font-mono); font-size: 8px; font-weight: 700; color: var(--ux-ink-2); letter-spacing: 0.06em; }
+  .trust-line { font-size: 11.5px; color: var(--ux-ink-3); margin-top: 10px; display: flex; gap: 6px; align-items: center; }
+
+  .related-section { margin-top: 32px; }
+  .related-rail { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 6px; }
+  @media (max-width: 1100px) { .related-rail { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 720px)  { .related-rail { grid-template-columns: repeat(2, 1fr); } }
+  .prod-art { width:100%; height:100%; display:grid; place-items:center; color: var(--ux-ink-3); font-family: var(--ux-font-mono); font-size: 10px; }
+  .prod-art--a { background: linear-gradient(135deg, #2a1a14, #4a2818); }
+  .prod-art--b { background: linear-gradient(135deg, #1a2a3a, #2a3a4a); }
+  .prod-art--c { background: linear-gradient(135deg, #1a2a1a, #2a3a25); }
+  .prod-art--d { background: linear-gradient(135deg, #2a1a2a, #3a2548); }
+  .prod-art--e { background: linear-gradient(135deg, #2e2418, #463a22); }
+  .prod-art--f { background: linear-gradient(135deg, #1a2422, #283a36); }
+</style>
+</head><body>
+
+<div class="ux-app" data-signals="{sidebar: false, q1: 2, q2: 1, q3: 1, q4: 1, coupon: ''}" data-attr-data-sidebar="$sidebar ? 'open' : ''">
+  <div class="ux-app__sidebar-overlay" data-on-click="$sidebar = false"></div>
+
+  <aside class="ux-sidebar">
+    <div class="ux-sidebar__brand">
+      <div class="ux-sidebar__logo">EX</div>
+      <div class="ux-sidebar__brand-text">
+        <div class="ux-sidebar__brand-name">ERPlora Cloud</div>
+        <div class="ux-sidebar__brand-meta">Acme Industries</div>
+      </div>
+    </div>
+    <div class="ux-sidebar__body">
+      <div class="ux-sidebar__group">Principal</div>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span class="ux-sidebar__label">Vista general</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg><span class="ux-sidebar__label">Organizaciones</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8"/></svg><span class="ux-sidebar__label">Hubs</span><span class="ux-sidebar__badge">7</span></button>
+      <button class="ux-sidebar__item" aria-current="page"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span class="ux-sidebar__label">Equipamiento</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span class="ux-sidebar__label">Usuarios</span></button>
+
+      <div class="ux-sidebar__group">Facturación</div>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span class="ux-sidebar__label">Facturas</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M5 9h14M5 15h14"/></svg><span class="ux-sidebar__label">Suscripciones</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span class="ux-sidebar__label">Pagos</span></button>
+    </div>
+    <div class="ux-sidebar__footer">
+      <div class="ux-sidebar__user">
+        <span class="ux-avatar ux-avatar--sm ux-avatar--brand">IB</span>
+        <div class="ux-sidebar__user-info">
+          <div class="ux-sidebar__user-name">Ioan Beilic</div>
+          <div class="ux-sidebar__user-meta">ioan@acme.com</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="ux-app__main">
+    <header class="ux-topbar">
+      <div class="ux-topbar__crumb">
+        <span class="ux-topbar__crumb-item">Cloud</span>
+        <span class="ux-topbar__crumb-sep">/</span>
+        <span class="ux-topbar__crumb-item">Equipo</span>
+        <span class="ux-topbar__crumb-sep">/</span>
+        <span class="ux-topbar__crumb-item">Carrito</span>
+      </div>
+      <div class="ux-topbar__search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input placeholder="Buscar terminales, lectores…"/>
+        <span class="ux-topbar__kbd">⌘K</span>
+      </div>
+      <div class="ux-topbar__actions">
+        <button class="ux-icon-btn" style="position:relative;" aria-label="Carrito">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+          <span class="ux-qty-badge ux-qty-badge--sm ux-qty-badge--brand ux-qty-badge--floating">5</span>
+        </button>
+        <button class="ux-icon-btn" aria-label="Notificaciones"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+        <span class="ux-avatar ux-avatar--sm ux-avatar--brand">IB</span>
+      </div>
+    </header>
+
+    <div class="ux-app__body">
+
+      <div class="ux-page-header">
+        <div class="ux-page-header__title">
+          <h1>Tu carrito</h1>
+          <div class="ux-page-header__sub">5 artículos · subtotal €2 049</div>
+        </div>
+        <div class="ux-page-header__actions">
+          <span class="ux-tag ux-tag--neutral">Paso 1 de 3</span>
+          <button class="ux-btn ux-btn--ghost">
+            <svg class="ux-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            Seguir comprando
+          </button>
+        </div>
+      </div>
+
+      <!-- Stepper progress -->
+      <div class="cart-stepper-wrap">
+        <div class="ux-stepper">
+          <div class="ux-stepper__step" data-state="active">
+            <div class="ux-stepper__bullet"><span>1</span></div>
+            <div class="ux-stepper__label">
+              <span class="ux-stepper__title">Carrito</span>
+              <span class="ux-stepper__sub">Revisa los artículos</span>
+            </div>
+          </div>
+          <div class="ux-stepper__step">
+            <div class="ux-stepper__bullet"><span>2</span></div>
+            <div class="ux-stepper__label">
+              <span class="ux-stepper__title">Envío</span>
+              <span class="ux-stepper__sub">Dirección y entrega</span>
+            </div>
+          </div>
+          <div class="ux-stepper__step">
+            <div class="ux-stepper__bullet"><span>3</span></div>
+            <div class="ux-stepper__label">
+              <span class="ux-stepper__title">Pago</span>
+              <span class="ux-stepper__sub">Tarjeta o transferencia</span>
+            </div>
+          </div>
+          <div class="ux-stepper__step">
+            <div class="ux-stepper__bullet"><span>4</span></div>
+            <div class="ux-stepper__label">
+              <span class="ux-stepper__title">Confirmación</span>
+              <span class="ux-stepper__sub">Resumen del pedido</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two column: items + summary -->
+      <div class="cart-layout">
+
+        <section>
+          <!-- Line 1 -->
+          <article class="cart-line">
+            <div class="cart-line__thumb cart-line__thumb--a">[TPV Modelo X]</div>
+            <div class="cart-line__info">
+              <div class="cart-line__name">Terminal POS Modelo X Pro</div>
+              <div class="cart-line__meta">SKU: ERP-TPV-X-PRO · Color: negro · Garantía 2 años</div>
+              <div class="cart-line__bottom">
+                <div class="ux-qty-stepper ux-qty-stepper--sm">
+                  <button class="ux-qty-stepper__btn ux-qty-stepper__btn--minus" data-on-click="$q1 = Math.max(1, $q1 - 1)" aria-label="Quitar"></button>
+                  <input class="ux-qty-stepper__input" type="number" data-bind-q1 value="2"/>
+                  <button class="ux-qty-stepper__btn ux-qty-stepper__btn--plus" data-on-click="$q1 = $q1 + 1" aria-label="Añadir"></button>
+                </div>
+                <span class="ux-stock ux-stock--in-stock"><span class="ux-stock__dot"></span><span class="ux-stock__label">En stock</span></span>
+                <button class="ux-btn ux-btn--ghost ux-btn--sm">
+                  <svg class="ux-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                  Quitar
+                </button>
+                <button class="ux-btn ux-btn--ghost ux-btn--sm">
+                  <svg class="ux-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  Guardar
+                </button>
+              </div>
+            </div>
+            <div class="cart-line__price-block">
+              <div class="cart-line__unit">€890 · ud</div>
+              <div class="cart-line__total" data-text="`€${($q1 * 890).toLocaleString('es-ES')}`">€1 780</div>
+            </div>
+          </article>
+
+          <!-- Line 2 -->
+          <article class="cart-line">
+            <div class="cart-line__thumb cart-line__thumb--d">[SumUp Air]</div>
+            <div class="cart-line__info">
+              <div class="cart-line__name">Lector SumUp Air contactless</div>
+              <div class="cart-line__meta">SKU: SUMUP-AIR-EU · Bluetooth + 4G</div>
+              <div class="cart-line__bottom">
+                <div class="ux-qty-stepper ux-qty-stepper--sm">
+                  <button class="ux-qty-stepper__btn ux-qty-stepper__btn--minus" data-on-click="$q2 = Math.max(1, $q2 - 1)" aria-label="Quitar"></button>
+                  <input class="ux-qty-stepper__input" type="number" data-bind-q2 value="1"/>
+                  <button class="ux-qty-stepper__btn ux-qty-stepper__btn--plus" data-on-click="$q2 = $q2 + 1" aria-label="Añadir"></button>
+                </div>
+                <span class="ux-stock ux-stock--in-stock"><span class="ux-stock__dot"></span><span class="ux-stock__label">Llega en 24h</span></span>
+                <button class="ux-btn ux-btn--ghost ux-btn--sm">Quitar</button>
+              </div>
+            </div>
+            <div class="cart-line__price-block">
+              <div class="cart-line__unit">€39 · ud</div>
+              <div class="cart-line__total" data-text="`€${($q2 * 39).toLocaleString('es-ES')}`">€39</div>
+            </div>
+          </article>
+
+          <!-- Line 3 -->
+          <article class="cart-line">
+            <div class="cart-line__thumb cart-line__thumb--c">[Star TSP143]</div>
+            <div class="cart-line__info">
+              <div class="cart-line__name">Impresora térmica Star TSP143 III</div>
+              <div class="cart-line__meta">SKU: STAR-TSP143-III · USB + Ethernet · Cable incluido</div>
+              <div class="cart-line__bottom">
+                <div class="ux-qty-stepper ux-qty-stepper--sm">
+                  <button class="ux-qty-stepper__btn ux-qty-stepper__btn--minus" data-on-click="$q3 = Math.max(1, $q3 - 1)" aria-label="Quitar"></button>
+                  <input class="ux-qty-stepper__input" type="number" data-bind-q3 value="1"/>
+                  <button class="ux-qty-stepper__btn ux-qty-stepper__btn--plus" data-on-click="$q3 = $q3 + 1" aria-label="Añadir"></button>
+                </div>
+                <span class="ux-stock ux-stock--low"><span class="ux-stock__dot"></span><span class="ux-stock__label">Quedan 4</span></span>
+                <button class="ux-btn ux-btn--ghost ux-btn--sm">Quitar</button>
+              </div>
+            </div>
+            <div class="cart-line__price-block">
+              <div class="cart-line__unit">€229 · ud</div>
+              <div class="cart-line__total" data-text="`€${($q3 * 229).toLocaleString('es-ES')}`">€229</div>
+            </div>
+          </article>
+
+          <!-- Line 4 -->
+          <article class="cart-line">
+            <div class="cart-line__thumb cart-line__thumb--f">[Bundle accesorios]</div>
+            <div class="cart-line__info">
+              <div class="cart-line__name">Bundle accesorios POS · 8 piezas</div>
+              <div class="cart-line__meta">SKU: ERP-ACC-BUNDLE-8 · Cables, soportes, rollos térmicos</div>
+              <div class="cart-line__bottom">
+                <div class="ux-qty-stepper ux-qty-stepper--sm">
+                  <button class="ux-qty-stepper__btn ux-qty-stepper__btn--minus" data-on-click="$q4 = Math.max(1, $q4 - 1)" aria-label="Quitar"></button>
+                  <input class="ux-qty-stepper__input" type="number" data-bind-q4 value="1"/>
+                  <button class="ux-qty-stepper__btn ux-qty-stepper__btn--plus" data-on-click="$q4 = $q4 + 1" aria-label="Añadir"></button>
+                </div>
+                <span class="ux-stock ux-stock--in-stock"><span class="ux-stock__dot"></span><span class="ux-stock__label">En stock</span></span>
+                <button class="ux-btn ux-btn--ghost ux-btn--sm">Quitar</button>
+              </div>
+            </div>
+            <div class="cart-line__price-block">
+              <div class="cart-line__unit">€85 · ud</div>
+              <div class="cart-line__total" data-text="`€${($q4 * 85).toLocaleString('es-ES')}`">€85</div>
+            </div>
+          </article>
+
+        </section>
+
+        <!-- Sticky summary -->
+        <aside class="cart-summary">
+          <div class="summary-card">
+            <h3 style="margin:0 0 10px;font-family:var(--ux-font-display);font-size:16px;font-weight:600;color:var(--ux-ink);">Resumen del pedido</h3>
+
+            <div class="summary-row"><span>Subtotal (5 artículos)</span><b data-text="`€${(($q1 * 890) + ($q2 * 39) + ($q3 * 229) + ($q4 * 85)).toLocaleString('es-ES')}`">€2 133</b></div>
+            <div class="summary-row"><span>IVA 21%</span><b data-text="`€${(((($q1 * 890) + ($q2 * 39) + ($q3 * 229) + ($q4 * 85)) * 0.21).toFixed(0))}`">€448</b></div>
+            <div class="summary-row">
+              <span>Envío</span>
+              <span class="ux-tag ux-tag--leaf ux-tag--sm">Gratis · desde €200</span>
+            </div>
+
+            <hr class="summary-divider"/>
+
+            <div style="display:flex;gap:6px;">
+              <input class="ux-input ux-input--sm" placeholder="Código de cupón" data-bind-coupon style="flex:1;"/>
+              <button class="ux-btn ux-btn--secondary ux-btn--sm">Aplicar</button>
+            </div>
+
+            <hr class="summary-divider"/>
+
+            <div class="summary-total">
+              <span class="summary-total__label">Total</span>
+              <span class="summary-total__value" data-text="`€${(((($q1 * 890) + ($q2 * 39) + ($q3 * 229) + ($q4 * 85)) * 1.21).toFixed(0)).toLocaleString('es-ES')}`">€2 581</span>
+            </div>
+
+            <button class="ux-btn ux-btn--primary ux-btn--lg ux-btn--block">
+              Continuar al envío
+              <svg class="ux-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+
+            <div class="pay-icons">
+              <span class="pay-icon" title="Visa">VISA</span>
+              <span class="pay-icon" title="Mastercard">MC</span>
+              <span class="pay-icon" title="Amex">AMEX</span>
+              <span class="pay-icon" title="Apple Pay">APay</span>
+              <span class="pay-icon" title="Google Pay">GPay</span>
+              <span class="pay-icon" title="SEPA">SEPA</span>
+            </div>
+
+            <div class="trust-line">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ux-leaf)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Compra segura · 30 días para devolver · Soporte 24/7
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Related rail -->
+      <section class="related-section">
+        <div class="ux-section" style="margin-bottom:14px;">
+          <h2 style="font-family:var(--ux-font-display);font-size:18px;font-weight:600;color:var(--ux-ink);margin:0;">También te puede interesar</h2>
+          <div style="font-size:12.5px;color:var(--ux-ink-3);margin-top:2px;">Productos comprados juntos por clientes con configuraciones parecidas</div>
+        </div>
+        <div class="related-rail">
+
+          <article class="ux-product ux-product--compact">
+            <div class="ux-product__media"><div class="prod-art prod-art--b">[Pantalla 7'']</div></div>
+            <div class="ux-product__body">
+              <h3 class="ux-product__name">Pantalla cliente 7''</h3>
+              <div class="ux-product__price-row"><span class="ux-product__price">€189</span></div>
+              <div class="ux-product__actions"><button class="ux-product__cta">+ Añadir</button></div>
+            </div>
+          </article>
+
+          <article class="ux-product ux-product--compact">
+            <div class="ux-product__media"><div class="prod-art prod-art--c">[Cajón]</div></div>
+            <div class="ux-product__body">
+              <h3 class="ux-product__name">Cajón monedero RJ11</h3>
+              <div class="ux-product__price-row"><span class="ux-product__price">€85</span></div>
+              <div class="ux-product__actions"><button class="ux-product__cta">+ Añadir</button></div>
+            </div>
+          </article>
+
+          <article class="ux-product ux-product--compact">
+            <div class="ux-product__media"><div class="prod-art prod-art--e">[Scanner]</div></div>
+            <div class="ux-product__body">
+              <h3 class="ux-product__name">Scanner Voyager 1602g</h3>
+              <div class="ux-product__price-row"><span class="ux-product__price">€129</span></div>
+              <div class="ux-product__actions"><button class="ux-product__cta">+ Añadir</button></div>
+            </div>
+          </article>
+
+          <article class="ux-product ux-product--compact">
+            <div class="ux-product__media"><div class="prod-art prod-art--d">[Brother QL]</div></div>
+            <div class="ux-product__body">
+              <h3 class="ux-product__name">Brother QL-820NWB</h3>
+              <div class="ux-product__price-row"><span class="ux-product__price">€340</span></div>
+              <div class="ux-product__actions"><button class="ux-product__cta">+ Añadir</button></div>
+            </div>
+          </article>
+
+          <article class="ux-product ux-product--compact">
+            <div class="ux-product__media"><div class="prod-art prod-art--a">[Soporte]</div></div>
+            <div class="ux-product__body">
+              <h3 class="ux-product__name">Soporte tablet metálico</h3>
+              <div class="ux-product__price-row"><span class="ux-product__price">€89</span></div>
+              <div class="ux-product__actions"><button class="ux-product__cta">+ Añadir</button></div>
+            </div>
+          </article>
+
+          <article class="ux-product ux-product--compact">
+            <div class="ux-product__media"><div class="prod-art prod-art--f">[Rollos x10]</div></div>
+            <div class="ux-product__body">
+              <h3 class="ux-product__name">Pack 10 rollos térmicos 80mm</h3>
+              <div class="ux-product__price-row"><span class="ux-product__price">€18</span></div>
+              <div class="ux-product__actions"><button class="ux-product__cta">+ Añadir</button></div>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+</body></html>

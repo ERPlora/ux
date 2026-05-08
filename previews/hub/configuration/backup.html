@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="es" data-theme="erplora">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Backup · Cafetería La Rambla</title>
+<link rel="stylesheet" href="../../../lib/css/ux.css"/>
+<link rel="stylesheet" href="../../../lib/templates/all.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+</head>
+<body>
+
+<div class="ux-app" id="app" data-tabbar="bottom"
+     data-signals="{sidebar: false, bk: {creating: false, autoEnabled: true}}"
+     data-attr-data-sidebar="$sidebar ? 'open' : ''">
+  <div class="ux-app__sidebar-overlay" data-on-click="$sidebar = false"></div>
+
+  <aside class="ux-sidebar">
+    <div class="ux-sidebar__brand">
+      <div class="ux-sidebar__logo">CR</div>
+      <div class="ux-sidebar__brand-text">
+        <div class="ux-sidebar__brand-name">Cafetería La Rambla</div>
+        <div class="ux-sidebar__brand-meta">Hub · v0.0.9</div>
+      </div>
+    </div>
+    <div class="ux-sidebar__body">
+      <div class="ux-sidebar__group">Plataforma</div>
+      <button class="ux-sidebar__item" aria-current="page"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg><span class="ux-sidebar__label">Configuración</span></button>
+    </div>
+    <div class="ux-sidebar__footer">
+      <div class="ux-sidebar__user">
+        <span class="ux-avatar ux-avatar--sm ux-avatar--brand">JC</span>
+        <div class="ux-sidebar__user-info">
+          <div class="ux-sidebar__user-name">Joan Castell</div>
+          <div class="ux-sidebar__user-meta">joan@larambla.es</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="ux-app__main">
+    <header class="ux-topbar">
+      <button class="ux-menu-btn ux-menu-btn--mobile-only" aria-label="Abrir menú"
+        data-on-click="$sidebar = !$sidebar"
+        data-attr-aria-expanded="$sidebar">
+        <span class="ux-menu-btn-lines"><span class="ux-menu-btn-line"></span><span class="ux-menu-btn-line"></span><span class="ux-menu-btn-line"></span></span>
+      </button>
+      <div class="ux-topbar__crumb">
+        <a class="ux-topbar__crumb-item" href="index.html">Configuración</a>
+        <span class="ux-topbar__crumb-sep">/</span>
+        <span class="ux-topbar__crumb-item">Backup &amp; restauración</span>
+      </div>
+    </header>
+
+    <div class="ux-app__body">
+
+      <div class="ux-page-header" style="border-bottom:1px solid var(--ux-line);margin-bottom:22px;">
+        <div class="ux-page-header__title">
+          <h1>Backup &amp; restauración</h1>
+          <div class="ux-page-header__sub">Snapshots automáticos del Hub almacenados cifrados en S3</div>
+        </div>
+        <div class="ux-page-header__actions">
+          <button class="ux-btn ux-btn--secondary ux-btn--sm">Subir backup externo</button>
+          <button class="ux-btn ux-btn--primary ux-btn--sm"
+                  data-on-click="$bk.creating = true; setTimeout(() => $bk.creating = false, 2200)"
+                  data-attr-disabled="$bk.creating">
+            <span data-show="!$bk.creating">+ Backup ahora</span>
+            <span data-show="$bk.creating">Generando…</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="ux-grid-4" style="gap:14px;margin-bottom:22px;">
+        <div style="background:var(--ux-bg-2);border:1px solid var(--ux-line);border-radius:14px;padding:14px;">
+          <div class="ux-eyebrow">Último backup</div>
+          <div style="font-family:var(--ux-font-display);font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-top:4px;">Hoy · 03:00</div>
+          <span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Completado</span>
+        </div>
+        <div style="background:var(--ux-bg-2);border:1px solid var(--ux-line);border-radius:14px;padding:14px;">
+          <div class="ux-eyebrow">Próximo automático</div>
+          <div style="font-family:var(--ux-font-display);font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-top:4px;">Mañana · 03:00</div>
+          <span class="ux-pill"><span class="ux-pill__dot"></span>Diario</span>
+        </div>
+        <div style="background:var(--ux-bg-2);border:1px solid var(--ux-line);border-radius:14px;padding:14px;">
+          <div class="ux-eyebrow">Espacio usado</div>
+          <div style="font-family:var(--ux-font-display);font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-top:4px;font-variant-numeric:tabular-nums;">1,8 GB <span style="color:var(--ux-ink-3);font-size:14px;">/ 5 GB</span></div>
+          <div class="ux-progress" style="margin-top:8px;"><div class="ux-progress__bar" style="width:36%;"></div></div>
+        </div>
+        <div style="background:var(--ux-bg-2);border:1px solid var(--ux-line);border-radius:14px;padding:14px;">
+          <div class="ux-eyebrow">Backups guardados</div>
+          <div style="font-family:var(--ux-font-display);font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-top:4px;">14<span style="color:var(--ux-ink-3);font-size:14px;">/14</span></div>
+          <span class="ux-pill"><span class="ux-pill__dot"></span>Retención 14 días</span>
+        </div>
+      </div>
+
+      <!-- Configuración auto-backup -->
+      <article class="ux-card" style="margin-bottom:22px;">
+        <header class="ux-card__header">
+          <div>
+            <h3 class="ux-card__title">Backup automático</h3>
+            <p class="ux-card__sub">Programación, intervalo y retención.</p>
+          </div>
+        </header>
+        <div class="ux-card__body">
+          <div class="ux-toggle-row">
+            <div class="ux-toggle-row__text">
+              <span class="ux-toggle-row__label">Activar backups automáticos</span>
+              <span class="ux-toggle-row__desc">Snapshot cifrado con AES-256 subido a S3 cada intervalo.</span>
+            </div>
+            <label class="ux-toggle"><input type="checkbox" data-bind="bk.autoEnabled"/><span class="ux-toggle__track"></span></label>
+          </div>
+          <div class="ux-form-row" style="padding-top:14px;" data-show="$bk.autoEnabled">
+            <div class="ux-field">
+              <label class="ux-field__label">Intervalo</label>
+              <select class="ux-select">
+                <option selected>Diario · 03:00</option>
+                <option>Cada 6 horas</option>
+                <option>Semanal · domingo</option>
+              </select>
+            </div>
+            <div class="ux-field">
+              <label class="ux-field__label">Retención</label>
+              <select class="ux-select">
+                <option>7 días</option>
+                <option selected>14 días</option>
+                <option>30 días</option>
+                <option>90 días</option>
+              </select>
+            </div>
+            <div class="ux-field">
+              <label class="ux-field__label">Cifrado</label>
+              <select class="ux-select">
+                <option selected>AES-256 (S3 SSE-KMS)</option>
+                <option>AES-256 (cliente)</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;padding-top:12px;">
+            <button class="ux-btn ux-btn--secondary ux-btn--sm">Guardar ajustes</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Histórico -->
+      <article class="ux-card">
+        <header class="ux-card__header">
+          <div>
+            <h3 class="ux-card__title">Historial</h3>
+            <p class="ux-card__sub">Últimos 14 backups</p>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="ux-btn ux-btn--ghost ux-btn--sm">Filtrar</button>
+            <button class="ux-btn ux-btn--ghost ux-btn--sm">Exportar CSV</button>
+          </div>
+        </header>
+        <div class="ux-table-scroll">
+          <table class="ux-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Tamaño</th>
+                <th>Estado</th>
+                <th>Origen</th>
+                <th class="ux-td--right" style="width:160px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="ux-td--mono">2026-05-08 03:00</td>
+                <td><span class="ux-badge">Auto</span></td>
+                <td class="ux-td--num">142 MB</td>
+                <td><span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>OK</span></td>
+                <td class="ux-td--muted">eu-west-1</td>
+                <td>
+                  <div class="ux-row-actions" style="justify-content:flex-end;">
+                    <button class="ux-row-action" title="Descargar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                    <button class="ux-row-action" title="Restaurar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="ux-td--mono">2026-05-07 18:42</td>
+                <td><span class="ux-badge ux-badge--brand">Manual</span></td>
+                <td class="ux-td--num">141 MB</td>
+                <td><span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>OK</span></td>
+                <td class="ux-td--muted">Joan C.</td>
+                <td>
+                  <div class="ux-row-actions" style="justify-content:flex-end;">
+                    <button class="ux-row-action" title="Descargar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                    <button class="ux-row-action" title="Restaurar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="ux-td--mono">2026-05-07 03:00</td>
+                <td><span class="ux-badge">Auto</span></td>
+                <td class="ux-td--num">140 MB</td>
+                <td><span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>OK</span></td>
+                <td class="ux-td--muted">eu-west-1</td>
+                <td>
+                  <div class="ux-row-actions" style="justify-content:flex-end;">
+                    <button class="ux-row-action" title="Descargar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                    <button class="ux-row-action" title="Restaurar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="ux-td--mono">2026-05-06 03:00</td>
+                <td><span class="ux-badge">Auto</span></td>
+                <td class="ux-td--num">138 MB</td>
+                <td><span class="ux-pill ux-pill--warn"><span class="ux-pill__dot"></span>Parcial</span></td>
+                <td class="ux-td--muted">eu-west-1</td>
+                <td>
+                  <div class="ux-row-actions" style="justify-content:flex-end;">
+                    <button class="ux-row-action" title="Ver log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></button>
+                    <button class="ux-row-action" title="Restaurar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="ux-td--mono">2026-05-05 03:00</td>
+                <td><span class="ux-badge">Auto</span></td>
+                <td class="ux-td--num">137 MB</td>
+                <td><span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>OK</span></td>
+                <td class="ux-td--muted">eu-west-1</td>
+                <td>
+                  <div class="ux-row-actions" style="justify-content:flex-end;">
+                    <button class="ux-row-action" title="Descargar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                    <button class="ux-row-action" title="Restaurar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</div>
+
+</body></html>
