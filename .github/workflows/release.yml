@@ -129,10 +129,18 @@ jobs:
               "ubuntu@$DEPLOY_HOST" sudo -u deploy -H bash -s <<EOSSH
             set -euo pipefail
             cd /srv/uxsite
-            git fetch --tags --prune
+            git fetch --tags --prune origin
             PREV=\$(git rev-parse HEAD)
-            git checkout "$DEPLOY_REF"
-            git reset --hard "$DEPLOY_REF"
+            # If DEPLOY_REF is a branch name, resolve it via origin/ to
+            # pick up the most recent push. If it's a tag, use it as-is.
+            REF="$DEPLOY_REF"
+            if git show-ref --verify --quiet "refs/tags/\$REF"; then
+              TARGET="\$REF"
+            else
+              TARGET="origin/\$REF"
+            fi
+            git checkout --detach "\$TARGET"
+            git reset --hard "\$TARGET"
             if git diff --name-only "\$PREV" HEAD | grep -q '^pyproject.toml\$'; then
               echo "pyproject.toml changed; reinstalling dependencies"
               .venv/bin/pip install --quiet -e '.[dev]' gunicorn
