@@ -1,0 +1,31 @@
+{# field(label, hint, error, required, attrs)
+
+   Form field wrapper matching lib/css/components/forms.css:
+
+     <div class="ux-field">
+       <label class="ux-field__label">...</label>
+       (the caller() block — the control: input, select, etc.)
+       <div class="ux-field__hint">...</div>
+       <div class="ux-field__error">...</div>
+     </div>
+
+   The control is supplied via `{% call field(...) %}<input .../>{% endcall %}`.
+   `required=True` adds the `ux-field__label--req` modifier (red asterisk).
+   When `error` is set the hint is suppressed.
+#}
+{% macro field(label=None, hint=None, error=None, required=False, attrs={}) %}
+<div class="ux-field"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if label %}
+  {%- set label_classes = ["ux-field__label"] -%}
+  {%- if required %}{%- do label_classes.append("ux-field__label--req") -%}{%- endif -%}
+  <label class="{{ label_classes | join(' ') }}">{{ label|e }}</label>
+{%- endif %}
+  {% if caller is defined %}{{ caller() }}{% endif %}
+{%- if error %}
+  <div class="ux-field__error">{{ error|e }}</div>
+{%- elif hint %}
+  <div class="ux-field__hint">{{ hint|e }}</div>
+{%- endif %}
+</div>
+{% endmacro %}

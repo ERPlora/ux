@@ -1,0 +1,38 @@
+{# progress(value, variant, size, indeterminate, striped, label, value_text, attrs)
+
+   CSS from lib/css/components/progress.css:
+     - sizes      : sm (ux-progress--sm) | md (default) | lg (ux-progress--lg)
+     - variants   : leaf | warn | danger | info  (ux-progress--{variant})
+     - states     : indeterminate | striped       (ux-progress--{state})
+
+   `value` is a number 0-100 (ignored when `indeterminate=True`).
+   When `label` or `value_text` is given, the macro wraps the bar inside the
+   `ux-progress-block` layout from the same css file (label + value header).
+#}
+{% macro progress(value=0, variant=None, size=None, indeterminate=False, striped=False, label=None, value_text=None, attrs={}) %}
+{%- set classes = ["ux-progress"] -%}
+{%- if size %}{%- do classes.append("ux-progress--" ~ size) -%}{%- endif -%}
+{%- if variant %}{%- do classes.append("ux-progress--" ~ variant) -%}{%- endif -%}
+{%- if indeterminate %}{%- do classes.append("ux-progress--indeterminate") -%}{%- endif -%}
+{%- if striped %}{%- do classes.append("ux-progress--striped") -%}{%- endif -%}
+{%- set show_block = label is not none or value_text is not none -%}
+{%- if show_block -%}
+<div class="ux-progress-block"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-progress-block__head">
+    <span class="ux-progress-block__label">{{ (label or "")|e }}</span>
+    <span class="ux-progress-block__value">{{ (value_text or "")|e }}</span>
+  </div>
+  <div class="{{ classes | join(' ') }}" role="progressbar"
+    {%- if not indeterminate %} aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="100"{% endif -%}>
+    <div class="ux-progress__bar"{% if not indeterminate %} style="width: {{ value }}%;"{% endif %}></div>
+  </div>
+</div>
+{%- else -%}
+<div class="{{ classes | join(' ') }}" role="progressbar"
+{%- if not indeterminate %} aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="100"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-progress__bar"{% if not indeterminate %} style="width: {{ value }}%;"{% endif %}></div>
+</div>
+{%- endif -%}
+{% endmacro %}

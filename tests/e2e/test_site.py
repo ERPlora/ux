@@ -22,7 +22,7 @@ def test_home(site_url):
             page.goto(site_url)
             assert "ERPlora UX" in page.content()
             # Sidebar is rendered for every page, so we should also see it here.
-            assert page.locator(".docs-sidebar").count() == 1
+            assert page.locator(".ux-sidebar").count() == 1
         finally:
             browser.close()
 

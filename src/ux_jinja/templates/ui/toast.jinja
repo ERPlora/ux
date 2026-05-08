@@ -1,0 +1,37 @@
+{# toast(title, desc, variant, dismissible, on_dismiss, attrs)
+
+   CSS from lib/css/components/overlays.css:
+     - variants : ok | warn | danger | info | brand
+                  (ux-toast--{variant})
+
+   The macro renders a single toast. To stack toasts, wrap them in a
+   `toast_region(pos)` container.
+
+   Body slot via `{% call %}` overrides `desc`.
+#}
+{% macro toast(title="", desc=None, variant=None, dismissible=False, on_dismiss=None, attrs={}) %}
+{%- set classes = ["ux-toast"] -%}
+{%- if variant %}{%- do classes.append("ux-toast--" ~ variant) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}" role="status"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-toast__body">
+    {%- if title %}<div class="ux-toast__title">{{ title|e }}</div>{% endif %}
+    {%- if caller is defined %}<div class="ux-toast__desc">{{ caller() }}</div>
+    {%- elif desc %}<div class="ux-toast__desc">{{ desc|e }}</div>{% endif %}
+  </div>
+  {%- if dismissible %}
+  <button type="button" class="ux-toast__close" aria-label="Dismiss"
+    {%- if on_dismiss %} data-on:click="{{ on_dismiss|e }}"{% endif -%}>&times;</button>
+  {%- endif %}
+</div>
+{% endmacro %}
+
+{# toast_region(pos) — fixed-position stack container.
+   `pos` ∈ top-right (default) | top-left | top-center
+        | bottom-right | bottom-left | bottom-center #}
+{% macro toast_region(pos="top-right", attrs={}) %}
+<div class="ux-toast-region" data-pos="{{ pos|e }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% endif -%}
+</div>
+{% endmacro %}

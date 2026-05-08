@@ -1,0 +1,48 @@
+{# avatar(name, src, alt, size, variant, status, attrs)
+
+   Variants from lib/css/components/avatar.css:
+     - size      : xs | sm | md (default, no class) | lg | xl
+     - variant   : brand          (ux-avatar--brand)
+     - shape     : always pill (the CSS uses border-radius: 50% on .ux-avatar
+                   and there is no square modifier; `shape` is accepted but
+                   ignored when set to "circle"; "square" is unsupported)
+
+   Content rules:
+     - If `src` is set, renders an <img> inside.
+     - Else if `name` is set, computes 1-2 initials from the words in `name`.
+     - A `caller()` slot wins over both (e.g. for "+4" tile in a stack).
+
+   `status` adds a sibling `ux-status-dot--{status}` indicator from
+   feedback-extra.css. Real CSS supports: online | busy | offline | danger.
+   Other values are passed through verbatim and may render as a default dot.
+#}
+{% macro avatar(name="", src=None, alt=None, size=None, variant=None, status=None, shape=None, attrs={}) %}
+{%- set classes = ["ux-avatar"] -%}
+{%- if size %}{%- do classes.append("ux-avatar--" ~ size) -%}{%- endif -%}
+{%- if variant %}{%- do classes.append("ux-avatar--" ~ variant) -%}{%- endif -%}
+{%- set initials = "" -%}
+{%- if name -%}
+  {%- set parts = name.split() -%}
+  {%- if parts|length >= 2 -%}
+    {%- set initials = (parts[0][0] ~ parts[-1][0])|upper -%}
+  {%- elif parts|length == 1 -%}
+    {%- set initials = parts[0][:2]|upper -%}
+  {%- endif -%}
+{%- endif -%}
+<span class="{{ classes | join(' ') }}"
+{%- if alt or name %} title="{{ (alt or name)|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined -%}{{ caller() }}
+{%- elif src -%}<img src="{{ src|e }}" alt="{{ (alt or name or '')|e }}"/>
+{%- else -%}{{ initials|e }}{%- endif -%}
+</span>
+{%- if status %}<span class="ux-status-dot ux-status-dot--{{ status|e }}" aria-hidden="true"></span>{% endif -%}
+{% endmacro %}
+
+{# avatar_stack() — wrapper for overlapping avatars. Use as `{% call avatar_stack() %}...{% endcall %}` #}
+{% macro avatar_stack(attrs={}) %}
+<span class="ux-avatar-stack"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% endif -%}
+</span>
+{% endmacro %}

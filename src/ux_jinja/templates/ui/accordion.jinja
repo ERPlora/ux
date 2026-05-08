@@ -1,0 +1,58 @@
+{# accordion(id, items, variant, single, attrs)
+
+   CSS from lib/css/components/navigation.css:
+     - variants : ghost (ux-accordion--ghost) | cards (ux-accordion--cards)
+
+   `items` is a list of dicts:
+     [{title, body, sub=None, meta=None, open=False}, ...]
+
+   Datastar wiring:
+     - The macro creates one signal per item: `<id>_<i>` (boolean).
+     - When `single=True` the accordion exposes a single signal `<id>_open`
+       holding the index of the active panel (or -1 for none); clicking a
+       trigger collapses any other panel.
+     - The CSS reacts to `data-state="open"` on `.ux-accordion__item`, so
+       we bind it via `data-attr:data-state` from each item's signal.
+#}
+{% macro accordion(id, items=[], variant=None, single=False, attrs={}) %}
+{%- set classes = ["ux-accordion"] -%}
+{%- if variant %}{%- do classes.append("ux-accordion--" ~ variant) -%}{%- endif -%}
+{%- set signals_parts = [] -%}
+{%- if single -%}
+  {%- set ns = namespace(initial=-1) -%}
+  {%- for item in items -%}{%- if item.open %}{%- set ns.initial = loop.index0 -%}{%- endif -%}{%- endfor -%}
+  {%- do signals_parts.append('"' ~ id ~ '_open": ' ~ ns.initial) -%}
+{%- else -%}
+  {%- for item in items -%}
+    {%- do signals_parts.append('"' ~ id ~ '_' ~ loop.index0 ~ '": ' ~ ('true' if item.open else 'false')) -%}
+  {%- endfor -%}
+{%- endif -%}
+<div class="{{ classes | join(' ') }}" id="{{ id|e }}"
+  {%- if signals_parts %} data-signals='{ {{ signals_parts | join(", ") }} }'{% endif -%}
+  {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for item in items %}
+  {%- set i = loop.index0 -%}
+  {%- if single -%}
+    {%- set state_expr = "$" ~ id ~ "_open === " ~ i ~ " ? 'open' : 'closed'" -%}
+    {%- set toggle_expr = "$" ~ id ~ "_open = $" ~ id ~ "_open === " ~ i ~ " ? -1 : " ~ i -%}
+    {%- set expanded_expr = "$" ~ id ~ "_open === " ~ i -%}
+  {%- else -%}
+    {%- set sig = "$" ~ id ~ "_" ~ i -%}
+    {%- set state_expr = sig ~ " ? 'open' : 'closed'" -%}
+    {%- set toggle_expr = sig ~ " = !" ~ sig -%}
+    {%- set expanded_expr = sig -%}
+  {%- endif %}
+  <div class="ux-accordion__item" data-attr:data-state="{{ state_expr }}">
+    <button type="button" class="ux-accordion__trigger" data-on:click="{{ toggle_expr }}" data-attr:aria-expanded="{{ expanded_expr }}">
+      <span></span>
+      <div class="ux-accordion__title">{{ item.title|e }}
+        {%- if item.sub %}<span class="ux-accordion__sub">{{ item.sub|e }}</span>{% endif -%}
+      </div>
+      {%- if item.meta %}<span class="ux-accordion__meta">{{ item.meta|e }}</span>{% else %}<span></span>{% endif %}
+      <span class="ux-accordion__caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></span>
+    </button>
+    <div class="ux-accordion__panel ux-accordion__panel--no-icon">{{ item.body|e if item.body is string else item.body }}</div>
+  </div>
+  {%- endfor %}
+</div>
+{% endmacro %}

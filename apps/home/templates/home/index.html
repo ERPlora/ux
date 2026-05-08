@@ -1,35 +1,54 @@
 {% extends "_base.html" %}
+{% from "ui/card.jinja" import card as ux_card %}
+{% from "ui/button.jinja" import button %}
+{% from "ui/badge.jinja" import badge %}
+{% from "ui/kpi.jinja" import kpi %}
 
 {% block title %}ERPlora UX — Components for ERP-grade Jinja templates{% endblock %}
 
+{% block crumb %}
+  <span class="ux-topbar__crumb-item" aria-current="page">Overview</span>
+{% endblock %}
+
 {% block content %}
-<section class="ux-stack">
-  <header>
-    <h1>ERPlora UX</h1>
-    <p>Jinja2 macros and ready-made page templates for the @erplora/ux CSS component library.</p>
-  </header>
+<h1 class="doc__title">ERPlora UX</h1>
+<p class="doc__sub">Jinja2 macros and ready-made page templates for the @erplora/ux CSS component library. Server-rendered with Hotframe, declarative interactivity with Datastar, zero build pipeline.</p>
 
-  <section>
-    <h2>Quick links</h2>
-    <ul class="ux-list">
-      <li class="ux-list__item"><a href="/c">Browse the {{ component_names | length }} components</a></li>
-      <li class="ux-list__item"><a href="/p">Browse the {{ page_names | length }} example pages</a></li>
-      <li class="ux-list__item"><a href="https://github.com/ERPlora/ux">Source on GitHub</a></li>
-    </ul>
-  </section>
+<div class="demo-grid">
+  {{ kpi(label="Components",   value=component_count, delta="20 macros", trend="flat", variant="brand") }}
+  {{ kpi(label="Example pages", value=page_count,    delta="ready to use", trend="flat") }}
+  {{ kpi(label="Build step",    value="0",           delta="zero pipeline", trend="flat", variant="brand") }}
+</div>
 
-  <section>
-    <h2>Install</h2>
-    <pre><code>pip install ux-jinja</code></pre>
-    <p>Then add the templates directory to your Jinja loader:</p>
-    <pre><code>import ux_jinja
-env.loader.searchpath.append(str(ux_jinja.TEMPLATES_DIR))</code></pre>
-  </section>
+<h3 class="doc__h2">What you get</h3>
+<div class="demo-grid">
+  {% call ux_card(title="System tokens", subtitle="One layer of CSS variables") %}
+    <p style="margin:0;color:var(--ux-ink-2);font-size:13px;line-height:1.55;">A single layer of variables defines colour, typography, spacing, radius, shadow and motion. Themes <code class="ux-code--inline">erplora</code> (dark) and <code class="ux-code--inline">erplora-light</code> are built in, plus five additional template families.</p>
+  {% endcall %}
+  {% call ux_card(title="Plain CSS", subtitle="No build steps") %}
+    <p style="margin:0;color:var(--ux-ink-2);font-size:13px;line-height:1.55;">Each component lives in its own <code class="ux-code--inline">.css</code> file. Import the component you need or pull the bundle <code class="ux-code--inline">erplora-ux.min.css</code> from jsdelivr.</p>
+  {% endcall %}
+  {% call ux_card(title="Datastar wired", subtitle="Declarative state via attributes") %}
+    <p style="margin:0;color:var(--ux-ink-2);font-size:13px;line-height:1.55;">Macros emit <code class="ux-code--inline">data-signals</code>, <code class="ux-code--inline">data-on:*</code> and <code class="ux-code--inline">data-bind</code>. SSE patches signals or DOM fragments with one decorator.</p>
+  {% endcall %}
+</div>
 
-  <section>
-    <h2>Use a macro</h2>
-    <pre><code>{% raw %}{% from "ui/button.jinja" import button %}
-{{ button("Save", variant="primary") }}{% endraw %}</code></pre>
-  </section>
-</section>
+<h3 class="doc__h2">Quick start</h3>
+<div class="demo-grid">
+  {% call ux_card(title="Browse components", subtitle="20 macros with live previews") %}
+    <a class="ux-btn ux-btn--primary ux-btn--sm" href="/c">Open gallery</a>
+  {% endcall %}
+  {% call ux_card(title="See a page in context", subtitle="Dashboard, list view, ...") %}
+    <a class="ux-btn ux-btn--secondary ux-btn--sm" href="/p">Open pages</a>
+  {% endcall %}
+  {% call ux_card(title="Try Datastar live", subtitle="SSE counter, clock, filter, accordion") %}
+    {{ badge("server-sent events", variant="ok", dot=True) }}
+    <div style="margin-top:10px;">
+      <a class="ux-btn ux-btn--brand ux-btn--sm" href="/live">Open live demo</a>
+    </div>
+  {% endcall %}
+  {% call ux_card(title="Install in your project", subtitle="pip + add the templates dir") %}
+    <a class="ux-btn ux-btn--ghost ux-btn--sm" href="/install">Read install guide</a>
+  {% endcall %}
+</div>
 {% endblock %}

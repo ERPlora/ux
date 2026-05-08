@@ -1,0 +1,51 @@
+{# radio(name, value, label, checked, value_signal, disabled, attrs)
+
+   Radio matching lib/css/components/forms.css:
+
+     <label class="ux-radio">
+       <input type="radio" name="..." value="..." />
+       <span class="ux-radio__dot"></span>
+       Label text
+     </label>
+
+   `radio_group(name, options, selected, inline, value_signal)` is the
+   convenience wrapper that emits a `.ux-radio-group` containing one `.ux-radio`
+   per option. `options` is a list of `(value, label)` tuples or dicts with
+   `value` and `label` keys.
+#}
+{% macro radio(name, value, label="", checked=False, value_signal=None, disabled=False, attrs={}) %}
+<label class="ux-radio"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <input type="radio" name="{{ name|e }}" value="{{ value|e }}"
+{%- if checked %} checked{% endif -%}
+{%- if disabled %} disabled{% endif -%}
+{%- if value_signal %} data-bind="{{ value_signal|e }}"{% endif -%}/>
+  <span class="ux-radio__dot"></span>
+{%- if caller is defined %}{{ caller() }}{% else %}{{ label|e }}{% endif -%}
+</label>
+{% endmacro %}
+
+
+{# radio_group(name, options, selected, inline, value_signal, attrs) #}
+{% macro radio_group(name, options=[], selected=None, inline=False, value_signal=None, attrs={}) %}
+{%- set classes = ["ux-radio-group"] -%}
+{%- if inline %}{%- do classes.append("ux-radio-group--inline") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}" role="radiogroup"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- for opt in options -%}
+  {%- if opt is mapping -%}
+    {%- set v = opt.get('value') -%}
+    {%- set l = opt.get('label', v) -%}
+  {%- else -%}
+    {%- set v = opt[0] -%}
+    {%- set l = opt[1] -%}
+  {%- endif -%}
+  <label class="ux-radio">
+    <input type="radio" name="{{ name|e }}" value="{{ v|e }}"
+{%- if selected is not none and v == selected %} checked{% endif -%}
+{%- if value_signal %} data-bind="{{ value_signal|e }}"{% endif -%}/>
+    <span class="ux-radio__dot"></span>{{ l|e }}
+  </label>
+{%- endfor %}
+</div>
+{% endmacro %}

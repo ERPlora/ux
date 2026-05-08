@@ -1,0 +1,27 @@
+{# dropzone(name, accept, multiple, drag_signal, title, hint, attrs)
+
+   File upload dropzone matching lib/css/components/forms-extra.css.
+   `drag_signal` is the Datastar boolean toggled while the user drags files
+   over the zone — when set, `data-state="dragging"` reflects it via Datastar.
+
+   Title and hint default to plain English copy. Pass `caller` to fully
+   replace the inner content.
+#}
+{% macro dropzone(name="files", accept=None, multiple=True, drag_signal=None, title="Drop files here or <b>browse</b>", hint=None, attrs={}) %}
+<label class="ux-dropzone"
+{%- if drag_signal %} data-attr:data-state="{{ drag_signal|e }} ? 'dragging' : ''" data-on:dragover__prevent="{{ drag_signal|e }} = true" data-on:dragleave="{{ drag_signal|e }} = false" data-on:drop__prevent="{{ drag_signal|e }} = false"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <input type="file" name="{{ name|e }}"
+{%- if accept %} accept="{{ accept|e }}"{% endif -%}
+{%- if multiple %} multiple{% endif %} hidden/>
+{%- if caller is defined %}{{ caller() }}{% else %}
+  <span class="ux-dropzone__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+  </span>
+  <div class="ux-dropzone__title">{{ title|safe }}</div>
+{%- if hint %}
+  <div class="ux-dropzone__hint">{{ hint|e }}</div>
+{%- endif %}
+{%- endif %}
+</label>
+{% endmacro %}

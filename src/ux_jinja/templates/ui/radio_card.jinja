@@ -1,0 +1,37 @@
+{# radio_card(name, options, selected, value_signal, attrs)
+
+   Rich radio card group matching lib/css/components/forms.css:
+
+     <label class="ux-radio-card">
+       <input type="radio" name="..." />
+       <span class="ux-radio__dot"></span>
+       <div>
+         <div class="ux-radio-card__title">...</div>
+         <div class="ux-radio-card__desc">...</div>
+       </div>
+     </label>
+
+   `options` is a list of dicts with keys `value`, `label` (or `title`),
+   and optional `description` (or `desc`). The cards are emitted as siblings
+   without a wrapper — the caller controls layout (e.g. `ux-grid-auto`).
+#}
+{% macro radio_card(name, options=[], selected=None, value_signal=None, attrs={}) %}
+{%- for opt in options -%}
+{%- set v = opt.get('value') -%}
+{%- set t = opt.get('title', opt.get('label', '')) -%}
+{%- set d = opt.get('description', opt.get('desc', '')) -%}
+<label class="ux-radio-card"
+{%- for k, val in attrs.items() %} {{ k }}="{{ val|e }}"{% endfor -%}>
+  <input type="radio" name="{{ name|e }}" value="{{ v|e }}"
+{%- if selected is not none and v == selected %} checked{% endif -%}
+{%- if value_signal %} data-bind="{{ value_signal|e }}"{% endif -%}/>
+  <span class="ux-radio__dot"></span>
+  <div>
+    <div class="ux-radio-card__title">{{ t|e }}</div>
+{%- if d %}
+    <div class="ux-radio-card__desc">{{ d|e }}</div>
+{%- endif %}
+  </div>
+</label>
+{%- endfor %}
+{% endmacro %}

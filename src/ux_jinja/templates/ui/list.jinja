@@ -1,0 +1,59 @@
+{# list(items, variant, attrs) and list_item(...)
+
+   CSS from lib/css/components/navigation.css:
+     - root variants : ghost (ux-list--ghost) | separated (ux-list--separated)
+     - icon tones    : brand | leaf | warn | danger | info
+                       (ux-list__icon--{tone})
+
+   `items` is an optional list of dicts. Each item dict shape:
+     {title, desc=None, icon_tone=None, aside=None, href=None, active=False,
+      on_click=None, chev=True}
+
+   For richer slot content use the companion `list_item()` macro inside a
+   `{% call list() %}` block.
+#}
+{% macro list(items=None, variant=None, attrs={}) %}
+{%- set classes = ["ux-list"] -%}
+{%- if variant %}{%- do classes.append("ux-list--" ~ variant) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if items %}
+{%- for item in items %}
+{{ list_item(
+  title=item.title|default(""),
+  desc=item.desc|default(None),
+  icon_tone=item.icon_tone|default(None),
+  aside=item.aside|default(None),
+  href=item.href|default(None),
+  active=item.active|default(false),
+  on_click=item.on_click|default(None),
+  chev=item.chev|default(true),
+) }}
+{%- endfor %}
+{%- endif -%}
+{%- if caller is defined %}{{ caller() }}{% endif %}
+</div>
+{% endmacro %}
+
+{# list_item(...) — single row. Use directly or via list(items=...). #}
+{% macro list_item(title="", desc=None, icon_tone=None, aside=None, href=None, active=False, on_click=None, chev=True, attrs={}) %}
+{%- set tag = "a" if href else "button" -%}
+{%- set icon_classes = ["ux-list__icon"] -%}
+{%- if icon_tone %}{%- do icon_classes.append("ux-list__icon--" ~ icon_tone) -%}{%- endif -%}
+<{{ tag }} class="ux-list__item"
+{%- if tag == "button" %} type="button"{% endif -%}
+{%- if href %} href="{{ href|e }}"{% endif -%}
+{%- if active %} data-active="true" aria-current="true"{% endif -%}
+{%- if on_click %} data-on:click="{{ on_click|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <span class="{{ icon_classes | join(' ') }}">{% if caller is defined %}{{ caller() }}{% endif %}</span>
+  <div class="ux-list__body">
+    <div class="ux-list__title">{{ title|e }}</div>
+    {%- if desc %}<div class="ux-list__desc">{{ desc|e }}</div>{% endif %}
+  </div>
+  <span class="ux-list__aside">
+    {%- if aside %}{{ aside|e }}{% endif -%}
+    {%- if chev %}<svg class="ux-list__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>{% endif -%}
+  </span>
+</{{ tag }}>
+{% endmacro %}

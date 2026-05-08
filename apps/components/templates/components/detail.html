@@ -1,35 +1,94 @@
 {% extends "_base.html" %}
+{% from "ui/tabs.jinja" import tabs, tab_panel %}
+{% from "ui/card.jinja" import card as ux_card %}
+{% from "ui/button.jinja" import button %}
 
 {% block title %}{{ name }} — ERPlora UX{% endblock %}
 
+{% block crumb %}
+  <a class="ux-topbar__crumb-item" href="/c">Components</a>
+  <span class="ux-topbar__crumb-sep">/</span>
+  <span class="ux-topbar__crumb-item">{{ name }}</span>
+{% endblock %}
+
 {% block content %}
-<section class="ux-stack">
-  <header>
-    <p><a href="/c">&larr; Components</a></p>
-    <h1>{{ name }}</h1>
-    <p>Live previews and emitted HTML for each fixture.</p>
-  </header>
+<h1 class="doc__title">{{ name }}</h1>
+<p class="doc__sub">{{ description }}</p>
 
-  {% for example in examples %}
-    <section>
-      <h2>{{ example.label }}</h2>
-      <div class="preview-frame">
-        {{ example.html | safe }}
+<div data-signals='{"copied_src": false, "copied_use": false}'>
+
+  {{ tabs("comp", value="preview", items=[
+    {"label": "Preview", "key": "preview"},
+    {"label": "Source",  "key": "source"},
+    {"label": "Usage",   "key": "usage"}
+  ]) }}
+
+  <div style="margin-top: 18px;">
+
+    {# ============= PREVIEW PANE ============= #}
+    {% call tab_panel("comp", "preview") %}
+      <div class="stage-wrap" data-attr:data-vp="$vp">
+        <div class="stage" data-attr:data-vp="$vp">
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            {% for example in examples %}
+              {% call ux_card(title=example.label) %}
+                <div class="preview-block">
+                  <div class="preview-frame">
+                    {{ example.html | safe }}
+                  </div>
+                  <div class="code-wrap">
+                    <pre><code>{{ example.source }}</code></pre>
+                  </div>
+                </div>
+              {% endcall %}
+            {% endfor %}
+          </div>
+        </div>
       </div>
-      <details>
-        <summary>Source</summary>
-        <pre><code>{{ example.source }}</code></pre>
-      </details>
-      <details>
-        <summary>Emitted HTML</summary>
-        <pre><code>{{ example.html }}</code></pre>
-      </details>
-    </section>
-  {% endfor %}
+    {% endcall %}
 
-  <section>
-    <h2>Macro source</h2>
-    <pre><code>{{ source }}</code></pre>
-  </section>
-</section>
+    {# ============= SOURCE PANE ============= #}
+    {% call tab_panel("comp", "source") %}
+      {% call ux_card(title="Macro source", subtitle="ux_jinja/templates/ui/" ~ name ~ ".jinja") %}
+        <div class="code-wrap">
+          <button type="button"
+                  class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
+                  data-on:click="
+                    navigator.clipboard.writeText(document.getElementById('src-{{ name }}').textContent);
+                    $copied_src = true;
+                    setTimeout(() => $copied_src = false, 1500);
+                  "
+                  data-text="$copied_src ? 'Copied' : 'Copy'">Copy</button>
+          <pre id="src-{{ name }}"><code>{{ source }}</code></pre>
+        </div>
+      {% endcall %}
+    {% endcall %}
+
+    {# ============= USAGE PANE ============= #}
+    {% call tab_panel("comp", "usage") %}
+      {% call ux_card(title="How to call this macro", subtitle="Drop this snippet into any Jinja template") %}
+        <div class="code-wrap">
+          <button type="button"
+                  class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
+                  data-on:click="
+                    navigator.clipboard.writeText(document.getElementById('use-{{ name }}').textContent);
+                    $copied_use = true;
+                    setTimeout(() => $copied_use = false, 1500);
+                  "
+                  data-text="$copied_use ? 'Copied' : 'Copy'">Copy</button>
+          <pre id="use-{{ name }}"><code>{{ usage }}</code></pre>
+        </div>
+      {% endcall %}
+
+      {% if examples and examples[0].html %}
+        {% call ux_card(title="Emitted HTML", subtitle="Output of the first example") %}
+          <div class="code-wrap">
+            <pre><code>{{ examples[0].html }}</code></pre>
+          </div>
+        {% endcall %}
+      {% endif %}
+    {% endcall %}
+
+  </div>
+</div>
 {% endblock %}

@@ -1,0 +1,60 @@
+{% from "ui/card.jinja" import card, card_footer %}
+{% from "ui/button.jinja" import button %}
+{% from "ui/avatar.jinja" import avatar %}
+{% from "ui/badge.jinja" import badge %}
+{% from "ui/kpi.jinja" import kpi %}
+
+{# Profile example page — header with avatar, KPI stats, recent activity.   #}
+{# Context vars (all optional):                                             #}
+{#   user     — dict with keys {name, email}. Falls back to placeholders.   #}
+{#   stats    — dict with keys {tasks_completed, projects, team_size}.      #}
+{#   activity — iterable of dicts with keys {label, kind} where kind        #}
+{#              maps to a badge variant (ok | info | warn | danger | brand).#}
+{# Consumers can extend this template by overriding the named block         #}
+{# ``profile_content``.                                                     #}
+{% set _user = user | default({}) %}
+{% set _name = _user.name | default("Jane Doe") %}
+{% set _email = _user.email | default("jane@example.com") %}
+{% set _stats = stats | default({}) %}
+{% set _tasks = _stats.tasks_completed | default(0) %}
+{% set _projects = _stats.projects | default(0) %}
+{% set _team = _stats.team_size | default(0) %}
+{% set _activity = activity | default([
+  {"label": "Closed task 'Refactor billing'", "kind": "ok"},
+  {"label": "Joined project 'Atlas'", "kind": "info"},
+  {"label": "Submitted timesheet for week 18", "kind": "brand"},
+  {"label": "Flagged invoice INV-2031", "kind": "warn"},
+  {"label": "Deleted draft 'Q2 report'", "kind": "danger"},
+]) %}
+{% block profile_content %}
+<section class="ux-stack">
+  <header class="ux-flex ux-items-center" style="gap:1rem">
+    {{ avatar(name=_name, size="xl") }}
+    <div>
+      <h1 style="margin:0">User profile</h1>
+      <p style="margin:.25rem 0 0">{{ _email|e }}</p>
+    </div>
+  </header>
+
+  <div class="ux-grid-auto ux-grid-auto--lg">
+    {{ kpi(label="Tasks completed", value=_tasks|string, trend="up", delta="+8 this week") }}
+    {{ kpi(label="Projects", value=_projects|string) }}
+    {{ kpi(label="Members in team", value=_team|string) }}
+  </div>
+
+  {% call card(title="Recent activity", subtitle="Last events on this profile") %}
+    <ul class="ux-list">
+      {% for item in _activity %}
+      <li class="ux-list__item">
+        <span class="ux-list__body">{{ item.label|e }}</span>
+        {{ badge(item.kind|capitalize, variant=item.kind) }}
+      </li>
+      {% endfor %}
+    </ul>
+  {% endcall %}
+
+  <div>
+    {{ button("Edit profile", variant="primary") }}
+  </div>
+</section>
+{% endblock %}

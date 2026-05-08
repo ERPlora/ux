@@ -1,0 +1,33 @@
+{# breadcrumbs(items, variant, attrs)
+
+   CSS root from lib/css/components/navigation.css:  .ux-crumbs
+   (note: the canonical class is `ux-crumbs`, not `ux-breadcrumbs`).
+
+   Variants:
+     - sm     → ux-crumbs--sm
+     - chips  → ux-crumbs--chips
+
+   `items` is a list of dicts:
+     [{label, href=None, current=False}, ...]
+   The last item is treated as current automatically when no `current` key
+   is set on any item. A `<svg>` chevron separator is rendered between
+   items (hidden by `--chips` variant via CSS).
+#}
+{% macro breadcrumbs(items=[], variant=None, attrs={}) %}
+{%- set classes = ["ux-crumbs"] -%}
+{%- if variant %}{%- do classes.append("ux-crumbs--" ~ variant) -%}{%- endif -%}
+{%- set explicit_current = items | selectattr("current", "defined") | selectattr("current") | list -%}
+<nav class="{{ classes | join(' ') }}" aria-label="Breadcrumb"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- for item in items %}
+  {%- set is_last = loop.last -%}
+  {%- set is_current = item.current if item.current is defined else (is_last and explicit_current|length == 0) -%}
+  {%- if item.href and not is_current -%}
+  <a class="ux-crumbs__item" href="{{ item.href|e }}">{{ item.label|e }}</a>
+  {%- else -%}
+  <span class="ux-crumbs__item ux-crumbs__item--current"{% if is_current %} aria-current="page"{% endif %}>{{ item.label|e }}</span>
+  {%- endif -%}
+  {%- if not is_last %}<span class="ux-crumbs__sep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></span>{% endif -%}
+{%- endfor %}
+</nav>
+{% endmacro %}

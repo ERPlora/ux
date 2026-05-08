@@ -1,53 +1,280 @@
+{#
+  Docs site shell — replicates the layout of /Users/ioan/Desktop/code/ux/index.html
+  but driven by Hotframe + Datastar. CSS comes from the published @ERPlora/ux
+  bundle on jsdelivr; the only inline styles below are the doc-only chrome
+  (sidebar width, viewport pills, body padding, theme select) so the page
+  itself remains canonically themed by the library.
+#}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="erplora">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}ERPlora UX{% endblock %}</title>
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/erplora-ux.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/templates/all.min.css" />
   <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js" nonce="{{ csp_nonce }}"></script>
-  <style>
-    /* Layout-only styling for the docs shell. Component CSS comes from the @erplora/ux bundle. */
-    body { margin: 0; font-family: var(--ux-font-body, system-ui, sans-serif); background: var(--ux-bg, #fafafa); color: var(--ux-ink, #111); }
-    h1, h2, h3, h4 { color: var(--ux-ink, #111); }
-    .docs-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
-    .docs-sidebar { background: var(--ux-bg-2, #fff); border-right: 1px solid var(--ux-line, #e5e5e5); padding: 1.25rem 1rem; }
-    .docs-sidebar h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ux-ink-3, #666); margin: 1.25rem 0 .5rem; }
-    .docs-sidebar a { display: block; padding: .35rem .5rem; border-radius: .375rem; color: var(--ux-ink, #111); text-decoration: none; font-size: .9rem; }
-    .docs-sidebar a:hover { background: var(--ux-bg-3, #f1f1f1); }
-    .docs-main { padding: 2rem 2.5rem; max-width: 1080px; }
-    .docs-main h1 { font-size: 1.75rem; margin: 0 0 .5rem; font-weight: 700; }
-    .docs-main h2 { font-size: 1.25rem; margin: 1.75rem 0 .75rem; font-weight: 600; }
-    .docs-main p { color: var(--ux-ink-2, #444); }
-    .docs-brand { font-weight: 700; font-size: 1.05rem; }
-    .docs-brand a { color: var(--ux-ink, #111); text-decoration: none; }
-    pre { background: #0b1020; color: #e2e8f0; padding: 1rem; border-radius: .5rem; overflow: auto; font-size: .82rem; }
-    code { font-family: "JetBrains Mono", ui-monospace, monospace; }
-    .preview-frame { border: 1px solid var(--ux-line, #e5e5e5); border-radius: .5rem; padding: 1.5rem; background: var(--ux-bg-2, #fff); }
+
+  <style nonce="{{ csp_nonce }}">
+    /* Doc-only chrome — everything else is the @erplora/ux library. */
+    body { background: var(--ux-bg); margin: 0; }
+    .ux-app[data-docs] { grid-template-columns: 250px 1fr; }
+    .ux-app[data-docs] .ux-sidebar { width: 250px; }
+
+    .ux-sidebar__item { position: relative; }
+    .ux-sidebar__item[aria-current="page"],
+    .ux-sidebar__item[data-route-active="true"] {
+      background: var(--ux-bg-3); color: var(--ux-ink);
+    }
+    .ux-sidebar__item[aria-current="page"]::before,
+    .ux-sidebar__item[data-route-active="true"]::before {
+      content: ""; position: absolute; left: 0;
+      width: 3px; height: 16px;
+      background: var(--ux-brand); border-radius: 0 2px 2px 0;
+    }
+    .ux-sidebar__item.is-hidden { display: none; }
+    .ux-sidebar__group.is-hidden { display: none; }
+
+    /* Pill selector (viewport, theme) — lives in the topbar. */
+    .vp { display: inline-flex; padding: 2px; background: var(--ux-bg-3);
+      border: 1px solid var(--ux-line); border-radius: var(--ux-radius-md); flex-shrink: 0; }
+    .vp button { height: 26px; padding: 0 9px; font-size: 11.5px;
+      color: var(--ux-ink-3); border-radius: 5px; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 5px;
+      background: transparent; border: 0; cursor: pointer; }
+    .vp button:hover { color: var(--ux-ink); }
+    .vp button[aria-pressed="true"] { background: var(--ux-bg-1); color: var(--ux-ink);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.4); }
+
+    .topbar-template { height: 30px; padding: 0 28px 0 10px;
+      background: var(--ux-bg-3) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238A8378' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>") no-repeat right 8px center;
+      border: 1px solid var(--ux-line); border-radius: var(--ux-radius-md);
+      color: var(--ux-ink-2); font-family: inherit; font-size: 11.5px; font-weight: 500;
+      -webkit-appearance: none; appearance: none; cursor: pointer; flex-shrink: 0; }
+    .topbar-template:hover { border-color: var(--ux-line-2); color: var(--ux-ink); }
+    .topbar-template option { background: var(--ux-bg-1); color: var(--ux-ink); }
+
+    /* Body container */
+    .doc__body { padding: 26px 22px 80px; }
+    .doc__body--canvas { padding: 18px; }
+    .doc__title { font-family: var(--ux-font-display); font-size: 28px;
+      font-weight: 600; letter-spacing: -0.04em; color: var(--ux-ink);
+      margin: 0 0 6px; }
+    .doc__sub { font-size: 14px; color: var(--ux-ink-3);
+      margin: 0 0 28px; max-width: 720px; }
+
+    /* Stage (preview holder) — viewport-aware width. */
+    .stage-wrap { background:
+        radial-gradient(circle at 20% 0%, color-mix(in oklch, var(--ux-brand) 8%, transparent), transparent 50%),
+        var(--ux-bg);
+      border: 1px solid var(--ux-line); border-radius: 14px;
+      padding: 24px; overflow: hidden; display: flex; justify-content: center; }
+    .stage { width: 100%; max-width: var(--stage-w, 1280px);
+      background: var(--ux-bg-1); border: 1px solid var(--ux-line-2);
+      border-radius: 10px; overflow: hidden;
+      transition: max-width 0.3s var(--ux-ease-out, ease-out);
+      box-shadow: var(--ux-shadow-md); padding: 24px; }
+    .stage[data-vp="desktop"] { --stage-w: 1280px; }
+    .stage[data-vp="tablet"]  { --stage-w: 834px; }
+    .stage[data-vp="mobile"]  { --stage-w: 390px; }
+
+    /* Preview blocks (one per fixture) inside a card */
+    .preview-block { display: flex; flex-direction: column; gap: 14px; }
+    .preview-block + .preview-block { margin-top: 18px; }
+    .preview-frame { border: 1px solid var(--ux-line); border-radius: 10px;
+      padding: 22px; background: var(--ux-bg-1); display: flex; flex-wrap: wrap;
+      gap: 10px; align-items: center; min-height: 60px; }
+
+    /* Code blocks */
+    .code-wrap { position: relative; background: var(--ux-bg-3);
+      border: 1px solid var(--ux-line); border-radius: 10px; overflow: hidden; }
+    .code-wrap pre { margin: 0; padding: 16px 18px; overflow: auto;
+      font-family: var(--ux-font-mono); font-size: 12.5px; line-height: 1.55;
+      color: var(--ux-ink-2); max-height: 460px; }
+    .code-wrap__copy { position: absolute; top: 8px; right: 8px; }
+
+    /* Card grid for galleries (overview / components / pages index). */
+    .demo-grid { display: grid; gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      margin-bottom: 32px; }
+    .demo-card-thumb { display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 16px; min-height: 100px; align-items: center;
+      background: var(--ux-bg); border: 1px solid var(--ux-line);
+      border-radius: 10px; margin-bottom: 12px; }
+
+    /* Section headings inside doc body */
+    .doc__h2 { font-family: var(--ux-font-display); font-size: 18px;
+      letter-spacing: -0.03em; margin: 30px 0 14px; color: var(--ux-ink);
+      font-weight: 600; }
+
+    /* Hide tabbar on desktop (library sets it visible by default in mobile-shell). */
+    @media (min-width: 901px) {
+      .ux-app__tabbar { display: none; }
+    }
   </style>
+
   {% block head_extra %}{% endblock %}
 </head>
 <body>
-  <div id="toast-container"></div>
-  <div class="docs-shell">
-    <aside class="docs-sidebar">
-      <p class="docs-brand"><a href="/">ERPlora UX</a></p>
-      <h2>Site</h2>
-      <a href="/">Home</a>
-      <a href="/c">Components</a>
-      <a href="/p">Pages</a>
-      <h2>Components</h2>
-      {% for name in component_names %}
-        <a href="/c/{{ name }}">{{ name }}</a>
+
+<div class="ux-app" data-docs
+     data-signals='{"q": "", "vp": "desktop", "theme": "erplora", "template": "", "sidebarOpen": false}'
+     data-attr:data-sidebar="$sidebarOpen ? 'open' : ''"
+     data-attr:data-theme="$theme"
+     data-attr:data-template="$template">
+
+  <div class="ux-app__sidebar-overlay" data-on:click="$sidebarOpen = false"></div>
+
+  <!-- ============================ SIDEBAR ============================ -->
+  <aside class="ux-sidebar">
+    <div class="ux-sidebar__brand">
+      <div class="ux-sidebar__logo">EX</div>
+      <div class="ux-sidebar__brand-text">
+        <span class="ux-sidebar__brand-name">ERPlora UX</span>
+        <span class="ux-sidebar__brand-meta">Hotframe edition</span>
+      </div>
+    </div>
+
+    <div style="padding: 10px 12px 4px;">
+      <div class="ux-search">
+        <span class="ux-search__icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </span>
+        <input class="ux-input ux-input--sm" type="search" placeholder="Filter components..."
+               data-bind="$q"
+               data-on:input="
+                 document.querySelectorAll('.ux-sidebar__item').forEach(function(it){
+                   var label = (it.getAttribute('data-label') || '').toLowerCase();
+                   it.classList.toggle('is-hidden', $q && !label.includes($q.toLowerCase()));
+                 });
+                 document.querySelectorAll('.ux-sidebar__group').forEach(function(g){
+                   var any = false;
+                   var n = g.nextElementSibling;
+                   while (n && !n.classList.contains('ux-sidebar__group')) {
+                     if (!n.classList.contains('is-hidden')) any = true;
+                     n = n.nextElementSibling;
+                   }
+                   g.classList.toggle('is-hidden', !any);
+                 });
+               " />
+      </div>
+    </div>
+
+    <nav class="ux-sidebar__body">
+      {% block sidebar_groups %}
+      {% for group in sidebar_groups %}
+        <div class="ux-sidebar__group">{{ group.label }}</div>
+        {% for item in group['items'] %}
+          <a class="ux-sidebar__item"
+             href="{{ item.href }}"
+             data-label="{{ item.label|lower }}"
+             {% if active_route == item.href %}aria-current="page" data-route-active="true"{% endif %}>
+            <svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="{{ item.icon }}"/>
+            </svg>
+            <span class="ux-sidebar__label">{{ item.label }}</span>
+            {% if item.badge %}<span class="ux-sidebar__badge ux-sidebar__badge--brand">{{ item.badge }}</span>{% endif %}
+          </a>
+        {% endfor %}
       {% endfor %}
-      <h2>Pages</h2>
-      {% for name in page_names %}
-        <a href="/p/{{ name }}">{{ name }}</a>
-      {% endfor %}
-    </aside>
-    <main class="docs-main">
+      {% endblock %}
+    </nav>
+
+    <div class="ux-sidebar__footer">
+      <div class="ux-sidebar__user">
+        <span class="ux-avatar ux-avatar--sm ux-avatar--brand">EX</span>
+        <div class="ux-sidebar__user-info">
+          <div class="ux-sidebar__user-name">System</div>
+          <div class="ux-sidebar__user-meta">main · Hotframe</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================ MAIN ============================ -->
+  <main class="ux-app__main">
+    <header class="ux-topbar">
+      <div class="ux-topbar__left">
+        <button class="ux-topbar__menu-btn" aria-label="Menu"
+                data-on:click="$sidebarOpen = !$sidebarOpen"
+                data-attr:aria-expanded="$sidebarOpen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <button class="ux-topbar__back-btn" aria-label="Back"
+                data-on:click="history.length > 1 ? history.back() : null">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+      </div>
+
+      <nav class="ux-topbar__crumb" aria-label="Breadcrumb">
+        <a class="ux-topbar__crumb-item" href="/">ERPlora UX</a>
+        <span class="ux-topbar__crumb-sep">/</span>
+        {% block crumb %}<span class="ux-topbar__crumb-item">Overview</span>{% endblock %}
+      </nav>
+
+      <h1 class="ux-topbar__page-title">{% block page_title %}{{ self.title() }}{% endblock %}</h1>
+
+      <div class="ux-topbar__actions">
+        {% block topbar_actions %}{% endblock %}
+
+        <div class="vp" role="tablist" aria-label="Theme">
+          <button data-on:click="$theme = 'erplora'"
+                  data-attr:aria-pressed="$theme === 'erplora'">Dark</button>
+          <button data-on:click="$theme = 'erplora-light'"
+                  data-attr:aria-pressed="$theme === 'erplora-light'">Light</button>
+        </div>
+
+        <select class="topbar-template" data-bind="$template" aria-label="Template">
+          {% for opt in theme_options %}
+            <option value="{{ opt.value }}">{{ opt.label }}</option>
+          {% endfor %}
+        </select>
+
+        {% block viewport_pills %}
+        <div class="vp" role="tablist" aria-label="Viewport">
+          <button data-on:click="$vp = 'desktop'" data-attr:aria-pressed="$vp === 'desktop'">Desktop</button>
+          <button data-on:click="$vp = 'tablet'"  data-attr:aria-pressed="$vp === 'tablet'">Tablet</button>
+          <button data-on:click="$vp = 'mobile'"  data-attr:aria-pressed="$vp === 'mobile'">Mobile</button>
+        </div>
+        {% endblock %}
+
+        <a class="ux-btn ux-btn--ghost ux-btn--sm" href="https://github.com/ERPlora/ux" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </header>
+
+    <div class="{% block body_class %}doc__body{% endblock %}">
       {% block content %}{% endblock %}
-    </main>
-  </div>
+    </div>
+  </main>
+
+  <!-- ============================ MOBILE TABBAR ============================ -->
+  <nav class="ux-app__tabbar" aria-label="Primary">
+    <div class="ux-tabbar ux-tabbar--fixed ux-tabbar--icons">
+      <a class="ux-tabbar-item" href="/" {% if active_route == '/' %}aria-current="page"{% endif %}>
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 5 10 12 3l7 7 2 2v9a2 2 0 0 1-2 2h-4v-7H10v7H6a2 2 0 0 1-2-2v-9z"/></svg></span>
+        <span class="ux-tabbar-label">Overview</span>
+      </a>
+      <a class="ux-tabbar-item" href="/c/button">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6"/></svg></span>
+        <span class="ux-tabbar-label">Button</span>
+      </a>
+      <a class="ux-tabbar-item" href="/p/dashboard">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></span>
+        <span class="ux-tabbar-label">Dashboard</span>
+      </a>
+      <a class="ux-tabbar-item" href="/live">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <span class="ux-tabbar-label">Live</span>
+      </a>
+      <a class="ux-tabbar-item" href="https://github.com/ERPlora/ux" target="_blank" rel="noopener">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.4-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2.9-.3 1.9-.4 3-.4s2 .1 3 .4c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.7.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg></span>
+        <span class="ux-tabbar-label">GitHub</span>
+      </a>
+    </div>
+  </nav>
+</div>
+
 </body>
 </html>

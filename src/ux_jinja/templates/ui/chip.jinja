@@ -1,0 +1,28 @@
+{# chip(label, variant, active, removable, on_click, on_remove, attrs)
+
+   Variants from lib/css/components/badge.css + orphan-variants.css:
+     - default (no modifier)         neutral chip
+     - brand                         ux-chip--brand
+     - info                          ux-chip--info
+
+   States:
+     - `active=True` adds data-active="true" so the CSS active rule kicks in.
+     - `removable=True` appends a `<button class="ux-chip__remove">` (uses
+       the badge.css remove glyph). `on_remove` is the Datastar expression
+       for that button's click handler.
+
+   `on_click` becomes data-on:click on the root element (chips are buttons
+   in spirit). Slot via `{% call %}` overrides `label`.
+#}
+{% macro chip(label="", variant=None, active=False, removable=False, on_click=None, on_remove=None, attrs={}) %}
+{%- set classes = ["ux-chip"] -%}
+{%- if variant %}{%- do classes.append("ux-chip--" ~ variant) -%}{%- endif -%}
+<span class="{{ classes | join(' ') }}"
+{%- if active %} data-active="true"{% endif -%}
+{%- if on_click %} data-on:click="{{ on_click|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% else %}{{ label|e }}{% endif -%}
+{%- if removable %}<button type="button" class="ux-chip__remove" aria-label="Remove"
+{%- if on_remove %} data-on:click="{{ on_remove|e }}"{% endif -%}>&times;</button>{% endif -%}
+</span>
+{% endmacro %}

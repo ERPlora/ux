@@ -1,0 +1,90 @@
+{% extends "_base.html" %}
+{% from "ui/card.jinja" import card as ux_card %}
+{% from "ui/button.jinja" import button %}
+{% from "ui/badge.jinja" import badge %}
+{% from "ui/accordion.jinja" import accordion %}
+
+{% block title %}Datastar live — ERPlora UX{% endblock %}
+
+{% block crumb %}
+  <a class="ux-topbar__crumb-item" href="/live">Datastar live</a>
+{% endblock %}
+
+{% block content %}
+<h1 class="doc__title">Datastar live</h1>
+<p class="doc__sub">Four working Datastar demos backed by Hotframe SSE endpoints. View the source of <code>apps/live/routes.py</code> to see the matching Python.</p>
+
+<div class="demo-grid">
+
+  {# ============= 1. Counter ============= #}
+  <div data-signals='{"count": 0}'>
+    {% call ux_card(title="Counter via SSE", subtitle="POST /live/api/increment patches $count") %}
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="font-family:var(--ux-font-mono);font-size:32px;color:var(--ux-brand);" data-text="$count">0</div>
+        {{ button("+1", on_click="@post('/live/api/increment')") }}
+        {{ button("Reset", variant="ghost", on_click="@post('/live/api/reset')") }}
+      </div>
+      <p style="margin:14px 0 0;color:var(--ux-ink-3);font-size:12px;">Each click POSTs every signal to the server; the server returns a <code>patch_signals</code> event with the new value.</p>
+    {% endcall %}
+  </div>
+
+  {# ============= 2. Clock ============= #}
+  <div data-signals='{"clockRunning": false}'>
+    {% call ux_card(title="Server clock streaming", subtitle="GET /live/api/clock streams 10 ticks") %}
+      <div id="live-clock" style="font-family:var(--ux-font-mono);font-size:14px;color:var(--ux-ink-3);">idle — press start</div>
+      <div style="margin-top:14px;display:flex;gap:8px;">
+        {{ button("Start clock", on_click="@get('/live/api/clock')") }}
+        {{ badge("server-sent", variant="ok", dot=True) }}
+      </div>
+    {% endcall %}
+  </div>
+
+  {# ============= 3. Search filter (pure client-side via data-show) ============= #}
+  <div data-signals='{"q": ""}'>
+    {% call ux_card(title="Search filter", subtitle="data-bind input + data-show items") %}
+      <div class="ux-search">
+        <span class="ux-search__icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </span>
+        <input class="ux-input ux-input--sm" type="search" placeholder="Filter fruits..." data-bind="$q" />
+      </div>
+      <ul style="list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:6px;">
+        {% for fruit in ["Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grape"] %}
+        <li class="ux-list__item" style="padding:8px 12px;border-radius:8px;background:var(--ux-bg-2);"
+            data-show="!$q || '{{ fruit|lower }}'.includes($q.toLowerCase())">
+          {{ fruit }}
+        </li>
+        {% endfor %}
+      </ul>
+    {% endcall %}
+  </div>
+
+  {# ============= 4. Accordion sync ============= #}
+  <div data-signals='{"openIdx": 0}'>
+    {% call ux_card(title="Accordion sync", subtitle="Three panels share one signal") %}
+      <p style="margin:0 0 12px;color:var(--ux-ink-2);font-size:13px;">Open one — the others close. Driven by a single shared <code>$openIdx</code> signal across three panels.</p>
+
+      <div class="ux-accordion">
+        {% for i in [0, 1, 2] %}
+          <div class="ux-accordion__item" data-attr:data-state="$openIdx === {{ i }} ? 'open' : 'closed'">
+            <button type="button" class="ux-accordion__trigger"
+                    data-on:click="$openIdx = $openIdx === {{ i }} ? -1 : {{ i }}"
+                    data-attr:aria-expanded="$openIdx === {{ i }}">
+              <span></span>
+              <div class="ux-accordion__title">Section {{ i + 1 }}
+                <span class="ux-accordion__sub">click to expand</span>
+              </div>
+              <span></span>
+              <span class="ux-accordion__caret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></span>
+            </button>
+            <div class="ux-accordion__panel ux-accordion__panel--no-icon">
+              Body for section {{ i + 1 }}. Notice that opening this one closes the others — the signal is shared.
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endcall %}
+  </div>
+
+</div>
+{% endblock %}

@@ -1,25 +1,52 @@
 {% extends "_base.html" %}
+{% from "ui/tabs.jinja" import tabs, tab_panel %}
+{% from "ui/card.jinja" import card as ux_card %}
 
 {% block title %}{{ name }} — ERPlora UX pages{% endblock %}
 
+{% block crumb %}
+  <a class="ux-topbar__crumb-item" href="/p">Pages</a>
+  <span class="ux-topbar__crumb-sep">/</span>
+  <span class="ux-topbar__crumb-item">{{ name }}</span>
+{% endblock %}
+
 {% block content %}
-<section class="ux-stack">
-  <header>
-    <p><a href="/p">&larr; Pages</a></p>
-    <h1>{{ name }}</h1>
-    <p>Live render of <code>{{ page_template }}</code>.</p>
-  </header>
+<h1 class="doc__title">{{ name }}</h1>
+<p class="doc__sub">{{ description }}  Live render of <code>{{ page_template }}</code>.</p>
 
-  <section>
-    <h2>Preview</h2>
-    <div class="preview-frame">
-      {% include page_template with context %}
-    </div>
-  </section>
+<div data-signals='{"copied_page": false}'>
 
-  <section>
-    <h2>Source</h2>
-    <pre><code>{{ source }}</code></pre>
-  </section>
-</section>
+  {{ tabs("page", value="preview", items=[
+    {"label": "Preview", "key": "preview"},
+    {"label": "Source",  "key": "source"}
+  ]) }}
+
+  <div style="margin-top: 18px;">
+
+    {% call tab_panel("page", "preview") %}
+      <div class="stage-wrap" data-attr:data-vp="$vp">
+        <div class="stage" data-attr:data-vp="$vp">
+          {% include page_template with context %}
+        </div>
+      </div>
+    {% endcall %}
+
+    {% call tab_panel("page", "source") %}
+      {% call ux_card(title="Page source", subtitle=page_template) %}
+        <div class="code-wrap">
+          <button type="button"
+                  class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
+                  data-on:click="
+                    navigator.clipboard.writeText(document.getElementById('src-page-{{ name }}').textContent);
+                    $copied_page = true;
+                    setTimeout(() => $copied_page = false, 1500);
+                  "
+                  data-text="$copied_page ? 'Copied' : 'Copy'">Copy</button>
+          <pre id="src-page-{{ name }}"><code>{{ source }}</code></pre>
+        </div>
+      {% endcall %}
+    {% endcall %}
+
+  </div>
+</div>
 {% endblock %}

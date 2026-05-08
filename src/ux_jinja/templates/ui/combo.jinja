@@ -1,0 +1,57 @@
+{# combo(name, options, value, placeholder, value_signal, open_signal, attrs)
+
+   Combobox / autocomplete shell matching lib/css/components/forms-advanced.css:
+
+     <div class="ux-combo">
+       <div class="ux-combo__field">
+         <input class="ux-combo__input" />
+         <svg class="ux-combo__caret"/>
+       </div>
+       <div class="ux-combo__menu">
+         <div class="ux-combo__option">...</div>
+       </div>
+     </div>
+
+   `options` is a list of dicts: `{value, label, meta?}`. `open_signal` is
+   the Datastar boolean that controls the menu visibility. When omitted the
+   menu still renders so it can be styled, but no toggle wiring is applied.
+#}
+{% macro combo(name, options=[], value=None, placeholder=None, value_signal=None, open_signal=None, attrs={}) %}
+<div class="ux-combo"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-combo__field"
+{%- if open_signal %} data-attr:class="{{ open_signal|e }} ? 'ux-combo__field ux-combo__field--open' : 'ux-combo__field'" data-on:click="{{ open_signal|e }} = !{{ open_signal|e }}"{% endif -%}>
+    <input class="ux-combo__input"
+      name="{{ name|e }}"
+{%- if value is not none and value != "" %} value="{{ value|e }}"{% endif -%}
+{%- if placeholder %} placeholder="{{ placeholder|e }}"{% endif -%}
+{%- if value_signal %} data-bind="{{ value_signal|e }}"{% endif -%}/>
+    <svg class="ux-combo__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+  </div>
+  <div class="ux-combo__menu"
+{%- if open_signal %} data-show="{{ open_signal|e }}"{% endif -%}>
+{%- for opt in options -%}
+    {%- if opt is mapping -%}
+      {%- set v = opt.get('value') -%}
+      {%- set l = opt.get('label', v) -%}
+      {%- set meta = opt.get('meta') -%}
+    {%- else -%}
+      {%- set v = opt[0] -%}
+      {%- set l = opt[1] -%}
+      {%- set meta = none -%}
+    {%- endif -%}
+    {%- set classes = ["ux-combo__option"] -%}
+    {%- if value is not none and v == value %}{%- do classes.append("ux-combo__option--selected") -%}{%- endif -%}
+    <div class="{{ classes | join(' ') }}" data-value="{{ v|e }}">
+      <span>{{ l|e }}</span>
+{%- if meta %}
+      <span class="ux-combo__option-meta">{{ meta|e }}</span>
+{%- endif %}
+    </div>
+{%- endfor %}
+{%- if not options %}
+    <div class="ux-combo__empty">No options</div>
+{%- endif %}
+  </div>
+</div>
+{% endmacro %}

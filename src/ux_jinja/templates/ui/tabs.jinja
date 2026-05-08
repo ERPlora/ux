@@ -1,0 +1,56 @@
+{# tabs(id, items, variant, value=None, attrs)
+
+   CSS from lib/css/components/tab-bar.css:
+     - variants : pill (ux-tabs--pill) | vertical (ux-tabs--vertical)
+
+   `items` is a list of dicts:
+     [{label, key, icon=None, badge=None}, ...]
+   `key` is the value stored in the active signal. If omitted, the index is
+   used.
+
+   `value` is the initial active key (defaults to the first item's key).
+
+   Datastar wiring:
+     - Signal: `<id>_tab` (string, holds the active key).
+     - Each tab toggles it via `data-on:click` and reflects state via
+       `data-attr:aria-selected`.
+#}
+{% macro tabs(id, items=[], variant=None, value=None, attrs={}) %}
+{%- set classes = ["ux-tabs"] -%}
+{%- if variant %}{%- do classes.append("ux-tabs--" ~ variant) -%}{%- endif -%}
+{%- set norm = [] -%}
+{%- for item in items -%}
+  {%- do norm.append({
+    "label": item.label|default(""),
+    "key": item.key|default(loop.index0),
+    "icon": item.icon|default(None),
+    "badge": item.badge|default(None),
+  }) -%}
+{%- endfor -%}
+{%- set initial = value if value is not none else (norm[0].key if norm else "") -%}
+{%- set sig = "$" ~ id ~ "_tab" -%}
+<div class="{{ classes | join(' ') }}" role="tablist" id="{{ id|e }}"
+  data-signals='{ "{{ id }}_tab": {{ initial | tojson }} }'
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for tab in norm %}
+  {%- set k_expr = tab.key | tojson -%}
+  <button type="button" class="ux-tab"
+    data-on:click="{{ sig }} = {{ k_expr }}"
+    data-attr:aria-selected="{{ sig }} === {{ k_expr }}">
+    {%- if tab.icon %}<span class="ux-tab-icon">{{ tab.icon }}</span>{% endif -%}
+    <span>{{ tab.label|e }}</span>
+    {%- if tab.badge is not none %}<span class="ux-tab-badge">{{ tab.badge|e }}</span>{% endif -%}
+  </button>
+  {%- endfor %}
+</div>
+{% endmacro %}
+
+{# tab_panel(tabs_id, key) — show/hide helper bound to the same tabs() signal.
+   Use as `{% call tab_panel("settings", "general") %}...{% endcall %}`. #}
+{% macro tab_panel(tabs_id, key, attrs={}) %}
+{%- set sig = "$" ~ tabs_id ~ "_tab" -%}
+<div role="tabpanel" data-show="{{ sig }} === {{ key | tojson }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% endif -%}
+</div>
+{% endmacro %}

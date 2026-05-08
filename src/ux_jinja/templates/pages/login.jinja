@@ -1,0 +1,52 @@
+{% from "ui/card.jinja" import card, card_footer %}
+{% from "ui/button.jinja" import button %}
+{% from "ui/input.jinja" import input as ux_input %}
+{% from "ui/badge.jinja" import badge %}
+
+{# Login example page — centred sign-in card composed from ux-jinja macros. #}
+{# Context vars (all optional):                                              #}
+{#   email_signal    — Datastar signal expression for the email field       #}
+{#                     (default "$email").                                  #}
+{#   password_signal — Datastar signal expression for the password field    #}
+{#                     (default "$password").                               #}
+{#   submit_url      — backend endpoint posted on submit (default           #}
+{#                     "/auth/login"). Used by the Datastar @post action.   #}
+{# Consumers can extend this template by overriding the named block         #}
+{# ``login_content`` from a project-specific layout.                        #}
+{% set _email_signal = email_signal | default("$email") %}
+{% set _password_signal = password_signal | default("$password") %}
+{% set _submit_url = submit_url | default("/auth/login") %}
+{% block login_content %}
+<section class="ux-flex ux-justify-center ux-items-center"
+  data-signals='{"email": "", "password": ""}'
+  style="min-height:100vh;padding:2rem 1rem">
+  <div style="width:100%;max-width:420px">
+    {% call card(elevated=True) %}
+      <header class="ux-stack" style="text-align:center;gap:.25rem;margin-bottom:1rem">
+        <h1 style="font-size:1.5rem;font-weight:700;margin:0">ux-jinja</h1>
+        <p style="margin:0">Sign in to your workspace.</p>
+      </header>
+
+      <form class="ux-stack" data-on:submit="@post('{{ _submit_url|e }}'); event.preventDefault()">
+        <label class="ux-stack" style="gap:.25rem">
+          <span>Email</span>
+          {{ ux_input("email", type="email", placeholder="you@example.com", value_signal=_email_signal) }}
+        </label>
+        <label class="ux-stack" style="gap:.25rem">
+          <span>Password</span>
+          {{ ux_input("password", type="password", placeholder="Your password", value_signal=_password_signal) }}
+        </label>
+        {{ button("Sign in", variant="primary", type="submit", attrs={"style": "width:100%"}) }}
+        <div style="text-align:center">
+          {{ button("Forgot password?", variant="link", href="/auth/forgot") }}
+        </div>
+      </form>
+
+      {% call card_footer() %}
+        <span>Preview build</span>
+        {{ badge("Beta", variant="info") }}
+      {% endcall %}
+    {% endcall %}
+  </div>
+</section>
+{% endblock %}
