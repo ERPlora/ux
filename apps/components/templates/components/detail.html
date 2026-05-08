@@ -15,7 +15,7 @@
 <h1 class="doc__title">{{ name }}</h1>
 <p class="doc__sub">{{ description }}</p>
 
-<div data-signals='{"copied_src": false, "copied_use": false}'>
+<div data-signals='{"copied_src": false, "copied_use": false, "copied_macro": false}'>
 
   {{ tabs("comp", value="preview", items=[
     {"label": "Preview", "key": "preview"},
@@ -25,20 +25,17 @@
 
   <div style="margin-top: 18px;">
 
-    {# ============= PREVIEW PANE ============= #}
+    {# ============================================================ #}
+    {# PREVIEW PANE — only the live render. One card per fixture.  #}
+    {# ============================================================ #}
     {% call tab_panel("comp", "preview") %}
       <div class="stage-wrap" data-attr:data-vp="$vp">
         <div class="stage" data-attr:data-vp="$vp">
           <div style="display:flex;flex-direction:column;gap:18px;">
             {% for example in examples %}
               {% call ux_card(title=example.label) %}
-                <div class="preview-block">
-                  <div class="preview-frame">
-                    {{ example.html | safe }}
-                  </div>
-                  <div class="code-wrap">
-                    <pre><code>{{ example.source }}</code></pre>
-                  </div>
+                <div class="preview-frame">
+                  {{ example.html | safe }}
                 </div>
               {% endcall %}
             {% endfor %}
@@ -47,46 +44,73 @@
       </div>
     {% endcall %}
 
-    {# ============= SOURCE PANE ============= #}
+    {# ============================================================ #}
+    {# SOURCE PANE — the HTML the browser receives, per fixture.   #}
+    {# ============================================================ #}
     {% call tab_panel("comp", "source") %}
-      {% call ux_card(title="Macro source", subtitle="ux_jinja/templates/ui/" ~ name ~ ".jinja") %}
-        <div class="code-wrap">
-          <button type="button"
-                  class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
-                  data-on:click="
-                    navigator.clipboard.writeText(document.getElementById('src-{{ name }}').textContent);
-                    $copied_src = true;
-                    setTimeout(() => $copied_src = false, 1500);
-                  "
-                  data-text="$copied_src ? 'Copied' : 'Copy'">Copy</button>
-          <pre id="src-{{ name }}"><code>{{ source }}</code></pre>
-        </div>
-      {% endcall %}
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        {% for example in examples %}
+          {% call ux_card(title=example.label, subtitle="Emitted HTML") %}
+            <div class="code-wrap">
+              <button type="button"
+                      class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
+                      data-on:click="
+                        navigator.clipboard.writeText(document.getElementById('html-{{ name }}-{{ loop.index }}').textContent);
+                        $copied_src = true;
+                        setTimeout(() => $copied_src = false, 1500);
+                      "
+                      data-text="$copied_src ? 'Copied' : 'Copy'">Copy</button>
+              <pre id="html-{{ name }}-{{ loop.index }}"><code>{{ example.html }}</code></pre>
+            </div>
+          {% endcall %}
+        {% endfor %}
+      </div>
     {% endcall %}
 
-    {# ============= USAGE PANE ============= #}
+    {# ============================================================ #}
+    {# USAGE PANE — the Jinja snippet to call the macro, per       #}
+    {# fixture, plus a final card with the macro's source on demand.#}
+    {# ============================================================ #}
     {% call tab_panel("comp", "usage") %}
-      {% call ux_card(title="How to call this macro", subtitle="Drop this snippet into any Jinja template") %}
-        <div class="code-wrap">
-          <button type="button"
-                  class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
-                  data-on:click="
-                    navigator.clipboard.writeText(document.getElementById('use-{{ name }}').textContent);
-                    $copied_use = true;
-                    setTimeout(() => $copied_use = false, 1500);
-                  "
-                  data-text="$copied_use ? 'Copied' : 'Copy'">Copy</button>
-          <pre id="use-{{ name }}"><code>{{ usage }}</code></pre>
-        </div>
-      {% endcall %}
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        {% for example in examples %}
+          {% call ux_card(title=example.label, subtitle="Jinja call") %}
+            <div class="code-wrap">
+              <button type="button"
+                      class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
+                      data-on:click="
+                        navigator.clipboard.writeText(document.getElementById('jinja-{{ name }}-{{ loop.index }}').textContent);
+                        $copied_use = true;
+                        setTimeout(() => $copied_use = false, 1500);
+                      "
+                      data-text="$copied_use ? 'Copied' : 'Copy'">Copy</button>
+              <pre id="jinja-{{ name }}-{{ loop.index }}"><code>{{ example.source }}</code></pre>
+            </div>
+          {% endcall %}
+        {% endfor %}
 
-      {% if examples and examples[0].html %}
-        {% call ux_card(title="Emitted HTML", subtitle="Output of the first example") %}
-          <div class="code-wrap">
-            <pre><code>{{ examples[0].html }}</code></pre>
+        <details class="ux-card ux-card--flat" style="margin-top: 8px;">
+          <summary class="ux-card__header" style="cursor: pointer;">
+            <h3 class="ux-card__title" style="margin: 0;">Macro implementation</h3>
+            <p class="ux-card__sub" style="margin: 4px 0 0;">
+              The actual Jinja code of <code>ux_jinja/templates/ui/{{ name }}.jinja</code>
+            </p>
+          </summary>
+          <div class="ux-card__body">
+            <div class="code-wrap">
+              <button type="button"
+                      class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
+                      data-on:click="
+                        navigator.clipboard.writeText(document.getElementById('macro-src-{{ name }}').textContent);
+                        $copied_macro = true;
+                        setTimeout(() => $copied_macro = false, 1500);
+                      "
+                      data-text="$copied_macro ? 'Copied' : 'Copy'">Copy</button>
+              <pre id="macro-src-{{ name }}"><code>{{ source }}</code></pre>
+            </div>
           </div>
-        {% endcall %}
-      {% endif %}
+        </details>
+      </div>
     {% endcall %}
 
   </div>
