@@ -12,25 +12,28 @@
   align-items: center;
   gap: var(--ux-space-3);
   padding: 0 var(--ux-page-pad);
-  background: color-mix(in oklch, var(--ux-bg) 80%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--ux-line);
+  /* Glass surface — readable over any content */
+  background: color-mix(in oklch, var(--ux-bg) 72%, transparent);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border-bottom: 1px solid color-mix(in oklch, var(--ux-line) 80%, transparent);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .ux-topbar { background: var(--ux-bg-1); }
 }
 
-/* Left cluster: hamburger + back button. Always visible — collapses sidebar on
-   desktop, opens drawer on mobile. */
-.ux-topbar__left {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ux-space-1);
-  flex-shrink: 0;
-}
+/* Ionic-style layout:  [ back ]   ─   title   ─   [ burger ]  +  actions
+   - back button slot — left edge
+   - title — center, dominates the space
+   - burger button slot — right edge (always visible, toggles sidebar)
+   - actions cluster — right of title on desktop, hidden under burger drawer on mobile
+*/
 
+/* Generic icon button used by back & burger. */
 .ux-topbar__menu-btn,
 .ux-topbar__back-btn {
   display: inline-flex;
-  width: 32px; height: 32px;
+  width: 36px; height: 36px;
   border-radius: var(--ux-radius-md);
   align-items: center;
   justify-content: center;
@@ -48,21 +51,8 @@
 .ux-topbar__back-btn:disabled,
 .ux-topbar__back-btn[aria-disabled="true"] { opacity: 0.35; pointer-events: none; }
 
-/* Center cluster — breadcrumbs (desktop) or page title (mobile). */
-.ux-topbar__crumb {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-  font-size: var(--ux-text-md);
-  font-weight: 500;
-  color: var(--ux-ink-2);
-  overflow: hidden;
-}
-
+/* Center page title — visible on every viewport, dominant */
 .ux-topbar__page-title {
-  display: none;
   flex: 1;
   min-width: 0;
   margin: 0;
@@ -76,9 +66,40 @@
   letter-spacing: var(--ux-tracking-tight);
 }
 
-@media (max-width: 767px) {
-  .ux-topbar__crumb { display: none; }
-  .ux-topbar__page-title { display: block; }
+/* Breadcrumbs — kept for backwards-compat, hidden by default in new layout.
+   Pages can opt-in by adding ux-topbar--with-crumb on the .ux-topbar. */
+.ux-topbar__crumb {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--ux-text-md);
+  font-weight: 500;
+  color: var(--ux-ink-2);
+  overflow: hidden;
+}
+.ux-topbar--with-crumb .ux-topbar__crumb { display: flex; }
+.ux-topbar--with-crumb .ux-topbar__page-title { display: none; }
+.ux-topbar__crumb-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ux-topbar__crumb-item:last-child { color: var(--ux-ink); }
+.ux-topbar__crumb-sep { color: var(--ux-ink-4); flex-shrink: 0; }
+
+/* (Legacy) left cluster — kept renderable, now empty in the new layout. */
+.ux-topbar__left {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ux-space-1);
+  flex-shrink: 0;
+}
+
+/* Hide the search box on smaller viewports to leave room for title + buttons. */
+@media (max-width: 1023px) {
+  .ux-topbar__search { display: none; }
 }
 .ux-topbar__crumb-item {
   white-space: nowrap;

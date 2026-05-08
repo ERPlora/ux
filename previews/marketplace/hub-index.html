@@ -1,0 +1,706 @@
+<!doctype html><html lang="es" data-theme="erplora"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Hub · Marketplace</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/erplora-ux.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/templates/all.min.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+<style>
+  /* Marketplace-only adjustments. Keep utilities OUT — only ux-* allowed. */
+  .mp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .mp-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+  .mp-toolbar > .ux-search { flex: 1 1 260px; min-width: 220px; max-width: 360px; }
+  .mp-section { padding: 18px 0; }
+  .mp-card { background: var(--ux-bg-2); border: 1px solid var(--ux-line); border-radius: var(--ux-radius-xl); padding: 16px; display: flex; flex-direction: column; gap: 12px; transition: border-color var(--ux-dur-fast), transform var(--ux-dur-fast); cursor: pointer; }
+  .mp-card:hover { border-color: var(--ux-line-2); transform: translateY(-1px); }
+  .mp-card__head { display: flex; gap: 12px; align-items: flex-start; }
+  .mp-card__icon { width: 40px; height: 40px; border-radius: var(--ux-radius-md); background: var(--ux-bg-3); color: var(--ux-ink-2); display: grid; place-items: center; flex-shrink: 0; }
+  .mp-card__icon svg { width: 20px; height: 20px; }
+  .mp-card__name { font-family: var(--ux-font-display); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--ux-ink); margin: 0; }
+  .mp-card__cat { font-size: 11px; color: var(--ux-ink-3); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+  .mp-card__desc { font-size: 13px; color: var(--ux-ink-2); line-height: 1.5; margin: 0; flex: 1; }
+  .mp-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .mp-card__price { font-family: var(--ux-font-display); font-size: 14px; font-weight: 600; color: var(--ux-ink); font-variant-numeric: tabular-nums; }
+  .mp-card__price--free { color: var(--ux-leaf); }
+  .mp-card__price-unit { font-size: 11px; color: var(--ux-ink-3); font-weight: 400; margin-left: 2px; }
+  .mp-page { padding: 22px; }
+  .mp-tabbar-internal { margin-bottom: 22px; }
+</style>
+</head><body>
+
+<div class="ux-app" id="app" data-sidebar="hidden" data-tabbar="bottom" data-signals="{sidebar: false, tab: 'catalog', search: '', category: '', priceFilter: ''}">
+
+  <div class="ux-app__main">
+    <header class="ux-topbar">
+        <div class="ux-topbar__left">
+          <button class="ux-topbar__back-btn" aria-label="Volver"
+            data-on-click="history.length > 1 ? history.back() : null">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+        </div>
+        <h1 class="ux-topbar__page-title">Página</h1>
+        
+        <div class="ux-topbar__search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input placeholder="Buscar módulos, soluciones…"/>
+        <span class="ux-topbar__kbd">⌘K</span>
+      </div>
+        
+        <div class="ux-topbar__actions">
+          <button class="ux-icon-btn" aria-label="Notificaciones"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+        </div>
+        <button class="ux-topbar__menu-btn" aria-label="Menú"
+            data-on-click="$sidebar = !$sidebar"
+            data-attr-aria-expanded="$sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+      </header>
+
+    <div class="ux-app__body">
+      <div class="mp-page">
+
+        <!-- Page header -->
+        <div class="ux-page-header">
+          <div class="ux-page-header__title">
+            <h1>Marketplace</h1>
+            <div class="ux-page-header__sub">Descubre módulos, soluciones por sector y cumplimiento legal para tu negocio</div>
+          </div>
+          <div class="ux-page-header__actions">
+            <button class="ux-btn ux-btn--ghost ux-btn--sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Mis facturas
+            </button>
+            <button class="ux-btn ux-btn--primary ux-btn--sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+              Solicitar módulo
+            </button>
+          </div>
+        </div>
+
+        <!-- Internal tab-bar (Catálogo, Soluciones, Tipos de negocio, Cumplimiento, Mis compras) -->
+        <div class="ux-tabs mp-tabbar-internal" role="tablist">
+          <button class="ux-tab" data-attr-aria-selected="$tab === 'catalog'" data-on:click="$tab = 'catalog'">
+            <svg class="ux-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            Catálogo <span class="ux-tab-badge">29</span>
+          </button>
+          <button class="ux-tab" data-attr-aria-selected="$tab === 'solutions'" data-on:click="$tab = 'solutions'">
+            <svg class="ux-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Soluciones <span class="ux-tab-badge">5</span>
+          </button>
+          <button class="ux-tab" data-attr-aria-selected="$tab === 'business'" data-on:click="$tab = 'business'">
+            <svg class="ux-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 9h.01M15 9h.01M9 13h.01M15 13h.01M9 17h.01M15 17h.01"/></svg>
+            Tipos de negocio
+          </button>
+          <button class="ux-tab" data-attr-aria-selected="$tab === 'compliance'" data-on:click="$tab = 'compliance'">
+            <svg class="ux-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            Cumplimiento
+          </button>
+          <button class="ux-tab" data-attr-aria-selected="$tab === 'purchases'" data-on:click="$tab = 'purchases'">
+            <svg class="ux-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Mis compras <span class="ux-tab-badge">7</span>
+          </button>
+        </div>
+
+        <!-- Catálogo -->
+        <section class="mp-section" data-show="$tab === 'catalog'">
+
+          <!-- Toolbar: search · category · price filter · view toggle -->
+          <div class="mp-toolbar">
+            <div class="ux-search">
+              <svg class="ux-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input class="ux-input ux-input--sm" placeholder="Buscar módulos…" data-bind="search"/>
+            </div>
+            <select class="ux-select ux-select--sm" data-bind="category" style="min-width:160px">
+              <option value="">Todas las categorías</option>
+              <option value="sales">Ventas</option>
+              <option value="finance">Finanzas</option>
+              <option value="hr">RRHH</option>
+              <option value="operations">Operaciones</option>
+              <option value="marketing">Marketing</option>
+              <option value="integrations">Integraciones</option>
+              <option value="hardware">Hardware</option>
+              <option value="ai">IA / Soporte</option>
+            </select>
+            <select class="ux-select ux-select--sm" data-bind="priceFilter" style="min-width:140px">
+              <option value="">Todos los precios</option>
+              <option value="free">Solo gratis</option>
+              <option value="paid">Solo de pago</option>
+              <option value="once">Pago único</option>
+            </select>
+
+            <div class="ux-dt-toolbar__spacer"></div>
+
+            <div class="ux-view-toggle" role="tablist" aria-label="Vista">
+              <button class="ux-view-toggle__btn" aria-pressed="true" title="Cuadrícula">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              </button>
+              <button class="ux-view-toggle__btn" title="Tabla">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- KPIs summary -->
+          <div class="ux-grid-4" style="margin-bottom:18px;">
+            <div class="ux-kpi">
+              <div class="ux-kpi__label">Módulos disponibles</div>
+              <div class="ux-kpi__value">29</div>
+              <span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>13 gratis</span>
+            </div>
+            <div class="ux-kpi">
+              <div class="ux-kpi__label">Instalados</div>
+              <div class="ux-kpi__value">12</div>
+              <span class="ux-badge"><span class="ux-badge__dot"></span>5 activos</span>
+            </div>
+            <div class="ux-kpi">
+              <div class="ux-kpi__label">Soluciones</div>
+              <div class="ux-kpi__value">5</div>
+              <span class="ux-badge"><span class="ux-badge__dot"></span>por sector</span>
+            </div>
+            <div class="ux-kpi ux-kpi--brand">
+              <div class="ux-kpi__label">Coste mensual</div>
+              <div class="ux-kpi__value">€89,96<span class="ux-kpi__value-unit">/mes</span></div>
+              <span class="ux-badge ux-badge--info"><span class="ux-badge__dot"></span>3 suscripciones</span>
+            </div>
+          </div>
+
+          <!-- Module grid (29 real modules) -->
+          <div class="mp-grid">
+
+            <!-- sales -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l3 14h12l3-10H6"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Ventas</h3>
+                  <div class="mp-card__cat">Ventas · v1.4.2</div>
+                </div>
+                <span class="ux-badge ux-badge--ok">Instalado</span>
+              </div>
+              <p class="mp-card__desc">Motor universal de ventas con presupuestos, pedidos y facturación integrada.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--ghost ux-btn--sm">Ver</button>
+              </div>
+            </div>
+
+            <!-- pos -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M8 21h8"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">TPV / POS</h3>
+                  <div class="mp-card__cat">Ventas · v2.0.1</div>
+                </div>
+                <span class="ux-badge ux-badge--ok">Activo</span>
+              </div>
+              <p class="mp-card__desc">Terminal punto de venta para barra, mesa y mostrador con soporte offline.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--ghost ux-btn--sm">Ver</button>
+              </div>
+            </div>
+
+            <!-- customers -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Clientes</h3>
+                  <div class="mp-card__cat">Ventas · v1.2.0</div>
+                </div>
+                <span class="ux-badge ux-badge--ok">Activo</span>
+              </div>
+              <p class="mp-card__desc">CRM ligero con segmentación, historial de compras y notas comerciales.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--ghost ux-btn--sm">Ver</button>
+              </div>
+            </div>
+
+            <!-- products -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Productos</h3>
+                  <div class="mp-card__cat">Ventas · v1.3.0</div>
+                </div>
+                <span class="ux-badge ux-badge--ok">Activo</span>
+              </div>
+              <p class="mp-card__desc">Catálogo central de productos, variantes, precios y unidades de medida.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--ghost ux-btn--sm">Ver</button>
+              </div>
+            </div>
+
+            <!-- purchases -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Compras</h3>
+                  <div class="mp-card__cat">Operaciones · v1.1.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Pedidos a proveedor, recepción de mercancía y conciliación con facturas.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- employees -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Empleados</h3>
+                  <div class="mp-card__cat">RRHH · v1.0.4</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Fichas de empleado, contratos y documentación obligatoria.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- hr -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Recursos Humanos</h3>
+                  <div class="mp-card__cat">RRHH · v1.2.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Vacaciones, ausencias, fichaje horario y aprobaciones.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- payroll_es -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Nóminas (ES)</h3>
+                  <div class="mp-card__cat">RRHH · v0.9.1</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Cálculo de nóminas con IRPF, SS y modelo 111 para España.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€19,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- verifactu -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">VeriFactu</h3>
+                  <div class="mp-card__cat">Cumplimiento · v1.0.0</div>
+                </div>
+                <span class="ux-badge ux-badge--info">Recomendado</span>
+              </div>
+              <p class="mp-card__desc">Sistema verificable de facturación AEAT — obligatorio en España desde 2026.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€9,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- fiscal_es -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Fiscal España</h3>
+                  <div class="mp-card__cat">Cumplimiento · v1.1.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Modelos 303, 390, 347 y 349 con presentación telemática.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- gestoria_es -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4V3H8v4H4l8 9 8-9z"/><path d="M4 19h16"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Gestoría</h3>
+                  <div class="mp-card__cat">Cumplimiento · v0.7.3</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Conexión directa con tu gestor: envío automático mensual de libros y nóminas.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€49,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- billing -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Facturación</h3>
+                  <div class="mp-card__cat">Finanzas · v1.5.0</div>
+                </div>
+                <span class="ux-badge ux-badge--ok">Activo</span>
+              </div>
+              <p class="mp-card__desc">Facturas, presupuestos y abonos con plantillas personalizables.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--ghost ux-btn--sm">Ver</button>
+              </div>
+            </div>
+
+            <!-- accounting -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Contabilidad</h3>
+                  <div class="mp-card__cat">Finanzas · v1.0.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Plan general contable, asientos automáticos y cuentas anuales.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€14,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- inventory -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7L12 3 4 7v10l8 4 8-4V7z"/><path d="M4 7l8 4M20 7l-8 4M12 11v10"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Inventario</h3>
+                  <div class="mp-card__cat">Operaciones · v1.2.1</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Stock en tiempo real, lotes, caducidades y trazabilidad.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- warehouses -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21V12h6v9"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Almacenes</h3>
+                  <div class="mp-card__cat">Operaciones · v0.8.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Multi-almacén con ubicaciones, traspasos y picking optimizado.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€7,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- kitchen -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Cocina (KDS)</h3>
+                  <div class="mp-card__cat">Operaciones · v1.0.5</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Pantalla de cocina con tickets en tiempo real y gestión de tiempos.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- reports -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8M16 17H8M10 9H8"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Informes</h3>
+                  <div class="mp-card__cat">Análisis · v1.0.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Informes preconfigurados con exportación a PDF y Excel.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- analytics -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="13" width="2" height="5"/><rect x="11" y="9" width="2" height="9"/><rect x="15" y="5" width="2" height="13"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Analytics</h3>
+                  <div class="mp-card__cat">Análisis · v0.6.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Dashboards interactivos con KPIs en tiempo real y alertas.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€24,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- marketing -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-7 18-2-7-9-3z"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Marketing</h3>
+                  <div class="mp-card__cat">Marketing · v0.7.2</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Campañas email, segmentos y automatizaciones por evento.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€19,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- whatsapp_inbox -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">WhatsApp Inbox</h3>
+                  <div class="mp-card__cat">Marketing · v0.5.0</div>
+                </div>
+                <span class="ux-badge ux-badge--info">Nuevo</span>
+              </div>
+              <p class="mp-card__desc">Bandeja unificada de WhatsApp Business con bot GPT y plantillas.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€29,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- shopify_sync -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Shopify Sync</h3>
+                  <div class="mp-card__cat">Integraciones · v1.0.2</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Sincroniza productos, stock y pedidos con tu tienda Shopify.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€14,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- woo_sync -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">WooCommerce Sync</h3>
+                  <div class="mp-card__cat">Integraciones · v1.0.1</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Conector bidireccional con WooCommerce — productos, pedidos, stock.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€14,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- magento_sync -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Magento Sync</h3>
+                  <div class="mp-card__cat">Integraciones · v0.9.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Integración con Magento 2 — catálogo y pedidos en tiempo real.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€19,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- tpv_hardware -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">TPV Hardware</h3>
+                  <div class="mp-card__cat">Hardware · v1.0.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Drivers para impresoras, cajón portamonedas, balanzas y escáneres.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- payments_stripe -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Pagos Stripe</h3>
+                  <div class="mp-card__cat">Hardware · v1.2.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Cobros con tarjeta presencial y online vía Stripe Terminal.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price mp-card__price--free">Gratis</span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- ai_assistant_pro -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">AI Assistant Pro</h3>
+                  <div class="mp-card__cat">IA / Soporte · v0.4.0</div>
+                </div>
+                <span class="ux-badge ux-badge--brand">Pro</span>
+              </div>
+              <p class="mp-card__desc">Asistente avanzado con GPT-5, herramientas y memoria de conversación.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€39,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- backup_cloud -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Backup Cloud</h3>
+                  <div class="mp-card__cat">IA / Soporte · v1.0.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Backup diario cifrado en la nube con retención de 90 días.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€9,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- support_priority -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Soporte Prioritario</h3>
+                  <div class="mp-card__cat">IA / Soporte · v1.0.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Respuesta en menos de 4 horas, llamada incluida y gestor dedicado.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€29,99<span class="mp-card__price-unit">/mes</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Instalar</button>
+              </div>
+            </div>
+
+            <!-- training -->
+            <div class="mp-card">
+              <div class="mp-card__head">
+                <div class="mp-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.7 3 3 6 3s6-1.3 6-3v-5"/></svg></div>
+                <div style="flex:1;min-width:0;">
+                  <h3 class="mp-card__name">Formación</h3>
+                  <div class="mp-card__cat">IA / Soporte · v1.0.0</div>
+                </div>
+              </div>
+              <p class="mp-card__desc">Pack onboarding 8 horas en remoto + manuales personalizados.</p>
+              <div class="mp-card__foot">
+                <span class="mp-card__price">€199<span class="mp-card__price-unit"> · pago único</span></span>
+                <button class="ux-btn ux-btn--primary ux-btn--sm">Comprar</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Soluciones (placeholder card pointing to dedicated preview) -->
+        <section class="mp-section" data-show="$tab === 'solutions'">
+          <div class="ux-empty">
+            <div class="ux-empty__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+            <div class="ux-empty__title">Soluciones por sector</div>
+            <div class="ux-empty__desc">Ver el preview dedicado <a href="solutions.html">solutions.html</a> con los 5 packs (Restaurante, Retail, Servicios, eCommerce, Industrial).</div>
+          </div>
+        </section>
+
+        <section class="mp-section" data-show="$tab === 'business'">
+          <div class="ux-empty">
+            <div class="ux-empty__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg></div>
+            <div class="ux-empty__title">Tipos de negocio</div>
+            <div class="ux-empty__desc">Ver preview dedicado <a href="business-types.html">business-types.html</a>.</div>
+          </div>
+        </section>
+
+        <section class="mp-section" data-show="$tab === 'compliance'">
+          <div class="ux-empty">
+            <div class="ux-empty__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="ux-empty__title">Cumplimiento legal</div>
+            <div class="ux-empty__desc">Ver preview dedicado <a href="compliance.html">compliance.html</a>.</div>
+          </div>
+        </section>
+
+        <section class="mp-section" data-show="$tab === 'purchases'">
+          <div class="ux-empty">
+            <div class="ux-empty__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+            <div class="ux-empty__title">Mis compras</div>
+            <div class="ux-empty__desc">Ver preview dedicado <a href="my-purchases.html">my-purchases.html</a>.</div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Hub bottom tabbar (mobile primary nav) -->
+  <nav class="ux-tabbar ux-app__tabbar" aria-label="Navegación principal del Hub">
+    <a class="ux-tabbar-item" href="#">
+      <span class="ux-tabbar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+      <span class="ux-tabbar-label">Inicio</span>
+    </a>
+    <a class="ux-tabbar-item" href="#">
+      <span class="ux-tabbar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l3 14h12l3-10H6"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg></span>
+      <span class="ux-tabbar-label">Ventas</span>
+    </a>
+    <a class="ux-tabbar-item" href="#">
+      <span class="ux-tabbar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>
+      <span class="ux-tabbar-label">Catálogo</span>
+    </a>
+    <a class="ux-tabbar-item" aria-current="page" href="#">
+      <span class="ux-tabbar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="ux-tabbar-badge">29</span></span>
+      <span class="ux-tabbar-label">Marketplace</span>
+    </a>
+    <a class="ux-tabbar-item" href="#">
+      <span class="ux-tabbar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></span>
+      <span class="ux-tabbar-label">Más</span>
+    </a>
+  </nav>
+</div>
+
+</body></html>
