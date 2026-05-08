@@ -626,6 +626,74 @@ EXAMPLES: dict[str, list[dict[str, str]]] = {
             '</div>'
         )},
     ],
+    "topbar": [
+        {"label": "Minimal", "render": (
+            '{% from "ui/topbar.jinja" import topbar %}'
+            '<div data-signals=\'{"sidebar": false}\'>'
+            '{{ topbar(title="Dashboard") }}'
+            '</div>'
+        )},
+        {"label": "With back button", "render": (
+            '{% from "ui/topbar.jinja" import topbar %}'
+            '<div data-signals=\'{"sidebar": false}\'>'
+            '{{ topbar(title="Edit employee", back_href="/preview/employees/list") }}'
+            '</div>'
+        )},
+        {"label": "With actions slot", "render": (
+            '{% from "ui/topbar.jinja" import topbar %}'
+            '<div data-signals=\'{"sidebar": false}\'>'
+            '{% call topbar(title="Inbox") %}'
+            '<button class="ux-icon-btn" aria-label="Notifications" type="button">'
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>'
+            '</button>'
+            '<span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Online</span>'
+            '<span class="ux-avatar ux-avatar--sm ux-avatar--brand">JC</span>'
+            '{% endcall %}'
+            '</div>'
+        )},
+        {"label": "No menu burger", "render": (
+            '{% from "ui/topbar.jinja" import topbar %}'
+            '{{ topbar(title="Settings", show_menu=False) }}'
+        )},
+    ],
+    "tabbar": [
+        {"label": "Default — 4 items", "render": (
+            '{% from "ui/tabbar.jinja" import tabbar %}'
+            '{{ tabbar(items=['
+            '  {"label":"Home","href":"/","icon":"ion:home-outline"},'
+            '  {"label":"Sales","href":"/sales","icon":"ion:trending-up-outline"},'
+            '  {"label":"Team","href":"/team","icon":"ion:people-outline"},'
+            '  {"label":"Settings","href":"/settings","icon":"ion:settings-outline"}'
+            '], current_path="/") }}'
+        )},
+        {"label": "With badges", "render": (
+            '{% from "ui/tabbar.jinja" import tabbar %}'
+            '{{ tabbar(items=['
+            '  {"label":"Home","href":"/","icon":"ion:home-outline"},'
+            '  {"label":"Inbox","href":"/inbox","icon":"ion:mail-outline","badge":"3"},'
+            '  {"label":"Orders","href":"/orders","icon":"ion:cart-outline","badge":"12"},'
+            '  {"label":"Profile","href":"/me","icon":"ion:person-outline"}'
+            '], current_path="/inbox") }}'
+        )},
+        {"label": "Pill variant", "render": (
+            '{% from "ui/tabbar.jinja" import tabbar %}'
+            '{{ tabbar(items=['
+            '  {"label":"Home","href":"/","icon":"ion:home-outline"},'
+            '  {"label":"Search","href":"/search","icon":"ion:search-outline"},'
+            '  {"label":"Alerts","href":"/alerts","icon":"ion:notifications-outline","badge":"5"},'
+            '  {"label":"Me","href":"/me","icon":"ion:person-circle-outline"}'
+            '], current_path="/", variant="pill") }}'
+        )},
+        {"label": "Indicator variant", "render": (
+            '{% from "ui/tabbar.jinja" import tabbar %}'
+            '{{ tabbar(items=['
+            '  {"label":"Home","href":"/","icon":"ion:home-outline"},'
+            '  {"label":"Agenda","href":"/agenda","icon":"ion:calendar-outline"},'
+            '  {"label":"History","href":"/history","icon":"ion:time-outline"},'
+            '  {"label":"More","href":"/more","icon":"ion:ellipsis-horizontal-outline"}'
+            '], current_path="/agenda", variant="indicator") }}'
+        )},
+    ],
 }
 
 
@@ -838,6 +906,22 @@ USAGE: dict[str, str] = {
     "spacer": (
         '{% from "ui/spacer.jinja" import spacer %}\n'
         '{{ spacer(size="lg", block=True) }}'
+    ),
+    "topbar": (
+        '{% from "ui/topbar.jinja" import topbar %}\n'
+        '<div data-signals=\'{"sidebar": false}\'>\n'
+        '  {% call topbar(title="Dashboard", back_href="/") %}\n'
+        '    <span class="ux-avatar ux-avatar--sm ux-avatar--brand">JC</span>\n'
+        '  {% endcall %}\n'
+        '</div>'
+    ),
+    "tabbar": (
+        '{% from "ui/tabbar.jinja" import tabbar %}\n'
+        '{{ tabbar(items=[\n'
+        '  {"label": "Home", "href": "/", "icon": "ion:home-outline"},\n'
+        '  {"label": "Inbox", "href": "/inbox", "icon": "ion:mail-outline", "badge": "3"},\n'
+        '  {"label": "Profile", "href": "/me", "icon": "ion:person-outline"},\n'
+        '], current_path="/") }}'
     ),
 }
 

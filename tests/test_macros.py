@@ -531,8 +531,10 @@ def test_tabs_default(env):
     assert 'class="ux-tabs"' in out
     assert 'role="tablist"' in out
     assert '"main_tab": "resumen"' in out
-    assert '$main_tab = "resumen"' in out
-    assert 'data-attr:aria-selected="$main_tab === &#34;aud&#34;"' in out or 'data-attr:aria-selected="$main_tab === \"aud\""' in out
+    # Single-quoted HTML attributes wrap double-quoted Datastar string
+    # literals — same pattern the public preview site uses.
+    assert 'data-on:click=\'$main_tab = "resumen"\'' in out
+    assert 'data-attr:aria-selected=\'$main_tab === "aud"\'' in out
 
 
 def test_tabs_pill_with_panel(env):
@@ -544,7 +546,7 @@ def test_tabs_pill_with_panel(env):
     out = render(env, src)
     assert "ux-tabs ux-tabs--pill" in out
     assert 'role="tabpanel"' in out
-    assert 'data-show="$view_tab ===' in out
+    assert "data-show='$view_tab ===" in out
 
 
 # ---------------------------------------------------------------------------
@@ -1238,3 +1240,110 @@ def test_spacer_block_lg(env):
     )
     assert "ux-spacer--lg" in out
     assert "ux-spacer--block" in out
+
+
+# ---------------------------------------------------------------------------
+# topbar
+# ---------------------------------------------------------------------------
+
+
+def test_topbar_minimal(env):
+    out = render(
+        env,
+        '{% from "ui/topbar.jinja" import topbar %}{{ topbar(title="Dashboard") }}',
+    )
+    assert 'class="ux-topbar"' in out
+    assert 'class="ux-topbar__page-title">Dashboard</h1>' in out
+    # Default show_menu=True renders the burger button.
+    assert "ux-topbar__menu-btn" in out
+
+
+def test_topbar_with_back(env):
+    out = render(
+        env,
+        '{% from "ui/topbar.jinja" import topbar %}'
+        '{{ topbar(title="Edit", back_href="/employees") }}',
+    )
+    assert "ux-topbar__back-btn" in out
+    assert 'aria-label="Back"' in out
+    assert "@get('/employees', {history: 'push'})" in out
+
+
+def test_topbar_actions_slot(env):
+    src = (
+        '{% from "ui/topbar.jinja" import topbar %}'
+        '{% call topbar(title="X") %}'
+        '<button class="ux-icon-btn">A</button>'
+        '{% endcall %}'
+    )
+    out = render(env, src)
+    assert 'class="ux-topbar__actions"' in out
+    assert ">A</button>" in out
+
+
+def test_topbar_no_menu(env):
+    out = render(
+        env,
+        '{% from "ui/topbar.jinja" import topbar %}'
+        '{{ topbar(title="Plain", show_menu=False) }}',
+    )
+    assert "ux-topbar__menu-btn" not in out
+
+
+def test_topbar_back_signal_overrides_href(env):
+    out = render(
+        env,
+        '{% from "ui/topbar.jinja" import topbar %}'
+        '{{ topbar(title="X", back_href="/x", back_signal="history.back()") }}',
+    )
+    assert "history.back()" in out
+    # When a signal is set the @get(href) action is replaced.
+    assert "@get(" not in out
+
+
+# ---------------------------------------------------------------------------
+# tabbar
+# ---------------------------------------------------------------------------
+
+
+def test_tabbar_renders_items(env):
+    out = render(
+        env,
+        '{% from "ui/tabbar.jinja" import tabbar %}'
+        '{{ tabbar(items=['
+        '  {"label":"Home","href":"/","icon":"ion:home-outline"},'
+        '  {"label":"Settings","href":"/settings","icon":"ion:settings-outline"}'
+        ']) }}',
+    )
+    assert 'class="ux-tabbar"' in out
+    assert 'href="/"' in out
+    assert 'icon="ion:home-outline"' in out
+    assert "Settings" in out
+
+
+def test_tabbar_current(env):
+    out = render(
+        env,
+        '{% from "ui/tabbar.jinja" import tabbar %}'
+        '{{ tabbar(items=[{"label":"H","href":"/","icon":"ion:home-outline"}], current_path="/") }}',
+    )
+    assert 'aria-current="page"' in out
+
+
+def test_tabbar_variant_and_fixed(env):
+    out = render(
+        env,
+        '{% from "ui/tabbar.jinja" import tabbar %}'
+        '{{ tabbar(items=[{"label":"H","href":"/","icon":"ion:home-outline"}], variant="pill", fixed=True) }}',
+    )
+    assert "ux-tabbar--pill" in out
+    assert "ux-tabbar--fixed" in out
+
+
+def test_tabbar_badge(env):
+    out = render(
+        env,
+        '{% from "ui/tabbar.jinja" import tabbar %}'
+        '{{ tabbar(items=[{"label":"Inbox","href":"/inbox","icon":"ion:mail","badge":"3"}]) }}',
+    )
+    assert 'class="ux-tabbar-badge">3</span>' in out

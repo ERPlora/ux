@@ -1,0 +1,83 @@
+{% extends "_base_preview.html" %}
+
+{% from "ui/button.jinja" import button %}
+{% from "ui/badge.jinja" import badge %}
+{% from "ui/card.jinja" import card, card_footer %}
+{% from "ui/icon.jinja" import icon %}
+{% from "ui/input.jinja" import input %}
+{% from "ui/field.jinja" import field %}
+{% from "ui/empty.jinja" import empty %}
+
+{% block title %}Error de arranque — Detalle{% endblock %}
+
+{% block body %}
+<main class="ux-error-page ux-error-page--danger">
+  <div class="ux-error-page__inner">
+    <div class="ux-error-page__illu">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    </div>
+    <div class="ux-error-page__code">Bootstrap failure · technical detail</div>
+    <h1 class="ux-error-page__title">Detalle del error de arranque</h1>
+    <p class="ux-error-page__msg">Información completa del fallo en la inicialización del Hub. Comparte estos datos con soporte si el reintento automático no resuelve el problema.</p>
+
+    <ul class="ux-error-page__diagnosis">
+      <li class="ux-error-page__diagnosis-item is-ok">
+        <span class="ux-error-page__diagnosis-icon">✓</span>
+        <span>Sistema de archivos · permisos OK</span>
+        <span class="ux-error-page__diagnosis-time">12 ms</span>
+      </li>
+      <li class="ux-error-page__diagnosis-item is-ok">
+        <span class="ux-error-page__diagnosis-icon">✓</span>
+        <span>Base de datos · 3.6 GB · íntegra</span>
+        <span class="ux-error-page__diagnosis-time">142 ms</span>
+      </li>
+      <li class="ux-error-page__diagnosis-item is-warn">
+        <span class="ux-error-page__diagnosis-icon">!</span>
+        <span>Resolución DNS para acme.erplora.cloud</span>
+        <span class="ux-error-page__diagnosis-time">5.4 s</span>
+      </li>
+      <li class="ux-error-page__diagnosis-item is-fail">
+        <span class="ux-error-page__diagnosis-icon">✗</span>
+        <span>TLS handshake con cloud (timeout 30 s)</span>
+        <span class="ux-error-page__diagnosis-time">timeout</span>
+      </li>
+    </ul>
+
+    <details class="ux-error-page__details" open>
+      <summary>Stack trace completo</summary>
+      <pre class="ux-error-page__trace">Traceback (most recent call last):
+  File "/opt/erplora/hub/bootstrap.py", line 142, in main
+    sync_client.connect(timeout=30)
+  File "/opt/erplora/hub/cloud_sync/client.py", line 87, in connect
+    self._tls_handshake()
+  File "/opt/erplora/hub/cloud_sync/client.py", line 121, in _tls_handshake
+    sock.do_handshake()
+  ssl.SSLError: [SSL: HANDSHAKE_TIMEOUT] timeout (_ssl.c:1129)
+
+Configuration:
+  hub_id:        hub-acme-prod-1
+  bridge_url:    https://acme.erplora.cloud:443
+  proxy:         (none)
+  ca_bundle:     /etc/ssl/certs/ca-certificates.crt
+  released:      v2.2.0 (sha 850419c · 2026-05-07)
+  uptime_at_fail: 23m 14s
+  trace_id:      4f2a-bootstrap-3b81-9c2e
+
+Last 5 successful syncs:
+  2026-05-08T13:42:00Z  ok  (rtt 142 ms)
+  2026-05-08T12:42:00Z  ok  (rtt 158 ms)
+  2026-05-08T11:42:00Z  ok  (rtt 134 ms)
+  2026-05-08T10:42:00Z  ok  (rtt 199 ms)
+  2026-05-08T09:42:00Z  ok  (rtt 121 ms)</pre>
+    </details>
+
+    <div class="ux-error-page__actions">
+      <button class="ux-btn ux-btn--ghost" data-on:click="navigator.clipboard?.writeText('4f2a-bootstrap-3b81-9c2e')">Copiar trace</button>
+      <a class="ux-btn ux-btn--ghost" href="/errors/bootstrap.html">← Volver al diagnóstico</a>
+      <button class="ux-btn ux-btn--primary" data-on:click="location.reload()">Reintentar ahora</button>
+    </div>
+
+    <div class="ux-error-page__meta">trace · 4f2a-bootstrap-3b81-9c2e · build v2.2.0 · 2026-05-08 14:33 UTC</div>
+  </div>
+</main>
+{% endblock %}

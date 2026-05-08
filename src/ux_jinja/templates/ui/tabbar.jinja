@@ -1,0 +1,54 @@
+{# tabbar(items, current_path, variant, fixed, attrs)
+
+   CSS root from lib/css/components/tab-bar.css:  .ux-tabbar
+   Mobile-first bottom navigation (also reused inside .ux-app__tabbar slot).
+
+   Variants (verified in tab-bar.css):
+     - indicator   ux-tabbar--indicator   iOS-style top indicator on active item
+     - pill        ux-tabbar--pill        Material-style pill background on active
+     - icons       ux-tabbar--icons       icons only, labels hidden
+   Modifiers:
+     - fixed       ux-tabbar--fixed       sticks the bar to the bottom of viewport
+     - inset       ux-tabbar--inset       padding for safe-area inset
+
+   Item shape:
+     {label, href, icon, badge, signal}
+
+     - label   visible label below the icon
+     - href    target route (anchor href)
+     - icon    Iconify identifier rendered through <iconify-icon>
+     - badge   optional badge text shown over the icon
+     - signal  optional raw Datastar expression for data-on:click (overrides @get)
+
+   Active item: any item whose href equals `current_path` gets aria-current="page".
+
+   Args:
+     - items          list of item dicts (see shape above)
+     - current_path   path of the active item (compared to item.href)
+     - variant        one of `indicator`, `pill`, `icons` (None = default)
+     - fixed          when True adds the ux-tabbar--fixed modifier
+     - attrs          extra HTML attributes spread on the <nav>
+#}
+{% macro tabbar(items=[], current_path=None, variant=None, fixed=False, attrs={}) %}
+{%- set classes = ["ux-tabbar"] -%}
+{%- if variant %}{%- do classes.append("ux-tabbar--" ~ variant) -%}{%- endif -%}
+{%- if fixed %}{%- do classes.append("ux-tabbar--fixed") -%}{%- endif -%}
+<nav class="{{ classes | join(' ') }}" aria-label="Main navigation"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- for item in items %}
+  {%- set is_current = (current_path is not none and item.href == current_path) -%}
+  <a class="ux-tabbar-item"
+     href="{{ item.href|e }}"
+     {%- if is_current %} aria-current="page"{% endif -%}
+     {%- if item.signal is defined and item.signal %} data-on:click="{{ item.signal|e }}"
+     {%- else %} data-on:click="@get('{{ item.href|e }}', {history: 'push'})"
+     {%- endif -%}>
+    <span class="ux-tabbar-icon">
+      <iconify-icon icon="{{ item.icon|e }}" width="22" height="22"></iconify-icon>
+      {%- if item.badge is defined and item.badge %}<span class="ux-tabbar-badge">{{ item.badge|e }}</span>{% endif %}
+    </span>
+    <span class="ux-tabbar-label">{{ item.label|e }}</span>
+  </a>
+{%- endfor %}
+</nav>
+{% endmacro %}
