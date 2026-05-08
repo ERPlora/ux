@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="es" data-theme="erplora">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Carta · Cafetería La Rambla</title>
+<link rel="stylesheet" href="../../../lib/css/ux.css"/>
+<link rel="stylesheet" href="../../../lib/templates/all.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+<style>
+  body { background: var(--ux-bg); margin: 0; min-height: 100dvh; }
+
+  .pub-shell { display: flex; flex-direction: column; min-height: 100dvh; }
+
+  /* Public navbar (TODO UX: no ux-public-nav yet) */
+  .pub-nav {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--ux-space-4);
+    padding: var(--ux-space-3) var(--ux-space-5);
+    background: color-mix(in oklch, var(--ux-bg) 80%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--ux-line);
+  }
+  .pub-nav__brand { display: inline-flex; align-items: center; gap: var(--ux-space-3); text-decoration: none; }
+  .pub-nav__logo {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--ux-brand), var(--ux-brand-2));
+    color: var(--ux-brand-fg);
+    display: grid; place-items: center;
+    font-family: var(--ux-font-display); font-weight: 700; font-size: 14px;
+  }
+  .pub-nav__name { font-family: var(--ux-font-display); font-size: 15px; font-weight: 600; color: var(--ux-ink); }
+  .pub-nav__cart {
+    position: relative;
+  }
+  .pub-nav__cart-count {
+    position: absolute; top: -6px; right: -6px;
+    min-width: 18px; height: 18px; padding: 0 5px;
+    border-radius: 999px;
+    background: var(--ux-brand); color: var(--ux-brand-fg);
+    font-family: var(--ux-font-mono); font-size: 10px; font-weight: 700;
+    display: grid; place-items: center;
+  }
+
+  /* Catalog header */
+  .cat-head {
+    padding: var(--ux-space-6) var(--ux-space-5) var(--ux-space-4);
+    max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box;
+  }
+  .cat-head__title {
+    font-family: var(--ux-font-display);
+    font-size: clamp(28px, 4vw, 36px);
+    font-weight: 700;
+    letter-spacing: var(--ux-tracking-tight);
+    color: var(--ux-ink);
+    margin: 0 0 var(--ux-space-2);
+  }
+  .cat-head__sub { color: var(--ux-ink-3); margin: 0 0 var(--ux-space-4); font-size: var(--ux-text-md); }
+
+  /* Layout: sidebar + grid */
+  .cat-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: var(--ux-space-5);
+    max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box;
+    padding: 0 var(--ux-space-5) var(--ux-space-8);
+  }
+  @media (max-width: 880px) {
+    .cat-layout { grid-template-columns: 1fr; }
+    .cat-sidebar { order: 2; }
+  }
+
+  /* Sidebar — chips list of categories */
+  .cat-sidebar {
+    position: sticky; top: 72px; align-self: start;
+  }
+  .cat-sidebar__title {
+    font-family: var(--ux-font-mono);
+    font-size: 11px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--ux-ink-3);
+    margin: 0 0 var(--ux-space-3);
+  }
+  .cat-cats {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  @media (max-width: 880px) {
+    .cat-sidebar { position: static; }
+    .cat-cats { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  }
+
+  /* Product grid */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--ux-space-4);
+  }
+</style>
+</head>
+<body>
+  <div class="pub-shell" data-signals="{cat: 'all', q: '', cartCount: 2}">
+
+    <!-- Public navbar -->
+    <nav class="pub-nav">
+      <a href="/" class="pub-nav__brand">
+        <span class="pub-nav__logo">L</span>
+        <span class="pub-nav__name">Cafetería La Rambla</span>
+      </a>
+      <button class="ux-btn ux-btn--ghost ux-btn--icon pub-nav__cart"
+              aria-label="Carrito"
+              data-on-click="window.location.href = '/public/cart'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        <span class="pub-nav__cart-count" data-text="$cartCount" data-show="$cartCount > 0">2</span>
+      </button>
+    </nav>
+
+    <!-- Header -->
+    <header class="cat-head">
+      <h1 class="cat-head__title">Carta</h1>
+      <p class="cat-head__sub">42 productos · pedidos online listos en 10 min</p>
+
+      <!-- Search -->
+      <div class="ux-search" style="max-width:480px">
+        <span class="ux-search__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+          </svg>
+        </span>
+        <input class="ux-input" type="search" placeholder="Buscar en la carta…"
+               data-bind-q/>
+        <button class="ux-search__clear" data-show="$q.length > 0" data-on-click="$q = ''" aria-label="Limpiar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Layout -->
+    <div class="cat-layout">
+
+      <!-- Categories sidebar -->
+      <aside class="cat-sidebar">
+        <h2 class="cat-sidebar__title">Categorías</h2>
+        <div class="cat-cats">
+          <button class="ux-chip" data-on-click="$cat = 'all'"
+                  data-attr-aria-pressed="$cat === 'all'">
+            Todo · 42
+          </button>
+          <button class="ux-chip" data-on-click="$cat = 'coffee'"
+                  data-attr-aria-pressed="$cat === 'coffee'">
+            Cafés · 12
+          </button>
+          <button class="ux-chip" data-on-click="$cat = 'bakery'"
+                  data-attr-aria-pressed="$cat === 'bakery'">
+            Bollería · 8
+          </button>
+          <button class="ux-chip" data-on-click="$cat = 'sandwich'"
+                  data-attr-aria-pressed="$cat === 'sandwich'">
+            Bocadillos · 9
+          </button>
+          <button class="ux-chip" data-on-click="$cat = 'cold'"
+                  data-attr-aria-pressed="$cat === 'cold'">
+            Bebidas frías · 7
+          </button>
+          <button class="ux-chip" data-on-click="$cat = 'dessert'"
+                  data-attr-aria-pressed="$cat === 'dessert'">
+            Postres · 6
+          </button>
+        </div>
+      </aside>
+
+      <!-- Product grid -->
+      <section class="cat-grid">
+
+        <!-- Cortado -->
+        <article class="ux-product">
+          <div class="ux-product__media">
+            <!-- TODO UX: no <img> placeholder helper — using gradient -->
+            <div style="width:100%; height:100%; background: linear-gradient(135deg, #6b4226, #2a1810); display:grid; place-items:center; color:#e8d5c0; font-family: var(--ux-font-display); font-size: 32px;">☕</div>
+            <div class="ux-product__badges">
+              <span class="ux-product__badge ux-product__badge--brand">Top</span>
+            </div>
+          </div>
+          <div class="ux-product__body">
+            <div class="ux-product__brand">Cafés</div>
+            <a href="/public/products/cortado" class="ux-product__name" style="text-decoration:none">
+              Cortado
+            </a>
+            <div class="ux-product__price-row">
+              <span class="ux-product__price">€1,80</span>
+            </div>
+            <div class="ux-product__actions">
+              <button class="ux-product__cta"
+                      data-on-click="$cartCount = $cartCount + 1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Añadir
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Espresso -->
+        <article class="ux-product">
+          <div class="ux-product__media">
+            <div style="width:100%; height:100%; background: linear-gradient(135deg, #3a1f0e, #120804); display:grid; place-items:center; color:#d4a574; font-family: var(--ux-font-display); font-size: 32px;">☕</div>
+          </div>
+          <div class="ux-product__body">
+            <div class="ux-product__brand">Cafés</div>
+            <a href="/public/products/espresso" class="ux-product__name" style="text-decoration:none">
+              Espresso
+            </a>
+            <div class="ux-product__price-row">
+              <span class="ux-product__price">€1,40</span>
+            </div>
+            <div class="ux-product__actions">
+              <button class="ux-product__cta"
+                      data-on-click="$cartCount = $cartCount + 1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Añadir
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Croissant -->
+        <article class="ux-product">
+          <div class="ux-product__media">
+            <div style="width:100%; height:100%; background: linear-gradient(135deg, #c89568, #6b4423); display:grid; place-items:center; color:#fff8e8; font-family: var(--ux-font-display); font-size: 32px;">🥐</div>
+            <div class="ux-product__badges">
+              <span class="ux-product__badge ux-product__badge--new">Nuevo</span>
+            </div>
+          </div>
+          <div class="ux-product__body">
+            <div class="ux-product__brand">Bollería</div>
+            <a href="/public/products/croissant" class="ux-product__name" style="text-decoration:none">
+              Croissant artesano
+            </a>
+            <div class="ux-product__price-row">
+              <span class="ux-product__price">€2,50</span>
+            </div>
+            <div class="ux-product__actions">
+              <button class="ux-product__cta"
+                      data-on-click="$cartCount = $cartCount + 1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Añadir
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Sandwich Ibérico -->
+        <article class="ux-product">
+          <div class="ux-product__media">
+            <div style="width:100%; height:100%; background: linear-gradient(135deg, #a85a3a, #5a2818); display:grid; place-items:center; color:#fff; font-family: var(--ux-font-display); font-size: 32px;">🥪</div>
+          </div>
+          <div class="ux-product__body">
+            <div class="ux-product__brand">Bocadillos</div>
+            <a href="/public/products/sandwich-iberico" class="ux-product__name" style="text-decoration:none">
+              Sandwich Ibérico con tomate
+            </a>
+            <div class="ux-product__price-row">
+              <span class="ux-product__price">€5,90</span>
+              <span class="ux-product__price-orig">€6,50</span>
+            </div>
+            <div class="ux-product__actions">
+              <button class="ux-product__cta"
+                      data-on-click="$cartCount = $cartCount + 1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Añadir
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Tortilla -->
+        <article class="ux-product">
+          <div class="ux-product__media">
+            <div style="width:100%; height:100%; background: linear-gradient(135deg, #d8a23a, #6b4f1a); display:grid; place-items:center; color:#fff; font-family: var(--ux-font-display); font-size: 32px;">🍳</div>
+          </div>
+          <div class="ux-product__body">
+            <div class="ux-product__brand">Bocadillos</div>
+            <a href="/public/products/tortilla" class="ux-product__name" style="text-decoration:none">
+              Pincho de tortilla
+            </a>
+            <div class="ux-product__price-row">
+              <span class="ux-product__price">€2,80</span>
+            </div>
+            <div class="ux-product__actions">
+              <button class="ux-product__cta"
+                      data-on-click="$cartCount = $cartCount + 1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Añadir
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Zumo naranja -->
+        <article class="ux-product">
+          <div class="ux-product__media">
+            <div style="width:100%; height:100%; background: linear-gradient(135deg, #ff8c2a, #c84a14); display:grid; place-items:center; color:#fff; font-family: var(--ux-font-display); font-size: 32px;">🍊</div>
+          </div>
+          <div class="ux-product__body">
+            <div class="ux-product__brand">Bebidas frías</div>
+            <a href="/public/products/zumo-naranja" class="ux-product__name" style="text-decoration:none">
+              Zumo de naranja natural
+            </a>
+            <div class="ux-product__price-row">
+              <span class="ux-product__price">€3,20</span>
+            </div>
+            <div class="ux-product__actions">
+              <button class="ux-product__cta"
+                      data-on-click="$cartCount = $cartCount + 1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Añadir
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Tarta zanahoria -->
+        <article class="ux-product is-on-sale">
+          <div class="ux-product__media">
+            <div style="width:100%; height:100%; background: linear-gradient(135deg, #b87a9d, #5a2c4a); display:grid; place-items:center; color:#fff; font-family: var(--ux-font-display); font-size: 32px;">🍰</div>
+            <div class="ux-product__badges">
+              <span class="ux-product__badge ux-product__badge--sale">−15%</span>
+            </div>
+          </div>
+          <div class="ux-product__body">
+            <div class="ux-product__brand">Postres</div>
+            <a href="/public/products/tarta-zanahoria" class="ux-product__name" style="text-decoration:none">
+              Tarta de zanahoria casera
+            </a>
+            <div class="ux-product__price-row">
+              <span class="ux-product__price">€3,80</span>
+              <span class="ux-product__price-orig">€4,50</span>
+            </div>
+            <div class="ux-product__actions">
+              <button class="ux-product__cta"
+                      data-on-click="$cartCount = $cartCount + 1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Añadir
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Té matcha (out) -->
+        <article class="ux-product is-out">
+          <div class="ux-product__media">
+            <div style="width:100%; height:100%; background: linear-gradient(135deg, #4a7d4a, #1f3a1f); display:grid; place-items:center; color:#fff; font-family: var(--ux-font-display); font-size: 32px;">🍵</div>
+          </div>
+          <div class="ux-product__body">
+            <div class="ux-product__brand">Bebidas frías</div>
+            <span class="ux-product__name">Matcha latte helado</span>
+            <div class="ux-product__price-row">
+              <span class="ux-product__price">€4,20</span>
+            </div>
+            <div class="ux-product__actions">
+              <button class="ux-product__cta">Sin stock</button>
+            </div>
+          </div>
+        </article>
+
+      </section>
+    </div>
+
+  </div>
+</body>
+</html>
