@@ -1,0 +1,42 @@
+{# drawer(open_signal, title, subtitle, side, attrs)
+
+   CSS from lib/css/components/overlays.css:
+     - sides    : right (default, no class) | left (ux-drawer--left)
+                  | bottom (ux-drawer--bottom)
+
+   `open_signal` is a Datastar signal (e.g. `"$showDrawer"`). The CSS
+   reacts to `data-state="open"` on `.ux-drawer-root`; we expose it via
+   `data-attr:data-state` so Datastar updates it from the same signal.
+
+   For the footer, place a `drawer_footer()` block inside the call body.
+#}
+{% macro drawer(open_signal, title=None, subtitle=None, side=None, attrs={}) %}
+{%- set drawer_classes = ["ux-drawer"] -%}
+{%- if side and side != "right" %}{%- do drawer_classes.append("ux-drawer--" ~ side) -%}{%- endif -%}
+<div class="ux-drawer-root"
+  data-show="{{ open_signal|e }}"
+  data-attr:data-state="{{ open_signal|e }} ? 'open' : 'closed'"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-backdrop" data-on:click="{{ open_signal|e }} = false"></div>
+  <aside class="{{ drawer_classes | join(' ') }}" role="dialog" aria-modal="true">
+    {%- if title or subtitle %}
+    <div class="ux-drawer__header">
+      <div>
+        {%- if title %}<div class="ux-drawer__title">{{ title|e }}</div>{% endif %}
+        {%- if subtitle %}<div class="ux-drawer__sub">{{ subtitle|e }}</div>{% endif %}
+      </div>
+      <button class="ux-drawer__close" type="button" aria-label="Close" data-on:click="{{ open_signal|e }} = false">&times;</button>
+    </div>
+    {%- endif %}
+    <div class="ux-drawer__body">{% if caller is defined %}{{ caller() }}{% endif %}</div>
+  </aside>
+</div>
+{% endmacro %}
+
+{# drawer_footer() — slot helper for the footer row inside a drawer body. #}
+{% macro drawer_footer(attrs={}) %}
+<div class="ux-drawer__footer"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% endif -%}
+</div>
+{% endmacro %}

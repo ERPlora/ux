@@ -1,0 +1,45 @@
+{# empty(title, description, icon_svg, action_label, action_href, on_action, compact, attrs)
+
+   Empty state matching lib/css/components/card.css:
+
+     <div class="ux-empty">
+       <div class="ux-empty__icon">{{ icon_svg }}</div>
+       <h3 class="ux-empty__title">...</h3>
+       <p class="ux-empty__desc">...</p>
+       <div class="ux-empty__actions">...</div>
+     </div>
+
+   `icon_svg` is raw SVG markup; if omitted a generic placeholder is rendered.
+   Set `compact=True` to switch to the `.ux-empty--compact` modifier (use
+   inside a card body).
+#}
+{% macro empty(title=None, description=None, icon_svg=None, action_label=None, action_href=None, on_action=None, compact=False, attrs={}) %}
+{%- set classes = ["ux-empty"] -%}
+{%- if compact %}{%- do classes.append("ux-empty--compact") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-empty__icon">
+{%- if icon_svg %}{{ icon_svg|safe }}{%- else -%}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4"/><path d="M3 17l9 4 9-4"/></svg>
+{%- endif %}
+  </div>
+{%- if title %}
+  <h3 class="ux-empty__title">{{ title|e }}</h3>
+{%- endif %}
+{%- if description %}
+  <p class="ux-empty__desc">{{ description|e }}</p>
+{%- endif %}
+{%- if caller is defined %}
+  <div class="ux-empty__actions">{{ caller() }}</div>
+{%- elif action_label %}
+  <div class="ux-empty__actions">
+    {%- if action_href %}
+    <a class="ux-btn ux-btn--primary" href="{{ action_href|e }}">{{ action_label|e }}</a>
+    {%- else %}
+    <button class="ux-btn ux-btn--primary" type="button"
+{%- if on_action %} data-on:click="{{ on_action|e }}"{% endif -%}>{{ action_label|e }}</button>
+    {%- endif %}
+  </div>
+{%- endif %}
+</div>
+{% endmacro %}

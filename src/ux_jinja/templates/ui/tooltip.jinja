@@ -1,0 +1,31 @@
+{# tooltip(content, placement, attrs)
+
+   Standalone floating tooltip from lib/css/components/overlays.css.
+     - placement : top (default) | bottom
+
+   The CSS only ships top/bottom modifiers; left/right are accepted but
+   render with no modifier class (positioning then becomes the consumer's
+   responsibility — usually via inline style or a parent JS positioner).
+
+   For trigger-based hover tooltips, prefer the `tooltip_trigger()` helper
+   which wraps a slot in a [data-tip] element (pure CSS, no js).
+#}
+{% macro tooltip(content="", placement="top", attrs={}) %}
+{%- set classes = ["ux-tooltip"] -%}
+{%- if placement in ("top", "bottom") -%}
+  {%- do classes.append("ux-tooltip--" ~ placement) -%}
+{%- endif -%}
+<div class="{{ classes | join(' ') }}" role="tooltip"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% else %}{{ content|e }}{% endif -%}
+</div>
+{% endmacro %}
+
+{# tooltip_trigger(tip, tag) — wraps a slot in an element with [data-tip]
+   so the pure-CSS hover tooltip from overlays.css triggers automatically. #}
+{% macro tooltip_trigger(tip="", tag="span", attrs={}) %}
+<{{ tag }} data-tip="{{ tip|e }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% endif -%}
+</{{ tag }}>
+{% endmacro %}

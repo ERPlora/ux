@@ -1,0 +1,26 @@
+{# divider(orientation, label, attrs)
+
+   CSS from lib/css/components/avatar.css:
+     - orientation : horizontal (default, no class) | vertical (ux-divider--vert)
+
+   When `label` is set the macro emits a labelled divider — there is no
+   dedicated class for this in the CSS, so we render a flex row that wraps
+   two `<hr class="ux-divider">` rules around the label text. Pass an
+   inline `attrs={"class": "..."}` to add custom utilities.
+#}
+{% macro divider(orientation="horizontal", label=None, attrs={}) %}
+{%- if label -%}
+<div class="ux-divider-row" role="separator" aria-label="{{ label|e }}"
+  style="display:flex;align-items:center;gap:var(--ux-space-2)"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <hr class="ux-divider" style="flex:1"/>
+  <span style="font-size:var(--ux-text-xs);color:var(--ux-ink-3)">{{ label|e }}</span>
+  <hr class="ux-divider" style="flex:1"/>
+</div>
+{%- else -%}
+{%- set classes = ["ux-divider"] -%}
+{%- if orientation == "vertical" %}{%- do classes.append("ux-divider--vert") -%}{%- endif -%}
+<hr class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}/>
+{%- endif -%}
+{% endmacro %}

@@ -1,0 +1,93 @@
+{% extends "_base.html" %}
+{% from "ui/card.jinja" import card as ux_card %}
+{% from "ui/accordion.jinja" import accordion %}
+
+{% block title %}Install — ERPlora UX{% endblock %}
+
+{% block crumb %}
+  <a class="ux-topbar__crumb-item" href="/install">Install</a>
+{% endblock %}
+
+{% block content %}
+<h1 class="doc__title">Install</h1>
+<p class="doc__sub">Three steps to start using the @erplora/ux library in any Jinja-rendered project — Flask, FastAPI, Django, Hotframe, anything.</p>
+
+<div data-signals='{"copied_pip": false, "copied_loader": false, "copied_macro": false, "copied_cdn": false}'>
+
+  {% call ux_card(title="1. Install the package") %}
+    <div class="code-wrap">
+      <button type="button"
+              class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
+              data-on:click="
+                navigator.clipboard.writeText(document.getElementById('snip-pip').textContent);
+                $copied_pip = true;
+                setTimeout(() => $copied_pip = false, 1500);
+              "
+              data-text="$copied_pip ? 'Copied' : 'Copy'">Copy</button>
+      <pre id="snip-pip"><code>pip install ux-jinja</code></pre>
+    </div>
+  {% endcall %}
+
+  <div style="height: 16px;"></div>
+
+  {% call ux_card(title="2. Register the templates loader") %}
+    <p style="margin:0 0 12px;color:var(--ux-ink-2);font-size:13px;">Append the bundled <code class="ux-code--inline">ux_jinja.TEMPLATES_DIR</code> to your Jinja loader so the macros under <code class="ux-code--inline">ui/</code> resolve.</p>
+    <div class="code-wrap">
+      <button type="button"
+              class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
+              data-on:click="
+                navigator.clipboard.writeText(document.getElementById('snip-loader').textContent);
+                $copied_loader = true;
+                setTimeout(() => $copied_loader = false, 1500);
+              "
+              data-text="$copied_loader ? 'Copied' : 'Copy'">Copy</button>
+      <pre id="snip-loader"><code>import ux_jinja
+env.loader.searchpath.append(str(ux_jinja.TEMPLATES_DIR))</code></pre>
+    </div>
+  {% endcall %}
+
+  <div style="height: 16px;"></div>
+
+  {% call ux_card(title="3. Pull the CSS and Datastar from the CDN") %}
+    <p style="margin:0 0 12px;color:var(--ux-ink-2);font-size:13px;">Drop these tags in your base template. They are exactly what this site uses.</p>
+    <div class="code-wrap">
+      <button type="button"
+              class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
+              data-on:click="
+                navigator.clipboard.writeText(document.getElementById('snip-cdn').textContent);
+                $copied_cdn = true;
+                setTimeout(() => $copied_cdn = false, 1500);
+              "
+              data-text="$copied_cdn ? 'Copied' : 'Copy'">Copy</button>
+      <pre id="snip-cdn"><code>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/erplora-ux.min.css" /&gt;
+&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/templates/all.min.css" /&gt;
+&lt;script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+  {% endcall %}
+
+  <div style="height: 16px;"></div>
+
+  {% call ux_card(title="4. Use a macro") %}
+    <div class="code-wrap">
+      <button type="button"
+              class="ux-btn ux-btn--ghost ux-btn--sm code-wrap__copy"
+              data-on:click="
+                navigator.clipboard.writeText(document.getElementById('snip-macro').textContent);
+                $copied_macro = true;
+                setTimeout(() => $copied_macro = false, 1500);
+              "
+              data-text="$copied_macro ? 'Copied' : 'Copy'">Copy</button>
+      <pre id="snip-macro"><code>{% raw %}{% from "ui/button.jinja" import button %}
+{{ button("Save", variant="primary", on_click="@post('/save')") }}{% endraw %}</code></pre>
+    </div>
+  {% endcall %}
+</div>
+
+<h3 class="doc__h2">FAQ</h3>
+{{ accordion("install_faq", items=[
+  {"title": "Does it require a build step?", "body": "No. The library is pure CSS, the macros are Jinja2 source files, Datastar is a single ESM module. Pull from the CDN or vendor it locally."},
+  {"title": "Is Datastar required?", "body": "Only if you want the interactive macros (modal, drawer, accordion, tabs). Static macros (button, badge, card, kpi) work without it."},
+  {"title": "Can I theme it?", "body": "Yes. Set data-theme on <html> and pick one of the template families (corporate, forest, ocean, minimal, violet) by setting data-template. CSS variables drive everything."},
+  {"title": "What about CSP?", "body": "Datastar is loaded from cdn.jsdelivr.net — add it to script-src. Inline event handlers are not used by the library; everything is data-* attributes."}
+]) }}
+{% endblock %}

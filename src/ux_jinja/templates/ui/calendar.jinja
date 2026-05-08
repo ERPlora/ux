@@ -1,0 +1,62 @@
+{# calendar(year, month, selected, events, weekday_labels, title, attrs)
+
+   Mini calendar matching `.ux-cal-mini` in lib/css/components/calendar.css.
+   Renders a single month grid with weekdays and clickable day cells.
+
+     <div class="ux-cal-mini">
+       <div class="ux-cal-mini__head">
+         <div class="ux-cal-mini__title">May 2026</div>
+       </div>
+       <div class="ux-cal-mini__grid">
+         <span class="ux-cal-mini__wd">M</span>...
+         <button class="ux-cal-mini__day">1</button>...
+       </div>
+     </div>
+
+   `selected` is an ISO date string ("2026-05-12") that flips the
+   `--selected` modifier on the matching cell. `events` is a list of ISO
+   strings — matching cells get `--has-event`. `weekday_labels` defaults
+   to Monday-first single-letter labels.
+
+   Day-of-week math uses Sakamoto's algorithm. ISO Monday = 0..Sunday = 6.
+#}
+{% macro calendar(year=2026, month=5, selected=None, events=[], weekday_labels=None, title=None, attrs={}) %}
+{%- if weekday_labels is none -%}{%- set weekday_labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] -%}{%- endif -%}
+{%- set month_names = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+] -%}
+{# Sakamoto: t = [0,3,2,5,0,3,5,1,4,6,2,4]
+   y' = year - (1 if month < 3 else 0)
+   dow_sun0 = (y' + y'//4 - y'//100 + y'//400 + t[m-1] + 1) % 7   (Sunday=0)
+   dow_mon0 = (dow_sun0 + 6) % 7                                  (Monday=0)
+#}
+{%- set _t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4] -%}
+{%- set _y = year - (1 if month < 3 else 0) -%}
+{%- set _dow_sun0 = (_y + (_y // 4) - (_y // 100) + (_y // 400) + _t[month - 1] + 1) % 7 -%}
+{%- set _first_dow = (_dow_sun0 + 6) % 7 -%}
+{%- set _is_leap = (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)) -%}
+{%- set _days_per_month = [31, (29 if _is_leap else 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] -%}
+{%- set _days_in_month = _days_per_month[month - 1] -%}
+<div class="ux-cal-mini"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-cal-mini__head">
+    <div class="ux-cal-mini__title">{{ title or (month_names[month - 1] ~ ' ' ~ year) }}</div>
+  </div>
+  <div class="ux-cal-mini__grid">
+{%- for wd in weekday_labels %}
+    <span class="ux-cal-mini__wd">{{ wd|e }}</span>
+{%- endfor %}
+{%- for _ in range(_first_dow) %}
+    <span class="ux-cal-mini__day ux-cal-mini__day--out"></span>
+{%- endfor %}
+{%- for d in range(1, _days_in_month + 1) %}
+    {%- set iso = '%04d-%02d-%02d' % (year, month, d) -%}
+    {%- set classes = ["ux-cal-mini__day"] -%}
+    {%- if selected and iso == selected %}{%- do classes.append("ux-cal-mini__day--selected") -%}{%- endif -%}
+    {%- if iso in events %}{%- do classes.append("ux-cal-mini__day--has-event") -%}{%- endif -%}
+    <button type="button" class="{{ classes | join(' ') }}" data-date="{{ iso }}">{{ d }}</button>
+{%- endfor %}
+  </div>
+</div>
+{% endmacro %}

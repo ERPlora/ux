@@ -1,0 +1,35 @@
+{# kpi(label, value, unit, delta, trend, variant, attrs)
+
+   Variants from lib/css/components/card.css:
+     - variant : brand (ux-kpi--brand) | glass (ux-kpi--glass)
+
+   `trend` is one of: up | down | flat.
+     - up   → ux-kpi__delta--up   + arrow up icon
+     - down → ux-kpi__delta--down + arrow down icon
+     - flat → no modifier (used for plain text deltas like "objetivo 70%")
+
+   `delta` is a free-form string (e.g. "+12.4%", "objetivo 70%"). When
+   `trend` is "up" or "down" the macro renders the matching arrow svg.
+
+   Body content (e.g. a sparkline svg) goes inside the `{% call %}` slot.
+#}
+{% macro kpi(label="", value="", unit=None, delta=None, trend=None, variant=None, attrs={}) %}
+{%- set classes = ["ux-kpi"] -%}
+{%- if variant %}{%- do classes.append("ux-kpi--" ~ variant) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-kpi__label">{{ label|e }}</div>
+  <div class="ux-kpi__value">{{ value|e }}{%- if unit %}<span class="ux-kpi__value-unit">{{ unit|e }}</span>{% endif -%}</div>
+  {%- if delta is not none %}
+  {%- set delta_classes = ["ux-kpi__delta"] -%}
+  {%- if trend == "up" %}{%- do delta_classes.append("ux-kpi__delta--up") -%}{%- endif -%}
+  {%- if trend == "down" %}{%- do delta_classes.append("ux-kpi__delta--down") -%}{%- endif -%}
+  <div class="{{ delta_classes | join(' ') }}">
+    {%- if trend == "up" %}<svg class="ux-kpi__delta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M7 17L17 7M9 7h8v8"/></svg>{% endif -%}
+    {%- if trend == "down" %}<svg class="ux-kpi__delta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M7 7l10 10M17 9v8H9"/></svg>{% endif -%}
+    <span>{{ delta|e }}</span>
+  </div>
+  {%- endif %}
+  {%- if caller is defined %}{{ caller() }}{% endif %}
+</div>
+{% endmacro %}

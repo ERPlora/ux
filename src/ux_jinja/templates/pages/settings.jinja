@@ -1,0 +1,93 @@
+{% from "ui/card.jinja" import card, card_footer %}
+{% from "ui/button.jinja" import button %}
+{% from "ui/input.jinja" import input as ux_input %}
+{% from "ui/textarea.jinja" import textarea %}
+{% from "ui/list.jinja" import list as ux_list %}
+
+{# Settings example page — sidebar nav + stacked content cards.             #}
+{# Context vars (all optional):                                             #}
+{#   user — dict with keys {name, email, bio}. Falls back to placeholders   #}
+{#          when missing.                                                   #}
+{# Consumers can extend this template by overriding the named block         #}
+{# ``settings_content``.                                                    #}
+{% set _user = user | default({}) %}
+{% set _name = _user.name | default("") %}
+{% set _email = _user.email | default("") %}
+{% set _bio = _user.bio | default("") %}
+{% block settings_content %}
+<section class="ux-stack">
+  <header>
+    <h1>Settings</h1>
+    <p>Manage your profile, account and notification preferences.</p>
+  </header>
+
+  <div class="ux-grid" style="display:grid;grid-template-columns:250px 1fr;gap:1.5rem">
+    <aside>
+      {{ ux_list(items=[
+        {"title": "Profile", "desc": "Personal info", "icon_tone": "brand", "active": true, "chev": false},
+        {"title": "Account", "desc": "Password and security", "chev": false},
+        {"title": "Notifications", "desc": "Channels and alerts", "chev": false},
+        {"title": "Privacy", "desc": "Data and visibility", "chev": false},
+      ]) }}
+    </aside>
+
+    <div class="ux-stack">
+      {% call card(title="Profile", subtitle="Update your public information") %}
+        <form class="ux-stack">
+          <label class="ux-stack" style="gap:.25rem">
+            <span>Name</span>
+            {{ ux_input("name", value=_name, placeholder="Your full name") }}
+          </label>
+          <label class="ux-stack" style="gap:.25rem">
+            <span>Email</span>
+            {{ ux_input("email", type="email", value=_email, placeholder="you@example.com") }}
+          </label>
+          <label class="ux-stack" style="gap:.25rem">
+            <span>Bio</span>
+            {{ textarea("bio", value=_bio, placeholder="A short introduction.", rows=4) }}
+          </label>
+        </form>
+        {% call card_footer() %}
+          {{ button("Save changes", variant="primary") }}
+        {% endcall %}
+      {% endcall %}
+
+      {% call card(title="Account", subtitle="Change your password") %}
+        <form class="ux-stack">
+          <label class="ux-stack" style="gap:.25rem">
+            <span>Current password</span>
+            {{ ux_input("current_password", type="password", placeholder="Current password") }}
+          </label>
+          <label class="ux-stack" style="gap:.25rem">
+            <span>New password</span>
+            {{ ux_input("new_password", type="password", placeholder="New password") }}
+          </label>
+        </form>
+        {% call card_footer() %}
+          {{ button("Update password", variant="primary") }}
+        {% endcall %}
+      {% endcall %}
+
+      {% call card(title="Notifications", subtitle="Pick how you want to be notified") %}
+        <div class="ux-stack">
+          <label class="ux-flex ux-items-center" style="gap:.5rem">
+            <input type="checkbox" name="notify_email" checked />
+            <span>Email — product updates</span>
+          </label>
+          <label class="ux-flex ux-items-center" style="gap:.5rem">
+            <input type="checkbox" name="notify_push" />
+            <span>Push — security alerts</span>
+          </label>
+          <label class="ux-flex ux-items-center" style="gap:.5rem">
+            <input type="checkbox" name="notify_sms" />
+            <span>SMS — billing reminders</span>
+          </label>
+        </div>
+        {% call card_footer() %}
+          {{ button("Save preferences", variant="secondary") }}
+        {% endcall %}
+      {% endcall %}
+    </div>
+  </div>
+</section>
+{% endblock %}

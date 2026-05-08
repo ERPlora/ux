@@ -1,0 +1,55 @@
+{# loading_state, error_state, success_state — feedback blocks for async UIs.
+
+   `loading_state(message, size)` -> centered `.ux-loading` block with a
+   `.ux-spinner`. Sizes mirror the spinner: sm | md (default) | lg | xl.
+
+   `error_state(message, code, retry_url, retry_label)` -> the `.ux-error`
+   card from lib/css/components/states.css with optional retry CTA.
+
+   `success_state(message, title)` -> a `.ux-alert.ux-alert--leaf` row.
+#}
+{% macro loading_state(message="Loading...", size=None, block=True, attrs={}) %}
+{%- set classes = ["ux-loading"] -%}
+{%- if block %}{%- do classes.append("ux-loading--block") -%}{%- endif -%}
+{%- set spinner_classes = ["ux-spinner"] -%}
+{%- if size %}{%- do spinner_classes.append("ux-spinner--" ~ size) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <span class="{{ spinner_classes | join(' ') }}" role="status" aria-label="Loading"></span>
+{%- if message %}<span>{{ message|e }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+
+{% macro error_state(message="Something went wrong.", title="Error", code=None, retry_url=None, retry_label="Retry", attrs={}) %}
+<div class="ux-error"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-error__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h0"/></svg>
+  </div>
+  <h3 class="ux-error__title">{{ title|e }}</h3>
+  <p class="ux-error__text">{{ message|e }}</p>
+{%- if code %}
+  <code class="ux-error__code">{{ code|e }}</code>
+{%- endif %}
+{%- if retry_url %}
+  <div class="ux-error__actions">
+    <a class="ux-btn ux-btn--primary" href="{{ retry_url|e }}">{{ retry_label|e }}</a>
+  </div>
+{%- endif %}
+</div>
+{% endmacro %}
+
+
+{% macro success_state(message="Done.", title=None, attrs={}) %}
+<div class="ux-alert ux-alert--leaf"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <span class="ux-alert__icon">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+  </span>
+  <div class="ux-alert__body">
+{%- if title %}<div class="ux-alert__title">{{ title|e }}</div>{% endif %}
+    <div class="ux-alert__desc">{{ message|e }}</div>
+  </div>
+</div>
+{% endmacro %}
