@@ -1,0 +1,418 @@
+<!doctype html><html lang="es" data-theme="erplora"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ERPlora Cloud · Invitar usuarios a hubs</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/erplora-ux.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/templates/all.min.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+<style>
+  body { background: var(--ux-bg); margin: 0; }
+  .invite-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+  @media (max-width: 1100px) { .invite-grid { grid-template-columns: 1fr; } }
+  .preview-mock { background: var(--ux-bg-1); border: 1px solid var(--ux-line); border-radius: var(--ux-radius-xl); padding: 22px; }
+  .preview-mock--light { background: #fefefe; color: #1a1612; }
+  .preview-mock__sub { font-size: var(--ux-text-xs); color: var(--ux-ink-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  .preview-mock__from { font-size: var(--ux-text-sm); color: var(--ux-ink-2); margin-bottom: 16px; }
+  .preview-mock--light .preview-mock__from { color: #524C44; }
+  .preview-mock--light .preview-mock__sub { color: #837B70; }
+  .preview-mock h2 { font-family: var(--ux-font-display); font-size: 22px; margin: 0 0 12px; letter-spacing: var(--ux-tracking-tight); }
+  .preview-mock p { font-size: var(--ux-text-md); line-height: 1.55; margin: 10px 0; }
+  .perm-grid { display: grid; grid-template-columns: 1fr; gap: 4px; padding-top: var(--ux-space-3); }
+</style>
+</head><body
+  data-signals="{
+    emails: ['ana.martin@bodegas-casadejus.com', 'sergi.puig@acme.com', 'nuria.roca@mariola.es'],
+    newEmail: '',
+    hubs: ['acme-prod', 'bodegas-casadejus'],
+    role: 'editor',
+    msg: '',
+    expiry: '7d',
+    showPerms: false,
+    canInvite: false,
+    canBilling: false,
+    canUsers: true,
+    previewMode: 'dark'
+  }">
+
+<div class="ux-app" data-signals="{sidebar: false}" data-attr-data-sidebar="$sidebar ? 'open' : ''">
+  <div class="ux-app__sidebar-overlay" data-on-click="$sidebar = false"></div>
+
+  <!-- =================== SIDEBAR =================== -->
+  <aside class="ux-sidebar">
+    <div class="ux-sidebar__brand">
+      <div class="ux-sidebar__logo" style="background: var(--ux-brand); color: var(--ux-brand-fg); display:grid; place-items:center; font-weight:700; font-size:13px;">EX</div>
+      <div class="ux-sidebar__brand-text">
+        <div class="ux-sidebar__brand-name">ERPlora Cloud</div>
+        <div class="ux-sidebar__brand-meta">Acme Industries</div>
+      </div>
+    </div>
+    <div class="ux-sidebar__body">
+      <div class="ux-sidebar__group">Principal</div>
+      <a class="ux-sidebar__item" href="#">
+        <svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 5 10 12 3l7 7 2 2v9a2 2 0 0 1-2 2h-4v-7H10v7H6a2 2 0 0 1-2-2v-9z"/></svg>
+        <span class="ux-sidebar__label">Overview</span>
+      </a>
+      <a class="ux-sidebar__item" href="#">
+        <svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 9h1m4 0h1M9 13h1m4 0h1M9 17h1m4 0h1"/></svg>
+        <span class="ux-sidebar__label">Organizations</span>
+      </a>
+      <a class="ux-sidebar__item" href="#">
+        <svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M7 12h.01M12 12h.01M17 12h.01"/></svg>
+        <span class="ux-sidebar__label">Hubs</span>
+        <span class="ux-sidebar__badge ux-sidebar__badge--brand">7</span>
+      </a>
+      <a class="ux-sidebar__item" href="#" data-route-active="true">
+        <svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="ux-sidebar__label">Users</span>
+      </a>
+      <a class="ux-sidebar__item" href="#">
+        <svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4M3 9l1.5-3h15L21 9M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM10 21V13h4v8"/></svg>
+        <span class="ux-sidebar__label">Equipment</span>
+      </a>
+      <div class="ux-sidebar__group">Facturación</div>
+      <a class="ux-sidebar__item" href="#"><svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg><span class="ux-sidebar__label">Invoices</span></a>
+      <a class="ux-sidebar__item" href="#"><svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M9 9h6v6H9z"/></svg><span class="ux-sidebar__label">Subscriptions</span></a>
+      <a class="ux-sidebar__item" href="#"><svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg><span class="ux-sidebar__label">Payments</span></a>
+      <div class="ux-sidebar__group">Desarrollador</div>
+      <a class="ux-sidebar__item" href="#"><svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.7L13 2.4a2 2 0 0 0-2 0L4 6.3A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg><span class="ux-sidebar__label">Modules</span></a>
+      <a class="ux-sidebar__item" href="#"><svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3M15 22v-4a4 4 0 0 0-1-3c5-.5 9-2 9-9a7 7 0 0 0-2-5c.4-1 .5-3-.2-4 0 0-2 0-4 1.5a13 13 0 0 0-7 0C7.8.5 5.8.5 5.8.5c-.7 1-.6 3-.2 4a7 7 0 0 0-2 5c0 7 4 8.5 9 9-.6.6-1 1.5-1 3v4"/></svg><span class="ux-sidebar__label">Repositories</span></a>
+      <a class="ux-sidebar__item" href="#"><svg class="ux-sidebar__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span class="ux-sidebar__label">Stripe Connect</span></a>
+    </div>
+    <div class="ux-sidebar__footer">
+      <div class="ux-sidebar__user">
+        <div class="ux-avatar ux-avatar--sm">IB</div>
+        <div class="ux-sidebar__user-info">
+          <div class="ux-sidebar__user-name">Ioan Beilic</div>
+          <div class="ux-sidebar__user-meta">ioan@acme.com</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =================== MAIN =================== -->
+  <main class="ux-app__main">
+    <header class="ux-topbar">
+        <div class="ux-topbar__left">
+          <button class="ux-topbar__back-btn" aria-label="Volver"
+            data-on-click="history.length > 1 ? history.back() : null">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+        </div>
+        <h1 class="ux-topbar__page-title">Invitar usuarios a hubs</h1>
+        
+        <div class="ux-topbar__search">
+        <div class="ux-search">
+          <span class="ux-search__icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+          <input type="search" placeholder="Buscar hubs, módulos, facturas…"/>
+          <span class="ux-search__kbd"><kbd class="ux-kbd">⌘</kbd><kbd class="ux-kbd">K</kbd></span>
+        </div>
+      </div>
+        
+        <div class="ux-topbar__actions">
+          <button class="ux-icon-btn" aria-label="Notificaciones"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+        <div class="ux-avatar ux-avatar--sm">IB</div>
+        </div>
+        <button class="ux-topbar__menu-btn" aria-label="Menú"
+            data-on-click="$sidebar = !$sidebar"
+            data-attr-aria-expanded="$sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+      </header>
+
+    <div class="ux-app__body" style="padding: 24px;">
+      <div class="ux-page-header">
+        <div>
+          <h1 class="ux-page-header__title">Invitar usuarios a hubs</h1>
+          <p class="ux-page-header__sub">Envía invitaciones a una o varias personas para que accedan a uno o varios hubs.</p>
+        </div>
+      </div>
+
+      <div class="ux-callout ux-callout--info" style="margin-bottom: 22px;">
+        <span class="ux-callout__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>
+        <div class="ux-callout__body">
+          <div class="ux-callout__title">Las invitaciones se envían inmediatamente</div>
+          <div class="ux-callout__desc">Los invitados recibirán un email con un enlace seguro. Deben aceptar antes de la fecha de caducidad o el enlace dejará de funcionar.</div>
+        </div>
+      </div>
+
+      <div class="invite-grid">
+
+        <!-- ========== Form ========== -->
+        <section class="ux-card">
+          <header class="ux-card__header">
+            <h2 class="ux-card__title">Detalles de la invitación</h2>
+            <p class="ux-card__sub">Configura quién, dónde y con qué permisos.</p>
+          </header>
+          <div class="ux-card__body">
+
+            <!-- Emails -->
+            <div class="ux-field" style="margin-bottom: 18px;">
+              <label class="ux-field__label ux-field__label--req">Emails de invitados</label>
+              <div class="ux-tag-input">
+                <span class="ux-tag" data-show="$emails.includes('ana.martin@bodegas-casadejus.com')">
+                  ana.martin@bodegas-casadejus.com
+                  <button class="ux-tag__remove" aria-label="Quitar" data-on-click="$emails = $emails.filter(e =&gt; e !== 'ana.martin@bodegas-casadejus.com')">×</button>
+                </span>
+                <span class="ux-tag" data-show="$emails.includes('sergi.puig@acme.com')">
+                  sergi.puig@acme.com
+                  <button class="ux-tag__remove" aria-label="Quitar" data-on-click="$emails = $emails.filter(e =&gt; e !== 'sergi.puig@acme.com')">×</button>
+                </span>
+                <span class="ux-tag" data-show="$emails.includes('nuria.roca@mariola.es')">
+                  nuria.roca@mariola.es
+                  <button class="ux-tag__remove" aria-label="Quitar" data-on-click="$emails = $emails.filter(e =&gt; e !== 'nuria.roca@mariola.es')">×</button>
+                </span>
+                <input
+                  type="email"
+                  placeholder="añadir email…"
+                  data-bind-newEmail
+                  data-on-keydown="if (evt.key === 'Enter' &amp;&amp; $newEmail.includes('@')) { $emails = [...$emails, $newEmail]; $newEmail = ''; }"
+                  style="flex: 1; min-width: 200px; background: transparent; border: 0; outline: 0; color: var(--ux-ink); font-size: var(--ux-text-md); padding: 4px 6px;"/>
+              </div>
+              <span class="ux-field__hint"><span data-text="$emails.length"></span> destinatarios · pulsa Enter para añadir</span>
+            </div>
+
+            <!-- Hubs multiselect -->
+            <div class="ux-field" style="margin-bottom: 18px;">
+              <label class="ux-field__label ux-field__label--req">Hubs</label>
+              <div class="ux-filter-chips">
+                <button class="ux-filter-chip"
+                  data-on-click="$hubs = $hubs.includes('acme-prod') ? $hubs.filter(h =&gt; h !== 'acme-prod') : [...$hubs, 'acme-prod']"
+                  data-class-is-active="$hubs.includes('acme-prod')">
+                  <span class="ux-filter-chip__check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span>
+                  <span class="ux-filter-chip__label">acme-prod</span>
+                  <span class="ux-filter-chip__count">12</span>
+                </button>
+                <button class="ux-filter-chip"
+                  data-on-click="$hubs = $hubs.includes('bodegas-casadejus') ? $hubs.filter(h =&gt; h !== 'bodegas-casadejus') : [...$hubs, 'bodegas-casadejus']"
+                  data-class-is-active="$hubs.includes('bodegas-casadejus')">
+                  <span class="ux-filter-chip__check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span>
+                  <span class="ux-filter-chip__label">bodegas-casadejus</span>
+                  <span class="ux-filter-chip__count">8</span>
+                </button>
+                <button class="ux-filter-chip"
+                  data-on-click="$hubs = $hubs.includes('mariola-tienda-1') ? $hubs.filter(h =&gt; h !== 'mariola-tienda-1') : [...$hubs, 'mariola-tienda-1']"
+                  data-class-is-active="$hubs.includes('mariola-tienda-1')">
+                  <span class="ux-filter-chip__check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span>
+                  <span class="ux-filter-chip__label">mariola-tienda-1</span>
+                  <span class="ux-filter-chip__count">4</span>
+                </button>
+                <button class="ux-filter-chip"
+                  data-on-click="$hubs = $hubs.includes('vinos-roca-staging') ? $hubs.filter(h =&gt; h !== 'vinos-roca-staging') : [...$hubs, 'vinos-roca-staging']"
+                  data-class-is-active="$hubs.includes('vinos-roca-staging')">
+                  <span class="ux-filter-chip__check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span>
+                  <span class="ux-filter-chip__label">vinos-roca-staging</span>
+                  <span class="ux-filter-chip__count">3</span>
+                </button>
+              </div>
+              <span class="ux-field__hint">Seleccionados: <span data-text="$hubs.length"></span> hub<span data-text="$hubs.length === 1 ? '' : 's'"></span></span>
+            </div>
+
+            <!-- Role -->
+            <div class="ux-field" style="margin-bottom: 18px;">
+              <label class="ux-field__label ux-field__label--req">Rol por hub</label>
+              <div class="ux-radio-group" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                <label class="ux-radio-card" data-class-is-selected="$role === 'admin'">
+                  <input type="radio" name="role" value="admin" data-on-click="$role = 'admin'" hidden/>
+                  <span class="ux-radio-card__title">Admin</span>
+                  <span class="ux-radio-card__desc">Acceso total · gestiona usuarios y configuración del hub.</span>
+                </label>
+                <label class="ux-radio-card" data-class-is-selected="$role === 'editor'">
+                  <input type="radio" name="role" value="editor" data-on-click="$role = 'editor'" checked hidden/>
+                  <span class="ux-radio-card__title">Editor</span>
+                  <span class="ux-radio-card__desc">Edita catálogo, pedidos y operaciones diarias. Sin facturación.</span>
+                </label>
+                <label class="ux-radio-card" data-class-is-selected="$role === 'viewer'">
+                  <input type="radio" name="role" value="viewer" data-on-click="$role = 'viewer'" hidden/>
+                  <span class="ux-radio-card__title">Viewer</span>
+                  <span class="ux-radio-card__desc">Solo lectura · ve métricas, reportes e historial.</span>
+                </label>
+                <label class="ux-radio-card" data-class-is-selected="$role === 'pos'">
+                  <input type="radio" name="role" value="pos" data-on-click="$role = 'pos'" hidden/>
+                  <span class="ux-radio-card__title">Solo POS</span>
+                  <span class="ux-radio-card__desc">Atiende caja en terminales POS. Sin acceso a backoffice.</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Mensaje -->
+            <div class="ux-field" style="margin-bottom: 18px;">
+              <label class="ux-field__label">Mensaje opcional</label>
+              <textarea class="ux-textarea" rows="3" maxlength="500"
+                placeholder="Hola, te invito a colaborar en el hub de Acme. Tu rol será Editor…"
+                data-bind-msg></textarea>
+              <span class="ux-field__hint"><span data-text="$msg.length"></span> / 500 caracteres</span>
+            </div>
+
+            <!-- Caducidad -->
+            <div class="ux-field" style="margin-bottom: 18px;">
+              <label class="ux-field__label">Caducidad de la invitación</label>
+              <div class="ux-toggle-group ux-toggle-group--block">
+                <button class="ux-toggle-group__option" data-on-click="$expiry = '24h'" data-class-is-selected="$expiry === '24h'">24 h</button>
+                <button class="ux-toggle-group__option" data-on-click="$expiry = '7d'" data-class-is-selected="$expiry === '7d'">7 días</button>
+                <button class="ux-toggle-group__option" data-on-click="$expiry = '30d'" data-class-is-selected="$expiry === '30d'">30 días</button>
+                <button class="ux-toggle-group__option" data-on-click="$expiry = 'none'" data-class-is-selected="$expiry === 'none'">Sin caducidad</button>
+              </div>
+            </div>
+
+            <!-- Permisos avanzados (collapsible) -->
+            <div class="ux-field" style="margin-bottom: 18px;">
+              <button class="ux-btn ux-btn--ghost ux-btn--sm" style="width: auto;"
+                data-on-click="$showPerms = !$showPerms"
+                data-attr-aria-expanded="$showPerms">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  data-style-transform="$showPerms ? 'rotate(90deg)' : 'rotate(0deg)'"
+                  style="transition: transform var(--ux-dur-fast); margin-right: 6px;">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+                Permisos avanzados
+              </button>
+              <div class="perm-grid" data-show="$showPerms">
+                <label class="ux-toggle-row">
+                  <span class="ux-toggle-row__text">
+                    <span class="ux-toggle-row__label">Puede invitar a otros usuarios</span>
+                    <span class="ux-toggle-row__desc">Permite reenviar invitaciones desde su cuenta.</span>
+                  </span>
+                  <input type="checkbox" class="ux-toggle" data-bind-canInvite/>
+                </label>
+                <label class="ux-toggle-row">
+                  <span class="ux-toggle-row__text">
+                    <span class="ux-toggle-row__label">Ve facturación e informes financieros</span>
+                    <span class="ux-toggle-row__desc">Acceso a facturas, pagos y reportes mensuales.</span>
+                  </span>
+                  <input type="checkbox" class="ux-toggle" data-bind-canBilling/>
+                </label>
+                <label class="ux-toggle-row">
+                  <span class="ux-toggle-row__text">
+                    <span class="ux-toggle-row__label">Ve listado de usuarios del hub</span>
+                    <span class="ux-toggle-row__desc">Ver miembros y sus roles, sin permitir cambios.</span>
+                  </span>
+                  <input type="checkbox" class="ux-toggle" data-bind-canUsers/>
+                </label>
+              </div>
+            </div>
+
+          </div>
+          <footer class="ux-card__footer ux-card__actions">
+            <button class="ux-btn ux-btn--ghost">Cancelar</button>
+            <button class="ux-btn ux-btn--primary ux-btn--block"
+              data-attr-disabled="$emails.length === 0 || $hubs.length === 0">
+              Enviar <span data-text="$emails.length"></span> invitación<span data-text="$emails.length === 1 ? '' : 'es'"></span>
+            </button>
+          </footer>
+        </section>
+
+        <!-- ========== Preview ========== -->
+        <aside style="position: sticky; top: 22px;">
+          <div class="ux-card" style="margin-bottom: 14px;">
+            <header class="ux-card__header" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <h2 class="ux-card__title">Vista previa del email</h2>
+                <p class="ux-card__sub">Esto recibirá cada invitado.</p>
+              </div>
+              <div class="ux-segment ux-segment--sm">
+                <button class="ux-segment__opt" data-on-click="$previewMode = 'dark'" data-attr-aria-pressed="$previewMode === 'dark'">🌙</button>
+                <button class="ux-segment__opt" data-on-click="$previewMode = 'light'" data-attr-aria-pressed="$previewMode === 'light'">☀</button>
+              </div>
+            </header>
+            <div class="ux-card__body">
+
+              <div class="preview-mock" data-class="$previewMode === 'light' ? 'preview-mock--light' : ''">
+                <div class="preview-mock__sub">Asunto</div>
+                <p style="font-weight: 600; font-size: var(--ux-text-md); margin: 0 0 16px;">
+                  Te invitamos a unirte a <span data-text="$hubs.length === 1 ? $hubs[0] : $hubs.length + ' hubs'"></span> en ERPlora Cloud
+                </p>
+
+                <div class="preview-mock__from">De: Ioan Beilic · Acme Industries · ioan@acme.com</div>
+                <hr style="border: 0; border-top: 1px solid var(--ux-line); margin: 16px 0;"/>
+
+                <h2>Hola 👋</h2>
+                <p>Te he invitado a colaborar en
+                  <strong data-text="$hubs.length === 1 ? 'el hub <strong>' + $hubs[0] + '</strong>' : $hubs.length + ' hubs'"></strong>
+                  como
+                  <strong data-text="$role === 'admin' ? 'Admin' : $role === 'editor' ? 'Editor' : $role === 'viewer' ? 'Viewer' : 'Solo POS'"></strong>.
+                </p>
+                <p data-show="$msg.length &gt; 0" style="background: color-mix(in oklch, var(--ux-brand) 10%, transparent); border-left: 3px solid var(--ux-brand); padding: 12px 14px; border-radius: 0 6px 6px 0;">
+                  <em data-text="$msg"></em>
+                </p>
+                <p>Pulsa el botón para activar tu acceso. La invitación caduca en
+                  <strong data-text="$expiry === '24h' ? '24 horas' : $expiry === '7d' ? '7 días' : $expiry === '30d' ? '30 días' : 'nunca'"></strong>.
+                </p>
+
+                <p style="margin-top: 22px;">
+                  <span style="display: inline-block; background: var(--ux-brand); color: var(--ux-brand-fg); padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: var(--ux-text-md);">
+                    Aceptar invitación →
+                  </span>
+                </p>
+
+                <hr style="border: 0; border-top: 1px solid var(--ux-line); margin: 22px 0 12px;"/>
+                <p style="font-size: var(--ux-text-xs); color: var(--ux-ink-3); margin: 0;">
+                  ¿No esperabas esta invitación? Puedes ignorar este email — no se creará ninguna cuenta.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Resumen rápido -->
+          <div class="ux-card">
+            <header class="ux-card__header">
+              <h3 class="ux-card__title">Resumen</h3>
+            </header>
+            <div class="ux-card__body" style="display: grid; gap: 10px; font-size: var(--ux-text-md);">
+              <div style="display: flex; justify-content: space-between;">
+                <span class="ux-c-ink-3">Destinatarios</span>
+                <strong data-text="$emails.length"></strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span class="ux-c-ink-3">Hubs</span>
+                <strong data-text="$hubs.length"></strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span class="ux-c-ink-3">Rol</span>
+                <strong data-text="$role === 'admin' ? 'Admin' : $role === 'editor' ? 'Editor' : $role === 'viewer' ? 'Viewer' : 'Solo POS'"></strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span class="ux-c-ink-3">Caducidad</span>
+                <strong data-text="$expiry === '24h' ? '24 horas' : $expiry === '7d' ? '7 días' : $expiry === '30d' ? '30 días' : 'sin caducidad'"></strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span class="ux-c-ink-3">Total invitaciones</span>
+                <strong data-text="($emails.length * $hubs.length)"></strong>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+
+  <!-- Bottom tab bar — mobile only via .ux-app__tabbar slot -->
+  <nav class="ux-app__tabbar" aria-label="Navegación principal">
+    <div class="ux-tabbar ux-tabbar--fixed ux-tabbar--icons">
+      <a class="ux-tabbar-item" href="#" aria-current="page">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 5 10 12 3l7 7 2 2v9a2 2 0 0 1-2 2h-4v-7H10v7H6a2 2 0 0 1-2-2v-9z"/></svg></span>
+        <span class="ux-tabbar-label">Inicio</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M7 12h.01M12 12h.01M17 12h.01"/></svg></span>
+        <span class="ux-tabbar-label">Hubs</span>
+        <span class="ux-tabbar-badge">7</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="ux-tabbar-label">Usuarios</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4M3 9l1.5-3h15L21 9M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM10 21V13h4v8"/></svg></span>
+        <span class="ux-tabbar-label">Equipo</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 19a5 5 0 0 1 10 0"/></svg></span>
+        <span class="ux-tabbar-label">Perfil</span>
+      </a>
+    </div>
+  </nav>
+</div>
+
+</body></html>

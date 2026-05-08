@@ -1,0 +1,410 @@
+<!doctype html><html lang="es" data-theme="erplora"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ERPlora Cloud · Vendor Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/erplora-ux.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/templates/all.min.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+<style>
+  body { background: var(--ux-bg); margin: 0; }
+  .charts-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+  @media (max-width: 1100px) { .charts-row { grid-template-columns: 1fr; } }
+  .stripe-card { background: linear-gradient(135deg, color-mix(in oklch, var(--ux-info) 12%, var(--ux-bg-2)), var(--ux-bg-2)); border: 1px solid var(--ux-line); border-radius: var(--ux-radius-xl); padding: 18px 22px; display: grid; grid-template-columns: 48px 1fr auto; gap: 16px; align-items: center; }
+  .stripe-card__logo { width: 48px; height: 48px; border-radius: var(--ux-radius-md); background: #635BFF; color: white; display: grid; place-items: center; font-family: var(--ux-font-display); font-weight: 700; font-size: 18px; }
+  .payout-card { background: var(--ux-bg-2); border: 1px solid var(--ux-line); border-radius: var(--ux-radius-xl); padding: 22px; display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; }
+  .payout-card__amt { font-family: var(--ux-font-display); font-size: 36px; font-weight: 700; letter-spacing: -0.04em; color: var(--ux-ink); font-variant-numeric: tabular-nums; }
+</style>
+</head><body>
+
+<div class="ux-app" id="app" data-tabbar="bottom" data-signals="{sidebar: false}" data-attr-data-sidebar="$sidebar ? 'open' : ''">
+  <div class="ux-app__sidebar-overlay" data-on-click="$sidebar = false"></div>
+
+  <aside class="ux-sidebar">
+    <div class="ux-sidebar__brand">
+      <div class="ux-sidebar__logo">EX</div>
+      <div class="ux-sidebar__brand-text">
+        <div class="ux-sidebar__brand-name">ERPlora Cloud</div>
+        <div class="ux-sidebar__brand-meta">Acme Industries SL</div>
+      </div>
+    </div>
+    <div class="ux-sidebar__body">
+      <div class="ux-sidebar__group">Cuenta</div>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span class="ux-sidebar__label">Vista general</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg><span class="ux-sidebar__label">Hubs</span><span class="ux-sidebar__badge">5</span></button>
+
+      <div class="ux-sidebar__group">Facturación</div>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg><span class="ux-sidebar__label">Facturas</span><span class="ux-sidebar__badge ux-sidebar__badge--brand">3</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg><span class="ux-sidebar__label">Suscripciones</span><span class="ux-sidebar__badge">5</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h2"/></svg><span class="ux-sidebar__label">Métodos de pago</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4V3H8v4H4l8 9 8-9z"/><path d="M4 19h16"/></svg><span class="ux-sidebar__label">Mis compras</span></button>
+
+      <div class="ux-sidebar__group">Vendor</div>
+      <button class="ux-sidebar__item" aria-current="page"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-7"/></svg><span class="ux-sidebar__label">Vendor Dashboard</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span class="ux-sidebar__label">Ingresos</span></button>
+    </div>
+    <div class="ux-sidebar__footer">
+      <div class="ux-sidebar__user">
+        <span class="ux-avatar ux-avatar--sm ux-avatar--brand">IB</span>
+        <div class="ux-sidebar__user-info">
+          <div class="ux-sidebar__user-name">Ioan Beilic</div>
+          <div class="ux-sidebar__user-meta">ioan@acme.com</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="ux-app__main">
+    <header class="ux-topbar">
+        <div class="ux-topbar__left">
+          <button class="ux-topbar__back-btn" aria-label="Volver"
+            data-on-click="history.length > 1 ? history.back() : null">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+        </div>
+        <h1 class="ux-topbar__page-title">Vendor Dashboard</h1>
+        
+        <div class="ux-topbar__search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input placeholder="Buscar módulo, payout…"/>
+        <span class="ux-topbar__kbd">⌘K</span>
+      </div>
+        
+        <div class="ux-topbar__actions">
+          <button class="ux-icon-btn" aria-label="Notificaciones"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+        </div>
+        <button class="ux-topbar__menu-btn" aria-label="Menú"
+            data-on-click="$sidebar = !$sidebar"
+            data-attr-aria-expanded="$sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+      </header>
+
+    <div class="ux-app__body">
+      <div class="ux-page-header">
+        <div class="ux-page-header__title">
+          <h1>Vendor Dashboard</h1>
+          <div class="ux-page-header__sub">Tus módulos publicados en el Marketplace · 12 activos</div>
+        </div>
+        <div class="ux-page-header__actions">
+          <button class="ux-btn ux-btn--outline ux-btn--sm">Ver módulos</button>
+          <button class="ux-btn ux-btn--primary ux-btn--sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Solicitar payout
+          </button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="ux-grid-4" style="margin-bottom: 22px;">
+        <div class="ux-kpi ux-kpi--brand">
+          <div class="ux-kpi__label">Ingresos totales</div>
+          <div class="ux-kpi__value">8 240<span class="ux-kpi__value-unit">€</span></div>
+          <div class="ux-kpi__delta">desde el inicio · 2024</div>
+        </div>
+        <div class="ux-kpi">
+          <div class="ux-kpi__label">Este mes</div>
+          <div class="ux-kpi__value">1 480<span class="ux-kpi__value-unit">€</span></div>
+          <div class="ux-kpi__delta ux-kpi__delta--up">
+            <svg class="ux-kpi__delta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17l9-9M9 8h7v7"/></svg>
+            +18% vs abril
+          </div>
+        </div>
+        <div class="ux-kpi">
+          <div class="ux-kpi__label">Módulos activos</div>
+          <div class="ux-kpi__value">12</div>
+          <div class="ux-kpi__delta">3 publicados en 2026</div>
+        </div>
+        <div class="ux-kpi">
+          <div class="ux-kpi__label">Descargas mes</div>
+          <div class="ux-kpi__value">3 240</div>
+          <div class="ux-kpi__delta ux-kpi__delta--up">+412 vs abril</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row" style="margin-bottom: 22px;">
+        <!-- Line chart -->
+        <div class="ux-chart">
+          <div class="ux-chart__head">
+            <div>
+              <h3 class="ux-chart__title">Ingresos · últimos 12 meses</h3>
+              <div class="ux-chart__sub">Net mensual tras comisiones</div>
+            </div>
+            <div>
+              <div class="ux-chart__big">8 240 €</div>
+              <div class="ux-chart__delta ux-chart__delta--up">+18% YoY</div>
+            </div>
+          </div>
+          <svg class="ux-chart__svg" viewBox="0 0 600 220" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="ux-area-grad" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="var(--ux-brand)" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="var(--ux-brand)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g class="ux-chart__grid">
+              <line x1="40" x2="590" y1="40" y2="40"/>
+              <line x1="40" x2="590" y1="90" y2="90"/>
+              <line x1="40" x2="590" y1="140" y2="140"/>
+              <line x1="40" x2="590" y1="190" y2="190"/>
+            </g>
+            <g class="ux-chart__axis">
+              <text x="36" y="44" text-anchor="end">2 000</text>
+              <text x="36" y="94" text-anchor="end">1 500</text>
+              <text x="36" y="144" text-anchor="end">1 000</text>
+              <text x="36" y="194" text-anchor="end">500</text>
+              <text x="60" y="212">jun</text>
+              <text x="110" y="212">jul</text>
+              <text x="160" y="212">ago</text>
+              <text x="210" y="212">sep</text>
+              <text x="260" y="212">oct</text>
+              <text x="310" y="212">nov</text>
+              <text x="360" y="212">dic</text>
+              <text x="410" y="212">ene</text>
+              <text x="460" y="212">feb</text>
+              <text x="510" y="212">mar</text>
+              <text x="540" y="212">abr</text>
+              <text x="580" y="212">may</text>
+            </g>
+            <path class="ux-chart__area" d="M60,170 L110,160 L160,150 L210,140 L260,120 L310,130 L360,110 L410,95 L460,80 L510,90 L540,70 L580,55 L580,200 L60,200 Z"/>
+            <path class="ux-chart__line" d="M60,170 L110,160 L160,150 L210,140 L260,120 L310,130 L360,110 L410,95 L460,80 L510,90 L540,70 L580,55"/>
+            <circle class="ux-chart__dot" cx="60"  cy="170" r="3"/>
+            <circle class="ux-chart__dot" cx="110" cy="160" r="3"/>
+            <circle class="ux-chart__dot" cx="160" cy="150" r="3"/>
+            <circle class="ux-chart__dot" cx="210" cy="140" r="3"/>
+            <circle class="ux-chart__dot" cx="260" cy="120" r="3"/>
+            <circle class="ux-chart__dot" cx="310" cy="130" r="3"/>
+            <circle class="ux-chart__dot" cx="360" cy="110" r="3"/>
+            <circle class="ux-chart__dot" cx="410" cy="95"  r="3"/>
+            <circle class="ux-chart__dot" cx="460" cy="80"  r="3"/>
+            <circle class="ux-chart__dot" cx="510" cy="90"  r="3"/>
+            <circle class="ux-chart__dot" cx="540" cy="70"  r="3"/>
+            <circle class="ux-chart__dot" cx="580" cy="55"  r="3"/>
+          </svg>
+        </div>
+
+        <!-- Top modules bar chart -->
+        <div class="ux-chart">
+          <div class="ux-chart__head">
+            <div>
+              <h3 class="ux-chart__title">Top 5 módulos · ingresos</h3>
+              <div class="ux-chart__sub">Marzo–mayo 2026</div>
+            </div>
+          </div>
+          <div class="ux-hbars">
+            <div class="ux-hbar">
+              <span class="ux-hbar__label">contabilidad-pro</span>
+              <div class="ux-hbar__track"><div class="ux-hbar__fill" style="width: 92%;"></div></div>
+              <span class="ux-hbar__value">1 240 €</span>
+            </div>
+            <div class="ux-hbar">
+              <span class="ux-hbar__label">vinedos-erp</span>
+              <div class="ux-hbar__track"><div class="ux-hbar__fill ux-hbar__fill--leaf" style="width: 68%;"></div></div>
+              <span class="ux-hbar__value">920 €</span>
+            </div>
+            <div class="ux-hbar">
+              <span class="ux-hbar__label">facturae-export</span>
+              <div class="ux-hbar__track"><div class="ux-hbar__fill ux-hbar__fill--info" style="width: 52%;"></div></div>
+              <span class="ux-hbar__value">710 €</span>
+            </div>
+            <div class="ux-hbar">
+              <span class="ux-hbar__label">stock-multi-sede</span>
+              <div class="ux-hbar__track"><div class="ux-hbar__fill ux-hbar__fill--warn" style="width: 38%;"></div></div>
+              <span class="ux-hbar__value">520 €</span>
+            </div>
+            <div class="ux-hbar">
+              <span class="ux-hbar__label">pos-tickets-bono</span>
+              <div class="ux-hbar__track"><div class="ux-hbar__fill" style="width: 22%;"></div></div>
+              <span class="ux-hbar__value">300 €</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stripe Connect -->
+      <div class="stripe-card" style="margin-bottom: 22px;">
+        <div class="stripe-card__logo">S</div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+            <div style="font-family: var(--ux-font-display); font-size: 15px; font-weight: 600; color: var(--ux-ink);">Stripe Connect</div>
+            <span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>Conectado</span>
+          </div>
+          <div style="font-size: 12.5px; color: var(--ux-ink-3);">
+            Cuenta <span class="ux-td--mono">acct_••••••••3F2A</span> · IBAN <span class="ux-td--mono">ES•• •••• •••• ••42</span><br/>
+            Pagos automáticos cada lunes · próximo: 13 may 2026
+          </div>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button class="ux-btn ux-btn--outline ux-btn--sm">Configurar</button>
+          <button class="ux-btn ux-btn--ghost ux-btn--sm">Stripe Dashboard ↗</button>
+        </div>
+      </div>
+
+      <!-- Próximo payout -->
+      <div class="payout-card" style="margin-bottom: 22px;">
+        <div>
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ux-ink-3); font-weight: 500;">Próximo payout</div>
+          <div class="payout-card__amt" style="margin-top: 6px;">1 240,00 €</div>
+          <div style="font-size: 12.5px; color: var(--ux-ink-3); margin-top: 4px;">Llegará el <b style="color: var(--ux-ink);">13 may 2026</b> · 28 movimientos · <a href="#" style="color: var(--ux-brand-3);">ver desglose</a></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+          <span class="ux-badge ux-badge--info"><span class="ux-badge__dot"></span>Programado</span>
+          <button class="ux-btn ux-btn--primary ux-btn--sm">Adelantar payout</button>
+        </div>
+      </div>
+
+      <!-- Movimientos recientes -->
+      <section class="ux-section">
+        <div class="ux-section__head">
+          <div>
+            <div class="ux-section__title">Movimientos recientes</div>
+            <div class="ux-section__sub">Últimos 10 movimientos en tu cuenta vendor</div>
+          </div>
+          <button class="ux-btn ux-btn--ghost ux-btn--sm">Ver todos</button>
+        </div>
+
+        <div class="ux-table-wrap">
+          <div class="ux-table-scroll">
+            <table class="ux-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th>Módulo / referencia</th>
+                  <th>Hub comprador</th>
+                  <th style="text-align: right;">Importe</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>06 may 2026 · 14:22</td>
+                  <td><span class="ux-badge ux-badge--ok">Venta</span></td>
+                  <td><div class="ux-cell-rich"><div class="ux-cell-rich__main"><div class="ux-cell-rich__title">contabilidad-pro</div><div class="ux-cell-rich__sub ux-td--mono">tx_8721</div></div></div></td>
+                  <td class="ux-td--muted">acme-prod</td>
+                  <td class="ux-td--num" style="color: var(--ux-leaf);">+89,00 €</td>
+                  <td><span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>Liquidado</span></td>
+                </tr>
+                <tr>
+                  <td>06 may 2026 · 11:08</td>
+                  <td><span class="ux-badge">Comisión</span></td>
+                  <td><div class="ux-cell-rich"><div class="ux-cell-rich__main"><div class="ux-cell-rich__title">contabilidad-pro</div><div class="ux-cell-rich__sub ux-td--mono">fee_8721</div></div></div></td>
+                  <td class="ux-td--muted">acme-prod</td>
+                  <td class="ux-td--num" style="color: var(--ux-danger);">−26,70 €</td>
+                  <td><span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>Liquidado</span></td>
+                </tr>
+                <tr>
+                  <td>05 may 2026 · 18:44</td>
+                  <td><span class="ux-badge ux-badge--ok">Venta</span></td>
+                  <td><div class="ux-cell-rich"><div class="ux-cell-rich__main"><div class="ux-cell-rich__title">vinedos-erp</div><div class="ux-cell-rich__sub ux-td--mono">tx_8714</div></div></div></td>
+                  <td class="ux-td--muted">mariola-prod</td>
+                  <td class="ux-td--num" style="color: var(--ux-leaf);">+159,00 €</td>
+                  <td><span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>Liquidado</span></td>
+                </tr>
+                <tr>
+                  <td>04 may 2026 · 09:12</td>
+                  <td><span class="ux-badge ux-badge--ok">Venta</span></td>
+                  <td><div class="ux-cell-rich"><div class="ux-cell-rich__main"><div class="ux-cell-rich__title">facturae-export</div><div class="ux-cell-rich__sub ux-td--mono">tx_8702</div></div></div></td>
+                  <td class="ux-td--muted">norte-prod</td>
+                  <td class="ux-td--num" style="color: var(--ux-leaf);">+49,00 €</td>
+                  <td><span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>Liquidado</span></td>
+                </tr>
+                <tr>
+                  <td>02 may 2026 · 16:30</td>
+                  <td><span class="ux-badge ux-badge--info">Renovación</span></td>
+                  <td><div class="ux-cell-rich"><div class="ux-cell-rich__main"><div class="ux-cell-rich__title">stock-multi-sede</div><div class="ux-cell-rich__sub ux-td--mono">renew_8688</div></div></div></td>
+                  <td class="ux-td--muted">rambla-prod</td>
+                  <td class="ux-td--num" style="color: var(--ux-leaf);">+45,00 €</td>
+                  <td><span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>Liquidado</span></td>
+                </tr>
+                <tr>
+                  <td>30 abr 2026 · 14:05</td>
+                  <td><span class="ux-badge ux-badge--info">Payout</span></td>
+                  <td><div class="ux-cell-rich"><div class="ux-cell-rich__main"><div class="ux-cell-rich__title">Payout abril 2026</div><div class="ux-cell-rich__sub ux-td--mono">po_4421</div></div></div></td>
+                  <td class="ux-td--muted">—</td>
+                  <td class="ux-td--num" style="color: var(--ux-info);">−1 320,00 €</td>
+                  <td><span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>Pagado</span></td>
+                </tr>
+                <tr>
+                  <td>28 abr 2026 · 11:14</td>
+                  <td><span class="ux-badge ux-badge--ok">Venta</span></td>
+                  <td><div class="ux-cell-rich"><div class="ux-cell-rich__main"><div class="ux-cell-rich__title">pos-tickets-bono</div><div class="ux-cell-rich__sub ux-td--mono">tx_8612</div></div></div></td>
+                  <td class="ux-td--muted">rambla-prod</td>
+                  <td class="ux-td--num" style="color: var(--ux-leaf);">+29,00 €</td>
+                  <td><span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>Liquidado</span></td>
+                </tr>
+                <tr>
+                  <td>26 abr 2026 · 08:50</td>
+                  <td><span class="ux-badge ux-badge--ok">Venta</span></td>
+                  <td><div class="ux-cell-rich"><div class="ux-cell-rich__main"><div class="ux-cell-rich__title">contabilidad-pro</div><div class="ux-cell-rich__sub ux-td--mono">tx_8580</div></div></div></td>
+                  <td class="ux-td--muted">acme-prod</td>
+                  <td class="ux-td--num" style="color: var(--ux-leaf);">+89,00 €</td>
+                  <td><span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>Liquidado</span></td>
+                </tr>
+                <tr>
+                  <td>22 abr 2026 · 17:22</td>
+                  <td><span class="ux-badge ux-badge--warn">Reembolso</span></td>
+                  <td><div class="ux-cell-rich"><div class="ux-cell-rich__main"><div class="ux-cell-rich__title">vinedos-erp</div><div class="ux-cell-rich__sub ux-td--mono">refund_8501</div></div></div></td>
+                  <td class="ux-td--muted">lola-prod</td>
+                  <td class="ux-td--num" style="color: var(--ux-danger);">−159,00 €</td>
+                  <td><span class="ux-badge ux-badge--warn"><span class="ux-badge__dot"></span>Procesado</span></td>
+                </tr>
+                <tr>
+                  <td>20 abr 2026 · 10:11</td>
+                  <td><span class="ux-badge ux-badge--ok">Venta</span></td>
+                  <td><div class="ux-cell-rich"><div class="ux-cell-rich__main"><div class="ux-cell-rich__title">facturae-export</div><div class="ux-cell-rich__sub ux-td--mono">tx_8482</div></div></div></td>
+                  <td class="ux-td--muted">acme-prod</td>
+                  <td class="ux-td--num" style="color: var(--ux-leaf);">+49,00 €</td>
+                  <td><span class="ux-badge ux-badge--ok"><span class="ux-badge__dot"></span>Liquidado</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ux-table-footer">
+            <div class="ux-pager">
+              <span class="ux-pager__info">Mostrando <b>1–10</b> de <b>286</b> movimientos</span>
+            </div>
+            <div class="ux-paginator">
+              <button class="ux-paginator__btn" aria-disabled="true">‹</button>
+              <button class="ux-paginator__btn" aria-current="page">1</button>
+              <button class="ux-paginator__btn">2</button>
+              <button class="ux-paginator__btn">3</button>
+              <span class="ux-paginator__gap">…</span>
+              <button class="ux-paginator__btn">29</button>
+              <button class="ux-paginator__btn">›</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+
+  <!-- Bottom tab bar — mobile only via .ux-app__tabbar slot -->
+  <nav class="ux-app__tabbar" aria-label="Navegación principal">
+    <div class="ux-tabbar ux-tabbar--fixed ux-tabbar--icons">
+      <a class="ux-tabbar-item" href="#" aria-current="page">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 5 10 12 3l7 7 2 2v9a2 2 0 0 1-2 2h-4v-7H10v7H6a2 2 0 0 1-2-2v-9z"/></svg></span>
+        <span class="ux-tabbar-label">Inicio</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M7 12h.01M12 12h.01M17 12h.01"/></svg></span>
+        <span class="ux-tabbar-label">Hubs</span>
+        <span class="ux-tabbar-badge">7</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="ux-tabbar-label">Usuarios</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4M3 9l1.5-3h15L21 9M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM10 21V13h4v8"/></svg></span>
+        <span class="ux-tabbar-label">Equipo</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 19a5 5 0 0 1 10 0"/></svg></span>
+        <span class="ux-tabbar-label">Perfil</span>
+      </a>
+    </div>
+  </nav>
+</div>
+
+</body></html>

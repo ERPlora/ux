@@ -1,0 +1,342 @@
+<!doctype html><html lang="es" data-theme="erplora"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ERPlora Cloud · Pedido confirmado</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/erplora-ux.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/templates/all.min.css"/>
+<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+<style>
+  body { background: var(--ux-bg); margin: 0; }
+  .success-wrap {
+    max-width: 720px;
+    margin: 24px auto 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 16px;
+  }
+  .success-hero {
+    text-align: center;
+    padding: 32px 20px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .success-check {
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    background: var(--ux-leaf-soft);
+    color: var(--ux-leaf);
+    display: grid; place-items: center;
+    box-shadow: 0 0 0 8px color-mix(in oklch, var(--ux-leaf) 8%, transparent);
+  }
+  .success-check svg { width: 42px; height: 42px; }
+  .success-title { font-family: var(--ux-font-display); font-size: 32px; font-weight: 700; color: var(--ux-ink); margin: 0; letter-spacing: -0.03em; }
+  .success-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; font-size: 13px; color: var(--ux-ink-3); }
+  .success-meta b { font-family: var(--ux-font-mono); color: var(--ux-ink); font-weight: 600; }
+
+  .success-card { background: var(--ux-bg-2); border: 1px solid var(--ux-line); border-radius: var(--ux-radius-lg); padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+  .success-card__head { display: flex; justify-content: space-between; align-items: baseline; }
+  .success-card__head h2 { font-family: var(--ux-font-display); font-size: 17px; font-weight: 600; margin: 0; color: var(--ux-ink); }
+
+  .mini-list { display: flex; flex-direction: column; gap: 10px; }
+  .mini-line { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--ux-line); }
+  .mini-line:last-child { border-bottom: none; }
+  .mini-line__thumb { width: 44px; height: 44px; border-radius: var(--ux-radius-sm); background: var(--ux-bg-3); display: grid; place-items: center; color: var(--ux-ink-3); font-family: var(--ux-font-mono); font-size: 9px; }
+  .mini-line__thumb--a { background: linear-gradient(135deg, #2a1a14, #4a2818); }
+  .mini-line__thumb--b { background: linear-gradient(135deg, #1a2a3a, #2a3a4a); }
+  .mini-line__thumb--c { background: linear-gradient(135deg, #1a2a1a, #2a3a25); }
+  .mini-line__thumb--d { background: linear-gradient(135deg, #2a1a2a, #3a2548); }
+  .mini-line__name { font-size: 14px; color: var(--ux-ink); font-weight: 500; }
+  .mini-line__qty  { font-size: 12px; color: var(--ux-ink-3); margin-top: 2px; }
+  .mini-line__price { font-family: var(--ux-font-mono); font-size: 14px; font-weight: 600; color: var(--ux-ink); font-variant-numeric: tabular-nums; }
+
+  .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 13px; color: var(--ux-ink-2); font-variant-numeric: tabular-nums; }
+  .summary-row b { color: var(--ux-ink); font-weight: 500; }
+  .summary-divider { border: none; border-top: 1px dashed var(--ux-line); margin: 6px 0; }
+  .summary-total { display: flex; justify-content: space-between; align-items: baseline; }
+  .summary-total__label { font-size: 13px; color: var(--ux-ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .summary-total__value { font-family: var(--ux-font-display); font-size: 26px; font-weight: 700; color: var(--ux-ink); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+
+  .delivery-block {
+    background: var(--ux-bg-3);
+    border: 1px solid var(--ux-line);
+    border-radius: var(--ux-radius-md);
+    padding: 14px 16px;
+    display: grid; grid-template-columns: 36px 1fr; gap: 14px; align-items: center;
+  }
+  .delivery-block__icon {
+    width: 36px; height: 36px;
+    background: var(--ux-brand-soft); color: var(--ux-brand-3);
+    border-radius: var(--ux-radius-sm);
+    display: grid; place-items: center;
+  }
+  .delivery-block__label { font-size: 11px; color: var(--ux-ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .delivery-block__value { font-family: var(--ux-font-display); font-size: 17px; font-weight: 600; color: var(--ux-ink); margin-top: 2px; }
+  .delivery-block__sub { font-size: 12px; color: var(--ux-ink-3); margin-top: 2px; }
+
+  .actions-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  }
+  @media (max-width: 640px) { .actions-row { grid-template-columns: repeat(2, 1fr); } }
+
+  .help-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 720px) { .help-section { grid-template-columns: 1fr; } }
+  .help-card {
+    display: flex; gap: 12px; padding: 14px;
+    background: var(--ux-bg-2); border: 1px solid var(--ux-line);
+    border-radius: var(--ux-radius-md);
+    text-decoration: none; color: var(--ux-ink);
+    transition: border-color var(--ux-dur-fast), transform var(--ux-dur-fast);
+  }
+  .help-card:hover { border-color: var(--ux-line-2); transform: translateY(-1px); }
+  .help-card__icon {
+    width: 36px; height: 36px; flex-shrink: 0;
+    background: var(--ux-bg-3);
+    border-radius: var(--ux-radius-sm);
+    display: grid; place-items: center;
+    color: var(--ux-ink-2);
+  }
+  .help-card__title { font-size: 13.5px; font-weight: 600; color: var(--ux-ink); }
+  .help-card__desc  { font-size: 12px; color: var(--ux-ink-3); margin-top: 2px; line-height: 1.4; }
+</style>
+</head><body>
+
+<div class="ux-app" data-signals="{sidebar: false}" data-attr-data-sidebar="$sidebar ? 'open' : ''">
+  <div class="ux-app__sidebar-overlay" data-on-click="$sidebar = false"></div>
+
+  <aside class="ux-sidebar">
+    <div class="ux-sidebar__brand">
+      <div class="ux-sidebar__logo">EX</div>
+      <div class="ux-sidebar__brand-text">
+        <div class="ux-sidebar__brand-name">ERPlora Cloud</div>
+        <div class="ux-sidebar__brand-meta">Acme Industries</div>
+      </div>
+    </div>
+    <div class="ux-sidebar__body">
+      <div class="ux-sidebar__group">Principal</div>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span class="ux-sidebar__label">Vista general</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg><span class="ux-sidebar__label">Organizaciones</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8"/></svg><span class="ux-sidebar__label">Hubs</span><span class="ux-sidebar__badge">7</span></button>
+      <button class="ux-sidebar__item" aria-current="page"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span class="ux-sidebar__label">Equipamiento</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span class="ux-sidebar__label">Usuarios</span></button>
+
+      <div class="ux-sidebar__group">Facturación</div>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span class="ux-sidebar__label">Facturas</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M5 9h14M5 15h14"/></svg><span class="ux-sidebar__label">Suscripciones</span></button>
+      <button class="ux-sidebar__item"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span class="ux-sidebar__label">Pagos</span></button>
+    </div>
+    <div class="ux-sidebar__footer">
+      <div class="ux-sidebar__user">
+        <span class="ux-avatar ux-avatar--sm ux-avatar--brand">IB</span>
+        <div class="ux-sidebar__user-info">
+          <div class="ux-sidebar__user-name">Ioan Beilic</div>
+          <div class="ux-sidebar__user-meta">ioan@acme.com</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="ux-app__main">
+    <header class="ux-topbar">
+        <div class="ux-topbar__left">
+          <button class="ux-topbar__back-btn" aria-label="Volver"
+            data-on-click="history.length > 1 ? history.back() : null">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+        </div>
+        <h1 class="ux-topbar__page-title">Pedido confirmado</h1>
+        
+        
+        <div class="ux-topbar__actions">
+          <button class="ux-icon-btn" style="position:relative;" aria-label="Carrito">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+        </button>
+        <span class="ux-avatar ux-avatar--sm ux-avatar--brand">IB</span>
+        </div>
+        <button class="ux-topbar__menu-btn" aria-label="Menú"
+            data-on-click="$sidebar = !$sidebar"
+            data-attr-aria-expanded="$sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+      </header>
+
+    <div class="ux-app__body">
+
+      <main class="success-wrap">
+
+        <section class="success-hero">
+          <div class="success-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12.5l4.5 4.5L19 7.5"/>
+            </svg>
+          </div>
+          <h1 class="success-title">¡Pedido confirmado!</h1>
+          <div class="success-meta">
+            <span>Pedido <b>#PED-2026-0142</b></span>
+            <span style="color:var(--ux-ink-4);">·</span>
+            <span>Confirmación enviada a <b style="color:var(--ux-ink-2);font-family:inherit;">ioan@acme.com</b></span>
+          </div>
+          <span class="ux-badge ux-badge--ok">Pago recibido · 8 may 2026 · 14:32</span>
+        </section>
+
+        <article class="success-card">
+          <div class="success-card__head">
+            <h2>Resumen del pedido</h2>
+            <span style="font-size:12px;color:var(--ux-ink-3);font-family:var(--ux-font-mono);">5 artículos · €2 286 IVA inc.</span>
+          </div>
+
+          <div class="mini-list">
+            <div class="mini-line">
+              <div class="mini-line__thumb mini-line__thumb--a">[TPV]</div>
+              <div>
+                <div class="mini-line__name">Terminal POS Modelo X Pro</div>
+                <div class="mini-line__qty">2 ud · €890 / ud</div>
+              </div>
+              <div class="mini-line__price">€1 780</div>
+            </div>
+            <div class="mini-line">
+              <div class="mini-line__thumb mini-line__thumb--d">[Air]</div>
+              <div>
+                <div class="mini-line__name">Lector SumUp Air contactless</div>
+                <div class="mini-line__qty">1 ud · €39</div>
+              </div>
+              <div class="mini-line__price">€39</div>
+            </div>
+            <div class="mini-line">
+              <div class="mini-line__thumb mini-line__thumb--c">[Star]</div>
+              <div>
+                <div class="mini-line__name">Impresora térmica Star TSP143 III</div>
+                <div class="mini-line__qty">1 ud · €229</div>
+              </div>
+              <div class="mini-line__price">€229</div>
+            </div>
+            <div class="mini-line">
+              <div class="mini-line__thumb mini-line__thumb--b">[Acc]</div>
+              <div>
+                <div class="mini-line__name">Bundle accesorios POS · 8 piezas</div>
+                <div class="mini-line__qty">1 ud · €85</div>
+              </div>
+              <div class="mini-line__price">€85</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="summary-row"><span>Subtotal</span><b>€2 222</b></div>
+            <div class="summary-row"><span>Envío estándar</span><span class="ux-tag ux-tag--leaf ux-tag--sm">Gratis</span></div>
+            <div class="summary-row"><span>IVA 21%</span><b>€467</b></div>
+            <div class="summary-row"><span>Descuento BUNDLE10</span><b style="color:var(--ux-leaf);">−€403</b></div>
+            <hr class="summary-divider"/>
+            <div class="summary-total">
+              <span class="summary-total__label">Total pagado</span>
+              <span class="summary-total__value">€2 286</span>
+            </div>
+          </div>
+
+          <div class="delivery-block">
+            <div class="delivery-block__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <div>
+              <div class="delivery-block__label">Entrega estimada</div>
+              <div class="delivery-block__value">12 may 2026 · entre 09:00 y 14:00</div>
+              <div class="delivery-block__sub">SEUR · Calle Velázquez 47, 4º izq · 28001 Madrid · Recibirás un email con el seguimiento.</div>
+            </div>
+          </div>
+        </article>
+
+        <div class="actions-row">
+          <button class="ux-btn ux-btn--outline">
+            <svg class="ux-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            Ver factura
+          </button>
+          <button class="ux-btn ux-btn--outline">
+            <svg class="ux-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Descargar PDF
+          </button>
+          <button class="ux-btn ux-btn--outline">
+            <svg class="ux-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+            Volver a la tienda
+          </button>
+          <button class="ux-btn ux-btn--outline">
+            <svg class="ux-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            Contactar soporte
+          </button>
+        </div>
+
+        <section>
+          <h3 style="font-family:var(--ux-font-display);font-size:16px;font-weight:600;margin:8px 0 12px;color:var(--ux-ink);">Mientras esperas tu pedido</h3>
+          <div class="help-section">
+            <a class="help-card" href="#">
+              <div class="help-card__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9"/></svg>
+              </div>
+              <div>
+                <div class="help-card__title">Configura tu hub</div>
+                <div class="help-card__desc">Tutorial paso a paso para tener todo listo cuando llegue el equipo.</div>
+              </div>
+            </a>
+            <a class="help-card" href="#">
+              <div class="help-card__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              </div>
+              <div>
+                <div class="help-card__title">Vídeos del Modelo X</div>
+                <div class="help-card__desc">12 vídeos cortos sobre primer arranque, atajos y operativa diaria.</div>
+              </div>
+            </a>
+            <a class="help-card" href="#">
+              <div class="help-card__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div>
+                <div class="help-card__title">Únete a la comunidad</div>
+                <div class="help-card__desc">Foro y Slack con más de 2 400 comerciantes ERPlora.</div>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <div class="ux-callout ux-callout--info">
+          <div class="ux-callout__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div>
+          <div class="ux-callout__body">
+            <div class="ux-callout__title">No tienes que hacer nada más</div>
+            <div class="ux-callout__desc">Si todo es correcto, recibirás actualizaciones automáticas por email cuando el pedido se prepare, salga del almacén y llegue a tu dirección. Si necesitas modificar algo, contacta con soporte en las próximas <b>2 horas</b>.</div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+
+  <!-- Bottom tab bar — mobile only via .ux-app__tabbar slot -->
+  <nav class="ux-app__tabbar" aria-label="Navegación principal">
+    <div class="ux-tabbar ux-tabbar--fixed ux-tabbar--icons">
+      <a class="ux-tabbar-item" href="#" aria-current="page">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 5 10 12 3l7 7 2 2v9a2 2 0 0 1-2 2h-4v-7H10v7H6a2 2 0 0 1-2-2v-9z"/></svg></span>
+        <span class="ux-tabbar-label">Inicio</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M7 12h.01M12 12h.01M17 12h.01"/></svg></span>
+        <span class="ux-tabbar-label">Hubs</span>
+        <span class="ux-tabbar-badge">7</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="ux-tabbar-label">Usuarios</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4M3 9l1.5-3h15L21 9M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM10 21V13h4v8"/></svg></span>
+        <span class="ux-tabbar-label">Equipo</span>
+      </a>
+      <a class="ux-tabbar-item" href="#">
+        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 19a5 5 0 0 1 10 0"/></svg></span>
+        <span class="ux-tabbar-label">Perfil</span>
+      </a>
+    </div>
+  </nav>
+</div>
+
+</body></html>
