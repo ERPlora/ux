@@ -103,7 +103,14 @@ import '@erplora/ux/min';
 ```
 ux/
 ├── index.html                    showcase navegable
-├── previews/                     un HTML por componente
+├── previews/                     vistas por dominio
+│   ├── components/                 demos de componentes individuales
+│   ├── auth/                       login (saas + hub), 2FA, sesiones, …
+│   ├── dashboard/                  saas, hub, hub-mobile
+│   ├── orgs/, hubs/, users/        gestión SaaS
+│   ├── billing/, marketplace/      facturación + tiendas (saas + hub)
+│   ├── modules/, employees/, roles/, settings/, profile/
+│   └── errors/, system/, public/
 ├── lib/css/
 │   ├── tokens.css                paleta · spacing · radii · sombras · motion
 │   ├── base.css                  reset moderno + tipografía
@@ -322,7 +329,7 @@ Datastar añade comportamiento declarativo con atributos `data-*`. La librería 
 </div>
 ```
 
-> Más patrones en `previews/*.html` — cada componente tiene un ejemplo navegable.
+> Componentes individuales en `previews/components/*.html`. Páginas completas (mockups de app real, listas para copy-paste) organizadas por dominio en `previews/<domain>/<page>.html` — auth, dashboard, orgs, hubs, billing, marketplace, modules, settings, etc.
 
 ---
 
@@ -349,7 +356,7 @@ npm run build:lightning
 1. Crea `lib/css/components/mi-componente.css` con clases `ux-mi-*`.
 2. Añade el `@import` en `lib/css/ux.css`.
 3. Añade la entrada al array `ORDER` en `build.mjs`.
-4. Crea `previews/mi-componente.html` con un ejemplo.
+4. Crea `previews/components/mi-componente.html` con un ejemplo.
 5. Registra la entrada en el nav lateral de `index.html` (sección `doc__nav-link` + objeto routes).
 6. `node build.mjs` y commit.
 
