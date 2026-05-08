@@ -1,0 +1,35 @@
+{# view_toggle(signal, views, attrs)
+
+   CSS root from lib/css/components/table.css:  .ux-view-toggle
+   Compact button group that switches between named views (e.g. table / grid).
+   Uses aria-pressed driven by a Datastar signal.
+
+   Sub-classes (verified in table.css):
+     - ux-view-toggle__btn                    each toggle button
+     - ux-view-toggle__btn[aria-pressed=true]  active fill + shadow
+
+   Args:
+     - signal  Datastar signal name that holds the current view key (default "view")
+     - views   list of dicts: [{"key": "table", "title": "Table", "svg": "<svg>..."}]
+               at minimum each dict needs "key"; "title" becomes the title attr.
+     - attrs   extra HTML attributes on the root div
+
+   Example:
+     {{ view_toggle("$view", views=[
+       {"key": "table", "title": "Table view", "svg": "..."},
+       {"key": "grid",  "title": "Grid view",  "svg": "..."},
+     ]) }}
+#}
+{% macro view_toggle(signal="$view", views=[], attrs={}) %}
+<div class="ux-view-toggle" role="tablist" aria-label="View"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for v in views %}
+  <button class="ux-view-toggle__btn" type="button"
+    {%- if v.get("title") %} title="{{ v.title|e }}"{% endif %}
+    data-on:click="{{ signal }} = '{{ v.key|e }}'"
+    data-attr:aria-pressed="{{ signal }} === '{{ v.key|e }}'">
+    {%- if v.get("svg") %}{{ v.svg }}{%- endif %}
+  </button>
+  {%- endfor %}
+</div>
+{% endmacro %}

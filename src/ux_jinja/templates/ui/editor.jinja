@@ -1,0 +1,31 @@
+{# editor(name, value, placeholder, focus_signal, attrs)
+
+   CSS from lib/css/components/editors.css:
+     - ux-richtext (--focus via is-focus)
+   Children: ux-richtext__toolbar, ux-richtext__btn (is-active),
+             ux-richtext__btn svg, ux-richtext__divider,
+             ux-richtext__select, ux-richtext__spacer,
+             ux-richtext__content
+
+   Shell macro: the toolbar and content area are passed via `caller is defined`.
+   Standalone: renders a minimal richtext shell with an editable content div.
+   `focus_signal` : Datastar signal name for focus state (default "editorFocus").
+#}
+{% macro editor(name=None, value="", placeholder="Write something...", focus_signal="editorFocus", attrs={}) %}
+{%- set sig = focus_signal|e -%}
+<div class="ux-richtext"
+  data-signals='{"{{ sig }}": false}'
+  data-class:is-focus="${{ sig }}"
+  data-on:focusin="${{ sig }} = true"
+  data-on:focusout="${{ sig }} = false"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% else %}
+  <div class="ux-richtext__toolbar" role="toolbar">
+  </div>
+  <div class="ux-richtext__content" contenteditable="true"
+       role="textbox" aria-multiline="true"
+       {%- if name %} data-field="{{ name|e }}"{% endif %}
+       {%- if placeholder %} data-placeholder="{{ placeholder|e }}"{% endif -%}>{{ value|e }}</div>
+{%- endif %}
+</div>
+{% endmacro %}

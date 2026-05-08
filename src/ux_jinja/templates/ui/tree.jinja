@@ -1,0 +1,52 @@
+{# tree(id, nodes, dense, attrs)
+
+   CSS from lib/css/components/navigation.css:
+     - ux-tree (--dense)
+   Children: ux-tree__node (data-state="open|closed", aria-expanded),
+             ux-tree__row (aria-selected, data-selected),
+             ux-tree__caret (--leaf), ux-tree__icon (--folder, --file),
+             ux-tree__label, ux-tree__meta, ux-tree__children
+
+   `nodes` is a list of dicts:
+     [{label, meta=None, open=False, selected=False, children=[], is_leaf=False}, ...]
+   If `caller is defined`, raw tree HTML is used instead.
+   Datastar: each node gets its own open signal scoped via node index.
+#}
+{% macro tree(id="tree", nodes=[], dense=False, attrs={}) %}
+{%- set classes = ["ux-tree"] -%}
+{%- if dense %}{%- do classes.append("ux-tree--dense") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}" id="{{ id|e }}" role="tree"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}
+{%- else %}
+{%- for node in nodes %}{{ _tree_node(node, id, loop.index0) }}{%- endfor %}
+{%- endif %}
+</div>
+{% endmacro %}
+
+{# _tree_node(node, prefix, idx) — recursive helper for tree nodes. #}
+{% macro _tree_node(node, prefix, idx) %}
+{%- set sig = prefix ~ "_n" ~ idx -%}
+{%- set is_leaf = node.is_leaf or not node.children -%}
+<div class="ux-tree__node"
+{%- if not is_leaf %} data-signals='{"{{ sig }}": {{ "true" if node.open else "false" }}}' data-attr:data-state="${{ sig }} ? 'open' : 'closed'"{% endif %}>
+  <div class="ux-tree__row"
+{%- if node.selected %} aria-selected="true"{% endif %}
+{%- if not is_leaf %} data-on:click="${{ sig }} = !${{ sig }}"{% endif %}>
+    {%- if is_leaf %}
+    <span class="ux-tree__caret ux-tree__caret--leaf"></span>
+    {%- else %}
+    <span class="ux-tree__caret" data-attr:aria-expanded="${{ sig }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+    </span>
+    {%- endif %}
+    <span class="ux-tree__label">{{ node.label|e }}</span>
+    {%- if node.meta %}<span class="ux-tree__meta">{{ node.meta|e }}</span>{% endif %}
+  </div>
+  {%- if not is_leaf and node.children %}
+  <div class="ux-tree__children" data-show="${{ sig }}">
+    {%- for child in node.children %}{{ _tree_node(child, sig, loop.index0) }}{%- endfor %}
+  </div>
+  {%- endif %}
+</div>
+{% endmacro %}

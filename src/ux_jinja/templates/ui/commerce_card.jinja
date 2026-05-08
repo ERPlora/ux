@@ -1,0 +1,84 @@
+{# commerce_card(number, title, date, status, from_name, to_name, lines, totals, notes, attrs)
+   Invoice / quote card (ux-invoice) for the Commerce module.
+
+   Arguments:
+     number    -- invoice number string, e.g. "F-2026-0184"
+     title     -- document type label, e.g. "Factura"
+     date      -- issue date string
+     due_date  -- due date string
+     status    -- badge label for document status, e.g. "Pendiente"
+     from_name -- issuer company name / logo text
+     from_info -- issuer address block (HTML-escaped multiline)
+     to_name   -- recipient name
+     to_info   -- recipient address block
+     lines     -- list of dicts: [{concept, qty, price, discount, vat, total}]
+     notes     -- notes text
+     attrs     -- escape-hatch dict on the outer .ux-invoice
+
+   Use the slot to fully replace the lines table.
+#}
+{% macro commerce_card(number="", title="Factura", date="", due_date="", status="",
+                        from_name="", from_info="", to_name="", to_info="",
+                        lines=[], notes="", attrs={}) %}
+<div class='ux-invoice'
+  {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <header class='ux-invoice__head'>
+    <div>
+      <div class='ux-invoice__logo'>{{ from_name|e }}</div>
+      {%- if from_info %}<div class='ux-invoice__from'>{{ from_info }}</div>{% endif %}
+    </div>
+    <div class='ux-invoice__meta'>
+      <div class='ux-invoice__title'>{{ title|e }}</div>
+      {%- if number %}
+      <div class='ux-invoice__meta-row'><span>N&ordm;</span><b>{{ number|e }}</b></div>
+      {%- endif %}
+      {%- if date %}
+      <div class='ux-invoice__meta-row'><span>Emisi&oacute;n</span><b>{{ date|e }}</b></div>
+      {%- endif %}
+      {%- if due_date %}
+      <div class='ux-invoice__meta-row'><span>Vencimiento</span><b>{{ due_date|e }}</b></div>
+      {%- endif %}
+      {%- if status %}
+      <div class='ux-invoice__meta-row'>
+        <span>Estado</span>
+        <span class='ux-badge ux-badge--warn'>{{ status|e }}</span>
+      </div>
+      {%- endif %}
+    </div>
+  </header>
+  {%- if to_name %}
+  <section class='ux-invoice__bill'>
+    <div>
+      <div class='ux-invoice__bill-name'>{{ to_name|e }}</div>
+      {%- if to_info %}<div class='ux-invoice__bill-info'>{{ to_info }}</div>{% endif %}
+    </div>
+  </section>
+  {%- endif %}
+  {%- if caller is defined %}
+  {{ caller() }}
+  {%- elif lines %}
+  <table class='ux-invoice__lines'>
+    <thead><tr>
+      <th>Concepto</th><th>Cant.</th><th>Precio</th><th>Dto.</th><th>IVA</th><th>Total</th>
+    </tr></thead>
+    <tbody>
+      {%- for line in lines %}
+      <tr>
+        <td>{{ line.concept|e }}</td>
+        <td>{{ line.qty|e }}</td>
+        <td>{{ line.price|e }}</td>
+        <td>{{ line.get("discount", "—")|e }}</td>
+        <td>{{ line.get("vat", "—")|e }}</td>
+        <td>{{ line.total|e }}</td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+  {%- endif %}
+  {%- if notes %}
+  <section class='ux-invoice__totals'>
+    <div class='ux-invoice__notes'>{{ notes }}</div>
+  </section>
+  {%- endif %}
+</div>
+{% endmacro %}

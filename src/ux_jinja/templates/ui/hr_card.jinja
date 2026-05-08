@@ -1,0 +1,43 @@
+{# hr_card(name, initials, role, status, stats, cover_style, avatar_style, attrs)
+   Employee card (ux-emp) for HR modules.
+
+   Arguments:
+     name          -- employee full name
+     initials      -- 2-letter initials shown in the avatar
+     role          -- role / position label
+     status        -- "" | "break" | "off"  — maps to ux-emp__status modifiers
+     status_label  -- display text for the status badge (default derived from status)
+     stats         -- list of dicts: [{label, value}] (max 3 recommended)
+     cover_style   -- inline style for .ux-emp__cover background (optional)
+     avatar_style  -- inline style for .ux-emp__avatar (optional)
+     attrs         -- escape-hatch dict on the <article>
+#}
+{% macro hr_card(name="", initials="", role="", status="", status_label="",
+                 stats=[], cover_style="", avatar_style="", attrs={}) %}
+{%- set status_labels = {"": "En turno", "break": "Pausa", "off": "Fuera"} -%}
+{%- set label = status_label if status_label else status_labels.get(status, "En turno") -%}
+{%- set status_class = ("ux-emp__status--" ~ status) if status else "" -%}
+<article class='ux-emp'
+  {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class='ux-emp__cover'{% if cover_style %} style="{{ cover_style|e }}"{% endif %}></div>
+  <header class='ux-emp__head'>
+    <div class='ux-emp__avatar'{% if avatar_style %} style="{{ avatar_style|e }}"{% endif %}>{{ initials|e }}</div>
+    <div class='ux-emp__name-block'>
+      <h3 class='ux-emp__name'>{{ name|e }}</h3>
+      <div class='ux-emp__role'>{{ role|e }}</div>
+    </div>
+    <span class='ux-emp__status {{ status_class }}'.strip()>{{ label|e }}</span>
+  </header>
+  {%- if stats %}
+  <div class='ux-emp__grid'>
+    {%- for s in stats %}
+    <div class='ux-emp__stat'>
+      <span class='ux-emp__stat-label'>{{ s.label|e }}</span>
+      <span class='ux-emp__stat-value'>{{ s.value|e }}</span>
+    </div>
+    {%- endfor %}
+  </div>
+  {%- endif %}
+  {%- if caller is defined %}{{ caller() }}{% endif %}
+</article>
+{% endmacro %}

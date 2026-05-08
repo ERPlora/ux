@@ -1,0 +1,377 @@
+{% extends "_base.html" %}
+{% from "ui/badge.jinja" import badge %}
+
+{% block title %}Design system — ERPlora UX{% endblock %}
+
+{% block crumb %}
+  <span class="ux-topbar__crumb-item" aria-current="page">Design system</span>
+{% endblock %}
+
+{% block head_extra %}
+<style nonce="{{ csp_nonce }}">
+  /* --- Paleta de colores ------------------------------------------ */
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+  .swatch {
+    background: var(--ux-bg-2);
+    border: 1px solid var(--ux-line);
+    border-radius: var(--ux-radius-md);
+    overflow: hidden;
+  }
+  .swatch__chip {
+    height: 52px;
+    width: 100%;
+  }
+  .swatch__info {
+    padding: 8px 10px;
+  }
+  .swatch__name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ux-ink);
+  }
+  .swatch__var {
+    font-family: var(--ux-font-mono);
+    font-size: 10.5px;
+    color: var(--ux-ink-4);
+    margin-top: 2px;
+  }
+  .swatch__hex {
+    font-family: var(--ux-font-mono);
+    font-size: 10.5px;
+    color: var(--ux-ink-3);
+  }
+
+  /* --- Tipografia ------------------------------------------------- */
+  .type-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--ux-bg-2);
+    border: 1px solid var(--ux-line);
+    border-radius: var(--ux-radius-lg);
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+  .type-row {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--ux-line);
+  }
+  .type-row:last-child { border-bottom: 0; }
+  .type-row__label {
+    font-family: var(--ux-font-mono);
+    font-size: 11px;
+    color: var(--ux-ink-4);
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+  .type-row__sample {
+    color: var(--ux-ink);
+    line-height: 1.1;
+  }
+  .type-row__token {
+    font-family: var(--ux-font-mono);
+    font-size: 10.5px;
+    color: var(--ux-ink-4);
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  /* --- Radios ----------------------------------------------------- */
+  .radii-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .radius-cell {
+    background: var(--ux-bg-2);
+    border: 1px solid var(--ux-line-2);
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .radius-cell__label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ux-ink);
+  }
+  .radius-cell__var {
+    font-family: var(--ux-font-mono);
+    font-size: 10.5px;
+    color: var(--ux-ink-4);
+  }
+
+  /* --- Sombras ---------------------------------------------------- */
+  .shadow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+  .shadow-cell {
+    background: var(--ux-bg-2);
+    border-radius: var(--ux-radius-md);
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .shadow-cell__label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ux-ink);
+  }
+  .shadow-cell__var {
+    font-family: var(--ux-font-mono);
+    font-size: 10.5px;
+    color: var(--ux-ink-4);
+  }
+
+  /* --- Espaciado -------------------------------------------------- */
+  .space-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--ux-bg-2);
+    border: 1px solid var(--ux-line);
+    border-radius: var(--ux-radius-lg);
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+  .space-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--ux-line);
+  }
+  .space-row:last-child { border-bottom: 0; }
+  .space-row__token {
+    font-family: var(--ux-font-mono);
+    font-size: 11px;
+    color: var(--ux-ink-4);
+    min-width: 130px;
+    flex-shrink: 0;
+  }
+  .space-row__bar {
+    background: var(--ux-brand-soft);
+    border: 1px solid var(--ux-brand);
+    height: 14px;
+    border-radius: var(--ux-radius-xs);
+    flex-shrink: 0;
+  }
+  .space-row__value {
+    font-family: var(--ux-font-mono);
+    font-size: 11.5px;
+    color: var(--ux-ink-3);
+    margin-left: auto;
+  }
+
+  /* Section heading */
+  .ds-section {
+    font-family: var(--ux-font-display);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--ux-ink);
+    margin: 36px 0 6px;
+  }
+  .ds-section:first-of-type { margin-top: 0; }
+  .ds-sub {
+    font-size: 13px;
+    color: var(--ux-ink-3);
+    margin: 0 0 16px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="doc__title">Design system</h1>
+<p class="doc__sub">Tokens base. Todo el sistema visual de ERPlora UX se deriva de estas variables CSS. Sobreescribe cualquier token en <code class="ux-code--inline">:root</code> para personalizar el tema.</p>
+
+<!-- ============================================================
+     PALETA
+============================================================ -->
+<h2 class="ds-section">Paleta de colores</h2>
+<p class="ds-sub">Variables <code class="ux-code--inline">--ux-bg-*</code> (fondos), <code class="ux-code--inline">--ux-ink-*</code> (texto), acentos y estados semanticos.</p>
+
+<div class="swatches">
+  {# Fondos #}
+  {% set palette = [
+    ("bg",      "--ux-bg",      "#0B0A09",  "Fondo canvas"),
+    ("bg-1",    "--ux-bg-1",    "#131210",  "Sidebar / topbar"),
+    ("bg-2",    "--ux-bg-2",    "#1A1815",  "Cards"),
+    ("bg-3",    "--ux-bg-3",    "#221F1B",  "Hover / inputs"),
+    ("bg-4",    "--ux-bg-4",    "#2B2722",  "Pressed / chips"),
+    ("ink",     "--ux-ink",     "#F5F1EA",  "Texto principal"),
+    ("ink-2",   "--ux-ink-2",   "#C4BCB0",  "Texto secundario"),
+    ("ink-3",   "--ux-ink-3",   "#8A8378",  "Texto terciario"),
+    ("ink-4",   "--ux-ink-4",   "#5C564D",  "Placeholder"),
+    ("brand",   "--ux-brand",   "#E8552A",  "Primario terracota"),
+    ("brand-2", "--ux-brand-2", "#B83A12",  "Terracota oscuro"),
+    ("brand-3", "--ux-brand-3", "#FF7A4D",  "Terracota claro"),
+    ("leaf",    "--ux-leaf",    "#4F9D6E",  "Exito / OK"),
+    ("warn",    "--ux-warn",    "#D8A23A",  "Advertencia"),
+    ("danger",  "--ux-danger",  "#D8553F",  "Error"),
+    ("info",    "--ux-info",    "#5B8CD9",  "Informacion"),
+  ] %}
+  {% for name, var, hex, desc in palette %}
+  <div class="swatch">
+    <div class="swatch__chip" style="background: var({{ var }});"></div>
+    <div class="swatch__info">
+      <div class="swatch__name">{{ name }}</div>
+      <div class="swatch__hex">{{ hex }}</div>
+      <div class="swatch__var">{{ var }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============================================================
+     TIPOGRAFIA
+============================================================ -->
+<h2 class="ds-section">Tipografia</h2>
+<p class="ds-sub">Escala densa orientada a dashboards. Fuentes: Inter (cuerpo), Inter Tight (display), JetBrains Mono (codigo y numeros).</p>
+
+<div class="type-stack">
+  <div class="type-row">
+    <span class="type-row__label">display / 5xl</span>
+    <span class="type-row__sample" style="font-family:var(--ux-font-display);font-size:44px;font-weight:700;letter-spacing:-0.04em;line-height:1.05;">Display 5xl</span>
+    <span class="type-row__token">--ux-text-5xl · 60px</span>
+  </div>
+  <div class="type-row">
+    <span class="type-row__label">display / 4xl</span>
+    <span class="type-row__sample" style="font-family:var(--ux-font-display);font-size:32px;font-weight:700;letter-spacing:-0.04em;line-height:1.05;">Display 4xl</span>
+    <span class="type-row__token">--ux-text-4xl · 44px</span>
+  </div>
+  <div class="type-row">
+    <span class="type-row__label">heading / 3xl</span>
+    <span class="type-row__sample" style="font-family:var(--ux-font-display);font-size:26px;font-weight:600;letter-spacing:-0.03em;">Heading 3xl</span>
+    <span class="type-row__token">--ux-text-3xl · 32px</span>
+  </div>
+  <div class="type-row">
+    <span class="type-row__label">heading / 2xl</span>
+    <span class="type-row__sample" style="font-size:20px;font-weight:600;letter-spacing:-0.02em;">Heading 2xl</span>
+    <span class="type-row__token">--ux-text-2xl · 24px</span>
+  </div>
+  <div class="type-row">
+    <span class="type-row__label">heading / xl</span>
+    <span class="type-row__sample" style="font-size:17px;font-weight:600;">Heading xl</span>
+    <span class="type-row__token">--ux-text-xl · 19px</span>
+  </div>
+  <div class="type-row">
+    <span class="type-row__label">body / lg</span>
+    <span class="type-row__sample" style="font-size:16px;">Texto largo para introduccion y parrafos de apoyo</span>
+    <span class="type-row__token">--ux-text-lg · 16px</span>
+  </div>
+  <div class="type-row">
+    <span class="type-row__label">body / base</span>
+    <span class="type-row__sample" style="font-size:14px;">Tono base para descripcion y cuerpo de tarjetas</span>
+    <span class="type-row__token">--ux-text-base · 14px</span>
+  </div>
+  <div class="type-row">
+    <span class="type-row__label">body / md</span>
+    <span class="type-row__sample" style="font-size:13.5px;">Texto denso para tablas y dashboards</span>
+    <span class="type-row__token">--ux-text-md · 13.5px</span>
+  </div>
+  <div class="type-row">
+    <span class="type-row__label">body / sm</span>
+    <span class="type-row__sample" style="font-size:12.5px;color:var(--ux-ink-2);">Auxiliar — metadatos, timestamps, hints</span>
+    <span class="type-row__token">--ux-text-sm · 12.5px</span>
+  </div>
+  <div class="type-row">
+    <span class="type-row__label">mono</span>
+    <span class="type-row__sample" style="font-family:var(--ux-font-mono);font-size:13px;">12.342,80&nbsp;&euro; &nbsp;&middot;&nbsp; req_a8f2d1c4</span>
+    <span class="type-row__token">--ux-font-mono · 13px</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     RADIOS
+============================================================ -->
+<h2 class="ds-section">Radios de borde</h2>
+<p class="ds-sub">Escala consistente de <code class="ux-code--inline">--ux-radius-xs</code> a <code class="ux-code--inline">--ux-radius-pill</code>.</p>
+
+<div class="radii-grid">
+  {% set radii = [
+    ("xs",   "--ux-radius-xs",   "4px"),
+    ("sm",   "--ux-radius-sm",   "6px"),
+    ("md",   "--ux-radius-md",   "8px"),
+    ("lg",   "--ux-radius-lg",   "10px"),
+    ("xl",   "--ux-radius-xl",   "14px"),
+    ("2xl",  "--ux-radius-2xl",  "18px"),
+    ("pill", "--ux-radius-pill", "9999px"),
+  ] %}
+  {% for name, var, val in radii %}
+  <div class="radius-cell" style="border-radius: var({{ var }});">
+    <span class="radius-cell__label">{{ name }}</span>
+    <span class="radius-cell__var">{{ val }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============================================================
+     SOMBRAS
+============================================================ -->
+<h2 class="ds-section">Sombras</h2>
+<p class="ds-sub">Variables <code class="ux-code--inline">--ux-shadow-*</code>. El tema oscuro usa sombras negras densas; el tema claro usa sombras sutiles.</p>
+
+<div class="shadow-grid">
+  {% set shadows = [
+    ("xs",   "--ux-shadow-xs",   "Separador sutil"),
+    ("sm",   "--ux-shadow-sm",   "Cards y dropdowns"),
+    ("md",   "--ux-shadow-md",   "Modales y drawers"),
+    ("lg",   "--ux-shadow-lg",   "Overlays elevados"),
+    ("glow", "--ux-shadow-glow", "Focus ring de marca"),
+  ] %}
+  {% for name, var, desc in shadows %}
+  <div class="shadow-cell" style="box-shadow: var({{ var }});">
+    <span class="shadow-cell__label">{{ name }}</span>
+    <span class="shadow-cell__var">{{ var }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============================================================
+     ESPACIADO
+============================================================ -->
+<h2 class="ds-section">Espaciado</h2>
+<p class="ds-sub">Escala de 4 px — de <code class="ux-code--inline">--ux-space-0</code> (0) a <code class="ux-code--inline">--ux-space-10</code> (72 px).</p>
+
+<div class="space-grid">
+  {% set spaces = [
+    ("--ux-space-0",  "0",    0),
+    ("--ux-space-1",  "4px",  4),
+    ("--ux-space-2",  "8px",  8),
+    ("--ux-space-3",  "12px", 12),
+    ("--ux-space-4",  "16px", 16),
+    ("--ux-space-5",  "20px", 20),
+    ("--ux-space-6",  "24px", 24),
+    ("--ux-space-7",  "32px", 32),
+    ("--ux-space-8",  "40px", 40),
+    ("--ux-space-9",  "56px", 56),
+    ("--ux-space-10", "72px", 72),
+  ] %}
+  {% for token, val, px in spaces %}
+  <div class="space-row">
+    <span class="space-row__token">{{ token }}</span>
+    <div class="space-row__bar" style="width: {{ [px, 1]|max }}px;"></div>
+    <span class="space-row__value">{{ val }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

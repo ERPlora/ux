@@ -1,0 +1,40 @@
+{# receipt(title, sub, lines, total, footer, attrs)
+
+   CSS from lib/css/components/pos.css:
+     - ux-receipt
+   Children: ux-receipt__title, ux-receipt__sub,
+             ux-receipt__divider, ux-receipt__line,
+             ux-receipt__line-name, ux-receipt__line-price,
+             ux-receipt__total, ux-receipt__footer
+
+   `lines` is a list of dicts:
+     [{name, price, divider_before=False}, ...]
+   If `caller is defined`, raw inner HTML is used instead of `lines`.
+#}
+{% macro receipt(title=None, sub=None, lines=[], total=None, footer=None, attrs={}) %}
+<div class="ux-receipt"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if title %}<div class="ux-receipt__title">{{ title|e }}</div>{% endif %}
+{%- if sub %}<div class="ux-receipt__sub">{{ sub|e }}</div>{% endif %}
+{%- if caller is defined %}
+{{ caller() }}
+{%- else %}
+{%- if title or sub %}<hr class="ux-receipt__divider"/>{% endif %}
+{%- for line in lines %}
+{%- if line.divider_before %}<hr class="ux-receipt__divider"/>{% endif %}
+<div class="ux-receipt__line">
+  <span class="ux-receipt__line-name">{{ line.name|e }}</span>
+  <span class="ux-receipt__line-price">{{ line.price|e }}</span>
+</div>
+{%- endfor %}
+{%- if total %}
+<hr class="ux-receipt__divider"/>
+<div class="ux-receipt__total"><span>TOTAL</span><span>{{ total|e }}</span></div>
+{%- endif %}
+{%- if footer %}
+<hr class="ux-receipt__divider"/>
+<div class="ux-receipt__footer">{{ footer|e }}</div>
+{%- endif %}
+{%- endif %}
+</div>
+{% endmacro %}

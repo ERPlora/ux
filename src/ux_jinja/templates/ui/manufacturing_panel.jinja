@@ -1,0 +1,62 @@
+{# manufacturing_panel(wo_id, title, sub, produced, total, bar_done, bar_running, bar_scrap, steps, attrs)
+   Work-order panel (ux-wo) for the Manufacturing module.
+
+   Arguments:
+     wo_id        -- work-order identifier string, e.g. "WO-2026-0184"
+     title        -- work-order title
+     sub          -- subtitle (line, shift, responsible)
+     produced     -- number of units produced (displayed in header)
+     total        -- total units in the order
+     bar_done     -- % width for the done segment (0–100, int)
+     bar_running  -- % width for the in-progress segment
+     bar_scrap    -- % width for the scrap segment
+     steps        -- list of dicts: [{name, meta, status}]
+                     status: "" | "done" | "active" | "blocked"
+     attrs        -- escape-hatch dict on the outer <div>
+
+   Use the slot to replace the steps list with custom markup.
+#}
+{% macro manufacturing_panel(wo_id="", title="", sub="", produced=0, total=0,
+                              bar_done=0, bar_running=0, bar_scrap=0,
+                              steps=[], attrs={}) %}
+{%- set step_classes = {"done": "ux-wo__step--done", "active": "ux-wo__step--active",
+                         "blocked": "ux-wo__step--blocked", "": ""} -%}
+<div class='ux-wo'
+  {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <header class='ux-wo__head'>
+    <span class='ux-wo__id'>{{ wo_id|e }}</span>
+    <div>
+      <h3 class='ux-wo__title'>{{ title|e }}</h3>
+      <p class='ux-wo__sub'>{{ sub|e }}</p>
+    </div>
+  </header>
+  <div class='ux-wo__progress'>
+    <div class='ux-wo__progress-head'>
+      <span>Producción <b>{{ produced }}</b> / {{ total }} ud</span>
+      {%- if total > 0 %}<span>{{ ((produced / total) * 100) | round(1) }}%</span>{% endif %}
+    </div>
+    <div class='ux-wo__bar'>
+      <div class='ux-wo__bar-seg ux-wo__bar-seg--done' style='width:{{ bar_done }}%'></div>
+      <div class='ux-wo__bar-seg ux-wo__bar-seg--running' style='width:{{ bar_running }}%'></div>
+      <div class='ux-wo__bar-seg ux-wo__bar-seg--scrap' style='width:{{ bar_scrap }}%'></div>
+    </div>
+  </div>
+  {%- if caller is defined %}
+  {{ caller() }}
+  {%- else %}
+  <div class='ux-wo__steps'>
+    {%- for step in steps %}
+    {%- set sc = step_classes.get(step.get("status", ""), "") %}
+    <div class='ux-wo__step {{ sc }}'.strip()>
+      <span class='ux-wo__step-num'>{{ loop.index }}</span>
+      <div>
+        <div class='ux-wo__step-name'>{{ step.name|e }}</div>
+        {%- if step.get("meta") %}<div class='ux-wo__step-meta'>{{ step.meta|e }}</div>{% endif %}
+      </div>
+      <span class='ux-wo__step-status'>{{ step.get("status_label", step.get("status", ""))|e }}</span>
+    </div>
+    {%- endfor %}
+  </div>
+  {%- endif %}
+</div>
+{% endmacro %}

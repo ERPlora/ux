@@ -1,0 +1,41 @@
+{# chart(title, sub, big, delta, delta_dir, flat, attrs)
+
+   CSS from lib/css/components/charts.css:
+     - ux-chart
+     - ux-chart--flat
+   Children: ux-chart__head, ux-chart__title, ux-chart__sub,
+             ux-chart__big, ux-chart__delta (--up | --down),
+             ux-chart__legend, ux-chart__legend-item, ux-chart__legend-dot,
+             ux-chart__svg (SVG host), ux-chart__grid, ux-chart__axis,
+             ux-chart__bar (--leaf --warn --info --mute),
+             ux-chart__line (--leaf --info --mute), ux-chart__area,
+             ux-chart__dot
+
+   Shell macro: pass the SVG/content via `caller is defined`.
+   `delta_dir` : "up" | "down" — maps to ux-chart__delta--up/down.
+#}
+{% macro chart(title=None, sub=None, big=None, delta=None, delta_dir=None, flat=False, attrs={}) %}
+{%- set classes = ["ux-chart"] -%}
+{%- if flat %}{%- do classes.append("ux-chart--flat") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if title or sub or big or delta %}
+  <header class="ux-chart__head">
+    <div>
+      {%- if title %}<h3 class="ux-chart__title">{{ title|e }}</h3>{% endif %}
+      {%- if sub %}<p class="ux-chart__sub">{{ sub|e }}</p>{% endif %}
+    </div>
+    {%- if big or delta %}
+    <div>
+      {%- if big %}<div class="ux-chart__big">{{ big|e }}</div>{% endif %}
+      {%- if delta %}
+      {%- set delta_class = "ux-chart__delta" ~ (" ux-chart__delta--" ~ delta_dir if delta_dir else "") -%}
+      <div class="{{ delta_class }}">{{ delta|e }}</div>
+      {%- endif %}
+    </div>
+    {%- endif %}
+  </header>
+{%- endif %}
+{%- if caller is defined %}{{ caller() }}{% endif %}
+</div>
+{% endmacro %}

@@ -1,0 +1,25 @@
+{# pos_canvas(signals, attrs)
+   Full POS layout: category rail + product grid (left) and cart aside (right).
+
+   The root element carries ux-pos and must receive Datastar signals so that
+   the mobile cart-open toggle and active-category filtering work. Consumer
+   passes the entire catalogue and cart markup via the slot.
+
+   Arguments:
+     signals  -- JSON-safe string for data-signals (default shown below)
+     attrs    -- escape-hatch dict rendered as extra HTML attributes
+
+   Usage:
+     {% call pos_canvas() %}
+       <!-- .ux-pos__main + .ux-pos__aside content here -->
+     {% endcall %}
+#}
+{% macro pos_canvas(signals='{"cartOpen": false, "activeCat": "all", "selectedLine": 0}', attrs={}) %}
+<div class='ux-pos'
+  data-signals='{{ signals }}'
+  data-attr:data-cart-open='$cartOpen ? "true" : "false"'
+  {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class='ux-pos__backdrop' data-on:click='$cartOpen = false'></div>
+  {%- if caller is defined %}{{ caller() }}{% endif %}
+</div>
+{% endmacro %}

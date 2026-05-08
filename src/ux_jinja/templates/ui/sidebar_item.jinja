@@ -1,0 +1,48 @@
+{# sidebar_item(label, icon_svg, href, active, badge, badge_variant, on_click, attrs)
+
+   CSS root from lib/css/components/sidebar.css:  .ux-sidebar__item
+   Single row in the sidebar navigation body. Also covers the group label helper.
+
+   Sub-classes (verified in sidebar.css):
+     - ux-sidebar__icon     16×16 icon slot
+     - ux-sidebar__label    flex-1 text label
+     - ux-sidebar__badge    count chip on the right
+     - ux-sidebar__badge--brand   brand-tinted count chip
+     - ux-sidebar__group    section heading (not an interactive item)
+
+   Active state attrs:
+     aria-current="page"  OR  data-active="true"
+
+   Args:
+     - label          visible text
+     - icon_svg       raw SVG string inserted into .ux-sidebar__icon (optional)
+     - href           when set renders as <a>, otherwise <button>
+     - active         when True sets aria-current="page"
+     - badge          numeric/string badge (optional)
+     - badge_variant  "" | "brand"
+     - on_click       Datastar expression for data-on:click
+     - group          when True renders a non-interactive .ux-sidebar__group label
+     - attrs          extra HTML attributes
+#}
+{% macro sidebar_item(label="", icon_svg=None, href=None, active=False, badge=None, badge_variant="", on_click=None, group=False, attrs={}) %}
+{%- if group %}
+<div class="ux-sidebar__group"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>{{ label|e }}</div>
+{%- else -%}
+{%- set tag = "a" if href else "button" -%}
+<{{ tag }} class="ux-sidebar__item"
+{%- if href %} href="{{ href|e }}"{% endif -%}
+{%- if tag == "button" %} type="button"{% endif -%}
+{%- if active %} aria-current="page"{% endif -%}
+{%- if on_click %} data-on:click="{{ on_click|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if icon_svg %}<span class="ux-sidebar__icon">{{ icon_svg }}</span>{%- endif -%}
+  <span class="ux-sidebar__label">{{ label|e }}</span>
+  {%- if badge is not none and badge != "" -%}
+  {%- set badge_cls = ["ux-sidebar__badge"] -%}
+  {%- if badge_variant %}{%- do badge_cls.append("ux-sidebar__badge--" ~ badge_variant) -%}{%- endif -%}
+  <span class="{{ badge_cls | join(' ') }}">{{ badge|e }}</span>
+  {%- endif -%}
+</{{ tag }}>
+{%- endif %}
+{% endmacro %}

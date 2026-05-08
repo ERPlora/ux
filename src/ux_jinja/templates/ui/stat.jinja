@@ -1,0 +1,32 @@
+{# stat(items, glass, attrs)
+
+   CSS from lib/css/components/card.css:
+     Container : ux-stats (--glass)
+     Item      : ux-stat
+   Children: ux-stat__label, ux-stat__value, ux-stat__delta (--up | --down)
+
+   `items` is a list of dicts:
+     [{label, value, delta=None, delta_dir=None}, ...]
+   `delta_dir` : "up" | "down" — maps to ux-stat__delta--up/down.
+   If `caller is defined`, raw inner HTML is used instead of `items`.
+#}
+{% macro stat(items=[], glass=False, attrs={}) %}
+{%- set classes = ["ux-stats"] -%}
+{%- if glass %}{%- do classes.append("ux-stats--glass") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}
+{%- else %}
+{%- for item in items %}
+<div class="ux-stat">
+  <div class="ux-stat__label">{{ item.label|e }}</div>
+  <div class="ux-stat__value">{{ item.value|e }}</div>
+  {%- if item.delta %}
+  {%- set delta_class = "ux-stat__delta" ~ (" ux-stat__delta--" ~ item.delta_dir if item.delta_dir else "") -%}
+  <div class="{{ delta_class }}">{{ item.delta|e }}</div>
+  {%- endif %}
+</div>
+{%- endfor %}
+{%- endif %}
+</div>
+{% endmacro %}
