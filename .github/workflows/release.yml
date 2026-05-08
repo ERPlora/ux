@@ -113,7 +113,7 @@ jobs:
           ssh-keyscan -T 10 -t ed25519,ecdsa,rsa \
             "${{ steps.lightsail.outputs.ip }}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-      - name: Deploy via SSH (git fetch + pip install + supervisorctl restart)
+      - name: Deploy via SSH (git fetch + smart pip + supervisorctl restart)
         env:
           DEPLOY_HOST: ${{ steps.lightsail.outputs.ip }}
           DEPLOY_REF: ${{ github.event.inputs.tag || github.ref_name }}
@@ -121,20 +121,35 @@ jobs:
           # Connect as `ubuntu` (the default Lightsail user, owner of the
           # key pair). `ubuntu` is already in sudoers and re-execs the
           # deploy as the unprivileged `deploy` user that owns /srv/uxsite.
+          # The deploy is skipping `pip install` unless pyproject.toml
+          # actually changed since the previous tag — Hotframe's
+          # dev-extras require ~150 MB of compile output and OOM-kill
+          # supervisor on the 512 MB Nano plan if reinstalled blindly.
           ssh -i ~/.ssh/uxsite_deploy -o StrictHostKeyChecking=accept-new \
               "ubuntu@$DEPLOY_HOST" sudo -u deploy -H bash -s <<EOSSH
             set -euo pipefail
             cd /srv/uxsite
             git fetch --tags --prune
+            PREV=\$(git rev-parse HEAD)
             git checkout "$DEPLOY_REF"
             git reset --hard "$DEPLOY_REF"
-            .venv/bin/pip install --quiet -e '.[dev]' gunicorn
+            if git diff --name-only "\$PREV" HEAD | grep -q '^pyproject.toml\$'; then
+              echo "pyproject.toml changed; reinstalling dependencies"
+              .venv/bin/pip install --quiet -e '.[dev]' gunicorn
+            else
+              # Reinstall just ux-jinja in editable mode is a no-op
+              # because we already use -e on the same checkout.
+              echo "pyproject.toml unchanged; skipping pip install"
+            fi
           EOSSH
           # Restart the supervisor program. `ubuntu` has the sudo NOPASSWD
-          # rule installed by setup.sh.
+          # rule installed by setup.sh. Use `start` first in case the
+          # process is currently down (e.g. previous OOM), then restart.
           ssh -i ~/.ssh/uxsite_deploy "ubuntu@$DEPLOY_HOST" \
-              sudo /usr/bin/supervisorctl restart uxsite
-          sleep 2
+              "sudo /usr/bin/supervisorctl status uxsite >/dev/null 2>&1 \
+                 && sudo /usr/bin/supervisorctl restart uxsite \
+                 || sudo /usr/bin/supervisorctl start uxsite"
+          sleep 3
           ssh -i ~/.ssh/uxsite_deploy "ubuntu@$DEPLOY_HOST" \
               "curl -fsS -o /dev/null -w 'HTTP %{http_code} TTFB %{time_starttransfer}s\n' http://127.0.0.1:8000/"
 
