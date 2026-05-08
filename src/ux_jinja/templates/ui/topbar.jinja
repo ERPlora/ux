@@ -1,0 +1,56 @@
+{# topbar(title, back_href, back_signal, show_menu, menu_signal, with_crumb, attrs)
+
+   CSS root from lib/css/components/topbar.css:  .ux-topbar
+   Layout (Ionic-style): [back] [title centred] [actions slot] [burger menu].
+
+   Sub-classes (verified in topbar.css):
+     - ux-topbar__left          legacy left cluster used for back button
+     - ux-topbar__back-btn      icon button on the left edge
+     - ux-topbar__menu-btn      hamburger toggle on the right edge
+     - ux-topbar__page-title    centred page title (h1)
+     - ux-topbar__crumb         breadcrumb trail (opt-in via with_crumb=True)
+     - ux-topbar__actions       cluster for status pills, avatar, icon buttons
+     - ux-topbar--with-crumb    modifier that hides title in favour of crumb
+
+   Args:
+     - title         page title rendered as h1.ux-topbar__page-title
+     - back_href     when set renders a back arrow that issues @get(href, {history:'push'})
+     - back_signal   raw Datastar action evaluated on back click (overrides back_href)
+     - show_menu     when True renders the right-side burger toggling menu_signal
+     - menu_signal   Datastar signal expression toggled by the burger (default `$sidebar`)
+     - with_crumb    adds the ux-topbar--with-crumb modifier so the slot renders crumb
+     - attrs         extra HTML attributes spread on the <header>
+
+   Slot via {% call topbar(...) %}...{% endcall %} renders the
+   ux-topbar__actions cluster (icon buttons, pills, avatar).
+#}
+{% macro topbar(title=None, back_href=None, back_signal=None, show_menu=True, menu_signal="$sidebar", with_crumb=False, attrs={}) %}
+{%- set classes = ["ux-topbar"] -%}
+{%- if with_crumb %}{%- do classes.append("ux-topbar--with-crumb") -%}{%- endif -%}
+<header class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-topbar__left">
+    {%- if back_href or back_signal %}
+    <button class="ux-topbar__back-btn" type="button" aria-label="Back"
+            {%- if back_signal %} data-on:click="{{ back_signal|e }}"
+            {%- elif back_href %} data-on:click="@get('{{ back_href|e }}', {history: 'push'})"
+            {%- endif -%}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
+    {%- endif %}
+  </div>
+  {%- if title and not with_crumb %}
+  <h1 class="ux-topbar__page-title">{{ title|e }}</h1>
+  {%- endif %}
+  {%- if caller is defined %}
+  <div class="ux-topbar__actions">{{ caller() }}</div>
+  {%- endif %}
+  {%- if show_menu %}
+  <button class="ux-topbar__menu-btn" type="button" aria-label="Menu"
+          data-on:click="{{ menu_signal }} = !{{ menu_signal }}"
+          data-attr:aria-expanded="{{ menu_signal }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  {%- endif %}
+</header>
+{% endmacro %}

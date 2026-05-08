@@ -29,14 +29,20 @@
 {%- endfor -%}
 {%- set initial = value if value is not none else (norm[0].key if norm else "") -%}
 {%- set sig = "$" ~ id ~ "_tab" -%}
+{#- Single-quoted HTML attributes wrap double-quoted Datastar string literals.  #}
+{#- Pattern: data-on:click='$x = "preview"'   matches the public preview site. #}
 <div class="{{ classes | join(' ') }}" role="tablist" id="{{ id|e }}"
   data-signals='{ "{{ id }}_tab": {{ initial | tojson }} }'
 {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
-  {%- for tab in norm %}
-  {%- set k_expr = tab.key | tojson -%}
+  {%- for tab in norm -%}
+    {%- if tab.key is string -%}
+      {%- set k_lit = '"' ~ tab.key ~ '"' -%}
+    {%- else -%}
+      {%- set k_lit = tab.key | string -%}
+    {%- endif -%}
   <button type="button" class="ux-tab"
-    data-on:click="{{ sig }} = {{ k_expr }}"
-    data-attr:aria-selected="{{ sig }} === {{ k_expr }}">
+    data-on:click='{{ sig }} = {{ k_lit }}'
+    data-attr:aria-selected='{{ sig }} === {{ k_lit }}'>
     {%- if tab.icon %}<span class="ux-tab-icon">{{ tab.icon }}</span>{% endif -%}
     <span>{{ tab.label|e }}</span>
     {%- if tab.badge is not none %}<span class="ux-tab-badge">{{ tab.badge|e }}</span>{% endif -%}
@@ -49,7 +55,12 @@
    Use as `{% call tab_panel("settings", "general") %}...{% endcall %}`. #}
 {% macro tab_panel(tabs_id, key, attrs={}) %}
 {%- set sig = "$" ~ tabs_id ~ "_tab" -%}
-<div role="tabpanel" data-show="{{ sig }} === {{ key | tojson }}"
+{%- if key is string -%}
+  {%- set k_lit = '"' ~ key ~ '"' -%}
+{%- else -%}
+  {%- set k_lit = key | string -%}
+{%- endif -%}
+<div role="tabpanel" data-show='{{ sig }} === {{ k_lit }}'
 {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
 {%- if caller is defined %}{{ caller() }}{% endif -%}
 </div>

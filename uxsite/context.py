@@ -59,6 +59,8 @@ COMPONENT_NAMES: list[str] = [
     "search",
     "breadcrumbs",
     "tabs",
+    "tabbar",
+    "topbar",
     "drawer",
     "modal",
     "tooltip",
@@ -103,6 +105,8 @@ COMPONENT_DESCRIPTIONS: dict[str, str] = {
     "select": "Native select with tuple, dict or string option formats.",
     "breadcrumbs": "Hierarchical crumb trail with chevron separator and chips variant.",
     "tabs": "Tab list with pill and vertical variants, signal-driven panels.",
+    "tabbar": "Mobile bottom tab bar with icon, label, badge and active aria-current.",
+    "topbar": "Sticky page top bar with back, centred title, actions slot and burger.",
     "drawer": "Right, left or bottom side drawer driven by a Datastar signal.",
     "modal": "Backdrop dialog with header, body and footer slots in four sizes.",
     "tooltip": "Floating tooltip and pure-CSS hover trigger via data-tip.",
@@ -181,7 +185,7 @@ SIDEBAR_GROUPS: list[dict] = [
         "label": "Navigation",
         "items": [
             {"label": name, "href": f"/c/{name}", "icon": ICON["nav"]}
-            for name in ("breadcrumbs", "tabs", "drawer")
+            for name in ("breadcrumbs", "tabs", "tabbar", "topbar", "drawer")
         ],
     },
     {
@@ -213,6 +217,54 @@ SIDEBAR_GROUPS: list[dict] = [
         "items": [
             {"label": name, "href": f"/p/{name}", "icon": ICON["page"]}
             for name in PAGE_NAMES
+        ],
+    },
+    {
+        "label": "Auth",
+        "items": [
+            {"label": "login-saas", "href": "/preview/auth/login-saas", "icon": ICON["input"]},
+            {"label": "login-hub", "href": "/preview/auth/login-hub", "icon": ICON["input"]},
+            {"label": "2fa-setup", "href": "/preview/auth/2fa-setup", "icon": ICON["input"]},
+            {"label": "2fa-profile", "href": "/preview/auth/2fa-profile", "icon": ICON["input"]},
+            {"label": "2fa-disable", "href": "/preview/auth/2fa-disable", "icon": ICON["input"]},
+            {"label": "change-password", "href": "/preview/auth/change-password", "icon": ICON["input"]},
+            {"label": "delete-account", "href": "/preview/auth/delete-account", "icon": ICON["input"]},
+            {"label": "sessions", "href": "/preview/auth/sessions", "icon": ICON["input"]},
+            {"label": "trusted-devices", "href": "/preview/auth/trusted-devices", "icon": ICON["input"]},
+        ],
+    },
+    {
+        "label": "Employees",
+        "items": [
+            {"label": "list", "href": "/preview/employees/list", "icon": ICON["page"]},
+            {"label": "add", "href": "/preview/employees/add", "icon": ICON["page"]},
+            {"label": "edit", "href": "/preview/employees/edit", "icon": ICON["page"]},
+        ],
+    },
+    {
+        "label": "Profile",
+        "items": [
+            {"label": "hub", "href": "/preview/profile/hub", "icon": ICON["page"]},
+            {"label": "saas", "href": "/preview/profile/saas", "icon": ICON["page"]},
+        ],
+    },
+    {
+        "label": "Users",
+        "items": [
+            {"label": "list", "href": "/preview/users/list", "icon": ICON["page"]},
+            {"label": "invite", "href": "/preview/users/invite", "icon": ICON["page"]},
+        ],
+    },
+    {
+        "label": "Errors",
+        "items": [
+            {"label": "404", "href": "/preview/errors/404", "icon": ICON["feedback"]},
+            {"label": "500", "href": "/preview/errors/500", "icon": ICON["feedback"]},
+            {"label": "403", "href": "/preview/errors/403", "icon": ICON["feedback"]},
+            {"label": "405", "href": "/preview/errors/405", "icon": ICON["feedback"]},
+            {"label": "unauthorized", "href": "/preview/errors/unauthorized", "icon": ICON["feedback"]},
+            {"label": "bootstrap", "href": "/preview/errors/bootstrap", "icon": ICON["feedback"]},
+            {"label": "bootstrap-detail", "href": "/preview/errors/bootstrap-detail", "icon": ICON["feedback"]},
         ],
     },
 ]

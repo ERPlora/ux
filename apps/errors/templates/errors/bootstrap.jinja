@@ -1,0 +1,94 @@
+{% extends "_base_preview.html" %}
+
+{% from "ui/button.jinja" import button %}
+{% from "ui/badge.jinja" import badge %}
+{% from "ui/card.jinja" import card, card_footer %}
+{% from "ui/icon.jinja" import icon %}
+{% from "ui/input.jinja" import input %}
+{% from "ui/field.jinja" import field %}
+{% from "ui/empty.jinja" import empty %}
+
+{% block title %}Error de arranque — ERPlora Hub{% endblock %}
+
+{% block body %}
+<main class="ux-error-page ux-error-page--danger" data-signals="{secs: 60}">
+  <div class="ux-error-page__inner">
+    <div class="ux-error-page__illu">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    </div>
+    <div class="ux-error-page__code">Bootstrap failed</div>
+    <h1 class="ux-error-page__title">El Hub no ha podido arrancar</h1>
+    <p class="ux-error-page__msg">Una de las dependencias del sistema falló durante la inicialización. Revisa el diagnóstico para identificar el problema.</p>
+
+    <ul class="ux-error-page__diagnosis">
+      <li class="ux-error-page__diagnosis-item is-ok">
+        <span class="ux-error-page__diagnosis-icon">✓</span>
+        <span>Conexión a base de datos local</span>
+        <span class="ux-error-page__diagnosis-time">142 ms</span>
+      </li>
+      <li class="ux-error-page__diagnosis-item is-ok">
+        <span class="ux-error-page__diagnosis-icon">✓</span>
+        <span>Migraciones pendientes aplicadas</span>
+        <span class="ux-error-page__diagnosis-time">3.2 s</span>
+      </li>
+      <li class="ux-error-page__diagnosis-item is-fail">
+        <span class="ux-error-page__diagnosis-icon">✗</span>
+        <span>Sincronización con ERPlora Cloud</span>
+        <span class="ux-error-page__diagnosis-time">timeout</span>
+      </li>
+      <li class="ux-error-page__diagnosis-item is-pending">
+        <span class="ux-error-page__diagnosis-icon">⋯</span>
+        <span>Carga de módulos instalados</span>
+        <span class="ux-error-page__diagnosis-time">esperando</span>
+      </li>
+      <li class="ux-error-page__diagnosis-item is-skip">
+        <span class="ux-error-page__diagnosis-icon">—</span>
+        <span>Verificación de licencia</span>
+        <span class="ux-error-page__diagnosis-time">omitido</span>
+      </li>
+    </ul>
+
+    <div class="ux-error-page__retry">
+      <span>Reintento automático en</span>
+      <span class="ux-error-page__retry-countdown" data-text="$secs"></span>
+      <span>s</span>
+    </div>
+
+    <details class="ux-error-page__details">
+      <summary>Ver log técnico</summary>
+      <pre class="ux-error-page__trace">[14:32:18] bootstrap: starting…
+[14:32:18] db: connected (sqlite at /var/erplora/hub.db)
+[14:32:21] migrations: applied 3 pending migrations
+[14:32:21] cloud-sync: connecting to https://acme.erplora.cloud
+[14:32:51] cloud-sync: ERROR: connection timeout after 30s
+[14:32:51] cloud-sync: retrying… (1/3)
+[14:33:21] cloud-sync: ERROR: connection timeout after 30s
+[14:33:21] bootstrap: aborting — cloud sync required for first start
+
+Trace ID:  4f2a-bootstrap-3b81-9c2e</pre>
+    </details>
+
+    <div class="ux-error-page__shortcuts">
+      <a class="ux-error-page__shortcut" href="/diag/">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18V5l12-2v13M9 9l12-2"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span class="ux-error-page__shortcut-title">Diagnóstico de red</span>
+      </a>
+      <a class="ux-error-page__shortcut" href="/system/bridge-setup/">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="ux-error-page__shortcut-title">Configurar Bridge</span>
+      </a>
+      <a class="ux-error-page__shortcut" href="/help/bootstrap/">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+        <span class="ux-error-page__shortcut-title">Guía de arranque</span>
+      </a>
+    </div>
+
+    <div class="ux-error-page__actions">
+      <a class="ux-btn ux-btn--ghost" href="/errors/bootstrap-detail.html">Ver detalle</a>
+      <button class="ux-btn ux-btn--primary" data-on:click="location.reload()">Reintentar ahora</button>
+    </div>
+
+    <div class="ux-error-page__meta">trace · 4f2a-bootstrap-3b81 · 2026-05-08 14:33 UTC</div>
+  </div>
+</main>
+{% endblock %}
