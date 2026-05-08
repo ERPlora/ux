@@ -85,6 +85,10 @@ const ORDER = [
   'components/editors.css',
   // v2.2 modules
   'components/public.css',
+  // Preview / demo utilities
+  'components/preview-utilities.css',
+  // Orphan variants — fills missing variant classes used in previews
+  'components/orphan-variants.css',
 ];
 
 const BANNER = `/*!
