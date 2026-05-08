@@ -1128,59 +1128,8 @@ EXAMPLES: dict[str, list[dict[str, str]]] = {
         )},
     ],
     "tabbar": [
-        {"label": "Default · 5 items con label", "render": (
-            '{% from "ui/tabbar.jinja" import tabbar %}'
-            '<div data-signals=\'{"tab": "inicio"}\'>'
-            '{{ tabbar(signal="$tab", items=['
-            '  {"key":"inicio","label":"Inicio","icon":"ion:home-outline"},'
-            '  {"key":"cobros","label":"Cobros","icon":"ion:card-outline","badge":"3"},'
-            '  {"key":"ventas","label":"Ventas","icon":"ion:trending-up-outline"},'
-            '  {"key":"equipo","label":"Equipo","icon":"ion:people-outline"},'
-            '  {"key":"ajustes","label":"Ajustes","icon":"ion:settings-outline"}'
-            ']) }}'
-            '</div>'
-        )},
-        {"label": "Variant indicator · barra superior iOS-style", "render": (
-            '{% from "ui/tabbar.jinja" import tabbar %}'
-            '<div data-signals=\'{"tab": "inicio"}\'>'
-            '{{ tabbar(signal="$tab", variant="indicator", items=['
-            '  {"key":"inicio","label":"Inicio","icon":"ion:home-outline"},'
-            '  {"key":"agenda","label":"Agenda","icon":"ion:calendar-outline"},'
-            '  {"key":"historial","label":"Historial","icon":"ion:time-outline"},'
-            '  {"key":"mas","label":"Mas","icon":"ion:add-circle-outline"}'
-            ']) }}'
-            '</div>'
-        )},
-        {"label": "Variant pill · fondo en activo (Material-style)", "render": (
-            '{% from "ui/tabbar.jinja" import tabbar %}'
-            '<div data-signals=\'{"tab": "inicio"}\'>'
-            '{{ tabbar(signal="$tab", variant="pill", items=['
-            '  {"key":"inicio","label":"Inicio","icon":"ion:home-outline"},'
-            '  {"key":"buscar","label":"Buscar","icon":"ion:search-outline"},'
-            '  {"key":"avisos","label":"Avisos","icon":"ion:notifications-outline","badge":"5"},'
-            '  {"key":"perfil","label":"Perfil","icon":"ion:person-circle-outline"}'
-            ']) }}'
-            '</div>'
-        )},
-        {"label": "Variant icons · solo iconos", "render": (
-            '{% from "ui/tabbar.jinja" import tabbar %}'
-            '<div data-signals=\'{"tab": "inicio"}\'>'
-            '{{ tabbar(signal="$tab", variant="icons", items=['
-            '  {"key":"inicio","label":"Inicio","icon":"ion:home-outline"},'
-            '  {"key":"buscar","label":"Buscar","icon":"ion:search-outline"},'
-            '  {"key":"crear","label":"Crear","icon":"ion:add-outline"},'
-            '  {"key":"perfil","label":"Perfil","icon":"ion:person-outline"}'
-            ']) }}'
-            '</div>'
-        )},
-        {"label": "Route-driven · navega entre paginas Hotframe", "render": (
-            '{% from "ui/tabbar.jinja" import tabbar %}'
-            '{{ tabbar(current_path="/", items=['
-            '  {"label":"Home","href":"/","icon":"ion:home-outline"},'
-            '  {"label":"Inbox","href":"/inbox","icon":"ion:mail-outline","badge":"3"},'
-            '  {"label":"Pedidos","href":"/pedidos","icon":"ion:cart-outline"},'
-            '  {"label":"Yo","href":"/me","icon":"ion:person-outline"}'
-            ']) }}'
+        {"label": "Default · Indicator · Pill · FAB · Phone shell", "render": (
+            '{% include "_previews/tabbar_full.html" %}'
         )},
     ],
     # ------------------------------------------------------------------ shells
