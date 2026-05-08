@@ -143,26 +143,102 @@
     font-family: var(--ux-font-mono); font-size: 10.5px; color: var(--ux-ink-3);
   }
 </style>
-<!-- Theme runtime — small ES module that owns [data-theme] / [data-template] -->
+<!--
+  Theme runtime.
+  We define window.uxTheme SYNCHRONOUSLY here so it's available BEFORE Datastar
+  processes the data-effect on .ux-app. ESM modules load deferred, which causes
+  a race: Datastar fires the first effect before the module sets window.uxTheme.
+  The full ESM ThemeManager (lib/js/theme-runtime.js) is still shipped for
+  consumers' apps; this is only the showcase bootstrap.
+-->
+<script>
+  (function () {
+    var STATE = {
+      theme: localStorage.getItem('ux-theme') || 'erplora',
+      template: localStorage.getItem('ux-template') || '',
+    };
+    var iframes = new Set();
+
+    function resolveTpl() {
+      if (!STATE.template) return '';
+      return STATE.theme === 'erplora-light' ? STATE.template + '-light' : STATE.template;
+    }
+    function applyOn(el) {
+      if (!el || !el.setAttribute) return;
+      el.setAttribute('data-theme', STATE.theme);
+      var t = resolveTpl();
+      if (t) el.setAttribute('data-template', t);
+      else   el.removeAttribute('data-template');
+    }
+    function syncIframe(ifr) {
+      try {
+        var doc = ifr.contentDocument;
+        if (!doc) return;
+        applyOn(doc.documentElement);
+      } catch (_) { /* cross-origin */ }
+    }
+    function applyAll() {
+      applyOn(document.documentElement);
+      iframes.forEach(syncIframe);
+    }
+    function persist() {
+      try {
+        localStorage.setItem('ux-theme', STATE.theme);
+        localStorage.setItem('ux-template', STATE.template);
+      } catch (_) {}
+    }
+
+    // Apply current state to <html> immediately so first paint is correct.
+    applyAll();
+
+    window.uxTheme = {
+      getState: function () { return { theme: STATE.theme, template: STATE.template }; },
+      set: function (theme, template) {
+        var dirty = false;
+        if (typeof theme === 'string' && STATE.theme !== theme) { STATE.theme = theme; dirty = true; }
+        if (template !== undefined && STATE.template !== (template || '')) { STATE.template = template || ''; dirty = true; }
+        if (dirty) { persist(); applyAll(); }
+      },
+      attachIframe: function (ifr) {
+        if (!ifr || iframes.has(ifr)) return;
+        iframes.add(ifr);
+        syncIframe(ifr);
+        ifr.addEventListener('load', function () { syncIframe(ifr); });
+      },
+    };
+
+    // Auto-attach any iframe that appears under document.body.
+    if ('MutationObserver' in window) {
+      var ready = function () {
+        document.querySelectorAll('iframe').forEach(window.uxTheme.attachIframe);
+        var mo = new MutationObserver(function (muts) {
+          muts.forEach(function (m) {
+            m.addedNodes.forEach(function (n) {
+              if (n.nodeType !== 1) return;
+              if (n.tagName === 'IFRAME') window.uxTheme.attachIframe(n);
+              else if (n.querySelectorAll) n.querySelectorAll('iframe').forEach(window.uxTheme.attachIframe);
+            });
+          });
+        });
+        mo.observe(document.body, { childList: true, subtree: true });
+      };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
+      else ready();
+    }
+  })();
+</script>
+
+<!-- Async: load the templates manifest and populate the topbar select. -->
 <script type="module">
-  import { createThemeManager, loadManifest } from './lib/js/theme-runtime.js';
-
-  const theme = createThemeManager();
-  theme.apply();                                  // sync <html> immediately on first paint
-  theme.observe(document.body);                   // auto-attach any iframe added later
-
-  // Populate the topbar select from the manifest (single source of truth).
-  loadManifest('lib/templates/manifest.json').then(manifest => {
-    const sel = document.querySelector('.topbar-template');
+  import { loadManifest } from './lib/js/theme-runtime.js';
+  loadManifest('lib/templates/manifest.json').then(function (manifest) {
+    var sel = document.querySelector('.topbar-template');
     if (!sel) return;
     sel.innerHTML = manifest.templates
-      .map(t => `<option value="${t.id}">${t.icon ? t.icon + ' ' : ''}${t.label}</option>`)
+      .map(function (t) { return '<option value="' + t.id + '">' + (t.icon ? t.icon + ' ' : '') + t.label + '</option>'; })
       .join('');
-    sel.value = theme.getState().template;
+    sel.value = window.uxTheme.getState().template;
   });
-
-  // Expose a single object for Datastar to call. Stable, narrow surface.
-  window.uxTheme = theme;
 </script>
 </head>
 <body>
