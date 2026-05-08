@@ -1,4 +1,4 @@
-# ERPlora UX · Full Reference (v2.1.0)
+# ERPlora UX · Full Reference (v2.2.0)
 
 This document is the **complete machine-readable inventory** of every class
 shipped by the library. Drop it into an LLM context window when you need
@@ -11,20 +11,38 @@ For a shorter agent-focused guide, see AGENTS.md.
 ## What this is
 
 CSS-only semantic component library. Single bundle:
-`https://cdn.jsdelivr.net/gh/ERPlora/ux@v2.1.0/dist/erplora-ux.min.css`
+`https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/erplora-ux.min.css`
 
 Class prefix: `ux-`
 BEM-light pattern: `ux-{block}__{element}--{modifier}`
 Runtime states: `is-active`, `is-open`, `is-loading`, `is-disabled`, `is-selected`
 Themes: `data-theme="erplora" | "erplora-light"` on `<html>` or any subtree.
+Templates (palette overrides): `data-template="corporate|minimal|forest|ocean|violet"` (each has `-light` variant).
 
 Optional Datastar interactivity: `data-signals`, `data-show`, `data-bind-*`,
 `data-on-click`, `data-class-*`. Library is functional without JS. ALL preview
 demos in this repo use Datastar exclusively — copy-paste any block and it works.
 
+## Grid system (read this first when laying out a page)
+
+Use in this order of preference:
+
+1. `.ux-container[--narrow|--reading|--wide|--full|--fluid]` — page max-width wrapper.
+2. `.ux-row` + `.ux-col-{1..12}` (mobile-first) + `.ux-col-{sm|md|lg}-{1..12}` — 12-col responsive grid.
+3. `.ux-grid-auto[--xs|--sm|--md|--lg|--xl]` — auto-fit minmax (cards, gallery). Add `--dense` for masonry pack.
+4. Container queries: `.ux-cq` wrapper + `.ux-col-cq-{1..12}` (container ≥ 480px) and `.ux-col-cq-lg-{1..12}` (≥ 720px).
+5. Subgrid: `.ux-row--subgrid` to inherit parent tracks.
+6. Aspect cells: `.ux-cell-{square|video|photo|portrait|wide}`.
+7. Sticky col helper: `.ux-col-sticky`.
+8. Logical spacing: `.ux-px-{3,4,6}`, `.ux-py-{3,4,6}`, `.ux-mx-auto`, `.ux-my-auto`.
+9. Visibility: viewport `.ux-hide-{sm|md|lg}`, container `.ux-show-cq-md` / `.ux-hide-cq-md`.
+10. Legacy fixed grids (still supported): `.ux-grid-2 / -3 / -4 / -6` (auto-collapse).
+
+Three breakpoints: mobile ≤ 767 · tablet 768-1199 · desktop ≥ 1200. Container queries unlock component-relative responsiveness when the viewport is wrong axis.
+
 ## Status / color modifiers (consistent across components)
 
-- `--brand`           Primary accent (terracota)
+- `--brand`           Primary accent (terracota, or template's brand)
 - `--ok` / `--leaf`   Success
 - `--warn`            Warning
 - `--danger`          Error / destructive
@@ -37,7 +55,7 @@ demos in this repo use Datastar exclusively — copy-paste any block and it work
 - `--compact` / `--dense`   Reduced padding
 - `--inline`          Inline layout
 
-## Tokens (override on `:root` to retheme)
+## Tokens (override on `:root` or under `[data-template="X"]`)
 
 Brand:        --ux-brand, --ux-brand-2, --ux-brand-3, --ux-brand-fg, --ux-brand-soft
 Status:       --ux-leaf, --ux-warn, --ux-danger, --ux-info  (each has *-soft, *-fg)
@@ -49,8 +67,18 @@ Radii:        --ux-radius-xs/sm/md/lg/xl/2xl/pill
 Typography:   --ux-text-2xs .. --ux-text-5xl, --ux-leading-*, --ux-tracking-*
 Motion:       --ux-dur-fast/base/slow, --ux-ease-out/spring
 Z-index:      --ux-z-base/sticky/drawer/modal/toast/tooltip
-Fonts:        --ux-font-sans (Inter), --ux-font-display (Inter Tight),
-              --ux-font-mono (JetBrains Mono)
+Layout:       --ux-topbar-h, --ux-sidebar-w, --ux-sidebar-w-collapsed, --ux-page-pad, --ux-page-max
+Fonts:        --ux-font-sans, --ux-font-display, --ux-font-mono
+
+## Glass / blur
+
+Apply translucency + backdrop blur to any surface. Built-in on .ux-topbar, .ux-sidebar, .ux-modal, .ux-drawer, and .ux-card--glass. Available as utilities for any other element:
+
+- `.ux-glass`           medium blur (14px)
+- `.ux-glass--strong`   heavy blur (22px)
+- `.ux-glass--soft`     light blur (10px)
+
+All fall back to a solid `--ux-bg-2` background where `backdrop-filter` isn't supported.
 
 ## Class catalog (per source file)
 
@@ -441,6 +469,18 @@ Block classes appear first; their `__elements` and `--modifiers` follow.
 .ux-loyalty__points-value
 .ux-loyalty__row
 .ux-loyalty__tier-badge
+.ux-pdp-gallery
+.ux-pdp-gallery__hero
+.ux-pdp-gallery__hero-badge
+.ux-pdp-gallery__nav
+.ux-pdp-gallery__nav--next
+.ux-pdp-gallery__nav--prev
+.ux-pdp-gallery__strip
+.ux-pdp-gallery__thumb
+.ux-pdp-qty
+.ux-pdp-qty--sm
+.ux-pdp-qty__btn
+.ux-pdp-qty__value
 .ux-pmatrix
 .ux-product
 .ux-product--compact
@@ -763,6 +803,17 @@ Block classes appear first; their `__elements` and `--modifiers` follow.
 .ux-stepper__step
 .ux-stepper__sub
 .ux-stepper__title
+.ux-stripe-form
+.ux-stripe-form__brand
+.ux-stripe-form__brands
+.ux-stripe-form__card-element
+.ux-stripe-form__field
+.ux-stripe-form__hint
+.ux-stripe-form__hint--error
+.ux-stripe-form__label
+.ux-stripe-form__powered
+.ux-stripe-form__row
+.ux-stripe-form__row--cols-2
 
 ## forms-inputs
 .ux-currency
@@ -846,6 +897,61 @@ Block classes appear first; their `__elements` and `--modifiers` follow.
 .ux-toggle-row__label
 .ux-toggle-row__text
 .ux-toggle__track
+
+## grid
+.ux-cell-photo
+.ux-cell-portrait
+.ux-cell-square
+.ux-cell-video
+.ux-cell-wide
+.ux-col-1
+.ux-col-10
+.ux-col-11
+.ux-col-12
+.ux-col-2
+.ux-col-3
+.ux-col-4
+.ux-col-5
+.ux-col-6
+.ux-col-7
+.ux-col-8
+.ux-col-9
+.ux-col-auto
+.ux-col-full
+.ux-col-sticky
+.ux-container
+.ux-container--fluid
+.ux-container--flush
+.ux-container--full
+.ux-container--narrow
+.ux-container--reading
+.ux-container--wide
+.ux-cq
+.ux-cq-block
+.ux-cq-normal
+.ux-grid-auto
+.ux-grid-auto--dense
+.ux-grid-auto--lg
+.ux-grid-auto--md
+.ux-grid-auto--sm
+.ux-grid-auto--xl
+.ux-grid-auto--xs
+.ux-mx-auto
+.ux-my-auto
+.ux-px-3
+.ux-px-4
+.ux-px-6
+.ux-py-3
+.ux-py-4
+.ux-py-6
+.ux-row
+.ux-row--dense
+.ux-row--gap-0
+.ux-row--gap-lg
+.ux-row--gap-sm
+.ux-row--stack
+.ux-row--subgrid
+.ux-row--subgrid-rows
 
 ## hr
 .ux-attendance
@@ -1796,6 +1902,23 @@ Block classes appear first; their `__elements` and `--modifiers` follow.
 .ux-spinner--xl
 .ux-spinner--xs
 
+## public
+.ux-public-map
+.ux-public-map__caption
+.ux-public-map__caption-meta
+.ux-public-map__pin
+.ux-public-map__pulse
+.ux-public-map__roads
+.ux-public-nav
+.ux-public-nav__actions
+.ux-public-nav__brand
+.ux-public-nav__link
+.ux-public-nav__links
+.ux-public-nav__logo
+.ux-public-nav__name
+.ux-public-nav__spacer
+.ux-public-nav__sub
+
 ## selection
 .ux-filter-chip
 .ux-filter-chip--sm
@@ -1874,9 +1997,37 @@ Block classes appear first; their `__elements` and `--modifiers` follow.
 .ux-alert__desc
 .ux-alert__icon
 .ux-alert__title
+.ux-bootstrap-error
+.ux-bootstrap-error__actions
+.ux-bootstrap-error__check
+.ux-bootstrap-error__check--fail
+.ux-bootstrap-error__check--ok
+.ux-bootstrap-error__check--pending
+.ux-bootstrap-error__check-body
+.ux-bootstrap-error__check-icon
+.ux-bootstrap-error__check-msg
+.ux-bootstrap-error__check-name
+.ux-bootstrap-error__checks
+.ux-bootstrap-error__details
+.ux-bootstrap-error__head
+.ux-bootstrap-error__icon
+.ux-bootstrap-error__panel
+.ux-bootstrap-error__sub
+.ux-bootstrap-error__title
 .ux-btn--loading
 .ux-disabled
 .ux-error
+.ux-error-page
+.ux-error-page--danger
+.ux-error-page--info
+.ux-error-page--warn
+.ux-error-page__actions
+.ux-error-page__code
+.ux-error-page__illu
+.ux-error-page__inner
+.ux-error-page__meta
+.ux-error-page__msg
+.ux-error-page__title
 .ux-error__actions
 .ux-error__code
 .ux-error__icon
@@ -2099,11 +2250,15 @@ Block classes appear first; their `__elements` and `--modifiers` follow.
 
 ## topbar
 .ux-topbar
+.ux-topbar--with-crumb
 .ux-topbar__actions
+.ux-topbar__back-btn
 .ux-topbar__crumb
 .ux-topbar__crumb-item
 .ux-topbar__crumb-sep
 .ux-topbar__kbd
+.ux-topbar__left
 .ux-topbar__menu-btn
+.ux-topbar__page-title
 .ux-topbar__search
 
