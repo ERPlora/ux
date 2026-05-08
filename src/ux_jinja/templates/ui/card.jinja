@@ -1,0 +1,41 @@
+{# card(title, subtitle, elevated, flat, glass, interactive, attrs)
+   Wraps the `<article class="ux-card">` shell with header/body slots.
+
+   Body content goes inside the `{% call card(...) %}...{% endcall %}` block.
+   Optional title/subtitle render the standard ux-card__header.
+
+   Variants from lib/css/components/card.css:
+     - ux-card--elevated
+     - ux-card--flat
+     - ux-card--glass
+     - ux-card--interactive
+
+   For a footer, use the companion `card_footer()` macro inside the call block.
+#}
+{% macro card(title=None, subtitle=None, elevated=False, flat=False, glass=False, interactive=False, attrs={}) %}
+{%- set classes = ["ux-card"] -%}
+{%- if elevated %}{%- do classes.append("ux-card--elevated") -%}{%- endif -%}
+{%- if flat %}{%- do classes.append("ux-card--flat") -%}{%- endif -%}
+{%- if glass %}{%- do classes.append("ux-card--glass") -%}{%- endif -%}
+{%- if interactive %}{%- do classes.append("ux-card--interactive") -%}{%- endif -%}
+<article class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if title or subtitle %}
+  <header class="ux-card__header">
+    <div>
+      {%- if title %}<h3 class="ux-card__title">{{ title|e }}</h3>{% endif %}
+      {%- if subtitle %}<p class="ux-card__sub">{{ subtitle|e }}</p>{% endif %}
+    </div>
+  </header>
+{%- endif %}
+  <div class="ux-card__body">{% if caller is defined %}{{ caller() }}{% endif %}</div>
+</article>
+{% endmacro %}
+
+{# card_footer() — slot helper for the footer row. Use inside a card() body. #}
+{% macro card_footer(attrs={}) %}
+<footer class="ux-card__footer"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% endif -%}
+</footer>
+{% endmacro %}

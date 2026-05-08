@@ -1,0 +1,37 @@
+{# select(name, options, value, size, disabled, value_signal, attrs)
+
+   Emits `<select class="ux-select">` matching lib/css/components/forms.css.
+   `options` accepts:
+     - list of (value, label) tuples
+     - list of dicts {value, label, disabled}
+     - list of plain strings (used as both value and label)
+   Sizes: sm | lg.
+#}
+{% macro select(name, options=[], value=None, size=None, disabled=False, value_signal=None, attrs={}) %}
+{%- set classes = ["ux-select"] -%}
+{%- if size %}{%- do classes.append("ux-select--" ~ size) -%}{%- endif -%}
+<select class="{{ classes | join(' ') }}"
+  name="{{ name|e }}"
+{%- if disabled %} disabled{% endif -%}
+{%- if value_signal %} data-bind="{{ value_signal|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- for opt in options -%}
+  {%- if opt is mapping -%}
+    {%- set ov = opt.value -%}
+    {%- set ol = opt.label -%}
+    {%- set od = opt.disabled|default(false) -%}
+  {%- elif opt is string -%}
+    {%- set ov = opt -%}
+    {%- set ol = opt -%}
+    {%- set od = false -%}
+  {%- else -%}
+    {%- set ov = opt[0] -%}
+    {%- set ol = opt[1] -%}
+    {%- set od = false -%}
+  {%- endif -%}
+  <option value="{{ ov|e }}"
+  {%- if value is not none and ov == value %} selected{% endif -%}
+  {%- if od %} disabled{% endif -%}>{{ ol|e }}</option>
+{%- endfor %}
+</select>
+{% endmacro %}

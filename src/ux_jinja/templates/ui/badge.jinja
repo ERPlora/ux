@@ -1,0 +1,27 @@
+{# badge(label, variant, size, dot, attrs)
+
+   CSS variants from lib/css/components/badge.css:
+     - default (no modifier)   neutral grey badge
+     - brand                   ux-badge--brand
+     - ok                      ux-badge--ok          (success)
+     - warn                    ux-badge--warn        (warning)
+     - danger                  ux-badge--danger
+     - info                    ux-badge--info
+     - solid                   ux-badge--solid
+     - solid-brand             ux-badge--solid-brand
+   Sizes:
+     - sm                      ux-badge--sm
+
+   `dot=True` renders the leading <span class="ux-badge__dot"> seen in previews
+   for tonal variants.
+#}
+{% macro badge(label="", variant=None, size=None, dot=False, attrs={}) %}
+{%- set classes = ["ux-badge"] -%}
+{%- if variant %}{%- do classes.append("ux-badge--" ~ variant) -%}{%- endif -%}
+{%- if size %}{%- do classes.append("ux-badge--" ~ size) -%}{%- endif -%}
+<span class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if dot %}<span class="ux-badge__dot"></span>{% endif -%}
+{%- if caller is defined %}{{ caller() }}{% else %}{{ label|e }}{% endif -%}
+</span>
+{% endmacro %}

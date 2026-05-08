@@ -1,0 +1,51 @@
+{# modal(open_signal, title, subtitle, size, attrs)
+
+   Renders the modal shell from lib/css/components/overlays.css:
+
+     <div class="ux-modal-root" data-state="open|closed" data-show="$signal">
+       <div class="ux-backdrop" data-on:click="$signal = false"></div>
+       <div class="ux-modal ux-modal--{size}">
+         <div class="ux-modal__header">...title...close...</div>
+         <div class="ux-modal__body">{{ caller() }}</div>
+       </div>
+     </div>
+
+   `open_signal` is the Datastar signal name (e.g. `"$showModal"`). The CSS
+   reacts to `data-state="open"`; we expose it via `data-attr:data-state` so
+   Datastar updates it from the same signal.
+
+   For a footer, place a `modal_footer()` block inside the call body.
+   Sizes: sm | md (default) | lg | xl.
+#}
+{% macro modal(open_signal, title=None, subtitle=None, size=None, attrs={}) %}
+{%- set modal_classes = ["ux-modal"] -%}
+{%- if size %}{%- do modal_classes.append("ux-modal--" ~ size) -%}{%- endif -%}
+<div class="ux-modal-root"
+  data-show="{{ open_signal|e }}"
+  data-attr:data-state="{{ open_signal|e }} ? 'open' : 'closed'"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-backdrop" data-on:click="{{ open_signal|e }} = false"></div>
+  <div class="{{ modal_classes | join(' ') }}" role="dialog" aria-modal="true">
+    {%- if title or subtitle %}
+    <div class="ux-modal__header">
+      <div class="ux-modal__heading">
+        {%- if title %}<h3 class="ux-modal__title">{{ title|e }}</h3>{% endif %}
+        {%- if subtitle %}<p class="ux-modal__sub">{{ subtitle|e }}</p>{% endif %}
+      </div>
+      <button class="ux-modal__close" type="button" aria-label="Close" data-on:click="{{ open_signal|e }} = false">&times;</button>
+    </div>
+    {%- endif %}
+    <div class="ux-modal__body">{% if caller is defined %}{{ caller() }}{% endif %}</div>
+  </div>
+</div>
+{% endmacro %}
+
+{# modal_footer() — slot helper for the footer row inside a modal body. #}
+{% macro modal_footer(between=False, attrs={}) %}
+{%- set classes = ["ux-modal__footer"] -%}
+{%- if between %}{%- do classes.append("ux-modal__footer--between") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% endif -%}
+</div>
+{% endmacro %}
