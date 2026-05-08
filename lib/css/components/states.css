@@ -360,6 +360,7 @@
    Error pages — full-screen composite (403/404/405/500/etc.)
    ============================================================ */
 .ux-error-page {
+  --_err-accent: var(--ux-brand);
   min-height: 100vh;
   min-height: 100dvh;
   display: grid;
@@ -372,6 +373,9 @@
   position: relative;
   overflow: hidden;
 }
+.ux-error-page--info   { --_err-accent: var(--ux-info); }
+.ux-error-page--warn   { --_err-accent: var(--ux-warn); }
+.ux-error-page--danger { --_err-accent: var(--ux-danger); }
 .ux-error-page::before {
   content: "";
   position: absolute;
@@ -441,6 +445,220 @@
   font-size: 12px;
   color: var(--ux-ink-3);
   margin-top: var(--ux-space-3);
+}
+
+/* ----------------------------------------------------------
+   Optional sub-atoms — composable, all optional. Mix as needed.
+   Same atoms work across cloud + hub; backends only differ in
+   i18n strings, link `href`s, and which sub-atoms they include.
+
+   __search          — input slot for 404 "did you mean"
+   __shortcuts       — grid of card-link tiles (home, support…)
+   __shortcut        — single tile with __shortcut-title /
+                       __shortcut-desc
+   __details         — collapsible <details> for technical info
+   __trace           — pre-formatted trace block inside __details
+   __retry           — countdown chip ("Reintentando en 30s")
+   __retry-countdown — the number element (data-text bound)
+   __retry-bar       — linear progress for the retry timer
+   __retry-fill      — animated fill of the bar
+   __diagnosis       — checklist for bootstrap / dep errors
+   __diagnosis-item  — row with is-ok / is-fail / is-warn /
+                       is-pending / is-skip states +
+                       __diagnosis-icon + __diagnosis-time
+   ---------------------------------------------------------- */
+
+.ux-error-page__search {
+  position: relative;
+  z-index: 1;
+  max-width: 380px;
+  margin: 0 auto var(--ux-space-5);
+}
+
+.ux-error-page__shortcuts {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--ux-space-2);
+  max-width: 520px;
+  margin: var(--ux-space-2) auto 0;
+}
+.ux-error-page__shortcut {
+  display: flex;
+  align-items: center;
+  gap: var(--ux-space-2);
+  padding: 12px 14px;
+  border-radius: var(--ux-radius-md);
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  color: var(--ux-ink);
+  text-decoration: none;
+  font-size: var(--ux-text-sm);
+  text-align: left;
+  transition: border-color var(--ux-dur-fast), background var(--ux-dur-fast), transform var(--ux-dur-fast);
+}
+.ux-error-page__shortcut:hover {
+  border-color: var(--ux-line-2);
+  background: var(--ux-bg-3);
+  transform: translateY(-1px);
+}
+.ux-error-page__shortcut svg {
+  width: 18px;
+  height: 18px;
+  color: var(--ux-ink-3);
+  flex-shrink: 0;
+}
+.ux-error-page__shortcut-title {
+  font-weight: 600;
+  color: var(--ux-ink);
+  display: block;
+  line-height: 1.3;
+}
+.ux-error-page__shortcut-desc {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--ux-ink-3);
+  line-height: 1.3;
+}
+
+.ux-error-page__details {
+  position: relative;
+  z-index: 1;
+  margin: var(--ux-space-4) auto 0;
+  max-width: 540px;
+  text-align: left;
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink-2);
+}
+.ux-error-page__details summary {
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: var(--ux-radius-md);
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  color: var(--ux-ink-2);
+  font-weight: 500;
+  user-select: none;
+  list-style: none;
+}
+.ux-error-page__details summary::-webkit-details-marker { display: none; }
+.ux-error-page__details summary::before {
+  content: "▸ ";
+  display: inline-block;
+  margin-right: 4px;
+  transition: transform var(--ux-dur-fast);
+}
+.ux-error-page__details[open] summary::before {
+  transform: rotate(90deg);
+}
+.ux-error-page__details summary:hover {
+  border-color: var(--ux-line-2);
+}
+.ux-error-page__trace {
+  margin: var(--ux-space-2) 0 0;
+  padding: 12px 14px;
+  border-radius: var(--ux-radius-md);
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  font-family: var(--ux-font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ux-ink-2);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.ux-error-page__retry {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: var(--ux-space-3) auto 0;
+  padding: 6px 12px;
+  border-radius: var(--ux-radius-pill);
+  background: color-mix(in oklch, var(--_err-accent) 8%, var(--ux-bg-2));
+  border: 1px solid color-mix(in oklch, var(--_err-accent) 25%, transparent);
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink-2);
+}
+.ux-error-page__retry-countdown {
+  font-family: var(--ux-font-mono);
+  font-weight: 700;
+  color: var(--_err-accent);
+  min-width: 1.5em;
+  text-align: center;
+}
+.ux-error-page__retry-bar {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 240px;
+  margin: var(--ux-space-2) auto 0;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ux-bg-3);
+  overflow: hidden;
+}
+.ux-error-page__retry-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--_err-accent);
+  transition: width var(--ux-dur-base) linear;
+}
+
+.ux-error-page__diagnosis {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: var(--ux-space-4) auto 0;
+  max-width: 480px;
+  text-align: left;
+}
+.ux-error-page__diagnosis-item {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--ux-radius-md);
+  background: var(--ux-bg-2);
+  border: 1px solid var(--ux-line);
+  font-size: var(--ux-text-sm);
+  color: var(--ux-ink-2);
+}
+.ux-error-page__diagnosis-icon {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  color: var(--ux-ink-3);
+}
+.ux-error-page__diagnosis-time {
+  font-family: var(--ux-font-mono);
+  font-size: 11px;
+  color: var(--ux-ink-3);
+}
+.ux-error-page__diagnosis-item.is-ok      .ux-error-page__diagnosis-icon { color: var(--ux-leaf); }
+.ux-error-page__diagnosis-item.is-fail    { border-color: color-mix(in oklch, var(--ux-danger) 30%, transparent); }
+.ux-error-page__diagnosis-item.is-fail    .ux-error-page__diagnosis-icon { color: var(--ux-danger); }
+.ux-error-page__diagnosis-item.is-warn    .ux-error-page__diagnosis-icon { color: var(--ux-warn); }
+.ux-error-page__diagnosis-item.is-pending .ux-error-page__diagnosis-icon { color: var(--ux-info); }
+.ux-error-page__diagnosis-item.is-skip    { opacity: 0.55; }
+
+/* Mobile tweaks: smaller illu, 2-column shortcuts grid. */
+@media (max-width: 600px) {
+  .ux-error-page__illu {
+    width: 72px;
+    height: 72px;
+  }
+  .ux-error-page__shortcuts {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 /* ============================================================
