@@ -784,20 +784,50 @@ EXAMPLES: dict[str, list[dict[str, str]]] = {
         )},
     ],
     "datatable": [
-        {"label": "Basic", "render": (
-            '{% from "ui/datatable.jinja" import datatable %}'
-            '{{ datatable("dt_demo", '
-            "columns=[{'key': 'name', 'label': 'Name'}, {'key': 'qty', 'label': 'Qty', 'align': 'right'}, {'key': 'sku', 'label': 'SKU'}], "
-            "rows=[{'name': 'Apple', 'qty': 12, 'sku': 'AP-01'}, {'name': 'Pear', 'qty': 5, 'sku': 'PE-04'}, {'name': 'Cherry', 'qty': 47, 'sku': 'CH-22'}, {'name': 'Mango', 'qty': 9, 'sku': 'MA-08'}]"
-            ") }}"
-        )},
-        {"label": "With view toggle", "render": (
-            '{% from "ui/datatable.jinja" import datatable %}'
-            '{{ datatable("dt_demo2", view_toggle=True, '
-            "columns=[{'key': 'name', 'label': 'Name'}, {'key': 'role', 'label': 'Role'}], "
-            "rows=[{'name': 'Ada', 'role': 'Engineer'}, {'name': 'Grace', 'role': 'Engineer'}, {'name': 'Linus', 'role': 'Ops'}]"
-            ") }}"
-        )},
+        {
+            # Replica fiel del preview público: vista Tabla con toolbar
+            # consolidada (search + 2 filters + date range + page size + view
+            # toggle + IO + primary action) + tabla con avatares y badges.
+            "label": "Vista tabla - toolbar consolidada en una linea",
+            "render": '{% include "_previews/datatable_full.html" %}',
+        },
+        {
+            "label": "Basico - macro datatable() con datos simples",
+            "render": (
+                '{% from "ui/datatable.jinja" import datatable %}'
+                '{{ datatable("dt_simple", '
+                "columns=[{'key':'name','label':'Producto','sortable':True}, "
+                "{'key':'qty','label':'Cant.','align':'right'}, "
+                "{'key':'sku','label':'SKU'}], "
+                "rows=[{'name':'Cafe arabica','qty':12,'sku':'CA-01'}, "
+                "{'name':'Cafe robusta','qty':5,'sku':'CA-04'}, "
+                "{'name':'Te verde','qty':47,'sku':'TE-22'}, "
+                "{'name':'Mate','qty':9,'sku':'MA-08'}], "
+                'search_placeholder="Buscar producto...", '
+                "view_toggle=False, io_icons=False, "
+                'primary_action={"label":"+ Nuevo"})'
+                ' }}'
+            ),
+        },
+        {
+            "label": "Con filtros, fechas, view toggle y IO icons",
+            "render": (
+                '{% from "ui/datatable.jinja" import datatable %}'
+                '{{ datatable("dt_full", '
+                "columns=[{'key':'name','label':'Cliente','sortable':True}, "
+                "{'key':'email','label':'Email'}, "
+                "{'key':'role','label':'Rol'}, "
+                "{'key':'state','label':'Estado'}], "
+                "rows=[{'name':'Ada Lovelace','email':'ada@ex.com','role':'Admin','state':'activo'}, "
+                "{'name':'Grace Hopper','email':'grace@ex.com','role':'Engineer','state':'invitado'}, "
+                "{'name':'Linus Torvalds','email':'linus@ex.com','role':'Ops','state':'suspendido'}], "
+                "filters=[{'name':'estado','label':'Todos los Estados','options':['Pagado','Procesando','Reembolso']}, "
+                "{'name':'tipo','label':'Todos los tipos','options':['POS','Web','App']}], "
+                "date_range={'label':'Rango de fechas','from_label':'01/10/25','to_label':'18/10/25'}, "
+                'primary_action={"label":"+ Nuevo"})'
+                ' }}'
+            ),
+        },
     ],
     "field": [
         {"label": "With hint", "render": (
@@ -2272,8 +2302,12 @@ USAGE: dict[str, str] = {
 
 def _build_env() -> Environment:
     """Build a Jinja env loaded against the ux-jinja templates directory."""
+    repo_root = Path(__file__).resolve().parents[2]
     return Environment(
-        loader=FileSystemLoader(str(Path(ux_jinja.TEMPLATES_DIR))),
+        loader=FileSystemLoader([
+            str(Path(ux_jinja.TEMPLATES_DIR)),
+            str(repo_root / "templates"),
+        ]),
         extensions=["jinja2.ext.do"],
         autoescape=select_autoescape(["html"]),
     )

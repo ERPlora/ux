@@ -1,0 +1,401 @@
+<h4>DataTable · vista Tabla (toolbar consolidada en una línea)</h4>
+<div class="ux-table-wrap" id="dt-table" data-signals="{view: 'table'}">
+
+  <!-- Toolbar única: búsqueda · filtros · rango fechas · spacer · page-size · view-toggle · io · acción primaria -->
+  <div class="ux-dt-toolbar">
+    <div class="ux-search" style="flex:1 1 220px;max-width:300px">
+      <svg class="ux-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input class="ux-input ux-input--sm" placeholder="Buscar pedido o cliente…"/>
+    </div>
+
+    <select class="ux-select ux-select--sm" style="width:auto;min-width:140px">
+      <option>Todos los Estados</option>
+      <option>Pagado</option>
+      <option>Procesando</option>
+      <option>Reembolso</option>
+    </select>
+
+    <select class="ux-select ux-select--sm" style="width:auto;min-width:130px">
+      <option>Todos los tipos</option>
+      <option>POS · Local</option>
+      <option>Web</option>
+      <option>App</option>
+    </select>
+
+    <label class="ux-date-range" title="Rango de fechas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>01/10/25</span>
+      <span class="ux-date-range__sep">→</span>
+      <span>18/10/25</span>
+    </label>
+
+    <div class="ux-dt-toolbar__spacer"></div>
+
+    <select class="ux-select ux-select--sm" style="width:auto;min-width:64px" title="Por página">
+      <option>10</option><option selected>25</option><option>50</option><option>100</option>
+    </select>
+
+    <div class="ux-dt-toolbar__divider"></div>
+
+    <!-- View toggle: tabla / grid -->
+    <div class="ux-view-toggle" role="tablist" aria-label="Vista">
+      <button class="ux-view-toggle__btn" data-on:click="$view = 'table'" data-attr:aria-pressed="$view === 'table'" title="Vista tabla">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <button class="ux-view-toggle__btn" data-on:click="$view = 'grid'" data-attr:aria-pressed="$view === 'grid'" title="Vista cuadrícula">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+    </div>
+
+    <div class="ux-dt-toolbar__divider"></div>
+
+    <!-- IO icons sin texto -->
+    <button class="ux-icon-btn" title="Importar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+    <button class="ux-icon-btn" title="Exportar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </button>
+    <button class="ux-icon-btn" title="Más opciones">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+    </button>
+
+    <div class="ux-dt-toolbar__divider"></div>
+
+    <button class="ux-btn ux-btn--primary ux-btn--sm">+ Nuevo</button>
+  </div>
+
+  <!-- Vista tabla -->
+  <div id="view-table" class="ux-table-scroll" data-show="$view === 'table'">
+    <table class="ux-table">
+      <thead>
+        <tr>
+          <th style="width:36px"><label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label></th>
+          <th class="ux-th--sortable">Pedido</th>
+          <th class="ux-th--sortable">Cliente</th>
+          <th class="ux-th--sortable">Canal</th>
+          <th class="ux-th--sortable">Estado</th>
+          <th>Tendencia 7d</th>
+          <th class="ux-th--sortable ux-td--right" aria-sort="descending">Total</th>
+          <th class="ux-th--sortable">Fecha</th>
+          <th style="width:120px;text-align:right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><label class="ux-check"><input type="checkbox" checked/><span class="ux-check__box"></span></label></td>
+          <td class="ux-td--mono">#PED-2041</td>
+          <td>
+            <div class="ux-cell-rich">
+              <div class="ux-avatar ux-avatar--sm" data-tone="brand">MR</div>
+              <div class="ux-cell-rich__main">
+                <span class="ux-cell-rich__title">Marina Ribó</span>
+                <span class="ux-cell-rich__sub">Habitual · 24 pedidos</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="ux-badge">POS · Local</span></td>
+          <td><span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Pagado</span></td>
+          <td><svg class="ux-spark ux-spark--up" viewBox="0 0 80 22" preserveAspectRatio="none"><polyline points="0,16 10,14 20,15 30,10 40,11 50,8 60,7 70,5 80,4"/></svg></td>
+          <td class="ux-td--num">€324,50</td>
+          <td class="ux-td--muted">Hoy · 14:22</td>
+          <td>
+            <div class="ux-row-actions ux-justify-end">
+              <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+            </div>
+          </td>
+        </tr>
+        <tr aria-selected="true">
+          <td><label class="ux-check"><input type="checkbox" checked/><span class="ux-check__box"></span></label></td>
+          <td class="ux-td--mono">#PED-2040</td>
+          <td>
+            <div class="ux-cell-rich">
+              <div class="ux-avatar ux-avatar--sm" data-tone="info">JG</div>
+              <div class="ux-cell-rich__main">
+                <span class="ux-cell-rich__title">Joaquín Gómez</span>
+                <span class="ux-cell-rich__sub">Nuevo</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="ux-badge ux-badge--info"><span class="ux-badge__dot"></span>Web</span></td>
+          <td><span class="ux-pill ux-pill--warn"><span class="ux-pill__dot"></span>Procesando</span></td>
+          <td>
+            <span class="ux-spark-bars ux-spark-bars--brand">
+              <span class="ux-spark-bars__bar" style="height:30%"></span>
+              <span class="ux-spark-bars__bar" style="height:55%"></span>
+              <span class="ux-spark-bars__bar" style="height:42%"></span>
+              <span class="ux-spark-bars__bar" style="height:75%"></span>
+              <span class="ux-spark-bars__bar" style="height:60%"></span>
+              <span class="ux-spark-bars__bar" style="height:85%"></span>
+              <span class="ux-spark-bars__bar ux-h-full"></span>
+            </span>
+          </td>
+          <td class="ux-td--num">€186,00</td>
+          <td class="ux-td--muted">Hoy · 13:48</td>
+          <td>
+            <div class="ux-row-actions ux-justify-end">
+              <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label></td>
+          <td class="ux-td--mono">#PED-2039</td>
+          <td>
+            <div class="ux-cell-rich">
+              <div class="ux-avatar ux-avatar--sm" data-tone="ok">EL</div>
+              <div class="ux-cell-rich__main">
+                <span class="ux-cell-rich__title">Eva Linares</span>
+                <span class="ux-cell-rich__sub">VIP · 5 años</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="ux-badge">App</span></td>
+          <td><span class="ux-pill ux-pill--danger"><span class="ux-pill__dot"></span>Reembolso</span></td>
+          <td><svg class="ux-spark ux-spark--down" viewBox="0 0 80 22" preserveAspectRatio="none"><polyline points="0,4 10,6 20,5 30,9 40,11 50,14 60,15 70,18 80,17"/></svg></td>
+          <td class="ux-td--num ux-c-danger">−€42,00</td>
+          <td class="ux-td--muted">Ayer · 18:02</td>
+          <td>
+            <div class="ux-row-actions ux-justify-end">
+              <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label></td>
+          <td class="ux-td--mono">#PED-2038</td>
+          <td>
+            <div class="ux-cell-rich">
+              <div class="ux-avatar ux-avatar--sm" data-tone="warn">RP</div>
+              <div class="ux-cell-rich__main">
+                <span class="ux-cell-rich__title">Roberto Pinto</span>
+                <span class="ux-cell-rich__sub">Habitual</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="ux-badge ux-badge--info"><span class="ux-badge__dot"></span>Web</span></td>
+          <td><span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Pagado</span></td>
+          <td><svg class="ux-spark ux-spark--up" viewBox="0 0 80 22" preserveAspectRatio="none"><polyline points="0,18 10,16 20,14 30,15 40,11 50,9 60,10 70,6 80,4"/></svg></td>
+          <td class="ux-td--num">€312,80</td>
+          <td class="ux-td--muted">Ayer · 12:30</td>
+          <td>
+            <div class="ux-row-actions ux-justify-end">
+              <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label></td>
+          <td class="ux-td--mono">#PED-2037</td>
+          <td>
+            <div class="ux-cell-rich">
+              <div class="ux-avatar ux-avatar--sm">SC</div>
+              <div class="ux-cell-rich__main">
+                <span class="ux-cell-rich__title">Sara Caamaño</span>
+                <span class="ux-cell-rich__sub">Nuevo</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="ux-badge">POS · Local</span></td>
+          <td><span class="ux-pill ux-pill--info"><span class="ux-pill__dot"></span>Pendiente envío</span></td>
+          <td><span class="ux-trend ux-trend--up">+12%</span></td>
+          <td class="ux-td--num">€68,00</td>
+          <td class="ux-td--muted">Lun · 09:14</td>
+          <td>
+            <div class="ux-row-actions ux-justify-end">
+              <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Vista grid (oculta por defecto) -->
+  <div id="view-grid" class="ux-dt-grid" data-show="$view === 'grid'">
+    <article class="ux-dt-card" aria-selected="true">
+      <header class="ux-dt-card__head">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="ux-dt-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18l-2 13H5L3 3z"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg></div>
+          <div>
+            <div class="ux-dt-card__title">Marina Ribó</div>
+            <div class="ux-dt-card__sub">#PED-2041</div>
+          </div>
+        </div>
+        <span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Pagado</span>
+      </header>
+      <div class="ux-dt-card__body">
+        <div class="ux-dt-card__field"><span>Total</span><strong>€324,50</strong></div>
+        <div class="ux-dt-card__field"><span>Canal</span><strong>POS · Local</strong></div>
+        <div class="ux-dt-card__field"><span>Fecha</span><strong>Hoy · 14:22</strong></div>
+        <div class="ux-dt-card__field"><span>Tendencia</span><span class="ux-trend ux-trend--up">+18%</span></div>
+      </div>
+      <footer class="ux-dt-card__footer">
+        <label class="ux-check"><input type="checkbox" checked/><span class="ux-check__box"></span></label>
+        <div class="ux-row-actions">
+          <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg></button>
+        </div>
+      </footer>
+    </article>
+
+    <article class="ux-dt-card">
+      <header class="ux-dt-card__head">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="ux-dt-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg></div>
+          <div>
+            <div class="ux-dt-card__title">Joaquín Gómez</div>
+            <div class="ux-dt-card__sub">#PED-2040</div>
+          </div>
+        </div>
+        <span class="ux-pill ux-pill--warn"><span class="ux-pill__dot"></span>Procesando</span>
+      </header>
+      <div class="ux-dt-card__body">
+        <div class="ux-dt-card__field"><span>Total</span><strong>€186,00</strong></div>
+        <div class="ux-dt-card__field"><span>Canal</span><strong>Web</strong></div>
+        <div class="ux-dt-card__field"><span>Fecha</span><strong>Hoy · 13:48</strong></div>
+        <div class="ux-dt-card__field"><span>Tendencia</span><span class="ux-trend ux-trend--up">+24%</span></div>
+      </div>
+      <footer class="ux-dt-card__footer">
+        <label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label>
+        <div class="ux-row-actions">
+          <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg></button>
+        </div>
+      </footer>
+    </article>
+
+    <article class="ux-dt-card">
+      <header class="ux-dt-card__head">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="ux-dt-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
+          <div>
+            <div class="ux-dt-card__title">Eva Linares</div>
+            <div class="ux-dt-card__sub">#PED-2039</div>
+          </div>
+        </div>
+        <span class="ux-pill ux-pill--danger"><span class="ux-pill__dot"></span>Reembolso</span>
+      </header>
+      <div class="ux-dt-card__body">
+        <div class="ux-dt-card__field"><span>Total</span><strong class="ux-c-danger">−€42,00</strong></div>
+        <div class="ux-dt-card__field"><span>Canal</span><strong>App</strong></div>
+        <div class="ux-dt-card__field"><span>Fecha</span><strong>Ayer · 18:02</strong></div>
+        <div class="ux-dt-card__field"><span>Tendencia</span><span class="ux-trend ux-trend--down">−8%</span></div>
+      </div>
+      <footer class="ux-dt-card__footer">
+        <label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label>
+        <div class="ux-row-actions">
+          <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg></button>
+        </div>
+      </footer>
+    </article>
+
+    <article class="ux-dt-card">
+      <header class="ux-dt-card__head">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="ux-dt-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18l-2 13H5L3 3z"/></svg></div>
+          <div>
+            <div class="ux-dt-card__title">Roberto Pinto</div>
+            <div class="ux-dt-card__sub">#PED-2038</div>
+          </div>
+        </div>
+        <span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Pagado</span>
+      </header>
+      <div class="ux-dt-card__body">
+        <div class="ux-dt-card__field"><span>Total</span><strong>€312,80</strong></div>
+        <div class="ux-dt-card__field"><span>Canal</span><strong>Web</strong></div>
+        <div class="ux-dt-card__field"><span>Fecha</span><strong>Ayer · 12:30</strong></div>
+        <div class="ux-dt-card__field"><span>Tendencia</span><span class="ux-trend ux-trend--up">+15%</span></div>
+      </div>
+      <footer class="ux-dt-card__footer">
+        <label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label>
+        <div class="ux-row-actions">
+          <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg></button>
+        </div>
+      </footer>
+    </article>
+
+    <article class="ux-dt-card">
+      <header class="ux-dt-card__head">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="ux-dt-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18l-2 13H5L3 3z"/></svg></div>
+          <div>
+            <div class="ux-dt-card__title">Sara Caamaño</div>
+            <div class="ux-dt-card__sub">#PED-2037</div>
+          </div>
+        </div>
+        <span class="ux-pill ux-pill--info"><span class="ux-pill__dot"></span>Pendiente</span>
+      </header>
+      <div class="ux-dt-card__body">
+        <div class="ux-dt-card__field"><span>Total</span><strong>€68,00</strong></div>
+        <div class="ux-dt-card__field"><span>Canal</span><strong>POS · Local</strong></div>
+        <div class="ux-dt-card__field"><span>Fecha</span><strong>Lun · 09:14</strong></div>
+        <div class="ux-dt-card__field"><span>Tendencia</span><span class="ux-trend ux-trend--up">+12%</span></div>
+      </div>
+      <footer class="ux-dt-card__footer">
+        <label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label>
+        <div class="ux-row-actions">
+          <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg></button>
+        </div>
+      </footer>
+    </article>
+
+    <article class="ux-dt-card">
+      <header class="ux-dt-card__head">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="ux-dt-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg></div>
+          <div>
+            <div class="ux-dt-card__title">Pablo Núñez</div>
+            <div class="ux-dt-card__sub">#PED-2036</div>
+          </div>
+        </div>
+        <span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Pagado</span>
+      </header>
+      <div class="ux-dt-card__body">
+        <div class="ux-dt-card__field"><span>Total</span><strong>€152,40</strong></div>
+        <div class="ux-dt-card__field"><span>Canal</span><strong>App</strong></div>
+        <div class="ux-dt-card__field"><span>Fecha</span><strong>Lun · 08:02</strong></div>
+        <div class="ux-dt-card__field"><span>Tendencia</span><span class="ux-trend ux-trend--up">+5%</span></div>
+      </div>
+      <footer class="ux-dt-card__footer">
+        <label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label>
+        <div class="ux-row-actions">
+          <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg></button>
+        </div>
+      </footer>
+    </article>
+  </div>
+
+  <div class="ux-table-footer">
+    <div>Mostrando 1–25 de 1.284 registros</div>
+    <nav class="ux-pagination" aria-label="Paginación">
+      <button class="ux-pagination__btn" disabled>‹</button>
+      <button class="ux-pagination__btn" aria-current="page">1</button>
+      <button class="ux-pagination__btn">2</button>
+      <button class="ux-pagination__btn">3</button>
+      <span class="ux-pagination__ellipsis">…</span>
+      <button class="ux-pagination__btn">52</button>
+      <button class="ux-pagination__btn">›</button>
+    </nav>
+  </div>
+</div>
