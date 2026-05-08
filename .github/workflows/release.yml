@@ -93,14 +93,25 @@ jobs:
 
       - name: Fetch SSH private key from Secrets Manager
         run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
-          aws secretsmanager get-secret-value \
+          # Capture into a variable first so a CLI failure aborts the step
+          # instead of writing the error message into the key file.
+          SSH_KEY=$(aws secretsmanager get-secret-value \
             --secret-id "$SSH_SECRET_NAME" \
             --query 'SecretString' \
-            --output text > ~/.ssh/uxsite_deploy
+            --output text)
+          if [ -z "$SSH_KEY" ] || ! echo "$SSH_KEY" | head -1 | grep -q "BEGIN.*PRIVATE KEY"; then
+            echo "Secret $SSH_SECRET_NAME is empty or not a private key" >&2
+            exit 1
+          fi
+          umask 077
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/uxsite_deploy
           chmod 600 ~/.ssh/uxsite_deploy
-          ssh-keyscan -t ed25519,ecdsa,rsa "${{ steps.lightsail.outputs.ip }}" \
-            >> ~/.ssh/known_hosts 2>/dev/null
+          # Scan host keys; skip silently on connection issues so the
+          # subsequent ssh step prints a clearer error.
+          ssh-keyscan -T 10 -t ed25519,ecdsa,rsa \
+            "${{ steps.lightsail.outputs.ip }}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Deploy via SSH (git fetch + pip install + supervisorctl restart)
         env:
