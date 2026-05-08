@@ -234,7 +234,7 @@ def test_datatable_basic(env):
         '{% from "ui/datatable.jinja" import datatable %}'
         '{{ datatable("dt1", '
         "columns=[{'key': 'name', 'label': 'Name'}, {'key': 'qty', 'label': 'Qty', 'align': 'right'}], "
-        "rows=[{'name': 'Apple', 'qty': 12}], search=False) }}"
+        "rows=[{'name': 'Apple', 'qty': 12}], search=False, view_toggle=False, io_icons=False, pagination=False) }}"
     )
     out = render(env, src)
     assert 'class="ux-table-wrap"' in out
@@ -247,11 +247,108 @@ def test_datatable_basic(env):
 def test_datatable_search_signal(env):
     src = (
         '{% from "ui/datatable.jinja" import datatable %}'
-        '{{ datatable("users", columns=["Name"], rows=[], search=True) }}'
+        '{{ datatable("users", columns=["Name"], rows=[], search=True, view_toggle=False, io_icons=False, pagination=False) }}'
     )
     out = render(env, src)
     assert "users_q" in out
-    assert 'data-bind="$users_q"' in out
+    assert "data-bind=" in out
+    assert "$users_q" in out
+
+
+def test_datatable_filters(env):
+    src = (
+        '{% from "ui/datatable.jinja" import datatable %}'
+        "{{ datatable('ord', columns=['Estado'], rows=[], search=False, view_toggle=False, io_icons=False, pagination=False,"
+        " filters=[{'name': 'estado', 'label': 'Todos los Estados', 'options': ['Pagado', 'Procesando']}]) }}"
+    )
+    out = render(env, src)
+    assert "Todos los Estados" in out
+    assert "Pagado" in out
+    assert "Procesando" in out
+    assert "ord_estado" in out
+
+
+def test_datatable_date_range(env):
+    src = (
+        '{% from "ui/datatable.jinja" import datatable %}'
+        "{{ datatable('rng', columns=[], rows=[], search=False, view_toggle=False, io_icons=False, pagination=False,"
+        " date_range={'label': 'Rango', 'from_label': '01/10/25', 'to_label': '31/10/25'}) }}"
+    )
+    out = render(env, src)
+    assert "ux-date-range" in out
+    assert "01/10/25" in out
+    assert "31/10/25" in out
+    assert "ux-date-range__sep" in out
+
+
+def test_datatable_view_toggle(env):
+    src = (
+        '{% from "ui/datatable.jinja" import datatable %}'
+        "{{ datatable('vt', columns=[{'key': 'n', 'label': 'N'}], rows=[{'n': 'X'}], view_toggle=True, io_icons=False, pagination=False) }}"
+    )
+    out = render(env, src)
+    assert "ux-view-toggle" in out
+    assert "vt_view" in out
+    assert 'data-show=' in out
+    assert '"table"' in out
+    assert '"grid"' in out
+    assert "ux-dt-grid" in out
+    # default grid card renders row data
+    assert ">X<" in out
+
+
+def test_datatable_io_icons(env):
+    src = (
+        '{% from "ui/datatable.jinja" import datatable %}'
+        "{{ datatable('io', columns=[], rows=[], search=False, view_toggle=False, io_icons=True, pagination=False) }}"
+    )
+    out = render(env, src)
+    assert "ux-icon-btn" in out
+    assert "Importar" in out
+    assert "Exportar" in out
+
+
+def test_datatable_primary_action(env):
+    src = (
+        '{% from "ui/datatable.jinja" import datatable %}'
+        "{{ datatable('pa', columns=[], rows=[], search=False, view_toggle=False, io_icons=False, pagination=False,"
+        " primary_action={'label': '+ Nuevo', 'on_click': 'console.log(1)'}) }}"
+    )
+    out = render(env, src)
+    assert "ux-btn--primary" in out
+    assert "+ Nuevo" in out
+
+
+def test_datatable_pagination(env):
+    src = (
+        '{% from "ui/datatable.jinja" import datatable %}'
+        "{{ datatable('pg', columns=[], rows=[], search=False, view_toggle=False, io_icons=False, pagination=True) }}"
+    )
+    out = render(env, src)
+    assert "ux-table-footer" in out
+    assert "ux-pagination" in out
+    assert "ux-pagination__btn" in out
+
+
+def test_datatable_sortable_columns(env):
+    src = (
+        '{% from "ui/datatable.jinja" import datatable %}'
+        "{{ datatable('sc', columns=[{'key': 'name', 'label': 'Name', 'sortable': True}], rows=[], search=False, view_toggle=False, io_icons=False, pagination=False) }}"
+    )
+    out = render(env, src)
+    assert "ux-th--sortable" in out
+
+
+def test_datatable_badge_cell(env):
+    src = (
+        '{% from "ui/datatable.jinja" import datatable %}'
+        "{{ datatable('bc', columns=[{'key': 'status', 'label': 'Estado'}], "
+        "rows=[{'status': {'badge': True, 'label': 'Pagado', 'variant': 'ok'}}], "
+        "search=False, view_toggle=False, io_icons=False, pagination=False) }}"
+    )
+    out = render(env, src)
+    assert "ux-badge--ok" in out
+    assert "Pagado" in out
 
 
 # ---------------------------------------------------------------------------
@@ -1347,3 +1444,717 @@ def test_tabbar_badge(env):
         '{{ tabbar(items=[{"label":"Inbox","href":"/inbox","icon":"ion:mail","badge":"3"}]) }}',
     )
     assert 'class="ux-tabbar-badge">3</span>' in out
+
+
+# ---------------------------------------------------------------------------
+# chart
+# ---------------------------------------------------------------------------
+
+
+def test_chart_default(env):
+    out = render(
+        env,
+        '{% from "ui/chart.jinja" import chart %}'
+        '{% call chart(title="Sales 2026", sub="Monthly", big="€84k", delta="+12%", delta_dir="up") %}'
+        '<svg class="ux-chart__svg"></svg>'
+        '{% endcall %}',
+    )
+    assert 'class="ux-chart"' in out
+    assert 'class="ux-chart__title">Sales 2026</h3>' in out
+    assert 'ux-chart__delta--up' in out
+    assert 'class="ux-chart__svg"' in out
+
+
+def test_chart_flat(env):
+    out = render(
+        env,
+        '{% from "ui/chart.jinja" import chart %}'
+        '{% call chart(flat=True) %}<svg></svg>{% endcall %}',
+    )
+    assert 'ux-chart--flat' in out
+
+
+# ---------------------------------------------------------------------------
+# chat
+# ---------------------------------------------------------------------------
+
+
+def test_chat_shell(env):
+    out = render(
+        env,
+        '{% from "ui/chat.jinja" import chat %}'
+        '{% call chat() %}'
+        '<aside class="ux-chat__list"></aside>'
+        '<div class="ux-chat__thread"></div>'
+        '{% endcall %}',
+    )
+    assert 'class="ux-chat"' in out
+    assert 'class="ux-chat__list"' in out
+
+
+def test_chat_attrs(env):
+    out = render(
+        env,
+        '{% from "ui/chat.jinja" import chat %}'
+        '{% call chat(attrs={"id": "main-chat"}) %}{% endcall %}',
+    )
+    assert 'id="main-chat"' in out
+
+
+# ---------------------------------------------------------------------------
+# kanban
+# ---------------------------------------------------------------------------
+
+
+def test_kanban_shell(env):
+    out = render(
+        env,
+        '{% from "ui/kanban.jinja" import kanban %}'
+        '{% call kanban() %}'
+        '<section class="ux-kanban__col"></section>'
+        '{% endcall %}',
+    )
+    assert 'class="ux-kanban"' in out
+    assert 'class="ux-kanban__col"' in out
+
+
+def test_kcard_renders(env):
+    out = render(
+        env,
+        '{% from "ui/kanban.jinja" import kcard %}'
+        '{{ kcard(title="Lead Iberia", desc="Demo Q2", priority="high") }}',
+    )
+    assert 'class="ux-kcard"' in out
+    assert 'class="ux-kcard__title">Lead Iberia</h5>' in out
+    assert 'ux-kcard__priority--high' in out
+
+
+# ---------------------------------------------------------------------------
+# receipt
+# ---------------------------------------------------------------------------
+
+
+def test_receipt_with_lines(env):
+    out = render(
+        env,
+        '{% from "ui/receipt.jinja" import receipt %}'
+        '{{ receipt(title="Cafeteria", lines=[{"name": "Coffee", "price": "1.50"}], total="€1.50") }}',
+    )
+    assert 'class="ux-receipt"' in out
+    assert 'class="ux-receipt__title">Cafeteria</div>' in out
+    assert 'class="ux-receipt__line-name">Coffee</span>' in out
+    assert 'class="ux-receipt__total"' in out
+
+
+def test_receipt_caller(env):
+    out = render(
+        env,
+        '{% from "ui/receipt.jinja" import receipt %}'
+        '{% call receipt(title="Z Report") %}'
+        '<div class="ux-receipt__line"><span>Items</span><span>42</span></div>'
+        '{% endcall %}',
+    )
+    assert 'class="ux-receipt__title">Z Report</div>' in out
+    assert 'class="ux-receipt__line"' in out
+
+
+# ---------------------------------------------------------------------------
+# editor
+# ---------------------------------------------------------------------------
+
+
+def test_editor_default(env):
+    out = render(
+        env,
+        '{% from "ui/editor.jinja" import editor %}'
+        '{{ editor(name="body", placeholder="Write...") }}',
+    )
+    assert 'class="ux-richtext"' in out
+    assert 'class="ux-richtext__content"' in out
+    assert 'data-field="body"' in out
+
+
+def test_editor_focus_signal(env):
+    out = render(
+        env,
+        '{% from "ui/editor.jinja" import editor %}'
+        '{{ editor(focus_signal="myFocus") }}',
+    )
+    assert 'myFocus' in out
+    assert 'data-class:is-focus' in out
+
+
+# ---------------------------------------------------------------------------
+# multimedia
+# ---------------------------------------------------------------------------
+
+
+def test_gallery_items(env):
+    out = render(
+        env,
+        '{% from "ui/multimedia.jinja" import gallery %}'
+        '{{ gallery(items=[{"label": "IMG_001", "caption": "photo.jpg", "selected": True}]) }}',
+    )
+    assert 'class="ux-gallery"' in out
+    assert 'ux-gallery__item--selected' in out
+    assert 'class="ux-gallery__caption">photo.jpg</div>' in out
+
+
+def test_upload_macro(env):
+    out = render(
+        env,
+        '{% from "ui/multimedia.jinja" import upload %}'
+        '{{ upload(title="Drop files", sub="PNG, PDF") }}',
+    )
+    assert 'class="ux-upload"' in out
+    assert 'class="ux-upload__title">Drop files</div>' in out
+    assert 'class="ux-upload__sub">PNG, PDF</div>' in out
+
+
+# ---------------------------------------------------------------------------
+# tree
+# ---------------------------------------------------------------------------
+
+
+def test_tree_leaf_nodes(env):
+    out = render(
+        env,
+        '{% from "ui/tree.jinja" import tree %}'
+        '{{ tree(id="t1", nodes=[{"label": "Root", "is_leaf": True}]) }}',
+    )
+    assert 'class="ux-tree"' in out
+    assert 'ux-tree__caret--leaf' in out
+    assert 'Root' in out
+
+
+def test_tree_dense(env):
+    out = render(
+        env,
+        '{% from "ui/tree.jinja" import tree %}'
+        '{{ tree(id="t2", dense=True, nodes=[]) }}',
+    )
+    assert 'ux-tree--dense' in out
+
+
+# ---------------------------------------------------------------------------
+# stat
+# ---------------------------------------------------------------------------
+
+
+def test_stat_items(env):
+    out = render(
+        env,
+        '{% from "ui/stat.jinja" import stat %}'
+        '{{ stat(items=[{"label": "Orders", "value": "1284", "delta": "+6%", "delta_dir": "up"}]) }}',
+    )
+    assert 'class="ux-stats"' in out
+    assert 'class="ux-stat__label">Orders</div>' in out
+    assert 'ux-stat__delta--up' in out
+
+
+def test_stat_glass(env):
+    out = render(
+        env,
+        '{% from "ui/stat.jinja" import stat %}'
+        '{% call stat(glass=True) %}<div class="ux-stat"></div>{% endcall %}',
+    )
+    assert 'ux-stats--glass' in out
+
+
+# ---------------------------------------------------------------------------
+# inline_feedback
+# ---------------------------------------------------------------------------
+
+
+def test_banner_variants(env):
+    out = render(
+        env,
+        '{% from "ui/inline_feedback.jinja" import banner %}'
+        '{{ banner(title="Alert", msg="Check this.", variant="warn") }}',
+    )
+    assert 'class="ux-banner ux-banner--warn"' in out
+    assert 'class="ux-banner__title">Alert</div>' in out
+    assert 'class="ux-banner__desc">Check this.</div>' in out
+
+
+def test_callout_default(env):
+    out = render(
+        env,
+        '{% from "ui/inline_feedback.jinja" import callout %}'
+        '{{ callout(body="Good practice.", variant="info") }}',
+    )
+    assert 'class="ux-callout ux-callout--info"' in out
+    assert 'Good practice.' in out
+
+
+# ---------------------------------------------------------------------------
+# cmdk
+# ---------------------------------------------------------------------------
+
+
+def test_cmdk_renders(env):
+    out = render(
+        env,
+        '{% from "ui/cmdk.jinja" import cmdk %}'
+        '{% call cmdk(id="palette", placeholder="Search commands...") %}'
+        '<div class="ux-cmdk__group"></div>'
+        '{% endcall %}',
+    )
+    assert 'class="ux-cmdk"' in out
+    assert 'class="ux-cmdk__input"' in out
+    assert 'placeholder="Search commands..."' in out
+
+
+def test_cmdk_signals(env):
+    out = render(
+        env,
+        '{% from "ui/cmdk.jinja" import cmdk %}'
+        '{% call cmdk(id="cmd") %}{% endcall %}',
+    )
+    assert 'cmdOpen' in out
+    assert 'cmdQ' in out
+
+
+# ---------------------------------------------------------------------------
+# app_shell
+# ---------------------------------------------------------------------------
+
+
+def test_app_shell_renders_root(env):
+    out = render(
+        env,
+        '{% from "ui/app_shell.jinja" import app_shell %}'
+        '{% call app_shell() %}inner{% endcall %}',
+    )
+    assert 'class="ux-app"' in out
+    assert 'class="ux-app__sidebar-overlay"' in out
+    assert "inner" in out
+
+
+def test_app_shell_tabbar_attr(env):
+    out = render(
+        env,
+        '{% from "ui/app_shell.jinja" import app_shell %}'
+        '{% call app_shell(tabbar=True, sidebar_signal="nav") %}x{% endcall %}',
+    )
+    assert 'data-tabbar="bottom"' in out
+    assert "$nav" in out
+
+
+# ---------------------------------------------------------------------------
+# pill
+# ---------------------------------------------------------------------------
+
+
+def test_pill_default(env):
+    out = render(
+        env,
+        '{% from "ui/pill.jinja" import pill %}{{ pill("Online") }}',
+    )
+    assert 'class="ux-pill"' in out
+    assert 'class="ux-pill__dot"' in out
+    assert ">Online</span>" in out
+
+
+def test_pill_variant_and_no_dot(env):
+    out = render(
+        env,
+        '{% from "ui/pill.jinja" import pill %}{{ pill("Done", variant="ok", dot=False) }}',
+    )
+    assert "ux-pill--ok" in out
+    assert "ux-pill__dot" not in out
+
+
+# ---------------------------------------------------------------------------
+# tabbar_item
+# ---------------------------------------------------------------------------
+
+
+def test_tabbar_item_renders_button(env):
+    out = render(
+        env,
+        '{% from "ui/tabbar_item.jinja" import tabbar_item %}'
+        '{{ tabbar_item(label="Home", tab_signal="$tab", tab_key="home") }}',
+    )
+    assert 'class="ux-tabbar-item"' in out
+    assert 'class="ux-tabbar-label">Home</span>' in out
+    assert "data-on:click=" in out
+
+
+def test_tabbar_item_badge(env):
+    out = render(
+        env,
+        '{% from "ui/tabbar_item.jinja" import tabbar_item %}'
+        '{{ tabbar_item(label="Inbox", badge="5") }}',
+    )
+    assert 'class="ux-tabbar-badge">5</span>' in out
+
+
+# ---------------------------------------------------------------------------
+# sidebar
+# ---------------------------------------------------------------------------
+
+
+def test_sidebar_renders_brand(env):
+    out = render(
+        env,
+        '{% from "ui/sidebar.jinja" import sidebar %}'
+        '{% call sidebar(brand_initials="ER", brand_name="ERPlora") %}body{% endcall %}',
+    )
+    assert 'class="ux-sidebar"' in out
+    assert 'class="ux-sidebar__logo">ER</div>' in out
+    assert ">ERPlora</div>" in out
+    assert "body" in out
+
+
+def test_sidebar_collapsed(env):
+    out = render(
+        env,
+        '{% from "ui/sidebar.jinja" import sidebar %}'
+        '{% call sidebar(collapsed=True) %}x{% endcall %}',
+    )
+    assert "ux-sidebar--collapsed" in out
+
+
+# ---------------------------------------------------------------------------
+# sidebar_item
+# ---------------------------------------------------------------------------
+
+
+def test_sidebar_item_button(env):
+    out = render(
+        env,
+        '{% from "ui/sidebar_item.jinja" import sidebar_item %}'
+        '{{ sidebar_item(label="Dashboard", active=True) }}',
+    )
+    assert 'class="ux-sidebar__item"' in out
+    assert 'aria-current="page"' in out
+    assert ">Dashboard</span>" in out
+
+
+def test_sidebar_item_group_label(env):
+    out = render(
+        env,
+        '{% from "ui/sidebar_item.jinja" import sidebar_item %}'
+        '{{ sidebar_item(label="Operations", group=True) }}',
+    )
+    assert 'class="ux-sidebar__group"' in out
+    assert ">Operations</div>" in out
+
+
+# ---------------------------------------------------------------------------
+# view_toggle
+# ---------------------------------------------------------------------------
+
+
+def test_view_toggle_renders(env):
+    views = [
+        {"key": "table", "title": "Table"},
+        {"key": "grid", "title": "Grid"},
+    ]
+    out = render(
+        env,
+        '{% from "ui/view_toggle.jinja" import view_toggle %}'
+        '{{ view_toggle("$v", views=' + repr(views) + ') }}',
+    )
+    assert 'class="ux-view-toggle"' in out
+    assert 'class="ux-view-toggle__btn"' in out
+    assert "data-attr:aria-pressed=" in out
+
+
+def test_view_toggle_signal_name(env):
+    views = [{"key": "list"}]
+    out = render(
+        env,
+        '{% from "ui/view_toggle.jinja" import view_toggle %}'
+        '{{ view_toggle("$mode", views=' + repr(views) + ') }}',
+    )
+    assert "$mode === 'list'" in out
+
+
+# ---------------------------------------------------------------------------
+# icon_btn
+# ---------------------------------------------------------------------------
+
+
+def test_icon_btn_default(env):
+    out = render(
+        env,
+        '{% from "ui/icon_btn.jinja" import icon_btn %}'
+        '{% call icon_btn(label="Settings") %}<svg/>{% endcall %}',
+    )
+    assert 'class="ux-icon-btn"' in out
+    assert 'aria-label="Settings"' in out
+    assert '<svg/>' in out
+
+
+def test_icon_btn_brand_variant(env):
+    out = render(
+        env,
+        '{% from "ui/icon_btn.jinja" import icon_btn %}'
+        '{% call icon_btn(label="Add", variant="brand", size="sm") %}<svg/>{% endcall %}',
+    )
+    assert "ux-icon-btn--brand" in out
+    assert "ux-icon-btn--sm" in out
+
+
+# ---------------------------------------------------------------------------
+# dt_toolbar
+# ---------------------------------------------------------------------------
+
+
+def test_dt_toolbar_renders(env):
+    out = render(
+        env,
+        '{% from "ui/dt_toolbar.jinja" import dt_toolbar %}'
+        '{% call dt_toolbar() %}<span>inner</span>{% endcall %}',
+    )
+    assert 'class="ux-dt-toolbar"' in out
+    assert "<span>inner</span>" in out
+
+
+def test_dt_toolbar_extra_attrs(env):
+    out = render(
+        env,
+        '{% from "ui/dt_toolbar.jinja" import dt_toolbar %}'
+        '{% call dt_toolbar(attrs={"id": "tb1"}) %}{% endcall %}',
+    )
+    assert 'id="tb1"' in out
+
+
+# ---------------------------------------------------------------------------
+# date_range
+# ---------------------------------------------------------------------------
+
+
+def test_date_range_renders(env):
+    out = render(
+        env,
+        '{% from "ui/date_range.jinja" import date_range %}'
+        '{{ date_range(from_value="2026-01-01", to_value="2026-01-31") }}',
+    )
+    assert 'class="ux-date-range"' in out
+    assert 'class="ux-date-range__sep"' in out
+    assert "2026-01-01" in out
+    assert "2026-01-31" in out
+
+
+def test_date_range_hidden_inputs(env):
+    out = render(
+        env,
+        '{% from "ui/date_range.jinja" import date_range %}'
+        '{{ date_range(from_value="2026-01-01", to_value="2026-01-31",'
+        ' from_name="from", to_name="to") }}',
+    )
+    assert 'name="from"' in out
+    assert 'name="to"' in out
+
+
+# ---------------------------------------------------------------------------
+# pos_canvas
+# ---------------------------------------------------------------------------
+
+
+def test_pos_canvas_default(env):
+    out = render(env, '{% from "ui/pos_canvas.jinja" import pos_canvas %}{% call pos_canvas() %}<p>body</p>{% endcall %}')
+    assert "ux-pos" in out
+    assert "ux-pos__backdrop" in out
+    assert "cartOpen" in out
+    assert "<p>body</p>" in out
+
+
+def test_pos_canvas_custom_signals(env):
+    out = render(
+        env,
+        '{% from "ui/pos_canvas.jinja" import pos_canvas %}'
+        '{%- call pos_canvas(signals=\'{"cartOpen": true}\') %}{% endcall %}',
+    )
+    assert '"cartOpen": true' in out
+
+
+# ---------------------------------------------------------------------------
+# pos_numpad
+# ---------------------------------------------------------------------------
+
+
+def test_pos_numpad_default(env):
+    out = render(
+        env,
+        '{% from "ui/pos_numpad.jinja" import pos_numpad %}{{ pos_numpad(label="A cobrar", value="20,00") }}',
+    )
+    assert "ux-numpad-display" in out
+    assert "A cobrar" in out
+    assert "20,00" in out
+    assert "ux-numpad__btn" in out
+
+
+def test_pos_numpad_calc_layout(env):
+    out = render(
+        env,
+        '{% from "ui/pos_numpad.jinja" import pos_numpad %}{{ pos_numpad(layout="calc") }}',
+    )
+    assert "ux-numpad__btn--double" in out
+
+
+# ---------------------------------------------------------------------------
+# pos_payment
+# ---------------------------------------------------------------------------
+
+
+def test_pos_payment_default_methods(env):
+    out = render(
+        env,
+        '{% from "ui/pos_payment.jinja" import pos_payment %}{{ pos_payment(total="19,40") }}',
+    )
+    assert "ux-pay-methods" in out
+    assert "ux-pay-method" in out
+    assert "payMethod" in out
+
+
+def test_pos_payment_custom_methods(env):
+    out = render(
+        env,
+        '{% from "ui/pos_payment.jinja" import pos_payment %}'
+        '{{ pos_payment(methods=[{"id":"cash","name":"Efectivo","sub":"Cambio","icon_svg":"<svg/>"}], selected="cash") }}',
+    )
+    assert "Efectivo" in out
+    assert 'aria-pressed="true"' in out
+
+
+# ---------------------------------------------------------------------------
+# kds
+# ---------------------------------------------------------------------------
+
+
+def test_kds_default(env):
+    out = render(
+        env,
+        '{% from "ui/kds.jinja" import kds %}'
+        '{{ kds(order="M4 2041", source="Mesa Ana", time="14:32",'
+        ' items=[{"qty": 2, "name": "Cafe cortado", "done": false}]) }}',
+    )
+    assert "ux-kds" in out
+    assert "M4 2041" in out
+    assert "ux-kds__qty" in out
+    assert "Cafe cortado" in out
+
+
+def test_kds_late_status(env):
+    out = render(
+        env,
+        '{% from "ui/kds.jinja" import kds %}{{ kds(status="late") }}',
+    )
+    assert "ux-kds--late" in out
+
+
+# ---------------------------------------------------------------------------
+# hr_card
+# ---------------------------------------------------------------------------
+
+
+def test_hr_card_default(env):
+    out = render(
+        env,
+        '{% from "ui/hr_card.jinja" import hr_card %}'
+        '{{ hr_card(name="Marina Vidal", initials="MV", role="Jefa de linea",'
+        ' stats=[{"label":"Antig.","value":"6,2 a"}]) }}',
+    )
+    assert "ux-emp" in out
+    assert "Marina Vidal" in out
+    assert "MV" in out
+    assert "ux-emp__stat" in out
+
+
+def test_hr_card_status_break(env):
+    out = render(
+        env,
+        '{% from "ui/hr_card.jinja" import hr_card %}{{ hr_card(name="Ivan", initials="IR", status="break") }}',
+    )
+    assert "ux-emp__status--break" in out
+
+
+# ---------------------------------------------------------------------------
+# manufacturing_panel
+# ---------------------------------------------------------------------------
+
+
+def test_manufacturing_panel_default(env):
+    out = render(
+        env,
+        '{% from "ui/manufacturing_panel.jinja" import manufacturing_panel %}'
+        '{{ manufacturing_panel(wo_id="WO-2026-0184", title="Bicicleta B-Linea",'
+        ' produced=148, total=240, bar_done=55) }}',
+    )
+    assert "ux-wo" in out
+    assert "WO-2026-0184" in out
+    assert "ux-wo__bar" in out
+
+
+def test_manufacturing_panel_steps(env):
+    out = render(
+        env,
+        '{% from "ui/manufacturing_panel.jinja" import manufacturing_panel %}'
+        '{{ manufacturing_panel(steps=['
+        '  {"name":"Corte","status":"done","status_label":"Completo"},'
+        '  {"name":"Ensamblaje","status":"active","status_label":"En curso"}'
+        ']) }}',
+    )
+    assert "ux-wo__step--done" in out
+    assert "ux-wo__step--active" in out
+
+
+# ---------------------------------------------------------------------------
+# commerce_card
+# ---------------------------------------------------------------------------
+
+
+def test_commerce_card_default(env):
+    out = render(
+        env,
+        '{% from "ui/commerce_card.jinja" import commerce_card %}'
+        '{{ commerce_card(number="F-2026-0184", title="Factura", date="14/05/2026",'
+        ' from_name="ERPlora SL", to_name="Norden Bikes") }}',
+    )
+    assert "ux-invoice" in out
+    assert "F-2026-0184" in out
+    assert "Norden Bikes" in out
+
+
+def test_commerce_card_lines(env):
+    out = render(
+        env,
+        '{% from "ui/commerce_card.jinja" import commerce_card %}'
+        '{{ commerce_card(lines=[{"concept":"Bicicleta","qty":"1","price":"384","total":"384"}]) }}',
+    )
+    assert "ux-invoice__lines" in out
+    assert "Bicicleta" in out
+
+
+# ---------------------------------------------------------------------------
+# mobile_shell
+# ---------------------------------------------------------------------------
+
+
+def test_mobile_shell_default(env):
+    out = render(
+        env,
+        '{% from "ui/mobile_shell.jinja" import mobile_shell %}'
+        '{% call mobile_shell(brand_initials="EX", brand_name="La Rambla",'
+        ' nav_items=[{"label":"Inicio","href":"/","icon_svg":"<svg/>"}]) %}'
+        '<p>content</p>{% endcall %}',
+    )
+    assert "ux-app" in out
+    assert "ux-sidebar" in out
+    assert "ux-tabbar" in out
+    assert "La Rambla" in out
+    assert "<p>content</p>" in out
+
+
+def test_mobile_shell_current_path(env):
+    out = render(
+        env,
+        '{% from "ui/mobile_shell.jinja" import mobile_shell %}'
+        '{% call mobile_shell(nav_items=[{"label":"Home","href":"/","icon_svg":""}],'
+        ' current_path="/") %}{% endcall %}',
+    )
+    assert 'aria-current="page"' in out

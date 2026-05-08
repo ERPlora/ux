@@ -1,0 +1,53 @@
+{# sidebar(brand_initials, brand_name, brand_meta, collapsed, attrs)
+
+   CSS root from lib/css/components/sidebar.css:  .ux-sidebar
+   Full left-rail navigation pane: brand header, scrollable body, user footer.
+
+   Sub-classes (verified in sidebar.css):
+     - ux-sidebar--collapsed     icon-only collapsed variant
+     - ux-sidebar__brand         top brand/logo bar
+     - ux-sidebar__logo          initials square
+     - ux-sidebar__brand-text    text column (name + meta)
+     - ux-sidebar__brand-name    app / workspace name
+     - ux-sidebar__brand-meta    sub-line (e.g. "3 locations")
+     - ux-sidebar__body          scrollable item area
+     - ux-sidebar__group         section label
+     - ux-sidebar__footer        bottom user strip
+     - ux-sidebar__user          clickable user row in footer
+     - ux-sidebar__user-info     name + meta column
+     - ux-sidebar__user-name     user display name
+     - ux-sidebar__user-meta     secondary line (role / email)
+
+   Args:
+     - brand_initials   1-2 chars shown in .ux-sidebar__logo (default "")
+     - brand_name       workspace or app name
+     - brand_meta       small sub-line (e.g. "3 sedes")
+     - collapsed        when True adds .ux-sidebar--collapsed
+     - attrs            extra HTML attributes on the <aside>
+
+   Body slot via {% call sidebar(...) %}...{% endcall %} renders into ux-sidebar__body.
+   Use sidebar_item() macros inside the body slot.
+   For a footer user strip, place it after the caller() block or use the
+   companion ux-sidebar__footer HTML directly.
+#}
+{% macro sidebar(brand_initials="", brand_name="", brand_meta="", collapsed=False, attrs={}) %}
+{%- set classes = ["ux-sidebar"] -%}
+{%- if collapsed %}{%- do classes.append("ux-sidebar--collapsed") -%}{%- endif -%}
+<aside class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-sidebar__brand">
+    {%- if brand_initials %}
+    <div class="ux-sidebar__logo">{{ brand_initials|e }}</div>
+    {%- endif %}
+    {%- if brand_name or brand_meta %}
+    <div class="ux-sidebar__brand-text">
+      {%- if brand_name %}<div class="ux-sidebar__brand-name">{{ brand_name|e }}</div>{%- endif %}
+      {%- if brand_meta %}<div class="ux-sidebar__brand-meta">{{ brand_meta|e }}</div>{%- endif %}
+    </div>
+    {%- endif %}
+  </div>
+  <div class="ux-sidebar__body">
+    {%- if caller is defined %}{{ caller() }}{%- endif %}
+  </div>
+</aside>
+{% endmacro %}

@@ -1,0 +1,33 @@
+{# date_range(from_value, to_value, from_name, to_name, on_click, title, attrs)
+
+   CSS root from lib/css/components/table.css:  .ux-date-range
+   Compact inline date-range display/trigger — shows two date values separated by
+   an arrow. Usually wraps two hidden inputs and opens a date picker overlay.
+
+   Sub-classes (verified in table.css):
+     - ux-date-range__sep   separator character between the two dates (→)
+
+   Args:
+     - from_value   display string for start date (default "")
+     - to_value     display string for end date (default "")
+     - from_name    name of the hidden from-date input (optional)
+     - to_name      name of the hidden to-date input (optional)
+     - on_click     Datastar expression for data-on:click (e.g. open picker)
+     - title        title/aria-label for the label element (default "Date range")
+     - icon         when True prepends a calendar SVG icon (default True)
+     - attrs        extra HTML attributes on the root label
+#}
+{% macro date_range(from_value="", to_value="", from_name=None, to_name=None, on_click=None, title="Date range", icon=True, attrs={}) %}
+<label class="ux-date-range" title="{{ title|e }}"
+{%- if on_click %} data-on:click="{{ on_click|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if icon -%}
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+  {%- endif -%}
+  <span>{{ from_value|e }}</span>
+  <span class="ux-date-range__sep">→</span>
+  <span>{{ to_value|e }}</span>
+  {%- if from_name %}<input type="hidden" name="{{ from_name|e }}" value="{{ from_value|e }}">{%- endif %}
+  {%- if to_name %}<input type="hidden" name="{{ to_name|e }}" value="{{ to_value|e }}">{%- endif %}
+</label>
+{% endmacro %}

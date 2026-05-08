@@ -1,0 +1,43 @@
+{# inline_feedback: banner(title, msg, variant, closeable, action_label, action_href, attrs)
+                   callout(body, variant, title, attrs)
+
+   CSS from lib/css/components/inline-feedback.css:
+     Banner  : ux-banner (--info --ok --warn --danger --brand --solid --top --inline)
+               ux-banner__icon, ux-banner__body, ux-banner__title, ux-banner__desc,
+               ux-banner__actions, ux-banner__action (--primary), ux-banner__close
+     Callout : ux-callout (--info --ok --warn --danger --brand)
+               ux-callout__icon, ux-callout__body, ux-callout__title,
+               ux-callout__desc, ux-callout__list, ux-callout__actions, ux-callout__link
+
+   `variant` : info | ok | warn | danger | brand
+#}
+{% macro banner(title=None, msg=None, variant="info", closeable=False, action_label=None, action_href=None, attrs={}) %}
+<div class="ux-banner ux-banner--{{ variant|e }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <span class="ux-banner__icon">
+    {%- if caller is defined %}{{ caller() }}{% endif %}
+  </span>
+  <div class="ux-banner__body">
+    {%- if title %}<div class="ux-banner__title">{{ title|e }}</div>{% endif %}
+    {%- if msg %}<div class="ux-banner__desc">{{ msg|e }}</div>{% endif %}
+  </div>
+  {%- if action_label and action_href %}
+  <a class="ux-banner__action" href="{{ action_href|e }}">{{ action_label|e }}</a>
+  {%- endif %}
+  {%- if closeable %}
+  <button class="ux-banner__close" type="button" aria-label="Close">&times;</button>
+  {%- endif %}
+</div>
+{% endmacro %}
+
+{# callout(body, variant, title, attrs) — compact inline callout. #}
+{% macro callout(body="", variant="info", title=None, attrs={}) %}
+<div class="ux-callout ux-callout--{{ variant|e }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <span class="ux-callout__icon"></span>
+  <div class="ux-callout__body">
+    {%- if title %}<div class="ux-callout__title">{{ title|e }}</div>{% endif %}
+    <div class="ux-callout__desc">{{ body|e }}</div>
+  </div>
+</div>
+{% endmacro %}

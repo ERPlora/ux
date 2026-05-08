@@ -1,0 +1,44 @@
+{# multimedia(items, selected, attrs)
+
+   CSS from lib/css/components/multimedia.css:
+     Gallery   : ux-gallery, ux-gallery__item (--ph, --selected),
+                 ux-gallery__caption, ux-gallery__select
+     Lightbox  : ux-lightbox, ux-lightbox__head, ux-lightbox__main,
+                 ux-lightbox__img, ux-lightbox__nav (--prev, --next),
+                 ux-lightbox__strip, ux-lightbox__strip-item (--active)
+     Upload    : ux-upload, ux-upload__icon, ux-upload__title, ux-upload__sub
+     Attachment: ux-attachments, ux-attachment, ux-attachment__icon
+                 (--pdf, --xls, --img, --zip), ux-attachment__body,
+                 ux-attachment__name
+
+   `items` is a list of dicts:
+     [{label, caption, selected=False}, ...]
+   If `caller is defined`, raw inner HTML is used instead.
+#}
+{% macro gallery(items=[], attrs={}) %}
+<div class="ux-gallery"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}
+{%- else %}
+{%- for item in items %}
+{%- set sel_class = " ux-gallery__item--selected" if item.selected else "" -%}
+<div class="ux-gallery__item ux-gallery__item--ph{{ sel_class }}" data-label="{{ item.label|e }}">
+  <span class="ux-gallery__select">{% if item.selected %}&#10003;{% endif %}</span>
+  {%- if item.caption %}<div class="ux-gallery__caption">{{ item.caption|e }}</div>{% endif %}
+</div>
+{%- endfor %}
+{%- endif %}
+</div>
+{% endmacro %}
+
+{# upload(title, sub, attrs) — dropzone upload area. #}
+{% macro upload(title="Drag files here", sub=None, attrs={}) %}
+<div class="ux-upload"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-upload__icon">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+  </div>
+  <div class="ux-upload__title">{{ title|e }}</div>
+  {%- if sub %}<div class="ux-upload__sub">{{ sub|e }}</div>{% endif %}
+</div>
+{% endmacro %}

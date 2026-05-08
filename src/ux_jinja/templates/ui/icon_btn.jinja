@@ -1,0 +1,42 @@
+{# icon_btn(label, variant, size, on_click, href, pressed, attrs)
+
+   CSS root from lib/css/components/avatar.css + table.css:  .ux-icon-btn
+   Square icon-only button — no text label. Used in toolbars, topbars and row actions.
+
+   Variants (verified in table.css + avatar.css):
+     - ""       default ghost with hover highlight
+     - brand    filled brand background
+     - danger   danger colour on hover only
+
+   Sizes (verified in avatar.css):
+     - ""   default 30px (avatar.css) / 34px (table.css context)
+     - sm   24×24
+     - lg   36×36
+
+   Args:
+     - label    aria-label for accessibility (required for screen readers)
+     - variant  "" | "brand" | "danger"
+     - size     "" | "sm" | "lg"
+     - on_click Datastar expression for data-on:click
+     - href     when set renders as <a> instead of <button>
+     - pressed  when True sets aria-pressed="true"
+     - type     button type attr (default "button")
+     - attrs    extra HTML attributes
+
+   Slot via {% call icon_btn(...) %}...{% endcall %} renders the SVG/icon content.
+#}
+{% macro icon_btn(label="", variant="", size="", on_click=None, href=None, pressed=False, type="button", attrs={}) %}
+{%- set tag = "a" if href else "button" -%}
+{%- set classes = ["ux-icon-btn"] -%}
+{%- if variant %}{%- do classes.append("ux-icon-btn--" ~ variant) -%}{%- endif -%}
+{%- if size %}{%- do classes.append("ux-icon-btn--" ~ size) -%}{%- endif -%}
+<{{ tag }} class="{{ classes | join(' ') }}"
+{%- if tag == "button" %} type="{{ type }}"{% endif -%}
+{%- if href %} href="{{ href|e }}"{% endif -%}
+{%- if label %} aria-label="{{ label|e }}"{% endif -%}
+{%- if pressed %} aria-pressed="true"{% endif -%}
+{%- if on_click %} data-on:click="{{ on_click|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{%- endif -%}
+</{{ tag }}>
+{% endmacro %}

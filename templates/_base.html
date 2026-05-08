@@ -120,10 +120,19 @@
 
   {% block head_extra %}{% endblock %}
 </head>
+<script nonce="{{ csp_nonce }}">
+  (function(){
+    var t = localStorage.getItem('ux-theme') || 'erplora';
+    var tpl = localStorage.getItem('ux-template') || '';
+    document.documentElement.setAttribute('data-theme', t);
+    if (tpl) document.documentElement.setAttribute('data-template', tpl);
+  })();
+</script>
 <body>
 
 <div class="ux-app" data-docs
-     data-signals='{"q": "", "vp": "desktop", "theme": "erplora", "template": "", "sidebarOpen": false}'
+     data-signals="{q: '', vp: 'desktop', sidebarOpen: false, theme: localStorage.getItem('ux-theme') || 'erplora', template: localStorage.getItem('ux-template') || ''}"
+     data-effect="localStorage.setItem('ux-theme', $theme); localStorage.setItem('ux-template', $template)"
      data-attr:data-sidebar="$sidebarOpen ? 'open' : ''"
      data-attr:data-theme="$theme"
      data-attr:data-template="$template">
@@ -143,7 +152,7 @@
     <div style="padding: 10px 12px 4px;">
       <div class="ux-search">
         <span class="ux-search__icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <iconify-icon icon="ion:search-outline" width="14" height="14"></iconify-icon>
         </span>
         <input class="ux-input ux-input--sm" type="search" placeholder="Filter components..."
                data-bind="$q"
@@ -174,10 +183,7 @@
              href="{{ item.href }}"
              data-label="{{ item.label|lower }}"
              {% if active_route == item.href %}aria-current="page" data-route-active="true"{% endif %}>
-            <svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="{{ item.icon }}"/>
-            </svg>
+            <iconify-icon class="ux-sidebar__icon" icon="{{ item.icon }}" width="20" height="20"></iconify-icon>
             <span class="ux-sidebar__label">{{ item.label }}</span>
             {% if item.badge %}<span class="ux-sidebar__badge ux-sidebar__badge--brand">{{ item.badge }}</span>{% endif %}
           </a>
@@ -204,11 +210,11 @@
         <button class="ux-topbar__menu-btn" aria-label="Menu"
                 data-on:click="$sidebarOpen = !$sidebarOpen"
                 data-attr:aria-expanded="$sidebarOpen">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          <iconify-icon icon="ion:menu-outline" width="20" height="20"></iconify-icon>
         </button>
         <button class="ux-topbar__back-btn" aria-label="Back"
                 data-on:click="history.length > 1 ? history.back() : null">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <iconify-icon icon="ion:arrow-back-outline" width="20" height="20"></iconify-icon>
         </button>
       </div>
 
@@ -257,23 +263,23 @@
   <nav class="ux-app__tabbar" aria-label="Primary">
     <div class="ux-tabbar ux-tabbar--fixed ux-tabbar--icons">
       <a class="ux-tabbar-item" href="/" {% if active_route == '/' %}aria-current="page"{% endif %}>
-        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 5 10 12 3l7 7 2 2v9a2 2 0 0 1-2 2h-4v-7H10v7H6a2 2 0 0 1-2-2v-9z"/></svg></span>
+        <span class="ux-tabbar-icon"><iconify-icon icon="ion:home-outline" width="18" height="18"></iconify-icon></span>
         <span class="ux-tabbar-label">Overview</span>
       </a>
       <a class="ux-tabbar-item" href="/c/button">
-        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6"/></svg></span>
+        <span class="ux-tabbar-icon"><iconify-icon icon="ion:cube-outline" width="18" height="18"></iconify-icon></span>
         <span class="ux-tabbar-label">Button</span>
       </a>
       <a class="ux-tabbar-item" href="/p/dashboard">
-        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></span>
+        <span class="ux-tabbar-icon"><iconify-icon icon="ion:grid-outline" width="18" height="18"></iconify-icon></span>
         <span class="ux-tabbar-label">Dashboard</span>
       </a>
       <a class="ux-tabbar-item" href="/live">
-        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <span class="ux-tabbar-icon"><iconify-icon icon="ion:flash-outline" width="18" height="18"></iconify-icon></span>
         <span class="ux-tabbar-label">Live</span>
       </a>
       <a class="ux-tabbar-item" href="https://github.com/ERPlora/ux" target="_blank" rel="noopener">
-        <span class="ux-tabbar-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.4-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2.9-.3 1.9-.4 3-.4s2 .1 3 .4c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.7.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg></span>
+        <span class="ux-tabbar-icon"><iconify-icon icon="ion:logo-github" width="18" height="18"></iconify-icon></span>
         <span class="ux-tabbar-label">GitHub</span>
       </a>
     </div>

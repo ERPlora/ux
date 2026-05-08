@@ -35,3 +35,14 @@ async def install(request: Request):
         "home/install.html",
         {**nav_context(), "active_route": "/install"},
     )
+
+
+@router.get("/design-system", name="design_system", include_in_schema=False)
+async def design_system(request: Request):
+    """Design system tokens — palette, typography, radii, shadows, spacing."""
+    templates = request.app.state.templates
+    return templates.TemplateResponse(
+        request,
+        "home/design_system.html",
+        {**nav_context(), "active_route": "/design-system"},
+    )

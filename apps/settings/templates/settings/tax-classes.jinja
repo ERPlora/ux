@@ -1,0 +1,270 @@
+{% extends "_base_preview.html" %}
+
+{% block title %}Clases de impuestos · Cafetería La Rambla{% endblock %}
+
+{% block body %}
+<div class="ux-app" id="app" data-tabbar="bottom"
+     data-signals="{sidebar: false, tax: {showModal: false, editId: '', name: '', rate: '', code: '', active: true}}"
+     data-attr:data-sidebar="$sidebar ? 'open' : ''">
+  <div class="ux-app__sidebar-overlay" data-on:click="$sidebar = false"></div>
+
+  <aside class="ux-sidebar">
+    <div class="ux-sidebar__brand">
+      <div class="ux-sidebar__logo">CR</div>
+      <div class="ux-sidebar__brand-text">
+        <div class="ux-sidebar__brand-name">Cafetería La Rambla</div>
+        <div class="ux-sidebar__brand-meta">Hub · v0.0.9</div>
+      </div>
+    </div>
+    <div class="ux-sidebar__body">
+      <div class="ux-sidebar__group">Plataforma</div>
+      <button class="ux-sidebar__item" aria-current="page"><svg class="ux-sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg><span class="ux-sidebar__label">Configuración</span></button>
+    </div>
+    <div class="ux-sidebar__footer">
+      <div class="ux-sidebar__user">
+        <span class="ux-avatar ux-avatar--sm ux-avatar--brand">JC</span>
+        <div class="ux-sidebar__user-info">
+          <div class="ux-sidebar__user-name">Joan Castell</div>
+          <div class="ux-sidebar__user-meta">joan@larambla.es</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="ux-app__main">
+    <header class="ux-topbar">
+        <div class="ux-topbar__left">
+          <button class="ux-topbar__back-btn" aria-label="Volver"
+            data-on:click="history.length > 1 ? history.back() : null">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+        </div>
+        <h1 class="ux-topbar__page-title">Página</h1>
+        
+        
+        <button class="ux-topbar__menu-btn" aria-label="Menú"
+            data-on:click="$sidebar = !$sidebar"
+            data-attr:aria-expanded="$sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+      </header>
+
+    <nav class="ux-tabs ux-tabs-scroll" aria-label="Sub-secciones de ajustes">
+      <a class="ux-tab" href="preferences.html">Preferencias</a>
+      <a class="ux-tab" href="hub.html">Hub</a>
+      <a class="ux-tab" href="hub-config.html">Config</a>
+      <a class="ux-tab" href="compliance.html">Cumplimiento</a>
+      <a class="ux-tab" href="devices.html">Dispositivos</a>
+      <a class="ux-tab" href="printers.html">Impresoras</a>
+      <a class="ux-tab" href="backup.html">Backup</a>
+      <a class="ux-tab" href="files.html">Archivos</a>
+      <a class="ux-tab" href="tax-classes.html" aria-current="page">Tax</a>
+      <a class="ux-tab" href="help.html">Ayuda</a>
+      <a class="ux-tab" href="scheduled-tasks.html">Tareas</a>
+      <a class="ux-tab" href="file-browser.html">File browser</a>
+    </nav>
+
+    <div class="ux-app__body">
+
+      <div class="ux-page-header" style="border-bottom:1px solid var(--ux-line);margin-bottom:18px;">
+        <div class="ux-page-header__title">
+          <h1>Clases de impuestos</h1>
+          <div class="ux-page-header__sub">IVA español aplicado a productos del catálogo (AEAT · VeriFactu)</div>
+        </div>
+        <div class="ux-page-header__actions">
+          <button class="ux-btn ux-btn--ghost ux-btn--sm">Importar plantilla</button>
+          <button class="ux-btn ux-btn--primary ux-btn--sm"
+                  data-on:click="$tax.editId = ''; $tax.name = ''; $tax.rate = ''; $tax.code = ''; $tax.active = true; $tax.showModal = true">
+            + Nueva clase
+          </button>
+        </div>
+      </div>
+
+      <!-- Banner contexto -->
+      <div class="ux-banner ux-banner--info ux-mb-4">
+        <div class="ux-banner__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div>
+        <div class="ux-banner__body">
+          <div class="ux-banner__title">Régimen fiscal: General · España (ES)</div>
+          <div class="ux-banner__desc">Las tasas se sincronizan con VeriFactu. Cambios afectan a productos a partir de la fecha efectiva.</div>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <article class="ux-card">
+        <div class="ux-table-scroll">
+          <table class="ux-table">
+            <thead>
+              <tr>
+                <th style="width:36px;"><label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label></th>
+                <th class="ux-th--sortable">Nombre</th>
+                <th class="ux-th--sortable ux-td--right">Tasa</th>
+                <th>Código fiscal</th>
+                <th>Países</th>
+                <th>Por defecto</th>
+                <th>Estado</th>
+                <th style="width:140px;text-align:right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label></td>
+                <td>
+                  <div class="ux-font-medium">IVA general</div>
+                  <div class="ux-text-xs ux-c-ink-3">Tasa estándar para hostelería</div>
+                </td>
+                <td class="ux-td--num"><strong>21,00 %</strong></td>
+                <td class="ux-td--mono">S1-21</td>
+                <td><span class="ux-badge">ES</span></td>
+                <td><span class="ux-badge ux-badge--brand">Predet.</span></td>
+                <td><span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Activo</span></td>
+                <td>
+                  <div class="ux-row-actions ux-justify-end">
+                    <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    <button class="ux-row-action" title="Editar"
+                      data-on:click="$tax.editId = '1'; $tax.name = 'IVA general'; $tax.rate = '21'; $tax.code = 'S1-21'; $tax.active = true; $tax.showModal = true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label></td>
+                <td>
+                  <div class="ux-font-medium">IVA reducido</div>
+                  <div class="ux-text-xs ux-c-ink-3">Comida para llevar, bebidas no alcohólicas</div>
+                </td>
+                <td class="ux-td--num"><strong>10,00 %</strong></td>
+                <td class="ux-td--mono">S2-10</td>
+                <td><span class="ux-badge">ES</span></td>
+                <td>
+                  <button class="ux-btn ux-btn--ghost ux-btn--sm" style="padding:0 6px;font-size:11px;">Hacer predet.</button>
+                </td>
+                <td><span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Activo</span></td>
+                <td>
+                  <div class="ux-row-actions ux-justify-end">
+                    <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label></td>
+                <td>
+                  <div class="ux-font-medium">IVA superreducido</div>
+                  <div class="ux-text-xs ux-c-ink-3">Pan, leche, fruta, libros</div>
+                </td>
+                <td class="ux-td--num"><strong>4,00 %</strong></td>
+                <td class="ux-td--mono">S3-04</td>
+                <td><span class="ux-badge">ES</span></td>
+                <td>
+                  <button class="ux-btn ux-btn--ghost ux-btn--sm" style="padding:0 6px;font-size:11px;">Hacer predet.</button>
+                </td>
+                <td><span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Activo</span></td>
+                <td>
+                  <div class="ux-row-actions ux-justify-end">
+                    <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label></td>
+                <td>
+                  <div class="ux-font-medium">Exento</div>
+                  <div class="ux-text-xs ux-c-ink-3">Operaciones exentas (art. 20 LIVA)</div>
+                </td>
+                <td class="ux-td--num"><strong>0,00 %</strong></td>
+                <td class="ux-td--mono">EX-00</td>
+                <td><span class="ux-badge">ES</span></td>
+                <td>—</td>
+                <td><span class="ux-pill ux-pill--ok"><span class="ux-pill__dot"></span>Activo</span></td>
+                <td>
+                  <div class="ux-row-actions ux-justify-end">
+                    <button class="ux-row-action" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    <button class="ux-row-action" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><label class="ux-check"><input type="checkbox"/><span class="ux-check__box"></span></label></td>
+                <td>
+                  <div style="font-weight:500;color:var(--ux-ink-3);">IGIC general</div>
+                  <div class="ux-text-xs ux-c-ink-3">Canarias · desactivado</div>
+                </td>
+                <td class="ux-td--num ux-c-ink-3">7,00 %</td>
+                <td class="ux-td--mono">IG1-07</td>
+                <td><span class="ux-badge">ES-CN</span></td>
+                <td>—</td>
+                <td><span class="ux-pill"><span class="ux-pill__dot"></span>Inactivo</span></td>
+                <td>
+                  <div class="ux-row-actions ux-justify-end">
+                    <button class="ux-row-action" title="Activar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg></button>
+                    <button class="ux-row-action ux-row-action--danger" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Modal nueva/editar -->
+      <div class="ux-modal-root"
+        data-show="$tax.showModal"
+        data-attr:data-state="$tax.showModal ? 'open' : 'closed'"
+        data-on:click__self="$tax.showModal = false">
+        <div class="ux-modal ux-modal--sm" role="dialog" aria-modal="true">
+          <div class="ux-modal__header">
+            <div class="ux-modal__icon ux-modal__icon--brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h4"/></svg></div>
+            <div class="ux-modal__heading">
+              <h3 class="ux-modal__title" data-text="$tax.editId ? 'Editar clase de impuesto' : 'Nueva clase de impuesto'"></h3>
+              <p class="ux-modal__sub">Tasa aplicada a productos asignados.</p>
+            </div>
+            <button class="ux-modal__close" data-on:click="$tax.showModal = false" aria-label="Cerrar">×</button>
+          </div>
+          <div class="ux-modal__body">
+            <div class="ux-form">
+              <div class="ux-field">
+                <label class="ux-field__label ux-field__label--req">Nombre</label>
+                <input class="ux-input" data-bind="tax.name" placeholder="ej. IVA general"/>
+              </div>
+              <div class="ux-form-row">
+                <div class="ux-field">
+                  <label class="ux-field__label ux-field__label--req">Tasa (%)</label>
+                  <input class="ux-input" type="number" step="0.01" min="0" max="100" data-bind="tax.rate" placeholder="21,00"/>
+                </div>
+                <div class="ux-field">
+                  <label class="ux-field__label">Código fiscal</label>
+                  <input class="ux-input" data-bind="tax.code" placeholder="S1-21"/>
+                </div>
+              </div>
+              <div class="ux-field">
+                <label class="ux-field__label">Países aplicables</label>
+                <select class="ux-select" multiple style="height:auto;min-height:96px;">
+                  <option selected>España (ES)</option>
+                  <option>Canarias (ES-CN)</option>
+                  <option>Ceuta y Melilla (ES-CE/ML)</option>
+                  <option>Portugal (PT)</option>
+                </select>
+              </div>
+              <label class="ux-toggle-row" style="border-top:1px solid var(--ux-line);padding-top:12px;">
+                <div class="ux-toggle-row__text">
+                  <span class="ux-toggle-row__label">Activo</span>
+                  <span class="ux-toggle-row__desc">Disponible para asignar a productos.</span>
+                </div>
+                <label class="ux-toggle"><input type="checkbox" data-bind="tax.active"/><span class="ux-toggle__track"></span></label>
+              </label>
+            </div>
+          </div>
+          <div class="ux-modal__footer">
+            <button class="ux-btn ux-btn--ghost" data-on:click="$tax.showModal = false">Cancelar</button>
+            <button class="ux-btn ux-btn--primary" data-text="$tax.editId ? 'Guardar cambios' : 'Crear clase'"></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

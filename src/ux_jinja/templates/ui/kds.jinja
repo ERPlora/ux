@@ -1,0 +1,52 @@
+{# kds(order, source, time, items, notes, status, attrs)
+   Kitchen Display System ticket card.
+
+   Arguments:
+     order   -- order label string, e.g. "M4 · #2041"
+     source  -- source label, e.g. "Mesa · Ana"
+     time    -- elapsed time string, e.g. "14:32"
+     items   -- list of dicts: [{qty, name, done}]
+     notes   -- list of note strings rendered as .ux-kds__notes rows
+     status  -- "" | "late" | "ready"  — maps to ux-kds--late / ux-kds--ready
+     attrs   -- escape-hatch dict
+
+   Use the slot (caller) to completely replace the items list when full
+   control is needed.
+#}
+{% macro kds(order="", source="", time="", items=[], notes=[], status="", attrs={}) %}
+{%- set classes = ["ux-kds"] -%}
+{%- if status == "late" %}{%- do classes.append("ux-kds--late") -%}{%- endif -%}
+{%- if status == "ready" %}{%- do classes.append("ux-kds--ready") -%}{%- endif -%}
+<article class='{{ classes | join(" ") }}'
+  {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <header class='ux-kds__head'>
+    <div>
+      <div class='ux-kds__order'>{{ order|e }}</div>
+      <div class='ux-kds__source'>{{ source|e }}</div>
+    </div>
+    <span class='ux-kds__time'>{{ time|e }}</span>
+  </header>
+  {%- if caller is defined %}
+  {{ caller() }}
+  {%- else %}
+  <ul class='ux-kds__items' style='padding:0;margin:0;list-style:none'>
+    {%- for item in items %}
+    <li class='ux-kds__item{% if item.done %} ux-kds__item--done{% endif %}'>
+      <span class='ux-kds__qty'>{{ item.qty }}×</span>{{ item.name|e }}
+    </li>
+    {%- endfor %}
+    {%- for note in notes %}
+    <li class='ux-kds__notes'>{{ note|e }}</li>
+    {%- endfor %}
+  </ul>
+  {%- endif %}
+  <div class='ux-kds__actions'>
+    {%- if status == "ready" %}
+    <button class='ux-btn ux-btn--secondary ux-btn--sm'>Entregado</button>
+    {%- else %}
+    <button class='ux-btn ux-btn--ghost ux-btn--sm'>Marcar</button>
+    <button class='ux-btn ux-btn--primary ux-btn--sm'>Listo &#8594;</button>
+    {%- endif %}
+  </div>
+</article>
+{% endmacro %}

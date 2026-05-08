@@ -1,0 +1,39 @@
+{# cmdk(id, placeholder, groups, attrs)
+
+   CSS from lib/css/components/cmdk.css:
+     - ux-cmdk-backdrop
+     - ux-cmdk
+   Children: ux-cmdk__head, ux-cmdk__icon, ux-cmdk__input,
+             ux-cmdk__hint, ux-cmdk__body,
+             ux-cmdk__group, ux-cmdk__item (aria-selected),
+             ux-cmdk__item-icon, ux-cmdk__item-text,
+             ux-cmdk__item-title, ux-cmdk__item-sub, ux-cmdk__item-meta,
+             ux-cmdk__item-shortcut, ux-cmdk__empty,
+             ux-cmdk__empty-icon, ux-cmdk__empty-text, ux-cmdk__empty-sub,
+             ux-cmdk__footer
+
+   Shell macro: groups/items passed via `caller is defined`.
+   Datastar wiring: `id` drives the open signal (`$<id>Open`) and query (`$<id>Q`).
+#}
+{% macro cmdk(id="cmdk", placeholder="Search...", attrs={}) %}
+{%- set open_sig = id ~ "Open" -%}
+{%- set q_sig = id ~ "Q" -%}
+<div data-signals='{"{{ open_sig }}": false, "{{ q_sig }}": ""}'>
+  <div class="ux-cmdk-backdrop" data-show="${{ open_sig }}" data-on:click="${{ open_sig }} = false"></div>
+  <div class="ux-cmdk" data-show="${{ open_sig }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+    <div class="ux-cmdk__head">
+      <span class="ux-cmdk__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+      <input class="ux-cmdk__input" type="text"
+             placeholder="{{ placeholder|e }}"
+             data-bind="{{ q_sig }}"
+             autocomplete="off" spellcheck="false"/>
+    </div>
+    <div class="ux-cmdk__body">
+      {%- if caller is defined %}{{ caller() }}{% endif %}
+    </div>
+  </div>
+</div>
+{% endmacro %}

@@ -1,0 +1,43 @@
+{# tabbar_item(label, icon_svg, href, tab_signal, tab_key, badge, attrs)
+
+   CSS root from lib/css/components/tab-bar.css:  .ux-tabbar-item
+   Single item inside a .ux-tabbar nav — icon + label + optional badge count.
+
+   Sub-classes (verified in tab-bar.css):
+     - ux-tabbar-icon      icon wrapper (24×24)
+     - ux-tabbar-label     text label below icon
+     - ux-tabbar-badge     count badge overlaid on icon
+     - ux-tabbar-badge--dot  dot-only variant
+
+   Active state attrs (verified):
+     aria-current="page"  OR  data-active="true"  OR  .ux-tabbar-item--active
+
+   Args:
+     - label       visible text label
+     - icon_svg    raw SVG string inserted into ux-tabbar-icon (optional)
+     - href        when set renders as <a> (default None → <button>)
+     - tab_signal  Datastar signal driving active state e.g. "$tab"
+     - tab_key     value for this item — used to set aria-current via data-attr
+     - badge       numeric badge count rendered inside ux-tabbar-badge (optional)
+     - badge_dot   when True renders dot-only badge ignoring badge value
+     - attrs       extra HTML attributes on the item element
+#}
+{% macro tabbar_item(label="", icon_svg=None, href=None, tab_signal=None, tab_key=None, badge=None, badge_dot=False, attrs={}) %}
+{%- set tag = "a" if href else "button" -%}
+<{{ tag }} class="ux-tabbar-item"
+{%- if href %} href="{{ href|e }}"{% endif -%}
+{%- if tag == "button" %} type="button"{% endif -%}
+{%- if tab_signal and tab_key %}
+  data-on:click="{{ tab_signal }} = '{{ tab_key|e }}'"
+  data-attr:aria-current="{{ tab_signal }} === '{{ tab_key|e }}' ? 'page' : null"
+{%- endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <span class="ux-tabbar-icon">
+    {%- if icon_svg %}{{ icon_svg }}{%- endif -%}
+    {%- if badge_dot %}<span class="ux-tabbar-badge ux-tabbar-badge--dot"></span>
+    {%- elif badge is not none and badge != "" %}<span class="ux-tabbar-badge">{{ badge|e }}</span>
+    {%- endif -%}
+  </span>
+  <span class="ux-tabbar-label">{{ label|e }}</span>
+</{{ tag }}>
+{% endmacro %}

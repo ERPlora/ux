@@ -1,0 +1,46 @@
+{# pos_payment(total, methods, selected, attrs)
+   Payment method picker for POS checkout.
+
+   Arguments:
+     total    -- formatted total string (e.g. "€19,40")
+     methods  -- list of dicts: [{id, name, sub, icon_svg}]
+                 icon_svg is raw SVG markup placed inside .ux-pay-method__icon
+     selected -- id of the initially active method (matches methods[i].id)
+     attrs    -- escape-hatch dict on the outer wrapper
+
+   The outer wrapper uses data-signals to track the active method.
+   Consumer wires confirm/cancel buttons outside or via the slot.
+#}
+{% macro pos_payment(total="€0,00", methods=[], selected="", attrs={}) %}
+{%- set default_methods = [
+  {"id": "card", "name": "Tarjeta", "sub": "Visa · MC · Amex",
+   "icon_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>'},
+  {"id": "cash", "name": "Efectivo", "sub": "Cambio automático",
+   "icon_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1l3 5 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z"/></svg>'},
+  {"id": "mobile", "name": "Bizum / móvil", "sub": "QR contactless",
+   "icon_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>'},
+  {"id": "mixed", "name": "Mixto", "sub": "2+ métodos",
+   "icon_svg": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h4v4M10 20H6v-4M21 3l-7 7M3 21l7-7"/></svg>'}
+] -%}
+{%- set active_methods = methods if methods else default_methods -%}
+{%- set active_id = selected if selected else (active_methods[0].id if active_methods else "") -%}
+<div
+  data-signals='{"payMethod": "{{ active_id }}"}'
+  {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class='ux-pay-methods'>
+    {%- for m in active_methods %}
+    <button class='ux-pay-method'
+      data-on:click='$payMethod = "{{ m.id }}"'
+      data-attr:aria-pressed='$payMethod === "{{ m.id }}" ? "true" : "false"'
+      {%- if m.id == active_id %} aria-pressed="true"{% endif %}>
+      <div class='ux-pay-method__icon'>{{ m.icon_svg }}</div>
+      <div>
+        <div class='ux-pay-method__name'>{{ m.name|e }}</div>
+        <div class='ux-pay-method__sub'>{{ m.sub|e }}</div>
+      </div>
+    </button>
+    {%- endfor %}
+  </div>
+  {%- if caller is defined %}{{ caller() }}{% endif %}
+</div>
+{% endmacro %}

@@ -1,50 +1,72 @@
-{# tabbar(items, current_path, variant, fixed, attrs)
+{# tabbar(items, signal=None, current_path=None, variant=None, fixed=False,
+           inset=False, attrs={})
 
-   CSS root from lib/css/components/tab-bar.css:  .ux-tabbar
-   Mobile-first bottom navigation (also reused inside .ux-app__tabbar slot).
+   CSS root from lib/css/components/tab-bar.css: .ux-tabbar
+   Mobile-first bottom navigation. Matches previews/components/tabbar.html
+   exactly.
 
    Variants (verified in tab-bar.css):
-     - indicator   ux-tabbar--indicator   iOS-style top indicator on active item
-     - pill        ux-tabbar--pill        Material-style pill background on active
-     - icons       ux-tabbar--icons       icons only, labels hidden
+     - indicator   .ux-tabbar--indicator   iOS-style top indicator on active item
+     - pill        .ux-tabbar--pill        Material-style pill background on active
+     - icons       .ux-tabbar--icons       icons only, labels hidden
    Modifiers:
-     - fixed       ux-tabbar--fixed       sticks the bar to the bottom of viewport
-     - inset       ux-tabbar--inset       padding for safe-area inset
+     - fixed       .ux-tabbar--fixed       sticks the bar to the bottom of viewport
+     - inset       .ux-tabbar--inset       extra padding for safe-area inset
 
-   Item shape:
-     {label, href, icon, badge, signal}
+   Two activation modes:
 
-     - label   visible label below the icon
-     - href    target route (anchor href)
-     - icon    Iconify identifier rendered through <iconify-icon>
-     - badge   optional badge text shown over the icon
-     - signal  optional raw Datastar expression for data-on:click (overrides @get)
+   1. Signal-driven (default — same as the public preview):
+      Pass `signal="$tab"` and each item carries a `key` value. Click toggles
+      the signal; aria-current is reactive.
 
-   Active item: any item whose href equals `current_path` gets aria-current="page".
+      tabbar(signal="$tab", items=[
+          {"key": "inicio", "label": "Inicio", "icon": "..."},
+          {"key": "cobros", "label": "Cobros", "icon": "...", "badge": "3"},
+      ])
 
-   Args:
-     - items          list of item dicts (see shape above)
-     - current_path   path of the active item (compared to item.href)
-     - variant        one of `indicator`, `pill`, `icons` (None = default)
-     - fixed          when True adds the ux-tabbar--fixed modifier
-     - attrs          extra HTML attributes spread on the <nav>
+   2. Route-driven (for full-page apps):
+      Pass `current_path` and each item carries `href`. The matching item gets
+      aria-current="page" statically; the click navigates via history push.
+
+      tabbar(current_path="/billing", items=[
+          {"label": "Inicio", "href": "/", "icon": "..."},
+          ...
+      ])
+
+   Item shape (signal mode):  {key, label, icon, badge}
+   Item shape (route  mode):  {label, href, icon, badge}
+
+   `icon` is either an Iconify identifier (rendered as <iconify-icon>) OR an
+   inline SVG markup string (rendered as Markup). Inline SVGs match the
+   public preview byte-for-byte.
 #}
-{% macro tabbar(items=[], current_path=None, variant=None, fixed=False, attrs={}) %}
+{% macro tabbar(items=[], signal=None, current_path=None, variant=None,
+                fixed=False, inset=False, attrs={}) %}
 {%- set classes = ["ux-tabbar"] -%}
 {%- if variant %}{%- do classes.append("ux-tabbar--" ~ variant) -%}{%- endif -%}
 {%- if fixed %}{%- do classes.append("ux-tabbar--fixed") -%}{%- endif -%}
+{%- if inset %}{%- do classes.append("ux-tabbar--inset") -%}{%- endif -%}
 <nav class="{{ classes | join(' ') }}" aria-label="Main navigation"
 {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
 {%- for item in items %}
-  {%- set is_current = (current_path is not none and item.href == current_path) -%}
+  {%- set is_current = (current_path is not none and item.href is defined and item.href == current_path) -%}
   <a class="ux-tabbar-item"
+    {%- if signal and item.key is defined %}
+     data-on:click='{{ signal }} = "{{ item.key|e }}"'
+     data-attr:aria-current='{{ signal }} === "{{ item.key|e }}" ? "page" : null'
+    {%- elif item.href is defined %}
      href="{{ item.href|e }}"
+     data-on:click="@get('{{ item.href|e }}', {history: 'push'})"
      {%- if is_current %} aria-current="page"{% endif -%}
-     {%- if item.signal is defined and item.signal %} data-on:click="{{ item.signal|e }}"
-     {%- else %} data-on:click="@get('{{ item.href|e }}', {history: 'push'})"
-     {%- endif -%}>
+    {%- endif -%}>
     <span class="ux-tabbar-icon">
-      <iconify-icon icon="{{ item.icon|e }}" width="22" height="22"></iconify-icon>
+      {%- if item.icon is defined and item.icon -%}
+        {%- if "<svg" in item.icon -%}
+          {{ item.icon|safe }}
+        {%- else -%}
+          <iconify-icon icon="{{ item.icon|e }}" width="22" height="22"></iconify-icon>
+        {%- endif -%}
+      {%- endif -%}
       {%- if item.badge is defined and item.badge %}<span class="ux-tabbar-badge">{{ item.badge|e }}</span>{% endif %}
     </span>
     <span class="ux-tabbar-label">{{ item.label|e }}</span>

@@ -1,0 +1,35 @@
+{# kanban(cols, attrs) / kcard(title, desc, priority, tags, attrs)
+
+   CSS from lib/css/components/kanban.css:
+     Board  : ux-kanban
+     Column : ux-kanban__col (--wide), ux-kanban__col-head,
+              ux-kanban__col-title, ux-kanban__col-dot (--brand --leaf --warn --danger --info),
+              ux-kanban__col-count, ux-kanban__col-actions,
+              ux-kanban__col-body, ux-kanban__col-foot, ux-kanban__add
+     Card   : ux-kcard, ux-kcard__cover, ux-kcard__tags, ux-kcard__tag (--brand --leaf --warn --danger --info),
+              ux-kcard__title, ux-kcard__desc, ux-kcard__meta,
+              ux-kcard__meta-l, ux-kcard__avatars, ux-kcard__icon,
+              ux-kcard__priority (--low --med --high --crit),
+              ux-kcard--dragging
+
+   Shell macro: columns are passed via `caller is defined`.
+   `cols` is unused in the shell — the consumer builds the column HTML.
+#}
+{% macro kanban(attrs={}) %}
+<div class="ux-kanban"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if caller is defined %}{{ caller() }}{% endif %}
+</div>
+{% endmacro %}
+
+{# kcard(title, desc, priority, attrs) — a single kanban card. #}
+{% macro kcard(title="", desc=None, priority=None, attrs={}) %}
+{%- set classes = ["ux-kcard"] -%}
+<article class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{%- if priority %}<span class="ux-kcard__priority ux-kcard__priority--{{ priority|e }}"></span>{% endif %}
+{%- if title %}<h5 class="ux-kcard__title">{{ title|e }}</h5>{% endif %}
+{%- if desc %}<p class="ux-kcard__desc">{{ desc|e }}</p>{% endif %}
+{%- if caller is defined %}{{ caller() }}{% endif %}
+</article>
+{% endmacro %}

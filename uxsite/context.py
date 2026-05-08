@@ -13,19 +13,28 @@ Items list shape::
 from __future__ import annotations
 
 
-# Single SVG path-d strings reused across the sidebar — keeps the layout
-# compact without bringing in a heavyweight icon set.
-ICON: dict[str, str] = {
-    "home": "M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z",
-    "install": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",
-    "live": "M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83",
-    "cube": "M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.3 7L12 12l8.7-5M12 22V12",
-    "input": "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8",
-    "nav": "M3 12h18M3 6h18M3 18h12",
-    "modal": "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
-    "feedback": "M12 9v4M12 17h0M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z",
-    "table": "M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18",
-    "page": "M3 3h18v18H3zM3 9h18M9 21V9",
+# Iconify icon identifiers used in the sidebar.
+# Each key maps to an ion: icon from https://icon-sets.iconify.design/ion/
+ICON_NAMES: dict[str, str] = {
+    "home":     "ion:home-outline",
+    "install":  "ion:download-outline",
+    "live":     "ion:flash-outline",
+    "cube":     "ion:cube-outline",
+    "input":    "ion:create-outline",
+    "nav":      "ion:menu-outline",
+    "modal":    "ion:chatbubble-outline",
+    "feedback": "ion:alert-circle-outline",
+    "table":    "ion:grid-outline",
+    "page":     "ion:document-outline",
+    # Extra icons matching the public index.html NAV
+    "layers":   "ion:layers-outline",
+    "layout":   "ion:browsers-outline",
+    "grid":     "ion:apps-outline",
+    "forms":    "ion:reader-outline",
+    "alert":    "ion:warning-outline",
+    "flow":     "ion:pulse-outline",
+    "factory":  "ion:business-outline",
+    "store":    "ion:storefront-outline",
 }
 
 
@@ -42,6 +51,8 @@ COMPONENT_NAMES: list[str] = [
     "divider",
     "kpi",
     "spacer",
+    "pill",
+    "icon_btn",
     "input",
     "textarea",
     "select",
@@ -60,7 +71,11 @@ COMPONENT_NAMES: list[str] = [
     "breadcrumbs",
     "tabs",
     "tabbar",
+    "tabbar_item",
     "topbar",
+    "sidebar",
+    "sidebar_item",
+    "app_shell",
     "drawer",
     "modal",
     "tooltip",
@@ -72,7 +87,28 @@ COMPONENT_NAMES: list[str] = [
     "empty",
     "states",
     "datatable",
+    "dt_toolbar",
+    "date_range",
+    "view_toggle",
     "calendar",
+    "chart",
+    "chat",
+    "kanban",
+    "receipt",
+    "editor",
+    "multimedia",
+    "tree",
+    "stat",
+    "inline_feedback",
+    "cmdk",
+    "pos_canvas",
+    "pos_numpad",
+    "pos_payment",
+    "kds",
+    "hr_card",
+    "manufacturing_panel",
+    "commerce_card",
+    "mobile_shell",
 ]
 
 
@@ -133,6 +169,33 @@ COMPONENT_DESCRIPTIONS: dict[str, str] = {
     "empty": "Empty state with icon, title, description and optional CTA button.",
     "states": "Loading, error and success blocks for async surfaces and pages.",
     "calendar": "Mini month grid with weekday header, selected day and event markers.",
+    "pill": "Status tag with a leading coloured dot — lighter than badge, no solid fill.",
+    "icon_btn": "Square icon-only ghost button for toolbars, topbars and row actions.",
+    "tabbar_item": "Single item inside a .ux-tabbar nav — icon, label and optional badge.",
+    "sidebar": "Full left-rail navigation pane with brand header, scrollable body and footer.",
+    "sidebar_item": "Navigation row inside a sidebar — icon, label, badge and active state.",
+    "app_shell": "Two-column app layout — sidebar + main area with mobile drawer support.",
+    "dt_toolbar": "DataTable consolidated toolbar row wrapping search, filters and view controls.",
+    "date_range": "Compact inline date-range display trigger for table toolbars.",
+    "view_toggle": "Icon-button pair that switches between named views (table / grid).",
+    "chart": "Shell for ux-chart with header, delta and SVG slot — flat or elevated.",
+    "chat": "Two-pane chat layout with conversation list and thread — caller-driven shell.",
+    "kanban": "Horizontal board shell with ux-kanban__col columns and draggable kcard items.",
+    "receipt": "POS-style thermal receipt with lines, total and optional footer block.",
+    "editor": "Richtext editor shell using ux-richtext with toolbar and editable content div.",
+    "multimedia": "Gallery grid and upload dropzone using ux-gallery and ux-upload.",
+    "tree": "Collapsible file/folder tree with Datastar open signals and dense mode.",
+    "stat": "Horizontal stats bar (ux-stats / ux-stat) with value, label and delta tones.",
+    "inline_feedback": "Banner and callout blocks for info, warn, danger and ok inline messages.",
+    "cmdk": "Command-palette overlay driven by Datastar open/query signals.",
+    "pos_canvas": "Full POS layout shell — category rail, product grid and cart aside with Datastar signals.",
+    "pos_numpad": "Numeric entry pad for POS cash or quantity input — standard or calculator layout.",
+    "pos_payment": "Payment method picker for POS checkout — card, cash, mobile and mixed methods.",
+    "kds": "Kitchen Display System ticket card with order header, item list and action buttons.",
+    "hr_card": "Employee card (ux-emp) with avatar, name, role, status badge and stats grid.",
+    "manufacturing_panel": "Work-order panel with OEE progress bar and step-by-step status list.",
+    "commerce_card": "Invoice / quote builder (ux-invoice) with header, line table and totals block.",
+    "mobile_shell": "Mobile app shell — ux-app with offcanvas sidebar and ux-tabbar bottom nav.",
 }
 
 
@@ -150,121 +213,336 @@ PAGE_DESCRIPTIONS: dict[str, str] = {
 }
 
 
-# Sidebar layout — replicates the structure brief from the build doc.
+# Sidebar layout — mirrors the canonical NAV array in index.html exactly.
+# Mapping rules:
+#   components/<name> with existing /c/<name> route → href="/c/<name>"
+#   components/<name> without /c/<name> route       → href="#", badge="soon"
+#   app pages                                        → href="/preview/<cat>/<slug>"
+#   overview / design-system                         → special top-level routes
+_C = ICON_NAMES["cube"]
+_NAV = ICON_NAMES["nav"]
+_LAYOUT = ICON_NAMES["layout"]
+_FORMS = ICON_NAMES["forms"]
+_TABLE = ICON_NAMES["table"]
+_MODAL = ICON_NAMES["modal"]
+_FLOW = ICON_NAMES["flow"]
+_FACTORY = ICON_NAMES["factory"]
+_STORE = ICON_NAMES["store"]
+_GRID = ICON_NAMES["grid"]
+_ALERT = ICON_NAMES["alert"]
+
 SIDEBAR_GROUPS: list[dict] = [
+    # ── Foundations ──────────────────────────────────────────────────────────
     {
-        "label": "Getting started",
+        "label": "Foundations",
         "items": [
-            {"label": "Home", "href": "/", "icon": ICON["home"]},
-            {"label": "Install", "href": "/install", "icon": ICON["install"]},
-            {"label": "Datastar live", "href": "/live", "icon": ICON["live"], "badge": "live"},
+            {"label": "Visión general", "href": "/",              "icon": ICON_NAMES["home"]},
+            {"label": "Design system",  "href": "/design-system", "icon": ICON_NAMES["layers"]},
         ],
     },
+    # ── Layout ───────────────────────────────────────────────────────────────
     {
-        "label": "Core",
+        "label": "Layout",
         "items": [
-            {"label": name, "href": f"/c/{name}", "icon": ICON["cube"]}
-            for name in (
-                "button", "badge", "card", "chip", "avatar",
-                "icon", "divider", "kpi", "spacer",
-            )
+            {"label": "App shell",    "href": "/c/app_shell", "icon": _LAYOUT},
+            {"label": "Mobile shell", "href": "/c/mobile_shell", "icon": _LAYOUT},
+            {"label": "Sidebar",      "href": "/c/sidebar",   "icon": _LAYOUT},
+            {"label": "Topbar",       "href": "/c/topbar",    "icon": _LAYOUT},
         ],
     },
+    # ── Navegación ───────────────────────────────────────────────────────────
     {
-        "label": "Inputs",
+        "label": "Navegación",
         "items": [
-            {"label": name, "href": f"/c/{name}", "icon": ICON["input"]}
-            for name in (
-                "input", "textarea", "select", "field", "toggle", "check",
-                "radio", "radio_card", "range", "slider",
-                "datepicker", "timepicker", "dropzone", "combo", "search",
-            )
+            {"label": "Tab bar (bottom)", "href": "/c/tabbar",      "icon": _NAV},
+            {"label": "Tabs (top)",       "href": "/c/tabs",        "icon": _NAV},
+            {"label": "Menu button",      "href": "#",              "icon": _NAV, "badge": "soon"},
+            {"label": "Breadcrumbs",      "href": "/c/breadcrumbs", "icon": _NAV},
         ],
     },
+    # ── Atomics ──────────────────────────────────────────────────────────────
     {
-        "label": "Navigation",
+        "label": "Atomics",
         "items": [
-            {"label": name, "href": f"/c/{name}", "icon": ICON["nav"]}
-            for name in ("breadcrumbs", "tabs", "tabbar", "topbar", "drawer")
+            {"label": "Button",                           "href": "/c/button",   "icon": _C},
+            {"label": "Badge & Pill",                     "href": "/c/badge",    "icon": _C},
+            {"label": "Avatar",                           "href": "/c/avatar",   "icon": _C},
+            {"label": "Progress · Spinner · Pagination",  "href": "/c/progress", "icon": _C},
+            {"label": "Datepicker · OTP · Rating · Auto", "href": "#",           "icon": _C, "badge": "soon"},
         ],
     },
+    # ── Surfaces ─────────────────────────────────────────────────────────────
+    {
+        "label": "Surfaces",
+        "items": [
+            {"label": "Card",               "href": "/c/card",          "icon": _GRID},
+            {"label": "KPI card",           "href": "/c/kpi",           "icon": _GRID},
+            {"label": "Stats",              "href": "/c/stat",          "icon": _GRID},
+            {"label": "Empty state",        "href": "/c/empty",         "icon": _GRID},
+            {"label": "Accordion",          "href": "/c/accordion",     "icon": _GRID},
+            {"label": "List",               "href": "/c/list",          "icon": _GRID},
+            {"label": "Tree",               "href": "/c/tree",          "icon": _GRID},
+            {"label": "Banners · Callouts", "href": "/c/inline_feedback", "icon": _ALERT},
+        ],
+    },
+    # ── Forms ────────────────────────────────────────────────────────────────
+    {
+        "label": "Forms",
+        "items": [
+            {"label": "Inputs · Search",           "href": "#", "icon": _FORMS, "badge": "soon"},
+            {"label": "Select · Toggle · Radio",   "href": "#", "icon": _FORMS, "badge": "soon"},
+            {"label": "Form layout",               "href": "#", "icon": _FORMS, "badge": "soon"},
+            {"label": "Slider · Upload · Stepper", "href": "#", "icon": _FORMS, "badge": "soon"},
+        ],
+    },
+    # ── Data display ─────────────────────────────────────────────────────────
+    {
+        "label": "Data display",
+        "items": [
+            {"label": "Table",                  "href": "#",            "icon": _TABLE, "badge": "soon"},
+            {"label": "DataTable + Pagination", "href": "/c/datatable", "icon": _TABLE},
+            {"label": "Sparkline",              "href": "#",            "icon": _TABLE, "badge": "soon"},
+        ],
+    },
+    # ── Overlays ─────────────────────────────────────────────────────────────
     {
         "label": "Overlays",
         "items": [
-            {"label": name, "href": f"/c/{name}", "icon": ICON["modal"]}
-            for name in ("modal", "tooltip", "toast")
+            {"label": "Modal",                     "href": "/c/modal",   "icon": _MODAL},
+            {"label": "Drawer",                    "href": "/c/drawer",  "icon": _MODAL},
+            {"label": "Toast",                     "href": "/c/toast",   "icon": _MODAL},
+            {"label": "Tooltip · Popover · Menu",  "href": "/c/tooltip", "icon": _MODAL},
+            {"label": "Context menu · Hover card", "href": "#",          "icon": _MODAL, "badge": "soon"},
         ],
     },
+    # ── Workflow ─────────────────────────────────────────────────────────────
     {
-        "label": "Feedback",
+        "label": "Workflow",
         "items": [
-            {"label": name, "href": f"/c/{name}", "icon": ICON["feedback"]}
-            for name in (
-                "progress", "accordion", "list",
-                "timeline", "empty", "states",
-            )
+            {"label": "Kanban",             "href": "/c/kanban",   "icon": _FLOW},
+            {"label": "Calendar",           "href": "/c/calendar", "icon": _FLOW},
+            {"label": "Chat",               "href": "/c/chat",     "icon": _FLOW},
+            {"label": "Timeline & Stepper", "href": "/c/timeline", "icon": _FLOW},
+            {"label": "Charts",             "href": "/c/chart",    "icon": _FLOW},
         ],
     },
+    # ── Industria ────────────────────────────────────────────────────────────
     {
-        "label": "Data",
+        "label": "Industria",
         "items": [
-            {"label": name, "href": f"/c/{name}", "icon": ICON["table"]}
-            for name in ("datatable", "calendar")
+            {"label": "Manufactura",              "href": "/c/manufacturing_panel", "icon": _FACTORY},
+            {"label": "Recursos humanos",         "href": "/c/hr_card",             "icon": _FACTORY},
+            {"label": "Multimedia",               "href": "/c/multimedia",          "icon": _FACTORY},
+            {"label": "Forms avanzados",          "href": "#",                      "icon": _FACTORY, "badge": "soon"},
+            {"label": "Comercial · invoice",      "href": "/c/commerce_card",       "icon": _FACTORY},
+            {"label": "Mobile patterns",          "href": "#",                      "icon": _FACTORY, "badge": "soon"},
+            {"label": "Cmd+K · Notif · Coach",    "href": "/c/cmdk",                "icon": _FACTORY},
+            {"label": "Estados · skel · loading", "href": "/c/states",              "icon": _FACTORY},
         ],
     },
+    # ── POS · Punto de venta ─────────────────────────────────────────────────
     {
-        "label": "Pages",
+        "label": "POS · Punto de venta",
         "items": [
-            {"label": name, "href": f"/p/{name}", "icon": ICON["page"]}
-            for name in PAGE_NAMES
+            {"label": "POS · canvas completo", "href": "/c/pos_canvas",  "icon": _STORE},
+            {"label": "Numpad",                "href": "/c/pos_numpad",  "icon": _STORE},
+            {"label": "Cobro / pago",          "href": "/c/pos_payment", "icon": _STORE},
+            {"label": "Receipt (ticket)",      "href": "/c/receipt",     "icon": _STORE},
+            {"label": "KDS · cocina",          "href": "/c/kds",         "icon": _STORE},
         ],
     },
+    # ── v2.1 · Actions & inputs ──────────────────────────────────────────────
+    {
+        "label": "v2.1 · Actions & inputs",
+        "items": [
+            {"label": "Back · Split btn · Calc · App icon",                    "href": "#", "icon": _C,     "badge": "soon"},
+            {"label": "Tag · Filter chip · Toggle group · Variant · Qty badge", "href": "#", "icon": _C,     "badge": "soon"},
+            {"label": "Currency · Phone · Qty stepper",                        "href": "#", "icon": _FORMS, "badge": "soon"},
+        ],
+    },
+    # ── v2.1 · Data & layout ─────────────────────────────────────────────────
+    {
+        "label": "v2.1 · Data & layout",
+        "items": [
+            {"label": "JSON · QR · Carousel · Img · Zoom · Reorder · Vlist · Iscroll", "href": "#", "icon": _TABLE,  "badge": "soon"},
+            {"label": "Panel · Masonry · Master-detail · Scroll · Split · Toolbar",    "href": "#", "icon": _LAYOUT, "badge": "soon"},
+            {"label": "Rich text · Keyboard · OSK · VKB",                              "href": "#", "icon": _FORMS,  "badge": "soon"},
+        ],
+    },
+    # ── v2.1 · Verticals ─────────────────────────────────────────────────────
+    {
+        "label": "v2.1 · Verticals",
+        "items": [
+            {"label": "Audio · Video · PDF",                        "href": "#", "icon": _FACTORY, "badge": "soon"},
+            {"label": "Time clock · Shift cal · Attendance · Perf", "href": "#", "icon": _FACTORY, "badge": "soon"},
+            {"label": "Machine · Prodline · QC · Batch",            "href": "#", "icon": _FACTORY, "badge": "soon"},
+            {"label": "Loyalty · Ticket · Event · Product",         "href": "#", "icon": _STORE,   "badge": "soon"},
+            {"label": "Menubar · Scheduler",                        "href": "#", "icon": _NAV,     "badge": "soon"},
+        ],
+    },
+    # ── Auth ─────────────────────────────────────────────────────────────────
     {
         "label": "Auth",
         "items": [
-            {"label": "login-saas", "href": "/preview/auth/login-saas", "icon": ICON["input"]},
-            {"label": "login-hub", "href": "/preview/auth/login-hub", "icon": ICON["input"]},
-            {"label": "2fa-setup", "href": "/preview/auth/2fa-setup", "icon": ICON["input"]},
-            {"label": "2fa-profile", "href": "/preview/auth/2fa-profile", "icon": ICON["input"]},
-            {"label": "2fa-disable", "href": "/preview/auth/2fa-disable", "icon": ICON["input"]},
-            {"label": "change-password", "href": "/preview/auth/change-password", "icon": ICON["input"]},
-            {"label": "delete-account", "href": "/preview/auth/delete-account", "icon": ICON["input"]},
-            {"label": "sessions", "href": "/preview/auth/sessions", "icon": ICON["input"]},
-            {"label": "trusted-devices", "href": "/preview/auth/trusted-devices", "icon": ICON["input"]},
+            {"label": "Login (SaaS)",           "href": "/preview/auth/login-saas",      "icon": _C, "badge": "saas"},
+            {"label": "Login (Hub · PIN pad)",  "href": "/preview/auth/login-hub",       "icon": _C, "badge": "hub"},
+            {"label": "Activar 2FA",            "href": "/preview/auth/2fa-setup",       "icon": _C},
+            {"label": "Gestionar 2FA",          "href": "/preview/auth/2fa-profile",     "icon": _C},
+            {"label": "Desactivar 2FA",         "href": "/preview/auth/2fa-disable",     "icon": _C},
+            {"label": "Cambiar contraseña",     "href": "/preview/auth/change-password", "icon": _C},
+            {"label": "Sesiones activas",       "href": "/preview/auth/sessions",        "icon": _C},
+            {"label": "Dispositivos confiados", "href": "/preview/auth/trusted-devices", "icon": _C},
+            {"label": "Eliminar cuenta",        "href": "/preview/auth/delete-account",  "icon": _ALERT},
         ],
     },
+    # ── Dashboard & profile ──────────────────────────────────────────────────
     {
-        "label": "Employees",
+        "label": "Dashboard & profile",
         "items": [
-            {"label": "list", "href": "/preview/employees/list", "icon": ICON["page"]},
-            {"label": "add", "href": "/preview/employees/add", "icon": ICON["page"]},
-            {"label": "edit", "href": "/preview/employees/edit", "icon": ICON["page"]},
+            {"label": "Dashboard (SaaS)", "href": "/preview/dashboard/saas", "icon": _LAYOUT, "badge": "saas"},
+            {"label": "Dashboard (Hub)",  "href": "/preview/dashboard/hub",  "icon": _LAYOUT, "badge": "hub"},
+            {"label": "Perfil (SaaS)",    "href": "/preview/profile/saas",   "icon": _C,      "badge": "saas"},
+            {"label": "Perfil (Hub)",     "href": "/preview/profile/hub",    "icon": _C,      "badge": "hub"},
         ],
     },
+    # ── Organizations ────────────────────────────────────────────────────────
     {
-        "label": "Profile",
+        "label": "Organizations",
         "items": [
-            {"label": "hub", "href": "/preview/profile/hub", "icon": ICON["page"]},
-            {"label": "saas", "href": "/preview/profile/saas", "icon": ICON["page"]},
+            {"label": "Organizaciones",    "href": "/preview/orgs/list",            "icon": _GRID},
+            {"label": "Nueva org",         "href": "/preview/orgs/create",          "icon": _GRID},
+            {"label": "Detalle org",       "href": "/preview/orgs/detail",          "icon": _GRID},
+            {"label": "Invitar miembro",   "href": "/preview/orgs/invite",          "icon": _GRID},
+            {"label": "Facturación org",   "href": "/preview/orgs/billing",         "icon": _GRID},
+            {"label": "Direcciones envío", "href": "/preview/orgs/shipping",        "icon": _GRID},
+            {"label": "Métodos de pago",   "href": "/preview/orgs/payment-methods", "icon": _GRID},
         ],
     },
+    # ── Hubs ─────────────────────────────────────────────────────────────────
+    {
+        "label": "Hubs",
+        "items": [
+            {"label": "Hubs activos",       "href": "/preview/hubs/active",   "icon": _FLOW},
+            {"label": "Hubs inactivos",     "href": "/preview/hubs/inactive", "icon": _FLOW},
+            {"label": "Crear hub (wizard)", "href": "/preview/hubs/create",   "icon": _FLOW},
+            {"label": "Configuración hub",  "href": "/preview/hubs/settings", "icon": _FLOW},
+            {"label": "Usuarios del hub",   "href": "/preview/hubs/users",    "icon": _FLOW},
+            {"label": "Módulos del hub",    "href": "/preview/hubs/modules",  "icon": _FLOW},
+            {"label": "Acceso QR hub",      "href": "/preview/hubs/qr",       "icon": _FLOW},
+        ],
+    },
+    # ── Users ────────────────────────────────────────────────────────────────
     {
         "label": "Users",
         "items": [
-            {"label": "list", "href": "/preview/users/list", "icon": ICON["page"]},
-            {"label": "invite", "href": "/preview/users/invite", "icon": ICON["page"]},
+            {"label": "Usuarios globales", "href": "/preview/users/list",   "icon": _C},
+            {"label": "Invitar a hubs",    "href": "/preview/users/invite", "icon": _C},
         ],
     },
+    # ── Billing ──────────────────────────────────────────────────────────────
+    {
+        "label": "Billing",
+        "items": [
+            {"label": "Facturas",            "href": "/preview/billing/invoices",         "icon": _MODAL},
+            {"label": "Detalle factura",     "href": "/preview/billing/invoice-detail",   "icon": _MODAL},
+            {"label": "Suscripciones",       "href": "/preview/billing/subscriptions",    "icon": _MODAL},
+            {"label": "Mis compras",         "href": "/preview/billing/purchases",        "icon": _MODAL},
+            {"label": "Historial pagos",     "href": "/preview/billing/payment-history",  "icon": _MODAL},
+            {"label": "Facturación del hub", "href": "/preview/billing/hub",              "icon": _MODAL,   "badge": "hub"},
+            {"label": "Vendor dashboard",    "href": "/preview/billing/vendor-dashboard", "icon": _FACTORY},
+            {"label": "Detalle ingresos",    "href": "/preview/billing/vendor-earnings",  "icon": _FACTORY},
+            {"label": "Payouts",             "href": "/preview/billing/payouts",          "icon": _FACTORY},
+            {"label": "Detalle payout",      "href": "/preview/billing/payout-detail",    "icon": _FACTORY},
+            {"label": "Stripe Connect",      "href": "/preview/billing/stripe-connect",   "icon": _FACTORY},
+        ],
+    },
+    # ── Marketplace ──────────────────────────────────────────────────────────
+    {
+        "label": "Marketplace",
+        "items": [
+            {"label": "Tienda equipos (SaaS)", "href": "/preview/marketplace/saas-shop",          "icon": _STORE, "badge": "saas"},
+            {"label": "Carrito (SaaS)",        "href": "/preview/marketplace/saas-cart",          "icon": _STORE, "badge": "saas"},
+            {"label": "Checkout (SaaS)",       "href": "/preview/marketplace/saas-checkout",      "icon": _STORE, "badge": "saas"},
+            {"label": "Pedido confirmado",     "href": "/preview/marketplace/saas-success",       "icon": _STORE, "badge": "saas"},
+            {"label": "Marketplace (Hub)",     "href": "/preview/marketplace/hub-index",          "icon": _STORE, "badge": "hub"},
+            {"label": "Catálogo (29 módulos)", "href": "/preview/marketplace/hub-catalog",        "icon": _STORE, "badge": "hub"},
+            {"label": "Detalle de módulo",     "href": "/preview/marketplace/hub-detail",         "icon": _STORE, "badge": "hub"},
+            {"label": "Soluciones por sector", "href": "/preview/marketplace/hub-solutions",      "icon": _STORE, "badge": "hub"},
+            {"label": "Tipos de negocio",      "href": "/preview/marketplace/hub-business-types", "icon": _STORE, "badge": "hub"},
+            {"label": "Cumplimiento",          "href": "/preview/marketplace/hub-compliance",     "icon": _STORE, "badge": "hub"},
+            {"label": "Mis compras (Hub)",     "href": "/preview/marketplace/hub-my-purchases",   "icon": _STORE, "badge": "hub"},
+            {"label": "Checkout (Stripe)",     "href": "/preview/marketplace/hub-checkout",       "icon": _STORE, "badge": "hub"},
+            {"label": "Modal README",          "href": "/preview/marketplace/hub-readme",         "icon": _STORE, "badge": "hub"},
+        ],
+    },
+    # ── Modules & Developer ──────────────────────────────────────────────────
+    {
+        "label": "Modules & Developer",
+        "items": [
+            {"label": "Developer hub",     "href": "/preview/modules/overview",      "icon": _FACTORY},
+            {"label": "Mis módulos",       "href": "/preview/modules/my",            "icon": _FACTORY},
+            {"label": "Subir módulo",      "href": "/preview/modules/upload",        "icon": _FACTORY},
+            {"label": "Editar módulo",     "href": "/preview/modules/edit",          "icon": _FACTORY},
+            {"label": "Estadísticas",      "href": "/preview/modules/stats",         "icon": _FACTORY},
+            {"label": "Colaboradores",     "href": "/preview/modules/members",       "icon": _FACTORY},
+            {"label": "Repositorios",      "href": "/preview/modules/repositories",  "icon": _FACTORY},
+            {"label": "Conectar GitHub",   "href": "/preview/modules/add-from-git",  "icon": _FACTORY},
+            {"label": "Instalados en hub", "href": "/preview/modules/hub-installed", "icon": _FACTORY, "badge": "hub"},
+        ],
+    },
+    # ── Employees & roles ────────────────────────────────────────────────────
+    {
+        "label": "Employees & roles",
+        "items": [
+            {"label": "Empleados",       "href": "/preview/employees/list",       "icon": _FLOW},
+            {"label": "Añadir empleado", "href": "/preview/employees/add",        "icon": _FLOW},
+            {"label": "Editar empleado", "href": "/preview/employees/edit",       "icon": _FLOW},
+            {"label": "Roles",           "href": "/preview/roles/list",           "icon": _FLOW},
+            {"label": "Form de rol",     "href": "/preview/roles/form",           "icon": _FLOW},
+            {"label": "Detalle de rol",  "href": "/preview/roles/detail",         "icon": _FLOW},
+            {"label": "Eliminar rol",    "href": "/preview/roles/confirm-delete", "icon": _FLOW},
+        ],
+    },
+    # ── Settings ─────────────────────────────────────────────────────────────
+    {
+        "label": "Settings",
+        "items": [
+            {"label": "Preferencias",       "href": "/preview/settings/preferences",     "icon": _C},
+            {"label": "Settings hub",       "href": "/preview/settings/hub",             "icon": _C, "badge": "hub"},
+            {"label": "Configuración hub",  "href": "/preview/settings/hub-config",      "icon": _C, "badge": "hub"},
+            {"label": "Cumplimiento",       "href": "/preview/settings/compliance",      "icon": _C},
+            {"label": "Dispositivos",       "href": "/preview/settings/devices",         "icon": _C},
+            {"label": "Impresoras",         "href": "/preview/settings/printers",        "icon": _C},
+            {"label": "Backup",             "href": "/preview/settings/backup",          "icon": _C},
+            {"label": "File browser",       "href": "/preview/settings/file-browser",    "icon": _C},
+            {"label": "Clases de impuesto", "href": "/preview/settings/tax-classes",     "icon": _C},
+            {"label": "Archivos",           "href": "/preview/settings/files",           "icon": _C},
+            {"label": "Centro de ayuda",    "href": "/preview/settings/help",            "icon": _C},
+            {"label": "Tareas programadas", "href": "/preview/settings/scheduled-tasks", "icon": _C},
+        ],
+    },
+    # ── System & public ──────────────────────────────────────────────────────
+    {
+        "label": "System & public",
+        "items": [
+            {"label": "Dispositivos del sistema", "href": "/preview/system/index",        "icon": _C,     "badge": "hub"},
+            {"label": "Setup Bridge (wizard)",    "href": "/preview/system/bridge-setup", "icon": _C,     "badge": "hub"},
+            {"label": "Landing pública",          "href": "/preview/public/index",        "icon": _STORE, "badge": "hub"},
+            {"label": "Catálogo público",         "href": "/preview/public/catalog",      "icon": _STORE, "badge": "hub"},
+            {"label": "Detalle producto",         "href": "/preview/public/product",      "icon": _STORE, "badge": "hub"},
+        ],
+    },
+    # ── Errors ───────────────────────────────────────────────────────────────
     {
         "label": "Errors",
         "items": [
-            {"label": "404", "href": "/preview/errors/404", "icon": ICON["feedback"]},
-            {"label": "500", "href": "/preview/errors/500", "icon": ICON["feedback"]},
-            {"label": "403", "href": "/preview/errors/403", "icon": ICON["feedback"]},
-            {"label": "405", "href": "/preview/errors/405", "icon": ICON["feedback"]},
-            {"label": "unauthorized", "href": "/preview/errors/unauthorized", "icon": ICON["feedback"]},
-            {"label": "bootstrap", "href": "/preview/errors/bootstrap", "icon": ICON["feedback"]},
-            {"label": "bootstrap-detail", "href": "/preview/errors/bootstrap-detail", "icon": ICON["feedback"]},
+            {"label": "403 — Forbidden",    "href": "/preview/errors/403",              "icon": _ALERT},
+            {"label": "404 — Not found",    "href": "/preview/errors/404",              "icon": _ALERT},
+            {"label": "405 — Method NA",    "href": "/preview/errors/405",              "icon": _ALERT},
+            {"label": "500 — Server error", "href": "/preview/errors/500",              "icon": _ALERT},
+            {"label": "Bootstrap error",    "href": "/preview/errors/bootstrap",        "icon": _ALERT},
+            {"label": "Bootstrap detail",   "href": "/preview/errors/bootstrap-detail", "icon": _ALERT},
+            {"label": "Acceso denegado",    "href": "/preview/errors/unauthorized",     "icon": _ALERT},
         ],
     },
 ]

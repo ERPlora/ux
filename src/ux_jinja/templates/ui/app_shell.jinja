@@ -1,0 +1,38 @@
+{# app_shell(sidebar_signal, tabbar, sidebar_state, attrs)
+
+   CSS root from lib/css/components/app-shell.css:  .ux-app
+   Layout: sidebar (sticky) + main column.
+   Mobile: sidebar becomes an offcanvas drawer; tab-bar appears at bottom.
+
+   Sub-classes (verified in app-shell.css):
+     - ux-app__sidebar-overlay   mobile backdrop (clicks close sidebar)
+     - ux-app__main              right column (flex column)
+     - ux-app__body              scrollable page area with padding
+     - ux-app__tabbar            mobile bottom tab-bar slot
+
+   Data attrs (verified in preview):
+     - data-sidebar="open|collapsed|hidden"
+     - data-tabbar="bottom"
+
+   Args:
+     - sidebar_signal   Datastar signal name for sidebar open state (default "sidebar")
+     - tabbar           when True adds data-tabbar="bottom" and shows ux-app__tabbar slot
+     - sidebar_state    initial string value — ""|"collapsed"|"hidden" (default "")
+     - attrs            extra HTML attributes on the root .ux-app div
+
+   Slots via {% call app_shell(...) %}...{% endcall %}:
+     Use companion macros sidebar() and sidebar_item() for the left pane.
+     Place topbar + page content directly inside — they land in ux-app__main.
+#}
+{% macro app_shell(sidebar_signal="sidebar", tabbar=False, sidebar_state="", attrs={}) %}
+{%- set root_attrs = {} -%}
+{%- if tabbar %}{%- set _ = root_attrs.update({"data-tabbar": "bottom"}) -%}{%- endif -%}
+<div class="ux-app"
+  data-signals='{"{{ sidebar_signal }}": false}'
+  data-attr:data-sidebar="{{ '$' ~ sidebar_signal }} ? 'open' : '{{ sidebar_state|e }}'"
+  {%- for k, v in root_attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}
+  {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-app__sidebar-overlay" data-on:click="{{ '$' ~ sidebar_signal }} = false"></div>
+  {%- if caller is defined %}{{ caller() }}{%- endif %}
+</div>
+{% endmacro %}
