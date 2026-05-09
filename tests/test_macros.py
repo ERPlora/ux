@@ -2131,30 +2131,5 @@ def test_commerce_card_lines(env):
 
 
 # ---------------------------------------------------------------------------
-# mobile_shell
+# mobile_shell — removed: app_shell is responsive via CSS, no separate macro
 # ---------------------------------------------------------------------------
-
-
-def test_mobile_shell_default(env):
-    out = render(
-        env,
-        '{% from "ui/mobile_shell.jinja" import mobile_shell %}'
-        '{% call mobile_shell(brand_initials="EX", brand_name="La Rambla",'
-        ' nav_items=[{"label":"Inicio","href":"/","icon_svg":"<svg/>"}]) %}'
-        '<p>content</p>{% endcall %}',
-    )
-    assert "ux-app" in out
-    assert "ux-sidebar" in out
-    assert "ux-tabbar" in out
-    assert "La Rambla" in out
-    assert "<p>content</p>" in out
-
-
-def test_mobile_shell_current_path(env):
-    out = render(
-        env,
-        '{% from "ui/mobile_shell.jinja" import mobile_shell %}'
-        '{% call mobile_shell(nav_items=[{"label":"Home","href":"/","icon_svg":""}],'
-        ' current_path="/") %}{% endcall %}',
-    )
-    assert 'aria-current="page"' in out
