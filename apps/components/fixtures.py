@@ -1206,19 +1206,46 @@ EXAMPLES: dict[str, list[dict[str, str]]] = {
             '</nav>'
         )},
     ],
-    "mobile_shell": [
-        {"label": "Shell móvil con tabbar", "render": (
-            '{% from "ui/mobile_shell.jinja" import mobile_shell %}'
-            '{% call mobile_shell('
-            '  brand_initials="ER", brand_name="ERPlora", brand_meta="Demo",\n'
-            '  nav_items=['
-            '    {"label": "Inicio", "href": "/"},'
-            '    {"label": "Ventas", "href": "/ventas"},'
-            '    {"label": "Perfil", "href": "/me"}'
-            '  ],\n'
-            '  current_path="/") %}'
-            '<p style="padding:16px;font-size:13px;color:var(--ux-ink-2);">Contenido de la app móvil.</p>'
+    "page_shell": [
+        {"label": "Módulo Ventas · 4 tabs en el footer del page_shell", "render": (
+            '{% from "ui/page_shell.jinja" import page_shell %}'
+            '<div class="ux-app" data-sidebar="hidden" style="min-height:480px;border:1px solid var(--ux-line);border-radius:14px;overflow:hidden;background:var(--ux-bg-1);">'
+            '{% call page_shell(title="Ventas · Madrid Centro",'
+            '  active_tab="resumen",'
+            '  tabs=['
+            '    {"key": "resumen",  "label": "Resumen",  "icon": "lucide:home"},'
+            '    {"key": "tickets",  "label": "Tickets",  "icon": "lucide:receipt", "badge": "3"},'
+            '    {"key": "clientes", "label": "Clientes", "icon": "lucide:users"},'
+            '    {"key": "reportes", "label": "Reportes", "icon": "lucide:bar-chart-3"}'
+            '  ]) %}'
+            '<div class="ux-flex ux-flex-col ux-gap-3" style="padding:18px;">'
+            '<div class="ux-eyebrow">VENTAS HOY</div>'
+            '<div style="font-family:var(--ux-font-display);font-size:32px;font-weight:600;">2.481 €</div>'
+            '<p class="ux-c-ink-2" style="font-size:13px;line-height:1.6;">'
+            'Click en un tab del footer para ver cómo Datastar reemplaza solo este content_shell sin recargar el sidebar ni el topbar.'
+            '</p>'
+            '</div>'
             '{% endcall %}'
+            '</div>'
+        )},
+    ],
+    "content_shell": [
+        {"label": "Slot dinámico con id='content'", "render": (
+            '{% from "ui/content_shell.jinja" import content_shell %}'
+            '<div data-signals=\'{"hits": 0}\'>'
+            '<button class="ux-btn ux-btn--ghost ux-btn--sm" data-on:click="$hits = $hits + 1">'
+            'Simular reemplazo (no fetch real, solo cuenta)'
+            '</button>'
+            '{% call content_shell(id="demo-content",'
+            '  attrs={"style": "min-height:140px;border:1px dashed var(--ux-line);border-radius:10px;margin-top:12px;padding:16px;"}) %}'
+            '<p class="ux-c-ink-3">Contenido inicial.</p>'
+            '<p class="ux-c-ink-2" data-text="\'Reemplazos: \' + $hits"></p>'
+            '<p class="ux-c-ink-3" style="margin-top:8px;font-size:12px;">'
+            'En producción los tabs llaman <code>@get(\'/sales/tickets\', {target: \'#demo-content\'})</code> '
+            'y Datastar reescribe sólo este div con el HTML del fragment endpoint.'
+            '</p>'
+            '{% endcall %}'
+            '</div>'
         )},
     ],
     # ------------------------------------------------------------------ navigation extras
@@ -2715,16 +2742,23 @@ USAGE: dict[str, str] = {
         '{{ sidebar_item("Ventas", href="/ventas", active=True, badge="5", badge_variant="brand") }}\n'
         '{{ sidebar_item("Sección", group=True) }}'
     ),
-    "mobile_shell": (
-        '{% from "ui/mobile_shell.jinja" import mobile_shell %}\n'
-        '{% call mobile_shell(\n'
-        '  brand_initials="ER", brand_name="ERPlora",\n'
-        '  nav_items=[\n'
-        '    {"label": "Inicio", "href": "/"},\n'
-        '    {"label": "Ventas", "href": "/ventas"},\n'
-        '  ],\n'
-        '  current_path="/") %}\n'
-        '  <p>Contenido</p>\n'
+    "page_shell": (
+        '{% from "ui/page_shell.jinja" import page_shell %}\n'
+        '{% call page_shell(title="Ventas",\n'
+        '  active_tab="resumen",\n'
+        '  tabs=[\n'
+        '    {"key": "resumen",  "label": "Resumen",  "icon": "lucide:home",  "href": "/sales"},\n'
+        '    {"key": "tickets",  "label": "Tickets",  "icon": "lucide:receipt", "href": "/sales/tickets"},\n'
+        '    {"key": "clientes", "label": "Clientes", "icon": "lucide:users",   "href": "/sales/clients"},\n'
+        '  ]) %}\n'
+        '  <p>El contenido inicial. Cuando se hace click en un tab Datastar\n'
+        '     hace `@get(href, {target: \'#content\'})`.</p>\n'
+        '{% endcall %}'
+    ),
+    "content_shell": (
+        '{% from "ui/content_shell.jinja" import content_shell %}\n'
+        '{% call content_shell(id="content") %}\n'
+        '  <p>Contenido inicial — los tabs lo reemplazan.</p>\n'
         '{% endcall %}'
     ),
     "pill": (

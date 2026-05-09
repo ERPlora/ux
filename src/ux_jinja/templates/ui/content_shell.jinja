@@ -1,0 +1,25 @@
+{# content_shell(id, loader_url, attrs)
+
+   CSS root: .ux-content-shell (lib/css/components/app-shell.css)
+   Swappable content area scoped to a `page_shell`. The point of having
+   a dedicated div with a known id is so tabbar items (or anything else
+   in the page) can target it via Datastar `@get('/url', {target: '#id'})`
+   to swap fragments without re-rendering the parent shell.
+
+   When used standalone (no parent page_shell), supply your own id and
+   wire the targeting from outside.
+
+   Args:
+     - id          element id (default "content")
+     - loader_url  optional URL fetched on mount via data-on:load — useful
+                   when the page renders the shell empty server-side and
+                   relies on a fragment endpoint for the initial content
+     - attrs       extra HTML attributes
+#}
+{% macro content_shell(id="content", loader_url=None, attrs={}) %}
+<div class="ux-content-shell" id="{{ id|e }}"
+{%- if loader_url %} data-on:load="@get({{ loader_url|tojson }}, {target: '#{{ id|e }}'})"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if caller is defined %}{{ caller() }}{% endif -%}
+</div>
+{% endmacro %}

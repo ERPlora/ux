@@ -108,7 +108,8 @@ COMPONENT_NAMES: list[str] = [
     "hr_card",
     "manufacturing_panel",
     "commerce_card",
-    "mobile_shell",
+    "page_shell",
+    "content_shell",
     # v2.1 · added 2026-05-09 — round-out of legacy library coverage.
     "menu_btn",
     "table",
@@ -249,7 +250,8 @@ COMPONENT_DESCRIPTIONS: dict[str, str] = {
     "hr_card": "Employee card (ux-emp) with avatar, name, role, status badge and stats grid.",
     "manufacturing_panel": "Work-order panel with OEE progress bar and step-by-step status list.",
     "commerce_card": "Invoice / quote builder (ux-invoice) with header, line table and totals block.",
-    "mobile_shell": "Mobile app shell — ux-app with offcanvas sidebar and ux-tabbar bottom nav.",
+    "page_shell": "Per-module shell — topbar + swappable content + tabbar (secondary nav). Loaded inside app_shell when a sidebar item is clicked.",
+    "content_shell": "Swappable content div — Datastar `@get(url, {target: '#content'})` from tabbar items rewrites just this slot, leaving sidebar + topbar untouched.",
     "menu_btn": "Three-line burger button — pair with a Datastar signal to drive a sidebar or drawer.",
     "table": "Plain tabular data — columns and rows, optional sortable headers and dense / sticky variants.",
     "sparkline": "Inline SVG sparkline — line or filled area, sized for KPI cards and table cells.",
@@ -349,10 +351,11 @@ SIDEBAR_GROUPS: list[dict] = [
     {
         "label": "Layout",
         "items": [
-            {"label": "App shell",    "href": "/c/app_shell", "icon": _LAYOUT},
-            {"label": "Mobile shell", "href": "/c/mobile_shell", "icon": _LAYOUT},
-            {"label": "Sidebar",      "href": "/c/sidebar",   "icon": _LAYOUT},
-            {"label": "Topbar",       "href": "/c/topbar",    "icon": _LAYOUT},
+            {"label": "App shell",     "href": "/c/app_shell",     "icon": _LAYOUT},
+            {"label": "Page shell",    "href": "/c/page_shell",    "icon": _LAYOUT},
+            {"label": "Content shell", "href": "/c/content_shell", "icon": _LAYOUT},
+            {"label": "Sidebar",       "href": "/c/sidebar",       "icon": _LAYOUT},
+            {"label": "Topbar",        "href": "/c/topbar",        "icon": _LAYOUT},
         ],
     },
     # ── Navegación ───────────────────────────────────────────────────────────
