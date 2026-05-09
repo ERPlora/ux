@@ -87,8 +87,15 @@
     .preview-block { display: flex; flex-direction: column; gap: 14px; }
     .preview-block + .preview-block { margin-top: 18px; }
     .preview-frame { border: 1px solid var(--ux-line); border-radius: 10px;
-      padding: 22px; background: var(--ux-bg-1); display: flex; flex-wrap: wrap;
-      gap: 10px; align-items: center; min-height: 60px; }
+      padding: 22px; background: var(--ux-bg-1); min-height: 60px; }
+    /* Direct flex/grid children of preview-frame fill the full width.
+       Multiple inline-rendered demos inside a single fixture get a small wrapper
+       margin instead of relying on the old flex-wrap layout. */
+    .preview-frame > .ux-grid-auto,
+    .preview-frame > .ux-grid-2,
+    .preview-frame > .ux-grid-3,
+    .preview-frame > .ux-grid-4 { width: 100%; }
+    .preview-frame > * + * { margin-top: 14px; }
 
     /* Code blocks */
     .code-wrap { position: relative; background: var(--ux-bg-3);
@@ -116,26 +123,40 @@
     @media (min-width: 901px) {
       .ux-app__tabbar { display: none; }
     }
+
+    /* Mobile / tablet: collapse sidebar, single-column main, leave room for tabbar. */
+    @media (max-width: 900px) {
+      .ux-app[data-docs] { grid-template-columns: 1fr; }
+      .ux-app[data-docs] .ux-sidebar { width: 280px; }
+      .doc__body { padding: 18px 14px 96px; }
+      .doc__body--canvas { padding: 12px 12px 96px; }
+      .stage-wrap { padding: 12px; }
+      .stage { padding: 14px; }
+      /* The topbar wraps to two rows on small viewports so the title and the
+         pill cluster don't fight for the same line. */
+      .ux-topbar { flex-wrap: wrap; row-gap: 8px; }
+      .ux-topbar__crumb { display: none; }
+      .ux-topbar__page-title { flex: 1 1 auto; min-width: 0; }
+      .ux-topbar__actions { flex: 1 1 100%; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
+    }
+    @media (max-width: 540px) {
+      .vp[aria-label="Theme"] button:not([aria-pressed="true"]) { display: none; }
+      .topbar-template { max-width: 130px; text-overflow: ellipsis; }
+    }
   </style>
 
   {% block head_extra %}{% endblock %}
 </head>
-<script nonce="{{ csp_nonce }}">
-  (function(){
-    var t = localStorage.getItem('ux-theme') || 'erplora';
-    var tpl = localStorage.getItem('ux-template') || '';
-    document.documentElement.setAttribute('data-theme', t);
-    if (tpl) document.documentElement.setAttribute('data-template', tpl);
-  })();
-</script>
 <body>
 
+{# Theme + template come from server-side context (cookie -> Hotframe -> Jinja).
+   No client-side JS, no localStorage — pure Datastar reactivity. #}
 <div class="ux-app" data-docs
-     data-signals="{q: '', vp: 'desktop', sidebarOpen: false, theme: localStorage.getItem('ux-theme') || 'erplora', template: localStorage.getItem('ux-template') || ''}"
-     data-effect="localStorage.setItem('ux-theme', $theme); localStorage.setItem('ux-template', $template)"
+     data-signals='{"q": "", "vp": "desktop", "sidebarOpen": false, "theme": {{ ui_theme | default("erplora") | tojson }}, "template": {{ ui_template | default("") | tojson }}}'
      data-attr:data-sidebar="$sidebarOpen ? 'open' : ''"
      data-attr:data-theme="$theme"
-     data-attr:data-template="$template">
+     data-attr:data-template="$template"
+     data-effect="document.documentElement.dataset.theme = $theme; if ($template) { document.documentElement.dataset.template = $template; } else { delete document.documentElement.dataset.template; }">
 
   <div class="ux-app__sidebar-overlay" data-on:click="$sidebarOpen = false"></div>
 
@@ -236,9 +257,11 @@
                   data-attr:aria-pressed="$theme === 'erplora-light'">Light</button>
         </div>
 
-        <select class="topbar-template" data-bind="$template" aria-label="Template">
+        <select class="topbar-template" aria-label="Template"
+                data-on:change="$template = evt.target.value"
+                data-attr:value="$template">
           {% for opt in theme_options %}
-            <option value="{{ opt.value }}">{{ opt.label }}</option>
+            <option value="{{ opt.value }}"{% if opt.value == ui_template %} selected{% endif %}>{{ opt.label }}</option>
           {% endfor %}
         </select>
 

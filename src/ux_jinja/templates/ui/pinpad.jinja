@@ -1,0 +1,35 @@
+{# pinpad(value_signal, on_digit, on_action, action_icon, action_label, attrs)
+
+   CSS root: .ux-pinpad (lib/css/components/pickers.css)
+   Numeric keypad — 0..9 + biometric/clear action key, used by login screens
+   and POS PIN entry.
+
+   Args:
+     - value_signal   Datastar signal that accumulates digits (e.g. "$pin")
+     - max_length     truncate the signal to this length (default 4)
+     - on_action      Datastar expression for the bottom-left action key
+     - action_icon    raw HTML/SVG/iconify rendered inside the action key
+     - action_label   aria-label for the action key (default "Borrar")
+     - attrs          extra HTML attributes on the wrapper
+#}
+{% macro pinpad(value_signal=None, max_length=4, on_action=None, action_icon=None, action_label="Borrar", attrs={}) %}
+{%- set _bind = value_signal -%}
+<div class="ux-pinpad"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for d in [1,2,3,4,5,6,7,8,9] -%}
+  <button type="button" class="ux-pinpad__key"
+    {%- if _bind %} data-on:click="{{ _bind }} = ({{ _bind }} + '{{ d }}').slice(0, {{ max_length }})"{% endif -%}
+  >{{ d }}</button>
+  {%- endfor -%}
+  <button type="button" class="ux-pinpad__key ux-pinpad__key--action"
+    aria-label="{{ action_label|e }}"
+    {%- if on_action %} data-on:click="{{ on_action|e }}"
+    {%- elif _bind %} data-on:click="{{ _bind }} = {{ _bind }}.slice(0, -1)"{% endif -%}
+  >{% if action_icon %}{{ action_icon|safe }}{% else %}⌫{% endif %}</button>
+  <button type="button" class="ux-pinpad__key"
+    {%- if _bind %} data-on:click="{{ _bind }} = ({{ _bind }} + '0').slice(0, {{ max_length }})"{% endif -%}
+  >0</button>
+  <button type="button" class="ux-pinpad__key ux-pinpad__key--action"
+    aria-label="OK">OK</button>
+</div>
+{% endmacro %}

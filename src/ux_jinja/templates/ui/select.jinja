@@ -13,7 +13,11 @@
 <select class="{{ classes | join(' ') }}"
   name="{{ name|e }}"
 {%- if disabled %} disabled{% endif -%}
-{%- if value_signal %} data-bind="{{ value_signal|e }}"{% endif -%}
+{# data-bind on a native select doesn't react to `change` in Datastar v1, so
+   we wire both the inbound (signal -> select) and outbound (select -> signal)
+   bindings explicitly. #}
+{%- if value_signal %} data-bind="{{ value_signal|e }}"
+  data-on:change="{{ value_signal|e }} = evt.target.value"{% endif -%}
 {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
 {%- for opt in options -%}
   {%- if opt is mapping -%}

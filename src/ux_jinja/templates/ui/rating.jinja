@@ -1,0 +1,35 @@
+{# rating(value, max, size, readonly, value_signal, label, attrs)
+
+   CSS root: .ux-rating (lib/css/components/pickers.css)
+   Star rating. Each star is a <button> that updates value_signal when not
+   readonly. Filled stars get .ux-rating__star--filled.
+
+   Args:
+     - value         current rating (0..max)
+     - max           total stars (default 5)
+     - size          "" | "sm" | "lg"
+     - readonly      no hover/click — display only
+     - value_signal  Datastar signal that holds the current rating
+     - label         optional inline text shown right of the stars
+     - attrs         extra HTML attributes on the wrapper
+#}
+{% macro rating(value=0, max=5, size="", readonly=False, value_signal=None, label=None, attrs={}) %}
+{%- set classes = ["ux-rating"] -%}
+{%- if size %}{%- do classes.append("ux-rating--" ~ size) -%}{%- endif -%}
+{%- if readonly %}{%- do classes.append("ux-rating--readonly") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for i in range(1, max + 1) -%}
+  <button type="button" class="ux-rating__star{% if i <= value %} ux-rating__star--filled{% endif %}"
+    aria-label="{{ i }} {% if i == 1 %}estrella{% else %}estrellas{% endif %}"
+    {%- if readonly %} disabled{% endif -%}
+    {%- if value_signal and not readonly %}
+      data-on:click="{{ value_signal }} = {{ i }}"
+      data-class="{ 'ux-rating__star--filled': {{ value_signal }} >= {{ i }} }"
+    {%- endif -%}>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+  </button>
+  {%- endfor -%}
+  {%- if label %}<span class="ux-rating__label">{{ label|e }}</span>{% endif -%}
+</div>
+{% endmacro %}

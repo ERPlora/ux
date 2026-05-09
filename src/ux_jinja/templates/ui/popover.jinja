@@ -1,0 +1,31 @@
+{# popover(title, open_signal, placement, attrs)
+
+   CSS root: .ux-popover (lib/css/components/overlays.css)
+   Floating panel anchored to a trigger. Toggle via Datastar signal.
+
+   Use as a block macro:
+
+     {% call popover(title="Filters", open_signal="$open") %}
+       …popover body…
+     {% endcall %}
+
+   Args:
+     - title         optional header text
+     - open_signal   Datastar signal that controls visibility
+     - placement     "top"|"bottom"|"left"|"right" — adds .ux-popover--<p>
+     - footer        raw HTML for the footer slot (or pass nothing)
+     - attrs         extra HTML attributes on the popover root
+#}
+{% macro popover(title=None, open_signal=None, placement="bottom", footer=None, attrs={}) %}
+{%- set classes = ["ux-popover"] -%}
+{%- if placement %}{%- do classes.append("ux-popover--" ~ placement) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}" role="dialog"
+{%- if open_signal %} data-show="{{ open_signal }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if title %}<header class="ux-popover__title">{{ title|e }}</header>{% endif %}
+  <div class="ux-popover__body">
+    {%- if caller is defined %}{{ caller() }}{% endif -%}
+  </div>
+  {%- if footer %}<footer class="ux-popover__footer">{{ footer|safe }}</footer>{% endif %}
+</div>
+{% endmacro %}

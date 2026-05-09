@@ -1,0 +1,46 @@
+{# qty_stepper(name, value, min, max, step, size, variant, value_signal, attrs)
+
+   CSS root: .ux-qty-stepper (lib/css/components/forms-inputs.css)
+   Numeric +/- input. Matches the quantity widget used in cart, POS and
+   inventory rows.
+
+   Args:
+     - name           input name
+     - value          initial numeric value (default 1)
+     - min            minimum (default 0)
+     - max            maximum (omit for unbounded)
+     - step           increment per click (default 1)
+     - size           "" | "sm" | "lg"
+     - variant        "" | "ghost" | "block"
+     - value_signal   Datastar signal for two-way bind
+     - attrs          extra HTML attributes on the wrapper
+#}
+{% macro qty_stepper(name="qty", value=1, min=0, max=None, step=1, size="", variant="", value_signal=None, attrs={}) %}
+{%- set classes = ["ux-qty-stepper"] -%}
+{%- if size %}{%- do classes.append("ux-qty-stepper--" ~ size) -%}{%- endif -%}
+{%- if variant %}{%- do classes.append("ux-qty-stepper--" ~ variant) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+{# When wired to a signal, the +/- buttons clamp via Math.min/max and the
+   input is the source of truth (data-bind both ways). The buttons set
+   `el.value` first so the input event fires and Datastar picks up the
+   change — `data-attr:value` alone doesn't update the input property,
+   only the attribute. #}
+{%- set _bind = value_signal -%}
+  <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--minus" aria-label="Restar"
+    {%- if _bind %} data-on:click="{
+      const i = el.parentElement.querySelector('.ux-qty-stepper__input');
+      const n = Math.max({{ min }}, (Number(i.value) || 0) - {{ step }});
+      i.value = n; i.dispatchEvent(new Event('input', {bubbles: true}));
+    }"{% endif -%}>−</button>
+  <input class="ux-qty-stepper__input" type="number" name="{{ name|e }}"
+         value="{{ value }}" min="{{ min }}"{% if max is not none %} max="{{ max }}"{% endif %} step="{{ step }}"
+         {%- if _bind %} data-bind="{{ _bind }}"{% endif -%}>
+  <button type="button" class="ux-qty-stepper__btn ux-qty-stepper__btn--plus" aria-label="Sumar"
+    {%- if _bind %} data-on:click="{
+      const i = el.parentElement.querySelector('.ux-qty-stepper__input');
+      const n = {% if max is not none %}Math.min({{ max }}, {% endif %}(Number(i.value) || 0) + {{ step }}{% if max is not none %}){% endif %};
+      i.value = n; i.dispatchEvent(new Event('input', {bubbles: true}));
+    }"{% endif -%}>+</button>
+</div>
+{% endmacro %}

@@ -1,0 +1,40 @@
+{# sparkline(values, variant, size, width, height, attrs)
+
+   CSS root: .ux-spark (lib/css/components/table.css)
+   Tiny SVG line/area chart suitable for KPI cards and table cells.
+
+   Args:
+     - values   list of numbers (the series)
+     - variant  "" | "up" | "down" | "brand"
+     - size     "" | "sm" | "lg"
+     - width    explicit pixel width override (default from CSS)
+     - height   explicit pixel height override (default from CSS)
+     - filled   render an area (polygon) under the line
+     - attrs    extra HTML attributes on the wrapping <span>
+#}
+{% macro sparkline(values=[], variant="", size="", width=None, height=None, filled=False, attrs={}) %}
+{%- set classes = ["ux-spark"] -%}
+{%- if variant %}{%- do classes.append("ux-spark--" ~ variant) -%}{%- endif -%}
+{%- if size %}{%- do classes.append("ux-spark--" ~ size) -%}{%- endif -%}
+{%- set vw = width or 80 -%}
+{%- set vh = height or 22 -%}
+{%- set vmax = (values | max) if values else 1 -%}
+{%- set vmin = (values | min) if values else 0 -%}
+{%- set vrange = (vmax - vmin) if (vmax - vmin) > 0 else 1 -%}
+{%- set step = vw / ((values | length - 1) if (values | length) > 1 else 1) -%}
+{%- set points = [] -%}
+{%- for v in values -%}
+  {%- set x = loop.index0 * step -%}
+  {%- set y = vh - (((v - vmin) / vrange) * (vh - 2)) - 1 -%}
+  {%- do points.append(x ~ "," ~ y) -%}
+{%- endfor -%}
+<span class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <svg viewBox="0 0 {{ vw }} {{ vh }}" preserveAspectRatio="none" aria-hidden="true">
+    {%- if filled and points -%}
+    <polygon points="0,{{ vh }} {{ points | join(' ') }} {{ vw }},{{ vh }}" fill="currentColor" opacity="0.18" stroke="none"/>
+    {%- endif -%}
+    <polyline points="{{ points | join(' ') }}" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</span>
+{% endmacro %}

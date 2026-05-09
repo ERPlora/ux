@@ -1,0 +1,27 @@
+{# stepper(steps, vertical, attrs)
+
+   CSS root: .ux-stepper (lib/css/components/forms-extra.css)
+   Step indicator for wizards / multi-page forms. Supports horizontal and
+   vertical layouts.
+
+   Args:
+     - steps     list of dicts: {title, sub?, state?: "done"|"active"|""}
+     - vertical  add .ux-stepper--vertical
+     - attrs     extra HTML attributes on the wrapper
+#}
+{% macro stepper(steps=[], vertical=False, attrs={}) %}
+{%- set classes = ["ux-stepper"] -%}
+{%- if vertical %}{%- do classes.append("ux-stepper--vertical") -%}{%- endif -%}
+<ol class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for step in steps -%}
+  <li class="ux-stepper__step" data-state="{{ step.state|default('') }}">
+    <span class="ux-stepper__bullet"><span>{{ loop.index }}</span></span>
+    <span class="ux-stepper__label">
+      <span class="ux-stepper__title">{{ step.title|e }}</span>
+      {%- if step.sub %}<span class="ux-stepper__sub">{{ step.sub|e }}</span>{% endif -%}
+    </span>
+  </li>
+  {%- endfor -%}
+</ol>
+{% endmacro %}

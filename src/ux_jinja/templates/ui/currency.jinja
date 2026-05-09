@@ -1,0 +1,35 @@
+{# currency(name, value, symbol, currency_options, size, value_signal, attrs)
+
+   CSS root: .ux-currency (lib/css/components/forms-inputs.css)
+   Amount input with leading currency symbol and optional currency selector.
+
+   Args:
+     - name              input name
+     - value             initial numeric value
+     - symbol            leading symbol (default "€"); ignored when currency_options is set
+     - currency_options  list of currency codes/labels; renders a <select>
+     - size              "" | "sm" | "lg"
+     - invalid           add .ux-currency--invalid
+     - value_signal      Datastar signal for the amount
+     - attrs             extra HTML attributes on the wrapper
+#}
+{% macro currency(name="amount", value=None, symbol="€", currency_options=None, size="", invalid=False, value_signal=None, attrs={}) %}
+{%- set classes = ["ux-currency"] -%}
+{%- if size %}{%- do classes.append("ux-currency--" ~ size) -%}{%- endif -%}
+{%- if invalid %}{%- do classes.append("ux-currency--invalid") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if currency_options -%}
+  <select class="ux-currency__currency-select" aria-label="Moneda">
+    {%- for opt in currency_options -%}
+    <option value="{{ opt|e }}">{{ opt|e }}</option>
+    {%- endfor -%}
+  </select>
+  {%- else -%}
+  <span class="ux-currency__symbol">{{ symbol|e }}</span>
+  {%- endif -%}
+  <input class="ux-currency__input" type="number" inputmode="decimal" step="0.01"
+         name="{{ name|e }}"{% if value is not none %} value="{{ value }}"{% endif %}
+         {%- if value_signal %} data-bind="{{ value_signal }}"{% endif -%}>
+</div>
+{% endmacro %}
