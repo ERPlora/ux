@@ -1,0 +1,22 @@
+{# kbd(keys, attrs)
+
+   CSS root: .ux-kbd (lib/css/components/forms-inputs.css or kbd.css)
+   Keyboard key display — renders one or more <kbd> elements joined by "+".
+
+   Args:
+     - keys      single string ("⌘K") or list of strings (["⌘", "K"])
+     - attrs     extra HTML attributes on the wrapper
+#}
+{% macro kbd(keys, attrs={}) %}
+{%- if keys is string -%}
+<kbd class="ux-kbd"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>{{ keys|e }}</kbd>
+{%- else -%}
+<span class="ux-kbd-group"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for k in keys -%}
+  <kbd class="ux-kbd">{{ k|e }}</kbd>{% if not loop.last %}<span class="ux-kbd-sep">+</span>{% endif -%}
+  {%- endfor -%}
+</span>
+{%- endif -%}
+{% endmacro %}

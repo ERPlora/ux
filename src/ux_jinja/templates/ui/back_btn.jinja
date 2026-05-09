@@ -1,0 +1,29 @@
+{# back_btn(label, href, on_click, size, attrs)
+
+   CSS root: .ux-back-btn (lib/css/components/topbar.css)
+   Back-arrow button used in topbars, modals and detail pages. Renders
+   either as a link or a button depending on whether `href` is supplied.
+
+   Args:
+     - label    visible text after the arrow (default "Atrás")
+     - href     when set, renders as <a href>
+     - on_click Datastar expression for data-on:click
+     - size     "" | "sm" | "lg"
+     - icon_only render only the arrow with no label
+     - attrs    extra HTML attributes
+#}
+{% macro back_btn(label="Atrás", href=None, on_click=None, size="", icon_only=False, attrs={}) %}
+{%- set tag = "a" if href else "button" -%}
+{%- set classes = ["ux-back-btn"] -%}
+{%- if size %}{%- do classes.append("ux-back-btn--" ~ size) -%}{%- endif -%}
+{%- if icon_only %}{%- do classes.append("ux-back-btn--icon") -%}{%- endif -%}
+<{{ tag }} class="{{ classes | join(' ') }}"
+{%- if tag == "button" %} type="button"{% endif -%}
+{%- if href %} href="{{ href|e }}"{% endif -%}
+{%- if on_click %} data-on:click="{{ on_click|e }}"{% endif -%}
+{%- if icon_only %} aria-label="{{ label|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <iconify-icon class="ux-back-btn__icon" icon="lucide:arrow-left" width="18" height="18"></iconify-icon>
+  {%- if not icon_only %}<span class="ux-back-btn__label">{{ label|e }}</span>{% endif -%}
+</{{ tag }}>
+{% endmacro %}

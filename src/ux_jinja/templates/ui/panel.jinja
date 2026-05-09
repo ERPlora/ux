@@ -1,0 +1,33 @@
+{# panel(title, variant, attrs)
+
+   CSS root: .ux-panel (lib/css/components/layout-extra.css)
+   Generic content panel — header / body / footer slots. Lighter than
+   `card` (no shadow), heavier than `section` (has explicit chrome). The
+   block-call form is the primary usage:
+
+     {% call panel(title="Detalles") %}…body…{% endcall %}
+
+   Args:
+     - title         optional header text
+     - variant       "" | "ghost" | "bordered"
+     - actions       raw HTML rendered right of the title in the header
+     - footer        raw HTML for the footer slot
+     - attrs         extra HTML attributes
+#}
+{% macro panel(title=None, variant="", actions=None, footer=None, attrs={}) %}
+{%- set classes = ["ux-panel"] -%}
+{%- if variant %}{%- do classes.append("ux-panel--" ~ variant) -%}{%- endif -%}
+<section class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if title or actions -%}
+  <header class="ux-panel__head">
+    {%- if title %}<h3 class="ux-panel__title">{{ title|e }}</h3>{% endif -%}
+    {%- if actions %}<div class="ux-panel__actions">{{ actions|safe }}</div>{% endif -%}
+  </header>
+  {%- endif -%}
+  <div class="ux-panel__body">
+    {%- if caller is defined %}{{ caller() }}{% endif -%}
+  </div>
+  {%- if footer %}<footer class="ux-panel__footer">{{ footer|safe }}</footer>{% endif -%}
+</section>
+{% endmacro %}

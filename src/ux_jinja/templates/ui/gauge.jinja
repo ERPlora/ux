@@ -1,0 +1,41 @@
+{# gauge(value, min, max, label, sub, variant, attrs)
+
+   CSS root: .ux-gauge (lib/css/components/feedback-extra.css)
+   Half-arc gauge for OEE / quality / SLA-style readouts. The CSS sizes
+   the dial to 140×76 — pass `attrs={"style": "..."}` to override.
+
+   Args:
+     - value     current numeric value
+     - min       gauge minimum (default 0)
+     - max       gauge maximum (default 100)
+     - label     eyebrow above the dial
+     - sub       sub-line below the dial
+     - variant   "" | "leaf" | "warn" | "danger"
+     - attrs     extra HTML attributes on the wrapper
+#}
+{% macro gauge(value=0, min=0, max=100, label=None, sub=None, variant="", attrs={}) %}
+{%- set _r = 60 -%}
+{%- set _circ = (3.14159265 * _r) -%}
+{%- set _pct = ((value - min) / ((max - min) or 1)) -%}
+{%- if _pct < 0 %}{% set _pct = 0 %}{% endif -%}
+{%- if _pct > 1 %}{% set _pct = 1 %}{% endif -%}
+{%- set _seg = (_circ * _pct) -%}
+{%- set _rest = (_circ - _seg) -%}
+<div class="ux-gauge"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if label %}<div class="ux-gauge__label">{{ label|e }}</div>{% endif -%}
+  <div class="ux-gauge__dial">
+    <svg viewBox="0 0 140 140" aria-hidden="true">
+      <path class="ux-gauge__track"
+            d="M 10 70 A 60 60 0 0 1 130 70"
+            fill="none" stroke-width="14" stroke-linecap="round"/>
+      <path class="ux-gauge__fill{% if variant %} ux-gauge__fill--{{ variant }}{% endif %}"
+            d="M 10 70 A 60 60 0 0 1 130 70"
+            fill="none" stroke-width="14" stroke-linecap="round"
+            stroke-dasharray="{{ '%.2f'|format(_seg) }} {{ '%.2f'|format(_rest) }}"/>
+    </svg>
+    <div class="ux-gauge__value">{{ value|e }}</div>
+  </div>
+  {%- if sub %}<div class="ux-gauge__sub">{{ sub|e }}</div>{% endif -%}
+</div>
+{% endmacro %}

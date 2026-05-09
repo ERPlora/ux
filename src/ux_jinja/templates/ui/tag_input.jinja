@@ -1,0 +1,48 @@
+{# tag_input(name, tags, placeholder, tags_signal, attrs)
+
+   CSS root: .ux-tag-input (lib/css/components/forms-advanced.css)
+   Free-form tag entry: type and press Enter / "," to commit. Backspace on
+   an empty input removes the previous tag. Tags are mirrored to a Datastar
+   array signal when supplied.
+
+   Args:
+     - name           hidden field name (joined CSV value)
+     - tags           pre-populated list of strings
+     - placeholder    placeholder for the inner input
+     - tags_signal    Datastar array signal that holds the live tags list
+     - attrs          extra HTML attributes on the wrapper
+#}
+{% macro tag_input(name="tags", tags=[], placeholder="Añadir...", tags_signal=None, attrs={}) %}
+<div class="ux-tag-input"
+  data-on:click="el.querySelector('input').focus()"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for t in tags -%}
+  <span class="ux-tag-input__tag">{{ t|e }}<button type="button" class="ux-tag-input__remove" aria-label="Eliminar">×</button></span>
+  {%- endfor -%}
+  <input type="text" placeholder="{{ placeholder|e }}"
+    data-on:keydown="{
+      if ((evt.key === 'Enter' || evt.key === ',') && el.value.trim()) {
+        evt.preventDefault();
+        const t = el.value.trim();
+        const tag = document.createElement('span');
+        tag.className = 'ux-tag-input__tag';
+        tag.textContent = t;
+        const x = document.createElement('button');
+        x.type = 'button'; x.className = 'ux-tag-input__remove'; x.textContent = '×';
+        x.setAttribute('aria-label', 'Eliminar');
+        tag.appendChild(x);
+        el.parentElement.insertBefore(tag, el);
+        el.value = '';
+        {% if tags_signal %}{{ tags_signal }} = [...({{ tags_signal }} || []), t];{% endif %}
+      } else if (evt.key === 'Backspace' && !el.value) {
+        const tags = el.parentElement.querySelectorAll('.ux-tag-input__tag');
+        tags[tags.length - 1]?.remove();
+        {% if tags_signal %}{{ tags_signal }} = ({{ tags_signal }} || []).slice(0, -1);{% endif %}
+      }
+    }"
+    data-on:click__stop="">
+  <input type="hidden" name="{{ name|e }}"
+    {%- if tags_signal %} data-attr:value="({{ tags_signal }} || []).join(',')"{% endif -%}
+    value="{{ tags | join(',') | e }}">
+</div>
+{% endmacro %}

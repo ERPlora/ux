@@ -124,6 +124,21 @@ COMPONENT_NAMES: list[str] = [
     "color_picker",
     "currency",
     "phone",
+    # ── v2.1 round 2 (added 2026-05-09 same day) ─────────────────────
+    "alert",
+    "back_btn",
+    "kbd",
+    "split_btn",
+    "app_icon",
+    "tag_input",
+    "filter_chip",
+    "qty_badge",
+    "wizard",
+    "qr",
+    "carousel",
+    "panel",
+    "donut",
+    "gauge",
 ]
 
 
@@ -225,6 +240,20 @@ COMPONENT_DESCRIPTIONS: dict[str, str] = {
     "color_picker": "Row of colour swatches — pick a brand colour with Datastar bind.",
     "currency": "Amount input with leading symbol or currency selector — locale-friendly numeric entry.",
     "phone": "International phone input — flag plus dial code prefix and tel-mode number field.",
+    "alert": "Bordered alert block — info / warn / danger / leaf / ok variants with optional close button.",
+    "back_btn": "Back-arrow button for topbars and detail pages, with icon-only and link variants.",
+    "kbd": "Keyboard key display — single key or chord like ⌘ + K with proper <kbd> elements.",
+    "split_btn": "Split button — primary action plus dropdown caret with action menu.",
+    "app_icon": "Square launcher tile with icon, optional badge and caption — used on marketplace and module overviews.",
+    "tag_input": "Free-form tag entry — type + Enter to commit, Backspace to remove, hidden CSV mirror for forms.",
+    "filter_chip": "Stateful filter pill with optional count and check overlay when active.",
+    "qty_badge": "Numeric pill for cart counts and unread badges — sits over icons in tabbar items.",
+    "wizard": "Multi-step wizard shell — header stepper plus prev/next/finish footer driven by a Datastar signal.",
+    "qr": "QR-code container with caption — pass a pre-rendered image URL or a value for default encoding.",
+    "carousel": "Horizontally-scrollable carousel with prev/next chevrons and slide tracks.",
+    "panel": "Generic panel — header / body / footer slots, ghost and bordered variants.",
+    "donut": "SVG donut chart — segment list plus centre value, label and sub-line.",
+    "gauge": "Half-arc gauge for OEE / quality / SLA readouts — variant per status colour.",
 }
 
 
@@ -408,18 +437,26 @@ SIDEBAR_GROUPS: list[dict] = [
     {
         "label": "v2.1 · Actions & inputs",
         "items": [
-            {"label": "Back · Split btn · Calc · App icon",                    "href": "#", "icon": _C,     "badge": "soon"},
-            {"label": "Tag · Filter chip · Toggle group · Variant · Qty badge", "href": "#", "icon": _C,     "badge": "soon"},
-            {"label": "Currency · Phone · Qty stepper",                        "href": "#", "icon": _FORMS, "badge": "soon"},
+            {"label": "Back button",      "href": "/c/back_btn",    "icon": _C},
+            {"label": "Split button",     "href": "/c/split_btn",   "icon": _C},
+            {"label": "App icon",         "href": "/c/app_icon",    "icon": _C},
+            {"label": "Tag input",        "href": "/c/tag_input",   "icon": _C},
+            {"label": "Filter chip",      "href": "/c/filter_chip", "icon": _C},
+            {"label": "Qty badge",        "href": "/c/qty_badge",   "icon": _C},
+            {"label": "Keyboard key",     "href": "/c/kbd",         "icon": _C},
+            {"label": "Wizard",           "href": "/c/wizard",      "icon": _FORMS},
+            {"label": "Alert",            "href": "/c/alert",       "icon": _ALERT},
         ],
     },
     # ── v2.1 · Data & layout ─────────────────────────────────────────────────
     {
         "label": "v2.1 · Data & layout",
         "items": [
-            {"label": "JSON · QR · Carousel · Img · Zoom · Reorder · Vlist · Iscroll", "href": "#", "icon": _TABLE,  "badge": "soon"},
-            {"label": "Panel · Masonry · Master-detail · Scroll · Split · Toolbar",    "href": "#", "icon": _LAYOUT, "badge": "soon"},
-            {"label": "Rich text · Keyboard · OSK · VKB",                              "href": "#", "icon": _FORMS,  "badge": "soon"},
+            {"label": "QR code",        "href": "/c/qr",       "icon": _TABLE},
+            {"label": "Carousel",       "href": "/c/carousel", "icon": _TABLE},
+            {"label": "Panel",          "href": "/c/panel",    "icon": _LAYOUT},
+            {"label": "Donut chart",    "href": "/c/donut",    "icon": _TABLE},
+            {"label": "Gauge",          "href": "/c/gauge",    "icon": _TABLE},
         ],
     },
     # ── v2.1 · Verticals ─────────────────────────────────────────────────────

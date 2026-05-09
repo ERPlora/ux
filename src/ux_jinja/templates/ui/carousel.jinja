@@ -1,0 +1,41 @@
+{# carousel(slides, variant, size, attrs)
+
+   CSS root: .ux-carousel (lib/css/components/multimedia.css)
+   Horizontally-scrollable carousel with optional left/right nav buttons.
+   Slide content is supplied as a list of HTML strings or via the caller
+   block for full control.
+
+   Args:
+     - slides    list of raw HTML strings (each becomes a slide)
+     - variant   "" | "cards"
+     - size      "" | "sm"
+     - show_nav  render prev/next chevrons (default True)
+     - attrs     extra HTML attributes
+#}
+{% macro carousel(slides=[], variant="", size="", show_nav=True, attrs={}) %}
+{%- set classes = ["ux-carousel"] -%}
+{%- if variant %}{%- do classes.append("ux-carousel--" ~ variant) -%}{%- endif -%}
+{%- if size %}{%- do classes.append("ux-carousel--" ~ size) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-carousel__track" data-carousel-track>
+    {%- if caller is defined -%}
+      {{ caller() }}
+    {%- else -%}
+      {%- for s in slides -%}
+      <div class="ux-carousel__slide">{{ s|safe }}</div>
+      {%- endfor -%}
+    {%- endif -%}
+  </div>
+  {%- if show_nav -%}
+  <button type="button" class="ux-carousel__nav ux-carousel__nav--prev" aria-label="Anterior"
+    data-on:click="el.parentElement.querySelector('[data-carousel-track]').scrollBy({left: -el.parentElement.querySelector('[data-carousel-track]').clientWidth, behavior: 'smooth'})">
+    <iconify-icon icon="lucide:chevron-left" width="18" height="18"></iconify-icon>
+  </button>
+  <button type="button" class="ux-carousel__nav ux-carousel__nav--next" aria-label="Siguiente"
+    data-on:click="el.parentElement.querySelector('[data-carousel-track]').scrollBy({left: el.parentElement.querySelector('[data-carousel-track]').clientWidth, behavior: 'smooth'})">
+    <iconify-icon icon="lucide:chevron-right" width="18" height="18"></iconify-icon>
+  </button>
+  {%- endif -%}
+</div>
+{% endmacro %}

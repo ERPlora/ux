@@ -1,0 +1,34 @@
+{# qr(value, size, src, label, sub, attrs)
+
+   CSS root: .ux-qr (lib/css/components/forms-advanced.css)
+   QR-code container with optional caption. The actual image is supplied
+   via `src` (already-rendered PNG/SVG URL) — the macro doesn't ship a QR
+   encoder. For dev convenience pass `value` and the macro will use the
+   public quickchart.io endpoint as a sane default; in production swap it
+   for your own QR service.
+
+   Args:
+     - value     payload to encode (used to build the default src)
+     - src       explicit image URL (overrides value)
+     - size      "" | "sm" | "lg"
+     - label     caption shown under the QR
+     - sub       second-line caption
+     - attrs     extra HTML attributes
+#}
+{% macro qr(value=None, src=None, size="", label=None, sub=None, attrs={}) %}
+{%- set classes = ["ux-qr"] -%}
+{%- if size %}{%- do classes.append("ux-qr--" ~ size) -%}{%- endif -%}
+{%- set _src = src or ("https://quickchart.io/qr?size=320&text=" ~ (value | urlencode) if value else "") -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-qr__img">
+    {%- if _src %}<img src="{{ _src|e }}" alt="QR">{% endif -%}
+  </div>
+  {%- if label or sub -%}
+  <div class="ux-qr__caption">
+    {%- if label %}<div class="ux-qr__label">{{ label|e }}</div>{% endif -%}
+    {%- if sub %}<div class="ux-qr__sub">{{ sub|e }}</div>{% endif -%}
+  </div>
+  {%- endif -%}
+</div>
+{% endmacro %}

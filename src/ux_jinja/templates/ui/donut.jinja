@@ -1,0 +1,44 @@
+{# donut(slices, value, label, sub, size, attrs)
+
+   CSS root: .ux-donut (lib/css/components/charts.css)
+   SVG donut chart. Slices are computed from the supplied list of segment
+   values; the centre shows a primary value and a sub-label.
+
+   Args:
+     - slices    list of {value, variant?: brand|leaf|info|warn|mute}
+     - value     centre value (string)
+     - label     centre eyebrow
+     - sub       centre sub-line
+     - size      pixel size of the SVG (default 160)
+     - thickness ring thickness in px (default 18)
+     - attrs     extra HTML attributes
+#}
+{% macro donut(slices=[], value="", label=None, sub=None, size=160, thickness=18, attrs={}) %}
+{%- set _r = ((size - thickness) / 2) -%}
+{%- set _circ = (2 * 3.14159265 * _r) -%}
+{%- set _total = (slices | sum(attribute='value')) or 1 -%}
+{%- set _ns = namespace(offset=0) -%}
+<div class="ux-donut" style="--_size: {{ size }}px;"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <svg class="ux-donut__svg" viewBox="0 0 {{ size }} {{ size }}" aria-hidden="true">
+    <circle class="ux-donut__track" cx="{{ size / 2 }}" cy="{{ size / 2 }}" r="{{ _r }}"
+            fill="none" stroke="currentColor" stroke-width="{{ thickness }}" />
+    {%- for s in slices -%}
+      {%- set seg = (_circ * s.value / _total) -%}
+      {%- set rest = (_circ - seg) -%}
+      <circle class="ux-donut__slice ux-donut__slice--{{ s.variant|default('brand') }}"
+              cx="{{ size / 2 }}" cy="{{ size / 2 }}" r="{{ _r }}"
+              fill="none" stroke="currentColor" stroke-width="{{ thickness }}"
+              stroke-dasharray="{{ '%.2f'|format(seg) }} {{ '%.2f'|format(rest) }}"
+              stroke-dashoffset="{{ '%.2f'|format(0 - _ns.offset) }}"
+              transform="rotate(-90 {{ size / 2 }} {{ size / 2 }})" />
+      {%- set _ns.offset = _ns.offset + seg -%}
+    {%- endfor -%}
+  </svg>
+  <div class="ux-donut__center">
+    {%- if label %}<div class="ux-donut__center-label">{{ label|e }}</div>{% endif -%}
+    {%- if value %}<div class="ux-donut__center-value">{{ value|e }}</div>{% endif -%}
+    {%- if sub %}<div class="ux-donut__center-sub">{{ sub|e }}</div>{% endif -%}
+  </div>
+</div>
+{% endmacro %}

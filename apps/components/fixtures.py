@@ -1999,6 +1999,176 @@ EXAMPLES: dict[str, list[dict[str, str]]] = {
             '</div>'
         )},
     ],
+    # ── v2.1 round 2 fixtures ──────────────────────────────────────────
+    "alert": [
+        {"label": "Cinco variantes", "render": (
+            '{% from "ui/alert.jinja" import alert %}'
+            '<div class="ux-flex ux-flex-col ux-gap-2">'
+            '{{ alert(title="Información", body="El backup se ha programado para esta noche.", variant="info") }}'
+            '{{ alert(title="Atención", body="Tu plan vence en 7 días.", variant="warn") }}'
+            '{{ alert(title="Error de pago", body="No hemos podido cobrar la última factura.", variant="danger", dismissible=True) }}'
+            '{{ alert(title="Operación correcta", body="Stripe Connect activado.", variant="leaf") }}'
+            '{{ alert(body="Mensaje neutral sin título.") }}'
+            '</div>'
+        )},
+    ],
+    "back_btn": [
+        {"label": "Default · sm · lg · solo icono", "render": (
+            '{% from "ui/back_btn.jinja" import back_btn %}'
+            '<div class="ux-flex ux-wrap ux-gap-3 ux-items-center">'
+            '{{ back_btn() }}'
+            '{{ back_btn(label="Volver al pedido", size="sm") }}'
+            '{{ back_btn(label="Inicio", href="/", size="lg") }}'
+            '{{ back_btn(label="Atrás", icon_only=True) }}'
+            '</div>'
+        )},
+    ],
+    "kbd": [
+        {"label": "Tecla simple y combinaciones", "render": (
+            '{% from "ui/kbd.jinja" import kbd %}'
+            '<div class="ux-flex ux-wrap ux-gap-3 ux-items-center">'
+            '{{ kbd("⌘") }} '
+            '{{ kbd("Esc") }} '
+            '{{ kbd(["⌘", "K"]) }} '
+            '{{ kbd(["Ctrl", "Shift", "P"]) }}'
+            '</div>'
+        )},
+    ],
+    "split_btn": [
+        {"label": "Acción + menú", "render": (
+            '{% from "ui/split_btn.jinja" import split_btn %}'
+            '<div data-signals=\'{"saved": "", "splitOpen": false}\' class="ux-flex ux-gap-3 ux-items-center">'
+            '{{ split_btn("Guardar", on_click="$saved = \'Guardado\'", items=['
+            '  {"label": "Guardar y cerrar", "on_click": "$saved = \'Guardado y cerrado\'"},'
+            '  {"label": "Guardar y duplicar", "on_click": "$saved = \'Duplicado\'"},'
+            '  {"label": "Descartar cambios", "on_click": "$saved = \'Descartado\'", "danger": True},'
+            ']) }}'
+            '<span class="ux-c-ink-3" data-text="$saved"></span>'
+            '</div>'
+        )},
+    ],
+    "app_icon": [
+        {"label": "Lanzadores con badge", "render": (
+            '{% from "ui/app_icon.jinja" import app_icon %}'
+            '<div class="ux-flex ux-wrap ux-gap-3 ux-items-start">'
+            '{{ app_icon(label="Inbox", icon="lucide:inbox", badge="12", variant="brand") }}'
+            '{{ app_icon(label="Calendario", icon="lucide:calendar", variant="info") }}'
+            '{{ app_icon(label="Tareas", icon="lucide:check-square", badge="3", variant="leaf") }}'
+            '{{ app_icon(label="Avisos", icon="lucide:bell", badge="!", variant="warn") }}'
+            '{{ app_icon(label="Errores", icon="lucide:alert-octagon", variant="danger") }}'
+            '</div>'
+        )},
+    ],
+    "tag_input": [
+        {"label": "Etiquetas de cliente", "render": (
+            '{% from "ui/tag_input.jinja" import tag_input %}'
+            '<div data-signals=\'{"tags": ["VIP", "Madrid"]}\'>'
+            '{{ tag_input("client_tags", tags=["VIP", "Madrid"], placeholder="Añade una etiqueta y pulsa Enter", tags_signal="$tags") }}'
+            '</div>'
+        )},
+    ],
+    "filter_chip": [
+        {"label": "Filtros de pedidos", "render": (
+            '{% from "ui/filter_chip.jinja" import filter_chip %}'
+            '<div data-signals=\'{"f": "all"}\' class="ux-flex ux-wrap ux-gap-2">'
+            '{{ filter_chip("Todos", count=184, value_signal="$f", value_key="all") }}'
+            '{{ filter_chip("Hoy", count=12, value_signal="$f", value_key="today") }}'
+            '{{ filter_chip("Pendientes", count=4, value_signal="$f", value_key="pending") }}'
+            '{{ filter_chip("Devueltos", count=1, value_signal="$f", value_key="returned") }}'
+            '</div>'
+        )},
+    ],
+    "qty_badge": [
+        {"label": "Sobre iconos", "render": (
+            '{% from "ui/qty_badge.jinja" import qty_badge %}'
+            '<div class="ux-flex ux-wrap ux-gap-3 ux-items-center">'
+            '<span class="ux-relative" style="display:inline-block;width:24px;height:24px;">'
+            '<iconify-icon icon="lucide:shopping-cart" width="24" height="24"></iconify-icon>'
+            '<span style="position:absolute;top:-6px;right:-8px;">{{ qty_badge("3", size="sm") }}</span>'
+            '</span>'
+            '{{ qty_badge("12") }} '
+            '{{ qty_badge("99+", variant="leaf") }} '
+            '{{ qty_badge("!", variant="warn", size="xs") }} '
+            '{{ qty_badge("0", variant="danger") }}'
+            '</div>'
+        )},
+    ],
+    "wizard": [
+        {"label": "Onboarding 4 pasos", "render": (
+            '{% from "ui/wizard.jinja" import wizard %}'
+            '<div data-signals=\'{"step": 1}\'>'
+            '{% call wizard(steps=['
+            '  {"title": "Cuenta", "sub": "Email y nombre"},'
+            '  {"title": "Empresa", "sub": "Datos fiscales"},'
+            '  {"title": "Pago", "sub": "Tarjeta o transferencia"},'
+            '  {"title": "Listo", "sub": "Confirmación"}'
+            ']) %}'
+            '<div data-show="$step === 0"><p class="ux-c-ink-2">Paso 0 — datos de cuenta.</p></div>'
+            '<div data-show="$step === 1"><p class="ux-c-ink-2">Paso 1 — datos de la empresa.</p></div>'
+            '<div data-show="$step === 2"><p class="ux-c-ink-2">Paso 2 — método de pago.</p></div>'
+            '<div data-show="$step === 3"><p class="ux-c-ink-2">Paso 3 — todo listo, ¡bienvenido!</p></div>'
+            '{% endcall %}'
+            '</div>'
+        )},
+    ],
+    "qr": [
+        {"label": "Tres tamaños", "render": (
+            '{% from "ui/qr.jinja" import qr %}'
+            '<div class="ux-flex ux-wrap ux-gap-3 ux-items-end">'
+            '{{ qr(value="https://erplora.com/hub/madrid", size="sm", label="Madrid") }}'
+            '{{ qr(value="https://erplora.com/hub/madrid", label="Madrid Centro", sub="POS principal") }}'
+            '{{ qr(value="https://erplora.com/hub/madrid", size="lg") }}'
+            '</div>'
+        )},
+    ],
+    "carousel": [
+        {"label": "Tarjetas de producto", "render": (
+            '{% from "ui/carousel.jinja" import carousel %}'
+            '{% call carousel(variant="cards") %}'
+            '<div class="ux-carousel__slide"><div class="ux-card" style="padding:18px;"><div class="ux-eyebrow">PRODUCTO 1</div><div style="font-family:var(--ux-font-display);font-size:22px;font-weight:600;">Café 250 g</div></div></div>'
+            '<div class="ux-carousel__slide"><div class="ux-card" style="padding:18px;"><div class="ux-eyebrow">PRODUCTO 2</div><div style="font-family:var(--ux-font-display);font-size:22px;font-weight:600;">Té matcha</div></div></div>'
+            '<div class="ux-carousel__slide"><div class="ux-card" style="padding:18px;"><div class="ux-eyebrow">PRODUCTO 3</div><div style="font-family:var(--ux-font-display);font-size:22px;font-weight:600;">Cápsulas mix</div></div></div>'
+            '<div class="ux-carousel__slide"><div class="ux-card" style="padding:18px;"><div class="ux-eyebrow">PRODUCTO 4</div><div style="font-family:var(--ux-font-display);font-size:22px;font-weight:600;">Tetera japonesa</div></div></div>'
+            '{% endcall %}'
+        )},
+    ],
+    "panel": [
+        {"label": "Default · ghost · bordered", "render": (
+            '{% from "ui/panel.jinja" import panel %}'
+            '<div class="ux-flex ux-flex-col ux-gap-3">'
+            '{% call panel(title="Resumen del pedido") %}'
+            '<p class="ux-c-ink-2">3 productos · entrega mañana antes de las 12h.</p>'
+            '{% endcall %}'
+            '{% call panel(title="Notas internas", variant="ghost") %}'
+            '<p class="ux-c-ink-2">Cliente VIP — confirmar disponibilidad antes de cobrar.</p>'
+            '{% endcall %}'
+            '{% call panel(title="Configuración", variant="bordered", footer=\'<button class="ux-btn ux-btn--primary ux-btn--sm">Guardar</button>\') %}'
+            '<p class="ux-c-ink-2">Personaliza los avisos y el horario de notificaciones.</p>'
+            '{% endcall %}'
+            '</div>'
+        )},
+    ],
+    "donut": [
+        {"label": "Reparto de ingresos", "render": (
+            '{% from "ui/donut.jinja" import donut %}'
+            '{{ donut(slices=['
+            '  {"value": 42, "variant": "brand"},'
+            '  {"value": 28, "variant": "leaf"},'
+            '  {"value": 18, "variant": "info"},'
+            '  {"value": 12, "variant": "warn"}'
+            '], value="100%", label="ingresos", sub="Q1 2026") }}'
+        )},
+    ],
+    "gauge": [
+        {"label": "OEE · Calidad · SLA", "render": (
+            '{% from "ui/gauge.jinja" import gauge %}'
+            '<div class="ux-flex ux-wrap ux-gap-4 ux-items-end">'
+            '{{ gauge(value=78, label="OEE", sub="línea 2", variant="leaf") }}'
+            '{{ gauge(value=92, label="Calidad", sub="lote 0184", variant="leaf") }}'
+            '{{ gauge(value=46, label="SLA", sub="reportes", variant="warn") }}'
+            '</div>'
+        )},
+    ],
 }
 
 
@@ -2531,6 +2701,71 @@ USAGE: dict[str, str] = {
     "phone": (
         '{% from "ui/phone.jinja" import phone %}\n'
         '{{ phone("phone", value="612 345 678", dial="+34", flag="🇪🇸") }}'
+    ),
+    # ── v2.1 round 2 ───────────────────────────────────────────────────
+    "alert": (
+        '{% from "ui/alert.jinja" import alert %}\n'
+        '{{ alert(title="Atención", body="Tu plan vence en 7 días.", variant="warn") }}'
+    ),
+    "back_btn": (
+        '{% from "ui/back_btn.jinja" import back_btn %}\n'
+        '{{ back_btn(label="Atrás", href="/orders") }}'
+    ),
+    "kbd": (
+        '{% from "ui/kbd.jinja" import kbd %}\n'
+        '{{ kbd(["⌘", "K"]) }}'
+    ),
+    "split_btn": (
+        '{% from "ui/split_btn.jinja" import split_btn %}\n'
+        '{{ split_btn("Guardar",\n'
+        '  items=[{"label": "Guardar y cerrar", "on_click": "@post(\'/save?close=1\')"}],\n'
+        '  on_click="@post(\'/save\')") }}'
+    ),
+    "app_icon": (
+        '{% from "ui/app_icon.jinja" import app_icon %}\n'
+        '{{ app_icon(label="Inbox", icon="lucide:inbox", badge="12", variant="brand") }}'
+    ),
+    "tag_input": (
+        '{% from "ui/tag_input.jinja" import tag_input %}\n'
+        '{{ tag_input("client_tags", tags=["VIP"], tags_signal="$tags") }}'
+    ),
+    "filter_chip": (
+        '{% from "ui/filter_chip.jinja" import filter_chip %}\n'
+        '{{ filter_chip("Pendientes", count=4, value_signal="$f", value_key="pending") }}'
+    ),
+    "qty_badge": (
+        '{% from "ui/qty_badge.jinja" import qty_badge %}\n'
+        '{{ qty_badge("3", size="sm") }}'
+    ),
+    "wizard": (
+        '{% from "ui/wizard.jinja" import wizard %}\n'
+        '{% call wizard(steps=[{"title": "Cuenta"}, {"title": "Empresa"}, {"title": "Listo"}]) %}\n'
+        '  <div data-show="$step === 0">…</div>\n'
+        '{% endcall %}'
+    ),
+    "qr": (
+        '{% from "ui/qr.jinja" import qr %}\n'
+        '{{ qr(value="https://erplora.com/hub/madrid", label="Madrid Centro") }}'
+    ),
+    "carousel": (
+        '{% from "ui/carousel.jinja" import carousel %}\n'
+        '{% call carousel(variant="cards") %}\n'
+        '  <div class="ux-carousel__slide">…</div>\n'
+        '{% endcall %}'
+    ),
+    "panel": (
+        '{% from "ui/panel.jinja" import panel %}\n'
+        '{% call panel(title="Resumen") %}…{% endcall %}'
+    ),
+    "donut": (
+        '{% from "ui/donut.jinja" import donut %}\n'
+        '{{ donut(slices=[{"value": 42, "variant": "brand"},\n'
+        '                 {"value": 58, "variant": "mute"}],\n'
+        '         value="42%", label="conversión") }}'
+    ),
+    "gauge": (
+        '{% from "ui/gauge.jinja" import gauge %}\n'
+        '{{ gauge(value=78, label="OEE", variant="leaf") }}'
     ),
 }
 

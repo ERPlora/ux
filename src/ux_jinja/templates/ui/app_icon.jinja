@@ -1,0 +1,36 @@
+{# app_icon(label, icon, href, on_click, variant, size, badge, attrs)
+
+   CSS root: .ux-app-icon (lib/css/components/forms-extra.css)
+   Square launcher tile — icon, optional badge, optional caption. Used on
+   marketplace home screens, public landing tiles and module overview.
+
+   Args:
+     - label    text shown under the tile
+     - icon     Iconify name (e.g. "lucide:store") or raw HTML
+     - href     when set, renders as <a>
+     - on_click Datastar expression
+     - variant  "" | "brand" | "leaf" | "info" | "warn" | "danger"
+     - size     "" | "xs" | "sm" | "lg" | "xl"
+     - badge    text/number shown top-right
+     - attrs    extra HTML attributes
+#}
+{% macro app_icon(label="", icon=None, href=None, on_click=None, variant="", size="", badge=None, attrs={}) %}
+{%- set tag = "a" if href else "button" -%}
+{%- set classes = ["ux-app-icon"] -%}
+{%- if variant %}{%- do classes.append("ux-app-icon--" ~ variant) -%}{%- endif -%}
+{%- if size %}{%- do classes.append("ux-app-icon--" ~ size) -%}{%- endif -%}
+<{{ tag }} class="{{ classes | join(' ') }}"
+{%- if tag == "button" %} type="button"{% endif -%}
+{%- if href %} href="{{ href|e }}"{% endif -%}
+{%- if on_click %} data-on:click="{{ on_click|e }}"{% endif -%}
+{%- if label %} aria-label="{{ label|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <span class="ux-app-icon__icon">
+    {%- if icon and icon.startswith("<") -%}{{ icon|safe }}
+    {%- elif icon -%}<iconify-icon icon="{{ icon|e }}" width="22" height="22"></iconify-icon>
+    {%- endif -%}
+    {%- if badge is not none %}<span class="ux-app-icon__badge">{{ badge|e }}</span>{% endif -%}
+  </span>
+  {%- if label %}<span class="ux-app-icon__label">{{ label|e }}</span>{% endif -%}
+</{{ tag }}>
+{% endmacro %}

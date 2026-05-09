@@ -1,0 +1,29 @@
+{# filter_chip(label, count, active, on_click, value_signal, value_key, attrs)
+
+   CSS root: .ux-filter-chip (lib/css/components/forms-extra.css)
+   Stateful filter pill — used in datatable toolbars and POS catalogues.
+
+   Args:
+     - label         visible text
+     - count         optional number shown right of the label
+     - active        when True renders with the .is-active modifier
+     - on_click      Datastar expression
+     - value_signal  Datastar signal — when value_key is also set, the
+                     chip toggles to/from that value (single-select group)
+     - value_key     this chip's value
+     - attrs         extra HTML attributes
+#}
+{% macro filter_chip(label, count=None, active=False, on_click=None, value_signal=None, value_key=None, attrs={}) %}
+{%- set classes = ["ux-filter-chip"] -%}
+{%- if active %}{%- do classes.append("is-active") -%}{%- endif -%}
+<button type="button" class="{{ classes | join(' ') }}"
+{%- if value_signal and value_key is not none %}
+  data-on:click="{{ value_signal }} = ({{ value_signal }} === {{ value_key|tojson }}) ? null : {{ value_key|tojson }}"
+  data-class="{ 'is-active': {{ value_signal }} === {{ value_key|tojson }} }"
+{%- elif on_click %} data-on:click="{{ on_click|e }}"{% endif -%}
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <span class="ux-filter-chip__check"><iconify-icon icon="lucide:check" width="12" height="12"></iconify-icon></span>
+  <span class="ux-filter-chip__label">{{ label|e }}</span>
+  {%- if count is not none %}<span class="ux-filter-chip__count">{{ count|e }}</span>{% endif -%}
+</button>
+{% endmacro %}

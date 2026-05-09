@@ -1,0 +1,55 @@
+{# wizard(steps, current, on_next, on_prev, attrs)
+
+   CSS root: .ux-wizard (lib/css/components/forms-advanced.css)
+   Multi-step wizard shell. Each step is rendered through the caller block;
+   the macro emits the stepper header at the top and the prev/next footer
+   at the bottom. Use the wizard's `step_signal` to drive panel visibility.
+
+   Use as a block:
+
+     {% call wizard(steps=[{"title": "Cuenta"}, {"title": "Empresa"}],
+                    step_signal="$step", current=1) %}
+       <div data-show="$step === 0">…panel 0…</div>
+       <div data-show="$step === 1">…panel 1…</div>
+     {% endcall %}
+
+   Args:
+     - steps         list of {title, sub?}
+     - current       initial step index (default 0)
+     - step_signal   Datastar signal that holds the current index
+     - prev_label    "Atrás"
+     - next_label    "Siguiente"
+     - finish_label  "Finalizar"
+     - attrs         extra HTML attributes
+#}
+{% macro wizard(steps=[], current=0, step_signal="$step", prev_label="Atrás", next_label="Siguiente", finish_label="Finalizar", attrs={}) %}
+{%- set _last = (steps | length) - 1 -%}
+<div class="ux-wizard"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <ol class="ux-wizard__steps">
+    {%- for s in steps -%}
+    <li class="ux-wizard__step"
+      data-attr:data-state="(({{ step_signal }}) > {{ loop.index0 }}) ? 'done' : (({{ step_signal }}) === {{ loop.index0 }} ? 'active' : '')">
+      <span class="ux-wizard__bullet"><span>{{ loop.index }}</span></span>
+      <span class="ux-wizard__label">
+        <span class="ux-wizard__title">{{ s.title|e }}</span>
+        {%- if s.sub %}<span class="ux-wizard__sub">{{ s.sub|e }}</span>{% endif -%}
+      </span>
+    </li>
+    {%- endfor -%}
+  </ol>
+  <div class="ux-wizard__body">
+    {%- if caller is defined %}{{ caller() }}{% endif -%}
+  </div>
+  <footer class="ux-wizard__footer">
+    <button type="button" class="ux-btn ux-btn--ghost"
+      data-on:click="if (({{ step_signal }}) > 0) {{ step_signal }}--"
+      data-attr:disabled="({{ step_signal }}) === 0">{{ prev_label|e }}</button>
+    <button type="button" class="ux-btn ux-btn--primary"
+      data-on:click="if (({{ step_signal }}) < {{ _last }}) {{ step_signal }}++"
+      data-attr:hidden="({{ step_signal }}) === {{ _last }}">{{ next_label|e }}</button>
+    <button type="button" class="ux-btn ux-btn--primary"
+      data-attr:hidden="({{ step_signal }}) !== {{ _last }}">{{ finish_label|e }}</button>
+  </footer>
+</div>
+{% endmacro %}

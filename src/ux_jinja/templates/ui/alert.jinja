@@ -1,0 +1,33 @@
+{# alert(title, body, variant, dismissible, attrs)
+
+   CSS root: .ux-alert (lib/css/components/feedback-extra.css)
+   Bordered alert block — heavier than `inline_feedback`'s callout, lighter
+   than a `modal`. Variants share an identical layout, only colour differs.
+
+   Variants: "" | info | warn | danger | leaf | ok
+   Use as `alert("Mensaje")` for the single-line form, or as a block with
+   `{% call alert(title="...", variant="warn") %}<p>body</p>{% endcall %}`.
+
+   Args:
+     - title         optional bold heading
+     - body          single-line message (ignored when caller is supplied)
+     - variant       "" (neutral) | info | warn | danger | leaf | ok
+     - dismissible   render an "x" close button
+     - close_signal  Datastar signal toggled by the close button
+     - attrs         extra HTML attributes
+#}
+{% macro alert(title=None, body="", variant="", dismissible=False, close_signal=None, attrs={}) %}
+{%- set classes = ["ux-alert"] -%}
+{%- if variant %}{%- do classes.append("ux-alert--" ~ variant) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}" role="alert"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-alert__body">
+    {%- if title %}<div class="ux-alert__title">{{ title|e }}</div>{% endif -%}
+    {%- if caller is defined %}{{ caller() }}{%- elif body %}<p class="ux-alert__msg">{{ body|e }}</p>{%- endif -%}
+  </div>
+  {%- if dismissible -%}
+  <button type="button" class="ux-alert__close" aria-label="Cerrar"
+    {%- if close_signal %} data-on:click="{{ close_signal }} = false"{% endif -%}>×</button>
+  {%- endif -%}
+</div>
+{% endmacro %}

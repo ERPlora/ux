@@ -1,0 +1,43 @@
+{# split_btn(label, items, variant, size, on_click, open_signal, attrs)
+
+   CSS root: .ux-split-btn (lib/css/components/forms-extra.css)
+   Two-segment button: main action on the left, dropdown caret on the right.
+   When the caret is clicked, `open_signal` flips and the menu shows.
+
+   Args:
+     - label         primary action label
+     - items         list of {label, on_click?, href?, danger?}
+     - variant       "" | "primary" | "secondary"
+     - size          "" | "sm" | "lg"
+     - on_click      Datastar expression fired by the main half
+     - open_signal   Datastar signal that toggles the menu (default
+                     auto-creates a unique scoped signal)
+     - attrs         extra HTML attributes
+#}
+{% macro split_btn(label, items=[], variant="primary", size="", on_click=None, open_signal=None, attrs={}) %}
+{%- set classes = ["ux-split-btn"] -%}
+{%- if variant %}{%- do classes.append("ux-split-btn--" ~ variant) -%}{%- endif -%}
+{%- if size %}{%- do classes.append("ux-split-btn--" ~ size) -%}{%- endif -%}
+{%- set _open = open_signal or "$splitOpen" -%}
+<div class="{{ classes | join(' ') }}"
+  data-attr:aria-expanded="{{ _open }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <button type="button" class="ux-split-btn__main"
+    {%- if on_click %} data-on:click="{{ on_click|e }}"{% endif -%}
+  >{{ label|e }}</button>
+  <button type="button" class="ux-split-btn__caret" aria-label="Más opciones"
+    data-on:click="{{ _open }} = !{{ _open }}">
+    <iconify-icon class="ux-split-btn__caret-icon" icon="lucide:chevron-down" width="14" height="14"></iconify-icon>
+  </button>
+  <div class="ux-split-btn__menu" data-show="{{ _open }}">
+    {%- for it in items -%}
+    {%- set tag = "a" if it.href else "button" -%}
+    <{{ tag }} class="ux-split-btn__item{% if it.danger %} ux-split-btn__item--danger{% endif %}"
+      {%- if tag == "button" %} type="button"{% endif -%}
+      {%- if it.href %} href="{{ it.href|e }}"{% endif -%}
+      {%- if it.on_click %} data-on:click="{{ it.on_click|e }}; {{ _open }} = false"{% endif -%}
+    >{{ it.label|e }}</{{ tag }}>
+    {%- endfor -%}
+  </div>
+</div>
+{% endmacro %}
