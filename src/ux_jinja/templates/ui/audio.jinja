@@ -1,0 +1,27 @@
+{# audio(title, artist, cover, duration, position, variant, attrs)
+
+   CSS root: .ux-audio (lib/css/components/multimedia.css)
+   Static audio-player chrome — play button, progress bar, time, optional
+   speed control. Wire to a real <audio> element via Datastar in the host.
+
+   Variants: "" | compact | full
+#}
+{% macro audio(title="", artist=None, cover=None, duration="0:00", position="0:00", progress=0, variant="", attrs={}) %}
+{%- set classes = ["ux-audio"] -%}
+{%- if variant %}{%- do classes.append("ux-audio--" ~ variant) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <button type="button" class="ux-audio__play" aria-label="Reproducir">
+    <iconify-icon icon="lucide:play" width="16" height="16"></iconify-icon>
+  </button>
+  {%- if cover -%}<div class="ux-audio__cover" style="background-image:url('{{ cover|e }}');"></div>{%- endif -%}
+  <div class="ux-audio__info">
+    <div class="ux-audio__title">{{ title|e }}</div>
+    {%- if artist %}<div class="ux-audio__artist">{{ artist|e }}</div>{% endif -%}
+  </div>
+  <div class="ux-audio__progress">
+    <div class="ux-audio__bar"><div class="ux-audio__fill" style="width:{{ progress }}%;"></div></div>
+    <div class="ux-audio__time">{{ position|e }} / {{ duration|e }}</div>
+  </div>
+</div>
+{% endmacro %}

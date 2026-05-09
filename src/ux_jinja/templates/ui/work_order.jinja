@@ -1,0 +1,40 @@
+{# work_order(id, title, sub, progress_pct, steps, attrs)
+
+   CSS root: .ux-wo (lib/css/components/manufacturing.css)
+   Work-order panel — header with id/title, segmented progress bar and a
+   list of steps with name/meta/status.
+
+   steps: list of {num, name, meta?, status: "done"|"running"|"pending"}
+#}
+{% macro work_order(id="", title="", sub=None, progress_pct=0, steps=[], attrs={}) %}
+<div class="ux-wo"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-wo__head">
+    <div>
+      <div class="ux-wo__id">{{ id|e }}</div>
+      <div class="ux-wo__title">{{ title|e }}</div>
+      {%- if sub %}<div class="ux-wo__sub">{{ sub|e }}</div>{% endif -%}
+    </div>
+  </div>
+  <div class="ux-wo__progress">
+    <div class="ux-wo__progress-head"><span>Avance</span><span>{{ progress_pct|e }}%</span></div>
+    <div class="ux-wo__bar">
+      <div class="ux-wo__bar-seg ux-wo__bar-seg--running" style="width:{{ progress_pct }}%;"></div>
+    </div>
+  </div>
+  {%- if steps -%}
+  <div class="ux-wo__steps">
+    {%- for s in steps -%}
+    <div class="ux-wo__step">
+      <span class="ux-wo__step-num">{{ s.num|default(loop.index)|e }}</span>
+      <div>
+        <div class="ux-wo__step-name">{{ s.name|e }}</div>
+        {%- if s.meta %}<div class="ux-wo__step-meta">{{ s.meta|e }}</div>{% endif -%}
+      </div>
+      <span class="ux-wo__step-status">{{ s.status|default('pending')|e }}</span>
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- endif -%}
+</div>
+{% endmacro %}

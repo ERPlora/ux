@@ -1,0 +1,31 @@
+{# swipe(items, attrs)
+
+   CSS root: .ux-swipe (lib/css/components/mobile.css)
+   Swipeable list — each row reveals action buttons on swipe. The CSS
+   handles the visual; the row uses transform: translateX driven by JS.
+
+   items: list of {name, sub?, actions: list of {label, kind: del|archive|flag, on_click?}}
+#}
+{% macro swipe(items=[], attrs={}) %}
+<div class="ux-swipe"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for it in items -%}
+  <div class="ux-swipe__item">
+    <div class="ux-swipe__row">
+      <div>
+        <div class="ux-swipe__name">{{ it.name|e }}</div>
+        {%- if it.sub %}<div class="ux-swipe__sub">{{ it.sub|e }}</div>{% endif -%}
+      </div>
+    </div>
+    {%- if it.actions -%}
+    <div class="ux-swipe__actions">
+      {%- for a in it.actions -%}
+      <button type="button" class="ux-swipe__btn ux-swipe__btn--{{ a.kind|default('del') }}"
+        {%- if a.on_click %} data-on:click="{{ a.on_click|e }}"{% endif -%}>{{ a.label|e }}</button>
+      {%- endfor -%}
+    </div>
+    {%- endif -%}
+  </div>
+  {%- endfor -%}
+</div>
+{% endmacro %}

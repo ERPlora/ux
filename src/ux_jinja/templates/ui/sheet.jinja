@@ -1,0 +1,36 @@
+{# sheet(title, actions, open_signal, attrs)
+
+   CSS root: .ux-sheet (lib/css/components/mobile.css)
+   Bottom sheet — iOS-style action panel sliding from the bottom. Pair
+   with `ux-sheet-backdrop` and a Datastar signal to open/close.
+
+   actions: list of {label, on_click?, danger?, meta?}
+#}
+{% macro sheet(title=None, actions=[], open_signal="$sheet", cancel_label="Cancelar", attrs={}) %}
+<div class="ux-sheet-backdrop" data-show="{{ open_signal }}" data-on:click="{{ open_signal }} = false"></div>
+<div class="ux-sheet" data-show="{{ open_signal }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-sheet__handle"></div>
+  {%- if title -%}
+  <div class="ux-sheet__head">
+    <button type="button" class="ux-sheet__cancel" data-on:click="{{ open_signal }} = false">{{ cancel_label|e }}</button>
+    <div class="ux-sheet__title">{{ title|e }}</div>
+    <span></span>
+  </div>
+  {%- endif -%}
+  <div class="ux-sheet__body">
+    {%- if caller is defined -%}{{ caller() }}{%- endif -%}
+  </div>
+  {%- if actions -%}
+  <div class="ux-sheet__actions">
+    {%- for a in actions -%}
+    <button type="button" class="ux-sheet__action{% if a.danger %} ux-sheet__action--danger{% endif %}"
+      {%- if a.on_click %} data-on:click="{{ a.on_click|e }}; {{ open_signal }} = false"{% endif -%}>
+      {{ a.label|e }}
+      {%- if a.meta %}<span class="ux-sheet__action-meta">{{ a.meta|e }}</span>{% endif -%}
+    </button>
+    {%- endfor -%}
+  </div>
+  {%- endif -%}
+</div>
+{% endmacro %}

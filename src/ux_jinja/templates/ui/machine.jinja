@@ -1,0 +1,45 @@
+{# machine(id, name, state, metrics, alerts, variant, size, attrs)
+
+   CSS root: .ux-machine (lib/css/components/manufacturing.css)
+   Single machine card — id, state badge, metric grid, alert chips.
+
+   Args:
+     - id        machine id (e.g. "M-014")
+     - name      machine name
+     - state     "" (running) | "maintenance"
+     - state_label visible label for the state badge
+     - metrics   list of {label, value}
+     - alerts    list of {label, kind: "warn"|"info"}
+     - variant   "" | "maintenance"
+     - size      "" | "sm"
+#}
+{% macro machine(id="", name="", state_label="Running", metrics=[], alerts=[], variant="", size="", attrs={}) %}
+{%- set classes = ["ux-machine"] -%}
+{%- if variant %}{%- do classes.append("ux-machine--" ~ variant) -%}{%- endif -%}
+{%- if size %}{%- do classes.append("ux-machine--" ~ size) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-machine__head">
+    <div>
+      <div class="ux-machine__id">{{ id|e }}</div>
+      <div class="ux-machine__name">{{ name|e }}</div>
+    </div>
+    <span class="ux-machine__state-badge">{{ state_label|e }}</span>
+  </div>
+  <div class="ux-machine__body">
+    {%- for m in metrics -%}
+    <div class="ux-machine__metric">
+      <span class="ux-machine__metric-label">{{ m.label|e }}</span>
+      <span class="ux-machine__metric-value">{{ m.value|e }}</span>
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- if alerts -%}
+  <div class="ux-machine__alerts">
+    {%- for a in alerts -%}
+    <span class="ux-machine__alert-chip ux-machine__alert-chip--{{ a.kind|default('info') }}">{{ a.label|e }}</span>
+    {%- endfor -%}
+  </div>
+  {%- endif -%}
+</div>
+{% endmacro %}

@@ -1,0 +1,45 @@
+{# scheduler(days, hours, appointments, variant, size, attrs)
+
+   CSS root: .ux-scheduler (lib/css/components/navigation.css)
+   Calendar grid (week/day view) with appointment blocks placed in cells.
+
+   days:         list of {name, date, today?: bool}
+   hours:        list of strings ["09:00", "10:00", …]
+   appointments: list of {day_index, hour_index, span?: rows, title, time?,
+                          attendee?, kind: brand|leaf|info|warn|danger}
+   variant:      "" | day
+   size:         "" | sm | lg
+#}
+{% macro scheduler(days=[], hours=[], appointments=[], variant="", size="", attrs={}) %}
+{%- set classes = ["ux-scheduler"] -%}
+{%- if variant %}{%- do classes.append("ux-scheduler--" ~ variant) -%}{%- endif -%}
+{%- if size %}{%- do classes.append("ux-scheduler--" ~ size) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-scheduler__head">
+    <div></div>
+    {%- for d in days -%}
+    <div class="ux-scheduler__day{% if d.today %} ux-scheduler__day--today{% endif %}">
+      <span class="ux-scheduler__day-name">{{ d.name|e }}</span>
+      <span class="ux-scheduler__day-date">{{ d.date|e }}</span>
+    </div>
+    {%- endfor -%}
+  </div>
+  <div class="ux-scheduler__grid" style="grid-template-columns: 60px repeat({{ days|length }}, 1fr); grid-template-rows: repeat({{ hours|length }}, var(--_sch-row-h, 44px));">
+    {%- for h in hours -%}
+    <div class="ux-scheduler__hour-label" style="grid-column: 1; grid-row: {{ loop.index }};">{{ h|e }}</div>
+    {%- for d in days -%}
+    <div class="ux-scheduler__cell" style="grid-column: {{ loop.index + 1 }}; grid-row: {{ loop.index0 + 1 }};"></div>
+    {%- endfor -%}
+    {%- endfor -%}
+    {%- for a in appointments -%}
+    <div class="ux-scheduler__appointment ux-scheduler__appointment--{{ a.kind|default('brand') }}"
+      style="grid-column: {{ a.day_index + 2 }}; grid-row: {{ a.hour_index + 1 }} / span {{ a.span|default(1) }};">
+      <span class="ux-scheduler__appointment-time">{{ a.time|default('')|e }}</span>
+      <span class="ux-scheduler__appointment-title">{{ a.title|e }}</span>
+      {%- if a.attendee %}<span class="ux-scheduler__appointment-attendee">{{ a.attendee|e }}</span>{% endif -%}
+    </div>
+    {%- endfor -%}
+  </div>
+</div>
+{% endmacro %}

@@ -1,0 +1,29 @@
+{# clock(name, time, date, status, elapsed, variant, attrs)
+
+   CSS root: .ux-clock (lib/css/components/hr.css)
+   Time-clock kiosk — clock-in / clock-out / break button row, large clock
+   display, current shift status.
+
+   Variants: "" | compact | kiosk
+#}
+{% macro clock(name="", time="00:00", date=None, status=None, elapsed=None, variant="", attrs={}) %}
+{%- set classes = ["ux-clock"] -%}
+{%- if variant %}{%- do classes.append("ux-clock--" ~ variant) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if name %}<div class="ux-clock__name">{{ name|e }}</div>{% endif -%}
+  <div class="ux-clock__display">{{ time|e }}</div>
+  {%- if date %}<div class="ux-clock__date">{{ date|e }}</div>{% endif -%}
+  {%- if status or elapsed -%}
+  <div class="ux-clock__status">
+    {%- if status %}{{ status|e }}{% endif -%}
+    {%- if elapsed %}<span class="ux-clock__elapsed">{{ elapsed|e }}</span>{% endif -%}
+  </div>
+  {%- endif -%}
+  <div class="ux-clock__actions">
+    <button class="ux-clock__btn ux-clock__btn--in" type="button">Entrada</button>
+    <button class="ux-clock__btn ux-clock__btn--break" type="button">Descanso</button>
+    <button class="ux-clock__btn ux-clock__btn--out" type="button">Salida</button>
+  </div>
+</div>
+{% endmacro %}

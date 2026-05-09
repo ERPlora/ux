@@ -1,0 +1,45 @@
+{# product(name, brand, price, price_orig, img, badges, rating, variant, attrs)
+
+   CSS root: .ux-product (lib/css/components/commerce.css)
+   Product card for catalogues — image, badges, brand, name, price.
+
+   variants: "" | grid | list | compact
+   badges:   list of {label, kind: "new"|"sale"|"brand"}
+#}
+{% macro product(name="", brand=None, price="", price_orig=None, img=None, badges=[], rating=None, variant="grid", cta_label="Añadir", attrs={}) %}
+{%- set classes = ["ux-product"] -%}
+{%- if variant and variant != "grid" %}{%- do classes.append("ux-product--" ~ variant) -%}{%- endif -%}
+<article class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-product__media">
+    {%- if img -%}<img class="ux-product__img" src="{{ img|e }}" alt="{{ name|e }}">{%- endif -%}
+    {%- if badges -%}
+    <div class="ux-product__badges">
+      {%- for b in badges -%}
+      <span class="ux-product__badge ux-product__badge--{{ b.kind|default('brand') }}">{{ b.label|e }}</span>
+      {%- endfor -%}
+    </div>
+    {%- endif -%}
+    <button type="button" class="ux-product__wishlist" aria-label="Favorito">
+      <iconify-icon icon="lucide:heart" width="14" height="14"></iconify-icon>
+    </button>
+  </div>
+  <div class="ux-product__body">
+    {%- if brand %}<div class="ux-product__brand">{{ brand|e }}</div>{% endif -%}
+    <div class="ux-product__name">{{ name|e }}</div>
+    {%- if rating -%}
+    <div class="ux-product__rating">
+      <iconify-icon icon="lucide:star" width="12" height="12"></iconify-icon>
+      <span>{{ rating|e }}</span>
+    </div>
+    {%- endif -%}
+    <div class="ux-product__price-row">
+      <span class="ux-product__price">{{ price|e }}</span>
+      {%- if price_orig %}<span class="ux-product__price-orig">{{ price_orig|e }}</span>{% endif -%}
+    </div>
+    <div class="ux-product__actions">
+      <button type="button" class="ux-product__cta">{{ cta_label|e }}</button>
+    </div>
+  </div>
+</article>
+{% endmacro %}

@@ -1,0 +1,26 @@
+{# perf(label, value, target, percent, delta, variant, attrs)
+
+   CSS root: .ux-perf (lib/css/components/hr.css)
+   Single performance bar — percentage fill versus target with optional
+   delta arrow. Use for KPIs in employee detail pages.
+
+   Variants: "" | mini | radial
+#}
+{% macro perf(label="", value="", target=None, percent=0, delta=None, delta_dir="up", variant="", attrs={}) %}
+{%- set classes = ["ux-perf"] -%}
+{%- if variant %}{%- do classes.append("ux-perf--" ~ variant) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-perf__head">
+    <span class="ux-perf__label">{{ label|e }}</span>
+    {%- if delta %}<span class="ux-perf__delta ux-perf__delta--{{ delta_dir }}">{{ delta|e }}</span>{% endif -%}
+  </div>
+  <div class="ux-perf__bar">
+    <div class="ux-perf__fill" style="width:{{ percent }}%;"></div>
+  </div>
+  <div class="ux-perf__zones">
+    <span class="ux-perf__value">{{ value|e }}</span>
+    {%- if target %}<span class="ux-perf__target">/ {{ target|e }}</span>{% endif -%}
+  </div>
+</div>
+{% endmacro %}

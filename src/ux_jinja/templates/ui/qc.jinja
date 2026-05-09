@@ -1,0 +1,51 @@
+{# qc(title, sub, items, summary, inspector, notes, attrs)
+
+   CSS root: .ux-qc (lib/css/components/manufacturing.css)
+   Quality-check sheet — a list of inspection items, summary stats and an
+   inspector row.
+
+   items:    list of {label, sub?, ok?: bool}
+   summary:  list of {label, value}
+   inspector: {name, avatar?}
+#}
+{% macro qc(title="QC inspection", sub=None, items=[], summary=[], inspector=None, notes=None, attrs={}) %}
+<div class="ux-qc"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-qc__head">
+    <div>
+      <div class="ux-qc__title">{{ title|e }}</div>
+      {%- if sub %}<div class="ux-qc__sub">{{ sub|e }}</div>{% endif -%}
+    </div>
+  </div>
+  <ul class="ux-qc__list">
+    {%- for it in items -%}
+    <li class="ux-qc__item">
+      <span class="ux-qc__check{% if it.ok %} ux-qc__check--ok{% endif %}">
+        <iconify-icon class="ux-qc__check-icon" icon="lucide:{{ 'check' if it.ok else 'x' }}" width="14" height="14"></iconify-icon>
+      </span>
+      <div>
+        <div class="ux-qc__label">{{ it.label|e }}</div>
+        {%- if it.sub %}<div class="ux-qc__meta">{{ it.sub|e }}</div>{% endif -%}
+      </div>
+    </li>
+    {%- endfor -%}
+  </ul>
+  {%- if summary -%}
+  <div class="ux-qc__summary">
+    {%- for s in summary -%}
+    <div class="ux-qc__summary-stat">
+      <div class="ux-qc__summary-stat-value">{{ s.value|e }}</div>
+      <div class="ux-qc__summary-stat-label">{{ s.label|e }}</div>
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- endif -%}
+  {%- if inspector -%}
+  <div class="ux-qc__inspector">
+    <span class="ux-qc__inspector-avatar ux-avatar ux-avatar--sm">{{ inspector.avatar|default("?")|e }}</span>
+    <span>{{ inspector.name|e }}</span>
+  </div>
+  {%- endif -%}
+  {%- if notes %}<div class="ux-qc__notes">{{ notes|e }}</div>{% endif -%}
+</div>
+{% endmacro %}

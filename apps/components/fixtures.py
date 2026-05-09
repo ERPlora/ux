@@ -2169,6 +2169,290 @@ EXAMPLES: dict[str, list[dict[str, str]]] = {
             '</div>'
         )},
     ],
+    # ── v2.1 round 3 fixtures (verticals) ──────────────────────────────
+    "audio": [
+        {"label": "Compact y full", "render": (
+            '{% from "ui/audio.jinja" import audio %}'
+            '<div class="ux-flex ux-flex-col ux-gap-3">'
+            '{{ audio(title="Café Tasso · Lo-fi", artist="ERPlora Radio", duration="3:42", position="1:14", progress=33, variant="compact") }}'
+            '{{ audio(title="POS demo recording", artist="Sales team", duration="12:08", position="0:42", progress=8, variant="full") }}'
+            '</div>'
+        )},
+    ],
+    "video": [
+        {"label": "Reproductor", "render": (
+            '{% from "ui/video.jinja" import video %}'
+            '{{ video(title="Demo módulo Ventas", duration="2:15", position="0:32", progress=24) }}'
+        )},
+    ],
+    "pdf": [
+        {"label": "Visor", "render": (
+            '{% from "ui/pdf.jinja" import pdf %}'
+            '{% call pdf(pages=8, current=3) %}'
+            '<div class="ux-c-ink-3" style="padding:60px;text-align:center;">[ contenido del PDF ]</div>'
+            '{% endcall %}'
+        )},
+    ],
+    "clock": [
+        {"label": "Kiosko de fichaje", "render": (
+            '{% from "ui/clock.jinja" import clock %}'
+            '{{ clock(name="Carlos Pereda", time="09:42", date="vie 9 may 2026", status="En turno", elapsed="3h 12m", variant="kiosk") }}'
+        )},
+    ],
+    "attendance": [
+        {"label": "Lista del día", "render": (
+            '{% from "ui/attendance.jinja" import attendance %}'
+            '{{ attendance(title="Hoy · 9 mayo", items=['
+            '  {"name": "María Lozano", "role": "Sala", "avatar": "ML", "time": "09:02", "status": "present", "status_label": "Entró"},'
+            '  {"name": "Carlos Pereda", "role": "Cocina", "avatar": "CP", "time": "09:14", "status": "late", "status_label": "Tarde"},'
+            '  {"name": "Sara Ruiz", "role": "Caja", "avatar": "SR", "time": "—", "status": "absent", "status_label": "Ausente"},'
+            '  {"name": "Marc Vives", "role": "Sala", "avatar": "MV", "time": "—", "status": "leave", "status_label": "Permiso"}'
+            ']) }}'
+        )},
+    ],
+    "perf": [
+        {"label": "Barras de KPI", "render": (
+            '{% from "ui/perf.jinja" import perf %}'
+            '<div class="ux-flex ux-flex-col ux-gap-3" style="max-width:380px;">'
+            '{{ perf(label="Conversión", value="76%", target="80%", percent=76, delta="+4 pts", delta_dir="up") }}'
+            '{{ perf(label="Ticket medio", value="13,48 €", target="14 €", percent=92, delta="-0,42 €", delta_dir="down") }}'
+            '{{ perf(label="NPS", value="64", target="70", percent=64) }}'
+            '</div>'
+        )},
+    ],
+    "shift_cal": [
+        {"label": "Semana del 5–11 mayo", "render": (
+            '{% from "ui/shift_cal.jinja" import shift_cal %}'
+            '{{ shift_cal('
+            '  days=[{"label": "L"}, {"label": "M"}, {"label": "X"}, {"label": "J"}, {"label": "V"}, {"label": "S"}, {"label": "D"}],'
+            '  today=4,'
+            '  rows=['
+            '    {"name": "María", "shifts": ['
+            '      {"type": "morning", "label": "M", "time": "07–15"},'
+            '      {"type": "morning", "label": "M", "time": "07–15"},'
+            '      {"type": "off", "label": "Off"},'
+            '      {"type": "afternoon", "label": "T", "time": "15–23"},'
+            '      {"type": "afternoon", "label": "T", "time": "15–23"},'
+            '      {"type": "morning", "label": "M", "time": "07–15"},'
+            '      {"type": "off", "label": "Off"}'
+            '    ]},'
+            '    {"name": "Carlos", "shifts": ['
+            '      {"type": "afternoon", "label": "T", "time": "15–23"},'
+            '      {"type": "afternoon", "label": "T", "time": "15–23"},'
+            '      {"type": "afternoon", "label": "T", "time": "15–23"},'
+            '      {"type": "off", "label": "Off"},'
+            '      {"type": "off", "label": "Off"},'
+            '      {"type": "night", "label": "N", "time": "23–07"},'
+            '      {"type": "night", "label": "N", "time": "23–07"}'
+            '    ]}'
+            '  ]'
+            ') }}'
+        )},
+    ],
+    "payslip": [
+        {"label": "Nómina mensual", "render": (
+            '{% from "ui/payslip.jinja" import payslip %}'
+            '{{ payslip(name="Carlos Pereda", period="Abril 2026", net="1.842,33 €", rows=['
+            '  {"label": "Salario base", "value": "1.800,00 €"},'
+            '  {"label": "Plus nocturnidad", "value": "120,00 €"},'
+            '  {"label": "Antigüedad", "value": "60,00 €"},'
+            '  {"label": "Total devengado", "value": "1.980,00 €", "total": True},'
+            '  {"label": "IRPF (15%)", "value": "-297,00 €"},'
+            '  {"label": "Seguridad Social", "value": "-118,80 €"},'
+            ']) }}'
+        )},
+    ],
+    "machine": [
+        {"label": "Tarjeta de máquina", "render": (
+            '{% from "ui/machine.jinja" import machine %}'
+            '<div class="ux-flex ux-wrap ux-gap-3">'
+            '{{ machine(id="M-014", name="Empaquetadora 1", state_label="Running", metrics=['
+            '  {"label": "OEE", "value": "78%"},'
+            '  {"label": "Uptime", "value": "98%"},'
+            '  {"label": "T. ciclo", "value": "12 s"}'
+            '], alerts=[{"label": "Mantenimiento programado", "kind": "warn"}]) }}'
+            '{{ machine(id="M-022", name="Etiquetadora", variant="maintenance", state_label="Maintenance", metrics=['
+            '  {"label": "Próx. revisión", "value": "12 mayo"},'
+            '  {"label": "Ciclos", "value": "1.243"}'
+            ']) }}'
+            '</div>'
+        )},
+    ],
+    "prodline": [
+        {"label": "Cadena de envasado", "render": (
+            '{% from "ui/prodline.jinja" import prodline %}'
+            '{{ prodline(stations=['
+            '  {"label": "Recepción", "count": 124, "icon": "lucide:truck"},'
+            '  {"label": "Mezcla", "count": 96, "icon": "lucide:beaker"},'
+            '  {"label": "Llenado", "count": 84, "icon": "lucide:droplet"},'
+            '  {"label": "Tapado", "count": 72, "icon": "lucide:circle"},'
+            '  {"label": "Etiquetado", "count": 60, "icon": "lucide:tag"}'
+            '], connectors=['
+            '  {"kind": "running", "percent": 100},'
+            '  {"kind": "running", "percent": 100},'
+            '  {"kind": "slow", "percent": 60},'
+            '  {"kind": "blocked", "percent": 20}'
+            ']) }}'
+        )},
+    ],
+    "qc": [
+        {"label": "Inspección de lote", "render": (
+            '{% from "ui/qc.jinja" import qc %}'
+            '{{ qc(title="QC · lote B-0184", sub="Café molido 250 g", items=['
+            '  {"label": "Aspecto visual", "ok": True},'
+            '  {"label": "Peso 250 g ±2", "sub": "Promedio 249,4 g", "ok": True},'
+            '  {"label": "Sellado hermético", "ok": True},'
+            '  {"label": "Etiquetado lote", "ok": False}'
+            '], summary=['
+            '  {"label": "Items OK", "value": "3"},'
+            '  {"label": "Fallos", "value": "1"},'
+            '  {"label": "Resultado", "value": "Re-trabajo"}'
+            '], inspector={"name": "M. Lozano", "avatar": "ML"}, notes="Re-imprimir etiquetas con número de lote correcto.") }}'
+        )},
+    ],
+    "batch": [
+        {"label": "Trazabilidad de lote", "render": (
+            '{% from "ui/batch.jinja" import batch %}'
+            '{{ batch(id="B-0184", product="Café molido 250 g", qty="380 ud · 95 kg", status_label="En proceso",'
+            '  meta=['
+            '    {"label": "Materia prima", "value": "Lote MP-0042"},'
+            '    {"label": "Línea", "value": "Empaquetadora 1"},'
+            '    {"label": "Inicio", "value": "08 may 09:14"},'
+            '    {"label": "Vencimiento", "value": "08 may 2027"}'
+            '  ],'
+            '  chain=['
+            '    {"label": "Mezcla", "time": "09:14", "state": ""},'
+            '    {"label": "Llenado", "time": "09:42", "state": ""},'
+            '    {"label": "Tapado", "time": "10:08", "state": "current"},'
+            '    {"label": "Etiquetado", "state": "pending"},'
+            '    {"label": "QC final", "state": "pending"}'
+            '  ]'
+            ') }}'
+        )},
+    ],
+    "oee": [
+        {"label": "OEE de línea", "render": (
+            '{% from "ui/oee.jinja" import oee %}'
+            '{{ oee(value=78, target=85, breakdown=['
+            '  {"label": "Disponibilidad", "value": "92%"},'
+            '  {"label": "Rendimiento", "value": "88%"},'
+            '  {"label": "Calidad", "value": "96%"}'
+            ']) }}'
+        )},
+    ],
+    "work_order": [
+        {"label": "Orden de fabricación", "render": (
+            '{% from "ui/work_order.jinja" import work_order %}'
+            '{{ work_order(id="WO-0142", title="Lote B-0184 · Café molido 250 g", sub="línea M-014", progress_pct=42, steps=['
+            '  {"num": 1, "name": "Mezcla", "meta": "30 min · 1 op.", "status": "done"},'
+            '  {"num": 2, "name": "Llenado", "meta": "45 min · 2 op.", "status": "running"},'
+            '  {"num": 3, "name": "Tapado", "meta": "20 min · 1 op.", "status": "pending"},'
+            '  {"num": 4, "name": "Etiquetado", "meta": "15 min · 1 op.", "status": "pending"},'
+            '  {"num": 5, "name": "QC final", "meta": "10 min · 1 op.", "status": "pending"}'
+            ']) }}'
+        )},
+    ],
+    "signature": [
+        {"label": "Pad de firma", "render": (
+            '{% from "ui/signature.jinja" import signature %}'
+            '{{ signature(label="Firma del cliente", hint="Firma con el dedo o el ratón.") }}'
+        )},
+    ],
+    "loyalty": [
+        {"label": "Tarjetas por nivel", "render": (
+            '{% from "ui/loyalty.jinja" import loyalty %}'
+            '<div class="ux-flex ux-flex-col ux-gap-3">'
+            '{{ loyalty(brand="ERPlora Cafe", name="Ana García", num="•••• 0184", tier="Silver", points="240", expires="dic 2027", variant="silver") }}'
+            '{{ loyalty(brand="ERPlora Cafe", name="Marc Vives", num="•••• 0421", tier="Gold", points="1.420", expires="abr 2027", variant="gold") }}'
+            '{{ loyalty(brand="ERPlora Cafe", name="Sara Ruiz", num="•••• 0987", tier="Platinum", points="3.812", expires="jul 2027", variant="platinum") }}'
+            '</div>'
+        )},
+    ],
+    "ticket": [
+        {"label": "Ticket POS", "render": (
+            '{% from "ui/ticket.jinja" import ticket %}'
+            '{{ ticket(num="#1024", server="Carlos · Caja 2", time="14:32", type="takeaway", type_label="Para llevar",'
+            '  items=['
+            '    {"qty": 2, "name": "Café con leche", "price": "3,80 €", "mods": ["sin azúcar", "soja"]},'
+            '    {"qty": 1, "name": "Croissant", "price": "2,40 €"},'
+            '    {"qty": 1, "name": "Muffin chocolate", "price": "2,80 €"}'
+            '  ],'
+            '  totals=['
+            '    {"label": "Subtotal", "value": "9,00 €"},'
+            '    {"label": "IVA 10%", "value": "0,90 €"},'
+            '    {"label": "Total", "value": "9,90 €", "main": True}'
+            '  ]) }}'
+        )},
+    ],
+    "event_card": [
+        {"label": "Eventos del calendario", "render": (
+            '{% from "ui/event_card.jinja" import event_card %}'
+            '<div class="ux-flex ux-flex-col ux-gap-3" style="max-width:480px;">'
+            '{{ event_card(title="Reunión de equipo · Q2", day="14", month="MAY", location="Oficina Madrid", attendees=['
+            '  {"initials": "ML"}, {"initials": "CP"}, {"initials": "SR"}, {"initials": "MV"}, {"initials": "AB"}, {"initials": "JC"}'
+            ']) }}'
+            '{{ event_card(title="Cierre fiscal", day="30", month="JUN", location="Asesoría", variant="danger", attendees=[{"initials": "IB"}]) }}'
+            '</div>'
+        )},
+    ],
+    "product": [
+        {"label": "Tarjetas de producto", "render": (
+            '{% from "ui/product.jinja" import product %}'
+            '<div class="ux-grid-3">'
+            '{{ product(name="Café molido 250 g", brand="ERPlora", price="6,80 €", price_orig="7,90 €", rating="4.6", badges=[{"label": "OFERTA", "kind": "sale"}]) }}'
+            '{{ product(name="Tetera japonesa", brand="ERPlora", price="29,00 €", rating="4.9", badges=[{"label": "NUEVO", "kind": "new"}]) }}'
+            '{{ product(name="Cápsulas mix · 10 ud", brand="ERPlora", price="4,20 €", rating="4.3") }}'
+            '</div>'
+        )},
+    ],
+    "menubar": [
+        {"label": "Menubar de aplicación", "render": (
+            '{% from "ui/menubar.jinja" import menubar %}'
+            '{{ menubar(app_name="ERPlora", items=['
+            '  {"label": "Archivo", "menu": [{"label": "Nuevo", "shortcut": "⌘N"}, {"label": "Abrir", "shortcut": "⌘O"}, {"divider": True}, {"label": "Cerrar", "shortcut": "⌘W"}]},'
+            '  {"label": "Editar", "menu": [{"label": "Deshacer", "shortcut": "⌘Z"}, {"label": "Rehacer", "shortcut": "⌘⇧Z"}]},'
+            '  {"label": "Ver", "menu": [{"label": "Pantalla completa", "shortcut": "F11"}]}'
+            ']) }}'
+        )},
+    ],
+    "scheduler": [
+        {"label": "Agenda semanal", "render": (
+            '{% from "ui/scheduler.jinja" import scheduler %}'
+            '{{ scheduler('
+            '  days=[{"name":"L","date":"5"},{"name":"M","date":"6"},{"name":"X","date":"7"},{"name":"J","date":"8"},{"name":"V","date":"9","today":True}],'
+            '  hours=["09:00","10:00","11:00","12:00","13:00"],'
+            '  appointments=['
+            '    {"day_index": 0, "hour_index": 0, "span": 2, "title": "Daily standup", "time": "09:00", "kind": "brand"},'
+            '    {"day_index": 2, "hour_index": 1, "span": 1, "title": "Demo cliente", "time": "10:00", "kind": "info"},'
+            '    {"day_index": 4, "hour_index": 2, "span": 2, "title": "Cierre semanal", "time": "11:00", "kind": "warn"}'
+            '  ]'
+            ') }}'
+        )},
+    ],
+    "sheet": [
+        {"label": "Acciones bottom sheet", "render": (
+            '{% from "ui/sheet.jinja" import sheet %}'
+            '<div data-signals=\'{"sheetOpen": false}\'>'
+            '<button class="ux-btn ux-btn--ghost" data-on:click="$sheetOpen = true">Abrir sheet</button>'
+            '{{ sheet(title="Compartir pedido", open_signal="$sheetOpen", actions=['
+            '  {"label": "Enviar por email", "meta": "ana@example.com"},'
+            '  {"label": "Enviar por WhatsApp"},'
+            '  {"label": "Imprimir ticket"},'
+            '  {"label": "Eliminar pedido", "danger": True}'
+            ']) }}'
+            '</div>'
+        )},
+    ],
+    "swipe": [
+        {"label": "Lista swipeable", "render": (
+            '{% from "ui/swipe.jinja" import swipe %}'
+            '{{ swipe(items=['
+            '  {"name": "Pedido #1024", "sub": "Café molido · 6,80 €", "actions": [{"label": "Eliminar", "kind": "del"}]},'
+            '  {"name": "Pedido #1025", "sub": "Tetera japonesa · 29,00 €", "actions": [{"label": "Archivar", "kind": "archive"}, {"label": "Eliminar", "kind": "del"}]},'
+            '  {"name": "Pedido #1026", "sub": "Cápsulas mix · 4,20 €", "actions": [{"label": "Marcar", "kind": "flag"}, {"label": "Archivar", "kind": "archive"}, {"label": "Eliminar", "kind": "del"}]}'
+            ']) }}'
+        )},
+    ],
 }
 
 
@@ -2766,6 +3050,126 @@ USAGE: dict[str, str] = {
     "gauge": (
         '{% from "ui/gauge.jinja" import gauge %}\n'
         '{{ gauge(value=78, label="OEE", variant="leaf") }}'
+    ),
+    # ── v2.1 round 3 verticals ─────────────────────────────────────────
+    "audio": (
+        '{% from "ui/audio.jinja" import audio %}\n'
+        '{{ audio(title="Lo-fi beats", duration="3:42", position="1:14", progress=33) }}'
+    ),
+    "video": (
+        '{% from "ui/video.jinja" import video %}\n'
+        '{{ video(title="Demo", duration="2:15", position="0:32", progress=24) }}'
+    ),
+    "pdf": (
+        '{% from "ui/pdf.jinja" import pdf %}\n'
+        '{% call pdf(pages=8, current=3) %}…page content…{% endcall %}'
+    ),
+    "clock": (
+        '{% from "ui/clock.jinja" import clock %}\n'
+        '{{ clock(name="Carlos", time="09:42", date="vie 9 may 2026", variant="kiosk") }}'
+    ),
+    "attendance": (
+        '{% from "ui/attendance.jinja" import attendance %}\n'
+        '{{ attendance(items=[\n'
+        '  {"name": "María", "avatar": "ML", "time": "09:02", "status": "present"}\n'
+        ']) }}'
+    ),
+    "perf": (
+        '{% from "ui/perf.jinja" import perf %}\n'
+        '{{ perf(label="Conversión", value="76%", target="80%", percent=76) }}'
+    ),
+    "shift_cal": (
+        '{% from "ui/shift_cal.jinja" import shift_cal %}\n'
+        '{{ shift_cal(days=[{"label": "L"}, {"label": "M"}],\n'
+        '             rows=[{"name": "Ana", "shifts": [\n'
+        '               {"type": "morning", "label": "M"},\n'
+        '               {"type": "off", "label": "Off"}\n'
+        '             ]}]) }}'
+    ),
+    "payslip": (
+        '{% from "ui/payslip.jinja" import payslip %}\n'
+        '{{ payslip(name="Carlos", period="Abril 2026", net="1.842,33 €", rows=[\n'
+        '  {"label": "Salario base", "value": "1.800,00 €"}\n'
+        ']) }}'
+    ),
+    "machine": (
+        '{% from "ui/machine.jinja" import machine %}\n'
+        '{{ machine(id="M-014", name="Empaquetadora 1",\n'
+        '  metrics=[{"label": "OEE", "value": "78%"}]) }}'
+    ),
+    "prodline": (
+        '{% from "ui/prodline.jinja" import prodline %}\n'
+        '{{ prodline(stations=[{"label": "Recepción"}, {"label": "Mezcla"}],\n'
+        '            connectors=[{"kind": "running", "percent": 100}]) }}'
+    ),
+    "qc": (
+        '{% from "ui/qc.jinja" import qc %}\n'
+        '{{ qc(title="QC · lote B-0184",\n'
+        '      items=[{"label": "Aspecto visual", "ok": True}]) }}'
+    ),
+    "batch": (
+        '{% from "ui/batch.jinja" import batch %}\n'
+        '{{ batch(id="B-0184", product="Café molido", qty="380 ud", chain=[\n'
+        '  {"label": "Mezcla", "time": "09:14"}\n'
+        ']) }}'
+    ),
+    "oee": (
+        '{% from "ui/oee.jinja" import oee %}\n'
+        '{{ oee(value=78, breakdown=[{"label": "Disp.", "value": "92%"}]) }}'
+    ),
+    "work_order": (
+        '{% from "ui/work_order.jinja" import work_order %}\n'
+        '{{ work_order(id="WO-0142", title="Lote B-0184", progress_pct=42, steps=[\n'
+        '  {"name": "Mezcla", "status": "done"}\n'
+        ']) }}'
+    ),
+    "signature": (
+        '{% from "ui/signature.jinja" import signature %}\n'
+        '{{ signature(label="Firma del cliente") }}'
+    ),
+    "loyalty": (
+        '{% from "ui/loyalty.jinja" import loyalty %}\n'
+        '{{ loyalty(brand="ERPlora", name="Ana García", num="•••• 0184",\n'
+        '          tier="Silver", points="240", variant="silver") }}'
+    ),
+    "ticket": (
+        '{% from "ui/ticket.jinja" import ticket %}\n'
+        '{{ ticket(num="#1024", server="Carlos", time="14:32",\n'
+        '  items=[{"qty": 2, "name": "Café", "price": "3,80 €"}],\n'
+        '  totals=[{"label": "Total", "value": "9,90 €", "main": True}]) }}'
+    ),
+    "event_card": (
+        '{% from "ui/event_card.jinja" import event_card %}\n'
+        '{{ event_card(title="Reunión Q2", day="14", month="MAY",\n'
+        '  attendees=[{"initials": "ML"}, {"initials": "CP"}]) }}'
+    ),
+    "product": (
+        '{% from "ui/product.jinja" import product %}\n'
+        '{{ product(name="Café molido 250 g", brand="ERPlora", price="6,80 €",\n'
+        '          rating="4.6") }}'
+    ),
+    "menubar": (
+        '{% from "ui/menubar.jinja" import menubar %}\n'
+        '{{ menubar(items=[{"label": "Archivo", "menu": [\n'
+        '  {"label": "Nuevo", "shortcut": "⌘N"}\n'
+        ']}]) }}'
+    ),
+    "scheduler": (
+        '{% from "ui/scheduler.jinja" import scheduler %}\n'
+        '{{ scheduler(days=[{"name": "L", "date": "5"}],\n'
+        '             hours=["09:00", "10:00"],\n'
+        '             appointments=[{"day_index": 0, "hour_index": 0,\n'
+        '                            "title": "Standup", "kind": "brand"}]) }}'
+    ),
+    "sheet": (
+        '{% from "ui/sheet.jinja" import sheet %}\n'
+        '{{ sheet(title="Compartir", open_signal="$sheet",\n'
+        '  actions=[{"label": "Email"}, {"label": "Eliminar", "danger": True}]) }}'
+    ),
+    "swipe": (
+        '{% from "ui/swipe.jinja" import swipe %}\n'
+        '{{ swipe(items=[{"name": "Pedido #1024",\n'
+        '                  "actions": [{"label": "Borrar", "kind": "del"}]}]) }}'
     ),
 }
 

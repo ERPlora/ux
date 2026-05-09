@@ -1,0 +1,42 @@
+{# oee(value, target, breakdown, title, attrs)
+
+   CSS root: .ux-oee (lib/css/components/manufacturing.css)
+   Overall Equipment Effectiveness gauge — large radial value plus a
+   metric breakdown beneath (Availability / Performance / Quality).
+
+   breakdown: list of {label, value}
+#}
+{% macro oee(value=0, target=85, breakdown=[], title="OEE", attrs={}) %}
+{%- set _r = 60 -%}
+{%- set _circ = (3.14159265 * _r) -%}
+{%- set _pct = (value / 100) -%}
+{%- if _pct < 0 %}{% set _pct = 0 %}{% endif -%}
+{%- if _pct > 1 %}{% set _pct = 1 %}{% endif -%}
+{%- set _seg = (_circ * _pct) -%}
+{%- set _rest = (_circ - _seg) -%}
+{%- set _good = (value >= target) -%}
+<div class="ux-oee"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-oee__title">{{ title|e }}</div>
+  <div class="ux-oee__gauge">
+    <svg viewBox="0 0 140 80" aria-hidden="true">
+      <path class="ux-oee__gauge-track" d="M 10 70 A 60 60 0 0 1 130 70" fill="none"/>
+      <path class="{{ 'ux-oee__gauge-fill--good' if _good else 'ux-oee__gauge-fill--warn' }}"
+            d="M 10 70 A 60 60 0 0 1 130 70" fill="none"
+            stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="{{ '%.2f'|format(_seg) }} {{ '%.2f'|format(_rest) }}"/>
+    </svg>
+    <div class="ux-oee__gauge-value">{{ value|e }}%</div>
+  </div>
+  {%- if breakdown -%}
+  <div class="ux-oee__breakdown">
+    {%- for b in breakdown -%}
+    <div class="ux-oee__metric">
+      <span class="ux-oee__metric-value">{{ b.value|e }}</span>
+      <span class="ux-oee__metric-label">{{ b.label|e }}</span>
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- endif -%}
+</div>
+{% endmacro %}

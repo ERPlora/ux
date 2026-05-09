@@ -1,0 +1,31 @@
+{# attendance(items, attrs)
+
+   CSS root: .ux-attendance (lib/css/components/hr.css)
+   Attendance list — one row per employee with status badge and times.
+
+   Each item: {name, role?, time?, status: "present"|"late"|"absent"|"leave",
+               status_label?, avatar?: initials}
+#}
+{% macro attendance(items=[], title=None, attrs={}) %}
+<div class="ux-attendance"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if title -%}
+  <div class="ux-attendance__head"><div class="ux-attendance__title">{{ title|e }}</div></div>
+  {%- endif -%}
+  <div class="ux-attendance__list">
+    {%- for it in items -%}
+    <div class="ux-attendance__item">
+      <span class="ux-attendance__avatar ux-avatar ux-avatar--sm">{{ it.avatar|default("?")|e }}</span>
+      <div class="ux-attendance__info">
+        <div class="ux-attendance__name">{{ it.name|e }}</div>
+        {%- if it.role %}<div class="ux-attendance__role">{{ it.role|e }}</div>{% endif -%}
+      </div>
+      {%- if it.time %}<div class="ux-attendance__time">{{ it.time|e }}</div>{% endif -%}
+      <span class="ux-attendance__status ux-attendance__status--{{ it.status|default('present') }}">
+        {{ it.status_label|default(it.status|default('present'))|e }}
+      </span>
+    </div>
+    {%- endfor -%}
+  </div>
+</div>
+{% endmacro %}

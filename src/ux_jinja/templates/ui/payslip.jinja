@@ -1,0 +1,31 @@
+{# payslip(name, period, rows, net, attrs)
+
+   CSS root: .ux-payslip (lib/css/components/hr.css)
+   Payslip table with header row, multiple rows of concept/value and a
+   highlighted net total at the bottom.
+
+   rows: list of {label, value, total?: bool}
+#}
+{% macro payslip(name="", period="", rows=[], net=None, net_label="Neto", attrs={}) %}
+<div class="ux-payslip"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-payslip__head">
+    <div class="ux-payslip__title">{{ name|e }}</div>
+    {%- if period %}<div class="ux-payslip__period">{{ period|e }}</div>{% endif -%}
+  </div>
+  <div class="ux-payslip__rows">
+    <div class="ux-payslip__row ux-payslip__row--header"><span>Concepto</span><span>Importe</span></div>
+    {%- for r in rows -%}
+    <div class="ux-payslip__row{% if r.total %} ux-payslip__row--total{% endif %}">
+      <span>{{ r.label|e }}</span><span>{{ r.value|e }}</span>
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- if net is not none -%}
+  <div class="ux-payslip__net">
+    <span class="ux-payslip__net-label">{{ net_label|e }}</span>
+    <span class="ux-payslip__net-value">{{ net|e }}</span>
+  </div>
+  {%- endif -%}
+</div>
+{% endmacro %}

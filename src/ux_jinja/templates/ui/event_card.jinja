@@ -1,0 +1,37 @@
+{# event_card(title, day, month, location, attendees, variant, size, attrs)
+
+   CSS root: .ux-event-card (lib/css/components/commerce.css)
+   Calendar / event card with date block and attendee avatars.
+
+   attendees: list of {initials, label?}
+   variant:   "" | "danger"
+   size:      "" | sm | lg
+#}
+{% macro event_card(title="", day="", month="", location=None, attendees=[], variant="", size="", attrs={}) %}
+{%- set classes = ["ux-event-card"] -%}
+{%- if variant %}{%- do classes.append("ux-event-card--" ~ variant) -%}{%- endif -%}
+{%- if size %}{%- do classes.append("ux-event-card--" ~ size) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-event-card__date-block">
+    <span class="ux-event-card__day">{{ day|e }}</span>
+    <span class="ux-event-card__month">{{ month|e }}</span>
+  </div>
+  <div class="ux-event-card__body">
+    <div class="ux-event-card__title">{{ title|e }}</div>
+    {%- if location %}<div class="ux-event-card__location">{{ location|e }}</div>{% endif -%}
+    {%- if attendees -%}
+    <div class="ux-event-card__attendees">
+      <div class="ux-event-card__avatars">
+        {%- for a in attendees[:4] -%}
+        <span class="ux-avatar ux-avatar--xs">{{ a.initials|e }}</span>
+        {%- endfor -%}
+        {%- if attendees|length > 4 -%}
+        <span class="ux-avatar ux-avatar--xs ux-avatar--more">+{{ attendees|length - 4 }}</span>
+        {%- endif -%}
+      </div>
+    </div>
+    {%- endif -%}
+  </div>
+</div>
+{% endmacro %}

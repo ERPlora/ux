@@ -1,0 +1,38 @@
+{# shift_cal(days, rows, today, attrs)
+
+   CSS root: .ux-shift-cal (lib/css/components/hr.css)
+   Weekly shift calendar — header row with day labels, body rows per
+   employee with shift type badges per cell.
+
+   `days` — list of dicts: {label, date}
+   `rows` — list of {name, shifts: [{type: "morning|afternoon|night|off", time?}]}
+            shifts list must align with days length
+   `today` — index of today's column (highlights the header cell)
+#}
+{% macro shift_cal(days=[], rows=[], today=None, attrs={}) %}
+<div class="ux-shift-cal"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-shift-cal__head">
+    <div class="ux-shift-cal__head-cell ux-shift-cal__name-cell"></div>
+    {%- for d in days -%}
+    <div class="ux-shift-cal__head-cell{% if today is not none and loop.index0 == today %} ux-shift-cal__head-cell--today{% endif %}">
+      <span>{{ d.label|e }}</span>
+      {%- if d.date %}<span style="color:var(--ux-ink-3);font-size:11px;margin-left:4px;">{{ d.date|e }}</span>{% endif -%}
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- for r in rows -%}
+  <div class="ux-shift-cal__row">
+    <div class="ux-shift-cal__name-cell">{{ r.name|e }}</div>
+    {%- for s in r.shifts -%}
+    <div class="ux-shift-cal__cell">
+      <span class="ux-shift-cal__shift ux-shift-cal__shift--{{ s.type|default('off') }}">
+        <span class="ux-shift-cal__shift-type">{{ s.label|default(s.type|default('Off'))|e }}</span>
+        {%- if s.time %}<span class="ux-shift-cal__shift-time">{{ s.time|e }}</span>{% endif -%}
+      </span>
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- endfor -%}
+</div>
+{% endmacro %}

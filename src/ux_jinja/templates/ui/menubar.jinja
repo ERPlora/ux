@@ -1,0 +1,34 @@
+{# menubar(app_name, items, variant, attrs)
+
+   CSS root: .ux-menubar (lib/css/components/navigation.css)
+   Desktop-app menubar (File / Edit / View …) with optional shortcuts in
+   each menu item. Wires open state via Datastar signals, one per menu.
+
+   items: list of {label, menu: list of {label, shortcut?, divider?}}
+   variant: "" | compact | floating
+#}
+{% macro menubar(app_name=None, items=[], variant="", attrs={}) %}
+{%- set classes = ["ux-menubar"] -%}
+{%- if variant %}{%- do classes.append("ux-menubar--" ~ variant) -%}{%- endif -%}
+<nav class="{{ classes | join(' ') }}" role="menubar"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if app_name %}<span class="ux-menubar__app-name">{{ app_name|e }}</span>{% endif -%}
+  {%- for m in items -%}
+  <div class="ux-menubar__item" data-signals="{{ '{ open' ~ loop.index ~ ': false }' }}">
+    <button type="button" data-on:click="{{ '$open' ~ loop.index ~ ' = !$open' ~ loop.index }}">{{ m.label|e }}</button>
+    <div class="ux-menubar__panel" data-show="{{ '$open' ~ loop.index }}">
+      {%- for it in m.menu -%}
+      {%- if it.divider -%}
+      <div class="ux-menubar__divider"></div>
+      {%- else -%}
+      <div class="ux-menubar__menu">
+        <span>{{ it.label|e }}</span>
+        {%- if it.shortcut %}<span class="ux-menubar__menu-shortcut">{{ it.shortcut|e }}</span>{% endif -%}
+      </div>
+      {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+  {%- endfor -%}
+</nav>
+{% endmacro %}

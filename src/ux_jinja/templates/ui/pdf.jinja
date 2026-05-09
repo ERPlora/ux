@@ -1,0 +1,44 @@
+{# pdf(pages, current, no_thumbs, attrs)
+
+   CSS root: .ux-pdf (lib/css/components/multimedia.css)
+   PDF viewer shell — toolbar, optional thumbnail strip, page viewport.
+   Supply rendered page contents via the caller block.
+#}
+{% macro pdf(pages=10, current=1, no_thumbs=False, attrs={}) %}
+{%- set classes = ["ux-pdf"] -%}
+{%- if no_thumbs %}{%- do classes.append("ux-pdf--no-thumbs") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-pdf__toolbar">
+    <div class="ux-pdf__toolbar-group">
+      <button class="ux-pdf__btn" aria-label="Anterior"><iconify-icon icon="lucide:chevron-left" width="14" height="14"></iconify-icon></button>
+      <span class="ux-pdf__page-info">
+        <input class="ux-pdf__page-input" type="number" min="1" max="{{ pages }}" value="{{ current }}"/>
+        <span class="ux-pdf__page-num">/ {{ pages }}</span>
+      </span>
+      <button class="ux-pdf__btn" aria-label="Siguiente"><iconify-icon icon="lucide:chevron-right" width="14" height="14"></iconify-icon></button>
+    </div>
+    <div class="ux-pdf__toolbar-spacer"></div>
+    <div class="ux-pdf__toolbar-group">
+      <button class="ux-pdf__btn" aria-label="Reducir"><iconify-icon icon="lucide:zoom-out" width="14" height="14"></iconify-icon></button>
+      <button class="ux-pdf__btn" aria-label="Ampliar"><iconify-icon icon="lucide:zoom-in" width="14" height="14"></iconify-icon></button>
+      <span class="ux-pdf__toolbar-sep"></span>
+      <button class="ux-pdf__btn" aria-label="Descargar"><iconify-icon icon="lucide:download" width="14" height="14"></iconify-icon></button>
+    </div>
+  </div>
+  <div class="ux-pdf__viewer">
+    {%- if not no_thumbs -%}
+    <div class="ux-pdf__thumbs">
+      {%- for i in range(1, pages + 1) -%}
+      <div class="ux-pdf__thumb"><div class="ux-pdf__thumb-content"></div><div class="ux-pdf__thumb-num">{{ i }}</div></div>
+      {%- endfor -%}
+    </div>
+    {%- endif -%}
+    <div class="ux-pdf__page">
+      <div class="ux-pdf__page-content">
+        {%- if caller is defined %}{{ caller() }}{% endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}

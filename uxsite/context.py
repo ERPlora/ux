@@ -139,6 +139,30 @@ COMPONENT_NAMES: list[str] = [
     "panel",
     "donut",
     "gauge",
+    # ── v2.1 round 3 (verticals) ─────────────────────────────────────
+    "audio",
+    "video",
+    "pdf",
+    "clock",
+    "attendance",
+    "perf",
+    "shift_cal",
+    "payslip",
+    "machine",
+    "prodline",
+    "qc",
+    "batch",
+    "oee",
+    "work_order",
+    "signature",
+    "loyalty",
+    "ticket",
+    "event_card",
+    "product",
+    "menubar",
+    "scheduler",
+    "sheet",
+    "swipe",
 ]
 
 
@@ -254,6 +278,29 @@ COMPONENT_DESCRIPTIONS: dict[str, str] = {
     "panel": "Generic panel — header / body / footer slots, ghost and bordered variants.",
     "donut": "SVG donut chart — segment list plus centre value, label and sub-line.",
     "gauge": "Half-arc gauge for OEE / quality / SLA readouts — variant per status colour.",
+    "audio": "Audio player chrome with cover, play button, scrubber and time — compact / full variants.",
+    "video": "Video player with poster, play overlay and progress controls — sm / lg sizes.",
+    "pdf": "PDF viewer shell — toolbar, optional thumbnail strip and page viewport.",
+    "clock": "Time-clock kiosk for attendance — entry / break / exit buttons and elapsed time.",
+    "attendance": "Attendance roster row — avatar, name, role, status badge (present/late/absent/leave).",
+    "perf": "Performance KPI bar — value vs target with optional delta arrow.",
+    "shift_cal": "Weekly shift calendar — header day cells and per-employee shift rows.",
+    "payslip": "Payslip table — concept rows plus highlighted net total at the bottom.",
+    "machine": "Machine card with state badge, metric grid and alert chips.",
+    "prodline": "Production-line schematic — stations connected by running / slow / blocked progress bars.",
+    "qc": "Quality-check inspection sheet — items list, summary stats and inspector row.",
+    "batch": "Batch traceability card — id, product, qty, status and chain timeline.",
+    "oee": "OEE radial gauge with availability / performance / quality breakdown.",
+    "work_order": "Work-order panel — segmented progress bar and step-by-step status list.",
+    "signature": "Signature pad shell — SVG capture surface plus clear / accept actions.",
+    "loyalty": "Membership card — brand, tier, points and number; brand / gold / silver / platinum variants.",
+    "ticket": "POS / kitchen ticket — header, line items with mods and totals; takeaway / delivery type badges.",
+    "event_card": "Calendar event card with date block, location and attendee avatar stack.",
+    "product": "Product card for catalogues — image, badges, brand, name, price and CTA.",
+    "menubar": "Desktop-app menubar (File / Edit / View) with shortcut hints in each menu.",
+    "scheduler": "Calendar scheduler grid — day or week view with appointment blocks per cell.",
+    "sheet": "Bottom sheet — iOS-style action panel with backdrop, driven by a Datastar signal.",
+    "swipe": "Swipeable list row — reveals delete / archive / flag actions on swipe.",
 }
 
 
@@ -415,9 +462,9 @@ SIDEBAR_GROUPS: list[dict] = [
             {"label": "Manufactura",              "href": "/c/manufacturing_panel", "icon": _FACTORY},
             {"label": "Recursos humanos",         "href": "/c/hr_card",             "icon": _FACTORY},
             {"label": "Multimedia",               "href": "/c/multimedia",          "icon": _FACTORY},
-            {"label": "Forms avanzados",          "href": "#",                      "icon": _FACTORY, "badge": "soon"},
+            {"label": "Wizard · Signature",       "href": "/c/wizard",              "icon": _FACTORY},
             {"label": "Comercial · invoice",      "href": "/c/commerce_card",       "icon": _FACTORY},
-            {"label": "Mobile patterns",          "href": "#",                      "icon": _FACTORY, "badge": "soon"},
+            {"label": "Sheet · Swipe",            "href": "/c/sheet",               "icon": _FACTORY},
             {"label": "Cmd+K · Notif · Coach",    "href": "/c/cmdk",                "icon": _FACTORY},
             {"label": "Estados · skel · loading", "href": "/c/states",              "icon": _FACTORY},
         ],
@@ -459,15 +506,57 @@ SIDEBAR_GROUPS: list[dict] = [
             {"label": "Gauge",          "href": "/c/gauge",    "icon": _TABLE},
         ],
     },
-    # ── v2.1 · Verticals ─────────────────────────────────────────────────────
+    # ── v2.1 · Multimedia ────────────────────────────────────────────────────
     {
-        "label": "v2.1 · Verticals",
+        "label": "v2.1 · Multimedia",
         "items": [
-            {"label": "Audio · Video · PDF",                        "href": "#", "icon": _FACTORY, "badge": "soon"},
-            {"label": "Time clock · Shift cal · Attendance · Perf", "href": "#", "icon": _FACTORY, "badge": "soon"},
-            {"label": "Machine · Prodline · QC · Batch",            "href": "#", "icon": _FACTORY, "badge": "soon"},
-            {"label": "Loyalty · Ticket · Event · Product",         "href": "#", "icon": _STORE,   "badge": "soon"},
-            {"label": "Menubar · Scheduler",                        "href": "#", "icon": _NAV,     "badge": "soon"},
+            {"label": "Audio",     "href": "/c/audio",     "icon": _FACTORY},
+            {"label": "Video",     "href": "/c/video",     "icon": _FACTORY},
+            {"label": "PDF",       "href": "/c/pdf",       "icon": _FACTORY},
+            {"label": "Signature", "href": "/c/signature", "icon": _FACTORY},
+            {"label": "Sheet",     "href": "/c/sheet",     "icon": _FACTORY},
+            {"label": "Swipe",     "href": "/c/swipe",     "icon": _FACTORY},
+        ],
+    },
+    # ── v2.1 · Recursos humanos ──────────────────────────────────────────────
+    {
+        "label": "v2.1 · Recursos humanos",
+        "items": [
+            {"label": "Time clock", "href": "/c/clock",      "icon": _FACTORY},
+            {"label": "Attendance", "href": "/c/attendance", "icon": _FACTORY},
+            {"label": "Perf bar",   "href": "/c/perf",       "icon": _FACTORY},
+            {"label": "Shift cal",  "href": "/c/shift_cal",  "icon": _FACTORY},
+            {"label": "Payslip",    "href": "/c/payslip",    "icon": _FACTORY},
+        ],
+    },
+    # ── v2.1 · Manufactura avanzada ──────────────────────────────────────────
+    {
+        "label": "v2.1 · Manufactura avanzada",
+        "items": [
+            {"label": "Machine card",    "href": "/c/machine",    "icon": _FACTORY},
+            {"label": "Production line", "href": "/c/prodline",   "icon": _FACTORY},
+            {"label": "QC inspection",   "href": "/c/qc",         "icon": _FACTORY},
+            {"label": "Batch trace",     "href": "/c/batch",      "icon": _FACTORY},
+            {"label": "OEE",             "href": "/c/oee",        "icon": _FACTORY},
+            {"label": "Work order",      "href": "/c/work_order", "icon": _FACTORY},
+        ],
+    },
+    # ── v2.1 · Comercio extra ────────────────────────────────────────────────
+    {
+        "label": "v2.1 · Comercio extra",
+        "items": [
+            {"label": "Loyalty card",   "href": "/c/loyalty",    "icon": _STORE},
+            {"label": "Ticket / KDS",   "href": "/c/ticket",     "icon": _STORE},
+            {"label": "Event card",     "href": "/c/event_card", "icon": _STORE},
+            {"label": "Product card",   "href": "/c/product",    "icon": _STORE},
+        ],
+    },
+    # ── v2.1 · Navegación extra ──────────────────────────────────────────────
+    {
+        "label": "v2.1 · Navegación extra",
+        "items": [
+            {"label": "Menubar",   "href": "/c/menubar",   "icon": _NAV},
+            {"label": "Scheduler", "href": "/c/scheduler", "icon": _NAV},
         ],
     },
     # ── Auth ─────────────────────────────────────────────────────────────────

@@ -1,0 +1,51 @@
+{# ticket(num, server, time, items, totals, type, notes, attrs)
+
+   CSS root: .ux-ticket (lib/css/components/commerce.css)
+   POS ticket — order header, line list with mods, totals block and an
+   optional type badge.
+
+   items:  list of {qty, name, mods?: list of strings, price}
+   totals: list of {label, value, main?: bool}
+   type:   "" | takeaway | delivery
+#}
+{% macro ticket(num="", server="", time="", items=[], totals=[], type="", type_label=None, notes=None, delivered=False, attrs={}) %}
+{%- set classes = ["ux-ticket"] -%}
+{%- if delivered %}{%- do classes.append("ux-ticket--delivered") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-ticket__head">
+    <div>
+      <div class="ux-ticket__num">{{ num|e }}</div>
+      {%- if server %}<div class="ux-ticket__server">{{ server|e }}</div>{% endif -%}
+    </div>
+    {%- if time %}<div class="ux-ticket__time">{{ time|e }}</div>{% endif -%}
+    {%- if type -%}
+    <span class="ux-ticket__type-badge ux-ticket__type-badge--{{ type }}">{{ type_label|default(type)|e }}</span>
+    {%- endif -%}
+  </div>
+  <div class="ux-ticket__divider"></div>
+  <div class="ux-ticket__items">
+    {%- for it in items -%}
+    <div class="ux-ticket__item">
+      <span class="ux-ticket__qty">{{ it.qty|e }}×</span>
+      <span class="ux-ticket__name">{{ it.name|e }}</span>
+      <span class="ux-ticket__price">{{ it.price|e }}</span>
+      {%- if it.mods -%}
+      <span class="ux-ticket__mods">{{ it.mods | join(' · ') | e }}</span>
+      {%- endif -%}
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- if totals -%}
+  <div class="ux-ticket__divider"></div>
+  <div class="ux-ticket__totals">
+    {%- for t in totals -%}
+    <div class="ux-ticket__total-row{% if t.main %} ux-ticket__total-row--main{% endif %}">
+      <span>{{ t.label|e }}</span><span>{{ t.value|e }}</span>
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- endif -%}
+  {%- if notes %}<div class="ux-ticket__notes">{{ notes|e }}</div>{% endif -%}
+</div>
+{% endmacro %}

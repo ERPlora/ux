@@ -1,0 +1,33 @@
+{# prodline(stations, attrs)
+
+   CSS root: .ux-prodline (lib/css/components/manufacturing.css)
+   Production-line schematic — a row of stations connected by progress
+   bars. Each station has a count and an icon; each connector can be
+   running, slow or blocked.
+
+   stations: list of {label, count?, icon?: Iconify name}
+   connectors: list of {kind: "running"|"slow"|"blocked", percent?: 0..100}
+               len(connectors) == len(stations) - 1
+#}
+{% macro prodline(stations=[], connectors=[], attrs={}) %}
+<div class="ux-prodline"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-prodline__line">
+    {%- for s in stations -%}
+    <div class="ux-prodline__station">
+      <span class="ux-prodline__station-icon">
+        {%- if s.icon -%}<iconify-icon icon="{{ s.icon|e }}" width="18" height="18"></iconify-icon>{%- endif -%}
+      </span>
+      <span class="ux-prodline__station-name">{{ s.label|e }}</span>
+      {%- if s.count is not none %}<span class="ux-prodline__station-count">{{ s.count|e }}</span>{% endif -%}
+    </div>
+    {%- if not loop.last -%}
+      {%- set conn = connectors[loop.index0] if connectors and connectors|length > loop.index0 else {} -%}
+      <div class="ux-prodline__connector{% if conn.kind == 'slow' %} ux-prodline__connector--slow{% elif conn.kind == 'blocked' %} ux-prodline__connector--blocked{% endif %}">
+        <div class="ux-prodline__connector-fill" style="width:{{ conn.percent|default(100) }}%;"></div>
+      </div>
+    {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+{% endmacro %}

@@ -1,0 +1,44 @@
+{# batch(id, product, qty, status, meta, chain, attrs)
+
+   CSS root: .ux-batch (lib/css/components/manufacturing.css)
+   Batch traceability card — id, product, quantity, status badge, key/value
+   meta rows and an optional chain/timeline of chain steps.
+
+   meta:  list of {label, value}
+   chain: list of {label, time?, state: "current"|"pending"|""}
+#}
+{% macro batch(id="", product="", qty="", status_label="Active", meta=[], chain=[], attrs={}) %}
+<div class="ux-batch"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <div class="ux-batch__head">
+    <div>
+      <div class="ux-batch__id">{{ id|e }}</div>
+      <div class="ux-batch__product"><span class="ux-batch__product-name">{{ product|e }}</span></div>
+    </div>
+    <span class="ux-batch__status-badge">{{ status_label|e }}</span>
+  </div>
+  {%- if qty %}<div class="ux-batch__qty">{{ qty|e }}</div>{% endif -%}
+  {%- if meta -%}
+  <div class="ux-batch__meta">
+    {%- for m in meta -%}
+    <div class="ux-batch__meta-row">
+      <span class="ux-batch__meta-label">{{ m.label|e }}</span>
+      <span class="ux-batch__meta-value">{{ m.value|e }}</span>
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- endif -%}
+  {%- if chain -%}
+  <div class="ux-batch__chain">
+    {%- for c in chain -%}
+    <div class="ux-batch__chain-step{% if c.state %} ux-batch__chain-step--{{ c.state }}{% endif %}">
+      <div class="ux-batch__chain-step-body">
+        <div class="ux-batch__chain-step-label">{{ c.label|e }}</div>
+        {%- if c.time %}<div class="ux-batch__chain-step-time">{{ c.time|e }}</div>{% endif -%}
+      </div>
+    </div>
+    {%- endfor -%}
+  </div>
+  {%- endif -%}
+</div>
+{% endmacro %}
