@@ -1,0 +1,36 @@
+{# segment(options, value_signal, value_key, size, attrs)
+
+   CSS root: .ux-segment (lib/css/components/forms-extra.css)
+   Segmented control — a row of buttons, one active. Lighter than tabs:
+   used for view-toggles, day-range filters, etc.
+
+   Args:
+     - options       list of (value, label) tuples or {value, label} dicts
+     - value_signal  Datastar signal holding the active value
+     - value_key     initial active value (when no signal)
+     - size          "" | "sm" | "lg"
+     - attrs         extra HTML attributes on the wrapper
+#}
+{% macro segment(options=[], value_signal=None, value_key=None, size="", attrs={}) %}
+{%- set classes = ["ux-segment"] -%}
+{%- if size %}{%- do classes.append("ux-segment--" ~ size) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}" role="tablist"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for opt in options -%}
+    {%- if opt is mapping -%}
+      {%- set v = opt.value -%}
+      {%- set lbl = opt.label -%}
+    {%- else -%}
+      {%- set v = opt[0] -%}
+      {%- set lbl = opt[1] -%}
+    {%- endif -%}
+    {%- set active = (value_key is not none and value_key == v) -%}
+    <button type="button" class="ux-segment__opt" role="tab"
+      {%- if active %} aria-pressed="true" data-active="true"{% endif -%}
+      {%- if value_signal %} data-on:click='{{ value_signal }} = {{ v|tojson }}'
+        data-attr:aria-pressed='({{ value_signal }} === {{ v|tojson }}) ? "true" : null'
+        data-attr:data-active='({{ value_signal }} === {{ v|tojson }}) ? "true" : null'{% endif -%}
+    >{{ lbl|e }}</button>
+  {%- endfor -%}
+</div>
+{% endmacro %}

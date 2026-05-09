@@ -1,0 +1,35 @@
+{# autocomplete(name, options, query_signal, value_signal, placeholder, attrs)
+
+   CSS root: .ux-autocomplete (lib/css/components/pickers.css)
+   Search-as-you-type list. Lighter than `combo` — just an input plus a
+   filtered options list, no chips or popover positioning.
+
+   Args:
+     - name          input name
+     - options       list of dicts: {value, label, meta?, icon?, group?}
+     - placeholder   placeholder text
+     - query_signal  Datastar signal that holds the current query
+     - value_signal  Datastar signal that receives the picked value
+     - attrs         extra HTML attributes on the wrapper
+#}
+{% macro autocomplete(name="q", options=[], placeholder="Buscar...", query_signal=None, value_signal=None, attrs={}) %}
+<div class="ux-autocomplete"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <input class="ux-input" type="search" name="{{ name|e }}" placeholder="{{ placeholder|e }}"
+    {%- if query_signal %} data-bind="{{ query_signal }}"{% endif -%}>
+  <ul class="ux-autocomplete__list" role="listbox">
+    {%- for opt in options -%}
+    <li class="ux-autocomplete__opt" role="option"
+      {%- if opt.value is defined and value_signal %}
+        data-on:click='{{ value_signal }} = {{ opt.value|tojson }}'
+        data-attr:aria-selected='({{ value_signal }} === {{ opt.value|tojson }}) ? "true" : null'
+      {%- endif -%}
+      {%- if opt.group %} data-group="{{ opt.group|e }}"{% endif -%}>
+      {%- if opt.icon %}<span class="ux-autocomplete__opt-icon">{{ opt.icon|safe }}</span>{% endif -%}
+      <span>{{ opt.label|e }}</span>
+      {%- if opt.meta %}<span class="ux-autocomplete__opt-meta">{{ opt.meta|e }}</span>{% endif -%}
+    </li>
+    {%- endfor -%}
+  </ul>
+</div>
+{% endmacro %}

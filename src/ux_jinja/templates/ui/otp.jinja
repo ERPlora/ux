@@ -1,0 +1,31 @@
+{# otp(name, length, value, size, value_signal, attrs)
+
+   CSS root: .ux-otp (lib/css/components/pickers.css)
+   One-time-password / verification-code split input. Pair with a Datastar
+   signal that concatenates the cells if you want a single bound value.
+
+   Args:
+     - name          shared name prefix; cells become "{name}-1", "{name}-2"...
+     - length        number of cells (default 6)
+     - separator_at  index where to insert a separator (e.g. 3 → "•••-•••")
+     - size          "" | "sm" | "lg"
+     - value         pre-fill string (each char fills one cell)
+     - value_signal  Datastar signal for two-way bind on each cell (string)
+     - attrs         extra HTML attributes on the wrapper
+#}
+{% macro otp(name, length=6, separator_at=None, size="", value="", value_signal=None, attrs={}) %}
+{%- set classes = ["ux-otp"] -%}
+{%- if size %}{%- do classes.append("ux-otp--" ~ size) -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for i in range(length) -%}
+    {%- if separator_at and i == separator_at -%}
+    <span class="ux-otp__sep">·</span>
+    {%- endif -%}
+    <input class="ux-otp__cell" type="text" inputmode="numeric" maxlength="1"
+           name="{{ name|e }}-{{ i }}" autocomplete="one-time-code"
+           {%- if value and value | length > i %} value="{{ value[i]|e }}"{% endif -%}
+           {%- if value_signal %} data-bind="{{ value_signal|e }}_{{ i }}"{% endif -%} />
+  {%- endfor -%}
+</div>
+{% endmacro %}

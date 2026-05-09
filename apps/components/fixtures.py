@@ -1784,6 +1784,221 @@ EXAMPLES: dict[str, list[dict[str, str]]] = {
             '{% endcall %}'
         )},
     ],
+    # ── v2.1 macros (added 2026-05-09) ─────────────────────────────────
+    "menu_btn": [
+        {"label": "Default · suelto y dentro de un topbar", "render": (
+            '{% from "ui/menu_btn.jinja" import menu_btn %}'
+            '<div class="ux-flex ux-gap-3 ux-items-center" data-signals=\'{"open": false}\'>'
+            '{{ menu_btn(label="Abrir menú", on_click="$open = !$open") }}'
+            '<span class="ux-c-ink-3 ux-text-sm" data-text="$open ? \'menú abierto\' : \'menú cerrado\'">menú cerrado</span>'
+            '</div>'
+        )},
+        {"label": "Mobile only — hidden ≥ desktop", "render": (
+            '{% from "ui/menu_btn.jinja" import menu_btn %}'
+            '{{ menu_btn(label="Abrir menú", mobile_only=True) }}'
+        )},
+    ],
+    "table": [
+        {"label": "Tabla básica", "render": (
+            '{% from "ui/table.jinja" import table %}'
+            '{{ table('
+            '  columns=['
+            '    {"key": "name", "label": "Cliente"},'
+            '    {"key": "city", "label": "Ciudad"},'
+            '    {"key": "amount", "label": "Importe", "align": "right"},'
+            '  ],'
+            '  rows=['
+            '    {"name": "Acme S.L.", "city": "Madrid", "amount": "1.240,00 €"},'
+            '    {"name": "Norden Bikes", "city": "Barcelona", "amount": "820,50 €"},'
+            '    {"name": "Pulpo Cooperativa", "city": "Valencia", "amount": "415,00 €"},'
+            '  ]) }}'
+        )},
+        {"label": "Densa · cabeceras ordenables", "render": (
+            '{% from "ui/table.jinja" import table %}'
+            '{{ table(dense=True,'
+            '  columns=['
+            '    {"key": "sku", "label": "SKU", "sortable": True, "sort": "ascending"},'
+            '    {"key": "name", "label": "Producto", "sortable": True},'
+            '    {"key": "stock", "label": "Stock", "align": "right"},'
+            '  ],'
+            '  rows=['
+            '    {"sku": "A-001", "name": "Café 250 g", "stock": 124},'
+            '    {"sku": "A-002", "name": "Café molido", "stock": 56, "selected": True},'
+            '    {"sku": "B-110", "name": "Cápsulas mix", "stock": 12},'
+            '  ]) }}'
+        )},
+    ],
+    "sparkline": [
+        {"label": "Variantes y tamaños", "render": (
+            '{% from "ui/sparkline.jinja" import sparkline %}'
+            '<div class="ux-flex ux-wrap ux-gap-3 ux-items-center">'
+            '{{ sparkline([3,5,4,7,6,9,8,11,10,13], variant="up") }} '
+            '{{ sparkline([12,10,11,8,9,6,7,4,3,2], variant="down") }} '
+            '{{ sparkline([5,7,6,9,8,11,10,13,12,15], variant="brand", filled=True) }}'
+            '</div>'
+            '<div class="ux-flex ux-wrap ux-gap-3 ux-items-center" style="margin-top:14px;">'
+            '{{ sparkline([3,5,4,7,6,9,8], variant="brand", size="sm") }} '
+            '{{ sparkline([3,5,4,7,6,9,8,11,10], variant="brand") }} '
+            '{{ sparkline([3,5,4,7,6,9,8,11,10,13,15,12], variant="brand", size="lg") }}'
+            '</div>'
+        )},
+        {"label": "Embebido en una KPI", "render": (
+            '{% from "ui/sparkline.jinja" import sparkline %}'
+            '<div class="ux-card" style="max-width:260px;padding:14px;">'
+            '<div class="ux-eyebrow ux-c-ink-3">Tickets · 7 días</div>'
+            '<div class="ux-flex ux-items-end ux-gap-3" style="margin-top:6px;">'
+            '<span style="font-family:var(--ux-font-display);font-size:24px;font-weight:600;">184</span>'
+            '{{ sparkline([12,18,14,22,19,28,24], variant="up", size="lg", filled=True) }}'
+            '</div>'
+            '</div>'
+        )},
+    ],
+    "otp": [
+        {"label": "6 dígitos · default", "render": (
+            '{% from "ui/otp.jinja" import otp %}'
+            '<div data-signals=\'{"otp0":"","otp1":"","otp2":"","otp3":"","otp4":"","otp5":""}\'>'
+            '{{ otp("code", length=6, value_signal="$otp") }}'
+            '</div>'
+        )},
+        {"label": "Con separador y tamaño grande", "render": (
+            '{% from "ui/otp.jinja" import otp %}'
+            '{{ otp("code2", length=6, separator_at=3, size="lg") }}'
+        )},
+    ],
+    "pinpad": [
+        {"label": "POS PIN · 4 dígitos", "render": (
+            '{% from "ui/pinpad.jinja" import pinpad %}'
+            '<div data-signals=\'{"pin": ""}\' class="ux-flex ux-flex-col ux-items-center ux-gap-3">'
+            '<div style="font-family:var(--ux-font-mono);font-size:22px;letter-spacing:8px;color:var(--ux-ink);min-height:28px;" data-text="\'•\'.repeat($pin.length).padEnd(4, \'_\')">____</div>'
+            '{{ pinpad(value_signal="$pin", max_length=4) }}'
+            '</div>'
+        )},
+    ],
+    "rating": [
+        {"label": "Interactivo · 0/5", "render": (
+            '{% from "ui/rating.jinja" import rating %}'
+            '<div data-signals=\'{"stars": 4}\'>'
+            '{{ rating(value=4, value_signal="$stars", label="4 / 5") }}'
+            '</div>'
+        )},
+        {"label": "Tamaños y readonly", "render": (
+            '{% from "ui/rating.jinja" import rating %}'
+            '<div class="ux-flex ux-flex-col ux-gap-2">'
+            '{{ rating(value=5, size="sm", readonly=True) }}'
+            '{{ rating(value=3, readonly=True) }}'
+            '{{ rating(value=2, size="lg", readonly=True) }}'
+            '</div>'
+        )},
+    ],
+    "qty_stepper": [
+        {"label": "Default · sm · lg", "render": (
+            '{% from "ui/qty_stepper.jinja" import qty_stepper %}'
+            '<div class="ux-flex ux-wrap ux-gap-3 ux-items-center" data-signals=\'{"q1":1,"q2":2,"q3":4}\'>'
+            '{{ qty_stepper("q1", value=1, min=1, max=99, size="sm", value_signal="$q1") }}'
+            '{{ qty_stepper("q2", value=2, min=0, max=99, value_signal="$q2") }}'
+            '{{ qty_stepper("q3", value=4, min=0, max=99, size="lg", value_signal="$q3") }}'
+            '</div>'
+        )},
+    ],
+    "segment": [
+        {"label": "Día · semana · mes · trimestre", "render": (
+            '{% from "ui/segment.jinja" import segment %}'
+            '<div data-signals=\'{"period": "week"}\'>'
+            '{{ segment(options=[("day","Día"),("week","Semana"),("month","Mes"),("q","Trim.")], value_signal="$period", value_key="week") }}'
+            '<div class="ux-c-ink-3 ux-text-sm" style="margin-top:10px;" data-text="\'Periodo activo: \' + $period">Periodo activo: week</div>'
+            '</div>'
+        )},
+        {"label": "Tamaños", "render": (
+            '{% from "ui/segment.jinja" import segment %}'
+            '<div class="ux-flex ux-flex-col ux-gap-2">'
+            '{{ segment(options=[("a","Lista"),("b","Cuadrícula")], size="sm", value_key="a") }}'
+            '{{ segment(options=[("a","Lista"),("b","Cuadrícula")], value_key="a") }}'
+            '{{ segment(options=[("a","Lista"),("b","Cuadrícula")], size="lg", value_key="a") }}'
+            '</div>'
+        )},
+    ],
+    "stepper": [
+        {"label": "Horizontal · 4 pasos", "render": (
+            '{% from "ui/stepper.jinja" import stepper %}'
+            '{{ stepper(steps=['
+            '  {"title": "Cuenta", "sub": "Email y nombre", "state": "done"},'
+            '  {"title": "Empresa", "sub": "Datos fiscales", "state": "done"},'
+            '  {"title": "Pago", "sub": "Tarjeta o transferencia", "state": "active"},'
+            '  {"title": "Listo", "sub": "Confirmación"},'
+            ']) }}'
+        )},
+        {"label": "Vertical · settings wizard", "render": (
+            '{% from "ui/stepper.jinja" import stepper %}'
+            '{{ stepper(vertical=True, steps=['
+            '  {"title": "Conexión Stripe", "sub": "Onboarding completado", "state": "done"},'
+            '  {"title": "Identidad fiscal", "sub": "DNI subido y verificado", "state": "done"},'
+            '  {"title": "Cuenta bancaria", "sub": "Pendiente de validar", "state": "active"},'
+            '  {"title": "Primer payout", "sub": "Tras la primera venta"},'
+            ']) }}'
+        )},
+    ],
+    "popover": [
+        {"label": "Toggle · filtros rápidos", "render": (
+            '{% from "ui/popover.jinja" import popover %}'
+            '<div data-signals=\'{"pop": false}\' style="position:relative;display:inline-block;">'
+            '<button class="ux-btn ux-btn--ghost" data-on:click="$pop = !$pop">Filtros</button>'
+            '{% call popover(title="Filtrar pedidos", open_signal="$pop") %}'
+            '<div class="ux-flex ux-flex-col ux-gap-2">'
+            '<label class="ux-flex ux-items-center ux-gap-2"><input type="checkbox" class="ux-check"> Sólo facturados</label>'
+            '<label class="ux-flex ux-items-center ux-gap-2"><input type="checkbox" class="ux-check"> Excluir devoluciones</label>'
+            '<label class="ux-flex ux-items-center ux-gap-2"><input type="checkbox" class="ux-check"> Pendiente de cobro</label>'
+            '</div>'
+            '{% endcall %}'
+            '</div>'
+        )},
+    ],
+    "autocomplete": [
+        {"label": "Buscar cliente", "render": (
+            '{% from "ui/autocomplete.jinja" import autocomplete %}'
+            '<div data-signals=\'{"q": "", "client": ""}\'>'
+            '{{ autocomplete("client", placeholder="Empieza a escribir un cliente...",'
+            '   query_signal="$q", value_signal="$client",'
+            '   options=['
+            '     {"value": "acme", "label": "Acme S.L.", "meta": "12 facturas"},'
+            '     {"value": "norden", "label": "Norden Bikes", "meta": "Barcelona"},'
+            '     {"value": "pulpo", "label": "Pulpo Cooperativa", "meta": "Valencia"},'
+            '     {"value": "ojala", "label": "Ojalá Bar", "meta": "Madrid"},'
+            '   ]) }}'
+            '<div class="ux-c-ink-3 ux-text-sm" style="margin-top:10px;" data-text="\'Seleccionado: \' + ($client || \'—\')">Seleccionado: —</div>'
+            '</div>'
+        )},
+    ],
+    "color_picker": [
+        {"label": "Paleta de marca", "render": (
+            '{% from "ui/color_picker.jinja" import color_picker %}'
+            '<div data-signals=\'{"brand": "#E8552A"}\'>'
+            '{{ color_picker("brand_color",'
+            '  swatches=["#E8552A","#1E3A8A","#2F5233","#0EA5E9","#7C3AED","#111827","#10B981","#F59E0B","#EF4444"],'
+            '  value="#E8552A", value_signal="$brand") }}'
+            '<div class="ux-c-ink-3 ux-text-sm" style="margin-top:10px;" data-text="\'Color activo: \' + $brand">Color activo: #E8552A</div>'
+            '</div>'
+        )},
+    ],
+    "currency": [
+        {"label": "EUR · USD · GBP", "render": (
+            '{% from "ui/currency.jinja" import currency %}'
+            '<div class="ux-flex ux-flex-col ux-gap-3" style="max-width:280px;">'
+            '{{ currency("amount_eur", value=1240.50, symbol="€") }}'
+            '{{ currency("amount_usd", value=2199.00, symbol="$") }}'
+            '{{ currency("amount_multi", value=550.00, currency_options=["EUR","USD","GBP","CHF"]) }}'
+            '</div>'
+        )},
+    ],
+    "phone": [
+        {"label": "España · Francia · UK", "render": (
+            '{% from "ui/phone.jinja" import phone %}'
+            '<div class="ux-flex ux-flex-col ux-gap-3" style="max-width:280px;">'
+            '{{ phone("p_es", value="612 345 678", dial="+34", flag="🇪🇸") }}'
+            '{{ phone("p_fr", value="0 6 12 34 56 78", dial="+33", flag="🇫🇷") }}'
+            '{{ phone("p_uk", value="07700 900 000", dial="+44", flag="🇬🇧") }}'
+            '</div>'
+        )},
+    ],
 }
 
 
@@ -2245,6 +2460,77 @@ USAGE: dict[str, str] = {
         '    </div>\n'
         '  </div>\n'
         '{% endcall %}'
+    ),
+    # ── v2.1 macros (added 2026-05-09) ─────────────────────────────────
+    "menu_btn": (
+        '{% from "ui/menu_btn.jinja" import menu_btn %}\n'
+        '{{ menu_btn(label="Abrir menú", on_click="$sidebar = !$sidebar") }}'
+    ),
+    "table": (
+        '{% from "ui/table.jinja" import table %}\n'
+        '{{ table(\n'
+        '  columns=[{"key": "name", "label": "Cliente"},\n'
+        '           {"key": "amount", "label": "Importe", "align": "right"}],\n'
+        '  rows=[{"name": "Acme", "amount": "1.240 €"}]) }}'
+    ),
+    "sparkline": (
+        '{% from "ui/sparkline.jinja" import sparkline %}\n'
+        '{{ sparkline([3, 5, 4, 7, 6, 9, 8, 11, 10, 13], variant="up") }}'
+    ),
+    "otp": (
+        '{% from "ui/otp.jinja" import otp %}\n'
+        '{{ otp("code", length=6, value_signal="$otp") }}'
+    ),
+    "pinpad": (
+        '{% from "ui/pinpad.jinja" import pinpad %}\n'
+        '{{ pinpad(value_signal="$pin", max_length=4) }}'
+    ),
+    "rating": (
+        '{% from "ui/rating.jinja" import rating %}\n'
+        '{{ rating(value=4, value_signal="$stars", label="4 / 5") }}'
+    ),
+    "qty_stepper": (
+        '{% from "ui/qty_stepper.jinja" import qty_stepper %}\n'
+        '{{ qty_stepper("qty", value=1, min=1, max=99, value_signal="$qty") }}'
+    ),
+    "segment": (
+        '{% from "ui/segment.jinja" import segment %}\n'
+        '{{ segment(\n'
+        '  options=[("d", "Día"), ("w", "Semana"), ("m", "Mes")],\n'
+        '  value_signal="$period", value_key="w") }}'
+    ),
+    "stepper": (
+        '{% from "ui/stepper.jinja" import stepper %}\n'
+        '{{ stepper(steps=[\n'
+        '  {"title": "Cuenta", "state": "done"},\n'
+        '  {"title": "Pago",   "state": "active"},\n'
+        '  {"title": "Listo"}]) }}'
+    ),
+    "popover": (
+        '{% from "ui/popover.jinja" import popover %}\n'
+        '{% call popover(title="Filtros", open_signal="$pop") %}\n'
+        '  …popover body…\n'
+        '{% endcall %}'
+    ),
+    "autocomplete": (
+        '{% from "ui/autocomplete.jinja" import autocomplete %}\n'
+        '{{ autocomplete("client",\n'
+        '  options=[{"value": "acme", "label": "Acme", "meta": "12"}],\n'
+        '  query_signal="$q", value_signal="$client") }}'
+    ),
+    "color_picker": (
+        '{% from "ui/color_picker.jinja" import color_picker %}\n'
+        '{{ color_picker("brand",\n'
+        '  swatches=["#E8552A", "#1E3A8A", "#2F5233"],\n'
+        '  value="#E8552A", value_signal="$brand") }}'
+    ),
+    "currency": (
+        '{% from "ui/currency.jinja" import currency %}\n'
+        '{{ currency("amount", value=1240.50, symbol="€") }}'
+    ),
+    "phone": (
+        '{% from "ui/phone.jinja" import phone %}\n'
+        '{{ phone("phone", value="612 345 678", dial="+34", flag="🇪🇸") }}'
     ),
 }
 

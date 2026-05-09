@@ -1,0 +1,31 @@
+{# color_picker(name, swatches, value, value_signal, attrs)
+
+   CSS root: .ux-colorpicker (lib/css/components/pickers.css)
+   Row of colour swatches. The active swatch shows a check overlay via
+   `aria-pressed="true"`.
+
+   Args:
+     - name          input name (the value is also stored in a hidden input)
+     - swatches      list of CSS colour strings (hex, oklch, var(--...))
+     - value         initial selected colour
+     - value_signal  Datastar signal that holds the picked colour
+     - attrs         extra HTML attributes on the wrapper
+#}
+{% macro color_picker(name="color", swatches=[], value=None, value_signal=None, attrs={}) %}
+<div class="ux-colorpicker"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- for c in swatches -%}
+  <button type="button" class="ux-colorpicker__swatch"
+    style="--ux-color: {{ c }}; background: {{ c }};"
+    aria-label="Color {{ c }}"
+    {%- if value == c %} aria-pressed="true"{% endif -%}
+    {%- if value_signal %}
+      data-on:click='{{ value_signal }} = {{ c|tojson }}'
+      data-attr:aria-pressed='({{ value_signal }} === {{ c|tojson }}) ? "true" : null'
+    {%- endif -%}
+  ></button>
+  {%- endfor -%}
+  <input type="hidden" name="{{ name|e }}"{% if value %} value="{{ value|e }}"{% endif %}
+    {%- if value_signal %} data-bind="{{ value_signal }}"{% endif -%}>
+</div>
+{% endmacro %}

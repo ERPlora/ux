@@ -1,0 +1,30 @@
+{# phone(name, value, dial, flag, size, value_signal, attrs)
+
+   CSS root: .ux-phone (lib/css/components/forms-inputs.css)
+   International phone input — flag + dial code prefix + number input.
+
+   Args:
+     - name          input name
+     - value         initial number (excluding dial code)
+     - dial          dial code (e.g. "+34"); shown next to the flag
+     - flag          emoji flag or raw HTML
+     - size          "" | "sm" | "lg"
+     - invalid       add .ux-phone--invalid
+     - value_signal  Datastar signal for two-way bind
+     - attrs         extra HTML attributes on the wrapper
+#}
+{% macro phone(name="phone", value=None, dial="+34", flag="🇪🇸", size="", invalid=False, value_signal=None, attrs={}) %}
+{%- set classes = ["ux-phone"] -%}
+{%- if size %}{%- do classes.append("ux-phone--" ~ size) -%}{%- endif -%}
+{%- if invalid %}{%- do classes.append("ux-phone--invalid") -%}{%- endif -%}
+<div class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  <button type="button" class="ux-phone__country" aria-label="Cambiar país">
+    <span class="ux-phone__flag">{{ flag|safe }}</span>
+    <span class="ux-phone__dial">{{ dial|e }}</span>
+  </button>
+  <input class="ux-phone__input" type="tel" inputmode="tel" autocomplete="tel"
+         name="{{ name|e }}"{% if value is not none %} value="{{ value|e }}"{% endif %}
+         {%- if value_signal %} data-bind="{{ value_signal }}"{% endif -%}>
+</div>
+{% endmacro %}

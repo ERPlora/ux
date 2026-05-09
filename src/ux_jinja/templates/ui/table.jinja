@@ -1,0 +1,52 @@
+{# table(columns, rows, caption, dense, hover_row, attrs)
+
+   CSS root: .ux-table (lib/css/components/table.css)
+   Plain <table> styled with thead / tbody. For toolbars, search, view-toggle
+   and pagination prefer the richer datatable() macro.
+
+   Args:
+     - columns  list of dicts: {key, label, align?, sortable?, width?}
+     - rows     list of dicts keyed by column.key (raw HTML allowed via |safe)
+     - caption  optional <caption> text
+     - dense    add .ux-table--dense
+     - wrap     when True wrap in .ux-table-wrap (rounded card with overflow)
+     - sticky   add .ux-table--sticky-head
+     - attrs    extra HTML attributes on the <table>
+
+   Cell value passed through the autoescape pipeline. Pass `safe=True` per
+   column to render raw HTML (chips, badges, sparklines).
+#}
+{% macro table(columns=[], rows=[], caption=None, dense=False, wrap=True, sticky=False, attrs={}) %}
+{%- set classes = ["ux-table"] -%}
+{%- if dense %}{%- do classes.append("ux-table--dense") -%}{%- endif -%}
+{%- if sticky %}{%- do classes.append("ux-table--sticky-head") -%}{%- endif -%}
+{%- if wrap %}<div class="ux-table-wrap"><div class="ux-table-scroll">{%- endif -%}
+<table class="{{ classes | join(' ') }}"
+{%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
+  {%- if caption %}<caption>{{ caption|e }}</caption>{% endif %}
+  <thead>
+    <tr>
+      {%- for col in columns -%}
+      <th
+        {%- if col.align %} style="text-align:{{ col.align }}"{% endif -%}
+        {%- if col.sortable %} class="ux-th--sortable" aria-sort="{{ col.sort|default('none') }}"{% endif -%}
+        {%- if col.width %} style="width:{{ col.width }}"{% endif -%}
+      >{{ col.label|e }}</th>
+      {%- endfor -%}
+    </tr>
+  </thead>
+  <tbody>
+    {%- for row in rows -%}
+    <tr{% if row.selected %} aria-selected="true"{% endif %}>
+      {%- for col in columns -%}
+      <td{% if col.align %} style="text-align:{{ col.align }}"{% endif %}>
+        {%- set val = row[col.key] -%}
+        {%- if col.safe -%}{{ val|safe }}{%- else -%}{{ val|e }}{%- endif -%}
+      </td>
+      {%- endfor -%}
+    </tr>
+    {%- endfor -%}
+  </tbody>
+</table>
+{%- if wrap %}</div></div>{%- endif -%}
+{% endmacro %}
