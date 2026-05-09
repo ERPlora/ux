@@ -41,11 +41,17 @@ jobs:
     name: Publish ux-jinja to PyPI
     needs: test
     runs-on: ubuntu-latest
-    # The `pypi` GitHub environment holds PYPI_API_TOKEN. Until that
-    # token is configured, this job is skipped automatically by the
-    # `if:` guard below — Lightsail deploy still runs.
-    environment: pypi
-    if: ${{ vars.PYPI_PUBLISH_ENABLED == 'true' }}
+    # Trusted Publisher (OIDC) — no token, no secret. PyPI verifies
+    # the workflow identity via the `pypi` environment configured at
+    # https://pypi.org/manage/account/publishing/ (pending publisher
+    # for project ux-jinja, repo ERPlora/ux, workflow release.yml,
+    # environment pypi).
+    environment:
+      name: pypi
+      url: https://pypi.org/p/ux-jinja
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,16 +62,13 @@ jobs:
           python-version: "3.14"
 
       - name: Install build tools
-        run: pip install --upgrade build twine
+        run: pip install --upgrade build
 
       - name: Build sdist + wheel
         run: python -m build
 
       - name: Publish to PyPI
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload dist/*
+        uses: pypa/gh-action-pypi-publish@release/v1
 
   deploy-lightsail:
     name: Deploy uxsite to Lightsail
