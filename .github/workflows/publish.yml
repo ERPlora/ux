@@ -1,14 +1,16 @@
 name: Release
 
-# Triggered by pushing a vX.Y.Z tag from main. Three things happen in order:
-#   1. Run the test suite (fail-fast).
-#   2. Build the ux-jinja sdist + wheel and upload to PyPI.
-#   3. Pull the new tag on the Lightsail instance and bounce gunicorn.
+# Two tag conventions, two products in one repo:
+#   v*.*.*           → CSS lib release: build, run tests, deploy uxsite to Lightsail
+#   pyjinja-v*.*.*   → ux-jinja PyPI release: build wheel + sdist, upload via OIDC
+#
+# `workflow_dispatch` allows running the whole thing manually against any ref.
 
 on:
   push:
     tags:
       - "v*.*.*"
+      - "pyjinja-v*.*.*"
   workflow_dispatch:
     inputs:
       tag:
@@ -41,10 +43,12 @@ jobs:
     name: Publish ux-jinja to PyPI
     needs: test
     runs-on: ubuntu-latest
+    # Only on pyjinja-v* tags. CSS-lib releases (v*.*.*) skip this.
+    if: startsWith(github.ref, 'refs/tags/pyjinja-v')
     # Trusted Publisher (OIDC) — no token, no secret. PyPI verifies
     # the workflow identity via the `pypi` environment configured at
     # https://pypi.org/manage/account/publishing/ (pending publisher
-    # for project ux-jinja, repo ERPlora/ux, workflow release.yml,
+    # for project ux-jinja, repo ERPlora/ux, workflow publish.yml,
     # environment pypi).
     environment:
       name: pypi
@@ -73,6 +77,8 @@ jobs:
   deploy-lightsail:
     name: Deploy uxsite to Lightsail
     needs: test
+    # Only on CSS-lib tags (v*.*.*), not on pyjinja-v* PyPI tags.
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
