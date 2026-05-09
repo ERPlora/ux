@@ -631,7 +631,7 @@ def test_tabs_default(env):
     # Single-quoted HTML attributes wrap double-quoted Datastar string
     # literals — same pattern the public preview site uses.
     assert 'data-on:click=\'$main_tab = "resumen"\'' in out
-    assert 'data-attr:aria-selected=\'$main_tab === "aud"\'' in out
+    assert 'data-attr:aria-selected=\'$main_tab === "aud" ? "true" : "false"\'' in out
 
 
 def test_tabs_pill_with_panel(env):
