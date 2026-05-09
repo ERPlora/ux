@@ -22,7 +22,7 @@ async def dashboard_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "dashboard",
             "pages": PAGES,
             "active_route": "/preview/dashboard",
@@ -38,7 +38,7 @@ async def dashboard_detail(request: Request, name: str):
         request,
         f"dashboard/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/dashboard/{name}",
         },
     )

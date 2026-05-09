@@ -27,7 +27,7 @@ async def orgs_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "orgs",
             "pages": PAGES,
             "active_route": "/preview/orgs",
@@ -43,7 +43,7 @@ async def orgs_detail(request: Request, name: str):
         request,
         f"orgs/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/orgs/{name}",
         },
     )

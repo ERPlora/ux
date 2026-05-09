@@ -23,7 +23,7 @@ async def employees_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "employees",
             "pages": PAGES,
             "active_route": "/preview/employees",
@@ -39,7 +39,7 @@ async def employees_detail(request: Request, name: str):
         request,
         f"employees/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/employees/{name}",
         },
     )

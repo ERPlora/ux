@@ -613,8 +613,32 @@ THEME_OPTIONS: list[dict[str, str]] = [
 ]
 
 
-def nav_context() -> dict[str, object]:
-    """Return the navigation context injected into every page render."""
+_THEME_COOKIE = "ux_theme"
+_TEMPLATE_COOKIE = "ux_template"
+_VALID_THEMES = {"erplora", "erplora-light"}
+_VALID_TEMPLATES = {"", "corporate", "corporate-light", "forest", "forest-light",
+                    "ocean", "ocean-light", "minimal", "minimal-light",
+                    "violet", "violet-light"}
+
+
+def nav_context(request: object | None = None) -> dict[str, object]:
+    """Return the navigation context injected into every page render.
+
+    When a `request` is supplied, the user's theme / template choice is
+    restored from cookies set client-side in `_base.html`. Unknown values
+    fall back to the defaults so a malicious cookie can't make the site
+    render with an undefined `data-theme`.
+    """
+    ui_theme = "erplora"
+    ui_template = ""
+    if request is not None:
+        cookies = getattr(request, "cookies", None) or {}
+        cookie_theme = cookies.get(_THEME_COOKIE)
+        cookie_template = cookies.get(_TEMPLATE_COOKIE)
+        if cookie_theme in _VALID_THEMES:
+            ui_theme = cookie_theme
+        if cookie_template in _VALID_TEMPLATES:
+            ui_template = cookie_template
     return {
         "sidebar_groups": SIDEBAR_GROUPS,
         "component_names": COMPONENT_NAMES,
@@ -622,4 +646,6 @@ def nav_context() -> dict[str, object]:
         "component_descriptions": COMPONENT_DESCRIPTIONS,
         "page_descriptions": PAGE_DESCRIPTIONS,
         "theme_options": THEME_OPTIONS,
+        "ui_theme": ui_theme,
+        "ui_template": ui_template,
     }

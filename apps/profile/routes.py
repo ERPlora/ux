@@ -22,7 +22,7 @@ async def profile_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "profile",
             "pages": PAGES,
             "active_route": "/preview/profile",
@@ -38,7 +38,7 @@ async def profile_detail(request: Request, name: str):
         request,
         f"profile/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/profile/{name}",
         },
     )

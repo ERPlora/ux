@@ -37,7 +37,7 @@ async def live(request: Request):
     return templates.TemplateResponse(
         request,
         "live/index.html",
-        {**nav_context(), "active_route": "/live"},
+        {**nav_context(request), "active_route": "/live"},
     )
 
 

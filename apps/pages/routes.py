@@ -30,7 +30,7 @@ async def pages_index(request: Request):
     return templates.TemplateResponse(
         request,
         "pages/index.html",
-        {**nav_context(), "cards": cards, "active_route": "/p"},
+        {**nav_context(request), "cards": cards, "active_route": "/p"},
     )
 
 
@@ -48,7 +48,7 @@ async def page_detail(request: Request, name: str):
         request,
         "pages/detail.html",
         {
-            **nav_context(),
+            **nav_context(request),
             **context_for(name),
             "name": name,
             "description": PAGE_DESCRIPTIONS.get(name, ""),

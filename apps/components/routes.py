@@ -34,7 +34,7 @@ async def components_index(request: Request):
     return templates.TemplateResponse(
         request,
         "components/index.html",
-        {**nav_context(), "cards": cards, "active_route": "/c"},
+        {**nav_context(request), "cards": cards, "active_route": "/c"},
     )
 
 
@@ -48,7 +48,7 @@ async def component_detail(request: Request, name: str):
         request,
         "components/detail.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "name": name,
             "description": COMPONENT_DESCRIPTIONS.get(name, ""),
             "examples": render_examples_for(name),

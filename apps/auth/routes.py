@@ -29,7 +29,7 @@ async def auth_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "auth",
             "pages": PAGES,
             "active_route": "/preview/auth",
@@ -45,7 +45,7 @@ async def auth_detail(request: Request, name: str):
         request,
         f"auth/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/auth/{name}",
         },
     )

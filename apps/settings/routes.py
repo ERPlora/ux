@@ -32,7 +32,7 @@ async def settings_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "settings",
             "pages": PAGES,
             "active_route": "/preview/settings",
@@ -48,7 +48,7 @@ async def settings_detail(request: Request, name: str):
         request,
         f"settings/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/settings/{name}",
         },
     )

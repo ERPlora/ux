@@ -33,7 +33,7 @@ async def marketplace_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "marketplace",
             "pages": PAGES,
             "active_route": "/preview/marketplace",
@@ -49,7 +49,7 @@ async def marketplace_detail(request: Request, name: str):
         request,
         f"marketplace/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/marketplace/{name}",
         },
     )

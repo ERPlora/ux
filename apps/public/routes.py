@@ -23,7 +23,7 @@ async def public_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "public",
             "pages": PAGES,
             "active_route": "/preview/public",
@@ -39,7 +39,7 @@ async def public_detail(request: Request, name: str):
         request,
         f"public/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/public/{name}",
         },
     )

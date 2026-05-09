@@ -29,7 +29,7 @@ async def modules_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "modules",
             "pages": PAGES,
             "active_route": "/preview/modules",
@@ -45,7 +45,7 @@ async def modules_detail(request: Request, name: str):
         request,
         f"modules/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/modules/{name}",
         },
     )

@@ -18,7 +18,7 @@ async def home(request: Request):
         request,
         "home/index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "component_count": len(COMPONENT_NAMES),
             "page_count": len(PAGE_NAMES),
             "active_route": "/",
@@ -33,7 +33,7 @@ async def install(request: Request):
     return templates.TemplateResponse(
         request,
         "home/install.html",
-        {**nav_context(), "active_route": "/install"},
+        {**nav_context(request), "active_route": "/install"},
     )
 
 
@@ -44,5 +44,5 @@ async def design_system(request: Request):
     return templates.TemplateResponse(
         request,
         "home/design_system.html",
-        {**nav_context(), "active_route": "/design-system"},
+        {**nav_context(request), "active_route": "/design-system"},
     )

@@ -1,31 +1,79 @@
 {# otp(name, length, value, size, value_signal, attrs)
 
    CSS root: .ux-otp (lib/css/components/pickers.css)
-   One-time-password / verification-code split input. Pair with a Datastar
-   signal that concatenates the cells if you want a single bound value.
+   One-time-password / verification-code split input. Behaviour wired
+   per-cell, no JS dependency:
+     - typing a digit auto-advances focus to the next cell
+     - Backspace on an empty cell jumps to the previous cell
+     - pasting a code (any cell) fills all cells from that index forward
+     - non-digit input is silently dropped
+
+   When `value_signal` is set, the joined value is mirrored to that
+   Datastar signal on every input/paste so server-side handlers can read
+   the full code via a single signal.
 
    Args:
-     - name          shared name prefix; cells become "{name}-1", "{name}-2"...
+     - name          shared name prefix; cells become "{name}-0", "{name}-1"...
      - length        number of cells (default 6)
-     - separator_at  index where to insert a separator (e.g. 3 → "•••-•••")
+     - separator_at  index where to insert a "·" visual separator
      - size          "" | "sm" | "lg"
      - value         pre-fill string (each char fills one cell)
-     - value_signal  Datastar signal for two-way bind on each cell (string)
+     - value_signal  Datastar signal that holds the joined code
      - attrs         extra HTML attributes on the wrapper
 #}
 {% macro otp(name, length=6, separator_at=None, size="", value="", value_signal=None, attrs={}) %}
 {%- set classes = ["ux-otp"] -%}
 {%- if size %}{%- do classes.append("ux-otp--" ~ size) -%}{%- endif -%}
-<div class="{{ classes | join(' ') }}"
+{%- set _bind_attr = ('data-on:input="' ~ value_signal ~ ' = Array.from(el.parentElement.querySelectorAll(\'.ux-otp__cell\')).map(c => c.value).join(\'\')"') if value_signal else '' -%}
+<div class="{{ classes | join(' ') }}" data-otp
 {%- for k, v in attrs.items() %} {{ k }}="{{ v|e }}"{% endfor -%}>
   {%- for i in range(length) -%}
     {%- if separator_at and i == separator_at -%}
     <span class="ux-otp__sep">·</span>
     {%- endif -%}
-    <input class="ux-otp__cell" type="text" inputmode="numeric" maxlength="1"
-           name="{{ name|e }}-{{ i }}" autocomplete="one-time-code"
+    <input class="ux-otp__cell" type="text" inputmode="numeric" pattern="[0-9]*"
+           maxlength="1" name="{{ name|e }}-{{ i }}" autocomplete="one-time-code"
+           data-otp-cell="{{ i }}"
            {%- if value and value | length > i %} value="{{ value[i]|e }}"{% endif -%}
-           {%- if value_signal %} data-bind="{{ value_signal|e }}_{{ i }}"{% endif -%} />
+           data-on:input="{
+             /* Strip non-digits, keep only the last typed char. */
+             const v = (el.value || '').replace(/[^0-9]/g, '').slice(-1);
+             el.value = v;
+             if (v) {
+               const next = el.parentElement.querySelector(`[data-otp-cell='${ {{ i }} + 1 }']`);
+               if (next) next.focus();
+             }
+             {% if value_signal %}{{ value_signal }} = Array.from(el.parentElement.querySelectorAll('.ux-otp__cell')).map(c => c.value).join('');{% endif %}
+           }"
+           data-on:keydown="{
+             /* Backspace on an empty cell jumps to the previous cell. */
+             if (evt.key === 'Backspace' && !el.value) {
+               const prev = el.parentElement.querySelector(`[data-otp-cell='${ {{ i }} - 1 }']`);
+               if (prev) { prev.focus(); evt.preventDefault(); }
+             } else if (evt.key === 'ArrowLeft') {
+               const prev = el.parentElement.querySelector(`[data-otp-cell='${ {{ i }} - 1 }']`);
+               if (prev) { prev.focus(); evt.preventDefault(); }
+             } else if (evt.key === 'ArrowRight') {
+               const next = el.parentElement.querySelector(`[data-otp-cell='${ {{ i }} + 1 }']`);
+               if (next) { next.focus(); evt.preventDefault(); }
+             }
+           }"
+           data-on:paste="{
+             /* Pasting splits the digits across this cell and the
+                following ones. Stop the default paste so the first cell
+                doesn't double-fill. */
+             evt.preventDefault();
+             const digits = (evt.clipboardData.getData('text') || '').replace(/[^0-9]/g, '').split('');
+             const cells = Array.from(el.parentElement.querySelectorAll('.ux-otp__cell'));
+             let last = el;
+             for (let k = 0; k < digits.length; k++) {
+               const idx = {{ i }} + k;
+               if (cells[idx]) { cells[idx].value = digits[k]; last = cells[idx]; }
+             }
+             const nextIdx = Math.min({{ i }} + digits.length, cells.length - 1);
+             cells[nextIdx]?.focus();
+             {% if value_signal %}{{ value_signal }} = cells.map(c => c.value).join('');{% endif %}
+           }" />
   {%- endfor -%}
 </div>
 {% endmacro %}

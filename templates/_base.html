@@ -156,7 +156,17 @@
      data-attr:data-sidebar="$sidebarOpen ? 'open' : ''"
      data-attr:data-theme="$theme"
      data-attr:data-template="$template"
-     data-effect="document.documentElement.dataset.theme = $theme; if ($template) { document.documentElement.dataset.template = $template; } else { delete document.documentElement.dataset.template; }">
+     data-effect="
+       document.documentElement.dataset.theme = $theme;
+       if ($template) { document.documentElement.dataset.template = $template; }
+       else { delete document.documentElement.dataset.template; }
+       /* Persist the choice so the next request renders with the same
+          colours from the server side (no FOUC). 1-year max-age, scoped
+          to the docs site root, SameSite=Lax so it travels with normal
+          navigation. */
+       document.cookie = 'ux_theme=' + encodeURIComponent($theme) + '; path=/; max-age=31536000; SameSite=Lax';
+       document.cookie = 'ux_template=' + encodeURIComponent($template || '') + '; path=/; max-age=31536000; SameSite=Lax';
+     ">
 
   <div class="ux-app__sidebar-overlay" data-on:click="$sidebarOpen = false"></div>
 

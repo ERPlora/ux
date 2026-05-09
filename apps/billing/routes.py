@@ -31,7 +31,7 @@ async def billing_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "billing",
             "pages": PAGES,
             "active_route": "/preview/billing",
@@ -47,7 +47,7 @@ async def billing_detail(request: Request, name: str):
         request,
         f"billing/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/billing/{name}",
         },
     )

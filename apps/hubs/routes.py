@@ -27,7 +27,7 @@ async def hubs_index(request: Request):
         request,
         "preview_index.html",
         {
-            **nav_context(),
+            **nav_context(request),
             "category": "hubs",
             "pages": PAGES,
             "active_route": "/preview/hubs",
@@ -43,7 +43,7 @@ async def hubs_detail(request: Request, name: str):
         request,
         f"hubs/{name}.jinja",
         {
-            **nav_context(),
+            **nav_context(request),
             "active_route": f"/preview/hubs/{name}",
         },
     )
