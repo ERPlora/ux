@@ -68,11 +68,15 @@ jobs:
       - name: Install build tools
         run: pip install --upgrade build
 
-      - name: Build sdist + wheel
-        run: python -m build
+      - name: Build sdist + wheel into pypi-dist/
+        # `dist/` already contains the CSS bundle (committed for jsdelivr).
+        # We build into a separate folder so twine only sees Python artefacts.
+        run: python -m build --outdir pypi-dist
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: pypi-dist/
 
   deploy-lightsail:
     name: Deploy uxsite to Lightsail
